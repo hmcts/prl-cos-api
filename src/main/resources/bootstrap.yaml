@@ -1,0 +1,8 @@
+spring:
+  cloud:
+    propertiesvolume:
+      enabled: true
+      prefixed: true
+      paths: /mnt/secrets/div
+      aliases:
+        prl.uk-gov-notify-api-key: UK_GOV_NOTIFY_API_KEY

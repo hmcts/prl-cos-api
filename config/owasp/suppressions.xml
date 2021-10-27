@@ -15,4 +15,12 @@
     <cve>CVE-2020-10663</cve>
     <cve>CVE-2020-7712</cve>
    </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+        spring-core-5.2.9.RELEASE.jar (pkg:maven/org.springframework/spring-core@5.2.9.RELEASE, cpe:2.3:a:pivotal_software:spring_framework:5.2.9:release:*:*:*:*:*:*, cpe:2.3:a:springsource:spring_framework:5.2.9:release:*:*:*:*:*:*, cpe:2.3:a:vmware:spring_framework:5.2.9:release:*:*:*:*:*:*, cpe:2.3:a:vmware:springsource_spring_framework:5.2.9:release:*:*:*:*:*:*)
+    ]]></notes>
+    <cve>CVE-2021-22118</cve>
+  </suppress>
+
 </suppressions>
