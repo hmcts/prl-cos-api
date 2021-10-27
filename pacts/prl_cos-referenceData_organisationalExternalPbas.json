@@ -1,0 +1,159 @@
+{
+  "provider": {
+    "name": "referenceData_organisationalExternalPbas"
+  },
+  "consumer": {
+    "name": "prl_cos"
+  },
+  "interactions": [
+    {
+      "description": "a request for information for that organisation's pbas",
+      "request": {
+        "method": "GET",
+        "path": "/refdata/external/v1/organisations/pbas",
+        "headers": {
+          "Authorization": "Bearer UserAuthToken",
+          "ServiceAuthorization": "ServiceToken"
+        },
+        "query": {
+          "email": [
+            "someemailaddress@organisation.com"
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "organisationEntityResponse": {
+            "sraId": "sraId",
+            "companyNumber": "123456",
+            "sraRegulated": true,
+            "companyUrl": "somecompany@org.com",
+            "paymentAccount": [
+              "paymentAccountA1"
+            ],
+            "organisationIdentifier": "someemailaddress@organisation.com",
+            "status": "ACTIVE",
+            "superUser": {
+              "firstName": "firstName",
+              "lastName": "lastName",
+              "email": "emailAddress"
+            }
+          }
+        },
+        "matchingRules": {
+          "body": {
+            "$.organisationEntityResponse.organisationIdentifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.organisationEntityResponse.status": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "PENDING|ACTIVE|BLOCKED|DELETED"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.organisationEntityResponse.sraId": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.organisationEntityResponse.sraRegulated": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.organisationEntityResponse.companyNumber": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.organisationEntityResponse.companyUrl": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.organisationEntityResponse.paymentAccount[0]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.organisationEntityResponse.superUser.firstName": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.organisationEntityResponse.superUser.lastName": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.organisationEntityResponse.superUser.email": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "Pbas organisational data exists for identifier someemailaddress@organisation.com"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.1.11"
+    }
+  }
+}
