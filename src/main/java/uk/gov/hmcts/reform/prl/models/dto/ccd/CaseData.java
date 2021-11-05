@@ -121,11 +121,11 @@ public class CaseData {
     private final YesOrNo applicantAttendedMIAM;
     private final YesOrNo claimingExemptionMIAM;
     private final YesOrNo familyMediatorMIAM;
-    private final List<MIAMExemptionsChecklistEnum> mIAMExemptionsChecklist;
-    private final List<MIAMDomesticViolenceChecklistEnum> mIAMDomesticViolenceChecklist;
-    private final List<MIAMUrgencyReasonChecklistEnum> mIAMUrgencyReasonChecklist;
-    private final MIAMPreviousAttendanceChecklistEnum mIAMPreviousAttendanceChecklist;
-    private final MIAMOtherGroundsChecklistEnum mIAMOtherGroundsChecklist;
+    private final List<MIAMExemptionsChecklistEnum> miamExemptionsChecklist;
+    private final List<MIAMDomesticViolenceChecklistEnum> miamDomesticViolenceChecklist;
+    private final List<MIAMUrgencyReasonChecklistEnum> miamUrgencyReasonChecklist;
+    private final MIAMPreviousAttendanceChecklistEnum miamPreviousAttendanceChecklist;
+    private final MIAMOtherGroundsChecklistEnum miamOtherGroundsChecklist;
     private final String mediatorRegistrationNumber;
     private final String familyMediatorServiceName;
     private final String soleTraderName;
@@ -134,7 +134,7 @@ public class CaseData {
     private final String mediatorRegistrationNumber1;
     private final String familyMediatorServiceName1;
     private final String soleTraderName1;
-    private final MIAMDocument mIAMCertificationDocumentUpload1;
+    private final MIAMDocument miamCertificationDocumentUpload1;
     private final YesOrNo consentOrder;
     private final ConsentOrderDocument draftConsentOrderFile;
 
