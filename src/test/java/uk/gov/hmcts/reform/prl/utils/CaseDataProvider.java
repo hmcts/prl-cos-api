@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.prl.models.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 @NoArgsConstructor

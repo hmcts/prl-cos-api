@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models;
 
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Optional;
