@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
+import uk.gov.hmcts.reform.prl.workflows.TestDynamicListWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
 import static org.mockito.Mockito.verify;
@@ -31,6 +32,9 @@ public class CallbackControllerTest {
 
     @Mock
     private WorkflowResult workflowResult;
+
+    @Mock
+    TestDynamicListWorkflow testDynamicListWorkflow;
 
     @Test
     public void testSendEmail() throws WorkflowException {
@@ -57,6 +61,23 @@ public class CallbackControllerTest {
 
         verify(validateMiamApplicationOrExemptionWorkflow).run(callbackRequest);
         verifyNoMoreInteractions(validateMiamApplicationOrExemptionWorkflow);
+
+    }
+
+    @Test
+    public void testDyanmicListTest() throws WorkflowException {
+        CaseDetails caseDetails  = CaseDetailsProvider.full();
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.builder().build();
+
+
+        when(testDynamicListWorkflow.run(callbackRequest))
+            .thenReturn(workflowResult);
+
+        callbackController.testDynamicList(callbackRequest);
+
+        verify(testDynamicListWorkflow).run(callbackRequest);
+        verifyNoMoreInteractions(testDynamicListWorkflow);
 
     }
 }
