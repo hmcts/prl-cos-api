@@ -4,11 +4,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
-@@RequiredArgsConstructor
+@RequiredArgsConstructor
 public enum PermissionRequiredEnum {
 
-    Yes("Yes"),
-    noNotRequired("No, permission not required");
+    yes("yes"),
+    noNowSought("no now sought"),
+    noNotRequired("no, permission not required");
 
     private final String displayedValue;
 
