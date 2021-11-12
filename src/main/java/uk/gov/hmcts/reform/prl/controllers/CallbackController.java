@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
+import uk.gov.hmcts.reform.prl.workflows.TestDynamicListWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -28,6 +29,7 @@ public class CallbackController {
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
+    private final TestDynamicListWorkflow testDynamicListWorkflow;
 
 
     /**
@@ -83,6 +85,24 @@ public class CallbackController {
         );
     }
 
+    @PostMapping(path = "/test-dynamic-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to check DynamicMultiSelectList functionality")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public ResponseEntity<uk.gov.hmcts.reform.ccd.client.model.CallbackResponse> testDynamicList(
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) throws WorkflowException {
+        WorkflowResult workflowResult = testDynamicListWorkflow.run(callbackRequest);
+
+        return ok(
+
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(workflowResult.getErrors())
+                .build()
+
+        );
+    }
 
 
 }
