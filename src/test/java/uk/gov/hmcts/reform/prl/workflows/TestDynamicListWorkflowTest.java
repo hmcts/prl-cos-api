@@ -1,23 +1,20 @@
-package uk.gov.hmcts.reform.prl.tasks;
+package uk.gov.hmcts.reform.prl.workflows;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import uk.gov.hmcts.reform.prl.framework.context.DefaultTaskContext;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
-import uk.gov.hmcts.reform.prl.workflows.TestDynamicListWorkflow;
-import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
+import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+import uk.gov.hmcts.reform.prl.tasks.TestDynamicListTask;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static uk.gov.hmcts.reform.prl.models.OrchestrationConstants.APPLICANT_ATTENDED_MIAM;
-import static uk.gov.hmcts.reform.prl.models.OrchestrationConstants.CLAIMING_EXEMPTION_MIAM;
-import static uk.gov.hmcts.reform.prl.models.OrchestrationConstants.NO;
-import static uk.gov.hmcts.reform.prl.models.OrchestrationConstants.YES;
-import static uk.gov.hmcts.reform.prl.tasks.ValidateMiamApplicationOrExemptionTask.ERROR_MSG_MIAM;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
+@RunWith(MockitoJUnitRunner.class)
 public class TestDynamicListWorkflowTest {
 
     @Mock
@@ -27,8 +24,15 @@ public class TestDynamicListWorkflowTest {
     private TestDynamicListWorkflow testDynamicListWorkflow;
 
     @Test
-    public void give_when_then() {
+    public void give_when_then() throws WorkflowException {
 
-        assert(true);
+        testDynamicListWorkflow.run(
+            CallbackRequest.builder()
+                .caseDetails(CaseDetails.builder()
+                                 .data(ImmutableMap.of())
+                                 .build())
+                .build());
+
+        verify(testDynamicListTask).execute(any(), any());
     }
 }

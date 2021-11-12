@@ -24,6 +24,7 @@ public class ValidateMiamApplicationOrExemptionWorkFlowTest {
 
     @Test
     public void whenWorkflowRun_thenExpectedTasksInvoked() throws WorkflowException {
+
         validateMiamApplicationOrExemptionWorkflow.run(
             CallbackRequest.builder()
                 .caseDetails(CaseDetails.builder()
