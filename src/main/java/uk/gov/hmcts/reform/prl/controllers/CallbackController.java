@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -17,6 +18,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -78,6 +82,30 @@ public class CallbackController {
         return ok(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(workflowResult.getErrors())
+                .build()
+
+        );
+    }
+
+    @PostMapping(path = "/behaviour-collection", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Expands collection of behaviours to display field on page loading")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public ResponseEntity<uk.gov.hmcts.reform.ccd.client.model.CallbackResponse> expandBehaviourCollection(
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) throws WorkflowException {
+
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        caseData.put("behaviours", new ArrayList<>());
+
+
+
+
+
+        return ok(
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseData)
                 .build()
 
         );

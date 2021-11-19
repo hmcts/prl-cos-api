@@ -9,12 +9,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static uk.gov.hmcts.reform.prl.models.OrchestrationConstants.APPLICATION_CONSIDERED_IN_DAYS_AND_HOURS;
-import static uk.gov.hmcts.reform.prl.models.OrchestrationConstants.DAYS;
-import static uk.gov.hmcts.reform.prl.models.OrchestrationConstants.HOURS;
-import static uk.gov.hmcts.reform.prl.models.OrchestrationConstants.IS_APPLICATION_URGENT;
-import static uk.gov.hmcts.reform.prl.models.OrchestrationConstants.NO;
-import static uk.gov.hmcts.reform.prl.models.OrchestrationConstants.YES;
+import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.APPLICATION_CONSIDERED_IN_DAYS_AND_HOURS;
+import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.DAYS;
+import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.HOURS;
+import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.IS_APPLICATION_URGENT;
+import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.NO;
+import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.YES;
 import static uk.gov.hmcts.reform.prl.tasks.ApplicationTimetableTimeValidationTask.ERROR_MSG_NOTICE_DATE_OR_TIME_REQUIRED;
 
 public class ApplicationTimetableTimeValidationTaskTest {

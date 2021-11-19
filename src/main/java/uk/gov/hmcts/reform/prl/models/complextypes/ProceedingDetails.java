@@ -1,8 +1,9 @@
-package uk.gov.hmcts.reform.prl.models;
+package uk.gov.hmcts.reform.prl.models.complextypes;
 
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.documents.ProceedingOrderDocument;
 
 import java.time.LocalDate;
 

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models;
+package uk.gov.hmcts.reform.prl.models.documents;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Builder;

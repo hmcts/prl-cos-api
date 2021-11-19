@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models;
+package uk.gov.hmcts.reform.prl.models.complextypes;
 
 import lombok.Builder;
 import lombok.Data;
