@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models;
+package uk.gov.hmcts.reform.prl.enums;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

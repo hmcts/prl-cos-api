@@ -6,10 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.*;
 import uk.gov.hmcts.reform.prl.models.*;
+import uk.gov.hmcts.reform.prl.models.complextypes.*;
+import uk.gov.hmcts.reform.prl.models.documents.*;
 
 
 import java.time.LocalDate;
@@ -33,7 +34,7 @@ public class CaseData {
     private final YesOrNo isWelshNeeded;
     private final List<WelshNeeds> welshNeeds;
     private final YesOrNo isInterpreterNeeded;
-    private final List<InterpreterNeeds> interpreterNeeds;
+    private final List<InterpreterNeed> interpreterNeeds;
     private final YesOrNo isDisabilityPresent;
     private final String adjustmentsRequired;
     private final YesOrNo isSpecialArrangementsRequired;
@@ -41,6 +42,7 @@ public class CaseData {
     private final YesOrNo isIntermediaryNeeded;
     private final String reasonsForIntermediary;
     private final List<OrderTypeEnum> ordersApplyingFor;
+    private final childArrangementOrderTypeEnum typeOfChildArrangementsOrder;
     private final String natureOfOrder;
     private final PermissionRequiredEnum applicationPermissionRequired;
     private final String applicationPermissionRequiredReason;
@@ -136,6 +138,17 @@ public class CaseData {
     private final MIAMDocument miamCertificationDocumentUpload1;
     private final YesOrNo consentOrder;
     private final ConsentOrderDocument draftConsentOrderFile;
+    private final YesOrNo isThisCaseUrgent;
+    private final String caseUrgencyTimeAndReason;
+    private final String effortsMadeWithRespondents;
+    private final YesOrNo doYouNeedAWithoutNoticeHearing;
+    private final String reasonsForApplicationWithoutNotice;
+    private final YesOrNo doYouRequireAHearingWithReducedNotice;
+    //TODO: field below should have id linked to previous field
+    private final String setOutReasonsBelow;
+    private final YesOrNo areRespondentsAwareOfProceedings;
+    private final String applicantCaseName;
+
 
 }
 

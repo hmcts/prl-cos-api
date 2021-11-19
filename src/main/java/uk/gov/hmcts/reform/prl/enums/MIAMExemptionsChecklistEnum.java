@@ -12,6 +12,7 @@ public enum MIAMExemptionsChecklistEnum {
     previousMIAMattendance("Previous MIAM attendance or previous MIAM exemption"),
     other("Other");
 
+
     private final String displayedValue;
 
 }

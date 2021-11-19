@@ -1,10 +1,11 @@
-package uk.gov.hmcts.reform.prl.models;
+package uk.gov.hmcts.reform.prl.models.complextypes;
 
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Address;
 
 import java.time.LocalDate;
 

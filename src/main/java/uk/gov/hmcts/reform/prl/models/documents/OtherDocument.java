@@ -1,20 +1,19 @@
-package uk.gov.hmcts.reform.prl.models;
+package uk.gov.hmcts.reform.prl.models.documents;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.models.Document;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 @Data
 @Builder
-public class C8Document {
+public class OtherDocument {
 
     private final Document file;
 
     @JsonCreator
-    public C8Document(Document file) {
+    public OtherDocument(Document file) {
         this.file = file;
     }
-
 
 }

@@ -5,11 +5,11 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Gender {
+public enum LiveWithEnum {
 
-    FEMALE("female", "Female"),
-    MALE("male", "Male"),
-    OTHER("other", "They identify in another way");
+    APPLICANT("applicant", "Applicant"),
+    RESPONDENT("respondent", "Respondent"),
+    ANOTHER_PERSON("anotherPerson", "Another person not listed");
 
     private final String id;
     private final String displayedValue;
