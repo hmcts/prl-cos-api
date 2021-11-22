@@ -12,18 +12,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
-import java.util.ArrayList;
-import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -90,5 +86,8 @@ public class CallbackController {
 
         );
     }
+
+
+
 
 }
