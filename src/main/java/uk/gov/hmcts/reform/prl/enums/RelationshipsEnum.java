@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -7,13 +8,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum RelationshipsEnum {
 
+    @JsonProperty("father")
     FATHER("father", "Father"),
+    @JsonProperty("mother")
     MOTHER("mother", "Mother"),
-    STEPFATHER("stepfather", "Step-father"),
+    @JsonProperty("stepFather")
+    STEPFATHER("stepFather", "Step-father"),
+    @JsonProperty("stepMother")
     STEPMOTHER("stepMother", "Step-mother"),
-    GRANDPARENT("grandparent", "Grandparent"),
+    @JsonProperty("grandParent")
+    GRANDPARENT("grandParent", "Grandparent"),
+    @JsonProperty("guardian")
     GUARDIAN("guardian", "Guiardian"),
+    @JsonProperty("specialGuardian")
     SPECIAL_GUARDIAN("specialGuardian", "Special Guardian"),
+    @JsonProperty("other")
     OTHER("other", "Other");
 
     private final String id;

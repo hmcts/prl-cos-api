@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum OrderAppliedFor {
 
-    childArrangementsOrder("Child Arrangements Order");
+    childArrangementsOrder("Child Arrangements Order"),
+    prohibitedStepsOrder("Prohibited Steps Order"),
+    specificIssueOrder("specificIssueOrder");
 
     private final String displayedValue;
 

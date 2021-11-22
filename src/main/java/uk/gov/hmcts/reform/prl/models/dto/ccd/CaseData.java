@@ -7,12 +7,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import uk.gov.hmcts.reform.prl.enums.*;
 import uk.gov.hmcts.reform.prl.models.*;
 import uk.gov.hmcts.reform.prl.models.complextypes.*;
 import uk.gov.hmcts.reform.prl.models.documents.*;
-
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,13 +27,13 @@ public class CaseData {
     private final YesOrNo languagePreferenceWelsh;
     private final String applicantName;
     private final String childName;
-    private final List<ContactOrderDocument> contactOrderDocumentsUploaded;
-    private final List<C8Document> c8FormDocumentsUploaded;
-    private final List<OtherDocument> otherDocumentsUploaded;
+    private final List<Element<ContactOrderDocument>> contactOrderDocumentsUploaded;
+    private final List<Element<C8Document>> c8FormDocumentsUploaded;
+    private final List<Element<OtherDocument>> otherDocumentsUploaded;
     private final YesOrNo isWelshNeeded;
-    private final List<WelshNeeds> welshNeeds;
+    private final List<Element<WelshNeeds>> welshNeeds;
     private final YesOrNo isInterpreterNeeded;
-    private final List<InterpreterNeed> interpreterNeeds;
+    private final List<Element<InterpreterNeed>> interpreterNeeds;
     private final YesOrNo isDisabilityPresent;
     private final String adjustmentsRequired;
     private final YesOrNo isSpecialArrangementsRequired;
@@ -104,7 +102,7 @@ public class CaseData {
     private final YesOrNo otherSafetyOrWelfareConcerns;
     private final String otherSafetyOrWelfareConcernsDetails;
     private final Address childrenAddress;
-    private final List<Child> children;
+    private final List<Element<Child>> children;
     private final YesNoDontKnow isChildrenKnownToAuthority;
     private final String childAndLocalAuthority;
     private final YesNoDontKnow isChildrenUnderChildProtection;
@@ -115,11 +113,11 @@ public class CaseData {
     private final String childAddressAndAdultsLivingWith;
     private final YesOrNo isExistingProceedings;
     private final String childrenInProceeding;
-    private final List<ProceedingDetails> existingProceedings;
-    private final List<PartyDetails> applicants;
-    private final List<PartyDetails> respondents;
-    private final List<PartyDetails> othersToNotify;
-    private final List<Child> otherChildren;
+    private final List<Element<ProceedingDetails>> existingProceedings;
+    private final List<Element<PartyDetails>> applicants;
+    private final List<Element<PartyDetails>> respondents;
+    private final List<Element<PartyDetails>> othersToNotify;
+    private final List<Element<Child>> otherChildren;
     private final YesOrNo applicantAttendedMIAM;
     private final YesOrNo claimingExemptionMIAM;
     private final YesOrNo familyMediatorMIAM;
