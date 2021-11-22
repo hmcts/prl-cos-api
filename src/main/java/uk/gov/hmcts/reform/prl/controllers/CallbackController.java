@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
@@ -32,6 +35,7 @@ public class CallbackController {
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
+    private final ObjectMapper objectMapper;
 
 
     /**
@@ -98,16 +102,31 @@ public class CallbackController {
 
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseData.put("behaviours", new ArrayList<>());
+        return ok(
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseData).build()
 
+        );
+    }
 
+    @PostMapping(path = "/test", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to confirm that a MIAM has been attended or applicant is exempt. Returns error message if confirmation fails")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public ResponseEntity<uk.gov.hmcts.reform.ccd.client.model.CallbackResponse> testDataModel(
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) throws WorkflowException, JsonProcessingException {
 
+        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
 
+        String jsonCaseData = objectMapper.writeValueAsString(caseData);
+
+        System.out.println(jsonCaseData);
 
         return ok(
             AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseData)
                 .build()
-
         );
     }
 
