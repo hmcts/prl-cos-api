@@ -91,45 +91,4 @@ public class CallbackController {
         );
     }
 
-    @PostMapping(path = "/behaviour-collection", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Expands collection of behaviours to display field on page loading")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public ResponseEntity<uk.gov.hmcts.reform.ccd.client.model.CallbackResponse> expandBehaviourCollection(
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws WorkflowException {
-
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        caseData.put("behaviours", new ArrayList<>());
-        return ok(
-            AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseData).build()
-
-        );
-    }
-
-    @PostMapping(path = "/test", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to confirm that a MIAM has been attended or applicant is exempt. Returns error message if confirmation fails")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public ResponseEntity<uk.gov.hmcts.reform.ccd.client.model.CallbackResponse> testDataModel(
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws WorkflowException, JsonProcessingException {
-
-        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
-
-        String jsonCaseData = objectMapper.writeValueAsString(caseData);
-
-        System.out.println(jsonCaseData);
-
-        return ok(
-            AboutToStartOrSubmitCallbackResponse.builder()
-                .build()
-        );
-    }
-
-
-
 }
