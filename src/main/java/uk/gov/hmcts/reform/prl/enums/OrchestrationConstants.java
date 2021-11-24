@@ -15,8 +15,8 @@ public class OrchestrationConstants {
     public static final String DAYS = "days";
     public static final String HOURS = "hours";
 
-    public static final String APPLICANT_ATTENDED_MIAM = "ApplicantAttendedMIAM";
-    public static final String CLAIMING_EXEMPTION_MIAM = "ClaimingExemptionMIAM";
+    public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMIAM";
+    public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
 
 
 }
