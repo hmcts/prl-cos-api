@@ -7,10 +7,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Event {
 
-    TYPE_OF_APPLICATION("typeOfApplication", "Type of application"),
+    TYPE_OF_APPLICATION("selectApplicationType", "Type of application"),
     ATTENDING_THE_HEARING("attendingTheHearing", "Attending the hearing"),
     HEARING_URGENCY("hearingUrgency",  "Hearing urgency"),
-    APPLICANT_DETAILS("applicantDetails", "Applicant details"),
+    APPLICANT_DETAILS("applicantsDetails", "Applicant details"),
     CHILD_DETAILS("childDetails", "Child Details"),
     RESPONDENT_DETAILS("respondentDetails", "Respondent Details"),
     MIAM("miam", "MIAM"),
