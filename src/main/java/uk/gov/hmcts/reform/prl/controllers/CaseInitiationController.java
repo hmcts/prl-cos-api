@@ -45,7 +45,7 @@ public class CaseInitiationController extends AbstractCallbackController{
         final CaseData caseData = getCaseData(caseDetails);
 
 
-        publishEvent(new CaseDataChanged(caseData, authorisation));
+        publishEvent(new CaseDataChanged(caseData));
     }
 }
 
