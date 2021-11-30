@@ -46,8 +46,8 @@ public class CaseEventHandler {
                 CASE_TYPE,
                 caseData.getId(),
                 "internal-update-task-list",
-                Map.of("taskList", taskList),
-                event.getAuthorization()
+                Map.of("taskList", taskList)
+
             );
         }
     }
