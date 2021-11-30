@@ -20,13 +20,8 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @Setter
-@Builder(toBuilder = true)
+@Builder
 public class CaseData {
-
-    private final String state;
-    private final Long id;
-
-
 
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;

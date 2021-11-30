@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.utils.SslVerificationDisabler;
 
 import javax.annotation.PostConstruct;
 
-@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.prl", "uk.gov.hmcts.reform.idam.client"})
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.prl"})
 /*
  I don't know why this was not working, but I did what was suggested here:
  https://stackoverflow.com/questions/26889970/
