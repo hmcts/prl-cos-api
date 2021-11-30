@@ -12,7 +12,6 @@ public class SystemUserService {
     private final String username = "";
     private final String password = "";
 
-
     //TODO: use class to manage user config
     //private final SystemUpdateUserConfiguration userConfig;
     private final IdamClient idamClient;

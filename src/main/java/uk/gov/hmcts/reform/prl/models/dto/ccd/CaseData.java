@@ -25,8 +25,7 @@ public class CaseData {
 
     private final String state;
     private final Long id;
-
-
+    //private final String taskList;
 
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;

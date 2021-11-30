@@ -49,11 +49,11 @@ public class CoreCaseDataService {
                              Map<String, Object> eventData,
                              String auth) {
 
-        //String userToken = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(auth);
+        String userToken = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(userToken);
 
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
-            auth,
+            userToken,
             authTokenGenerator.generate(),
             systemUpdateUserId,
             jurisdiction,
@@ -70,7 +70,7 @@ public class CoreCaseDataService {
             .build();
 
         coreCaseDataApi.submitEventForCaseWorker(
-            auth,
+            userToken,
             authTokenGenerator.generate(),
             systemUpdateUserId,
             jurisdiction,

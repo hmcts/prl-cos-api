@@ -10,6 +10,5 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 public class CaseDataChanged {
 
     private final CaseData caseData;
-    private final String authorization;
 
 }

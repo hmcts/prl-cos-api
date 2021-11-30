@@ -14,7 +14,6 @@ public class ServiceTokenGeneratorConfiguration {
 
     @Bean
     public AuthTokenGenerator serviceAuthTokenGenerator(
-        //TODO: remove hardcoded details / where do these come from?
         @Value("${idam.s2s-auth.totp_secret}") String secret,
         @Value("${idam.s2s-auth.microservice}") String microService,
         ServiceAuthorisationApi serviceAuthorisationApi
