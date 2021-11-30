@@ -46,8 +46,7 @@ public class CoreCaseDataService {
                              String caseType,
                              Long caseId,
                              String eventName,
-                             Map<String, Object> eventData,
-                             String auth) {
+                             Map<String, Object> eventData) {
 
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);

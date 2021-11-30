@@ -17,6 +17,6 @@ public class TaskListController extends AbstractCallbackController {
     @PostMapping("/submitted")
     public void handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                 @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation) {
-        publishEvent(new CaseDataChanged(getCaseData(callbackRequest.getCaseDetails()), authorisation));
+        publishEvent(new CaseDataChanged(getCaseData(callbackRequest.getCaseDetails())));
     }
 }
