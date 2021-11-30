@@ -18,8 +18,5 @@ public class OrchestrationConstants {
     public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMIAM";
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
 
-    public static final String JURISDICTION = "PRIVATELAW";
-    public static final String CASE_TYPE = "C100";
-
 
 }
