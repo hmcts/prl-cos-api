@@ -12,7 +12,7 @@ public enum Event {
     HEARING_URGENCY("hearingUrgency",  "Hearing urgency"),
     APPLICANT_DETAILS("applicantsDetails", "Applicant details"),
     CHILD_DETAILS("childDetails", "Child Details"),
-    RESPONDENT_DETAILS("respondentDetails", "Respondent Details"),
+    RESPONDENT_DETAILS("respondentsDetails", "Respondent Details"),
     MIAM("miam", "MIAM"),
     CASE_NAME("caseName", "Case Name"),
     ALLEGATIONS_OF_HARM("allegationsOfHarm", "Allegations of Harm");
