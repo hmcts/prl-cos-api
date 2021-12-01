@@ -51,15 +51,22 @@ public class TaskListService {
     private List<Event> getEvents(CaseData caseData) {
 
         final List<Event> events = new ArrayList<>(List.of(
-            MIAM,
-            ATTENDING_THE_HEARING,
+            CASE_NAME,
+            TYPE_OF_APPLICATION,
             HEARING_URGENCY,
             APPLICANT_DETAILS,
             CHILD_DETAILS,
             RESPONDENT_DETAILS,
-            TYPE_OF_APPLICATION,
-            CASE_NAME,
-            ALLEGATIONS_OF_HARM
+            MIAM,
+            ALLEGATIONS_OF_HARM,
+            OTHER_PEOPLE_IN_THE_CASE,
+            OTHER_PROCEEDINGS,
+            ATTENDING_THE_HEARING,
+            INTERNATIONAL_ELEMENT,
+            LITIGATION_CAPACITY,
+            WELSH_LANGUAGE_REQUIREMENTS,
+            VIEW_PDF_APPLICATION,
+            SUBMIT_AND_PAY
         ));
 
         return events;
