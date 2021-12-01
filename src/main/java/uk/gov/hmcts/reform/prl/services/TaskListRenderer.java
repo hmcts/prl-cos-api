@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskSection;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,12 @@ public class TaskListRenderer {
 
         //lines.addAll(renderTasksErrors(tasksErrors));
 
+        List<String> testLines = new ArrayList<>();
+        testLines.add("yay");
+
+
+        lines.addAll(taskListRenderElements.renderCollapsible("Why can’t I submit my application?", testLines));
+
         return String.join("\n\n", lines);
     }
 
@@ -77,10 +84,27 @@ public class TaskListRenderer {
             .withTask(tasks.get(MIAM))
             .withTask(tasks.get(ALLEGATIONS_OF_HARM));
 
+        final TaskSection additionalInformation = newSection("Add additional information")
+            .withInfo("Only complete if relevant")
+            .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE))
+            .withTask(tasks.get(OTHER_PROCEEDINGS))
+            .withTask(tasks.get(ATTENDING_THE_HEARING))
+            .withTask(tasks.get(INTERNATIONAL_ELEMENT))
+            .withTask(tasks.get(LITIGATION_CAPACITY))
+            .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
+
+        final TaskSection pdfApplication = newSection("View PDF application")
+            .withTask(tasks.get(VIEW_PDF_APPLICATION));
+
+        final TaskSection submitAndPay = newSection("Submit and pay")
+            .withTask(tasks.get(SUBMIT_AND_PAY));
 
         return Stream.of(applicationDetails,
                          peopleInTheCase,
-                         requiredDetails)
+                         requiredDetails,
+                         additionalInformation,
+                         pdfApplication,
+                         submitAndPay)
             .filter(TaskSection::hasAnyTask)
             .collect(toList());
     }
