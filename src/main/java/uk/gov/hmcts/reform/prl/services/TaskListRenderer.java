@@ -59,8 +59,6 @@ public class TaskListRenderer {
         //lines.addAll(renderTasksErrors(tasksErrors));
 
         List<String> testLines = new ArrayList<>();
-        testLines.add("yay");
-
 
         lines.addAll(taskListRenderElements.renderCollapsible("Why can’t I submit my application?", testLines));
 
