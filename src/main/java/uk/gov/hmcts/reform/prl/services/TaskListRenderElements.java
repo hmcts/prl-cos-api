@@ -2,6 +2,7 @@
 
 package uk.gov.hmcts.reform.prl.services;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
@@ -16,6 +17,11 @@ import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
 @Component
 public class TaskListRenderElements {
 
+    public TaskListRenderElements(@Value("${resources.images.baseUrl}") String imagesBaseUrl) {
+        this.imagesBaseUrl = imagesBaseUrl;
+    }
+
+    private final String imagesBaseUrl;
 
     public String renderLink(Task task) {
         return renderLink(task.getEvent());
@@ -24,6 +30,10 @@ public class TaskListRenderElements {
     public String renderLink(Event event) {
         return format("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/%s/%s1'>%s</a>",
                       event.getId(), event.getId(), event.getName());
+    }
+
+    public String renderImage(String imageName, String title) {
+        return format("<img align='right' height='25px' src='%s%s' title='%s'/>", imagesBaseUrl, imageName, title);
     }
 
     public String renderDisabledLink(Task event) {

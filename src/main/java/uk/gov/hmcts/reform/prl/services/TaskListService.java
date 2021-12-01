@@ -20,7 +20,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.*;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TaskListService {
 
-//    private final EventsChecker eventsChecker;
+    //private final EventsChecker eventsChecker;
 //    private final FeatureToggleService featureToggles;
 
     public List<Task> getTasksForOpenCase(CaseData caseData) {
