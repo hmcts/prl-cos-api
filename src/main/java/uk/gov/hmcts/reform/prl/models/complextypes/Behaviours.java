@@ -6,7 +6,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 @Builder
 @Data
-public class Behaviour {
+public class Behaviours {
 
     private String abuseNatureDescription;
     private String behavioursStartDateAndLength;

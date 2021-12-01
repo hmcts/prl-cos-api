@@ -11,6 +11,7 @@ public enum LanguagePreference {
     ENGLISH("english"),
     WELSH("welsh");
 
+
     private final String code;
 
     public static LanguagePreference getLanguagePreference(CaseData caseData) {
