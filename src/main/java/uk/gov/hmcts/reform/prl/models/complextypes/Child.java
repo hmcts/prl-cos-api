@@ -28,6 +28,8 @@ public class Child {
     private final YesOrNo isChildCurrentAddressKnown;
     private final Address address;
     private final YesOrNo isChildAddressConfidential;
+    private final YesOrNo childUnsupervisedTime;
+    private final YesOrNo childContactFromOtherRecipients;
     private final String relationshipToApplicant;
     private final String relationshipToRespondent;
 
