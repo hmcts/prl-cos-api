@@ -9,8 +9,8 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SystemUserService {
 
-    private final String username = "";
-    private final String password = "";
+    private final String username = "privatelaw-system-update@mailnesia.com";
+    private final String password = "Password12!";
 
     //TODO: use class to manage user config
     //private final SystemUpdateUserConfiguration userConfig;
