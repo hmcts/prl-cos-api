@@ -6,12 +6,12 @@ import lombok.Data;
 
 @Data
 @Builder
-public class MIAMDocument {
+public class MiamDocument {
 
     private final Document file;
 
     @JsonCreator
-    public MIAMDocument(Document file) {
+    public MiamDocument(Document file) {
         this.file = file;
     }
 
