@@ -5,9 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.UUID;
 
 @Data
 @Builder
