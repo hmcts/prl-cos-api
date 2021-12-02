@@ -423,7 +423,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/models/**/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/SslVerificationDisabler.*',
-  '**uk/gov/hmcts/reform/prl/Application.*'
+  '**uk/gov/hmcts/reform/prl/Application.*',
+  '**uk/gov/hmcts/reform/prl/enums.*'
 ]
 
 sonarqube {
