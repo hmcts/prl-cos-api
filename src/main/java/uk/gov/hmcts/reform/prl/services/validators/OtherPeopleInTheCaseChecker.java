@@ -19,7 +19,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
 
     @Override
     public boolean isFinished(CaseData caseData) {
-        if (caseData.getOthersToNotify().size() != 0) {
+        if (caseData.getOthersToNotify() != null && caseData.getOthersToNotify().size() != 0) {
             List<PartyDetails> others = caseData.getOthersToNotify()
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
@@ -54,7 +54,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
 
-        if (caseData.getOthersToNotify().size() != 0) {
+        if (caseData.getOthersToNotify() != null && caseData.getOthersToNotify().size() != 0) {
             List<PartyDetails> others = caseData.getOthersToNotify()
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());

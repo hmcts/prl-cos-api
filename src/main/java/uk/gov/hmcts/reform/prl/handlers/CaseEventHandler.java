@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
+import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
@@ -31,6 +32,7 @@ public class CaseEventHandler {
     private final CoreCaseDataService coreCaseDataService;
     private final TaskListService taskListService;
     private final TaskListRenderer taskListRenderer;
+    private final TaskErrorService taskErrorService;
 
     @EventListener
     public void handleCaseDataChange(final CaseDataChanged event) {
@@ -41,7 +43,7 @@ public class CaseEventHandler {
 
             final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
 
-            List<EventValidationErrors> eventErrors = new ArrayList<>();
+            List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors();
 
             final String taskList = taskListRenderer.render(tasks, eventErrors);
 
