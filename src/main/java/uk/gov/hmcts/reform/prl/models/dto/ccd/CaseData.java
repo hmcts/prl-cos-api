@@ -48,6 +48,7 @@ public class CaseData {
     /**
      * Hearing urgency
      */
+
     private final YesOrNo isCaseUrgent;
     private final String caseUrgencyTimeAndReason;
     private final String effortsMadeWithRespondents;
