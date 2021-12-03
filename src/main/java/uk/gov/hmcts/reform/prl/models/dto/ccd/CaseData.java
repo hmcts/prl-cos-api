@@ -89,8 +89,8 @@ public class CaseData {
     private final String mediatorRegistrationNumber;
     private final String familyMediatorServiceName;
     private final String soleTraderName;
-    //TODO: refactor to remove duplicated details screen
     private final MIAMDocument mIAMCertificationDocumentUpload;
+    //TODO: refactor to remove duplicated details screen
     private final String mediatorRegistrationNumber1;
     private final String familyMediatorServiceName1;
     private final String soleTraderName1;

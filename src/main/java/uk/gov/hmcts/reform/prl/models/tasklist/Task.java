@@ -12,7 +12,7 @@ import java.util.Optional;
 public class Task {
 
     private final Event event;
-    //private final TaskState state;
+    private final TaskState state;
     private String hint;
 
     public Task withHint(String hint) {
@@ -24,10 +24,10 @@ public class Task {
         return Optional.ofNullable(hint);
     }
 
-    public static Task task(Event event) {
+    public static Task task(Event event, TaskState state) {
         return Task.builder()
             .event(event)
-            //.state(state)
+            .state(state)
             .build();
     }
 }
