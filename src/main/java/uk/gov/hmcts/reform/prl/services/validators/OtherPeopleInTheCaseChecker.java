@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
@@ -18,7 +19,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
 
     @Override
     public boolean isFinished(CaseData caseData) {
-        if (caseData.getOthersToNotify() != null) {
+        if (caseData.getOthersToNotify().size() != 0) {
             List<PartyDetails> others = caseData.getOthersToNotify()
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
@@ -45,7 +46,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
                 return false;
             }
 
-            return others.stream().map(PartyDetails::getFirstName).anyMatch(m -> !m.isEmpty());
+            return others.stream().anyMatch(Objects::nonNull);
         }
         return false;
     }
@@ -53,7 +54,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
 
-        if (caseData.getOthersToNotify() != null) {
+        if (caseData.getOthersToNotify().size() != 0) {
             List<PartyDetails> others = caseData.getOthersToNotify()
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());

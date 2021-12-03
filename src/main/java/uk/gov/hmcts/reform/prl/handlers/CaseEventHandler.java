@@ -6,13 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,9 +40,10 @@ public class CaseEventHandler {
 //            log.info(caseData.toString());
 
             final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
-            //List<EventValidationErrors> eventErrors = caseSubmissionChecker.validateAsGroups(caseData);
 
-            final String taskList = taskListRenderer.render(tasks);
+            List<EventValidationErrors> eventErrors = new ArrayList<>();
+
+            final String taskList = taskListRenderer.render(tasks, eventErrors);
 
             coreCaseDataService.triggerEvent(
                 JURISDICTION,

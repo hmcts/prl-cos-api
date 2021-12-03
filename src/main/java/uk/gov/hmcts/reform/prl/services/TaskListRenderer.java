@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 //import uk.gov.hmcts.reform.prl.models.submission.EventValidationErrors;
+import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskSection;
 
@@ -33,21 +34,7 @@ public class TaskListRenderer {
     private final TaskListRenderElements taskListRenderElements;
 
 
-//    public String render(List<Task> allTasks, List<EventValidationErrors> tasksErrors) {
-//        final List<String> lines = new LinkedList<>();
-//
-//        lines.add("<div class='width-50'>");
-//
-//        groupInSections(allTasks).forEach(section -> lines.addAll(renderSection(section)));
-//
-//        lines.add("</div>");
-//
-//        lines.addAll(renderTasksErrors(tasksErrors));
-//
-//        return String.join("\n\n", lines);
-//    }
-
-    public String render(List<Task> allTasks) {
+    public String render(List<Task> allTasks, List<EventValidationErrors> tasksErrors) {
         final List<String> lines = new LinkedList<>();
 
         lines.add("<div class='width-50'>");
@@ -56,12 +43,7 @@ public class TaskListRenderer {
 
         lines.add("</div>");
 
-        //lines.addAll(renderTasksErrors(tasksErrors));
-
-        List<String> testLines = new ArrayList<>();
-        testLines.add("This is a test string");
-
-        lines.addAll(taskListRenderElements.renderCollapsible("Why can’t I submit my application?", testLines));
+        lines.addAll(renderTasksErrors(tasksErrors));
 
         return String.join("\n\n", lines);
     }
@@ -160,18 +142,18 @@ public class TaskListRenderer {
         return lines;
     }
 
-//    private List<String> renderTasksErrors(List<EventValidationErrors> taskErrors) {
-//        if (isEmpty(taskErrors)) {
-//            return emptyList();
-//        }
-//        final List<String> errors = taskErrors.stream()
-//            .flatMap(task -> task.getErrors()
-//                .stream()
-//                .map(error -> format("%s in the %s", error, taskListRenderElements.renderLink(task.getEvent()))))
-//            .collect(toList());
-//
-//        return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
-//    }
+    private List<String> renderTasksErrors(List<EventValidationErrors> taskErrors) {
+        if (isEmpty(taskErrors)) {
+            return emptyList();
+        }
+        final List<String> errors = taskErrors.stream()
+            .flatMap(task -> task.getErrors()
+                .stream()
+                .map(error -> format("%s in %s", error, taskListRenderElements.renderLink(task.getEvent()))))
+            .collect(toList());
+
+        return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
+    }
 
 
 
