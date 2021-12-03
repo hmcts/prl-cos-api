@@ -59,6 +59,7 @@ public class TaskListRenderer {
         //lines.addAll(renderTasksErrors(tasksErrors));
 
         List<String> testLines = new ArrayList<>();
+        testLines.add("This is a test string");
 
         lines.addAll(taskListRenderElements.renderCollapsible("Why can’t I submit my application?", testLines));
 
@@ -79,30 +80,30 @@ public class TaskListRenderer {
             .withTask(tasks.get(RESPONDENT_DETAILS));
 
         final TaskSection requiredDetails = newSection("Add required details")
-            .withTask(tasks.get(MIAM))
-            .withTask(tasks.get(ALLEGATIONS_OF_HARM));
-
+            .withTask(tasks.get(MIAM));
+//            .withTask(tasks.get(ALLEGATIONS_OF_HARM));
+//
         final TaskSection additionalInformation = newSection("Add additional information")
             .withInfo("Only complete if relevant")
             .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE))
-            .withTask(tasks.get(OTHER_PROCEEDINGS))
+//            .withTask(tasks.get(OTHER_PROCEEDINGS))
             .withTask(tasks.get(ATTENDING_THE_HEARING))
             .withTask(tasks.get(INTERNATIONAL_ELEMENT))
             .withTask(tasks.get(LITIGATION_CAPACITY))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
-
+//
         final TaskSection pdfApplication = newSection("View PDF application")
             .withTask(tasks.get(VIEW_PDF_APPLICATION));
-
-        final TaskSection submitAndPay = newSection("Submit and pay")
-            .withTask(tasks.get(SUBMIT_AND_PAY));
+//
+//        final TaskSection submitAndPay = newSection("Submit and pay")
+//            .withTask(tasks.get(SUBMIT_AND_PAY));
 
         return Stream.of(applicationDetails,
                          peopleInTheCase,
                          requiredDetails,
                          additionalInformation,
-                         pdfApplication,
-                         submitAndPay)
+                         pdfApplication)
+//                         submitAndPay)
             .filter(TaskSection::hasAnyTask)
             .collect(toList());
     }
@@ -128,28 +129,32 @@ public class TaskListRenderer {
     private List<String> renderTask(Task task) {
         final List<String> lines = new LinkedList<>();
 
-        lines.add(taskListRenderElements.renderLink(task));
+        switch (task.getState()) {
 
-//        switch (task.getState()) {
-//            case NOT_AVAILABLE:
-//                lines.add(taskListRenderElements.renderDisabledLink(task)
-//                              + taskListRenderElements.renderImage("cannot-send-yet.png", "Cannot send yet"));
-//                break;
-//            case IN_PROGRESS:
-//                lines.add(taskListRenderElements.renderLink(task)
-//                              + taskListRenderElements.renderImage("in-progress.png", "In progress"));
-//                break;
-//            case COMPLETED:
-//                lines.add(taskListRenderElements.renderLink(task)
-//                              + taskListRenderElements.renderImage("information-added.png", "Information added"));
-//                break;
-//            case COMPLETED_FINISHED:
-//                lines.add(taskListRenderElements.renderLink(task)
-//                              + taskListRenderElements.renderImage("finished.png", "Finished"));
-//                break;
-//            default:
-//                lines.add(taskListRenderElements.renderLink(task));
-//        }
+            case NOT_STARTED:
+                if (task.getEvent().equals(VIEW_PDF_APPLICATION)) {
+                    lines.add(taskListRenderElements.renderLink(task));
+                }
+                else {
+                    lines.add(taskListRenderElements.renderLink(task)
+                                  + taskListRenderElements.renderImage("not-started.png", "Not started"));
+                }
+                break;
+            case IN_PROGRESS:
+                lines.add(taskListRenderElements.renderLink(task)
+                              + taskListRenderElements.renderImage("in-progress.png", "In progress"));
+                break;
+            case MANDATORY_COMPLETED:
+                lines.add(taskListRenderElements.renderLink(task)
+                              + taskListRenderElements.renderImage("information-added.png", "Information added"));
+                break;
+            case FINISHED:
+                lines.add(taskListRenderElements.renderLink(task)
+                              + taskListRenderElements.renderImage("finished.png", "Finished"));
+                break;
+            default:
+                lines.add(taskListRenderElements.renderLink(task));
+        }
 
         task.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
         return lines;

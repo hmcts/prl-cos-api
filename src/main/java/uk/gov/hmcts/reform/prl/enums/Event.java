@@ -14,15 +14,15 @@ public enum Event {
     CHILD_DETAILS("childDetails", "Child details"),
     RESPONDENT_DETAILS("respondentsDetails", "Respondent details"),
     MIAM("miam", "MIAM"),
-    ALLEGATIONS_OF_HARM("allegationsOfHarm", "Allegations of harm"),
+//    ALLEGATIONS_OF_HARM("allegationsOfHarm", "Allegations of harm"),
     OTHER_PEOPLE_IN_THE_CASE("otherPeopleInTheCase", "Other people in the case"),
-    OTHER_PROCEEDINGS("otherProceedings", "Other proceedings"),
+//    OTHER_PROCEEDINGS("otherProceedings", "Other proceedings"),
     ATTENDING_THE_HEARING("attendingTheHearing", "Attending the hearing"),
     INTERNATIONAL_ELEMENT("internationalElement", "Internation element"),
     LITIGATION_CAPACITY("litigationCapacity", "Litigation capacity"),
     WELSH_LANGUAGE_REQUIREMENTS("welshLanguageRequirements", "Welsh language requirements"),
-    VIEW_PDF_APPLICATION("viewPDFApplication", "View PDF application"),
-    SUBMIT_AND_PAY("submitAndPay", "Submit and pay");
+    VIEW_PDF_APPLICATION("viewPDFApplication", "View PDF application");
+//    SUBMIT_AND_PAY("submitAndPay", "Submit and pay");
 
     private final String id;
     private final String name;
