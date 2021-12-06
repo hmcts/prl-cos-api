@@ -6,7 +6,12 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.LITIGATION_CAPACITY_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 
 @Service
@@ -18,23 +23,35 @@ public class LitigationCapacityChecker implements EventChecker {
     @Override
     public boolean isFinished(CaseData caseData) {
 
-        boolean litigationFactorsComplete = !(caseData.getLitigationCapacityFactors() == null);
-        boolean litigationReferralsComplete = !(caseData.getLitigationCapacityReferrals() == null);
-        boolean litigationOtherComplete = !(caseData.getLitigationCapacityOtherFactors() == null);
-        boolean litigationOtherDetailsComplete = !(caseData.getLitigationCapacityOtherFactorsDetails() == null);
+        boolean litigationFactorsComplete = ofNullable(caseData.getLitigationCapacityFactors()).isPresent();
+        boolean litigationReferralsComplete = ofNullable(caseData.getLitigationCapacityReferrals()).isPresent();
+        boolean litigationOtherComplete = ofNullable(caseData.getLitigationCapacityOtherFactors()).isPresent();
+        boolean litigationOtherDetailsComplete = ofNullable(caseData.getLitigationCapacityOtherFactorsDetails())
+                                                                    .isPresent();
 
-        if (litigationOtherComplete) {
-            return  litigationOtherDetailsComplete;
+        Optional<YesOrNo> litigationOther = ofNullable(caseData.getLitigationCapacityOtherFactors());
+
+        if ((litigationOtherComplete && litigationOtherDetailsComplete) ||
+            (litigationOtherComplete && litigationOther.get().equals(NO))) {
+            taskErrorService.removeError(LITIGATION_CAPACITY_ERROR);
+            return true;
+            }
+
+        if (!litigationOtherComplete && (litigationFactorsComplete || litigationReferralsComplete)) {
+            taskErrorService.removeError(LITIGATION_CAPACITY_ERROR);
+            return true;
         }
-        return litigationFactorsComplete || litigationReferralsComplete;
+        return false;
+
     }
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        YesOrNo otherFactors = caseData.getLitigationCapacityOtherFactors();
-        if (otherFactors != null && otherFactors.equals(YES)) {
-            if(caseData.getLitigationCapacityOtherFactorsDetails() == null) {
-                taskErrorService.addEventError(LITIGATION_CAPACITY, "Add details of other factors");
+        Optional<YesOrNo> otherFactors = ofNullable(caseData.getLitigationCapacityOtherFactors());
+        if (otherFactors.isPresent() && otherFactors.get().equals(YES)) {
+            if(ofNullable(caseData.getLitigationCapacityOtherFactorsDetails()).isEmpty()) {
+                taskErrorService.addEventError(LITIGATION_CAPACITY, LITIGATION_CAPACITY_ERROR,
+                                               LITIGATION_CAPACITY_ERROR.getError());
                 return true;
             }
         }

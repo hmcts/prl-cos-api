@@ -50,7 +50,6 @@ public class HearingUrgencyChecker implements EventChecker{
     }
     @Override
     public boolean isStarted(CaseData caseData) {
-        taskErrorService.addEventError(HEARING_URGENCY, "Add whether the case is urgent");
         return anyNonEmpty(
             caseData.getCaseUrgencyTimeAndReason(),
             caseData.getEffortsMadeWithRespondents(),
