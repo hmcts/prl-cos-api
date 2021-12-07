@@ -118,6 +118,9 @@ public class CaseData {
     private final YesOrNo abductionOtherSafetyConcerns;
     private final String abductionOtherSafetyConcernsDetails;
     private final String abductionCourtStepsRequested;
+    private final YesOrNo allegationsOfHarmChildAbuseYesNo;
+    private final YesOrNo allegationsOfHarmSubstanceAbuseYesNo;
+    private final YesOrNo allegationsOfHarmOtherConcernsYesNo;
     private final List<Element<Behaviours>> behaviours;
     private final YesOrNo ordersNonMolestation;
     private final YesOrNo ordersOccupation;
@@ -167,6 +170,9 @@ public class CaseData {
     /**
      * Other proceedings
      */
+    private final YesNoDontKnow previousOrOngoingProceedingsForChildren;
+    private final List<Element<ProceedingDetails>> existingProceedings;
+
 
     /**
      * Attending the hearing

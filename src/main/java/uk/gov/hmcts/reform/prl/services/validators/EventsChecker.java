@@ -36,7 +36,13 @@ public class EventsChecker {
     MiamChecker miamChecker;
 
     @Autowired
+    AllegationsOfHarmChecker allegationsOfHarmChecker;
+
+    @Autowired
     OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
+
+    @Autowired
+    OtherProceedingsChecker otherProceedingsChecker;
 
     @Autowired
     AttendingTheHearingChecker attendingTheHearingChecker;
@@ -64,7 +70,9 @@ public class EventsChecker {
         eventStatus.put(CHILD_DETAILS, childChecker);
         eventStatus.put(RESPONDENT_DETAILS, respondentsChecker);
         eventStatus.put(MIAM, miamChecker);
+        eventStatus.put(ALLEGATIONS_OF_HARM, allegationsOfHarmChecker);
         eventStatus.put(OTHER_PEOPLE_IN_THE_CASE, otherPeopleInTheCaseChecker);
+        eventStatus.put(OTHER_PROCEEDINGS, otherProceedingsChecker);
         eventStatus.put(ATTENDING_THE_HEARING, attendingTheHearingChecker);
         eventStatus.put(INTERNATIONAL_ELEMENT, internationalElementChecker);
         eventStatus.put(LITIGATION_CAPACITY, litigationCapacityChecker);

@@ -6,16 +6,14 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum YesNoDontKnow {
+public enum ProceedingsEnum {
 
-    @JsonProperty("yes")
-    YES("Yes"),
-    @JsonProperty("no")
-    NO("No"),
-    @JsonProperty("dontKnow")
-    DONT_KNOW("Don't know");
+    @JsonProperty("ongoing")
+    ONGOING("ongoing", "Ongoing"),
+    @JsonProperty("previous")
+    PREVIOUS("previous", "Previous");
 
+    private final String id;
     private final String displayedValue;
-
 
 }
