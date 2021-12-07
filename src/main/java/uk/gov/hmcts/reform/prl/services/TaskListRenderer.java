@@ -62,18 +62,18 @@ public class TaskListRenderer {
             .withTask(tasks.get(RESPONDENT_DETAILS));
 
         final TaskSection requiredDetails = newSection("Add required details")
-            .withTask(tasks.get(MIAM));
-//            .withTask(tasks.get(ALLEGATIONS_OF_HARM));
-//
+            .withTask(tasks.get(MIAM))
+            .withTask(tasks.get(ALLEGATIONS_OF_HARM));
+
         final TaskSection additionalInformation = newSection("Add additional information")
             .withInfo("Only complete if relevant")
             .withTask(tasks.get(OTHER_PEOPLE_IN_THE_CASE))
-//            .withTask(tasks.get(OTHER_PROCEEDINGS))
+            .withTask(tasks.get(OTHER_PROCEEDINGS))
             .withTask(tasks.get(ATTENDING_THE_HEARING))
             .withTask(tasks.get(INTERNATIONAL_ELEMENT))
             .withTask(tasks.get(LITIGATION_CAPACITY))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
-//
+
         final TaskSection pdfApplication = newSection("View PDF application")
             .withTask(tasks.get(VIEW_PDF_APPLICATION));
 //
