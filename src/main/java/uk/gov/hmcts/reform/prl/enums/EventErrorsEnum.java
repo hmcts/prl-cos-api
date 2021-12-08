@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum EventErrorsEnum {
 
+    CHILD_DETAILS_ERROR("Add child details"),
     LITIGATION_CAPACITY_ERROR("Add the litigation capacity details"),
     INTERNATIONAL_ELEMENT_ERROR("Add the international element details"),
     OTHER_PEOPLE_ERROR("Add the details about other people in the case"),

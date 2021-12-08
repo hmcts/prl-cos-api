@@ -18,7 +18,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ATTENDING_THE_HEARING_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
-import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
@@ -111,7 +110,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
             return true;
         }
         taskErrorService.addEventError(ALLEGATIONS_OF_HARM, ALLEGATIONS_OF_HARM_ERROR,
-                                           ATTENDING_THE_HEARING_ERROR.getError());
+                                           ALLEGATIONS_OF_HARM_ERROR.getError());
         return false;
     }
 

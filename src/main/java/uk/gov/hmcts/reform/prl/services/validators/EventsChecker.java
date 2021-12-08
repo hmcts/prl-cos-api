@@ -59,6 +59,9 @@ public class EventsChecker {
     @Autowired
     PDFChecker pdfChecker;
 
+    @Autowired
+    SubmitAndPayChecker submitAndPayChecker;
+
     private EnumMap<Event, EventChecker> eventStatus = new EnumMap<Event, EventChecker>(Event.class);
 
     @PostConstruct
@@ -78,6 +81,7 @@ public class EventsChecker {
         eventStatus.put(LITIGATION_CAPACITY, litigationCapacityChecker);
         eventStatus.put(WELSH_LANGUAGE_REQUIREMENTS, welshLanguageRequirementsChecker);
         eventStatus.put(VIEW_PDF_APPLICATION, pdfChecker);
+        eventStatus.put(SUBMIT_AND_PAY, submitAndPayChecker);
     }
 
     public boolean isFinished(Event event, CaseData caseData) {
@@ -92,4 +96,7 @@ public class EventsChecker {
         return eventStatus.get(event).hasMandatoryCompleted(caseData);
     }
 
+    public EnumMap<Event, EventChecker> getEventStatus() {
+        return eventStatus;
+    }
 }
