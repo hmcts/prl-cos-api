@@ -9,12 +9,14 @@ import lombok.RequiredArgsConstructor;
 public enum YesNoDontKnow {
 
     @JsonProperty("yes")
-    YES("Yes"),
+    YES("yes", "Yes"),
     @JsonProperty("no")
-    NO("No"),
+    NO("no", "No"),
     @JsonProperty("dontKnow")
-    DONT_KNOW("Don't know");
+    DONT_KNOW("dontKnow", "Don't know");
 
+
+    private final String id;
     private final String displayedValue;
 
 

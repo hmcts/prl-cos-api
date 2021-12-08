@@ -63,8 +63,8 @@ public class TaskListService {
             INTERNATIONAL_ELEMENT,
             LITIGATION_CAPACITY,
             WELSH_LANGUAGE_REQUIREMENTS,
-            VIEW_PDF_APPLICATION
-//            SUBMIT_AND_PAY
+            VIEW_PDF_APPLICATION,
+            SUBMIT_AND_PAY
         ));
 
         return events;

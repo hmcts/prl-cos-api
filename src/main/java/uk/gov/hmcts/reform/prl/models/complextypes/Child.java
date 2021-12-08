@@ -24,6 +24,9 @@ public class Child {
     private final RelationshipsEnum  respondentsRelationshipToChild;
     private final String otherRespondentsRelationshipToChild;
     private final List<LiveWithEnum> childLiveWith;
+    private final YesNoDontKnow childrenKnownToLocalAuthority;
+    private final String childrenKnownToLocalAuthorityTextArea;
+    private final YesNoDontKnow childrenSubjectOfChildProtectionPlan;
     private final String otherPersonWhoLivesWithChild;
     private final YesOrNo isChildCurrentAddressKnown;
     private final Address address;

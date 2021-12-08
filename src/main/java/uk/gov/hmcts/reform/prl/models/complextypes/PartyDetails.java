@@ -26,7 +26,7 @@ public class PartyDetails {
     private final Address address;
     private final DontKnow isAddressUnknown;
     private final YesOrNo isAddressConfidential;
-    private final YesOrNo isAtAddressLessThan5Years;
+//    private final YesNoDontKnow isAtAddressLessThan5Years;
     private final String addressLivedLessThan5YearsDetails;
     private final YesOrNo canYouProvideEmailAddress;
     private final String email;
@@ -45,7 +45,7 @@ public class PartyDetails {
     private final String solicitorReference;
     private final String representativeFirstName;
     private final String representativeLastName;
-    private final YesOrNo isAtAddressLessThan5YearsWithDontKnow;
+    private final YesNoDontKnow isAtAddressLessThan5YearsWithDontKnow;
     private final YesNoDontKnow doTheyHaveLegalRepresentation;
     private final String sendSignUpLink;
     private final String solicitorEmail;
