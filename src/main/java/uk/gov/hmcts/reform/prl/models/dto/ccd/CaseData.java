@@ -215,4 +215,11 @@ public class CaseData {
     private final List<Element<C8Document>> c8FormDocumentsUploaded;
     private final List<Element<OtherDocument>> otherDocumentsUploaded;
 
+
+    /**
+     * Payment service request related calls
+     * */
+
+    private final String paymentServiceRequestReferenceNumber;
+
 }

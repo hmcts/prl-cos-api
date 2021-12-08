@@ -238,6 +238,7 @@ dependencies {
   implementation group: 'io.github.openfeign', name: 'feign-httpclient'
   implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
+  implementation group: 'io.springfox', name: 'springfox-spring-webflux', version: versions.springfoxSwagger
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.0.0'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
   implementation group: 'org.apache.commons', name: 'commons-math3', version: versions.commonsMath3
