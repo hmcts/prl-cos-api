@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models;
+package uk.gov.hmcts.reform.prl.enums;
 
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -10,6 +10,7 @@ public enum LanguagePreference {
 
     ENGLISH("english"),
     WELSH("welsh");
+
 
     private final String code;
 
