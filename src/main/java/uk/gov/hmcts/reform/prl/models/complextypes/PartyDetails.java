@@ -41,7 +41,7 @@ public class PartyDetails {
     private final YesOrNo isPlaceOfBirthKnown;
     private final Organisation solicitorOrg;
     private final Address solicitorAddress;
-    private final String dXNumber;
+    private final String dxNumber;
     private final String solicitorReference;
     private final String representativeFirstName;
     private final String representativeLastName;

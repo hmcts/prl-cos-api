@@ -20,9 +20,11 @@ public enum TypeOfOrderEnum {
     @JsonProperty("familyLaw1996Part4")
     FAMILY_LAW_1996_PART_4("familyLaw1996Part4", "Family Law Act 1996 Part 4"),
     @JsonProperty("contactOrResidenceOrder")
-    CONTACT_OR_RESIDENCE_ORDER("contactOrResidenceOrder", "Contact or residence order made within proceedings for a divorce or dissolution of a civil partnership"),
+    CONTACT_OR_RESIDENCE_ORDER("contactOrResidenceOrder",
+                               "Contact or residence order made within proceedings for a divorce or dissolution of a civil partnership"),
     @JsonProperty("contactOrResidenceOrderWithAdoption")
-    CONTACT_OR_RESIDENCE_ORDER_WITH_ADOPTION("contactOrResidenceOrderWithAdoption", "Contact or residence order made in connection with an Adoption Order"),
+    CONTACT_OR_RESIDENCE_ORDER_WITH_ADOPTION("contactOrResidenceOrderWithAdoption",
+                                             "Contact or residence order made in connection with an Adoption Order"),
     @JsonProperty("orderRelatingToChildMaintainance")
     CHILD_MAINTENANCE_ORDER("orderRelatingToChildMaintainance", "Order relating to child maintenance"),
     @JsonProperty("childArrangementsOrder")
