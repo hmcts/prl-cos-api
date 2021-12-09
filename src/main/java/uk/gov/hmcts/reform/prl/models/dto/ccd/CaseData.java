@@ -1,31 +1,15 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
-import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.*;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeeds;
+import uk.gov.hmcts.reform.prl.models.complextypes.*;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
@@ -45,13 +29,36 @@ public class CaseData {
 
     private final long id;
 
-    @JsonProperty("LanguagePreferenceWelsh")
-    private final YesOrNo languagePreferenceWelsh;
-
     /**
      * Case name.
      */
     private final String applicantCaseName;
+
+    /**
+     * Upload documents.
+     */
+
+    private final List<ContactOrderDocument> contactOrderDocumentsUploaded;
+    private final List<C8Document> c8FormDocumentsUploaded;
+    private final List<OtherDocument> otherDocumentsUploaded;
+
+    /**
+     * People in the case.
+     */
+
+    private final Address childrenAddress;
+    private final YesNoDontKnow isChildrenKnownToAuthority;
+    private final String childAndLocalAuthority;
+    private final YesOrNo isChildrenUnderChildProtection;
+    private final YesNoDontKnow isChildrenWithSameParents;
+    private final String parentsAndTheirChildren;
+    private final String parentalResponsibilities;
+    private final WhoChildrenLiveWith whoChildrenLiveWith;
+    private final String childAddressAndAdultsLivingWith;
+    private final YesOrNo isExistingProceedings;
+    private final String childrenInProceeding;
+    private final List<Element<Child>> otherChildren;
+
 
     /**
      * Type of application.
@@ -137,7 +144,6 @@ public class CaseData {
     private final YesOrNo abductionOtherSafetyConcerns;
     private final String abductionOtherSafetyConcernsDetails;
     private final String abductionCourtStepsRequested;
-    private final List<Element<Behaviours>> behaviours;
     private final YesOrNo ordersNonMolestation;
     private final YesOrNo ordersOccupation;
     private final YesOrNo ordersForcedMarriageProtection;
@@ -174,6 +180,7 @@ public class CaseData {
     private final YesOrNo ordersUndertakingInPlaceCurrent;
     private final String ordersUndertakingInPlaceCourtName;
     private final OtherDocument ordersUndertakingInPlaceDocument;
+    private final List<Element<Behaviours>> behaviours;
     private final YesOrNo allegationsOfHarmOtherConcerns;
     private final String allegationsOfHarmOtherConcernsDetails;
     private final String allegationsOfHarmOtherConcernsCourtActions;
@@ -187,11 +194,15 @@ public class CaseData {
      * Other proceedings.
      */
 
+    private final YesNoDontKnow previousOrOngoingProceedingsForChildren;
+    private final List<Element<ProceedingDetails>> otherProceedings;
+
+
     /**
      * Attending the hearing.
      */
     private final YesOrNo isWelshNeeded;
-    private final List<Element<WelshNeeds>> welshNeeds;
+    private final List<Element<WelshNeed>> welshNeeds;
     private final YesOrNo isInterpreterNeeded;
     private final List<Element<InterpreterNeed>> interpreterNeeds;
     private final YesOrNo isDisabilityPresent;
@@ -205,10 +216,10 @@ public class CaseData {
      * International element.
      */
     private final YesOrNo habitualResidentInOtherState;
-    private final YesOrNo jurisdictionIssue;
-    private final YesOrNo requestToForeignAuthority;
     private final String habitualResidentInOtherStateGiveReason;
+    private final YesOrNo jurisdictionIssue;
     private final String jurisdictionIssueGiveReason;
+    private final YesOrNo requestToForeignAuthority;
     private final String requestToForeignAuthorityGiveReason;
 
     /**
@@ -226,15 +237,6 @@ public class CaseData {
     private final LanguagePreference welshLanguageRequirementApplication;
     private final YesOrNo languageRequirementApplicationNeedWelsh;
     private final YesOrNo welshLanguageRequirementApplicationNeedEnglish;
-
-
-    /**
-     * Upload documents.
-     */
-    private final List<Element<ContactOrderDocument>> contactOrderDocumentsUploaded;
-    private final List<Element<C8Document>> c8FormDocumentsUploaded;
-    private final List<Element<OtherDocument>> otherDocumentsUploaded;
-
 
 }
 

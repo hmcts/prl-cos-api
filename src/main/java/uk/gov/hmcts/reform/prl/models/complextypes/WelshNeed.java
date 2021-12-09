@@ -6,7 +6,7 @@ import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 
 @Data
 @Builder
-public class WelshNeeds {
+public class WelshNeed {
 
     private final String whoNeedsWelsh;
     private final SpokenOrWrittenWelshEnum spokenOrWritten;
