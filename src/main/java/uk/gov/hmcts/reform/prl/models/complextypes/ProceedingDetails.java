@@ -2,28 +2,30 @@ package uk.gov.hmcts.reform.prl.models.complextypes;
 
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
+import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.ProceedingOrderDocument;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
 public class ProceedingDetails {
 
-    private final String courtName;
+    private final ProceedingsEnum previousOrOngoingProceedings;
     private final String caseNumber;
-    private final LocalDate date;
-    private final String cafcassOfficer;
-    private final YesOrNo emergencyProtectionOrder;
-    private final YesOrNo supervisionOrder;
-    private final YesOrNo caseOrder;
-    private final YesOrNo childAbduction;
-    private final YesOrNo familyLawAct;
-    private final YesOrNo contactOrderWithinProceedings;
-    private final YesOrNo contactOrderWithinAdoptionOrder;
-    private final YesOrNo childMaintenanceOrder;
-    private final YesOrNo childArrangementsOrder;
-    private final ProceedingOrderDocument proceedingOrder;
+    private final LocalDate dateStarted;
+    private final LocalDate dateEnded;
+    private final List<TypeOfOrderEnum> typeOfOrder;
+    private final String otherTypeOfOrder;
+    private final String nameOfJudge;
+    private final String nameOfCourt;
+    private final String nameOfChildrenInvolved;
+    private final String nameOfGuardian;
+    private final String nameAndOffice;
+    private final Document uploadRelevantOrder;
 
 }
