@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
-
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskSection;
 
@@ -16,7 +15,20 @@ import java.util.stream.Stream;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static uk.gov.hmcts.reform.prl.enums.Event.*;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
+import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
+import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
+import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
+import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskSection.newSection;
 
 @Service
@@ -37,8 +49,6 @@ public class TaskListRenderer {
         groupInSections(allTasks).forEach(section -> lines.addAll(renderSection(section)));
 
         lines.add("</div>");
-
-//        lines.addAll(renderTasksErrors(tasksErrors));
 
         return String.join("\n\n", lines);
     }
@@ -101,61 +111,8 @@ public class TaskListRenderer {
 
         lines.add(taskListRenderElements.renderLink(task));
 
-//        switch (task.getState()) {
-//
-//            case NOT_STARTED:
-//                if (task.getEvent().equals(VIEW_PDF_APPLICATION)) {
-//                    lines.add(taskListRenderElements.renderLink(task));
-//                }
-//                else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
-//                    lines.add(taskListRenderElements.renderLink(task)
-//                                  + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
-//                }
-//                else {
-//                    lines.add(taskListRenderElements.renderLink(task)
-//                                  + taskListRenderElements.renderImage("not-started.png", "Not started"));
-//                }
-//                break;
-//            case IN_PROGRESS:
-//                lines.add(taskListRenderElements.renderLink(task)
-//                              + taskListRenderElements.renderImage("in-progress.png", "In progress"));
-//                break;
-//            case MANDATORY_COMPLETED:
-//                if (task.getEvent().equals(SUBMIT_AND_PAY)) {
-//                    lines.add(taskListRenderElements.renderLink(task)
-//                                  + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
-//                }
-//                else {
-//
-//                    lines.add(taskListRenderElements.renderLink(task)
-//                                  + taskListRenderElements.renderImage("information-added.png", "Information added"));
-//                }
-//                break;
-//            case FINISHED:
-//                lines.add(taskListRenderElements.renderLink(task)
-//                              + taskListRenderElements.renderImage("finished.png", "Finished"));
-//                break;
-//            default:
-//                lines.add(taskListRenderElements.renderLink(task));
-//        }
-
         task.getHint().map(taskListRenderElements::renderHint).ifPresent(lines::add);
         return lines;
     }
-
-//    private List<String> renderTasksErrors(List<EventValidationErrors> taskErrors) {
-//        if (isEmpty(taskErrors)) {
-//            return emptyList();
-//        }
-//        final List<String> errors = taskErrors.stream()
-//            .flatMap(task -> task.getErrors()
-//                .stream()
-//                .map(error -> format("%s in %s", error, taskListRenderElements.renderLink(task.getEvent()))))
-//            .collect(toList());
-//
-//        return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
-//    }
-
-
 
 }
