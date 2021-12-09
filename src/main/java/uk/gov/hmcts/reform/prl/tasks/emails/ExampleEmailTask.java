@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.prl.tasks.emails;
 
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.framework.context.TaskContext;
-import uk.gov.hmcts.reform.prl.models.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;

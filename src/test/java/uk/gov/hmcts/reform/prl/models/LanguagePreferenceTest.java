@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.models;
 
 import org.junit.Test;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static org.hamcrest.MatcherAssert.assertThat;
