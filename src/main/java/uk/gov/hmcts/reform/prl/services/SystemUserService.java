@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 
@@ -9,12 +10,11 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SystemUserService {
 
-    private final String username = "";
-    private final String password = "";
+    @Value("${prl.username")
+    private final String username;
+    @Value("${prl.password")
+    private final String password;
 
-
-    //TODO: use class to manage user config
-    //private final SystemUpdateUserConfiguration userConfig;
     private final IdamClient idamClient;
 
     public String getSysUserToken() {

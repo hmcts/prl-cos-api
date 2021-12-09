@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 
 import java.util.List;
 import java.util.Map;
