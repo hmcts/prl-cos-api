@@ -6,7 +6,7 @@ java:
       resourceGroup: prl-aat
       secrets:
         - prl-cos-idam-client-secret
-        - microservicekey-prl-cos
+        - microservicekey-prl-cos-api
         - system-update-user-username
         - system-update-user-password
   environment:
