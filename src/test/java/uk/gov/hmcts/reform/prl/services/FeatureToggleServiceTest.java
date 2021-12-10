@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import static org.hamcrest.core.Is.is;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @TestPropertySource(properties = { "FEATURE_EXAMPLE=true", "FEATURE_EXAMPLE_OFF=false" })
+@Ignore
 public class FeatureToggleServiceTest {
 
     @Autowired
