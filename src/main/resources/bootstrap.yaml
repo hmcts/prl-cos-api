@@ -6,7 +6,7 @@ spring:
       paths: /mnt/secrets/prl
       aliases:
         prl.uk-gov-notify-api-key: UK_GOV_NOTIFY_API_KEY
-        microservicekey-prl-cos-api-service: microservicekey-prl-cos
+        microservicekey-prl-cos-api-service: microservicekey-prl-cos-api
         system-update-user-password: PRL_SYSTEM_UPDATE_PASSWORD
         system-update-user-username: PRL_SYSTEM_UPDATE_USERNAME
         AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
