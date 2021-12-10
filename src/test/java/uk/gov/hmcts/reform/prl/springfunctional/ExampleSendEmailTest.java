@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.springfunctional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import static uk.gov.hmcts.reform.prl.tasks.emails.ExampleEmailTaskTest.expected
 @PropertySource(value = "classpath:application.yaml")
 @AutoConfigureMockMvc
 @RunWith(SpringRunner.class)
+@Ignore
 public class ExampleSendEmailTest {
 
     private static final String API_URL = "/send-email";
