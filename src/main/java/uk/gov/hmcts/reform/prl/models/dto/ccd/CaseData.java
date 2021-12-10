@@ -1,16 +1,14 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import uk.gov.hmcts.reform.prl.enums.*;
-import uk.gov.hmcts.reform.prl.models.*;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.*;
 import uk.gov.hmcts.reform.prl.models.documents.*;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CCDPaymentServiceRequestUpdate;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,8 +19,10 @@ import java.util.List;
 @Getter
 @Setter
 @Builder(toBuilder = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CaseData {
 
+    @JsonProperty("id")
     private final long id;
 
     @JsonProperty("LanguagePreferenceWelsh")
@@ -31,6 +31,7 @@ public class CaseData {
     /**
      * Case name
      */
+    @JsonProperty("applicantCaseName")
     private final String applicantCaseName;
 
     /**
@@ -220,6 +221,7 @@ public class CaseData {
      * Payment service request related calls
      * */
 
+    @JsonProperty("paymentServiceRequestReferenceNumber")
     private final String paymentServiceRequestReferenceNumber;
-
+    private final CCDPaymentServiceRequestUpdate paymentCallbackServiceRequestUpdate;
 }

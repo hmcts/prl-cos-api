@@ -6,15 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 @Data
 @Builder
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PaymentDto {
     @JsonProperty("payment_amount")
-    private BigDecimal paymentAmount;
+    private String paymentAmount;
     @JsonProperty("payment_reference")
     private String paymentReference;
     @JsonProperty("payment_method")

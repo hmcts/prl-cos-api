@@ -6,8 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 @Data
 @Builder
 @AllArgsConstructor
@@ -18,9 +16,10 @@ public class ServiceRequestUpdateDto {
     @JsonProperty("ccd_case_number")
     private String ccdCaseNumber;
     @JsonProperty("service_request_amount")
-    private BigDecimal serviceRequestAmount;
+    private String serviceRequestAmount;
     @JsonProperty("service_request_status")
     private String serviceRequestStatus;
     @JsonProperty("payment")
     private PaymentDto payment;
+
 }
