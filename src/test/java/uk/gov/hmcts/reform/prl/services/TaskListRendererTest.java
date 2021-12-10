@@ -1,10 +1,21 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Test;
+import org.mockito.InjectMocks;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.common.xml.Xml.read;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
@@ -21,6 +32,9 @@ import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 
 public class TaskListRendererTest {
+
+
+
 
     private final TaskListRenderer taskListRenderer = new TaskListRenderer(
         new TaskListRenderElements(
@@ -46,11 +60,30 @@ public class TaskListRendererTest {
 
 
     @Test
-    public void shouldRenderTaskList() {
+    public void shouldRenderTaskList() throws IOException {
+
+        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/task-list-without-pdf-or-submit.md"));
+
+        List<String> lines = new ArrayList<>();
+
+        String line = taskListMarkDown.readLine();
+        while (line != null) {
+            lines.add(line);
+            line = taskListMarkDown.readLine();
+        }
+
+        String expectedTaskList = String.join("\n", lines);
+        String actualTaskList = taskListRenderer.render(tasks);
+
+        assert expectedTaskList.equals(actualTaskList);
+
+    }
+
+
 
     }
 
 
 
 
-}
+
