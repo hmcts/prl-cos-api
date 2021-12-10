@@ -1,21 +1,14 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.common.xml.Xml.read;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
@@ -80,10 +73,4 @@ public class TaskListRendererTest {
     }
 
 
-
-    }
-
-
-
-
-
+}
