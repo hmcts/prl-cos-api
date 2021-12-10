@@ -18,7 +18,6 @@ java:
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS: 900
 
-
   keyVaults:
     prl:
       resourceGroup: prl-aat
