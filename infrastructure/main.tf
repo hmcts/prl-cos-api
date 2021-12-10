@@ -5,7 +5,24 @@ provider "azurerm" {
 resource "azurerm_resource_group" "rg" {
   name     = "${var.product}-${var.component}-${var.env}"
   location = var.location
+  tags = var.common_tags
 }
+
+
+module "key-vault" {
+  source                  = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
+  name                    = "prl-${var.env}"
+  product                 = var.product
+  env                     = var.env
+  tenant_id               = var.tenant_id
+  object_id               = var.jenkins_AAD_objectId
+  resource_group_name     = azurerm_resource_group.rg.name
+  product_group_name      = "DTS Family Private Law"
+  product_group_object_id = var.jenkins_AAD_objectId
+  common_tags             = var.common_tags
+  create_managed_identity = true
+}
+
 locals {
 
   previewVaultName    = "${var.reform_team}-aat"
@@ -14,9 +31,25 @@ locals {
   vaultUri            = data.azurerm_key_vault.prl_key_vault.vault_uri
 }
 
+
+data "azurerm_key_vault_secret" "s2s_secret" {
+  key_vault_id = "${data.azurerm_key_vault.s2s_vault.id}"
+  name = "microservicekey-prl-cos-api"
+}
+
+resource "azurerm_key_vault_secret" "prl_s2s_secret" {
+  name         = "microservicekey-prl-cos-api"
+  value        = data.azurerm_key_vault_secret.s2s_secret.value
+  key_vault_id = module.key-vault.key_vault_id
+
+  depends_on = [
+    module.key-vault
+  ]
+}
+
 data "azurerm_key_vault" "prl_key_vault" {
-  name                = local.vaultName
-  resource_group_name = local.vaultName
+  name                = "prl-${var.env}"
+  resource_group_name = "prl-${var.env}"
 }
 
 data "azurerm_key_vault_secret" "system-update-user-username" {
