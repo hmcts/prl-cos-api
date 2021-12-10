@@ -33,8 +33,6 @@ public class ChildChecker implements EventChecker{
 
         Optional<List<Element<Child>>> childrenWrapped = ofNullable(caseData.getChildren());
 
-        boolean finished = true;
-
         if (childrenWrapped.isPresent() && childrenWrapped.get().size() != 0) {
             List<Child> children = childrenWrapped.get()
                 .stream()
@@ -42,18 +40,16 @@ public class ChildChecker implements EventChecker{
                 .collect(Collectors.toList());
 
             for (Child c : children) {
-                if (!(validateMandatoryFieldsCompleted(c))) {
-                    finished = false;
-                    break;
+                if(!(validateMandatoryFieldsCompleted(c))) {
+                    return false;
                 }
             }
         }
-        if (finished) {
-            taskErrorService.removeError(CHILD_DETAILS_ERROR);
-            return true;
+        else {
+            return false;
         }
-        finished = false;
-        return finished;
+        taskErrorService.removeError(CHILD_DETAILS_ERROR);
+        return true;
     }
 
     @Override
@@ -69,35 +65,9 @@ public class ChildChecker implements EventChecker{
                 .collect(Collectors.toList());
 
             for (Child c : children) {
-                Optional<String> firstName = ofNullable(c.getFirstName());
-                Optional<String> lastName = ofNullable(c.getLastName());
-                Optional<LocalDate> dateOfBirth = ofNullable(c.getDateOfBirth());
-                Optional<Gender> gender = ofNullable(c.getGender());
-                Optional<String> otherGender = ofNullable(c.getOtherGender());
-                Optional<List<OrderTypeEnum>> orderAppliedFor = ofNullable(c.getOrderAppliedFor());
-                Optional<RelationshipsEnum> applicantsRelationshipToChild = ofNullable(c.getApplicantsRelationshipToChild());
-                Optional<String> otherApplicantsRelationshipToChild = ofNullable(c.getOtherApplicantsRelationshipToChild());
-                Optional<RelationshipsEnum> respondentsRelationshipToChild = ofNullable(c.getRespondentsRelationshipToChild());
-                Optional<String> otherRespondentsRelationshipToChild = ofNullable(c.getOtherRespondentsRelationshipToChild());
-                Optional<YesNoDontKnow> childrenKnownToLocalAuthority = ofNullable(c.getChildrenKnownToLocalAuthority());
-                Optional<YesNoDontKnow> childrenSubjectOfChildProtectionPlan = ofNullable(c.getChildrenSubjectOfChildProtectionPlan());
-
-                List<Optional> fields = new ArrayList<>();
-                fields.add(firstName);
-                fields.add(lastName);
-                fields.add(dateOfBirth);
-                fields.add(gender);
-                fields.add(otherGender);
-                fields.add(orderAppliedFor);
-                fields.add(applicantsRelationshipToChild);
-                fields.add(otherApplicantsRelationshipToChild);
-                fields.add(respondentsRelationshipToChild);
-                fields.add(otherRespondentsRelationshipToChild);
-                fields.add(childrenKnownToLocalAuthority);
-                fields.add(childrenSubjectOfChildProtectionPlan);
-
-                anyStarted = fields.stream().anyMatch(Optional::isPresent);
-
+                if (validateAnyFieldStarted(c)) {
+                    anyStarted = true;
+                }
             }
         }
         if (anyStarted) {
@@ -121,6 +91,9 @@ public class ChildChecker implements EventChecker{
         Optional<String> otherGender = ofNullable(child.getOtherGender());
         Optional<List<OrderTypeEnum>> orderAppliedFor = ofNullable(child.getOrderAppliedFor());
         Optional<RelationshipsEnum> applicantsRelationshipToChild = ofNullable(child.getApplicantsRelationshipToChild());
+        Optional<RelationshipsEnum> respondentsRelationshipToChild = ofNullable(child.getRespondentsRelationshipToChild());
+        Optional<List<LiveWithEnum>> childLiveWith = ofNullable(child.getChildLiveWith());
+
 
         List<Optional> fields = new ArrayList<>();
         fields.add(firstName);
@@ -132,13 +105,41 @@ public class ChildChecker implements EventChecker{
         }
         fields.add(orderAppliedFor);
         fields.add(applicantsRelationshipToChild);
+        fields.add(respondentsRelationshipToChild);
+        fields.add(childLiveWith);
 
+        boolean emptyFieldPresent = fields.stream().anyMatch(Optional::isEmpty);
 
-        return !(fields.stream().anyMatch(Optional::isEmpty));
+        return !emptyFieldPresent;
     }
 
+    private boolean validateAnyFieldStarted(Child c) {
+        Optional<String> firstName = ofNullable(c.getFirstName());
+        Optional<String> lastName = ofNullable(c.getLastName());
+        Optional<LocalDate> dateOfBirth = ofNullable(c.getDateOfBirth());
+        Optional<Gender> gender = ofNullable(c.getGender());
+        Optional<String> otherGender = ofNullable(c.getOtherGender());
+        Optional<List<OrderTypeEnum>> orderAppliedFor = ofNullable(c.getOrderAppliedFor());
+        Optional<RelationshipsEnum> applicantsRelationshipToChild = ofNullable(c.getApplicantsRelationshipToChild());
+        Optional<RelationshipsEnum> respondentsRelationshipToChild = ofNullable(c.getRespondentsRelationshipToChild());
+        Optional<List<LiveWithEnum>> childLiveWith = ofNullable(c.getChildLiveWith());
+        Optional<YesNoDontKnow> childrenKnownToLocalAuthority = ofNullable(c.getChildrenKnownToLocalAuthority());
+        Optional<YesNoDontKnow> childrenSubjectOfChildProtectionPlan = ofNullable(c.getChildrenSubjectOfChildProtectionPlan());
 
+        List<Optional> fields = new ArrayList<>();
+        fields.add(firstName);
+        fields.add(lastName);
+        fields.add(dateOfBirth);
+        fields.add(gender);
+        fields.add(otherGender);
+        fields.add(orderAppliedFor);
+        fields.add(applicantsRelationshipToChild);
+        fields.add(respondentsRelationshipToChild);
+        fields.add(childLiveWith);
+        fields.add(childrenKnownToLocalAuthority);
+        fields.add(childrenSubjectOfChildProtectionPlan);
 
-
+        return  fields.stream().anyMatch(Optional::isPresent);
+    }
 
 }
