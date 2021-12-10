@@ -90,7 +90,7 @@ idam:
     url: ${idam-api-url}
   s2s-auth:
     url: ${idam-s2s-auth-url}
-    totp_secret: ${microservicekey-prl-cos-api-service}
+    totp_secret: ${microservicekey-prl-cos-api}
     microservice: prl_cos_api
   client:
     id: ${idam-client-id}
