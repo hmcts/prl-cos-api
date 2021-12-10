@@ -24,24 +24,11 @@ import uk.gov.hmcts.reform.prl.services.TaskListService;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseInitiationController extends AbstractCallbackController {
 
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
-    @Autowired
-    private final TaskListService taskListService;
-    @Autowired
-    private final TaskListRenderer taskListRenderer;
-
     @PostMapping("/submitted")
     public void handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                 @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation) {
 
-
-        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        final CaseData caseData = getCaseData(caseDetails);
-
-
-        publishEvent(new CaseDataChanged(caseData));
+        publishEvent(new CaseDataChanged(getCaseData(callbackRequest.getCaseDetails())));
     }
 }
 
