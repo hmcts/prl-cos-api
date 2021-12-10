@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
-import org.checkerframework.checker.units.qual.C;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -35,11 +34,8 @@ public class CaseEventHandlerTest {
     @InjectMocks
     CaseEventHandler caseEventHandler;
 
-    private final String JURISDICTION = "PRIVATELAW";
-    private final String CASE_TYPE = "C100";
-
     @Test
-    public void handleCaseDataChangeShouldCallCCDApi() {
+    public void handleCaseDataChangeTest() {
 
         CaseData caseData = CaseData.builder()
             .id(nextLong())
@@ -61,9 +57,12 @@ public class CaseEventHandlerTest {
         verify(taskListService).getTasksForOpenCase(caseData);
         verify(taskListRenderer).render(tasks);
 
+        String jurisdiction = "PRIVATELAW";
+        String caseType = "C100";
+
         verify(coreCaseDataService).triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
+            jurisdiction,
+            caseType,
             caseData.getId(),
             "internal-update-task-list",
             Map.of("taskList", renderedTaskLists)
