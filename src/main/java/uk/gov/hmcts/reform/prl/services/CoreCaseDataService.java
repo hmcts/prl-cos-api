@@ -21,7 +21,6 @@ public class CoreCaseDataService {
 
     private final AuthTokenGenerator authTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
-    private final RequestData requestData;
     private final SystemUserService systemUserService;
 
 
