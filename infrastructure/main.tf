@@ -29,8 +29,8 @@ data "azurerm_key_vault_secret" "system-update-user-password" {
   key_vault_id = data.azurerm_key_vault.prl_key_vault.id
 }
 
-data "azurerm_key_vault_secret" "idam-secret" {
-  name      = "idam-secret"
+data "azurerm_key_vault_secret" "prl-cos-idam-client-secret" {
+  name      = "prl-cos-idam-client-secret"
   key_vault_id = data.azurerm_key_vault.prl_key_vault.id
 }
 
