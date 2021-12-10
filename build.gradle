@@ -29,7 +29,7 @@ def versions = [
   commonsLang3                 : '3.9',
   commonsMath3                 : '3.6.1',
   dumbster                     : '1.7.1',
-  feignHttpClient              : '10.3.0',
+  //feignHttpClient              : '10.3.0',
   googleAuth                   : '1.5.0',
   guava                        : '30.1-jre',
   hmctsNotify                  : '3.14.1-RELEASE',
@@ -235,7 +235,7 @@ dependencies {
   implementation group: 'com.github.kirviq', name: 'dumbster', version: versions.dumbster
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
   implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
-  implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
+  implementation group: 'io.github.openfeign', name: 'feign-httpclient'
   implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
   implementation group: 'io.springfox', name: 'springfox-spring-webflux', version: versions.springfoxSwagger
