@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.prl.request.RequestData;
 
 
 
@@ -27,7 +26,6 @@ public class CoreCaseDataService {
 
     private final AuthTokenGenerator authTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
-    private final RequestData requestData;
     private final SystemUserService systemUserService;
 
 //    public void updateCase(Long caseId, Map<String, Object> updates) {
@@ -77,15 +75,5 @@ public class CoreCaseDataService {
             caseId.toString(),
             true,
             caseDataContent);
-    }
-
-    public CaseDetails findCaseDetailsById(final String caseId) {
-        return coreCaseDataApi.getCase(requestData.authorisation(), authTokenGenerator.generate(), caseId);
-    }
-
-    public SearchResult searchCases(String caseType, String query) {
-        String userToken = systemUserService.getSysUserToken();
-
-        return coreCaseDataApi.searchCases(userToken, authTokenGenerator.generate(), caseType, query);
     }
 }
