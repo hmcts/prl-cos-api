@@ -22,7 +22,7 @@ public class TaskListRenderElementsTest {
                                                  .event(Event.CASE_NAME)
                                                  .build());
 
-        assert(actual).equalsIgnoreCase("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name"
+        assert (actual).equalsIgnoreCase("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name"
                                          + "</a>");
     }
 
@@ -31,33 +31,33 @@ public class TaskListRenderElementsTest {
         String actual = underTest.renderDisabledLink(Task.builder()
                                                          .event(Event.CASE_NAME)
                                                          .build());
-        assert(actual).equalsIgnoreCase("<a>Case name</a>");
+        assert (actual).equalsIgnoreCase("<a>Case name</a>");
     }
 
     @Test
     public void shouldRenderHint() {
         String actual = underTest.renderHint("Hint");
 
-        assert(actual).equalsIgnoreCase("<span class='govuk-hint govuk-!-font-size-14'>Hint</span>");
+        assert (actual).equalsIgnoreCase("<span class='govuk-hint govuk-!-font-size-14'>Hint</span>");
     }
 
     @Test
     public void shouldRenderInfo() {
         String actual = underTest.renderInfo("Info");
 
-        assert(actual).equalsIgnoreCase("<div class='panel panel-border-wide govuk-!-font-size-16'>Info</div>");
+        assert (actual).equalsIgnoreCase("<div class='panel panel-border-wide govuk-!-font-size-16'>Info</div>");
     }
 
     @Test
     public void shouldRenderHeader() {
         String actual = underTest.renderHeader("Header");
 
-        assert(actual).equalsIgnoreCase("## Header");
+        assert (actual).equalsIgnoreCase("## Header");
     }
 
     @Test
-    public void shouldRenderCollapsable(){
-        List<String> actual=underTest.renderCollapsible("Header",emptyList());
+    public void shouldRenderCollapsable() {
+
         List<String> expected = new ArrayList<>();
         expected.add("<details class='govuk-details'>");
         expected.add("<summary class='govuk-details__summary'>");
@@ -68,6 +68,8 @@ public class TaskListRenderElementsTest {
         expected.add("<div class='govuk-details__text'>");
         expected.add("</div>");
         expected.add("</details>");
+
+        List<String> actual = underTest.renderCollapsible("Header",emptyList());
 
         assertTrue(actual.containsAll(expected));
 

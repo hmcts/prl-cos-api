@@ -5,10 +5,8 @@ package uk.gov.hmcts.reform.prl.services;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -24,14 +22,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class CoreCaseDataServiceTest {
 
-    private final String JURISDICTION = "PRIVATELAW";
-    private final String CASE_TYPE = "C100";
-    private final Long CASE_ID = 1234567887654321L;
-    private final String EVENT_NAME = "system-update";
-    private final String USERTOKEN = "Bearer testToken";
-    private final String SERVICE_AUTH_TOKEN = "Bearer testServiceAuth";
-    private final String SYSTEM_USER_ID = "systemUserID";
-    private final String EVENT_TOKEN = "eventToken";
+    private final String jurisdiction = "PRIVATELAW";
+    private final String caseType = "C100";
+    private final Long caseId = 1234567887654321L;
+    private final String eventName = "system-update";
+    private final String userToken = "Bearer testToken";
+    private final String serviceAuthToken = "Bearer testServiceAuth";
+    private final String systemUserId = "systemUserID";
+    private final String eventToken = "eventToken";
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -45,29 +43,29 @@ public class CoreCaseDataServiceTest {
 
     @BeforeEach
     void setup() {
-        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
     }
 
     @BeforeEach
     void setUp() {
-        when(systemUserService.getUserId(USERTOKEN)).thenReturn(SYSTEM_USER_ID);
-        when(systemUserService.getSysUserToken()).thenReturn(USERTOKEN);
+        when(systemUserService.getUserId(userToken)).thenReturn(systemUserId);
+        when(systemUserService.getSysUserToken()).thenReturn(userToken);
 
-        when(coreCaseDataApi.startEventForCaseWorker(USERTOKEN, SERVICE_AUTH_TOKEN, SYSTEM_USER_ID, JURISDICTION,
-                                                     CASE_TYPE, Long.toString(CASE_ID), EVENT_NAME))
-            .thenReturn(buildStartEventResponse(EVENT_NAME, EVENT_TOKEN));
+        when(coreCaseDataApi.startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                     caseType, Long.toString(caseId), eventName))
+            .thenReturn(buildStartEventResponse(eventName, eventToken));
     }
 
     @Test
     void shouldStartAndSubmitEventWithEventData() {
         Map<String, Object> eventData = Map.of("A", "B");
-        coreCaseDataService.triggerEvent(JURISDICTION, CASE_TYPE, CASE_ID, EVENT_NAME, eventData);
+        coreCaseDataService.triggerEvent(jurisdiction, caseType, caseId, eventName, eventData);
 
-        verify(coreCaseDataApi).startEventForCaseWorker(USERTOKEN, SERVICE_AUTH_TOKEN, SYSTEM_USER_ID,
-                                                        JURISDICTION, CASE_TYPE, Long.toString(CASE_ID), EVENT_NAME);
-        verify(coreCaseDataApi).submitEventForCaseWorker(USERTOKEN, SERVICE_AUTH_TOKEN, SYSTEM_USER_ID, JURISDICTION,
-                                                         CASE_TYPE, Long.toString(CASE_ID), true,
-                                                         buildCaseDataContent(EVENT_NAME, EVENT_TOKEN, eventData));
+        verify(coreCaseDataApi).startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                        caseType, Long.toString(caseId), eventName);
+        verify(coreCaseDataApi).submitEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                         caseType, Long.toString(caseId), true,
+                                                         buildCaseDataContent(eventName, eventToken, eventData));
     }
 
     private CaseDataContent buildCaseDataContent(String eventId, String eventToken, Object eventData) {

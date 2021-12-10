@@ -22,8 +22,6 @@ public class TaskListControllerTest {
     @Mock
     EventService eventPublisher;
 
-    private final String AUTH = "testAuth";
-
     @Test
     public void testHandleSubmitted() {
 
