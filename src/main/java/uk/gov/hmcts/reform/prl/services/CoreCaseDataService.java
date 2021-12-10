@@ -61,14 +61,4 @@ public class CoreCaseDataService {
             true,
             caseDataContent);
     }
-
-    public CaseDetails findCaseDetailsById(final String caseId) {
-        return coreCaseDataApi.getCase(requestData.authorisation(), authTokenGenerator.generate(), caseId);
-    }
-
-    public SearchResult searchCases(String caseType, String query) {
-        String userToken = systemUserService.getSysUserToken();
-
-        return coreCaseDataApi.searchCases(userToken, authTokenGenerator.generate(), caseType, query);
-    }
 }
