@@ -20,7 +20,7 @@ java:
 
   keyVaults:
     prl:
-      resourceGroup: prl-aat
+      resourceGroup: prl
       secrets:
         - prl-cos-idam-client-secret
         - microservicekey-prl-cos-api
