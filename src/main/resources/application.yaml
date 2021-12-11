@@ -82,8 +82,8 @@ uk:
 
 prl:
   system-update:
-    username: ${PRL_SYSTEM_UPDATE_USERNAME}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD}
+    username: ${PRL_SYSTEM_UPDATE_USERNAME:dummysystemupdate@test.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:dummy}
 
 idam:
   api:
