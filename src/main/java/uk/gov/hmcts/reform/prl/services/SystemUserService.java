@@ -10,9 +10,9 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SystemUserService {
 
-    @Value("${prl.username}")
+    @Value("${prl.system-update.username}")
     private final String username;
-    @Value("${prl.password}")
+    @Value("${prl.system-update.password}")
     private final String password;
 
     private final IdamClient idamClient;
