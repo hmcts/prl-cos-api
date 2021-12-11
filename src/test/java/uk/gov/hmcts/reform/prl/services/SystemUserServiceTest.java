@@ -5,9 +5,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.prl.config.SystemUserConfiguration;
 
 import java.util.UUID;
 
@@ -23,11 +25,17 @@ public class SystemUserServiceTest {
     @Mock
     IdamClient idamClient;
 
+    @Mock
+    SystemUserConfiguration userConfig;
+
     @InjectMocks
     SystemUserService systemUserService;
 
     @Test
     public void given_ValidUserNameAndPass_shouldReturnToken() {
+
+        when(userConfig.getUserName()).thenReturn(USERNAME);
+        when(userConfig.getPassword()).thenReturn(PASSWORD);
 
         String expectedToken = idamClient.getAccessToken(USERNAME, PASSWORD);
 
