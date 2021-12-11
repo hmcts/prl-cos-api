@@ -91,6 +91,7 @@ idam:
   s2s-auth:
     url: http://fake-service-auth-provider-api
     totp_secret: AAAAAAAAAAAAAAAA
+    microservice: prl_cos_api
   client:
     id: ${idam-client-id}
     redirect_uri: ${idam-client-redirect-url}
