@@ -89,9 +89,8 @@ idam:
   api:
     url: ${idam-api-url}
   s2s-auth:
-    url: ${idam-s2s-auth-url}
-    totp_secret: ${microservicekey-prl-cos-api}
-    microservice: prl_cos_api
+    url: http://fake-service-auth-provider-api
+    totp_secret: AAAAAAAAAAAAAAAA
   client:
     id: ${idam-client-id}
     redirect_uri: ${idam-client-redirect-url}
