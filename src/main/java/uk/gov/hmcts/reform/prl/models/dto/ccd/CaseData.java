@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
-import uk.gov.hmcts.reform.prl.models.dto.payment.CCDPaymentServiceRequestUpdate;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -260,9 +259,6 @@ public class CaseData {
     private final YesOrNo languageRequirementApplicationNeedWelsh;
     private final YesOrNo welshLanguageRequirementApplicationNeedEnglish;
 
-
-    @JsonProperty("paymentServiceRequestReferenceNumber")
-    private final String paymentServiceRequestReferenceNumber;
     private final CCDPaymentServiceRequestUpdate paymentCallbackServiceRequestUpdate;
 
 }

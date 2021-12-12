@@ -5,8 +5,11 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
@@ -14,6 +17,7 @@ import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class ServiceRequestUpdateCallbackController {
@@ -27,8 +31,16 @@ public class ServiceRequestUpdateCallbackController {
         @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
     public void serviceRequestUpdate(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) {
-        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+        try {
+            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+        }catch(Exception ex) {
+            log.info(
+                "Payment callback is unsuccessfull for the CaseID: {}",
+                serviceRequestUpdateDto.getCcdCaseNumber()
+            );
+        }
     }
 }
