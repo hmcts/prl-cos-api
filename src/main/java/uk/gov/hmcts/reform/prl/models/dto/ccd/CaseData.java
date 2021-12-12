@@ -265,5 +265,12 @@ public class CaseData {
     private final String paymentServiceRequestReferenceNumber;
     private final CCDPaymentServiceRequestUpdate paymentCallbackServiceRequestUpdate;
 
+    @JsonProperty("solicitorName")
+    private final String solicitorName;
+    @JsonProperty("feeAmount")
+    private final String feeAmount;
+    @JsonProperty("feeCode")
+    private final String feeCode;
+
 }
 
