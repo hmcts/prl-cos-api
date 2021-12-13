@@ -23,7 +23,6 @@ public class InternationalElementChecker implements EventChecker {
     @Override
     public boolean isFinished(CaseData caseData) {
 
-        removeValidationErrors(caseData);
 
         Optional<YesOrNo> habitualResidence = ofNullable(caseData.getHabitualResidentInOtherState());
         Optional<String> habitualResidenceReason = ofNullable(caseData.getHabitualResidentInOtherStateGiveReason());
@@ -49,7 +48,12 @@ public class InternationalElementChecker implements EventChecker {
         if (requestToForeignAuthority.isPresent() && requestToForeignAuthority.get().equals(YES)) {
             fieldsCompleted = requestToForeignAuthorityReason.isPresent();
         }
-        return fieldsCompleted;
+
+        if (fieldsCompleted) {
+            taskErrorService.removeError(INTERNATIONAL_ELEMENT_ERROR);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -75,8 +79,15 @@ public class InternationalElementChecker implements EventChecker {
         if (requestToForeignAuthority.isPresent() &&  (requestToForeignAuthorityReason.isEmpty() || requestToForeignAuthorityReason.get().isBlank())) {
             isStarted = addErrorAndReturnTrue();
         }
-        removeValidationErrors(caseData);
-        return isStarted;
+        if (isStarted) {
+            taskErrorService.addEventError(
+                INTERNATIONAL_ELEMENT,
+                INTERNATIONAL_ELEMENT_ERROR,
+                INTERNATIONAL_ELEMENT_ERROR.getError()
+            );
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -89,22 +100,22 @@ public class InternationalElementChecker implements EventChecker {
         return true;
     }
 
-    public void removeValidationErrors(CaseData caseData) {
-        Optional<YesOrNo> habitualResidence = ofNullable(caseData.getHabitualResidentInOtherState());
-        Optional<String> habitualResidenceReason = ofNullable(caseData.getHabitualResidentInOtherStateGiveReason());
-
-        Optional<YesOrNo> jurisdictionIssue = ofNullable(caseData.getJurisdictionIssue());
-        Optional<String> jurisdictionIssueReason = ofNullable(caseData.getJurisdictionIssueGiveReason());
-
-        Optional<YesOrNo> requestToForeignAuthority = ofNullable(caseData.getRequestToForeignAuthority());
-        Optional<String> requestToForeignAuthorityReason = ofNullable(caseData.getRequestToForeignAuthorityGiveReason());
-
-        if ((habitualResidence.isPresent() && habitualResidenceReason.isPresent()) ||
-            (jurisdictionIssue.isPresent() && jurisdictionIssueReason.isPresent()) ||
-            (requestToForeignAuthority.isPresent() && requestToForeignAuthorityReason.isPresent())) {
-
-            taskErrorService.removeError(INTERNATIONAL_ELEMENT_ERROR);
-        }
+//    public void removeValidationErrors(CaseData caseData) {
+//        Optional<YesOrNo> habitualResidence = ofNullable(caseData.getHabitualResidentInOtherState());
+//        Optional<String> habitualResidenceReason = ofNullable(caseData.getHabitualResidentInOtherStateGiveReason());
+//
+//        Optional<YesOrNo> jurisdictionIssue = ofNullable(caseData.getJurisdictionIssue());
+//        Optional<String> jurisdictionIssueReason = ofNullable(caseData.getJurisdictionIssueGiveReason());
+//
+//        Optional<YesOrNo> requestToForeignAuthority = ofNullable(caseData.getRequestToForeignAuthority());
+//        Optional<String> requestToForeignAuthorityReason = ofNullable(caseData.getRequestToForeignAuthorityGiveReason());
+//
+//        if ((habitualResidence.isPresent() && habitualResidenceReason.isPresent()) ||
+//            (jurisdictionIssue.isPresent() && jurisdictionIssueReason.isPresent()) ||
+//            (requestToForeignAuthority.isPresent() && requestToForeignAuthorityReason.isPresent())) {
+//
+//            taskErrorService.removeError(INTERNATIONAL_ELEMENT_ERROR);
+//        }
     }
 
 }

@@ -21,13 +21,20 @@ public class AttendingTheHearingChecker implements EventChecker {
 
     @Override
     public boolean isFinished(CaseData caseData) {
-        return allNonEmpty(
-            caseData.getIsWelshNeeded(),
-            caseData.getIsInterpreterNeeded(),
-            caseData.getIsDisabilityPresent(),
-            caseData.getIsSpecialArrangementsRequired(),
-            caseData.getIsIntermediaryNeeded()
+        boolean finished;
+        finished = allNonEmpty(
+                    caseData.getIsWelshNeeded(),
+                    caseData.getIsInterpreterNeeded(),
+                    caseData.getIsDisabilityPresent(),
+                    caseData.getIsSpecialArrangementsRequired(),
+                    caseData.getIsIntermediaryNeeded()
         );
+
+        if (finished) {
+            taskErrorService.removeError(ATTENDING_THE_HEARING_ERROR);
+            return true;
+        }
+        return false;
     }
 
     @Override
