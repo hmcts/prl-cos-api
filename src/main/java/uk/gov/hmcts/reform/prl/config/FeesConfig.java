@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.config;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.FeeType;
 
 import java.util.Map;
 
+@Builder
 @Getter
 @Setter
 @Configuration
@@ -22,6 +24,7 @@ public class FeesConfig {
         return parameters.get(feeType);
     }
 
+    @Builder
     @Getter
     @Setter
     @NoArgsConstructor

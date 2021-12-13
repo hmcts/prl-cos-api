@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -33,15 +32,14 @@ public class ServiceRequestUpdateCallbackController {
     public void serviceRequestUpdate(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
-    ) throws Exception {
+    ) {
         try {
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         }catch(Exception ex) {
-            log.error(
+            log.info(
                 "Payment callback is unsuccessfull for the CaseID: {}",
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
-            throw new Exception(ex.getMessage());
         }
     }
 }

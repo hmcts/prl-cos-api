@@ -11,13 +11,13 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CCDPaymentServiceRequestUpdate {
+public class CcdPaymentServiceRequestUpdate {
 
     private String serviceRequestReference;
     private String ccdCaseNumber;
     private String serviceRequestAmount;
     private String serviceRequestStatus;
     private LocalDateTime callBackUpdateTimestamp;
-    private CCDPayment payment;
+    private CcdPayment payment;
 
 }

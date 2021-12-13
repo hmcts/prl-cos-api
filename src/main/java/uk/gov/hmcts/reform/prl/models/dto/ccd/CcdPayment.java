@@ -9,7 +9,7 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CCDPayment {
+public class CcdPayment {
     private String paymentAmount;
     private String paymentReference;
     private String paymentMethod;

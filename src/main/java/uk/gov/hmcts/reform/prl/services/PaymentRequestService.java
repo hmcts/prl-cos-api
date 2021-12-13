@@ -20,10 +20,14 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import java.math.BigDecimal;
 
 @Service
+@Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PaymentRequestService extends AbstractCallbackController {
 
+    @Autowired
     private final PaymentApi paymentApi;
+
+    @Autowired
     private final AuthTokenGenerator authTokenGenerator;
     private final FeeService feeService;
 

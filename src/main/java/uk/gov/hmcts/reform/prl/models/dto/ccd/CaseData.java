@@ -259,9 +259,9 @@ public class CaseData {
     private final YesOrNo languageRequirementApplicationNeedWelsh;
     private final YesOrNo welshLanguageRequirementApplicationNeedEnglish;
 
+    private final CcdPaymentServiceRequestUpdate paymentCallbackServiceRequestUpdate;
     @JsonProperty("paymentServiceRequestReferenceNumber")
     private final String paymentServiceRequestReferenceNumber;
-    private final CCDPaymentServiceRequestUpdate paymentCallbackServiceRequestUpdate;
 
     @JsonProperty("solicitorName")
     private final String solicitorName;
