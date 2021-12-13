@@ -25,6 +25,8 @@ public class OrchestrationConstants {
     public static final String PAYMENT_ACTION = "payment";
     public static final String FEE_VERSION = "1";
     public static final Integer FEE_VOLUME = 1;
+    public static final String JURISDICTION = "PRIVATELAW";
+    public static final String CASE_TYPE = "C100";
 
 
 }
