@@ -114,11 +114,11 @@ security:
 auth:
   idam:
     client:
-      baseUrl: ${auth-idam-client-baseurl}
+      baseUrl: ${AUTH_IDAM_CLIENT_BASEURL:}
   provider:
     service:
       client:
-        baseUrl: ${auth-provider-service-client-baseurl}
+        baseUrl: ${AUTH_PROVIDER_SERVICE_CLIENT_BASEURL:}
 
 
 resources:
