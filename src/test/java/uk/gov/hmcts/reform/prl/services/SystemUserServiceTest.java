@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.OAuth2Configuration;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.config.SystemUserConfiguration;
 
@@ -23,6 +24,9 @@ public class SystemUserServiceTest {
 
     @Mock
     IdamClient idamClient;
+
+    @Mock
+    OAuth2Configuration auth;
 
     @Mock
     SystemUserConfiguration userConfig;
