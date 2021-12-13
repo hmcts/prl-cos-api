@@ -12,9 +12,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CCDPayment;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CCDPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 
 import java.time.LocalDateTime;
@@ -83,19 +83,20 @@ public class RequestUpdateCallbackService {
         return objectMapper.convertValue(CaseData.builder()
                                              .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
                                              .paymentCallbackServiceRequestUpdate(
-                                                 CCDPaymentServiceRequestUpdate.builder()
+                                                 CcdPaymentServiceRequestUpdate.builder()
                                                      .serviceRequestReference(
                                                          serviceRequestUpdateDto.getServiceRequestReference())
                                                      .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
                                                      .serviceRequestAmount(serviceRequestUpdateDto.getServiceRequestAmount())
                                                      .serviceRequestStatus(serviceRequestUpdateDto.getServiceRequestStatus())
                                                      .callBackUpdateTimestamp(LocalDateTime.now())
-                                                     .payment(CCDPayment.builder().paymentAmount(
+                                                     .payment(CcdPayment.builder().paymentAmount(
                                                          serviceRequestUpdateDto.getPayment().getPaymentAmount())
                                                                   .paymentReference(serviceRequestUpdateDto.getPayment().getPaymentReference())
                                                                   .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
                                                                   .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
-                                                                  .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber()).build()).build())
+                                                                  .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
+                                                                  .build()).build())
                                              .build(), CaseData.class);
     }
 }

@@ -34,8 +34,8 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
 
 
     @PostMapping(path = "/create-payment-service-request", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to create Fee and Pay service request . Returns service request reference if " +
-        "successful")
+    @ApiOperation(value = "Callback to create Fee and Pay service request . Returns service request reference if "
+        + "successful")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})

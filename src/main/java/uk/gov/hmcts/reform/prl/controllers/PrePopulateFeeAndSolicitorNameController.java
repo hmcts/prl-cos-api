@@ -39,7 +39,7 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/prePopulateSolicitorAndFees", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to get Solicitor name and fee amount. ")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "User name received."),
