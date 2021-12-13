@@ -72,7 +72,8 @@ idam:
     microservice: prl_cos_api
 payments:
   api:
-    url: http://payment-api-demo.service.core-compute-demo.internal/service-request
+    url: ${PAY_URL:}
+    callback-url: ${PAY_CALLBACK_URL:}
 
 core_case_data:
   api:
