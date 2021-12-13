@@ -7,10 +7,32 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.reform.prl.enums.*;
-import uk.gov.hmcts.reform.prl.models.*;
-import uk.gov.hmcts.reform.prl.models.complextypes.*;
-import uk.gov.hmcts.reform.prl.models.documents.*;
+import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
+import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
+import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
+import uk.gov.hmcts.reform.prl.models.documents.C8Document;
+import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
+import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
+import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
+import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,15 +51,41 @@ public class CaseData {
     private final YesOrNo languagePreferenceWelsh;
 
     /**
-     * Case name
+     * Case name.
      */
     private final String applicantCaseName;
 
     /**
-     * Type of application
+     * Upload documents.
+     */
+
+    private final List<ContactOrderDocument> contactOrderDocumentsUploaded;
+    private final List<C8Document> c8FormDocumentsUploaded;
+    private final List<OtherDocument> otherDocumentsUploaded;
+
+    /**
+     * People in the case.
+     */
+
+    private final Address childrenAddress;
+    private final YesNoDontKnow isChildrenKnownToAuthority;
+    private final String childAndLocalAuthority;
+    private final YesOrNo isChildrenUnderChildProtection;
+    private final YesNoDontKnow isChildrenWithSameParents;
+    private final String parentsAndTheirChildren;
+    private final String parentalResponsibilities;
+    private final WhoChildrenLiveWith whoChildrenLiveWith;
+    private final String childAddressAndAdultsLivingWith;
+    private final YesOrNo isExistingProceedings;
+    private final String childrenInProceeding;
+    private final List<Element<Child>> otherChildren;
+
+
+    /**
+     * Type of application.
      */
     private final List<OrderTypeEnum> ordersApplyingFor;
-    private final childArrangementOrderTypeEnum typeOfChildArrangementsOrder;
+    private final ChildArrangementOrderTypeEnum typeOfChildArrangementsOrder;
     private final String natureOfOrder;
     private final YesOrNo consentOrder;
     private final ConsentOrderDocument draftConsentOrderFile;
@@ -46,9 +94,8 @@ public class CaseData {
     private final String applicationDetails;
 
     /**
-     * Hearing urgency
+     * Hearing urgency.
      */
-
     private final YesOrNo isCaseUrgent;
     private final String caseUrgencyTimeAndReason;
     private final String effortsMadeWithRespondents;
@@ -59,12 +106,12 @@ public class CaseData {
     private final YesOrNo areRespondentsAwareOfProceedings;
 
     /**
-     * Applicant details
+     * Applicant details.
      */
     private final List<Element<PartyDetails>> applicants;
 
     /**
-     * Child details
+     * Child details.
      */
     private final List<Element<Child>> children;
     private final YesNoDontKnow childrenKnownToLocalAuthority;
@@ -72,31 +119,34 @@ public class CaseData {
     private final YesNoDontKnow childrenSubjectOfChildProtectionPlan;
 
     /**
-     * Respondent details
+     * Respondent details.
      */
     private final List<Element<PartyDetails>> respondents;
 
     /**
-     * MIAM
+     * MIAM.
      */
-    private final YesOrNo applicantAttendedMIAM;
-    private final YesOrNo claimingExemptionMIAM;
-    private final YesOrNo familyMediatorMIAM;
-    private final List<MIAMExemptionsChecklistEnum> miamExemptionsChecklist;
-    private final List<MIAMDomesticViolenceChecklistEnum> miamDomesticViolenceChecklist;
-    private final List<MIAMUrgencyReasonChecklistEnum> miamUrgencyReasonChecklist;
-    private final MIAMPreviousAttendanceChecklistEnum miamPreviousAttendanceChecklist;
-    private final MIAMOtherGroundsChecklistEnum miamOtherGroundsChecklist;
+    private final YesOrNo applicantAttendedMiam;
+    private final YesOrNo claimingExemptionMiam;
+    private final YesOrNo familyMediatorMiam;
+    private final List<MiamExemptionsChecklistEnum> miamExemptionsChecklist;
+    private final List<MiamDomesticViolenceChecklistEnum> miamDomesticViolenceChecklist;
+    private final List<MiamUrgencyReasonChecklistEnum> miamUrgencyReasonChecklist;
+    private final MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceChecklist;
+    private final MiamOtherGroundsChecklistEnum miamOtherGroundsChecklist;
     private final String mediatorRegistrationNumber;
     private final String familyMediatorServiceName;
     private final String soleTraderName;
-    private final MIAMDocument mIAMCertificationDocumentUpload;
     //TODO: refactor to remove duplicated details screen
+    private final MiamDocument miamCertificationDocumentUpload;
     private final String mediatorRegistrationNumber1;
     private final String familyMediatorServiceName1;
     private final String soleTraderName1;
-    private final MIAMDocument miamCertificationDocumentUpload1;
+    private final MiamDocument miamCertificationDocumentUpload1;
 
+    /**
+     * Allegations of harm.
+     */
     /**
      * Allegations of harm
      */
@@ -162,23 +212,25 @@ public class CaseData {
     private final String allegationsOfHarmOtherConcernsDetails;
     private final String allegationsOfHarmOtherConcernsCourtActions;
 
+
     /**
-     * Other people in the case
+     * Other people in the case.
      */
     private final List<Element<PartyDetails>> othersToNotify;
 
     /**
-     * Other proceedings
+     * Other proceedings.
      */
+
     private final YesNoDontKnow previousOrOngoingProceedingsForChildren;
-    private final List<Element<ProceedingDetails>> existingProceedings;
+    private final List<Element<ProceedingDetails>> otherProceedings;
 
 
     /**
-     * Attending the hearing
+     * Attending the hearing.
      */
     private final YesOrNo isWelshNeeded;
-    private final List<Element<WelshNeeds>> welshNeeds;
+    private final List<Element<WelshNeed>> welshNeeds;
     private final YesOrNo isInterpreterNeeded;
     private final List<Element<InterpreterNeed>> interpreterNeeds;
     private final YesOrNo isDisabilityPresent;
@@ -189,17 +241,17 @@ public class CaseData {
     private final String reasonsForIntermediary;
 
     /**
-     * International element
+     * International element.
      */
     private final YesOrNo habitualResidentInOtherState;
-    private final YesOrNo jurisdictionIssue;
-    private final YesOrNo requestToForeignAuthority;
     private final String habitualResidentInOtherStateGiveReason;
+    private final YesOrNo jurisdictionIssue;
     private final String jurisdictionIssueGiveReason;
+    private final YesOrNo requestToForeignAuthority;
     private final String requestToForeignAuthorityGiveReason;
 
     /**
-     * Litigation capacity
+     * Litigation capacity.
      */
     private final String litigationCapacityFactors;
     private final String litigationCapacityReferrals;
@@ -207,19 +259,11 @@ public class CaseData {
     private final String litigationCapacityOtherFactorsDetails;
 
     /**
-     * Welsh language requirements
+     * Welsh language requirements.
      */
     private final YesOrNo welshLanguageRequirement;
     private final LanguagePreference welshLanguageRequirementApplication;
     private final YesOrNo languageRequirementApplicationNeedWelsh;
     private final YesOrNo welshLanguageRequirementApplicationNeedEnglish;
-
-
-    /**
-     * Upload documents
-     */
-    private final List<Element<ContactOrderDocument>> contactOrderDocumentsUploaded;
-    private final List<Element<C8Document>> c8FormDocumentsUploaded;
-    private final List<Element<OtherDocument>> otherDocumentsUploaded;
 
 }

@@ -1,12 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.MIAMExemptionsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
 
-import static uk.gov.hmcts.reform.prl.enums.MIAMExemptionsChecklistEnum.*;
+import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
@@ -18,18 +19,18 @@ public class MiamChecker implements EventChecker {
     public boolean isFinished(CaseData caseData) {
 
         //TODO: use optionals in case data
-        if (caseData.getApplicantAttendedMIAM() != null) {
-            if (caseData.getApplicantAttendedMIAM().equals(YES)) {
+        if (caseData.getApplicantAttendedMiam() != null) {
+            if (caseData.getApplicantAttendedMiam().equals(YES)) {
                 return allNonEmpty(
                     caseData.getMediatorRegistrationNumber(),
                     caseData.getFamilyMediatorServiceName(),
                     caseData.getSoleTraderName(),
-                    caseData.getMIAMCertificationDocumentUpload()
+                    caseData.getMiamCertificationDocumentUpload()
                 );
             }
-            else if (caseData.getApplicantAttendedMIAM().equals(NO) &&
-                     caseData.getClaimingExemptionMIAM().equals(YES) &&
-                     caseData.getFamilyMediatorMIAM().equals(YES)) {
+            else if (caseData.getApplicantAttendedMiam().equals(NO) &&
+                     caseData.getClaimingExemptionMiam().equals(YES) &&
+                     caseData.getFamilyMediatorMiam().equals(YES)) {
                 return allNonEmpty(
                     caseData.getMediatorRegistrationNumber1(),
                     caseData.getFamilyMediatorServiceName1(),
@@ -47,9 +48,9 @@ public class MiamChecker implements EventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
         return anyNonEmpty(
-            caseData.getApplicantAttendedMIAM(),
-            caseData.getClaimingExemptionMIAM(),
-            caseData.getFamilyMediatorMIAM()
+            caseData.getApplicantAttendedMiam(),
+            caseData.getClaimingExemptionMiam(),
+            caseData.getFamilyMediatorMiam()
         );
     }
 
@@ -60,7 +61,7 @@ public class MiamChecker implements EventChecker {
 
     public boolean checkMIAMExemptions(CaseData caseData) {
 
-        List<MIAMExemptionsChecklistEnum> exceptions = caseData.getMiamExemptionsChecklist();
+        List<MiamExemptionsChecklistEnum> exceptions = caseData.getMiamExemptionsChecklist();
 
         boolean dvCompleted = true;
         boolean urgencyCompleted = true;

@@ -2,7 +2,13 @@ package uk.gov.hmcts.reform.prl.models.complextypes;
 
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.*;
+import uk.gov.hmcts.reform.prl.enums.DontKnow;
+import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 
 import java.time.LocalDate;
@@ -31,6 +37,8 @@ public class Child {
     private final YesOrNo isChildCurrentAddressKnown;
     private final Address address;
     private final YesOrNo isChildAddressConfidential;
+    private final YesOrNo childUnsupervisedTime;
+    private final YesOrNo childContactFromOtherRecipients;
     private final String relationshipToApplicant;
     private final String relationshipToRespondent;
 

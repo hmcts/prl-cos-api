@@ -26,7 +26,7 @@ public class PartyDetails {
     private final Address address;
     private final DontKnow isAddressUnknown;
     private final YesOrNo isAddressConfidential;
-//    private final YesNoDontKnow isAtAddressLessThan5Years;
+    //    private final YesNoDontKnow isAtAddressLessThan5Years;
     private final String addressLivedLessThan5YearsDetails;
     private final YesOrNo canYouProvideEmailAddress;
     private final String email;

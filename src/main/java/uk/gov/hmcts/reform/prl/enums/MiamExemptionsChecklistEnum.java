@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum MIAMExemptionsChecklistEnum {
+public enum MiamExemptionsChecklistEnum {
 
     @JsonProperty("domesticViolence")
     domesticViolence("Domestic violence"),

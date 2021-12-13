@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum childArrangementOrderTypeEnum {
+public enum ChildArrangementOrderTypeEnum {
 
     @JsonProperty("spendTimeWithOrder")
     SPEND_TIME_WITH_ORDER("spendTimeWithOrder", "Spend time with order"),
