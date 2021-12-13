@@ -7,7 +7,9 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
 @Service
-public class ApplicantsChecker implements EventChecker{
+public class ApplicantsChecker implements EventChecker {
+
+    //this event currently has internal validation so this will need to be refactored when that is removed.
 
     @Override
     public boolean isFinished(CaseData caseData) {
