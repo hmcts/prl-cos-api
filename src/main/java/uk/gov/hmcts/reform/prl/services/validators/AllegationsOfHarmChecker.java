@@ -109,8 +109,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
         if (isFinished) {
             return true;
         }
-        taskErrorService.addEventError(ALLEGATIONS_OF_HARM, ALLEGATIONS_OF_HARM_ERROR,
-                                           ALLEGATIONS_OF_HARM_ERROR.getError());
+
         return false;
     }
 
