@@ -31,6 +31,32 @@ public class MiamCheckerTest {
         assert miamChecker.isStarted(caseData);
     }
 
+    @Test
+    public void whenNoDataHasMandatoryCompletedReturnsFalse() {
+        CaseData caseData = CaseData.builder().build();
+
+        MiamChecker miamChecker = new MiamChecker();
+
+        assert !miamChecker.hasMandatoryCompleted(caseData);
+    }
+
+    @Test
+    public void whenNoDataIsFinishedReturnsFalse() {
+        CaseData caseData = CaseData.builder().build();
+
+        MiamChecker miamChecker = new MiamChecker();
+
+        assert !miamChecker.isFinished(caseData);
+    }
+
+    public void whenApplicantHasAttendedMiamAndDetailsProvidedIsFinishedReturnsTrue() {
+        CaseData caseData = CaseData.builder().build();
+
+        MiamChecker miamChecker = new MiamChecker();
+
+        assert !miamChecker.isFinished(caseData);
+    }
+
 
 
 
