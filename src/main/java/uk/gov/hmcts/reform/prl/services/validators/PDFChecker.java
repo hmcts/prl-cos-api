@@ -23,5 +23,4 @@ public class PDFChecker implements EventChecker {
         return false;
     }
 
-    public boolean hasNoState(CaseData caseData){ return true; }
 }
