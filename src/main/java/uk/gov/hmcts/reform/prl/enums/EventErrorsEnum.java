@@ -12,6 +12,7 @@ public enum EventErrorsEnum {
     RESPONDENT_DETAILS_ERROR("Add respondent details"),
     LITIGATION_CAPACITY_ERROR("Add the litigation capacity details"),
     INTERNATIONAL_ELEMENT_ERROR("Add the international element details"),
+    HEARING_URGENCY_ERROR("Add hearing urgency details"),
     OTHER_PEOPLE_ERROR("Add the details about other people in the case"),
     ATTENDING_THE_HEARING_ERROR("Add details about attending the hearing"),
     WELSH_LANGUAGE_ERROR("Add details about welsh language requirements"),

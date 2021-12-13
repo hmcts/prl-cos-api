@@ -23,7 +23,6 @@ public class InternationalElementChecker implements EventChecker {
     @Override
     public boolean isFinished(CaseData caseData) {
 
-
         Optional<YesOrNo> habitualResidence = ofNullable(caseData.getHabitualResidentInOtherState());
         Optional<String> habitualResidenceReason = ofNullable(caseData.getHabitualResidentInOtherStateGiveReason());
 
@@ -37,19 +36,21 @@ public class InternationalElementChecker implements EventChecker {
             return false;
         }
 
-        boolean fieldsCompleted = true;
+        boolean fieldsCompletedHR = true;
+        boolean fieldsCompletedJI = true;
+        boolean fieldsCompletedRFA = true;
 
         if (habitualResidence.isPresent() && habitualResidence.get().equals(YES)) {
-            fieldsCompleted = habitualResidenceReason.isPresent();
+            fieldsCompletedHR = habitualResidenceReason.isPresent();
         }
         if (jurisdictionIssue.isPresent() && jurisdictionIssue.get().equals(YES)) {
-            fieldsCompleted = jurisdictionIssueReason.isPresent();
+            fieldsCompletedJI = jurisdictionIssueReason.isPresent();
         }
         if (requestToForeignAuthority.isPresent() && requestToForeignAuthority.get().equals(YES)) {
-            fieldsCompleted = requestToForeignAuthorityReason.isPresent();
+            fieldsCompletedRFA = requestToForeignAuthorityReason.isPresent();
         }
 
-        if (fieldsCompleted) {
+        if (fieldsCompletedHR && fieldsCompletedJI && fieldsCompletedRFA) {
             taskErrorService.removeError(INTERNATIONAL_ELEMENT_ERROR);
             return true;
         }
@@ -59,7 +60,9 @@ public class InternationalElementChecker implements EventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
 
-        boolean isStarted = false;
+        boolean isStartedHR = false;
+        boolean isStartedJI = false;
+        boolean isStartedRFA = false;
 
         Optional<YesOrNo> habitualResidence = ofNullable(caseData.getHabitualResidentInOtherState());
         Optional<String> habitualResidenceReason = ofNullable(caseData.getHabitualResidentInOtherStateGiveReason());
@@ -71,15 +74,18 @@ public class InternationalElementChecker implements EventChecker {
         Optional<String> requestToForeignAuthorityReason = ofNullable(caseData.getRequestToForeignAuthorityGiveReason());
 
         if (habitualResidence.isPresent() &&  (habitualResidenceReason.isEmpty() || habitualResidenceReason.get().isBlank())) {
-            isStarted = addErrorAndReturnTrue();
+            isStartedHR = addErrorAndReturnTrue();
         }
+
         if (jurisdictionIssue.isPresent() &&  (jurisdictionIssueReason.isEmpty() || jurisdictionIssueReason.get().isBlank())) {
-            isStarted = addErrorAndReturnTrue();
+            isStartedJI = addErrorAndReturnTrue();
         }
+
         if (requestToForeignAuthority.isPresent() &&  (requestToForeignAuthorityReason.isEmpty() || requestToForeignAuthorityReason.get().isBlank())) {
-            isStarted = addErrorAndReturnTrue();
+            isStartedRFA = addErrorAndReturnTrue();
         }
-        if (isStarted) {
+
+        if (isStartedHR || isStartedJI || isStartedRFA) {
             taskErrorService.addEventError(
                 INTERNATIONAL_ELEMENT,
                 INTERNATIONAL_ELEMENT_ERROR,
@@ -116,8 +122,4 @@ public class InternationalElementChecker implements EventChecker {
 //
 //            taskErrorService.removeError(INTERNATIONAL_ELEMENT_ERROR);
 //        }
-    }
-
-
-
-
+}

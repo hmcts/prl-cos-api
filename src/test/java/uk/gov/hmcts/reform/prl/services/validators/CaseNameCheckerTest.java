@@ -33,6 +33,46 @@ public class CaseNameCheckerTest {
 
     }
 
+    @Test
+    public void whenCaseNameEnteredThenIsStartedReturnsFalse() {
+        CaseData caseData = CaseData.builder().applicantCaseName("Test Name").build();
+
+        CaseNameChecker caseNameChecker = new CaseNameChecker();
+
+        assert !caseNameChecker.isStarted(caseData);
+
+    }
+
+    @Test
+    public void whenNoCaseDataThenIsStartedReturnsFalse() {
+        CaseData caseData = CaseData.builder().build();
+
+        CaseNameChecker caseNameChecker = new CaseNameChecker();
+
+        assert !caseNameChecker.isStarted(caseData);
+
+    }
+
+    @Test
+    public void whenCaseNameEnteredThenHasMandatoryReturnsFalse() {
+        CaseData caseData = CaseData.builder().applicantCaseName("Test Name").build();
+
+        CaseNameChecker caseNameChecker = new CaseNameChecker();
+
+        assert !caseNameChecker.hasMandatoryCompleted(caseData);
+
+    }
+
+    @Test
+    public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
+        CaseData caseData = CaseData.builder().build();
+
+        CaseNameChecker caseNameChecker = new CaseNameChecker();
+
+        assert !caseNameChecker.hasMandatoryCompleted(caseData);
+
+    }
+
 
 
 }

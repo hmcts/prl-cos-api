@@ -16,7 +16,7 @@ public class CaseNameChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        return !(isFinished(caseData));
+        return false;
     }
 
     @Override
