@@ -20,7 +20,7 @@ public class FeeDto {
     @JsonProperty("code")
     private String code;
     @JsonProperty("version")
-    private String version;
+    private Integer version;
     @JsonProperty("volume")
     private Integer volume;
 }

@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 
@@ -25,6 +28,8 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
 
     private final PaymentRequestService paymentRequestService;
     private final AuthTokenGenerator authTokenGenerator;
+    @Autowired
+    private final ObjectMapper objectMapper;
 
 
 
@@ -37,15 +42,16 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     public ResponseEntity<CallbackResponse> createPaymentServiceRequest(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest
-    ) {
+    ) throws Exception {
         PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequest(callbackRequest, authorisation);
-        callbackRequest.getCaseDetails().getData().put(
-            "paymentServiceRequestReferenceNumber",
-            paymentServiceResponse.getServiceRequestReference()
+        CaseData caseData = objectMapper.convertValue(
+            CaseData.builder()
+                .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference()).build(),
+            CaseData.class
         );
         return ok(
             CallbackResponse.builder()
-                .data(getCaseData(callbackRequest.getCaseDetails()))
+                .data(caseData)
                 .build()
         );
     }

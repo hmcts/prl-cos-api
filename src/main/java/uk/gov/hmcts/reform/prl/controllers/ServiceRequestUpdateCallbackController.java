@@ -33,14 +33,15 @@ public class ServiceRequestUpdateCallbackController {
     public void serviceRequestUpdate(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
-    ) {
+    ) throws Exception {
         try {
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         }catch(Exception ex) {
-            log.info(
+            log.error(
                 "Payment callback is unsuccessfull for the CaseID: {}",
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
+            throw new Exception(ex.getMessage());
         }
     }
 }

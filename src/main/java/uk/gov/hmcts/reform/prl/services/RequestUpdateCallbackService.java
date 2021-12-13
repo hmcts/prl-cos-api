@@ -3,11 +3,13 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CCDPayment;
@@ -16,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
@@ -32,15 +35,15 @@ public class RequestUpdateCallbackService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final SystemUserService systemUserService;
 
-    public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
+    public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
 
         log.info("Processing the callback for the caseId {} with status {}",serviceRequestUpdateDto.getCcdCaseNumber(),
                  serviceRequestUpdateDto.getServiceRequestStatus());
-        if (serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)) {
+        String userToken = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(userToken);
+        CaseDetails caseDetails = coreCaseDataApi.getCase(userToken, authTokenGenerator.generate(), serviceRequestUpdateDto.getCcdCaseNumber());
+        if (!Objects.isNull(caseDetails.getId()) && serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)) {
             CaseData caseData = setCaseData(serviceRequestUpdateDto);
-
-            String userToken = systemUserService.getSysUserToken();
-            String systemUpdateUserId = systemUserService.getUserId(userToken);
             StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
                 userToken,
                 authTokenGenerator.generate(),
@@ -69,6 +72,10 @@ public class RequestUpdateCallbackService {
                 true,
                 caseDataContent
             );
+        }
+        else{
+            log.error("Case id {} not present or status is not paid", serviceRequestUpdateDto.getCcdCaseNumber());
+            throw new Exception("Case not present or status is not paid");
         }
     }
 
