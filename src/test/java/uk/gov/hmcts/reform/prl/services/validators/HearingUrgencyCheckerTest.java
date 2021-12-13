@@ -1,19 +1,32 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 
+@RunWith(MockitoJUnitRunner.class)
 public class HearingUrgencyCheckerTest {
+
+    @Mock
+    TaskErrorService taskErrorService;
+
+    @InjectMocks
+    HearingUrgencyChecker hearingUrgencyChecker;
+
+
+
     @Test
     public void NotFinishedWhenIsCaseUrgentNotSet(){
 
         CaseData casedata = CaseData.builder().build();
-
-        HearingUrgencyChecker hearingUrgencyChecker = new HearingUrgencyChecker();
 
         boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
 
@@ -27,8 +40,6 @@ public class HearingUrgencyCheckerTest {
             .areRespondentsAwareOfProceedings(NO)
             .doYouRequireAHearingWithReducedNotice(YES)
             .build();
-
-        HearingUrgencyChecker hearingUrgencyChecker = new HearingUrgencyChecker();
 
         boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
 
@@ -47,7 +58,6 @@ public class HearingUrgencyCheckerTest {
             .doYouRequireAHearingWithReducedNotice(NO)
             .build();
 
-        HearingUrgencyChecker hearingUrgencyChecker = new HearingUrgencyChecker();
 
         boolean isFinished =hearingUrgencyChecker.isFinished(casedata);
 
@@ -61,8 +71,6 @@ public class HearingUrgencyCheckerTest {
             .caseUrgencyTimeAndReason("reason")
             .build();
 
-        HearingUrgencyChecker hearingUrgencyChecker = new HearingUrgencyChecker();
-
         boolean isStarted =hearingUrgencyChecker.isStarted(casedata);
 
         assert(isStarted);
@@ -74,8 +82,6 @@ public class HearingUrgencyCheckerTest {
             .caseUrgencyTimeAndReason("reason")
             .build();
 
-        HearingUrgencyChecker hearingUrgencyChecker = new HearingUrgencyChecker();
-
         boolean isStarted =hearingUrgencyChecker.isStarted(casedata);
 
         assert(isStarted);
@@ -86,8 +92,6 @@ public class HearingUrgencyCheckerTest {
 
         CaseData casedata = CaseData.builder().build();
 
-        HearingUrgencyChecker hearingUrgencyChecker = new HearingUrgencyChecker();
-
         boolean isMandatory =hearingUrgencyChecker.hasMandatoryCompleted(casedata);
 
         assert(!isMandatory);
@@ -97,8 +101,6 @@ public class HearingUrgencyCheckerTest {
     public void MandatoryCompletedIfIsCaseUrgentSetToNo(){
 
         CaseData casedata = CaseData.builder().isCaseUrgent(NO).build();
-
-        HearingUrgencyChecker hearingUrgencyChecker = new HearingUrgencyChecker();
 
         boolean isMandatory =hearingUrgencyChecker.hasMandatoryCompleted(casedata);
 

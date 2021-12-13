@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -12,6 +13,7 @@ import java.util.List;
 
 
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.HEARING_URGENCY_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
@@ -29,13 +31,19 @@ public class HearingUrgencyChecker implements EventChecker{
 
         if (caseData.getIsCaseUrgent() != null) {
             if (caseData.getIsCaseUrgent().equals(NO)) {
-                return allNonEmpty(
+
+                boolean noOptionCompleted = allNonEmpty(
                     caseData.getDoYouNeedAWithoutNoticeHearing(),
                     caseData.getDoYouRequireAHearingWithReducedNotice(),
                     caseData.getAreRespondentsAwareOfProceedings()
                 );
+                if (noOptionCompleted) {
+                    taskErrorService.removeError(HEARING_URGENCY_ERROR);
+                    return true;
+                }
+
             } else {
-                return allNonEmpty(
+                boolean yesOptionCompleted =  allNonEmpty(
                     caseData.getCaseUrgencyTimeAndReason(),
                     caseData.getEffortsMadeWithRespondents(),
                     caseData.getDoYouNeedAWithoutNoticeHearing(),
@@ -44,13 +52,18 @@ public class HearingUrgencyChecker implements EventChecker{
                     caseData.getSetOutReasonsBelow(),
                     caseData.getAreRespondentsAwareOfProceedings()
                 );
+
+                if (yesOptionCompleted) {
+                    taskErrorService.removeError(HEARING_URGENCY_ERROR);
+                    return true;
+                }
             }
         }
         return false;
     }
     @Override
     public boolean isStarted(CaseData caseData) {
-        return anyNonEmpty(
+        boolean isStarted =  anyNonEmpty(
             caseData.getCaseUrgencyTimeAndReason(),
             caseData.getEffortsMadeWithRespondents(),
             caseData.getDoYouNeedAWithoutNoticeHearing(),
@@ -59,6 +72,11 @@ public class HearingUrgencyChecker implements EventChecker{
             caseData.getSetOutReasonsBelow(),
             caseData.getAreRespondentsAwareOfProceedings()
         );
+        if (isStarted) {
+            taskErrorService.addEventError(HEARING_URGENCY, HEARING_URGENCY_ERROR, HEARING_URGENCY_ERROR.getError());
+            return true;
+        }
+        return false;
     }
 
     @Override

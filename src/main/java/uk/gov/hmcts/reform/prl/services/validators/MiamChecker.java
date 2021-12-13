@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.prl.enums.MIAMExemptionsChecklistEnum.*;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
@@ -26,7 +27,7 @@ public class MiamChecker implements EventChecker {
                     caseData.getMIAMCertificationDocumentUpload()
                 );
             }
-            else if (caseData.getApplicantAttendedMIAM().equals(YES) &&
+            else if (caseData.getApplicantAttendedMIAM().equals(NO) &&
                      caseData.getClaimingExemptionMIAM().equals(YES) &&
                      caseData.getFamilyMediatorMIAM().equals(YES)) {
                 return allNonEmpty(
