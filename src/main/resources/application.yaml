@@ -80,17 +80,12 @@ uk:
 
 # NEW BELOW THIS LINE
 
-prl:
-  system-update:
-    username: ${PRL_SYSTEM_UPDATE_USERNAME:dummysystemupdate@test.com}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:dummy}
 
 idam:
   api:
     url: ${idam-api-url}
   s2s-auth:
     url: http://fake-service-auth-provider-api
-    totp_secret: AAAAAAAAAAAAAAAA
     microservice: prl_cos_api
 
 
