@@ -94,6 +94,9 @@ core_case_data:
   api:
     url: ${core-case-data-api-url}
 
+prl:
+  system-update:
+    username: ${PRL_SYSTEM_UPDATE_USERNAME:}
 
 security:
   oauth2:
