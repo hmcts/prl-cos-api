@@ -147,6 +147,9 @@ public class CaseData {
     /**
      * Allegations of harm.
      */
+    /**
+     * Allegations of harm
+     */
     private final YesOrNo allegationsOfHarmYesNo;
     private final YesOrNo allegationsOfHarmDomesticAbuseYesNo;
     private final List<ApplicantOrChildren> physicalAbuseVictim;
@@ -165,6 +168,10 @@ public class CaseData {
     private final YesOrNo abductionOtherSafetyConcerns;
     private final String abductionOtherSafetyConcernsDetails;
     private final String abductionCourtStepsRequested;
+    private final YesOrNo allegationsOfHarmChildAbuseYesNo;
+    private final YesOrNo allegationsOfHarmSubstanceAbuseYesNo;
+    private final YesOrNo allegationsOfHarmOtherConcernsYesNo;
+    private final List<Element<Behaviours>> behaviours;
     private final YesOrNo ordersNonMolestation;
     private final YesOrNo ordersOccupation;
     private final YesOrNo ordersForcedMarriageProtection;
@@ -201,10 +208,10 @@ public class CaseData {
     private final YesOrNo ordersUndertakingInPlaceCurrent;
     private final String ordersUndertakingInPlaceCourtName;
     private final OtherDocument ordersUndertakingInPlaceDocument;
-    private final List<Element<Behaviours>> behaviours;
     private final YesOrNo allegationsOfHarmOtherConcerns;
     private final String allegationsOfHarmOtherConcernsDetails;
     private final String allegationsOfHarmOtherConcernsCourtActions;
+
 
     /**
      * Other people in the case.
@@ -271,4 +278,3 @@ public class CaseData {
     private final String feeCode;
 
 }
-
