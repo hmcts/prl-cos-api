@@ -83,7 +83,7 @@ uk:
 
 idam:
   api:
-    url: ${idam-api-url}
+    url: ${IDAM_API_URL:}
   s2s-auth:
     url: http://fake-service-auth-provider-api
     microservice: prl_cos_api
@@ -92,11 +92,12 @@ idam:
 
 core_case_data:
   api:
-    url: ${core-case-data-api-url}
+    url: ${CORE_CASE_DATA_API_URL:}
 
 prl:
   system-update:
     username: ${PRL_SYSTEM_UPDATE_USERNAME:}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:}
 
 security:
   oauth2:
