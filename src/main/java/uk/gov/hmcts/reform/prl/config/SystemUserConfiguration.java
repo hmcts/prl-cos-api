@@ -11,7 +11,7 @@ public class SystemUserConfiguration {
     private final String userName;
     private final String password;
 
-    public SystemUserConfiguration(@Value("${prl.system-update.username}") String userName,
+    public SystemUserConfiguration(@Value("${PRL_SYSTEM_UPDATE_USERNAME}") String userName,
                                          @Value("${prl.system-update.password}") String password) {
         this.userName = userName;
         this.password = password;

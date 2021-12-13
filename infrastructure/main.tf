@@ -54,7 +54,7 @@ data "azurerm_key_vault" "prl_key_vault" {
 
 data "azurerm_key_vault_secret" "system-update-user-username" {
   name      = "system-update-user-username"
-  key_vault_id = data.azurerm_key_vault.prl_key_vault.id
+  key_vault_id = module.key-vault.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "system-update-user-password" {
@@ -97,3 +97,5 @@ resource "azurerm_key_vault_secret" "s2s" {
   value        = data.azurerm_key_vault_secret.s2s_key_from_vault.value
   key_vault_id = data.azurerm_key_vault.prl_key_vault.id
 }
+
+
