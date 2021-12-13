@@ -9,7 +9,7 @@ spring:
         microservicekey-prl-cos-api: idam.s2s-auth.totp_secret
         system-update-user-password: PRL_SYSTEM_UPDATE_PASSWORD
         system-update-user-username: PRL_SYSTEM_UPDATE_USERNAME
-        prl-cos-idam-client-secret: prl-cos-idam-client-secret
+        prl-cos-idam-client-secret: IDAM_CLIENT_SECRET
         gov-notify-api-key: GOV_NOTIFY_API_KEY
         idam-api-url: IDAM_API_URL
         idam-s2s-auth-url: IDAM_S2S_AUTH_URL
