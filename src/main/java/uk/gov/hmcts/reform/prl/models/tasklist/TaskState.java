@@ -4,4 +4,5 @@ public enum TaskState {
 
         NOT_STARTED, IN_PROGRESS, MANDATORY_COMPLETED, FINISHED
 
+
 }

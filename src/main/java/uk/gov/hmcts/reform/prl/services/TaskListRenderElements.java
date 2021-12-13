@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.String.format;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
 
 @Component
 public class TaskListRenderElements {

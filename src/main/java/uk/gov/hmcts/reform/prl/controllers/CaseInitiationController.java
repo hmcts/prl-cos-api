@@ -48,5 +48,3 @@ public class CaseInitiationController extends AbstractCallbackController{
         publishEvent(new CaseDataChanged(caseData));
     }
 }
-
-

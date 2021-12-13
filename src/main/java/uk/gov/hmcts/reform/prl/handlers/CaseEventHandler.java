@@ -41,20 +41,20 @@ public class CaseEventHandler {
 //        if (caseData.getState().equals(AWAITING_SUBMISSION_TO_HMCTS)) {
 //            log.info(caseData.toString());
 
-            final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
+        final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
 
-            List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors();
+        List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors();
 
-            final String taskList = taskListRenderer.render(tasks, eventErrors);
+        final String taskList = taskListRenderer.render(tasks, eventErrors);
 
-            coreCaseDataService.triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-task-list",
-                Map.of("taskList", taskList)
+        coreCaseDataService.triggerEvent(
+            JURISDICTION,
+            CASE_TYPE,
+            caseData.getId(),
+            "internal-update-task-list",
+            Map.of("taskList", taskList)
 
-            );
-        }
+        );
     }
+}
 //}
