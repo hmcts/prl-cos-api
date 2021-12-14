@@ -7,20 +7,18 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,7 +37,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public ResponseEntity<CallbackResponse> createPaymentServiceRequest(
+    public CallbackResponse createPaymentServiceRequest(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
@@ -49,10 +47,8 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
                 .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference()).build(),
             CaseData.class
         );
-        return ok(
-            CallbackResponse.builder()
+        return CallbackResponse.builder()
                 .data(caseData)
-                .build()
-        );
+                .build();
     }
 }
