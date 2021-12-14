@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
@@ -19,11 +18,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILD_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RESPONDENT_DETAILS_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.OTHER;
+
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 
 @Service
@@ -103,11 +100,7 @@ public class RespondentsChecker implements EventChecker{
         Optional<YesOrNo> canYouProvidePhoneNumber = ofNullable(respondent.getCanYouProvidePhoneNumber());
         Optional<String> phoneNumber = ofNullable(respondent.getPhoneNumber());
         Optional<YesNoDontKnow> doTheyHaveLegalRepresentation = ofNullable(respondent.getDoTheyHaveLegalRepresentation());
-        Optional<String> representativeFirstName = ofNullable(respondent.getRepresentativeFirstName());
-        Optional<String> representativeLastName = ofNullable(respondent.getRepresentativeLastName());
         Optional<String> solicitorEmail = ofNullable(respondent.getSolicitorEmail());
-        Optional<String> dXNumber = ofNullable(respondent.getDxNumber());
-        Optional<String> sendSignUpLink = ofNullable(respondent.getSendSignUpLink());
 
         List<Optional> fields = new ArrayList<>();
 
@@ -118,11 +111,11 @@ public class RespondentsChecker implements EventChecker{
             fields.add(dateOfBirth);
         }
         fields.add(gender);
-        if (gender.isPresent() && gender.get().equals(OTHER)) {
+        if (gender.isPresent() && gender.get().equals(Gender.OTHER)) {
             fields.add(otherGender);
         }
-        fields.add(isDateOfBirthKnown);
-        if (isDateOfBirthKnown.isPresent() && isPlaceOfBirthKnown.get().equals(YES)) {
+        fields.add(isPlaceOfBirthKnown);
+        if (isPlaceOfBirthKnown.isPresent() && isPlaceOfBirthKnown.get().equals(YES)) {
             fields.add(placeOfBirth);
         }
         fields.add(isCurrentAddressKnown);
@@ -130,7 +123,7 @@ public class RespondentsChecker implements EventChecker{
             fields.add(address);
         }
         fields.add(isAtAddressLessThan5YearsWithDontKnow);
-        if (isAtAddressLessThan5YearsWithDontKnow.isPresent() && isAtAddressLessThan5YearsWithDontKnow.get().equals(YES)) {
+        if (isAtAddressLessThan5YearsWithDontKnow.isPresent() && isAtAddressLessThan5YearsWithDontKnow.get().equals(YesNoDontKnow.YES)) {
             fields.add(addressLivedLessThan5YearsDetails);
         }
         fields.add(canYouProvideEmailAddress);
@@ -142,13 +135,12 @@ public class RespondentsChecker implements EventChecker{
             fields.add(phoneNumber);
         }
         fields.add(doTheyHaveLegalRepresentation);
-        if (doTheyHaveLegalRepresentation.isPresent() && doTheyHaveLegalRepresentation.get().equals(YES)){
+        if (doTheyHaveLegalRepresentation.isPresent() && doTheyHaveLegalRepresentation.get().equals(YesNoDontKnow.YES)){
             fields.add(solicitorEmail);
         }
 
-        boolean emptyFieldPresent = fields.stream().anyMatch(Optional::isEmpty);
+        return fields.stream().noneMatch(Optional::isEmpty);
 
-        return !emptyFieldPresent;
     }
 
     private boolean respondentDetailsStarted(PartyDetails respondent) {

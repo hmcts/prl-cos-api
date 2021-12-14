@@ -59,7 +59,7 @@ public class ApplicantsCheckerTest {
 
         ApplicantsChecker applicantsChecker = new ApplicantsChecker();
 
-        assert !applicantsChecker.isFinished(caseData);
+        assert !applicantsChecker.isStarted(caseData);
 
     }
 

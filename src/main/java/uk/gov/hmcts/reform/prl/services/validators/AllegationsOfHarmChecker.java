@@ -46,10 +46,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
 
         Optional<YesOrNo> allegationsOfHarm = ofNullable(caseData.getAllegationsOfHarmYesNo());
 
-        if (allegationsOfHarm.isPresent() && allegationsOfHarm.get().equals(YES)) {
-            return true;
-        }
-        return false;
+        return allegationsOfHarm.isPresent() && allegationsOfHarm.get().equals(YES);
     }
 
     @Override
@@ -77,6 +74,9 @@ public class AllegationsOfHarmChecker implements EventChecker {
 
                 for (Behaviours behaviour : behaviours) {
                     behavioursCompleted = validateBehaviour(behaviour);
+                    if (!behavioursCompleted) {
+                        return false;
+                    }
                 }
             }
 

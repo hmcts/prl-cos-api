@@ -24,7 +24,7 @@ public class SubmitAndPayChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        return !hasMandatoryCompleted(caseData);
+        return false;
     }
 
     @Override
