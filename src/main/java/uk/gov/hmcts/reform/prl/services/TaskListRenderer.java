@@ -130,19 +130,18 @@ public class TaskListRenderer {
                               + taskListRenderElements.renderImage("in-progress.png", "In progress"));
                 break;
             case MANDATORY_COMPLETED:
+                    lines.add(taskListRenderElements.renderLink(task)
+                                  + taskListRenderElements.renderImage("information-added.png", "Information added"));
+                break;
+            case FINISHED:
                 if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
                 }
                 else {
-
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage("information-added.png", "Information added"));
+                                  + taskListRenderElements.renderImage("finished.png", "Finished"));
                 }
-                break;
-            case FINISHED:
-                lines.add(taskListRenderElements.renderLink(task)
-                              + taskListRenderElements.renderImage("finished.png", "Finished"));
                 break;
             default:
                 lines.add(taskListRenderElements.renderLink(task));
