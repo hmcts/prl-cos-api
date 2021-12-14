@@ -41,11 +41,13 @@ public class ChildChecker implements EventChecker{
 
             for (Child c : children) {
                 if(!(validateMandatoryFieldsCompleted(c))) {
+                    taskErrorService.addEventError(CHILD_DETAILS, CHILD_DETAILS_ERROR, CHILD_DETAILS_ERROR.getError());
                     return false;
                 }
             }
         }
         else {
+            taskErrorService.addEventError(CHILD_DETAILS, CHILD_DETAILS_ERROR, CHILD_DETAILS_ERROR.getError());
             return false;
         }
         taskErrorService.removeError(CHILD_DETAILS_ERROR);
@@ -70,11 +72,7 @@ public class ChildChecker implements EventChecker{
                 }
             }
         }
-        if (anyStarted) {
-            taskErrorService.addEventError(CHILD_DETAILS, CHILD_DETAILS_ERROR, CHILD_DETAILS_ERROR.getError());
-            return true;
-        }
-        return false;
+        return anyStarted;
     }
 
     @Override

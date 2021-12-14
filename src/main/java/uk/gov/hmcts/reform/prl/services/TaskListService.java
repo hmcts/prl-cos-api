@@ -68,7 +68,7 @@ public class TaskListService {
             INTERNATIONAL_ELEMENT,
             LITIGATION_CAPACITY,
             WELSH_LANGUAGE_REQUIREMENTS,
-            VIEW_PDF_APPLICATION,
+            VIEW_PDF_DOCUMENT,
             SUBMIT_AND_PAY
         ));
 

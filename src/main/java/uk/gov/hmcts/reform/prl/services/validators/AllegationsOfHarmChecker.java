@@ -36,6 +36,8 @@ public class AllegationsOfHarmChecker implements EventChecker {
             taskErrorService.removeError(ALLEGATIONS_OF_HARM_ERROR);
             return true;
         }
+        taskErrorService.addEventError(ALLEGATIONS_OF_HARM, ALLEGATIONS_OF_HARM_ERROR,
+                                       ALLEGATIONS_OF_HARM_ERROR.getError());
         return false;
     }
 
@@ -45,8 +47,6 @@ public class AllegationsOfHarmChecker implements EventChecker {
         Optional<YesOrNo> allegationsOfHarm = ofNullable(caseData.getAllegationsOfHarmYesNo());
 
         if (allegationsOfHarm.isPresent() && allegationsOfHarm.get().equals(YES)) {
-            taskErrorService.addEventError(ALLEGATIONS_OF_HARM, ALLEGATIONS_OF_HARM_ERROR,
-                                           ALLEGATIONS_OF_HARM_ERROR.getError());
             return true;
         }
         return false;

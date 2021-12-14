@@ -44,11 +44,13 @@ public class RespondentsChecker implements EventChecker{
 
             for (PartyDetails p : respondents) {
                 if(!(validateMandatoryFieldsForRespondent(p))) {
+                    taskErrorService.addEventError(RESPONDENT_DETAILS, RESPONDENT_DETAILS_ERROR, RESPONDENT_DETAILS_ERROR.getError());
                     return false;
                 }
             }
         }
         else {
+            taskErrorService.addEventError(RESPONDENT_DETAILS, RESPONDENT_DETAILS_ERROR, RESPONDENT_DETAILS_ERROR.getError());
             return false;
         }
         taskErrorService.removeError(RESPONDENT_DETAILS_ERROR);
@@ -73,11 +75,7 @@ public class RespondentsChecker implements EventChecker{
                 }
             }
         }
-        if (anyStarted) {
-            taskErrorService.addEventError(RESPONDENT_DETAILS, RESPONDENT_DETAILS_ERROR, RESPONDENT_DETAILS_ERROR.getError());
-            return true;
-        }
-        return false;
+        return  anyStarted;
     }
 
 
@@ -108,7 +106,7 @@ public class RespondentsChecker implements EventChecker{
         Optional<String> representativeFirstName = ofNullable(respondent.getRepresentativeFirstName());
         Optional<String> representativeLastName = ofNullable(respondent.getRepresentativeLastName());
         Optional<String> solicitorEmail = ofNullable(respondent.getSolicitorEmail());
-        Optional<String> dXNumber = ofNullable(respondent.getDXNumber());
+        Optional<String> dXNumber = ofNullable(respondent.getDxNumber());
         Optional<String> sendSignUpLink = ofNullable(respondent.getSendSignUpLink());
 
         List<Optional> fields = new ArrayList<>();
@@ -174,7 +172,7 @@ public class RespondentsChecker implements EventChecker{
         Optional<String> representativeFirstName = ofNullable(respondent.getRepresentativeFirstName());
         Optional<String> representativeLastName = ofNullable(respondent.getRepresentativeLastName());
         Optional<String> solicitorEmail = ofNullable(respondent.getSolicitorEmail());
-        Optional<String> dXNumber = ofNullable(respondent.getDXNumber());
+        Optional<String> dXNumber = ofNullable(respondent.getDxNumber());
         Optional<String> sendSignUpLink = ofNullable(respondent.getSendSignUpLink());
 
         List<Optional> fields = new ArrayList<>();

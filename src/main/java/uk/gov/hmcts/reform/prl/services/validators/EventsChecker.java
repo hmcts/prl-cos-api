@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import javax.annotation.PostConstruct;
 import java.util.EnumMap;
@@ -80,7 +79,7 @@ public class EventsChecker {
         eventStatus.put(INTERNATIONAL_ELEMENT, internationalElementChecker);
         eventStatus.put(LITIGATION_CAPACITY, litigationCapacityChecker);
         eventStatus.put(WELSH_LANGUAGE_REQUIREMENTS, welshLanguageRequirementsChecker);
-        eventStatus.put(VIEW_PDF_APPLICATION, pdfChecker);
+        eventStatus.put(VIEW_PDF_DOCUMENT, pdfChecker);
         eventStatus.put(SUBMIT_AND_PAY, submitAndPayChecker);
     }
 

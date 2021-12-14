@@ -1,12 +1,24 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+
+@RunWith(MockitoJUnitRunner.class)
 public class LitigationCapacityCheckerTest {
 
-    LitigationCapacityChecker litigationCapacityChecker =new LitigationCapacityChecker();
+
+    @Mock
+    TaskErrorService taskErrorService;
+
+    @InjectMocks
+    LitigationCapacityChecker litigationCapacityChecker;
 
     @Test
     public void MandatoryAlwaysFalse(){
@@ -51,9 +63,9 @@ public class LitigationCapacityCheckerTest {
     @Test
     public void FinishedWithLitigationFactorsOrReferrals(){
         CaseData caseData=CaseData.builder()
-            .litigationCapacityOtherFactors(YesOrNo.YES)
-            .litigationCapacityFactors("")
-            .litigationCapacityReferrals("")
+            .litigationCapacityOtherFactors(YesOrNo.NO)
+            .litigationCapacityFactors("Test")
+            .litigationCapacityReferrals("test ")
             .build();
         boolean isFinished = litigationCapacityChecker.isFinished(caseData);
         assert (isFinished);
