@@ -26,7 +26,7 @@ def secrets = [
   'prl-${env}': [
     secret('microservicekey-prl-cos-api', 'S2S_SECRET'),
     secret('system-update-user-username', 'SYSTEM_UPDATE_USERNAME'),
-    secret('system-update-user-password', 'SYSTEM_UPDATE_USER_PASSWORD'),
+    secret('system-update-user-password', 'PRL_SYSTEM_UPDATE_USERNAME'),
   ]
 ]
 
