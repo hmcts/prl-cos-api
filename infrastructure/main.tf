@@ -20,7 +20,7 @@ module "key-vault" {
   product_group_name      = "DTS Family Private Law"
   product_group_object_id = var.jenkins_AAD_objectId
   common_tags             = var.common_tags
-  create_managed_identity = true
+  managed_identity_object_id = var.managed_identity_object_id
 }
 
 locals {
