@@ -33,6 +33,8 @@ public class TaskListService {
             .collect(toList());
     }
 
+    //this is hashed together slightly to deal with the submit and pay event.
+
     private TaskState getTaskState(CaseData caseData, Event event) {
         if (eventsChecker.isFinished(event, caseData)) {
             return TaskState.FINISHED;
@@ -41,6 +43,9 @@ public class TaskListService {
             return TaskState.MANDATORY_COMPLETED;
         }
         if (eventsChecker.isStarted(event, caseData)) {
+            if (event.equals(SUBMIT_AND_PAY)) {
+                return TaskState.NOT_STARTED;
+            }
             return TaskState.IN_PROGRESS;
         }
         return TaskState.NOT_STARTED;

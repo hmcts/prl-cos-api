@@ -24,7 +24,7 @@ public class SubmitAndPayChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        return false;
+        return !hasMandatoryCompleted(caseData);
     }
 
     @Override
@@ -56,12 +56,15 @@ public class SubmitAndPayChecker implements EventChecker {
         optionalEvents.put(LITIGATION_CAPACITY, eventsChecker.litigationCapacityChecker);
         optionalEvents.put(WELSH_LANGUAGE_REQUIREMENTS, eventsChecker.welshLanguageRequirementsChecker);
 
-        boolean optionalFinished = false;
+        boolean optionalFinished;
 
         for (Map.Entry<Event, EventChecker> e : optionalEvents.entrySet()) {
             optionalFinished = e.getValue().isFinished(caseData) || !(e.getValue().isStarted(caseData));
+            if (!optionalFinished) {
+                return false;
+            }
         }
 
-        return mandatoryFinished && optionalFinished;
+        return mandatoryFinished;
     }
 }
