@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 public enum EventErrorsEnum {
 
     CHILD_DETAILS_ERROR("Add child details"),
+    APPLICANTS_DETAILS_ERROR("Add applicant details"),
+    TYPE_OF_APPLICATION_ERROR("Add details about the type of application"),
     RESPONDENT_DETAILS_ERROR("Add respondent details"),
     LITIGATION_CAPACITY_ERROR("Add the litigation capacity details"),
     INTERNATIONAL_ELEMENT_ERROR("Add the international element details"),

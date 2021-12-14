@@ -21,8 +21,6 @@ public class HearingUrgencyCheckerTest {
     @InjectMocks
     HearingUrgencyChecker hearingUrgencyChecker;
 
-
-
     @Test
     public void NotFinishedWhenIsCaseUrgentNotSet(){
 

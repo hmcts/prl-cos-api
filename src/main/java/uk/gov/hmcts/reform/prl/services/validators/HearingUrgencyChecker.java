@@ -18,8 +18,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
-
-
 @Service
 public class HearingUrgencyChecker implements EventChecker{
 
@@ -59,11 +57,14 @@ public class HearingUrgencyChecker implements EventChecker{
                 }
             }
         }
+        taskErrorService.addEventError(HEARING_URGENCY,
+                                       HEARING_URGENCY_ERROR,
+                                       HEARING_URGENCY_ERROR.getError());
         return false;
     }
     @Override
     public boolean isStarted(CaseData caseData) {
-        boolean isStarted =  anyNonEmpty(
+        return anyNonEmpty(
             caseData.getCaseUrgencyTimeAndReason(),
             caseData.getEffortsMadeWithRespondents(),
             caseData.getDoYouNeedAWithoutNoticeHearing(),
@@ -72,11 +73,6 @@ public class HearingUrgencyChecker implements EventChecker{
             caseData.getSetOutReasonsBelow(),
             caseData.getAreRespondentsAwareOfProceedings()
         );
-        if (isStarted) {
-            taskErrorService.addEventError(HEARING_URGENCY, HEARING_URGENCY_ERROR, HEARING_URGENCY_ERROR.getError());
-            return true;
-        }
-        return false;
     }
 
     @Override

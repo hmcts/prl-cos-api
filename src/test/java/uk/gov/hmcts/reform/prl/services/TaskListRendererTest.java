@@ -1,12 +1,15 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Test;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
@@ -23,11 +26,10 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ATTENDING_THE_HEARING_ERROR;
 
 public class TaskListRendererTest {
-
-
-
 
     private final TaskListRenderer taskListRenderer = new TaskListRenderer(
         new TaskListRenderElements(
@@ -51,6 +53,13 @@ public class TaskListRendererTest {
         Task.builder().event(LITIGATION_CAPACITY).build(),
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).build());
 
+    private final List<EventValidationErrors> errors = List.of(
+        EventValidationErrors.builder().event(ALLEGATIONS_OF_HARM)
+            .errors(Collections.singletonList(ALLEGATIONS_OF_HARM_ERROR.toString())).build(),
+        EventValidationErrors.builder().event(ATTENDING_THE_HEARING)
+            .errors(Collections.singletonList(ATTENDING_THE_HEARING_ERROR.toString())).build()
+    );
+
 
     @Test
     public void shouldRenderTaskList() throws IOException {
@@ -66,7 +75,7 @@ public class TaskListRendererTest {
         }
 
         String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(tasks);
+        String actualTaskList = taskListRenderer.render(tasks, errors);
 
         assert expectedTaskList.equals(actualTaskList);
 

@@ -74,7 +74,7 @@ public class TaskListRenderer {
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
         final TaskSection pdfApplication = newSection("View PDF application")
-            .withTask(tasks.get(VIEW_PDF_APPLICATION));
+            .withTask(tasks.get(VIEW_PDF_DOCUMENT));
 
         final TaskSection submitAndPay = newSection("Submit and pay")
             .withTask(tasks.get(SUBMIT_AND_PAY));
@@ -113,11 +113,11 @@ public class TaskListRenderer {
         switch (task.getState()) {
 
             case NOT_STARTED:
-                if (task.getEvent().equals(VIEW_PDF_APPLICATION)) {
+                if (task.getEvent().equals(VIEW_PDF_DOCUMENT)) {
                     lines.add(taskListRenderElements.renderLink(task));
                 }
                 else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
-                    lines.add(taskListRenderElements.renderLink(task)
+                    lines.add(taskListRenderElements.renderDisabledLink(task)
                                   + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
                 }
                 else {

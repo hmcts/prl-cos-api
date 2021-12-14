@@ -21,7 +21,7 @@ public enum Event {
     INTERNATIONAL_ELEMENT("internationalElement", "International element"),
     LITIGATION_CAPACITY("litigationCapacity", "Litigation capacity"),
     WELSH_LANGUAGE_REQUIREMENTS("welshLanguageRequirements", "Welsh language requirements"),
-    VIEW_PDF_APPLICATION("viewPDFApplication", "View PDF application"),
+    VIEW_PDF_DOCUMENT("viewPdfDocument", "View PDF application"),
     SUBMIT_AND_PAY("submitAndPay", "Submit and pay");
 
     private final String id;

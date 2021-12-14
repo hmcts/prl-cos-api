@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 public class SystemUserConfiguration {
-
+//
 //    private final String userName;
 //    private final String password;
 //

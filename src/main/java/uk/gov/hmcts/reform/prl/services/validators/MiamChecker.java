@@ -3,9 +3,7 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
@@ -14,12 +12,13 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.MIAM_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
-import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
+
 
 @Service
 public class MiamChecker implements EventChecker {
@@ -71,8 +70,16 @@ public class MiamChecker implements EventChecker {
             }
         }
         else {
-            return checkMIAMExemptions(caseData);
+            Optional<List<MiamExemptionsChecklistEnum>> exceptions = ofNullable(caseData.getMiamExemptionsChecklist());
+            if (exceptions.isPresent()) {
+                finished =  checkMIAMExemptions(caseData);
+                if (finished) {
+                    taskErrorService.removeError(MIAM_ERROR);
+                    return true;
+                }
+            }
         }
+        taskErrorService.addEventError(MIAM, MIAM_ERROR, MIAM_ERROR.getError());
         return false;
     }
 
