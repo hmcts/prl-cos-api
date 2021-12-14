@@ -25,9 +25,9 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 
 def secrets = [
   'prl-${env}': [
-    secret('microservicekey-prl-cos-api', 'S2S_SECRET'),
     secret('system-update-user-username', 'PRL_SYSTEM_UPDATE_USERNAME'),
     secret('system-update-user-password', 'PRL_SYSTEM_UPDATE_PASSWORD'),
+    secret('microservicekey-prl-cos-api', 'S2S_SECRET'),
   ]
 ]
 
