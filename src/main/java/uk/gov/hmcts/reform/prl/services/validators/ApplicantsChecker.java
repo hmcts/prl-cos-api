@@ -35,8 +35,6 @@ public class ApplicantsChecker implements EventChecker {
     @Autowired
     TaskErrorService taskErrorService;
 
-    //this event currently has internal validation so this will need to be refactored when that is removed.
-
     @Override
     public boolean isFinished(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
@@ -170,8 +168,6 @@ public class ApplicantsChecker implements EventChecker {
     private boolean verifyAddressCompleted(Address address) {
         return allNonEmpty(
             address.getAddressLine1(),
-            address.getAddressLine2(),
-            address.getAddressLine3(),
             address.getPostTown(),
             address.getCountry(),
             address.getCounty(),
