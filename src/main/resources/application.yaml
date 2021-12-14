@@ -1,10 +1,9 @@
-
-  server:
+server:
     port: 4044
 
-  runs-locally: ${RUNS_LOCALLY:true}
+runs-locally: ${RUNS_LOCALLY:true}
 
-  management:
+management:
     endpoint:
       health:
         show-details: "always"
@@ -15,7 +14,7 @@
           include: health, info, prometheus
 
   #If you use a database then uncomment below lines and update db properties accordingly
-  spring:
+spring:
     config:
       import: "optional:configtree:/mnt/secrets/"
     application:
@@ -42,11 +41,11 @@
   #            # silence the 'wall-of-text' - unnecessary exception throw about blob types
   #            non_contextual_creation: true
 
-  azure:
+azure:
     application-insights:
       instrumentation-key: ${rpe.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
 
-  logging:
+logging:
     level:
       org.springframework.web: DEBUG
       uk.gov.hmcts.reform.prl: DEBUG
@@ -54,17 +53,17 @@
     pattern:
       console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
 
-  pba:
+pba:
     validation:
       service:
         api:
           baseurl: ${PRD_API_BASEURL:http://localhost:8892}
 
-  feature-toggle:
+feature-toggle:
     toggle:
       example: ${FEATURE_EXAMPLE:false}
 
-  uk:
+uk:
     gov:
       notify:
         api:
@@ -81,7 +80,7 @@
 
   # NEW BELOW THIS LINE
 
-  idam:
+idam:
     api:
       url: http://localhost:5000
     s2s-auth:
@@ -93,13 +92,24 @@
       redirect_uri: https://localhost:9000/oauth2/callback
       secret: OOOOOOOOOOOOOOOO
 
+payments:
+  api:
+    url: ${PAY_URL:}
+    callback-url: ${PAY_CALLBACK_URL:}
 
-  core_case_data:
-    api:
-      url: http://localhost:4452
+fees-register:
+  api:
+    url: http://fees-register-api-demo.service.core-compute-demo.internal
+  parameters:
+    C100_SUBMISSION_FEE:
+      channel: default
+      event: miscellaneous
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: ChildArrangement
+      service: private law
 
-
-  security:
+security:
     oauth2:
       client:
         provider:
@@ -109,9 +119,11 @@
           oidc:
             client-id: internal
             client-secret: internal
+core_case_data:
+  api:
+    url: http://localhost:4452
 
-
-  auth:
+auth:
     idam:
       client:
         baseUrl: http://localhost:5000
@@ -121,7 +133,6 @@
           baseUrl: http://localhost:4502
 
 
-  resources:
+resources:
     images:
       baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/'
-

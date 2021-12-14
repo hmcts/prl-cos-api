@@ -20,11 +20,11 @@ public class SystemUserService {
 
     private final IdamClient idamClient;
 
-    private final String username = "privatelaw-system-update@mailnesia.com";
-    private final String password = "Password12!";
+    private final String username = "";
+    private final String password = "";
+
 
     public String getSysUserToken() {
-
         log.info("*******************************************************");
         log.info(auth.getClientId());
         log.info(auth.getClientScope());
@@ -32,7 +32,6 @@ public class SystemUserService {
         log.info(auth.getClientSecret());
         //log.info(userConfig.getUserName());
         log.info("*******************************************************");
-
         return idamClient.getAccessToken(username, password);
     }
 
