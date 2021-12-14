@@ -94,24 +94,24 @@ public class MiamChecker implements EventChecker {
 
     public boolean checkMIAMExemptions(CaseData caseData) {
 
-        List<MiamExemptionsChecklistEnum> exceptions = caseData.getMiamExemptionsChecklist();
+        Optional<List<MiamExemptionsChecklistEnum>> exceptions = ofNullable(caseData.getMiamExemptionsChecklist());
 
         boolean dvCompleted = true;
         boolean urgencyCompleted = true;
         boolean prevAttendCompleted = true;
         boolean otherCompleted = true;
 
-        if (exceptions.contains(domesticViolence)) {
+        if (exceptions.isPresent() && exceptions.get().contains(domesticViolence)) {
             dvCompleted = anyNonEmpty(caseData.getMiamDomesticViolenceChecklist());
         }
-        if (exceptions.contains(urgency)) {
+        if (exceptions.isPresent() && exceptions.get().contains(urgency)) {
             urgencyCompleted = anyNonEmpty(caseData.getMiamUrgencyReasonChecklist());
         }
-        if (exceptions.contains(previousMIAMattendance)) {
-            urgencyCompleted = anyNonEmpty(caseData.getMiamPreviousAttendanceChecklist());
+        if (exceptions.isPresent() && exceptions.get().contains(previousMIAMattendance)) {
+            prevAttendCompleted = anyNonEmpty(caseData.getMiamPreviousAttendanceChecklist());
         }
-        if (exceptions.contains(other)) {
-            urgencyCompleted = anyNonEmpty(caseData.getMiamOtherGroundsChecklist());
+        if (exceptions.isPresent() && exceptions.get().contains(other)) {
+            otherCompleted = anyNonEmpty(caseData.getMiamOtherGroundsChecklist());
         }
 
         return dvCompleted && urgencyCompleted && prevAttendCompleted && otherCompleted;
