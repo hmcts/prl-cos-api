@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
 
@@ -35,6 +36,8 @@ public class CaseEventHandlerTest {
     TaskListService taskListService;
     @Mock
     TaskListRenderer taskListRenderer;
+    @Mock
+    TaskErrorService taskErrorService;
 
     @InjectMocks
     CaseEventHandler caseEventHandler;
@@ -61,16 +64,12 @@ public class CaseEventHandlerTest {
 
         final String renderedTaskLists = "<h1>Task 1</h1><h2>Task 2</h2>";
 
-        when(taskListService.getTasksForOpenCase(caseData)).thenReturn(tasks);
-        when(taskListRenderer.render(tasks, errors)).thenReturn(renderedTaskLists);
-
-        caseEventHandler.handleCaseDataChange(caseDataChanged);
-
-        verify(taskListService).getTasksForOpenCase(caseData);
-        verify(taskListRenderer).render(tasks, errors);
-
         String jurisdiction = "PRIVATELAW";
         String caseType = "C100";
+
+        caseEventHandler.handleCaseDataChange(caseDataChanged);
+        verify(taskListService).getTasksForOpenCase(caseData);
+        verify(taskListRenderer).render(tasks, errors);
 
         verify(coreCaseDataService).triggerEvent(
             jurisdiction,

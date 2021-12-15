@@ -38,7 +38,7 @@ public class AttendingTheHearingCheckerTest {
     @Test
     public void whenNoCaseDataThenIsFinishedFalse() {
         CaseData caseData = CaseData.builder().build();
-        assert attendingTheHearingChecker.isFinished(caseData);
+        assert !attendingTheHearingChecker.isFinished(caseData);
 
     }
 
