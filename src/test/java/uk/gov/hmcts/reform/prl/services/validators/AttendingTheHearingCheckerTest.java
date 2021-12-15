@@ -67,6 +67,26 @@ public class AttendingTheHearingCheckerTest {
 
     }
 
+    @Test
+    public void whenNoCaseDataHasMandatoryReturnsFalse() {
+        CaseData caseData = CaseData.builder().build();
+
+        assert !attendingTheHearingChecker.hasMandatoryCompleted(caseData);
+    }
+
+    @Test
+    public void whenFullCaseDataHasMandatoryReturnsFalse() {
+        CaseData caseData = CaseData.builder()
+            .isWelshNeeded(NO)
+            .isInterpreterNeeded(NO)
+            .isDisabilityPresent(NO)
+            .isSpecialArrangementsRequired(NO)
+            .isIntermediaryNeeded(NO)
+            .build();
+
+        assert !attendingTheHearingChecker.hasMandatoryCompleted(caseData);
+    }
+
 
 
 

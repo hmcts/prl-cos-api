@@ -173,7 +173,7 @@ public class ApplicantsChecker implements EventChecker {
 
     }
 
-    private boolean verifyAddressCompleted(Address address) {
+    public boolean verifyAddressCompleted(Address address) {
         return allNonEmpty(
             address.getAddressLine1(),
             address.getPostTown(),
