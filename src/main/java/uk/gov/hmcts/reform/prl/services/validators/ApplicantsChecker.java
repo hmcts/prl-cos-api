@@ -44,6 +44,8 @@ public class ApplicantsChecker implements EventChecker {
             return false;
         }
 
+        boolean allFinished = true;
+
         List<PartyDetails> applicants = applicantsWrapped.get()
             .stream()
             .map(Element::getValue)
@@ -54,10 +56,16 @@ public class ApplicantsChecker implements EventChecker {
 
             boolean mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant);
             boolean dxCompleted = (dxNumber.isPresent() && !(dxNumber.get().isBlank()));
+
             if (!(mandatoryCompleted && dxCompleted)) {
-                taskErrorService.addEventError(APPLICANT_DETAILS,
-                                               APPLICANTS_DETAILS_ERROR,
-                                               APPLICANTS_DETAILS_ERROR.getError());
+                if (mandatoryCompleted) {
+                    taskErrorService.removeError(APPLICANTS_DETAILS_ERROR);
+                }
+                else {
+                    taskErrorService.addEventError(APPLICANT_DETAILS,
+                                                   APPLICANTS_DETAILS_ERROR,
+                                                   APPLICANTS_DETAILS_ERROR.getError());
+                }
                 return false;
             }
         }
