@@ -23,7 +23,11 @@ java:
     prl:
       resourceGroup: prl
       secrets:
-        - prl-cos-idam-client-secret
-        - microservicekey-prl-cos-api
-        - system-update-user-username
-        - system-update-user-password
+        - name: prl-cos-idam-client-secret
+          alias: IDAM_CLIENT_SECRET
+        - name: microservicekey-prl-cos-api
+          alias: IDAM_S2S_AUTH_TOTP_SECRET
+        - name: system-update-user-username
+          alias: PRL_SYSTEM_UPDATE_USERNAME
+        - name: system-update-user-password
+          alias: PRL_SYSTEM_UPDATE_PASSWORD

@@ -6,7 +6,7 @@ spring:
       paths: /mnt/secrets/prl
       aliases:
         prl.uk-gov-notify-api-key: UK_GOV_NOTIFY_API_KEY
-        microservicekey-prl-cos-api: idam.s2s-auth.totp_secret
+        microservicekey-prl-cos-api: IDAM_S2S_AUTH_TOTP_SECRET
         system-update-user-password: PRL_SYSTEM_UPDATE_PASSWORD
         system-update-user-username: PRL_SYSTEM_UPDATE_USERNAME
         prl-cos-idam-client-secret: IDAM_CLIENT_SECRET
