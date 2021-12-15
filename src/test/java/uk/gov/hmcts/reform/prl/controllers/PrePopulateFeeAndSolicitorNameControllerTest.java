@@ -1,52 +1,52 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 
 import java.math.BigDecimal;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.http.RequestEntity.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-@SpringBootTest
+
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(SpringRunner.class)
 public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     private MockMvc mockMvc;
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
+    @InjectMocks
+    private PrePopulateFeeAndSolicitorNameController prePopulateFeeAndSolicitorNameController;
 
-    @MockBean
+    @Mock
     private UserService userService;
 
-    @MockBean
+    @Mock
     private FeeService feesService;
 
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
     private UserDetails userDetails;
 
+    @Mock
     private FeeResponse feeResponse;
 
     public static final String authToken = "Bearer eyJ0eXAiOiJKV1QiLCJ6aXAiOiJOT05FIiwia2lkIjoiYi9PNk92VnYxK3krV2dy"
@@ -64,7 +64,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     @Before
     public void setUp() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
@@ -77,40 +76,36 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     }
 
     @Test
-    public void shouldRetrieveSolicitorNameAndFeeWhenValidRequestAndReturn200() throws Exception {
+    public void testUserDetailsForSolicitorName() throws Exception {
+        CaseDetails caseDetails = CaseDetailsProvider.full();
 
-        when(userDetails.getFullName()).thenReturn("solicitor@example.com Solicitor");
+        CallbackRequest callbackRequest = CallbackRequest.builder().build();
+
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
-        MvcResult mvcResult = (MvcResult) mockMvc.perform(MockMvcRequestBuilders.post("/prePopulateSolicitorAndFees")
-                                                 .header(HttpHeaders.AUTHORIZATION, authToken)
-                                                 .accept(MediaType.APPLICATION_JSON)
-                                                 .content("{ \"CaseDetails\": { \"caseId\": \"1639090820727541\",\"state\": "
-                                                              + "\"AWAITING_SUBMISSION_TO_HMCTS\",\"CaseData\": { \"id\": null}}}"))
-            .andExpect(status().isOk());
+
+        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
+
+        verify(userService).getUserDetails(authToken);
+        verifyNoMoreInteractions(userService);
 
     }
 
     @Test
-    public void shouldReturn400WhenInvalidRequestBody() throws Exception {
+    public void testFeeDetailsForFeeAmount() throws Exception {
+        CaseDetails caseDetails = CaseDetailsProvider.full();
 
-        String authToken = "";
+        CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
-        mockMvc.perform((RequestBuilder) post("/prePopulateSolicitorAndFees")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header(HttpHeaders.AUTHORIZATION,  authToken)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
-    }
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
-    @Test
-    public void shouldReturnWhenInValidRequestAndReturn404() throws Exception {
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        String authToken = "";
-        mockMvc.perform((RequestBuilder) post("/getSolicitorAndFeeDetails1")
-                            .contentType(MediaType.APPLICATION_CBOR)
-                            .header(HttpHeaders.AUTHORIZATION,  authToken));
+        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
+
+        verify(feesService).fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+        verifyNoMoreInteractions(feesService);
 
     }
 

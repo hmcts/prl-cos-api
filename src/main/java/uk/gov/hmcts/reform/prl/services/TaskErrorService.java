@@ -33,13 +33,6 @@ public class TaskErrorService {
                                     .build());
     }
 
-//    public void addMultipleEventErrors(Event event, List<String> errors) {
-//        eventErrors.add(EventValidationErrors
-//                            .builder()
-//                            .event(event)
-//                            .errors(errors)
-//                            .build());
-//    }
 
     public void removeError(EventErrorsEnum errorType) {
         eventErrors.remove(errorType);

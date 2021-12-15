@@ -166,7 +166,7 @@ public class ApplicantsChecker implements EventChecker {
             if (solicitorAddress.isPresent() && ofNullable(solicitorAddress.get().getAddressLine1()).isEmpty()) {
                 return false;
             }
-            fields.add(ofNullable(solicitorAddress.get().getAddressLine1()));
+            fields.add(solicitorAddress);
         }
 
         return fields.stream().noneMatch(Optional::isEmpty);

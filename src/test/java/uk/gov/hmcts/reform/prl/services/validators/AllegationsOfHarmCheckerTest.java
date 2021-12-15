@@ -10,15 +10,44 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import java.util.Collections;
+
+import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.APPLICANTS;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
+
 @RunWith(MockitoJUnitRunner.class)
 public class AllegationsOfHarmCheckerTest {
+
     @Mock
     TaskErrorService taskErrorService;
     @InjectMocks
     AllegationsOfHarmChecker allegationsOfHarmChecker;
 
+
     @Test
-    public  void  NotFinishedFieldsNotValidatedToTrue(){
+    public void whenNoCaseDataThenIsStartedIsFalse() {
+
+        CaseData casedata = CaseData.builder().build();
+
+        assert !allegationsOfHarmChecker.isStarted(casedata);
+
+    }
+
+    @Test
+    public void whenPartialCaseDataThenIsStartedTrue() {
+        CaseData casedata = CaseData.builder()
+            .allegationsOfHarmYesNo(YES)
+            .build();
+
+        assert  allegationsOfHarmChecker.isStarted(casedata);
+    }
+
+
+
+    @Test
+    public void whenNoCaseDataThenNotFinished(){
+
         CaseData casedata = CaseData.builder().build();
 
         boolean isFinished = allegationsOfHarmChecker.isFinished(casedata);
@@ -27,9 +56,9 @@ public class AllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public  void  FinishedFieldsValidatedToTrue(){
+    public void FinishedFieldsValidatedToTrue(){
         CaseData casedata = CaseData.builder()
-            .allegationsOfHarmYesNo(YesOrNo.NO)
+            .allegationsOfHarmYesNo(NO)
             .build();
 
         boolean isFinished = allegationsOfHarmChecker.isFinished(casedata);
@@ -47,28 +76,43 @@ public class AllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public  void  FinishedWhenAbusePresent(){
+    public void whenNoCaseDataThenHasMandatoryFalse() {
+
+        CaseData casedata = CaseData.builder().build();
+
+        assert !allegationsOfHarmChecker.hasMandatoryCompleted(casedata);
+
+    }
+
+    @Test
+    public void whenFinishedCaseDataThenHasMandatoryFalse() {
+
         CaseData casedata = CaseData.builder()
-            .allegationsOfHarmYesNo(YesOrNo.YES)
-            .allegationsOfHarmChildAbductionYesNo(YesOrNo.YES)
-            .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.NO)
-            .abductionCourtStepsRequested("")
-            .childAbductionReasons("reason")
-            .previousAbductionThreats(YesOrNo.NO)
-            .abductionPreviousPoliceInvolvement(YesOrNo.NO)
-            .abductionOtherSafetyConcerns(YesOrNo.NO)
-            .ordersNonMolestation(YesOrNo.YES)
-            .ordersOccupation(YesOrNo.NO)
-            .ordersForcedMarriageProtection(YesOrNo.YES)
-            .ordersRestraining(YesOrNo.NO)
-            .ordersOtherInjunctive(YesOrNo.NO)
-            .ordersUndertakingInPlace(YesOrNo.YES)
-            .allegationsOfHarmOtherConcerns(YesOrNo.NO)
-            .allegationsOfHarmOtherConcernsCourtActions("action")
+            .allegationsOfHarmYesNo(NO)
+        .build();
+
+        assert !allegationsOfHarmChecker.hasMandatoryCompleted(casedata);
+
+    }
+
+    @Test
+    public void whenNoCaseDataValidateFieldsReturnsFalse() {
+        CaseData caseData = CaseData.builder().build();
+
+        assert !allegationsOfHarmChecker.validateFields(caseData);
+    }
+
+    @Test
+    public void whenAbuseDataPresentThenAbusePresentReturnsTrue() {
+        CaseData caseData = CaseData.builder()
+            .allegationsOfHarmDomesticAbuseYesNo(YES)
+            .physicalAbuseVictim(Collections.singletonList(APPLICANTS))
             .build();
 
-        boolean isFinished = allegationsOfHarmChecker.isFinished(casedata);
-
-        assert(isFinished);
     }
+
+
+
+
+
 }

@@ -36,14 +36,10 @@ public class CaseInitiationController extends AbstractCallbackController{
     private final TaskListRenderer taskListRenderer;
 
     @PostMapping("/submitted")
-    public void handleSubmitted(@RequestBody CallbackRequest callbackRequest,
-                                @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation) {
-
+    public void handleSubmitted(@RequestBody CallbackRequest callbackRequest) {
 
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
         final CaseData caseData = getCaseData(caseDetails);
-
         publishEvent(new CaseDataChanged(caseData));
     }
 }

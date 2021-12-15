@@ -1,7 +1,12 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
 
@@ -9,7 +14,14 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder
 import static uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum.noNotRequired;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ApplicationTypeCheckerTest {
+
+    @Mock
+    private TaskErrorService taskErrorService;
+
+    @InjectMocks
+    private ApplicationTypeChecker applicationTypeChecker;
 
     @Test
     public void whenFieldsPartiallyCompleteIsFinishedReturnsFalse() {
@@ -18,8 +30,6 @@ public class ApplicationTypeCheckerTest {
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .applicationDetails("Test details")
             .build();
-
-        ApplicationTypeChecker applicationTypeChecker = new ApplicationTypeChecker();
 
         assert !applicationTypeChecker.isFinished(caseData);
 
@@ -35,8 +45,6 @@ public class ApplicationTypeCheckerTest {
             .applicationDetails("Test details")
             .build();
 
-        ApplicationTypeChecker applicationTypeChecker = new ApplicationTypeChecker();
-
         assert applicationTypeChecker.isFinished(caseData);
 
     }
@@ -48,8 +56,6 @@ public class ApplicationTypeCheckerTest {
             .natureOfOrder("Test")
             .build();
 
-        ApplicationTypeChecker applicationTypeChecker = new ApplicationTypeChecker();
-
         assert applicationTypeChecker.isStarted(caseData);
 
     }
@@ -59,8 +65,6 @@ public class ApplicationTypeCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        ApplicationTypeChecker applicationTypeChecker = new ApplicationTypeChecker();
-
         assert !applicationTypeChecker.isStarted(caseData);
 
     }
@@ -69,8 +73,6 @@ public class ApplicationTypeCheckerTest {
     public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
-
-        ApplicationTypeChecker applicationTypeChecker = new ApplicationTypeChecker();
 
         assert !applicationTypeChecker.hasMandatoryCompleted(caseData);
 
@@ -86,8 +88,6 @@ public class ApplicationTypeCheckerTest {
             .applicationPermissionRequired(noNotRequired)
             .applicationDetails("Test details")
             .build();
-
-        ApplicationTypeChecker applicationTypeChecker = new ApplicationTypeChecker();
 
         assert !applicationTypeChecker.hasMandatoryCompleted(caseData);
 

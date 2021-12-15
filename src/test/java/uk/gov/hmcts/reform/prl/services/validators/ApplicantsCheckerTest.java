@@ -2,17 +2,29 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Test;
 
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
 import java.util.List;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ApplicantsCheckerTest {
 
+    @Mock
+    private TaskErrorService taskErrorService;
+
+    @InjectMocks
+    private ApplicantsChecker applicantsChecker;
+
     @Test
-    public void whenApplicantPresentThenIsFinishedReturnsTrue() {
+    public void whenApplicantPresentButNotCompleteThenIsFinishedReturnsFalse() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -20,9 +32,7 @@ public class ApplicantsCheckerTest {
 
         CaseData caseData = CaseData.builder().applicants(applicantList).build();
 
-        ApplicantsChecker applicantsChecker = new ApplicantsChecker();
-
-        assert applicantsChecker.isFinished(caseData);
+        assert !applicantsChecker.isFinished(caseData);
 
     }
 
@@ -30,8 +40,6 @@ public class ApplicantsCheckerTest {
     public void whenApplicantIsNotPresentThenIsFinishedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().applicants(null).build();
-
-        ApplicantsChecker applicantsChecker = new ApplicantsChecker();
 
         assert !applicantsChecker.isFinished(caseData);
 
@@ -46,8 +54,6 @@ public class ApplicantsCheckerTest {
 
         CaseData caseData = CaseData.builder().applicants(applicantList).build();
 
-        ApplicantsChecker applicantsChecker = new ApplicantsChecker();
-
         assert applicantsChecker.isStarted(caseData);
 
     }
@@ -57,22 +63,18 @@ public class ApplicantsCheckerTest {
 
         CaseData caseData = CaseData.builder().applicants(null).build();
 
-        ApplicantsChecker applicantsChecker = new ApplicantsChecker();
-
         assert !applicantsChecker.isStarted(caseData);
 
     }
 
     @Test
-    public void whenApplicantPresentThenHasMandatoryReturnsFalse() {
+    public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalse() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
         CaseData caseData = CaseData.builder().applicants(applicantList).build();
-
-        ApplicantsChecker applicantsChecker = new ApplicantsChecker();
 
         assert !applicantsChecker.hasMandatoryCompleted(caseData);
 
@@ -82,8 +84,6 @@ public class ApplicantsCheckerTest {
     public void whenApplicantIsNotPresentThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder().applicants(null).build();
-
-        ApplicantsChecker applicantsChecker = new ApplicantsChecker();
 
         assert !applicantsChecker.hasMandatoryCompleted(caseData);
 

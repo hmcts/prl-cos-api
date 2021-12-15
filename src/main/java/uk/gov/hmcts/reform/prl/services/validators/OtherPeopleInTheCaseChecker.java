@@ -69,19 +69,6 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
 
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
-//
-//        if (caseData.getOthersToNotify() != null && caseData.getOthersToNotify().size() != 0) {
-//            List<PartyDetails> others = caseData.getOthersToNotify()
-//                .stream().map(Element::getValue)
-//                .collect(Collectors.toList());
-//
-//            boolean allMandatoryCompleted = true;
-//
-//            for (PartyDetails party:others){
-//                allMandatoryCompleted = validateMandatoryPartyDetailsForOtherPerson(party);
-//            }
-//            return allMandatoryCompleted;
-//        }
         return false;
     }
 

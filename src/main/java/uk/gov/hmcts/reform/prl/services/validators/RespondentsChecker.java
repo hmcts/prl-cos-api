@@ -81,7 +81,7 @@ public class RespondentsChecker implements EventChecker{
         return false;
     }
 
-    private boolean validateMandatoryFieldsForRespondent(PartyDetails respondent){
+    public boolean validateMandatoryFieldsForRespondent(PartyDetails respondent){
 
         Optional<String> firstName = ofNullable(respondent.getFirstName());
         Optional<String> lastName = ofNullable(respondent.getLastName());
@@ -143,7 +143,7 @@ public class RespondentsChecker implements EventChecker{
 
     }
 
-    private boolean respondentDetailsStarted(PartyDetails respondent) {
+    public boolean respondentDetailsStarted(PartyDetails respondent) {
         Optional<String> firstName = ofNullable(respondent.getFirstName());
         Optional<String> lastName = ofNullable(respondent.getLastName());
         Optional<LocalDate> dateOfBirth = ofNullable(respondent.getDateOfBirth());
