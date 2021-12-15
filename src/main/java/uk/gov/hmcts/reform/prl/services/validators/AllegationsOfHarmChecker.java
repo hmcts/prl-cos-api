@@ -17,6 +17,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ATTENDING_THE_HEARING_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
@@ -170,6 +171,9 @@ public class AllegationsOfHarmChecker implements EventChecker {
         boolean policeCompleted = false;
         boolean otherCompleted = false;
 
+        if (childAbduction.isPresent() && childAbduction.get().equals(NO)){
+            return true;
+        }
 
         if (childAbduction.isPresent()) {
             if (childAbduction.get().equals(YES)) {
@@ -319,6 +323,11 @@ public class AllegationsOfHarmChecker implements EventChecker {
         Optional<YesOrNo> allegationsOfHarmOtherConcerns = ofNullable(caseData.getAllegationsOfHarmOtherConcernsYesNo());
         Optional<String> allegationsOfHarmOtherConcernsDetails = ofNullable(caseData.getAllegationsOfHarmOtherConcernsDetails());
         Optional<String> allegationsOfHarmOtherConcernsCourtActions = ofNullable(caseData.getAllegationsOfHarmOtherConcernsCourtActions());
+
+        if (allegationsOfHarmOtherConcerns.isPresent() && allegationsOfHarmOtherConcerns.get().equals(NO)) {
+            return true;
+        }
+
 
         boolean otherConcernsCompleted = true;
 
