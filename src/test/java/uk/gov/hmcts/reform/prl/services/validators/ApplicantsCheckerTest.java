@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -87,6 +88,31 @@ public class ApplicantsCheckerTest {
 
         assert !applicantsChecker.hasMandatoryCompleted(caseData);
 
+    }
+
+    @Test
+    public void whenIncompleteAddressDataThenVerificationReturnsFalse() {
+        Address address = Address.builder()
+            .addressLine2("Test")
+            .country("UK")
+            .build();
+
+       assert !applicantsChecker.verifyAddressCompleted(address);
+    }
+
+    @Test
+    public void whenCompleteAddressDataThenVerificationReturnsTrue() {
+        Address address = Address.builder()
+            .addressLine1("Test")
+            .addressLine2("Test")
+            .addressLine3("Test")
+            .county("London")
+            .country("UK")
+            .postTown("Southgate")
+            .postCode("N14 5EF")
+            .build();
+
+        assert applicantsChecker.verifyAddressCompleted(address);
     }
 
 
