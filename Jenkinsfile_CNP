@@ -1,6 +1,5 @@
 #!groovy
 import uk.gov.hmcts.contino.AppPipelineDsl
-import uk.gov.hmcts.contino.AppPipelineConfig
 
 properties([
   [$class: 'GithubProjectProperty', projectUrlStr: 'https://github.com/hmcts/prl-cos-api.git'],
@@ -13,12 +12,11 @@ def type = "java"
 def product = "prl"
 def component = "cos"
 
-static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+static Map<String, Object> secret(String secretName, String envVariable) {
   [$class     : 'AzureKeyVaultSecret',
    secretType : 'Secret',
    name       : secretName,
-   version    : '',
-   envVariable: envVar
+   envVariable: envVariable
   ]
 }
 
@@ -33,9 +31,10 @@ def secrets = [
 
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
+
+
 def pipelineConf = new AppPipelineConfig()
 pipelineConf.vaultSecrets = secrets
-
 withPipeline(type, product, component) {
   enableAksStagingDeployment()
   disableLegacyDeployment()
