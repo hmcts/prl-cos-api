@@ -7,13 +7,13 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 public class SystemUserConfiguration {
-
-    private final String userName;
-    private final String password;
-
-    public SystemUserConfiguration(@Value("${prl.system-update.username}") String userName,
-                                         @Value("${prl.system-update.password}") String password) {
-        this.userName = userName;
-        this.password = password;
-    }
+//
+//    private final String userName;
+//    private final String password;
+//
+//    public SystemUserConfiguration(@Value("${prl.system-update.username}") String userName,
+//                                         @Value("${prl.system-update.password}") String password) {
+//        this.userName = userName;
+//        this.password = password;
+//    }
 }
