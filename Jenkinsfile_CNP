@@ -1,5 +1,6 @@
 #!groovy
 import uk.gov.hmcts.contino.AppPipelineDsl
+import uk.gov.hmcts.contino.AppPipelineConfig
 
 properties([
   [$class: 'GithubProjectProperty', projectUrlStr: 'https://github.com/hmcts/prl-cos-api.git'],
