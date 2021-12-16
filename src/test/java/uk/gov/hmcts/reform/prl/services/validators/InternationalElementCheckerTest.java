@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
@@ -75,5 +76,18 @@ public class InternationalElementCheckerTest {
         CaseData caseData=CaseData.builder().build();
         boolean isStarted=internationalElementChecker.isStarted(caseData);
         assert (!isStarted);
+    }
+
+    @Test
+    public void verifyTaskErrorsIncreasesInSizeWhenAddMethodCalled() {
+
+        TaskErrorService newTaskErrorService = new TaskErrorService();
+
+        int preMapSize = newTaskErrorService.getEventErrors().size();
+        internationalElementChecker.addErrorAndReturnTrue();
+        int postMapSize = newTaskErrorService.getEventErrors().size();
+        System.out.println(preMapSize);
+        System.out.println(postMapSize);
+
     }
 }
