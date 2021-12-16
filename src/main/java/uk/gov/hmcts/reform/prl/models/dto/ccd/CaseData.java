@@ -147,9 +147,7 @@ public class CaseData {
     /**
      * Allegations of harm.
      */
-    /**
-     * Allegations of harm
-     */
+
     private final YesOrNo allegationsOfHarmYesNo;
     private final YesOrNo allegationsOfHarmDomesticAbuseYesNo;
     private final List<ApplicantOrChildren> physicalAbuseVictim;
