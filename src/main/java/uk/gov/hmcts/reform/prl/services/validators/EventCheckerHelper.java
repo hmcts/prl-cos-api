@@ -22,17 +22,6 @@ public class EventCheckerHelper {
             address.getPostCode());
     }
 
-//    public static boolean isEmptyTelephone(Telephone telephone) {
-//        return ObjectUtils.isEmpty(telephone)
-//            || allEmpty(
-//            telephone.getTelephoneNumber(),
-//            telephone.getContactDirection(),
-//            telephone.getTelephoneUsageType());
-//    }
-//
-//    public static boolean isEmptyEmail(EmailAddress email) {
-//        return ObjectUtils.isEmpty(email) || allEmpty(email.getEmail(), email.getEmailUsageType());
-//    }
 
     public static boolean allEmpty(Object... properties) {
         return Stream.of(properties).allMatch(ObjectUtils::isEmpty);

@@ -1,12 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -111,8 +110,126 @@ public class AllegationsOfHarmCheckerTest {
 
     }
 
+    @Test
+    public void whenNoCaseDataThenValidateOtherConcernsIsFalse() {
+        CaseData caseData = CaseData.builder().build();
+
+        assert !allegationsOfHarmChecker.validateOtherConcerns(caseData);
+
+    }
+
+    @Test
+    public void whenOtherConcernsPresentThenValidateOtherConcernsTrue() {
+        CaseData caseData = CaseData.builder()
+            .allegationsOfHarmOtherConcernsYesNo(YES)
+            .allegationsOfHarmOtherConcernsDetails("Details")
+            .allegationsOfHarmOtherConcernsCourtActions("Court actions")
+            .build();
+
+        assert allegationsOfHarmChecker.validateOtherConcerns(caseData);
+    }
+
+    @Test
+    public void whenNonMolestationOrderCurrentReturnTrue() {
+        CaseData caseData = CaseData.builder()
+            .ordersNonMolestation(YES)
+            .ordersNonMolestationCurrent(YES)
+            .build();
+
+        assert allegationsOfHarmChecker.validateNonMolestationOrder(caseData);
+    }
+
+    @Test
+    public void whenOccupationOrderCurrentReturnTrue() {
+        CaseData caseData = CaseData.builder()
+            .ordersOccupation(YES)
+            .ordersOccupationCurrent(YES)
+            .build();
+
+        assert allegationsOfHarmChecker.validateOccupationOrder(caseData);
+    }
+
+    @Test
+    public void whenForcedMarriageOrderCurrentReturnTrue() {
+        CaseData caseData = CaseData.builder()
+            .ordersForcedMarriageProtection(YES)
+            .ordersForcedMarriageProtectionCurrent(YES)
+            .build();
+
+        assert allegationsOfHarmChecker.validateForcedMarriageProtectionOrder(caseData);
+    }
+
+    @Test
+    public void whenRestrainingOrderOrderCurrentReturnTrue() {
+        CaseData caseData = CaseData.builder()
+            .ordersRestraining(YES)
+            .ordersRestrainingCurrent(YES)
+            .build();
+
+        assert allegationsOfHarmChecker.validateRestrainingOrder(caseData);
+    }
+
+    @Test
+    public void whenOtherInjunctiveOrderCurrentReturnTrue() {
+        CaseData caseData = CaseData.builder()
+            .ordersOtherInjunctive(YES)
+            .ordersOtherInjunctiveCurrent(YES)
+            .build();
+
+        assert allegationsOfHarmChecker.validateOtherInjunctiveOrder(caseData);
+    }
+
+    @Test
+    public void whenUndertakingOrderCurrentReturnTrue() {
+        CaseData caseData = CaseData.builder()
+            .ordersUndertakingInPlace(YES)
+            .ordersUndertakingInPlaceCurrent(YES)
+            .build();
+
+        assert allegationsOfHarmChecker.validateUndertakingInPlaceOrder(caseData);
+    }
+
+    @Test
+    public void whenNoCaseDataThenAbductionSectionNotComplete() {
+        CaseData caseData = CaseData.builder().build();
+
+        assert !allegationsOfHarmChecker.validateAbductionSection(caseData);
+    }
+
+    @Test
+    public void whenAnyAbusePresentThenReturnTrue() {
+        CaseData caseData = CaseData.builder()
+            .allegationsOfHarmDomesticAbuseYesNo(YES)
+            .build();
+
+        assert allegationsOfHarmChecker.abusePresent(caseData);
+    }
+
+    @Test
+    public void whenBehaviourPresentButIncompleteReturnFalse() {
+
+        Behaviours behaviour = Behaviours.builder()
+            .abuseNatureDescription("Test String")
+            .build();
+
+        assert !allegationsOfHarmChecker.validateBehaviour(behaviour);
+    }
+
+    @Test
+    public void whenCompleteBehaviourReturnTrue() {
+
+        Behaviours behaviour = Behaviours.builder()
+            .abuseNatureDescription("Test")
+            .behavioursStartDateAndLength("5 days")
+            .behavioursNature("Testing")
+            .behavioursApplicantSoughtHelp(YES)
+            .behavioursApplicantHelpSoughtWho("Who from")
+            .behavioursApplicantHelpAction("Action")
+            .build();
+
+        assert allegationsOfHarmChecker.validateBehaviour(behaviour);
 
 
-
+    }
 
 }
