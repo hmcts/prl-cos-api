@@ -37,9 +37,9 @@ def pipelineConf = new AppPipelineConfig()
 pipelineConf.vaultSecrets = secrets
 
 withPipeline(type, product, component) {
-  loadVaultSecrets(secrets)
   enableAksStagingDeployment()
   disableLegacyDeployment()
+  loadVaultSecrets(secrets)
 
   after('checkout') {
     echo '${product}-${component} checked out'
