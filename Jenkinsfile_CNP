@@ -36,10 +36,9 @@ def secrets = [
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
 withPipeline(type, product, component) {
-  pipelineConf = config
-  loadVaultSecrets(secrets)
   enableAksStagingDeployment()
   disableLegacyDeployment()
+  loadVaultSecrets(secrets)
 
   after('checkout') {
     echo 'prl-cos-api checked out'
