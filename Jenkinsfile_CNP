@@ -7,12 +7,10 @@ properties([
 ])
 
 @Library("Infrastructure")
-import uk.gov.hmcts.contino.AppPipelineConfig
 
 def type = "java"
 def product = "prl"
 def component = "cos"
-AppPipelineConfig pipelineConf
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   [$class     : 'AzureKeyVaultSecret',
@@ -36,39 +34,42 @@ def secrets = [
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
 withPipeline(type, product, component) {
+  loadVaultSecrets(secrets)
   enableAksStagingDeployment()
   disableLegacyDeployment()
-  loadVaultSecrets(secrets)
 
   after('checkout') {
-    echo 'prl-cos-api checked out'
+    echo '${product}-${component} checked out'
   }
 
-  after('test') {
-    steps.junit '**/test-results/**/*.xml'
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
+  before('smoketest:aat') {
+    env.test_environment = 'aat'
   }
 
   before('functionalTest:aat') {
     env.test_environment = 'aat'
   }
 
-  after('functionalTest:aat') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
+  before('smoketest:preview') {
+    env.test_environment = 'aat'
   }
 
   // Kubernetes does not retrieve variables from the output terraform
   before('functionalTest:preview') {
+    env.FEATURE_RESP_SOLICITOR_DETAILS = 'true'
     env.test_environment = 'aat'
   }
 
   after('functionalTest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
+  }
+
+  after('functionalTest:aat') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
   }
 
   onMaster() {
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }
+
