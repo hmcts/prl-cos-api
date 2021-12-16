@@ -78,16 +78,4 @@ public class InternationalElementCheckerTest {
         assert (!isStarted);
     }
 
-    @Test
-    public void verifyTaskErrorsIncreasesInSizeWhenAddMethodCalled() {
-
-        TaskErrorService newTaskErrorService = new TaskErrorService();
-
-        int preMapSize = newTaskErrorService.getEventErrors().size();
-        internationalElementChecker.addErrorAndReturnTrue();
-        int postMapSize = newTaskErrorService.getEventErrors().size();
-        System.out.println(preMapSize);
-        System.out.println(postMapSize);
-
-    }
 }
