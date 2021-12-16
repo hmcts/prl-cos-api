@@ -17,7 +17,8 @@ java:
     REFORM_SERVICE_NAME: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE: prl-cos-api
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS: 900
-    PRL_SYSTEM_UPDATE_PASSWORD:
+    PRL_SYSTEM_UPDATE_USERNAME: "{{ .Values.keyVaults.prl.secrets.system-update-user-username}}"
+    PRL_SYSTEM_UPDATE_PASSWORD: "{{ .Values.keyVaults.prl.secrets.system-update-user-password}}"
 
   keyVaults:
     prl:
