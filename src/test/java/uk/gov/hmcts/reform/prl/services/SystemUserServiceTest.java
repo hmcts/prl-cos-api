@@ -1,23 +1,23 @@
-package uk.gov.hmcts.reform.prl.services;
-
-import com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.RandomStringUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.OAuth2Configuration;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
-import uk.gov.hmcts.reform.prl.config.SystemUserConfiguration;
-
-import java.util.UUID;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.when;
-
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class SystemUserServiceTest {
+//package uk.gov.hmcts.reform.prl.services;
+//
+//import com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.RandomStringUtils;
+//import org.junit.Test;
+//import org.junit.runner.RunWith;
+//import org.mockito.InjectMocks;
+//import org.mockito.Mock;
+//import org.mockito.junit.MockitoJUnitRunner;
+//import uk.gov.hmcts.reform.idam.client.IdamClient;
+//import uk.gov.hmcts.reform.idam.client.OAuth2Configuration;
+//import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+//import uk.gov.hmcts.reform.prl.config.SystemUserConfiguration;
+//
+//import java.util.UUID;
+//
+//import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+//import static org.mockito.Mockito.when;
+//
+//@RunWith(MockitoJUnitRunner.Silent.class)
+//public class SystemUserServiceTest {
 //
 //    private static final String USERNAME = "username";
 //    private static final String PASSWORD = "password";
@@ -62,6 +62,6 @@ public class SystemUserServiceTest {
 //    }
 //
 //
-
-
-}
+//
+//
+//}
