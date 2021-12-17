@@ -20,7 +20,6 @@ java:
 
   keyVaults:
     prl:
-      resourceGroup: prl-{{ .Values.global.environment }}
       secrets:
         - name: prl-cos-idam-client-secret
           alias: IDAM_CLIENT_SECRET
