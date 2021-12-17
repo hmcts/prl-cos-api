@@ -88,6 +88,7 @@ idam:
     url: http://fake-service-auth-provider-api
     microservice: prl_cos_api
     totp_secret: AAAAAAAAAAAAAAAA
+  secret: W7supXKMJgcEWKBS
 
 
 core_case_data:
@@ -96,7 +97,7 @@ core_case_data:
 
 prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
 
 security:
