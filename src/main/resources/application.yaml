@@ -88,7 +88,8 @@ idam:
     url: http://fake-service-auth-provider-api
     microservice: prl_cos_api
     totp_secret: AAAAAAAAAAAAAAAA
-  secret: W7supXKMJgcEWKBS
+  client:
+    secret: W7supXKMJgcEWKBS
 
 
 core_case_data:
