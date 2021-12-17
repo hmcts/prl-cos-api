@@ -27,6 +27,6 @@ java:
         - name: microservicekey-prl-cos-api
           alias: IDAM_S2S_AUTH_TOTP_SECRET
         - name: system-update-user-username
-          alias: PRL_SYSTEM_UPDATE_USERNAME
+          alias: SYSTEM_UPDATE_USER_USERNAME
         - name: system-update-user-password
           alias: PRL_SYSTEM_UPDATE_PASSWORD

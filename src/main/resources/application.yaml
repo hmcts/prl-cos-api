@@ -96,7 +96,7 @@ core_case_data:
 
 prl:
   system-update:
-    username: ${PRL_SYSTEM_UPDATE_USERNAME:prl-system-update@mailinator.com}
+    username: ${SYSTEM_UPDATE_USER_USERNAME}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
 
 security:

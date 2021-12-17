@@ -25,11 +25,16 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 
 def secrets = [
   'prl-${env}': [
-    secret('system-update-user-username', 'PRL_SYSTEM_UPDATE_USERNAME'),
+    secret('system-update-user-username', 'SYSTEM_UPDATE_USER_USERNAME'),
     secret('system-update-user-password', 'PRL_SYSTEM_UPDATE_PASSWORD'),
     secret('microservicekey-prl-cos-api', 'IDAM_S2S_AUTH_TOTP_SECRET'),
     secret('prl-cos-idam-client-secret', 'IDAM_CLIENT_SECRET'),
   ]
+]
+
+def vaultOverrides = [
+  'preview' : 'aat',
+  'spreview': 'saat'
 ]
 
 // Vars for Kubernetes
@@ -37,6 +42,7 @@ env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
 withPipeline(type, product, component) {
   pipelineConf = config
+  overrideVaultEnvironments(vaultOverrides)
   loadVaultSecrets(secrets)
   enableAksStagingDeployment()
   disableLegacyDeployment()

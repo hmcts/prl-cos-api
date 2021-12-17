@@ -52,16 +52,6 @@ data "azurerm_key_vault" "prl_key_vault" {
   resource_group_name = "prl-${var.env}"
 }
 
-data "azurerm_key_vault_secret" "system_update_username" {
-  name      = "system-update-user-username"
-  key_vault_id = module.key-vault.key_vault_id
-}
-
-data "azurerm_key_vault_secret" "system_update_user_password" {
-  name      = "system-update-user-password"
-  key_vault_id = data.azurerm_key_vault.prl_key_vault.id
-}
-
 data "azurerm_key_vault_secret" "prl_cos_idam_client_secret" {
   key_vault_id = "${data.azurerm_key_vault.prl_key_vault.id}"
   name = "prl-cos-idam-client-secret"
