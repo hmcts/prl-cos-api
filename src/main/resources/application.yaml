@@ -1,8 +1,6 @@
 server:
   port: 4044
 
-runs-locally: ${RUNS_LOCALLY:true}
-
 management:
   endpoint:
     health:
@@ -84,6 +82,7 @@ uk:
 idam:
   s2s-auth:
     microservice: prl_cos_api
+    totp_secret: GT2V6PLQ34XGPTPM
   api:
     url: ${IDAM_API_URL:}
   client:
