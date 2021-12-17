@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.OAuth2Configuration;
+import uk.gov.hmcts.reform.prl.config.ServiceTokenGeneratorConfiguration;
 import uk.gov.hmcts.reform.prl.config.SystemUserConfiguration;
 
 @Service
@@ -18,6 +19,8 @@ public class SystemUserService {
 
     private final SystemUserConfiguration userConfig;
 
+    private final ServiceTokenGeneratorConfiguration serviceTokenGeneratorConfiguration;
+
     private final IdamClient idamClient;
 
     public String getSysUserToken() {
@@ -29,6 +32,8 @@ public class SystemUserService {
         log.info(auth.getClientSecret());
         log.info(userConfig.getUserName());
         log.info(userConfig.getPassword());
+        log.info("microService ----- ");
+        log.info(serviceTokenGeneratorConfiguration.getMicroService());
         log.info("*******************************************************");
 
         return idamClient.getAccessToken(userConfig.getUserName(), userConfig.getPassword());
