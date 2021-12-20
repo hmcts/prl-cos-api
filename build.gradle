@@ -1,9 +1,9 @@
 buildscript {
   repositories {
-    mavenCentral()
+    jcenter()
   }
   dependencies {
-    classpath("net.serenity-bdd:serenity-gradle-plugin:2.4.24")
+    classpath("net.serenity-bdd:serenity-gradle-plugin:2.3.6")
   }
 }
 
@@ -39,8 +39,8 @@ def versions = [
   jacksonDatatypeJsr           : '2.12.3',
   jsonAssert                   : '1.2.3',
   //  jsonPathAssert               : '2.2.0',
-  junit                        : '4.13.1',
-  junitPlatform                : '5.7.2',
+  junit                        : '5.8.1',
+  junitPlatform                : '1.8.1',
   lombok                       : '1.18.20',
   pact                         : '4.1.11',
   puppyCrawl                   : '8.43',
