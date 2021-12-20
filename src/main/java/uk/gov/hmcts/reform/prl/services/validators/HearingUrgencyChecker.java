@@ -90,10 +90,10 @@ public class HearingUrgencyChecker implements EventChecker {
 
                     for (Object field : mandatoryFields) {
                         if (field == null) {
-                            fieldsComplete = false;
+                            return false;
                         }
-                        return fieldsComplete;
                     }
+                    return true;
                 case NO:
                     return true;
                 default:
