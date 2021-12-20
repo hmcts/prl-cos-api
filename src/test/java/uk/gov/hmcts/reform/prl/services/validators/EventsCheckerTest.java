@@ -42,7 +42,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {EventsChecker.class, LocalValidatorFactoryBean.class})
 @TestInstance(PER_CLASS)
-class EventCheckerTest {
+class EventsCheckerTest {
 
     @MockBean
     CaseNameChecker caseNameChecker;
