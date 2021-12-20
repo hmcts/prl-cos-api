@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><testsuite errors="1" failures="0" name="uk.gov.hmcts.reform.prl.controllers.TaskListControllerIntegrationTest" skipped="0" tests="1" time="2.14" timestamp="2021-12-16 12:39:12"><testcase classname="uk.gov.hmcts.reform.prl.controllers.TaskListControllerIntegrationTest" name="Task list end point test"><error message="Failed to load ApplicationContext" type="java.lang.IllegalStateException">Failed to load ApplicationContext</error><system-err>Failed to load ApplicationContext
-org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:132)
-org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:124)
-org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:190)
-org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:132)
-org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:244)
-</system-err></testcase></testsuite>

@@ -5,10 +5,8 @@ package uk.gov.hmcts.reform.prl.services;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -21,7 +19,6 @@ import java.util.Map;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 public class CoreCaseDataServiceTest {
 
@@ -60,7 +57,7 @@ public class CoreCaseDataServiceTest {
     }
 
     @Test
-    void shouldStartAndSubmitEventWithEventData() {
+    public void shouldStartAndSubmitEventWithEventData() {
         Map<String, Object> eventData = Map.of("A", "B");
         coreCaseDataService.triggerEvent(jurisdiction, caseType, caseId, eventName, eventData);
 
