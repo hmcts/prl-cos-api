@@ -76,6 +76,9 @@ uk:
           welsh:
             EXAMPLE: example-template-id-222
 
+notify:
+  api-key: fake-key
+  baseUrl: https://api.notifications.service.gov.uk
 
 payments:
   api:
