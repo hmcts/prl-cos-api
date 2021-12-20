@@ -1,9 +1,9 @@
 buildscript {
   repositories {
-    jcenter()
+    mavenCentral()
   }
   dependencies {
-    classpath("net.serenity-bdd:serenity-gradle-plugin:2.3.6")
+    classpath("net.serenity-bdd:serenity-gradle-plugin:2.4.24")
   }
 }
 
@@ -39,8 +39,8 @@ def versions = [
   jacksonDatatypeJsr           : '2.12.3',
   jsonAssert                   : '1.2.3',
   //  jsonPathAssert               : '2.2.0',
-  junit                        : '5.8.1',
-  junitPlatform                : '1.8.1',
+  junit                        : '4.13.1',
+  junitPlatform                : '5.7.2',
   lombok                       : '1.18.20',
   pact                         : '4.1.11',
   puppyCrawl                   : '8.43',
@@ -441,8 +441,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/SslVerificationDisabler.*',
   '**uk/gov/hmcts/reform/prl/Application.*',
-  '**uk/gov/hmcts/reform/prl/services/validators/EventChecker.java',
-  '**uk/gov/hmcts/reform/prl/services/validators/SubmitAndPayChecker.java'
+  '**uk/gov/hmcts/reform/prl/services/validators/*.*'
 
 ]
 
