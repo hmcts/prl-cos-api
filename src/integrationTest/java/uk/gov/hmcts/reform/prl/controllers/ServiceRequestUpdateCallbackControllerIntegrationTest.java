@@ -23,14 +23,14 @@ public class ServiceRequestUpdateCallbackControllerIntegrationTest extends Integ
 
     protected String serviceUrl;
 
-    private final String ServiceRequestUpdateCalbackControllerEndPoint = "/service-request-update";
+    private final String serviceRequestContextPath = "/service-request-update";
 
     private final String path = "CallBackRequest.json";
 
     @Test
     public void whenInvalidRequestFormat_Return400() throws IOException {
 
-        HttpPost httpPost = new HttpPost(serviceUrl + ServiceRequestUpdateCalbackControllerEndPoint);
+        HttpPost httpPost = new HttpPost(serviceUrl + serviceRequestContextPath);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(
             httpResponse.getStatusLine().getStatusCode(),
@@ -40,7 +40,7 @@ public class ServiceRequestUpdateCallbackControllerIntegrationTest extends Integ
     @Test
     public void whenValidRequestFormat_Return200() throws Exception {
 
-        HttpPost httpPost = new HttpPost(serviceUrl + ServiceRequestUpdateCalbackControllerEndPoint);
+        HttpPost httpPost = new HttpPost(serviceUrl + serviceRequestContextPath);
         String requestBody = ResourceLoader.loadJson(path);
         httpPost.addHeader("Authorization", getAuthorizationToken());
         httpPost.addHeader("Authorization", "Service Auth");

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,7 +10,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class UserServiceTest {
@@ -49,13 +48,13 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testToCheckUserDetailsWithBadAuthToken(){
+    public void testToCheckUserDetailsWithBadAuthToken() {
 
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         String actualResult = userService.getUserDetails(authToken).getFullName();
 
-        assertNotEquals("Solicitor"  ,actualResult);
+        assertNotEquals("Solicitor", actualResult);
     }
 
 }

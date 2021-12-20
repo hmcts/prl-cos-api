@@ -22,14 +22,14 @@ public class FeeAndPayServiceRequestControllerIntegrationTest extends Integratio
     @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;
 
-    private final String FeeAndPayServiceRequestControllerEndPoint = "/create-payment-service-request";
+    private final String feeAndPayServiceRequestControllerEndPoint = "/create-payment-service-request";
 
     private final String path = "CallBackRequest.json";
 
     @Test
     public void whenInvalidRequestFormat_Return400() throws IOException {
 
-        HttpPost httpPost = new HttpPost(serviceUrl + FeeAndPayServiceRequestControllerEndPoint);
+        HttpPost httpPost = new HttpPost(serviceUrl + feeAndPayServiceRequestControllerEndPoint);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(
             httpResponse.getStatusLine().getStatusCode(),
@@ -39,7 +39,7 @@ public class FeeAndPayServiceRequestControllerIntegrationTest extends Integratio
     @Test
     public void whenValidRequestFormat_Return200() throws Exception {
 
-        HttpPost httpPost = new HttpPost(serviceUrl + FeeAndPayServiceRequestControllerEndPoint);
+        HttpPost httpPost = new HttpPost(serviceUrl + feeAndPayServiceRequestControllerEndPoint);
         String requestBody = ResourceLoader.loadJson(path);
         httpPost.addHeader("Authorization", getAuthorizationToken());
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);

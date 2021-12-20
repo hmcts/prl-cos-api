@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.Assert.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,7 +16,10 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
-import static org.mockito.Mockito.*;
+
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class RequestUpdateCallbackServiceTest {
@@ -61,12 +63,12 @@ public class RequestUpdateCallbackServiceTest {
 
     @Test
     void shouldStartAndSubmitEventWithCaseDetails() throws Exception {
-        CaseDetails caseDetails =CaseDetails.builder().id(Long.valueOf("123")).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).build();
         when(coreCaseDataApi.getCase(userToken,serviceAuthToken,caseId.toString())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, Long.toString(caseId), eventName))
             .thenReturn(buildStartEventResponse(eventName, eventToken));
-        serviceRequestUpdateDto =ServiceRequestUpdateDto.builder()
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(caseId.toString())
             .payment(PaymentDto.builder()
                          .paymentAmount("123")
@@ -78,7 +80,7 @@ public class RequestUpdateCallbackServiceTest {
             .serviceRequestStatus("Paid")
             .build();
 
-        CaseData caseData =CaseData.builder().build();
+        CaseData caseData = CaseData.builder().build();
 
         requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
 
@@ -88,15 +90,16 @@ public class RequestUpdateCallbackServiceTest {
                                                          caseType, Long.toString(caseId), true,
                                                          buildCaseDataContent(eventName, eventToken, null));
     }
+
     @Test
     void shouldNotStartOrSubmitEventWithoutCaseDetails() throws Exception {
 
-        CaseDetails caseDetails =CaseDetails.builder()
+        CaseDetails caseDetails = CaseDetails.builder()
             .build();
         when(coreCaseDataApi.getCase(userToken,serviceAuthToken,"123")).thenReturn(caseDetails);
 
-        assertThrows(Exception.class,()->{
-            serviceRequestUpdateDto =ServiceRequestUpdateDto.builder().ccdCaseNumber("123").serviceRequestStatus("Paid").build();
+        assertThrows(Exception.class,() -> {
+            serviceRequestUpdateDto = ServiceRequestUpdateDto.builder().ccdCaseNumber("123").serviceRequestStatus("Paid").build();
 
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         });

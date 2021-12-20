@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,7 @@ import uk.gov.hmcts.reform.prl.clients.PaymentApi;
 import uk.gov.hmcts.reform.prl.enums.OrchestrationConstants;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CasePaymentRequestDto;
@@ -21,10 +21,12 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.FeeDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import java.math.BigDecimal;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,7 +54,7 @@ public class PaymentRequestServiceTest {
     @Mock
     private PaymentServiceResponse paymentServiceResponse;
 
-    private  CallbackRequest callbackRequest;
+    private CallbackRequest callbackRequest;
 
     private PaymentServiceRequest paymentServiceRequest;
 
@@ -65,7 +67,7 @@ public class PaymentRequestServiceTest {
             .build();
 
 
-        paymentServiceRequest =PaymentServiceRequest.builder()
+        paymentServiceRequest = PaymentServiceRequest.builder()
             .callBackUrl(null)
             .casePaymentRequest(CasePaymentRequestDto.builder()
                                     .action(OrchestrationConstants.PAYMENT_ACTION)
@@ -82,7 +84,7 @@ public class PaymentRequestServiceTest {
             .build();
 
 
-        callbackRequest=CallbackRequest.builder()
+        callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .caseId("123")
                              .caseData(CaseData.builder()
@@ -112,12 +114,12 @@ public class PaymentRequestServiceTest {
         paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference("response").build();
 
         when(paymentApi
-                 .createPaymentServiceRequest("test token","Bearer testServiceAuth",paymentServiceRequest))
+                 .createPaymentServiceRequest("test token", "Bearer testServiceAuth", paymentServiceRequest))
             .thenReturn(paymentServiceResponse);
 
-        PaymentServiceResponse psr=paymentRequestService.createServiceRequest(callbackRequest,"test token");
+        PaymentServiceResponse psr = paymentRequestService.createServiceRequest(callbackRequest, "test token");
         assertNotNull(psr);
-        assertEquals(psr.getServiceRequestReference(),"response");
+        assertEquals(psr.getServiceRequestReference(), "response");
 
     }
 
@@ -136,9 +138,10 @@ public class PaymentRequestServiceTest {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
-        when(paymentApi.createPaymentServiceRequest("","Bearer testServiceAuth",paymentServiceRequest)).thenReturn(paymentServiceResponse);
+        when(paymentApi.createPaymentServiceRequest("", "Bearer testServiceAuth", paymentServiceRequest)).thenReturn(
+            paymentServiceResponse);
 
-        callbackRequest=CallbackRequest.builder()
+        callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .caseId("123")
                              .caseData(CaseData.builder()
@@ -148,7 +151,7 @@ public class PaymentRequestServiceTest {
                              .build())
             .build();
 
-        PaymentServiceResponse psr=paymentRequestService.createServiceRequest(callbackRequest,"");
+        PaymentServiceResponse psr = paymentRequestService.createServiceRequest(callbackRequest, "");
 
         assertNull(psr.getServiceRequestReference());
 
@@ -156,11 +159,11 @@ public class PaymentRequestServiceTest {
 
     @Test
     public void shouldThrowNullPointerException() throws Exception {
-        assertThrows(NullPointerException.class,()->{
-            callbackRequest=CallbackRequest.builder()
+        assertThrows(NullPointerException.class, () -> {
+            callbackRequest = CallbackRequest.builder()
                 .build();
 
-            PaymentServiceResponse psr=paymentRequestService.createServiceRequest(callbackRequest,"");
+            PaymentServiceResponse psr = paymentRequestService.createServiceRequest(callbackRequest, "");
         });
     }
 }
