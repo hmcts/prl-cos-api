@@ -116,7 +116,8 @@ public class TaskListRenderer {
         section.add(HORIZONTAL_LINE);
         sec.getTasks().forEach(task -> {
             section.addAll(renderTask(task));
-            section.add(HORIZONTAL_LINE);});
+            section.add(HORIZONTAL_LINE);
+        });
 
         return section;
     }
@@ -128,13 +129,12 @@ public class TaskListRenderer {
 
             case NOT_STARTED:
                 if (task.getEvent().equals(VIEW_PDF_DOCUMENT)) {
-                    lines.add(taskListRenderElements.renderLink(task));}
-                else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
+                    lines.add(taskListRenderElements.renderLink(task));
+                } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
                                   + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
-                }
-                else
-                { lines.add(taskListRenderElements.renderLink(task)
+                } else {
+                    lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("not-started.png", "Not started"));
                 }
                 break;
@@ -143,15 +143,14 @@ public class TaskListRenderer {
                               + taskListRenderElements.renderImage("in-progress.png", "In progress"));
                 break;
             case MANDATORY_COMPLETED:
-                    lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage("information-added.png", "Information added"));
+                lines.add(taskListRenderElements.renderLink(task)
+                              + taskListRenderElements.renderImage("information-added.png", "Information added"));
                 break;
             case FINISHED:
                 if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
-                }
-                else {
+                } else {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("finished.png", "Finished"));
                 }

@@ -21,38 +21,37 @@ public class LitigationCapacityCheckerTest {
     LitigationCapacityChecker litigationCapacityChecker;
 
     @Test
-    public void MandatoryAlwaysFalse(){
+    public void mandatoryAlwaysFalse() {
 
-
-        CaseData caseData=CaseData.builder().build();
-        boolean hasMandatory=litigationCapacityChecker.hasMandatoryCompleted(caseData);
+        CaseData caseData = CaseData.builder().build();
+        boolean hasMandatory = litigationCapacityChecker.hasMandatoryCompleted(caseData);
         assert (!hasMandatory);
     }
 
     @Test
-    public void NotStartedWithoutFieldValues(){
-        CaseData caseData=CaseData.builder().build();
+    public void notStartedWithoutFieldValues() {
+        CaseData caseData = CaseData.builder().build();
         boolean isStarted = litigationCapacityChecker.isStarted(caseData);
         assert (!isStarted);
     }
 
     @Test
-    public void StartedWithFieldOtherFactors(){
-        CaseData caseData=CaseData.builder().litigationCapacityOtherFactors(YesOrNo.YES).build();
+    public void startedWithFieldOtherFactors() {
+        CaseData caseData = CaseData.builder().litigationCapacityOtherFactors(YesOrNo.YES).build();
         boolean isStarted = litigationCapacityChecker.isStarted(caseData);
         assert (isStarted);
     }
 
     @Test
-    public void NotFinishedWithNullLitigationValues(){
-        CaseData caseData=CaseData.builder().build();
+    public void notFinishedWithNullLitigationValues() {
+        CaseData caseData = CaseData.builder().build();
         boolean isFinished = litigationCapacityChecker.isFinished(caseData);
         assert (!isFinished);
     }
 
     @Test
-    public void FinishedWithLitigationOtherFactors(){
-        CaseData caseData=CaseData.builder()
+    public void finishedWithLitigationOtherFactors() {
+        CaseData caseData = CaseData.builder()
             .litigationCapacityOtherFactors(YesOrNo.YES)
             .litigationCapacityOtherFactorsDetails("")
             .build();
@@ -61,8 +60,8 @@ public class LitigationCapacityCheckerTest {
     }
 
     @Test
-    public void FinishedWithLitigationFactorsOrReferrals(){
-        CaseData caseData=CaseData.builder()
+    public void finishedWithLitigationFactorsOrReferrals() {
+        CaseData caseData = CaseData.builder()
             .litigationCapacityOtherFactors(YesOrNo.NO)
             .litigationCapacityFactors("Test")
             .litigationCapacityReferrals("test ")
@@ -72,8 +71,8 @@ public class LitigationCapacityCheckerTest {
     }
 
     @Test
-    public void FinishedWithOtherFactorsAsNo(){
-        CaseData caseData=CaseData.builder()
+    public void finishedWithOtherFactorsAsNo() {
+        CaseData caseData = CaseData.builder()
             .litigationCapacityOtherFactors(YesOrNo.NO)
             .build();
         boolean isFinished = litigationCapacityChecker.isFinished(caseData);

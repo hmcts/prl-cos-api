@@ -1,10 +1,8 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Test;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
-import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

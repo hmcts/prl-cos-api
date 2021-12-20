@@ -34,9 +34,6 @@ public class CaseEventHandler {
     public void handleCaseDataChange(final CaseDataChanged event) {
         final CaseData caseData = event.getCaseData();
 
-//        if (caseData.getState().equals(AWAITING_SUBMISSION_TO_HMCTS)) {
-//            log.info(caseData.toString());
-
         final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
 
         List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors();

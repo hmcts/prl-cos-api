@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ATTENDING_THE_HEARING_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
@@ -90,30 +89,25 @@ public class AllegationsOfHarmChecker implements EventChecker {
             Optional<YesOrNo> ordersOtherInjunctive = ofNullable(caseData.getOrdersOtherInjunctive());
             Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(caseData.getOrdersUndertakingInPlace());
 
-            boolean previousOrders = ordersNonMolestation.isPresent() &&
-                                     ordersOccupation.isPresent() &&
-                                     ordersForcedMarriageProtection.isPresent() &&
-                                     ordersRestraining.isPresent() &&
-                                     ordersOtherInjunctive.isPresent() &&
-                                     ordersUndertakingInPlace.isPresent();
+            boolean previousOrders = ordersNonMolestation.isPresent()
+                                     && ordersOccupation.isPresent()
+                                     && ordersForcedMarriageProtection.isPresent()
+                                     && ordersRestraining.isPresent()
+                                     && ordersOtherInjunctive.isPresent()
+                                     && ordersUndertakingInPlace.isPresent();
 
-            isFinished = validateDomesticAbuseSection(caseData) &&
-                         validateOrders(caseData) &&
-                         previousOrders &&
-                         behavioursCompleted &&
-                         validateAbductionSection(caseData) &&
-                         validateOtherConcerns(caseData);
+            isFinished = validateDomesticAbuseSection(caseData)
+                         && validateOrders(caseData)
+                         && previousOrders
+                         && behavioursCompleted
+                         && validateAbductionSection(caseData)
+                         && validateOtherConcerns(caseData);
 
-        }
-        else {
+        } else {
             isFinished = allegationsOfHarmYesNo.isPresent();
         }
 
-        if (isFinished) {
-            return true;
-        }
-
-        return false;
+        return isFinished;
     }
 
 
@@ -144,11 +138,11 @@ public class AllegationsOfHarmChecker implements EventChecker {
         boolean abuseVictimCompleted = true;
 
         if (domesticAbuse.isPresent() && domesticAbuse.get().equals(YES)) {
-            abuseVictimCompleted = physicalAbuseVictim.isPresent() ||
-                emotionalAbuseVictim.isPresent() ||
-                psychologicalAbuseVictim.isPresent() ||
-                sexualAbuseVictim.isPresent() ||
-                financialAbuseVictim.isPresent();
+            abuseVictimCompleted = physicalAbuseVictim.isPresent()
+                || emotionalAbuseVictim.isPresent()
+                || psychologicalAbuseVictim.isPresent()
+                || sexualAbuseVictim.isPresent()
+                || financialAbuseVictim.isPresent();
         }
         return abuseVictimCompleted;
     }
@@ -173,7 +167,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
         boolean policeCompleted = false;
         boolean otherCompleted = false;
 
-        if (childAbduction.isPresent() && childAbduction.get().equals(NO)){
+        if (childAbduction.isPresent() && childAbduction.get().equals(NO)) {
             return true;
         }
 
@@ -186,8 +180,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
                 if (previousAbductionThreatsCompleted) {
                     if (previousAbductionThreats.get().equals(YES)) {
                         previousThreatSectionComplete = previousAbductionThreatsDetails.isPresent();
-                    }
-                    else {
+                    } else {
                         previousThreatSectionComplete = true;
                     }
                 }
@@ -197,8 +190,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
                 if (abductionPreviousPoliceInvolvementCompleted) {
                     if (abductionPreviousPoliceInvolvement.get().equals(YES)) {
                         policeCompleted = abductionPreviousPoliceInvolvementDetails.isPresent();
-                    }
-                    else {
+                    } else {
                         policeCompleted = true;
                     }
                 }
@@ -208,22 +200,19 @@ public class AllegationsOfHarmChecker implements EventChecker {
                 if (abductionOtherConcernsCompleted) {
                     if (abductionOtherSafetyConcerns.get().equals(YES)) {
                         otherCompleted = abductionOtherSafetyConcernsDetails.isPresent();
-                    }
-                    else {
+                    } else {
                         otherCompleted = true;
                     }
                 }
-            }
-            else {
+            } else {
                 abductionSectionCompleted = abductionCourtStepsRequested.isPresent();
             }
-            return abductionSectionCompleted &&
-                   previousThreatSectionComplete &&
-                   passportCompleted &&
-                   policeCompleted &&
-                   otherCompleted;
-        }
-        else {
+            return abductionSectionCompleted
+                   && previousThreatSectionComplete
+                   && passportCompleted
+                   && policeCompleted
+                   && otherCompleted;
+        } else {
             return false;
         }
     }
@@ -239,13 +228,13 @@ public class AllegationsOfHarmChecker implements EventChecker {
 
         boolean behaviourCompleted;
 
-        behaviourCompleted = abuseNatureDescription.isPresent() &&
-                                behavioursStartDateAndLength.isPresent() &&
-                                behavioursNature.isPresent();
+        behaviourCompleted = abuseNatureDescription.isPresent()
+                                && behavioursStartDateAndLength.isPresent()
+                                && behavioursNature.isPresent();
 
         if (behavioursApplicantSoughtHelp.isPresent() && behavioursApplicantSoughtHelp.get().equals(YES)) {
-            behaviourCompleted = behavioursApplicantHelpSoughtWho.isPresent() &&
-                                 behavioursApplicantHelpAction.isPresent();
+            behaviourCompleted = behavioursApplicantHelpSoughtWho.isPresent()
+                                 && behavioursApplicantHelpAction.isPresent();
         }
         return behaviourCompleted;
     }
@@ -282,43 +271,45 @@ public class AllegationsOfHarmChecker implements EventChecker {
     }
 
     public boolean validateOrders(CaseData caseData) {
+
+        boolean nonMolesComplete = true;
+        boolean occupationComplete = true;
+        boolean forcedMarComplete = true;
+        boolean restrainComplete = true;
+        boolean otherComplete = true;
+        boolean underComplete = true;
+
         Optional<YesOrNo> ordersNonMolestation = ofNullable(caseData.getOrdersNonMolestation());
-        Optional<YesOrNo> ordersOccupation = ofNullable(caseData.getOrdersOccupation());
-        Optional<YesOrNo> ordersForcedMarriageProtection = ofNullable(caseData.getOrdersForcedMarriageProtection());
-        Optional<YesOrNo> ordersRestraining = ofNullable(caseData.getOrdersRestraining());
-        Optional<YesOrNo> ordersOtherInjunctive = ofNullable(caseData.getOrdersOtherInjunctive());
-        Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(caseData.getOrdersUndertakingInPlace());
-
-
-        boolean allOrdersCompleted;
-
         if (ordersNonMolestation.isPresent() && ordersNonMolestation.get().equals(YES)) {
-            allOrdersCompleted = validateNonMolestationOrder(caseData);
+            nonMolesComplete = validateNonMolestationOrder(caseData);
         }
+        Optional<YesOrNo> ordersOccupation = ofNullable(caseData.getOrdersOccupation());
         if (ordersOccupation.isPresent() && ordersOccupation.get().equals(YES)) {
-            allOrdersCompleted = validateOccupationOrder(caseData);
+            occupationComplete = validateOccupationOrder(caseData);
         }
+        Optional<YesOrNo> ordersForcedMarriageProtection = ofNullable(caseData.getOrdersForcedMarriageProtection());
         if (ordersForcedMarriageProtection.isPresent() && ordersForcedMarriageProtection.get().equals(YES)) {
-            allOrdersCompleted = validateForcedMarriageProtectionOrder(caseData);
+            forcedMarComplete = validateForcedMarriageProtectionOrder(caseData);
         }
+        Optional<YesOrNo> ordersRestraining = ofNullable(caseData.getOrdersRestraining());
         if (ordersRestraining.isPresent() && ordersRestraining.get().equals(YES)) {
-            allOrdersCompleted = validateRestrainingOrder(caseData);
+            restrainComplete = validateRestrainingOrder(caseData);
         }
+        Optional<YesOrNo> ordersOtherInjunctive = ofNullable(caseData.getOrdersOtherInjunctive());
         if (ordersOtherInjunctive.isPresent() && ordersOtherInjunctive.get().equals(YES)) {
-            allOrdersCompleted = validateOtherInjunctiveOrder(caseData);
+            otherComplete = validateOtherInjunctiveOrder(caseData);
         }
+        Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(caseData.getOrdersUndertakingInPlace());
         if (ordersUndertakingInPlace.isPresent() && ordersUndertakingInPlace.get().equals(YES)) {
-            allOrdersCompleted = validateUndertakingInPlaceOrder(caseData);
+            underComplete = validateUndertakingInPlaceOrder(caseData);
         }
 
-        allOrdersCompleted = ordersNonMolestation.isPresent() &&
-                             ordersOccupation.isPresent() &&
-                             ordersForcedMarriageProtection.isPresent() &&
-                             ordersRestraining.isPresent() &&
-                             ordersOtherInjunctive.isPresent() &&
-                             ordersUndertakingInPlace.isPresent();
-
-        return allOrdersCompleted;
+        return nonMolesComplete
+            && occupationComplete
+            && forcedMarComplete
+            && restrainComplete
+            && otherComplete
+            && underComplete;
     }
 
     public boolean validateOtherConcerns(CaseData caseData) {
@@ -334,16 +325,13 @@ public class AllegationsOfHarmChecker implements EventChecker {
         boolean otherConcernsCompleted = true;
 
         if (allegationsOfHarmOtherConcerns.isPresent() && allegationsOfHarmOtherConcerns.get().equals(YES)) {
-            otherConcernsCompleted = allegationsOfHarmOtherConcernsDetails.isPresent() &&
-                                     allegationsOfHarmOtherConcernsCourtActions.isPresent();;
-        }
-        else {
-            otherConcernsCompleted = allegationsOfHarmOtherConcerns.isPresent() &&
-                                     allegationsOfHarmOtherConcernsCourtActions.isPresent();
+            otherConcernsCompleted = allegationsOfHarmOtherConcernsDetails.isPresent()
+                                     && allegationsOfHarmOtherConcernsCourtActions.isPresent();;
+        } else {
+            otherConcernsCompleted = allegationsOfHarmOtherConcerns.isPresent()
+                                     && allegationsOfHarmOtherConcernsCourtActions.isPresent();
         }
 
         return otherConcernsCompleted;
-        }
-
-
+    }
 }

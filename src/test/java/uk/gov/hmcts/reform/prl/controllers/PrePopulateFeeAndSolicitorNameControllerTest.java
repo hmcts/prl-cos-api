@@ -20,9 +20,9 @@ import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 
 import java.math.BigDecimal;
 
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 
 @PropertySource(value = "classpath:application.yaml")

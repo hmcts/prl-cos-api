@@ -41,6 +41,7 @@ class EventCheckerHelperTest {
         }
 
     }
+
     @Nested
     class EmptyAddress {
 

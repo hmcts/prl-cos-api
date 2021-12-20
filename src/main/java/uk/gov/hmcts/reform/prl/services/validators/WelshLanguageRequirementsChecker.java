@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -57,7 +55,7 @@ public class WelshLanguageRequirementsChecker implements EventChecker {
 
         Optional<YesOrNo> welshLanguageRequirement = ofNullable(caseData.getWelshLanguageRequirement());
 
-        if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(YES)){
+        if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(YES)) {
             taskErrorService.addEventError(WELSH_LANGUAGE_REQUIREMENTS, WELSH_LANGUAGE_ERROR,
                                            WELSH_LANGUAGE_ERROR.getError());
             return true;

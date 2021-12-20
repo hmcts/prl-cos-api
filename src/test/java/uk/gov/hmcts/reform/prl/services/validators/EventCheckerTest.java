@@ -87,7 +87,7 @@ class EventCheckerTest {
     WelshLanguageRequirementsChecker welshLanguageRequirementsChecker;
 
     @MockBean
-    PDFChecker pdfChecker;
+    PdfChecker pdfChecker;
 
     @MockBean
     SubmitAndPayChecker submitAndPayChecker;
