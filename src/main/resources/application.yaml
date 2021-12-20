@@ -1,6 +1,8 @@
 server:
   port: 4044
 
+runs-locally: ${RUNS_LOCALLY:true}
+
 management:
   endpoint:
     health:
@@ -75,18 +77,35 @@ uk:
             EXAMPLE: example-template-id-222
 
 
+payments:
+  api:
+    url: ${PAY_URL:}
+    callback-url: ${PAY_CALLBACK_URL:}
+
+fees-register:
+  api:
+    url: http://fees-register-api-demo.service.core-compute-demo.internal
+  parameters:
+    C100_SUBMISSION_FEE:
+      channel: default
+      event: miscellaneous
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: ChildArrangement
+      service: private law
 
 # NEW BELOW THIS LINE
 
 
 idam:
   s2s-auth:
+    url: http://localhost:4502
     microservice: prl_cos_api
-    totp_secret: GT2V6PLQ34XGPTPM
+    totp_secret: AAAAAAAAAA
   api:
-    url: ${IDAM_API_URL:}
+    url: http://localhost:5000
   client:
-    secret: W7supXKMJgcEWKBS
+    secret: BBBBBBBBBBB
 
 
 core_case_data:
@@ -123,3 +142,4 @@ auth:
 resources:
   images:
     baseUrl: 'https://github.com/hmcts/prl-cos-api/tree/task-list-and-submit-and-pay-combined/resources'
+
