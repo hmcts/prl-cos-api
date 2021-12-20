@@ -1,14 +1,10 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Test;
-
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.Gender;
-import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
-import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;

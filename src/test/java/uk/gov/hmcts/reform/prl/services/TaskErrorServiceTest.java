@@ -4,7 +4,6 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
-import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +24,7 @@ public class TaskErrorServiceTest {
         String errorString = ALLEGATIONS_OF_HARM_ERROR.toString();
 
         int previousMapSize = taskErrorService.eventErrors.size();
-        taskErrorService.addEventError(event, error ,errorString);
+        taskErrorService.addEventError(event, error, errorString);
 
         assert taskErrorService.eventErrors.size() == previousMapSize + 1;
 
@@ -39,7 +38,7 @@ public class TaskErrorServiceTest {
         Event event = ALLEGATIONS_OF_HARM;
         EventErrorsEnum error = ALLEGATIONS_OF_HARM_ERROR;
         String errorString = ALLEGATIONS_OF_HARM_ERROR.toString();
-        taskErrorService.addEventError(event, error ,errorString);
+        taskErrorService.addEventError(event, error, errorString);
 
         int previousMapSize = taskErrorService.eventErrors.size();
 
@@ -56,7 +55,7 @@ public class TaskErrorServiceTest {
         Event event = ALLEGATIONS_OF_HARM;
         EventErrorsEnum error = ALLEGATIONS_OF_HARM_ERROR;
         String errorString = ALLEGATIONS_OF_HARM_ERROR.toString();
-        taskErrorService.addEventError(event, error ,errorString);
+        taskErrorService.addEventError(event, error, errorString);
 
         assert taskErrorService.eventErrors.containsKey(error);
 
@@ -70,7 +69,7 @@ public class TaskErrorServiceTest {
         Event event = ALLEGATIONS_OF_HARM;
         EventErrorsEnum error = ALLEGATIONS_OF_HARM_ERROR;
         String errorString = ALLEGATIONS_OF_HARM_ERROR.toString();
-        taskErrorService.addEventError(event, error ,errorString);
+        taskErrorService.addEventError(event, error, errorString);
 
         taskErrorService.removeError(error);
 
@@ -86,7 +85,7 @@ public class TaskErrorServiceTest {
         Event event = ALLEGATIONS_OF_HARM;
         EventErrorsEnum error = ALLEGATIONS_OF_HARM_ERROR;
         String errorString = ALLEGATIONS_OF_HARM_ERROR.toString();
-        taskErrorService.addEventError(event, error ,errorString);
+        taskErrorService.addEventError(event, error, errorString);
 
         List<EventValidationErrors> expectedList = new ArrayList<>();
         EventValidationErrors errors = EventValidationErrors.builder()

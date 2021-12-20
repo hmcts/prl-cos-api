@@ -2,24 +2,20 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
-
 import java.util.List;
-
 
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.HEARING_URGENCY_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
-import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
+import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
-public class HearingUrgencyChecker implements EventChecker{
+public class HearingUrgencyChecker implements EventChecker {
 
     @Autowired
     TaskErrorService taskErrorService;
@@ -62,6 +58,7 @@ public class HearingUrgencyChecker implements EventChecker{
                                        HEARING_URGENCY_ERROR.getError());
         return false;
     }
+
     @Override
     public boolean isStarted(CaseData caseData) {
         return anyNonEmpty(
@@ -99,6 +96,8 @@ public class HearingUrgencyChecker implements EventChecker{
                     }
                 case NO:
                     return true;
+                default:
+                    return false;
             }
         }
         return false;

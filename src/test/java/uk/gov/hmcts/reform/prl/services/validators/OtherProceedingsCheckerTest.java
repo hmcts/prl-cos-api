@@ -24,8 +24,8 @@ public class OtherProceedingsCheckerTest {
     OtherProceedingsChecker otherProceedingsChecker;
 
     @Test
-    public void StartedWithPreviousOrOngoingProceedings(){
-        CaseData caseData=CaseData.builder()
+    public void startedWithPreviousOrOngoingProceedings() {
+        CaseData caseData = CaseData.builder()
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.YES)
             .build();
         boolean isStarted = otherProceedingsChecker.isStarted(caseData);
@@ -33,8 +33,8 @@ public class OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void NotStartedWithoutPreviousOrOngoingProceedings(){
-        CaseData caseData=CaseData.builder()
+    public void notStartedWithoutPreviousOrOngoingProceedings() {
+        CaseData caseData = CaseData.builder()
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.NO)
             .build();
         boolean isStarted = otherProceedingsChecker.isStarted(caseData);
@@ -42,8 +42,8 @@ public class OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void FinishedIfNoPreviousOrOngoingProceedings(){
-        CaseData caseData=CaseData.builder()
+    public void finishedIfNoPreviousOrOngoingProceedings() {
+        CaseData caseData = CaseData.builder()
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.NO)
             .build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
@@ -51,8 +51,8 @@ public class OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void NotFinishedWithPreviousOrOngoingProceedings(){
-        CaseData caseData=CaseData.builder()
+    public void notFinishedWithPreviousOrOngoingProceedings() {
+        CaseData caseData = CaseData.builder()
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.YES)
             .build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
@@ -60,14 +60,14 @@ public class OtherProceedingsCheckerTest {
     }
 
     @Test
-    public void FinishedWithPreviousOrOngoingProceedingList(){
+    public void finishedWithPreviousOrOngoingProceedingList() {
 
         ProceedingDetails proceedingDetails = ProceedingDetails.builder().build();
         Element<ProceedingDetails> wrappedProceedings = Element.<ProceedingDetails>builder().value(proceedingDetails).build();
         List<Element<ProceedingDetails>> listOfProceedings = Collections.singletonList(wrappedProceedings);
 
 
-        CaseData caseData=CaseData.builder()
+        CaseData caseData = CaseData.builder()
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.YES)
             .otherProceedings(listOfProceedings)
             .build();

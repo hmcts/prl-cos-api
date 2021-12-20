@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 @Service
-public class PDFChecker implements EventChecker {
+public class PdfChecker implements EventChecker {
 
 
     //always returns false as not part of task list validation or labelling

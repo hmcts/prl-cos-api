@@ -2,26 +2,20 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
-import javax.swing.text.html.Option;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.APPLICANTS_DETAILS_ERROR;
@@ -60,8 +54,7 @@ public class ApplicantsChecker implements EventChecker {
             if (!(mandatoryCompleted && dxCompleted)) {
                 if (mandatoryCompleted) {
                     taskErrorService.removeError(APPLICANTS_DETAILS_ERROR);
-                }
-                else {
+                } else {
                     taskErrorService.addEventError(APPLICANT_DETAILS,
                                                    APPLICANTS_DETAILS_ERROR,
                                                    APPLICANTS_DETAILS_ERROR.getError());
@@ -110,59 +103,44 @@ public class ApplicantsChecker implements EventChecker {
 
     private boolean mandatoryApplicantFieldsAreCompleted(PartyDetails applicant) {
 
-        Optional<String> firstName = ofNullable(applicant.getFirstName());
-        Optional<String> lastName = ofNullable(applicant.getLastName());
-        Optional<LocalDate> dateOfBirth = ofNullable(applicant.getDateOfBirth());
-        Optional<Gender> gender = ofNullable(applicant.getGender());
-        Optional<String> placeOfBirth = ofNullable(applicant.getPlaceOfBirth());
-        Optional<Address> address = ofNullable(applicant.getAddress());
-        Optional<YesOrNo> isAddressConfidential = ofNullable(applicant.getIsAddressConfidential());
-        Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
-        Optional<String> addressLivedLessThan5YearsDetails = ofNullable(applicant.getAddressLivedLessThan5YearsDetails());
-        Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(applicant.getCanYouProvideEmailAddress());
-        Optional<String> email = ofNullable(applicant.getEmail());
-        Optional<YesOrNo> isEmailAddressConfidential = ofNullable(applicant.getIsAddressConfidential());
-        Optional<String> phoneNumber = ofNullable(applicant.getPhoneNumber());
-        Optional<YesOrNo> isPhoneNumberConfidential = ofNullable(applicant.getIsPhoneNumberConfidential());
-        Optional<String> representativeFirstName = ofNullable(applicant.getRepresentativeFirstName());
-        Optional<String> representativeLastName = ofNullable(applicant.getRepresentativeLastName());
-        Optional<String> solicitorEmail = ofNullable(applicant.getSolicitorEmail());
-        Optional<Organisation> solicitorOrg = ofNullable(applicant.getSolicitorOrg());
-        Optional<Address> solicitorAddress = ofNullable(applicant.getSolicitorAddress());
 
         List<Optional> fields = new ArrayList<>();
-        fields.add(firstName);
-        fields.add(lastName);
-        fields.add(dateOfBirth);
+        fields.add(ofNullable(applicant.getFirstName()));
+        fields.add(ofNullable(applicant.getLastName()));
+        fields.add(ofNullable(applicant.getDateOfBirth()));
+        Optional<Gender> gender = ofNullable(applicant.getGender());
         fields.add(gender);
         if (gender.isPresent() && gender.get().equals(OTHER)) {
             fields.add(ofNullable(applicant.getOtherGender()));
         }
-        fields.add(placeOfBirth);
+        fields.add(ofNullable(applicant.getPlaceOfBirth()));
+        Optional<Address> address = ofNullable(applicant.getAddress());
         fields.add(address);
         if (address.isPresent() && !verifyAddressCompleted(address.get())) {
             return false;
         }
-
-        fields.add(isAddressConfidential);
+        fields.add(ofNullable(applicant.getIsAddressConfidential()));
+        Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
         fields.add(isAtAddressLessThan5Years);
         if (isAtAddressLessThan5Years.isPresent() && isAtAddressLessThan5Years.get().equals(YES)) {
-            fields.add(addressLivedLessThan5YearsDetails);
+            fields.add(ofNullable(applicant.getAddressLivedLessThan5YearsDetails()));
         }
+        Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(applicant.getCanYouProvideEmailAddress());
         fields.add(canYouProvideEmailAddress);
         if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(YES)) {
-            fields.add(email);
-            fields.add(isEmailAddressConfidential);
+            fields.add(ofNullable(applicant.getEmail()));
+            fields.add(ofNullable(applicant.getIsAddressConfidential()));
         }
-        fields.add(phoneNumber);
-        fields.add(isPhoneNumberConfidential);
-        fields.add(representativeFirstName);
-        fields.add(representativeLastName);
-        fields.add(solicitorEmail);
+        fields.add(ofNullable(applicant.getPhoneNumber()));
+        fields.add(ofNullable(applicant.getIsPhoneNumberConfidential()));
+        fields.add(ofNullable(applicant.getRepresentativeFirstName()));
+        fields.add(ofNullable(applicant.getRepresentativeLastName()));
+        fields.add(ofNullable(applicant.getSolicitorEmail()));
+        Optional<Organisation> solicitorOrg = ofNullable(applicant.getSolicitorOrg());
         if (solicitorOrg.isPresent() && (solicitorOrg.get().getOrganisationID() != null)) {
             fields.add(solicitorOrg);
-        }
-        else {
+        } else {
+            Optional<Address> solicitorAddress = ofNullable(applicant.getSolicitorAddress());
             if (solicitorAddress.isPresent() && ofNullable(solicitorAddress.get().getAddressLine1()).isEmpty()) {
                 return false;
             }
@@ -182,7 +160,6 @@ public class ApplicantsChecker implements EventChecker {
             address.getPostCode()
         );
     }
-
 
 }
 

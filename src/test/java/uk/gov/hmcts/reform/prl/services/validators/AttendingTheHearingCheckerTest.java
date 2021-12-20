@@ -49,7 +49,7 @@ public class AttendingTheHearingCheckerTest {
             .isDisabilityPresent(YES)
             .isInterpreterNeeded(YES)
             .build();
-        assert!attendingTheHearingChecker.isFinished(caseData);
+        assert !attendingTheHearingChecker.isFinished(caseData);
 
     }
 

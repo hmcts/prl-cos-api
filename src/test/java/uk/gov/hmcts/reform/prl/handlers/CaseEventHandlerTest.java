@@ -14,14 +14,12 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
 
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;

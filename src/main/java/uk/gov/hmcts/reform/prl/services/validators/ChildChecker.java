@@ -1,29 +1,25 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
-
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.*;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILD_DETAILS_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.OTHER;
+import static uk.gov.hmcts.reform.prl.enums.Gender.OTHER;
 
 @Service
-public class ChildChecker implements EventChecker{
+public class ChildChecker implements EventChecker {
 
     @Autowired
     TaskErrorService taskErrorService;
@@ -40,13 +36,12 @@ public class ChildChecker implements EventChecker{
                 .collect(Collectors.toList());
 
             for (Child c : children) {
-                if(!(validateMandatoryFieldsCompleted(c))) {
+                if (!(validateMandatoryFieldsCompleted(c))) {
                     taskErrorService.addEventError(CHILD_DETAILS, CHILD_DETAILS_ERROR, CHILD_DETAILS_ERROR.getError());
                     return false;
                 }
             }
-        }
-        else {
+        } else {
             taskErrorService.addEventError(CHILD_DETAILS, CHILD_DETAILS_ERROR, CHILD_DETAILS_ERROR.getError());
             return false;
         }
@@ -82,29 +77,19 @@ public class ChildChecker implements EventChecker{
 
     private boolean validateMandatoryFieldsCompleted(Child child) {
 
-        Optional<String> firstName = ofNullable(child.getFirstName());
-        Optional<String> lastName = ofNullable(child.getLastName());
-        Optional<LocalDate> dateOfBirth = ofNullable(child.getDateOfBirth());
-        Optional<Gender> gender = ofNullable(child.getGender());
-        Optional<String> otherGender = ofNullable(child.getOtherGender());
-        Optional<List<OrderTypeEnum>> orderAppliedFor = ofNullable(child.getOrderAppliedFor());
-        Optional<RelationshipsEnum> applicantsRelationshipToChild = ofNullable(child.getApplicantsRelationshipToChild());
-        Optional<RelationshipsEnum> respondentsRelationshipToChild = ofNullable(child.getRespondentsRelationshipToChild());
-        Optional<List<LiveWithEnum>> childLiveWith = ofNullable(child.getChildLiveWith());
-
-
         List<Optional> fields = new ArrayList<>();
-        fields.add(firstName);
-        fields.add(lastName);
-        fields.add(dateOfBirth);
+        fields.add(ofNullable(child.getFirstName()));
+        fields.add(ofNullable(child.getLastName()));
+        fields.add(ofNullable(child.getDateOfBirth()));
+        Optional<Gender> gender = ofNullable(child.getGender());
         fields.add(gender);
         if (gender.isPresent() && gender.get().equals(OTHER)) {
-            fields.add(otherGender);
+            fields.add(ofNullable(child.getOtherGender()));
         }
-        fields.add(orderAppliedFor);
-        fields.add(applicantsRelationshipToChild);
-        fields.add(respondentsRelationshipToChild);
-        fields.add(childLiveWith);
+        fields.add(ofNullable(child.getOrderAppliedFor()));
+        fields.add(ofNullable(child.getApplicantsRelationshipToChild()));
+        fields.add(ofNullable(child.getRespondentsRelationshipToChild()));
+        fields.add(ofNullable(child.getChildLiveWith()));
 
         boolean emptyFieldPresent = fields.stream().anyMatch(Optional::isEmpty);
 
@@ -112,30 +97,19 @@ public class ChildChecker implements EventChecker{
     }
 
     private boolean validateAnyFieldStarted(Child c) {
-        Optional<String> firstName = ofNullable(c.getFirstName());
-        Optional<String> lastName = ofNullable(c.getLastName());
-        Optional<LocalDate> dateOfBirth = ofNullable(c.getDateOfBirth());
-        Optional<Gender> gender = ofNullable(c.getGender());
-        Optional<String> otherGender = ofNullable(c.getOtherGender());
-        Optional<List<OrderTypeEnum>> orderAppliedFor = ofNullable(c.getOrderAppliedFor());
-        Optional<RelationshipsEnum> applicantsRelationshipToChild = ofNullable(c.getApplicantsRelationshipToChild());
-        Optional<RelationshipsEnum> respondentsRelationshipToChild = ofNullable(c.getRespondentsRelationshipToChild());
-        Optional<List<LiveWithEnum>> childLiveWith = ofNullable(c.getChildLiveWith());
-        Optional<YesNoDontKnow> childrenKnownToLocalAuthority = ofNullable(c.getChildrenKnownToLocalAuthority());
-        Optional<YesNoDontKnow> childrenSubjectOfChildProtectionPlan = ofNullable(c.getChildrenSubjectOfChildProtectionPlan());
 
         List<Optional> fields = new ArrayList<>();
-        fields.add(firstName);
-        fields.add(lastName);
-        fields.add(dateOfBirth);
-        fields.add(gender);
-        fields.add(otherGender);
-        fields.add(orderAppliedFor);
-        fields.add(applicantsRelationshipToChild);
-        fields.add(respondentsRelationshipToChild);
-        fields.add(childLiveWith);
-        fields.add(childrenKnownToLocalAuthority);
-        fields.add(childrenSubjectOfChildProtectionPlan);
+        fields.add(ofNullable(c.getFirstName()));
+        fields.add(ofNullable(c.getLastName()));
+        fields.add(ofNullable(c.getDateOfBirth()));
+        fields.add(ofNullable(c.getGender()));
+        fields.add(ofNullable(c.getOtherGender()));
+        fields.add(ofNullable(c.getOrderAppliedFor()));
+        fields.add(ofNullable(c.getApplicantsRelationshipToChild()));
+        fields.add(ofNullable(c.getRespondentsRelationshipToChild()));
+        fields.add(ofNullable(c.getChildLiveWith()));
+        fields.add(ofNullable(c.getChildrenKnownToLocalAuthority()));
+        fields.add(ofNullable(c.getChildrenSubjectOfChildProtectionPlan()));
 
         return  fields.stream().anyMatch(Optional::isPresent);
     }

@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import org.apache.commons.lang3.ObjectUtils;
 import uk.gov.hmcts.reform.prl.models.Address;
 
-
 import java.util.stream.Stream;
 
 public class EventCheckerHelper {

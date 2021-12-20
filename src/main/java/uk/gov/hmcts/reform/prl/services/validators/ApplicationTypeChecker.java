@@ -2,16 +2,14 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
-import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.TYPE_OF_APPLICATION_ERROR;
-import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
+import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
+
 
 @Service
 public class ApplicationTypeChecker implements EventChecker {

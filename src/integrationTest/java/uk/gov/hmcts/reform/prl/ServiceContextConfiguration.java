@@ -24,7 +24,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import uk.gov.hmcts.reform.prl.controllers.TaskListController;
 import uk.gov.hmcts.reform.prl.util.CosApiClient;
 
 @Configuration

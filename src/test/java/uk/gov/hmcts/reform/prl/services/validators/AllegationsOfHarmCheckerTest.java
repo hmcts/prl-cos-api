@@ -45,33 +45,34 @@ public class AllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void whenNoCaseDataThenNotFinished(){
+    public void whenNoCaseDataThenNotFinished() {
 
         CaseData casedata = CaseData.builder().build();
 
         boolean isFinished = allegationsOfHarmChecker.isFinished(casedata);
 
-        assert(!isFinished);
+        assert (!isFinished);
     }
 
     @Test
-    public void FinishedFieldsValidatedToTrue(){
+    public void finishedFieldsValidatedToTrue() {
+
         CaseData casedata = CaseData.builder()
             .allegationsOfHarmYesNo(NO)
             .build();
 
         boolean isFinished = allegationsOfHarmChecker.isFinished(casedata);
 
-        assert(isFinished);
+        assert (isFinished);
     }
 
     @Test
-    public void ValidateAbusePresentFalse(){
+    public void validateAbusePresentFalse() {
         CaseData casedata = CaseData.builder().build();
 
         boolean isAbusePresent = allegationsOfHarmChecker.isStarted(casedata);
 
-        assert(!isAbusePresent);
+        assert (!isAbusePresent);
     }
 
     @Test
@@ -88,7 +89,7 @@ public class AllegationsOfHarmCheckerTest {
 
         CaseData casedata = CaseData.builder()
             .allegationsOfHarmYesNo(NO)
-        .build();
+            .build();
 
         assert !allegationsOfHarmChecker.hasMandatoryCompleted(casedata);
 
