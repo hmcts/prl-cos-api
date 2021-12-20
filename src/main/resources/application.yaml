@@ -122,4 +122,4 @@ auth:
 
 resources:
   images:
-    baseUrl:
+    baseUrl: 'https://github.com/hmcts/prl-cos-api/tree/task-list-and-submit-and-pay-combined/resources'
