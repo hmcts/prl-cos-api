@@ -32,7 +32,7 @@ public class LitigationCapacityChecker implements EventChecker {
         Optional<YesOrNo> litigationOther = ofNullable(caseData.getLitigationCapacityOtherFactors());
 
         if ((litigationOtherComplete && litigationOtherDetailsComplete)
-            || (litigationOtherComplete && litigationOther.get().equals(NO))) {
+            || (litigationOtherComplete && (litigationOther.isPresent() && litigationOther.get().equals(NO)))) {
             taskErrorService.removeError(LITIGATION_CAPACITY_ERROR);
             return true;
         }
