@@ -39,9 +39,9 @@ public class UserServiceTest {
     @Test
     public void testToCheckUserDetails() {
 
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
 
-        String actualResult = userService.getUserDetails(authToken).getFullName();
+        String actualResult = idamClient.getUserDetails(authToken).getFullName();
 
         assertEquals("solicitor@example.com Solicitor", actualResult);
 
@@ -50,9 +50,9 @@ public class UserServiceTest {
     @Test
     public void testToCheckUserDetailsWithBadAuthToken() {
 
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
 
-        String actualResult = userService.getUserDetails(authToken).getFullName();
+        String actualResult = idamClient.getUserDetails(authToken).getFullName();
 
         assertNotEquals("Solicitor", actualResult);
     }

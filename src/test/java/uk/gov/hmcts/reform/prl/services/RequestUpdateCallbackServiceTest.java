@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(SpringRunner.class)
 public class RequestUpdateCallbackServiceTest {
 
     private final String jurisdiction = "PRIVATELAW";
@@ -48,21 +48,15 @@ public class RequestUpdateCallbackServiceTest {
     @InjectMocks
     RequestUpdateCallbackService requestUpdateCallbackService;
 
-    @BeforeEach
-    void setup() {
+    @Before
+    public void setUp() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-    }
-
-    @BeforeEach
-    void setUp() {
         when(systemUserService.getUserId(userToken)).thenReturn(systemUserId);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
-
-
     }
 
     @Test
-    void shouldStartAndSubmitEventWithCaseDetails() throws Exception {
+    public void shouldStartAndSubmitEventWithCaseDetails() throws Exception {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).build();
         when(coreCaseDataApi.getCase(userToken,serviceAuthToken,caseId.toString())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
@@ -92,7 +86,7 @@ public class RequestUpdateCallbackServiceTest {
     }
 
     @Test
-    void shouldNotStartOrSubmitEventWithoutCaseDetails() throws Exception {
+    public void shouldNotStartOrSubmitEventWithoutCaseDetails() throws Exception {
 
         CaseDetails caseDetails = CaseDetails.builder()
             .build();
