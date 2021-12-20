@@ -12,13 +12,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
-import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(SpringRunner.class)
