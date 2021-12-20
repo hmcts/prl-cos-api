@@ -1,12 +1,9 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
-
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
