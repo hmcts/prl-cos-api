@@ -43,8 +43,24 @@ public class FeeServiceTest {
     @Test
     public void testToCheckFeeAmount() throws Exception {
 
+        FeesConfig.FeeParameters feeParameters = FeesConfig.FeeParameters
+            .builder()
+            .channel("default")
+            .event("miscellaneous")
+            .service("private law")
+            .jurisdiction1("family")
+            .jurisdiction2("family court")
+            .keyword("ChildArrangement")
+            .build();
+
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
+        when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
+
+        assertEquals(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE),feeParameters);
+
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        assertEquals(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE),feeResponse);
         BigDecimal actualResult = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE).getAmount();
 
         assertEquals(BigDecimal.valueOf(232.00), actualResult);
