@@ -41,7 +41,7 @@ public class PaymentRequestService {
         );
         FeeResponse feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
         PaymentServiceResponse paymentServiceResponse = paymentApi
-            .createPaymentServiceRequest("XXX","XXXX",
+            .createPaymentServiceRequest(authorisation,authTokenGenerator.generate(),
                                          PaymentServiceRequest.builder()
             .callBackUrl(callBackUrl)
             .casePaymentRequest(CasePaymentRequestDto.builder()
