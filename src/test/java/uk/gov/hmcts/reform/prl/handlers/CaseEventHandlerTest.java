@@ -28,7 +28,6 @@ import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.FINISHED;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 
-
 @ExtendWith(MockitoExtension.class)
 class CaseEventHandlerTest {
 
