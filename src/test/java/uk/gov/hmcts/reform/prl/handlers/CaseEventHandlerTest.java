@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.prl.handlers;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
@@ -28,6 +30,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.FINISHED;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 
+@RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 class CaseEventHandlerTest {
 
