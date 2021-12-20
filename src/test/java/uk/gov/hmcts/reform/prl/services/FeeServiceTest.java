@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.prl.config.FeesConfig;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 
@@ -23,10 +24,14 @@ public class FeeServiceTest {
     @Mock
     private FeeResponse feeResponse;
 
+    @Mock
+    private FeesConfig feesConfig;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     @Before
     public void setUp() {
+
 
         feeResponse = FeeResponse.builder()
             .code("FEE0325")
