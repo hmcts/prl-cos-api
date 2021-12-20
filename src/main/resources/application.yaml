@@ -104,7 +104,7 @@ idam:
   s2s-auth:
     url: http://localhost:4502
     microservice: prl_cos_api
-    totp_secret: AAAAAAAAAA
+    totp-secret: AAAAAAAAAA
   api:
     url: http://localhost:5000
   client:
