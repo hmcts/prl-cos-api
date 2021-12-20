@@ -29,17 +29,14 @@ public abstract class IntegrationTest {
     @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;
 
-    @Value("${document.management.store.baseUrl}")
-    protected String documentManagementUrl;
+    @Value("${case.orchestration.prepopulate.uri}")
+    protected String prePopulateUri;
 
     @Value("${http.proxy:#{null}}")
     protected String httpProxy;
 
     @Value("${idam.user.genericpassword}")
     protected String aatPassword;
-
-    @Value("${idam.user.genericpassword}")
-    private String genericPassword;
 
     @Value("${auth.idam.client.baseUrl}")
     private String idamUserBaseUrl;
@@ -62,11 +59,13 @@ public abstract class IntegrationTest {
     @Value("${idam.s2s-auth.url}")
     private String idamS2sAuthUrl;
 
-    @Value("${docmosis.service.base.url}")
-    private String docmosisBaseUrl;
+    @Value("${payments.api.url}")
+    private String paymentUrl;
 
-    @Value("${ccd.document.base.url}")
-    private String ccdDocumentBaseUrl;
+    @Value("${payments.api.callback-url}")
+    private String paymentCallBackUrl;
+
+
 
     private String idamUsername;
 
@@ -89,12 +88,13 @@ public abstract class IntegrationTest {
         }
     }
 
-    private String getToken() {
-        String authHeaderToken = null;
-        String userLoginDetails = String.join(":", username, aatPassword);
-        authHeaderToken = "Bearer " + new String(Base64.getEncoder().encode((userLoginDetails).getBytes()));
-
-        return authHeaderToken;
+    public Response callPrePopulateFeeAndSolicitorName(String requestBody) {
+        return PrePopulateFeeAndSolicitorUtil
+            .prePopulateFeeAndSolicitorName(
+                requestBody,
+                prePopulateUri,
+                getUserToken()
+            );
     }
 
     private synchronized String getUserToken() {
@@ -102,7 +102,6 @@ public abstract class IntegrationTest {
 
         if (userToken == null) {
             createCaseworkerUserInIdam(username, aatPassword);
-
             userToken = generateUserTokenWithNoRoles(username, aatPassword);
         }
 

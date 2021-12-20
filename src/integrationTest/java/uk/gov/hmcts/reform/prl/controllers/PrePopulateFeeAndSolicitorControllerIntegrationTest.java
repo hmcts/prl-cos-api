@@ -1,0 +1,48 @@
+package uk.gov.hmcts.reform.prl.controllers;
+
+import io.restassured.response.Response;
+import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.prl.IntegrationTest;
+import uk.gov.hmcts.reform.prl.ResourceLoader;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class PrePopulateFeeAndSolicitorControllerIntegrationTest extends IntegrationTest {
+
+    private static final String VALID_INPUT_JSON = "CallBackRequest.json";
+
+    @Test
+    void contextLoads(ApplicationContext context) {
+        assertThat(context).isNotNull();
+    }
+
+    @Test
+    public void givenTemplateAndJsonInput_ReturnStatus200() throws Exception {
+
+        assertTrue(true);
+
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+
+        Response response = callPrePopulateFeeAndSolicitorName(requestBody);
+
+        assertEquals(200, response.getStatusCode());
+    }
+
+    @Test
+    public void givenRequestBodyAndInvalidAuthToken_ReturnStatus401() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+
+        Response response = callPrePopulateFeeAndSolicitorName(requestBody);
+
+        assertEquals(401, response.getStatusCode());
+    }
+}
