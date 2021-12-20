@@ -20,7 +20,6 @@ import java.util.Map;
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseEventHandler {
