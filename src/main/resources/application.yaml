@@ -104,11 +104,11 @@ idam:
   s2s-auth:
     url: http://localhost:4502
     microservice: prl_cos_api
-    totp-secret: AAAAAAAAAA
+    totp-secret: GT2V6PLQ34XGPTPM
   api:
     url: http://localhost:5000
   client:
-    secret: BBBBBBBBBBB
+    secret: W7supXKMJgcEWKBS
 
 
 core_case_data:
