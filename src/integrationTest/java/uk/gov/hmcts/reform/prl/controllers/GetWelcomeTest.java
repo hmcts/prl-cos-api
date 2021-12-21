@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.prl.util.CosApiClient;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@SpringBootTest(classes = Application.class)
 public class GetWelcomeTest extends IntegrationTest {
 
     @Autowired
