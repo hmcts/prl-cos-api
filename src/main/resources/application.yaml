@@ -144,5 +144,5 @@ auth:
 
 resources:
   images:
-    baseUrl: 'https://github.com/hmcts/prl-cos-api/tree/task-list-and-submit-and-pay-combined/resources'
+    baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/task-list-and-submit-and-pay-combined/resources/'
 
