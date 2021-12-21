@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><testsuite errors="0" failures="1" name="uk.gov.hmcts.reform.prl.controllers.FeeAndPayServiceRequestControllerIntegrationTest" skipped="0" tests="2" time="14.2" timestamp="2021-12-21 04:18:42"><testcase classname="uk.gov.hmcts.reform.prl.controllers.FeeAndPayServiceRequestControllerIntegrationTest" name="When invalid request format return400"/><testcase classname="uk.gov.hmcts.reform.prl.controllers.FeeAndPayServiceRequestControllerIntegrationTest" name="When valid request format return200"><failure message="Error generating code from IDAM: 400" type="java.lang.AssertionError">Error generating code from IDAM: 400</failure><system-err>Error generating code from IDAM: 400
+uk.gov.hmcts.reform.prl.IntegrationTest.generateUserTokenWithNoRoles(IntegrationTest.java:154)
+uk.gov.hmcts.reform.prl.IntegrationTest.getUserToken(IntegrationTest.java:105)
+uk.gov.hmcts.reform.prl.IntegrationTest.getAuthorizationToken(IntegrationTest.java:112)
+uk.gov.hmcts.reform.prl.controllers.FeeAndPayServiceRequestControllerIntegrationTest.whenValidRequestFormat_Return200(FeeAndPayServiceRequestControllerIntegrationTest.java:46)
+org.springframework.test.context.junit4.statements.RunBeforeTestMethodCallbacks.evaluate(RunBeforeTestMethodCallbacks.java:75)
+org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks.evaluate(RunAfterTestMethodCallbacks.java:86)
+</system-err></testcase></testsuite>
