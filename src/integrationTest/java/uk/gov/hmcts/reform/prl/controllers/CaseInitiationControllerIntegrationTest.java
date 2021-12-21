@@ -21,7 +21,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringBootTest(classes = {TaskListControllerIntegrationTest.class, Application.class})
+@SpringBootTest(classes = {CaseInitiationControllerIntegrationTest.class, Application.class})
 public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
@@ -49,7 +49,7 @@ public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
 
         HttpPost httpPost = new HttpPost(serviceUrl + caseInitiationControllerEndpoint);
         String requestBody = ResourceLoader.loadJson(validBody);
-        httpPost.addHeader("Authorization", "TestAuth");
+        httpPost.addHeader("Authorization", "Bearer testauthtoken");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
