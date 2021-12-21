@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?><testsuite errors="0" failures="1" name="uk.gov.hmcts.reform.prl.controllers.CaseInitiationControllerIntegrationTest" skipped="0" tests="2" time="1.04" timestamp="2021-12-21 05:19:19"><testcase classname="uk.gov.hmcts.reform.prl.controllers.CaseInitiationControllerIntegrationTest" name="When invalid request format return400"/><testcase classname="uk.gov.hmcts.reform.prl.controllers.CaseInitiationControllerIntegrationTest" name="When valid request format return200"><failure message="expected:&lt;200&gt; but was:&lt;500&gt;" type="java.lang.AssertionError">expected:&lt;200&gt; but was:&lt;500&gt;</failure><system-err>expected:&lt;200&gt; but was:&lt;500&gt;
+uk.gov.hmcts.reform.prl.controllers.CaseInitiationControllerIntegrationTest.whenValidRequestFormat_Return200(CaseInitiationControllerIntegrationTest.java:53)
+org.springframework.test.context.junit4.statements.RunBeforeTestMethodCallbacks.evaluate(RunBeforeTestMethodCallbacks.java:75)
+org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks.evaluate(RunAfterTestMethodCallbacks.java:86)
+</system-err></testcase></testsuite>
