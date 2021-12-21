@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.util.CosApiClient;
 
-@SpringBootTest(classes = {CallbackController.class, Application.class})
+@SpringBootTest(classes = {CallbackController.class})
 public class CallbackControllerTest extends IntegrationTest {
 
     @Autowired
