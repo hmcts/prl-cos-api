@@ -103,7 +103,6 @@ public class ApplicantsChecker implements EventChecker {
 
     private boolean mandatoryApplicantFieldsAreCompleted(PartyDetails applicant) {
 
-
         List<Optional> fields = new ArrayList<>();
         fields.add(ofNullable(applicant.getFirstName()));
         fields.add(ofNullable(applicant.getLastName()));
