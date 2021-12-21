@@ -19,7 +19,6 @@ import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
@@ -27,10 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import uk.gov.hmcts.reform.prl.util.CosApiClient;
 
-
 @Configuration
-@ComponentScan(basePackages = {"uk.gov.hmcts.reform.prl.*", "uk.gov.hmcts.reform.prl.services.*",
-    "uk.gov.hmcts.reform.prl.controllers.*", "uk.gov.hmcts.reform.idam.client"})
 @PropertySource("classpath:application.properties")
 public class ServiceContextConfiguration {
 
@@ -74,5 +70,4 @@ public class ServiceContextConfiguration {
 
         return objectMapper;
     }
-
 }
