@@ -9,7 +9,6 @@ import feign.Feign;
 import feign.Request;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
-import feign.Response;
 import feign.codec.Decoder;
 import feign.jackson.JacksonEncoder;
 import org.apache.http.entity.ContentType;
@@ -26,34 +25,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.healthcheck.InternalHealth;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.PaginatedSearchMetadata;
-import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.idam.client.IdamApi;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.models.AuthenticateUserRequest;
-import uk.gov.hmcts.reform.idam.client.models.AuthenticateUserResponse;
-import uk.gov.hmcts.reform.idam.client.models.ExchangeCodeRequest;
-import uk.gov.hmcts.reform.idam.client.models.GeneratePinRequest;
-import uk.gov.hmcts.reform.idam.client.models.GeneratePinResponse;
-import uk.gov.hmcts.reform.idam.client.models.TokenExchangeResponse;
-import uk.gov.hmcts.reform.idam.client.models.TokenRequest;
-import uk.gov.hmcts.reform.idam.client.models.TokenResponse;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
-import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
-import uk.gov.hmcts.reform.prl.clients.PaymentApi;
-import uk.gov.hmcts.reform.prl.models.FeeResponse;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.util.CosApiClient;
 
-import java.util.List;
-import java.util.Map;
 
 @Configuration
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform.prl.*", "uk.gov.hmcts.reform.prl.services.*",

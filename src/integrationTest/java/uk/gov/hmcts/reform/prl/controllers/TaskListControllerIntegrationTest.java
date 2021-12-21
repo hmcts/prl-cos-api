@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import lombok.extern.slf4j.Slf4j;
+
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
@@ -18,7 +19,6 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@Slf4j
 @SpringBootTest(classes = {TaskListControllerIntegrationTest.class, Application.class})
 public class TaskListControllerIntegrationTest extends IntegrationTest {
 
@@ -32,7 +32,7 @@ public class TaskListControllerIntegrationTest extends IntegrationTest {
     @Test
     public void whenInvalidRequestFormat_Return400() throws IOException {
 
-        log.info(serviceUrl + taskListControllerEndPoint);
+
         HttpPost httpPost = new HttpPost(serviceUrl + taskListControllerEndPoint);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(
@@ -43,7 +43,6 @@ public class TaskListControllerIntegrationTest extends IntegrationTest {
     @Test
     public void whenValidRequestFormat_Return200() throws Exception {
 
-        log.info(serviceUrl + taskListControllerEndPoint);
         HttpPost httpPost = new HttpPost(serviceUrl + taskListControllerEndPoint);
         String requestBody = ResourceLoader.loadJson(validBody);
         httpPost.addHeader("Authorization", "TestAuth");
