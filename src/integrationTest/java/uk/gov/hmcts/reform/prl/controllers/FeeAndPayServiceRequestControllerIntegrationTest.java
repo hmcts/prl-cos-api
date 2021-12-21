@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
@@ -16,7 +17,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringBootTest(classes = FeeAndPayServiceRequestControllerIntegrationTest.class)
+@SpringBootTest(classes = {FeeAndPayServiceRequestControllerIntegrationTest.class, Application.class})
 public class FeeAndPayServiceRequestControllerIntegrationTest extends IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
@@ -30,6 +31,7 @@ public class FeeAndPayServiceRequestControllerIntegrationTest extends Integratio
     public void whenInvalidRequestFormat_Return400() throws IOException {
 
         HttpPost httpPost = new HttpPost(serviceUrl + feeAndPayServiceRequestControllerEndPoint);
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(
             httpResponse.getStatusLine().getStatusCode(),

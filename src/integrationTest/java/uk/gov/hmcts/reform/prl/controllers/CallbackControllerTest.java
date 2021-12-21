@@ -3,11 +3,14 @@ package uk.gov.hmcts.reform.prl.controllers;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.util.CosApiClient;
 
+@SpringBootTest(classes = {CallbackController.class, Application.class})
 public class CallbackControllerTest extends IntegrationTest {
 
     @Autowired
