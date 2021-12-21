@@ -98,11 +98,11 @@ public abstract class IntegrationTest {
     }
 
     private synchronized String getUserToken() {
-        username = "simulate-delivered" + UUID.randomUUID() + "@testhmcts.net";
+        username = "simulate-delivered" + UUID.randomUUID() + "@mailinator.com";
 
         if (userToken == null) {
-            createCaseworkerUserInIdam(username, aatPassword);
-            userToken = generateUserTokenWithNoRoles(username, aatPassword);
+            createCaseworkerUserInIdam(username, "genericPassword123");
+            userToken = generateUserTokenWithNoRoles(username, "genericPassword123");
         }
 
         return userToken;
