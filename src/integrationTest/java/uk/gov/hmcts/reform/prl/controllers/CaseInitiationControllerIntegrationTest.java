@@ -18,7 +18,6 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 
 @SpringBootTest
-@PropertySource("classpath:application.properties")
 public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
