@@ -6,20 +6,16 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-//@SpringBootTest(classes = {TaskListControllerIntegrationTest.class, Application.class})
 @SpringBootTest
 public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
 
