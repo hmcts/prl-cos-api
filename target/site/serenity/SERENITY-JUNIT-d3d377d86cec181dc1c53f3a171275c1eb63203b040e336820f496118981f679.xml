@@ -1,13 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><testsuite errors="2" failures="0" name="uk.gov.hmcts.reform.prl.controllers.CaseInitiationControllerIntegrationTest" skipped="0" tests="2" time="3.23" timestamp="2021-12-21 12:06:33"><testcase classname="uk.gov.hmcts.reform.prl.controllers.CaseInitiationControllerIntegrationTest" name="When invalid request format return400"><error message="Failed to load ApplicationContext" type="java.lang.IllegalStateException">Failed to load ApplicationContext</error><system-err>Failed to load ApplicationContext
-org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:132)
-org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:124)
-org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:190)
-org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:132)
-org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:244)
-</system-err></testcase><testcase classname="uk.gov.hmcts.reform.prl.controllers.CaseInitiationControllerIntegrationTest" name="When valid request format return200"><error message="Failed to load ApplicationContext" type="java.lang.IllegalStateException">Failed to load ApplicationContext</error><system-err>Failed to load ApplicationContext
-org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:132)
-org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:124)
-org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:190)
-org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:132)
-org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:244)
+<?xml version="1.0" encoding="UTF-8"?><testsuite errors="0" failures="1" name="uk.gov.hmcts.reform.prl.controllers.CaseInitiationControllerIntegrationTest" skipped="0" tests="2" time="8.42" timestamp="2021-12-21 12:42:37"><testcase classname="uk.gov.hmcts.reform.prl.controllers.CaseInitiationControllerIntegrationTest" name="When invalid request format return400"/><testcase classname="uk.gov.hmcts.reform.prl.controllers.CaseInitiationControllerIntegrationTest" name="When valid request format return200"><failure message="expected:&lt;200&gt; but was:&lt;500&gt;" type="java.lang.AssertionError">expected:&lt;200&gt; but was:&lt;500&gt;</failure><system-err>expected:&lt;200&gt; but was:&lt;500&gt;
+uk.gov.hmcts.reform.prl.controllers.CaseInitiationControllerIntegrationTest.whenValidRequestFormat_Return200(CaseInitiationControllerIntegrationTest.java:57)
+org.springframework.test.context.junit4.statements.RunBeforeTestMethodCallbacks.evaluate(RunBeforeTestMethodCallbacks.java:75)
+org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks.evaluate(RunAfterTestMethodCallbacks.java:86)
 </system-err></testcase></testsuite>

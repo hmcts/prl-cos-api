@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
@@ -20,7 +21,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringBootTest(classes = TaskListControllerIntegrationTest.class)
+@SpringBootTest(classes = {TaskListControllerIntegrationTest.class, Application.class})
 public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
