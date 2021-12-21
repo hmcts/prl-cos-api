@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.Collections;
 
 import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.APPLICANTS;
+import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.CHILDREN;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 
@@ -231,6 +232,49 @@ public class AllegationsOfHarmCheckerTest {
         assert allegationsOfHarmChecker.validateBehaviour(behaviour);
 
 
+    }
+
+    @Test
+    public void whenAbuseSectionCompleteReturnTrue() {
+
+        CaseData caseData = CaseData.builder()
+            .allegationsOfHarmDomesticAbuseYesNo(YES)
+            .sexualAbuseVictim(Collections.singletonList(CHILDREN))
+            .build();
+
+        assert allegationsOfHarmChecker.validateDomesticAbuseSection(caseData);
+
+    }
+
+    @Test
+    public void whenAbuseInCompleteReturnFalse() {
+
+        CaseData caseData = CaseData.builder()
+            .allegationsOfHarmDomesticAbuseYesNo(YES)
+            .build();
+
+        assert !allegationsOfHarmChecker.validateDomesticAbuseSection(caseData);
+
+    }
+
+    @Test
+    public void whenOrderPresentButIncompleteReturnsFalse() {
+        CaseData caseData = CaseData.builder()
+            .ordersRestraining(YES)
+            .ordersRestrainingCourtName("Test Court Name")
+            .build();
+
+        assert !allegationsOfHarmChecker.validateOrders(caseData);
+    }
+
+    @Test
+    public void whenOrderPresentAndCompleteMandatoryDataReturnTrue() {
+        CaseData caseData = CaseData.builder()
+            .ordersOtherInjunctiveCurrent(YES)
+            .ordersOtherInjunctiveCurrent(NO)
+            .build();
+
+        assert allegationsOfHarmChecker.validateOrders(caseData);
     }
 
 }
