@@ -108,6 +108,8 @@ idam:
   api:
     url: http://localhost:5000
   client:
+    id: prl-cos-api
+    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
     secret: W7supXKMJgcEWKBS
 
 
