@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
@@ -11,6 +10,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
@@ -18,7 +18,8 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringBootTest(classes = TaskListControllerIntegrationTest.class)
+@Slf4j
+@SpringBootTest(classes = {TaskListControllerIntegrationTest.class, Application.class})
 public class TaskListControllerIntegrationTest extends IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
@@ -31,6 +32,7 @@ public class TaskListControllerIntegrationTest extends IntegrationTest {
     @Test
     public void whenInvalidRequestFormat_Return400() throws IOException {
 
+        log.info(serviceUrl + taskListControllerEndPoint);
         HttpPost httpPost = new HttpPost(serviceUrl + taskListControllerEndPoint);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(
@@ -41,6 +43,7 @@ public class TaskListControllerIntegrationTest extends IntegrationTest {
     @Test
     public void whenValidRequestFormat_Return200() throws Exception {
 
+        log.info(serviceUrl + taskListControllerEndPoint);
         HttpPost httpPost = new HttpPost(serviceUrl + taskListControllerEndPoint);
         String requestBody = ResourceLoader.loadJson(validBody);
         httpPost.addHeader("Authorization", "TestAuth");
