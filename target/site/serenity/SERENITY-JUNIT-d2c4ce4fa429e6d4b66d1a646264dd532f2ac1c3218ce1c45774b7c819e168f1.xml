@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><testsuite errors="1" failures="0" name="uk.gov.hmcts.reform.prl.controllers.GetWelcomeTest" skipped="0" tests="1" time="0.25" timestamp="2021-12-20 09:28:43"><testcase classname="uk.gov.hmcts.reform.prl.controllers.GetWelcomeTest" name="Welcome root endpoint"><error message="Failed to load ApplicationContext" type="java.lang.IllegalStateException">Failed to load ApplicationContext</error><system-err>Failed to load ApplicationContext
-org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:132)
-org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:124)
-org.springframework.test.context.support.DependencyInjectionTestExecutionListener.injectDependencies(DependencyInjectionTestExecutionListener.java:118)
-org.springframework.test.context.support.DependencyInjectionTestExecutionListener.prepareTestInstance(DependencyInjectionTestExecutionListener.java:83)
-org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:244)
-</system-err></testcase></testsuite>
