@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.response.Response;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
@@ -14,15 +15,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes = {Application.class, PrePopulateFeeAndSolicitorNameController.class})
 public class PrePopulateFeeAndSolicitorControllerIntegrationTest extends IntegrationTest {
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
-
-    @Test
-    void contextLoads(ApplicationContext context) {
-        assertThat(context).isNotNull();
-    }
 
     @Test
     public void givenTemplateAndJsonInput_ReturnStatus200() throws Exception {
