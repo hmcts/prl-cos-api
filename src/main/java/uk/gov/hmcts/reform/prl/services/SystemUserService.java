@@ -29,6 +29,7 @@ public class SystemUserService {
         log.info(auth.getClientSecret());
         //log.info(userConfig.getUserName());
         log.info("*******************************************************");
+        log.info(idamClient.getAccessToken(userConfig.getUserName(), userConfig.getPassword()));
         return idamClient.getAccessToken(userConfig.getUserName(), userConfig.getPassword());
     }
 

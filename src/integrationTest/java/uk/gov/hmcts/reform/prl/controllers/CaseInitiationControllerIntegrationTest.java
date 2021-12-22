@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
@@ -9,7 +10,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.web.WebAppConfiguration;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
@@ -18,18 +21,14 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringBootTest
-public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
+@SpringBootTest(classes = {CaseInitiationController.class})
+public class CaseInitiationControllerIntegrationTest {
 
-    @Value("${case.orchestration.service.base.uri}")
-    protected String serviceUrl;
-
+    protected String serviceUrl ="http://localhost:4044";
     private final String caseInitiationControllerEndpoint = "/case-initiation/submitted";
 
     private final String validBody = "controller/valid-request-body.json";
 
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
 
     @Test
     public void whenInvalidRequestFormat_Return400() throws IOException {
