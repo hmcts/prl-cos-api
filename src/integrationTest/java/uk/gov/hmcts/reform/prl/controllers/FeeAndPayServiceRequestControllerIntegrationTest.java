@@ -56,7 +56,7 @@ public class FeeAndPayServiceRequestControllerIntegrationTest extends Integratio
         ).build();
 
         String requestBody = ResourceLoader.loadJson(path);
-        httpPost.addHeader("Authorization", getAuthorizationToken());
+        httpPost.addHeader("Authorization", "Bearer Test");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity((HttpEntity) callbackRequest);
