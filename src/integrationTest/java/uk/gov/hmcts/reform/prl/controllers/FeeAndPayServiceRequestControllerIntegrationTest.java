@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import org.apache.http.HttpEntity;
+import io.restassured.response.Response;
+import net.serenitybdd.rest.SerenityRest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +29,9 @@ public class FeeAndPayServiceRequestControllerIntegrationTest extends Integratio
     @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;
 
+    @Value("${payments.api.url}")
+    protected String paymentUrl;
+
     private final String feeAndPayServiceRequestControllerEndPoint = "/create-payment-service-request";
 
     private final String path = "CallBackRequest.json";
@@ -43,6 +48,7 @@ public class FeeAndPayServiceRequestControllerIntegrationTest extends Integratio
             HttpStatus.SC_BAD_REQUEST);
     }
 
+    @Ignore
     @Test
     public void whenValidRequestFormat_Return200() throws Exception {
 
@@ -59,11 +65,21 @@ public class FeeAndPayServiceRequestControllerIntegrationTest extends Integratio
         httpPost.addHeader("Authorization", getAuthorizationToken());
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity((HttpEntity) callbackRequest);
+        httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(
             HttpStatus.SC_OK,
             httpResponse.getStatusLine().getStatusCode());
     }
 
+    @Test
+    public void return200ForHealthcheckForPaymentApi() throws Exception {
+
+        Response response = SerenityRest.given()
+            .when()
+            .get(paymentUrl + "/health")
+            .andReturn();
+        assertEquals(response.getStatusCode(), HttpStatus.SC_OK);
+
+    }
 }

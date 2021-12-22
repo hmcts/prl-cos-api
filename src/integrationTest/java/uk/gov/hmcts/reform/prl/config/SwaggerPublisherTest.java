@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.util.CosApiClient;
 
@@ -22,6 +24,7 @@ import static org.hamcrest.Matchers.is;
  * Each travis run on master should automatically save and upload (if updated) documentation.
  */
 @Slf4j
+@SpringBootTest(classes = {Application.class,SwaggerPublisherTest.class})
 public class SwaggerPublisherTest extends IntegrationTest {
 
     @Autowired
