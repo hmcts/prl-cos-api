@@ -15,16 +15,18 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.web.WebAppConfiguration;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+
 
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringBootTest(classes = {CaseInitiationController.class})
-public class CaseInitiationControllerIntegrationTest {
+@SpringBootTest
+public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
 
-    protected String serviceUrl ="http://localhost:4044";
+    @Value("${case.orchestration.service.base.uri}")
+    protected String serviceUrl;
+
     private final String caseInitiationControllerEndpoint = "/case-initiation/submitted";
 
     private final String validBody = "controller/valid-request-body.json";

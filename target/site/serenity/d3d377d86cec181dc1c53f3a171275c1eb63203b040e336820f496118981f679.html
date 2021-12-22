@@ -144,7 +144,7 @@
             <a href="capabilities.html"><i class="fa fa-book"></i> Requirements</a>
         </li>
     </ul>
-    <span class="date-and-time"><a href="build-info.html"><i class="fa fa-info-circle"></i></a> Report generated 22-12-2021 11:06</span>
+    <span class="date-and-time"><a href="build-info.html"><i class="fa fa-info-circle"></i></a> Report generated 22-12-2021 11:40</span>
     <br style="clear:left"/>
 </div>
     <div class="clr"></div>
@@ -173,9 +173,9 @@
                 <table class="outcome-header">
                     <tr>
                         <td colspan="2" class="test-title-bar">
-                            <span class="outcome-icon"><a href='##beforetable'><i class='fa fa-exclamation-triangle error-icon fa-2x' title='ERROR'></i></a></span>
+                            <span class="outcome-icon"><a href='##beforetable'><i class='fa fa-check-circle-o success-icon fa-2x' title='SUCCESS'></i></a></span>
                             <span class="test-case-title">
-                                <span class="error-color">
+                                <span class="success-color">
                                     When invalid request format return400
                                         <span class="related-issue-title"></span>
                                 </span>
@@ -214,64 +214,10 @@
                     <td colspan="5"></td>
                 </tr>
 
-                    <tr class="test-ERROR">
-                        <td width="40"><a href='##beforetable'><i class='fa fa-exclamation-triangle error-icon ' title='ERROR'></i></a></td>
-                        <td width="%" colspan="1">
-                                <span class="top-level-step">Failed to load ApplicationContext</span>
-                        </td>
-                        <td width="130"><span
-                                    class="top-level-step">ERROR</span>
-                        </td>
-                        <td width="100"><span class="top-level-step">1.88s</span></td>
-                    </tr>
-                    <tr class="test-ERROR">
-                        <td width="40">&nbsp</td>
-                        <td width="%" colspan="3">
-
-    <div style="display:block">
-        <div class="table">
-            <div class="row">
-                <div class="col-sm-10" style="padding-left:1.5em; padding-top:0.5em; padding-bottom:0.5em;">
-                    <span class="error-message error-message-title">Failed to load ApplicationContext</span>
-                </div>
-                <div class="col-sm-2">
-                    <a class="btn btn-warning details-button" data-toggle="collapse" href="#stacktraceModal-overall""
-                       role="button" aria-expanded="false" aria-controls="multiCollapseExample1"><i class="far fa-eye"></i> More details</a>
-                </div>
-             </div>
-        </div>
-    <div>
-
-    <!-- Details Section -->
-    <div class="row stacktrace-details">
-      <div class="col">
-        <div class="collapse multi-collapse" id="stacktraceModal-overall">
-            <div class="card">
-                <div class="card-header">
-                    <h4>java.lang.IllegalStateException </h4>
-                </div>
-                <div class="card-body">
-                    <div>
-                        <pre>org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:132)<br />org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:124)<br />org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:190)<br />org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:132)<br />org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:244)<br /></pre>
-                    </div>
-
-                    <h4>
-                        Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException
-                    </h4>
-                    <div>
-                            <pre>Error creating bean with name 'caseInitiationController': Unsatisfied dependency expressed through field 'coreCaseDataService'; nested exception is org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'coreCaseDataService' defined in file [/Users/m_2040749/Documents/prl/prl-cos-api/build/classes/java/main/uk/gov/hmcts/reform/prl/services/CoreCaseDataService.class]: Unsatisfied dependency expressed through constructor parameter 1; nested exception is org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}</pre>
-                        <pre>org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java :119)<br />org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java :399)<br />org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java :1413)<br />org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java :601)<br />org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java :524)<br />org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java :335)<br />org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java :234)<br />org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java :333)<br />org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java :208)<br />org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java :944)<br />org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java :918)<br />org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java :583)<br />org.springframework.boot.SpringApplication.refresh(SpringApplication.java :754)<br />org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java :434)<br />org.springframework.boot.SpringApplication.run(SpringApplication.java :338)<br />org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java :123)<br />org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java :99)<br />org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java :124)<br />org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java :124)<br />org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java :190)<br />org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java :132)<br />org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java :244)<br /></pre>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-                        </td>
-                    </tr>
-                <tr class="test-ERROR">
+                <tr class="test-SUCCESS">
                         <td colspan="2"></td>
-                    <td width="130"><span class="top-level-step"><em>ERROR</em></span></td>
-                    <td width="100"><span class="top-level-step"><em>1.88s</em></span></td>
+                    <td width="130"><span class="top-level-step"><em>SUCCESS</em></span></td>
+                    <td width="100"><span class="top-level-step"><em>1.77s</em></span></td>
                 </tr>
 
             </table>
