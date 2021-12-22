@@ -31,12 +31,8 @@ public class PrePopulateFeeAndSolicitorControllerIntegrationTest extends Integra
     }
 
     @Test
-    public void givenRequestBodyAndInvalidAuthToken_ReturnStatus401() throws Exception {
-
-        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-
-        Response response = callPrePopulateFeeAndSolicitorName(requestBody);
-
-        assertEquals(401, response.getStatusCode());
+    public void givenEmptyRequestBody_ReturnStatus400() throws Exception {
+        Response response = callInvalidPrePopulateFeeAndSolicitorName("");
+        assertEquals(400, response.getStatusCode());
     }
 }
