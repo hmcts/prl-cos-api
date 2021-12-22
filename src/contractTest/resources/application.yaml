@@ -18,7 +18,7 @@ spring:
   config:
     import: "optional:configtree:/mnt/secrets/"
   application:
-    name: Spring Boot Template
+    name: Prl cos api
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
@@ -63,17 +63,22 @@ feature-toggle:
   toggle:
     example: ${FEATURE_EXAMPLE:false}
 
-idam:
-  api:
-    url: http://localhost:5000
-  s2s-auth:
-    url: http://localhost:4502
-    totp_secret: AABBCCDDEEFFGGHH
-    microservice: prl_cos_api
-  client:
-    id: prl
-    redirect_uri: https://localhost:9000/oauth2/callback
-    secret: OOOOOOOOOOOOOOOO
+uk:
+  gov:
+    notify:
+      api:
+        key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxxx}
+        baseUrl: https://api.notifications.service.gov.uk
+      email:
+        templates:
+          english:
+            EXAMPLE: 2e00903c-46f4-46d6-9d94-d419ee30b927
+          welsh:
+            EXAMPLE: example-template-id-222
+
+notify:
+  api-key: fake-key
+  baseUrl: https://api.notifications.service.gov.uk
 
 payments:
   api:
@@ -92,6 +97,31 @@ fees-register:
       keyword: ChildArrangement
       service: private law
 
+# NEW BELOW THIS LINE
+
+
+idam:
+  s2s-auth:
+    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
+    microservice: prl_cos_api
+    totp-secret: yB71mnPeypP3HlcN
+  api:
+    url: https://idam-api.aat.platform.hmcts.net
+  client:
+    id: prl-cos-api
+    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
+    secret: DBssSOq0KKLNBf2z
+
+
+core_case_data:
+  api:
+    url: ${CORE_CASE_DATA_API_URL:}
+
+prl:
+  system-update:
+    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
+
 security:
   oauth2:
     client:
@@ -102,44 +132,19 @@ security:
         oidc:
           client-id: internal
           client-secret: internal
-core_case_data:
-  api:
-    url: http://localhost:4452
+
 
 auth:
   idam:
     client:
-      baseUrl: http://localhost:5000
+      baseUrl: ${AUTH_IDAM_CLIENT_BASEURL:}
   provider:
     service:
       client:
-        baseUrl: http://localhost:4502
+        baseUrl: ${AUTH_PROVIDER_SERVICE_CLIENT_BASEURL:}
 
 
 resources:
   images:
-    baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/'
+    baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/task-list-and-submit-and-pay-combined/resources/'
 
-
-uk:
-  gov:
-    notify:
-      api:
-        key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxxx}
-        baseUrl: https://api.notifications.service.gov.uk
-      email:
-        templates:
-          english:
-            EXAMPLE: 2e00903c-46f4-46d6-9d94-d419ee30b927
-          welsh:
-            EXAMPLE: example-template-id-222
-
-
-prl:
-  system-update:
-    username: privatelaw-system-update@mailnesia.com
-    password: Password12!
-
-notify:
-  api-key: fake-key
-  baseUrl: https://api.notifications.service.gov.uk
