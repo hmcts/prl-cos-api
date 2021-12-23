@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.hmcts.reform.prl.Application;
@@ -11,6 +13,7 @@ import uk.gov.hmcts.reform.prl.util.CosApiClient;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@RunWith(SpringIntegrationSerenityRunner.class)
 @SpringBootTest(classes = {Application.class})
 public class GetWelcomeTest extends IntegrationTest {
 

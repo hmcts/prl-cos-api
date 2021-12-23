@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.response.Response;
+import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -23,6 +25,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(SpringIntegrationSerenityRunner.class)
 @SpringBootTest(classes = {FeeAndPayServiceRequestControllerIntegrationTest.class, Application.class})
 public class FeeAndPayServiceRequestControllerIntegrationTest extends IntegrationTest {
 
