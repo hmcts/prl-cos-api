@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
@@ -237,9 +238,15 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenAbuseSectionCompleteReturnTrue() {
 
+        Behaviours behaviour = Behaviours.builder().build();
+        Element<Behaviours> wrappedBehaviour = Element.<Behaviours>builder()
+            .value(behaviour)
+            .build();
+
         CaseData caseData = CaseData.builder()
             .allegationsOfHarmDomesticAbuseYesNo(YES)
             .sexualAbuseVictim(Collections.singletonList(CHILDREN))
+            .behaviours(Collections.singletonList(wrappedBehaviour))
             .build();
 
         assert allegationsOfHarmChecker.validateDomesticAbuseSection(caseData);
