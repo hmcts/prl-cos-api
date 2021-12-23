@@ -66,7 +66,6 @@ public abstract class IntegrationTest {
     private String paymentCallBackUrl;
 
 
-
     private String idamUsername;
 
     private int responseCode;
