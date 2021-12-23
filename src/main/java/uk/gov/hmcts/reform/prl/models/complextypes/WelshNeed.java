@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class WelshNeeds {
+public class WelshNeed {
 
     private final String whoNeedsWelsh;
     private final List<SpokenOrWrittenWelshEnum> spokenOrWritten;
