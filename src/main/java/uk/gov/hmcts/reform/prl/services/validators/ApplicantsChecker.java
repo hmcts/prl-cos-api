@@ -149,7 +149,7 @@ public class ApplicantsChecker implements EventChecker {
 
         return fields.stream().noneMatch(Optional::isEmpty)
 
-           && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 
 
     }
