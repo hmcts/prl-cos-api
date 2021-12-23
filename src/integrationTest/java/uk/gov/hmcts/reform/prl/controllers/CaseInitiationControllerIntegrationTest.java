@@ -43,7 +43,6 @@ public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
             HttpStatus.SC_BAD_REQUEST);
     }
 
-    @Ignore
     @Test
     public void whenValidRequestFormat_Return200() throws Exception {
 
