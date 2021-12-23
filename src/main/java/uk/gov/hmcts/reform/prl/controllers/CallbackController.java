@@ -12,12 +12,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.*;
+import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -30,6 +33,9 @@ public class CallbackController {
     private final ExampleService exampleService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
     private final ObjectMapper objectMapper;
+    private final DgsService dgsService;
+
+    private static final String DRAFT_ORDER_DOC = "draftOrderDoc";
 
 
     /**
@@ -40,14 +46,25 @@ public class CallbackController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public ResponseEntity<CallbackResponse> sendEmail(
+    public CallbackResponse sendEmail(
         @RequestBody @ApiParam("CaseData") CallbackRequest request
     ) throws WorkflowException {
-        return ok(
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument("", request.getCaseDetails());
+        /*return ok(
             CallbackResponse.builder()
                 .data(exampleService.executeExampleWorkflow(request.getCaseDetails()))
                 .build()
-        );
+        );*/
+    /*Map<String, CCDDocument> details = new HashMap<String, CCDDocument>();
+        details.put(DRAFT_ORDER_DOC,CCDDocument.builder().documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl("http://dm-store:8080/documents/ed257124-dfda-4c75-932a-6ef237fd03d6/binary")
+            .documentFileName("LR Local Setup.pdf").build())*/
+        return CallbackResponse
+            .builder()
+            .data(CaseData.builder().draftOrderDoc(CCDDocument.builder().documentUrl(generatedDocumentInfo.getUrl())
+                                                       .documentBinaryUrl("http://dm-store:8080/documents/ed257124-dfda-4c75-932a-6ef237fd03d6/binary")
+                                                       .documentFileName("LR Local Setup.pdf").build()).build())
+            .build();
     }
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

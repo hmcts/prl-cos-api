@@ -126,12 +126,16 @@ public class CaseData {
     /**
      * MIAM.
      */
+    @JsonProperty("applicantAttendedMIAM")
     private final YesOrNo applicantAttendedMiam;
+    @JsonProperty("claimingExemptionMIAM")
     private final YesOrNo claimingExemptionMiam;
+    @JsonProperty("familyMediatorMIAM")
     private final YesOrNo familyMediatorMiam;
-    private final List<MiamExemptionsChecklistEnum> miamExemptionsChecklist;
-    private final List<MiamDomesticViolenceChecklistEnum> miamDomesticViolenceChecklist;
-    private final List<MiamUrgencyReasonChecklistEnum> miamUrgencyReasonChecklist;
+
+    private final List<String> miamExemptionsChecklist;
+    private final List<String> miamDomesticViolenceChecklist;
+    private final List<String> miamUrgencyReasonChecklist;
     private final MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceChecklist;
     private final MiamOtherGroundsChecklistEnum miamOtherGroundsChecklist;
     private final String mediatorRegistrationNumber;
@@ -146,6 +150,9 @@ public class CaseData {
 
     /**
      * Allegations of harm.
+     */
+    /**
+     * Allegations of harm
      */
     private final YesOrNo allegationsOfHarmYesNo;
     private final YesOrNo allegationsOfHarmDomesticAbuseYesNo;
@@ -165,6 +172,10 @@ public class CaseData {
     private final YesOrNo abductionOtherSafetyConcerns;
     private final String abductionOtherSafetyConcernsDetails;
     private final String abductionCourtStepsRequested;
+    private final YesOrNo allegationsOfHarmChildAbuseYesNo;
+    private final YesOrNo allegationsOfHarmSubstanceAbuseYesNo;
+    private final YesOrNo allegationsOfHarmOtherConcernsYesNo;
+    private final List<Element<Behaviours>> behaviours;
     private final YesOrNo ordersNonMolestation;
     private final YesOrNo ordersOccupation;
     private final YesOrNo ordersForcedMarriageProtection;
@@ -201,10 +212,10 @@ public class CaseData {
     private final YesOrNo ordersUndertakingInPlaceCurrent;
     private final String ordersUndertakingInPlaceCourtName;
     private final OtherDocument ordersUndertakingInPlaceDocument;
-    private final List<Element<Behaviours>> behaviours;
     private final YesOrNo allegationsOfHarmOtherConcerns;
     private final String allegationsOfHarmOtherConcernsDetails;
     private final String allegationsOfHarmOtherConcernsCourtActions;
+
 
     /**
      * Other people in the case.
@@ -259,5 +270,17 @@ public class CaseData {
     private final YesOrNo languageRequirementApplicationNeedWelsh;
     private final YesOrNo welshLanguageRequirementApplicationNeedEnglish;
 
-}
+    private final CcdPaymentServiceRequestUpdate paymentCallbackServiceRequestUpdate;
+    @JsonProperty("paymentServiceRequestReferenceNumber")
+    private final String paymentServiceRequestReferenceNumber;
 
+    @JsonProperty("solicitorName")
+    private final String solicitorName;
+    @JsonProperty("feeAmount")
+    private final String feeAmount;
+    @JsonProperty("feeCode")
+    private final String feeCode;
+    @JsonProperty("draftOrderDoc")
+    private final CCDDocument draftOrderDoc;
+
+}
