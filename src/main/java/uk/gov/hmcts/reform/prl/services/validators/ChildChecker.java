@@ -100,10 +100,11 @@ public class ChildChecker implements EventChecker {
         if (childLivesWith.isPresent() && childLivesWith.get().contains(ANOTHER_PERSON)) {
             fields.add(ofNullable(child.getOtherPersonWhoLivesWithChild()));
         }
+        fields.add(ofNullable(child.getChildrenKnownToLocalAuthority()));
+        fields.add(ofNullable(child.getChildrenSubjectOfChildProtectionPlan()));
 
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
-
 
     }
 
