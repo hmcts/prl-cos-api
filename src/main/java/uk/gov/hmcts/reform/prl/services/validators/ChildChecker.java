@@ -3,12 +3,14 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,6 +19,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILD_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.Gender.OTHER;
+import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.ANOTHER_PERSON;
 
 @Service
 public class ChildChecker implements EventChecker {
@@ -41,7 +44,8 @@ public class ChildChecker implements EventChecker {
                     return false;
                 }
             }
-        } else {
+        }
+        if (childrenWrapped.isEmpty()) {
             taskErrorService.addEventError(CHILD_DETAILS, CHILD_DETAILS_ERROR, CHILD_DETAILS_ERROR.getError());
             return false;
         }
@@ -89,11 +93,18 @@ public class ChildChecker implements EventChecker {
         fields.add(ofNullable(child.getOrderAppliedFor()));
         fields.add(ofNullable(child.getApplicantsRelationshipToChild()));
         fields.add(ofNullable(child.getRespondentsRelationshipToChild()));
-        fields.add(ofNullable(child.getChildLiveWith()));
+        Optional<List<LiveWithEnum>> childLivesWith = ofNullable(child.getChildLiveWith());
+        if (childLivesWith.isPresent() && childLivesWith.get().equals(Collections.emptyList())) {
+            return false;
+        }
+        if (childLivesWith.isPresent() && childLivesWith.get().contains(ANOTHER_PERSON)) {
+            fields.add(ofNullable(child.getOtherPersonWhoLivesWithChild()));
+        }
 
-        boolean emptyFieldPresent = fields.stream().anyMatch(Optional::isEmpty);
+        return fields.stream().noneMatch(Optional::isEmpty)
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 
-        return !emptyFieldPresent;
+
     }
 
     private boolean validateAnyFieldStarted(Child c) {
