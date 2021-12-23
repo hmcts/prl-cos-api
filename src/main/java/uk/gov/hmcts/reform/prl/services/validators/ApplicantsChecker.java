@@ -147,20 +147,17 @@ public class ApplicantsChecker implements EventChecker {
             fields.add(solicitorAddress);
         }
 
-        return fields.stream().noneMatch(Optional::isEmpty);
+        return fields.stream().noneMatch(Optional::isEmpty)
+
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+
 
     }
 
     public boolean verifyAddressCompleted(Address address) {
         return allNonEmpty(
-            address.getAddressLine1(),
-            address.getPostTown(),
-            address.getCountry(),
-            address.getCounty(),
-            address.getPostCode()
+            address.getAddressLine1()
         );
     }
 
 }
-
-

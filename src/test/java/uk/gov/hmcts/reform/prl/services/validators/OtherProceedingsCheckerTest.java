@@ -69,7 +69,7 @@ public class OtherProceedingsCheckerTest {
 
         CaseData caseData = CaseData.builder()
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.YES)
-            .otherProceedings(listOfProceedings)
+            .existingProceedings(listOfProceedings)
             .build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
         assert (!isFinished);
