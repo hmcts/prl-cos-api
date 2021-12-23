@@ -39,7 +39,7 @@ public class OtherProceedingsChecker implements EventChecker {
             return  true;
         }
 
-        Optional<List<Element<ProceedingDetails>>> proceedingDetails = ofNullable(caseData.getOtherProceedings());
+        Optional<List<Element<ProceedingDetails>>> proceedingDetails = ofNullable(caseData.getExistingProceedings());
 
         if (proceedingDetails.isPresent()) {
             List<ProceedingDetails> allProceedings = proceedingDetails.get()
