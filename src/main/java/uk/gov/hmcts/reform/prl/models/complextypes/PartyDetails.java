@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
@@ -41,7 +42,8 @@ public class PartyDetails {
     private final YesOrNo isPlaceOfBirthKnown;
     private final Organisation solicitorOrg;
     private final Address solicitorAddress;
-    private final String dxNumber;
+    @JsonProperty("dXNumber")
+    private final String dXNumber;
     private final String solicitorReference;
     private final String representativeFirstName;
     private final String representativeLastName;
@@ -49,5 +51,8 @@ public class PartyDetails {
     private final YesNoDontKnow doTheyHaveLegalRepresentation;
     private final String sendSignUpLink;
     private final String solicitorEmail;
+
+
+
 
 }
