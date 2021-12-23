@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.response.Response;
+import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(SpringRunner.class)
+@RunWith(SpringIntegrationSerenityRunner.class)
 @SpringBootTest(classes = {Application.class, PrePopulateFeeAndSolicitorNameController.class})
 public class PrePopulateFeeAndSolicitorControllerIntegrationTest extends IntegrationTest {
 
