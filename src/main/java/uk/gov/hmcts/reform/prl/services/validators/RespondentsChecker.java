@@ -101,7 +101,7 @@ public class RespondentsChecker implements EventChecker {
         Optional<YesOrNo> isCurrentAddressKnown = ofNullable(respondent.getIsCurrentAddressKnown());
         fields.add(isCurrentAddressKnown);
         if (isCurrentAddressKnown.isPresent() && isCurrentAddressKnown.get().equals(YES)) {
-            fields.add(ofNullable(respondent.getAddress()));
+            fields.add(ofNullable(respondent.getAddress().getAddressLine1()));
         }
         Optional<YesNoDontKnow> isAtAddressLessThan5YearsWithDontKnow = ofNullable(respondent.getIsAtAddressLessThan5YearsWithDontKnow());
         fields.add(isAtAddressLessThan5YearsWithDontKnow);
@@ -124,7 +124,8 @@ public class RespondentsChecker implements EventChecker {
             fields.add(ofNullable(respondent.getSolicitorEmail()));
         }
 
-        return fields.stream().noneMatch(Optional::isEmpty);
+        return fields.stream().noneMatch(Optional::isEmpty)
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
     }
 
     public boolean respondentDetailsStarted(PartyDetails respondent) {
@@ -157,6 +158,5 @@ public class RespondentsChecker implements EventChecker {
         return  fields.stream().anyMatch(Optional::isPresent);
 
     }
-
 
 }
