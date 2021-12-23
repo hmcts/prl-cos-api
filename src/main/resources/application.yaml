@@ -88,9 +88,12 @@ idam:
       totp_secret: AABBCCDDEEFFGGHH
       microservice: prl_cos_api
     client:
-      id: prl
+      id: prl_cos_api
       redirect_uri: https://localhost:9000/oauth2/callback
       secret: OOOOOOOOOOOOOOOO
+
+prl-dgs-api:
+  url: http://localhost:4007
 
 payments:
   api:

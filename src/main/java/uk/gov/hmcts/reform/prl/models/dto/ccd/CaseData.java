@@ -126,12 +126,16 @@ public class CaseData {
     /**
      * MIAM.
      */
+    @JsonProperty("applicantAttendedMIAM")
     private final YesOrNo applicantAttendedMiam;
+    @JsonProperty("claimingExemptionMIAM")
     private final YesOrNo claimingExemptionMiam;
+    @JsonProperty("familyMediatorMIAM")
     private final YesOrNo familyMediatorMiam;
-    private final List<MiamExemptionsChecklistEnum> miamExemptionsChecklist;
-    private final List<MiamDomesticViolenceChecklistEnum> miamDomesticViolenceChecklist;
-    private final List<MiamUrgencyReasonChecklistEnum> miamUrgencyReasonChecklist;
+
+    private final List<String> miamExemptionsChecklist;
+    private final List<String> miamDomesticViolenceChecklist;
+    private final List<String> miamUrgencyReasonChecklist;
     private final MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceChecklist;
     private final MiamOtherGroundsChecklistEnum miamOtherGroundsChecklist;
     private final String mediatorRegistrationNumber;
@@ -276,5 +280,7 @@ public class CaseData {
     private final String feeAmount;
     @JsonProperty("feeCode")
     private final String feeCode;
+    @JsonProperty("draftOrderDoc")
+    private final CCDDocument draftOrderDoc;
 
 }
