@@ -94,7 +94,7 @@ public class MiamChecker implements EventChecker {
 
     public boolean checkMIAMExemptions(CaseData caseData) {
 
-        Optional<List<MiamExemptionsChecklistEnum>> exceptions = ofNullable(caseData.getMiamExemptionsChecklist());
+        Optional<List<String>> exceptions = ofNullable(caseData.getMiamExemptionsChecklist());
 
         boolean dvCompleted = true;
         boolean urgencyCompleted = true;
