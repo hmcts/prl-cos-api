@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -20,6 +21,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILD_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.Gender.OTHER;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.ANOTHER_PERSON;
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.YES;
 
 @Service
 public class ChildChecker implements EventChecker {
@@ -100,7 +102,11 @@ public class ChildChecker implements EventChecker {
         if (childLivesWith.isPresent() && childLivesWith.get().contains(ANOTHER_PERSON)) {
             fields.add(ofNullable(child.getOtherPersonWhoLivesWithChild()));
         }
-        fields.add(ofNullable(child.getChildrenKnownToLocalAuthority()));
+        Optional<YesNoDontKnow> childLocalAuth = ofNullable(child.getChildrenKnownToLocalAuthority());
+        fields.add(childLocalAuth);
+        if (childLocalAuth.isPresent() && childLocalAuth.get().equals(YES)) {
+            fields.add(ofNullable(child.getChildrenKnownToLocalAuthorityTextArea()));
+        }
         fields.add(ofNullable(child.getChildrenSubjectOfChildProtectionPlan()));
 
         return fields.stream().noneMatch(Optional::isEmpty)
