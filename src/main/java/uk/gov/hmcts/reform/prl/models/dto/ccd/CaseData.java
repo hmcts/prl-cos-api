@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
 
@@ -281,6 +282,6 @@ public class CaseData {
     @JsonProperty("feeCode")
     private final String feeCode;
     @JsonProperty("draftOrderDoc")
-    private final CCDDocument draftOrderDoc;
+    private final Document draftOrderDoc;
 
 }
