@@ -241,11 +241,7 @@ dependencies {
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.0.0'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
   implementation group: 'org.apache.commons', name: 'commons-math3', version: versions.commonsMath3
-<<<<<<< HEAD
   implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.13'
-=======
-  implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.14'
->>>>>>> dependabot/gradle/org.springframework-spring-context-support-5.3.14
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
