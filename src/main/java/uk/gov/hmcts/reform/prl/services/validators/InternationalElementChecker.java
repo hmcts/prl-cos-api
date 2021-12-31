@@ -10,9 +10,8 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.*;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.INTERNATIONAL_ELEMENT_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
-import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allEmpty;
 
 @Service
 public class InternationalElementChecker implements EventChecker {
@@ -38,7 +37,7 @@ public class InternationalElementChecker implements EventChecker {
 
         boolean fieldsCompletedHR = true;
         boolean fieldsCompletedJI = true;
-        boolean fieldsCompletedRFA = true;
+        boolean fieldsCompletedRfa = true;
 
         if (habitualResidence.isPresent() && habitualResidence.get().equals(YES)) {
             fieldsCompletedHR = habitualResidenceReason.isPresent();
@@ -47,10 +46,10 @@ public class InternationalElementChecker implements EventChecker {
             fieldsCompletedJI = jurisdictionIssueReason.isPresent();
         }
         if (requestToForeignAuthority.isPresent() && requestToForeignAuthority.get().equals(YES)) {
-            fieldsCompletedRFA = requestToForeignAuthorityReason.isPresent();
+            fieldsCompletedRfa = requestToForeignAuthorityReason.isPresent();
         }
 
-        if (fieldsCompletedHR && fieldsCompletedJI && fieldsCompletedRFA) {
+        if (fieldsCompletedHR && fieldsCompletedJI && fieldsCompletedRfa) {
             taskErrorService.removeError(INTERNATIONAL_ELEMENT_ERROR);
             return true;
         }
@@ -62,7 +61,7 @@ public class InternationalElementChecker implements EventChecker {
 
         boolean isStartedHR = false;
         boolean isStartedJI = false;
-        boolean isStartedRFA = false;
+        boolean isStartedRfa = false;
 
         Optional<YesOrNo> habitualResidence = ofNullable(caseData.getHabitualResidentInOtherState());
         Optional<String> habitualResidenceReason = ofNullable(caseData.getHabitualResidentInOtherStateGiveReason());
@@ -74,18 +73,28 @@ public class InternationalElementChecker implements EventChecker {
         Optional<String> requestToForeignAuthorityReason = ofNullable(caseData.getRequestToForeignAuthorityGiveReason());
 
         if (habitualResidence.isPresent() &&  (habitualResidenceReason.isEmpty() || habitualResidenceReason.get().isBlank())) {
-            isStartedHR = addErrorAndReturnTrue();
+            taskErrorService.addEventError(INTERNATIONAL_ELEMENT,
+                                           INTERNATIONAL_ELEMENT_ERROR,
+                                           INTERNATIONAL_ELEMENT_ERROR.getError());
+            isStartedHR = true;
         }
 
         if (jurisdictionIssue.isPresent() &&  (jurisdictionIssueReason.isEmpty() || jurisdictionIssueReason.get().isBlank())) {
-            isStartedJI = addErrorAndReturnTrue();
+            taskErrorService.addEventError(INTERNATIONAL_ELEMENT,
+                                           INTERNATIONAL_ELEMENT_ERROR,
+                                           INTERNATIONAL_ELEMENT_ERROR.getError());
+            isStartedJI = true;
         }
 
-        if (requestToForeignAuthority.isPresent() &&  (requestToForeignAuthorityReason.isEmpty() || requestToForeignAuthorityReason.get().isBlank())) {
-            isStartedRFA = addErrorAndReturnTrue();
+        if (requestToForeignAuthority.isPresent()
+            &&  (requestToForeignAuthorityReason.isEmpty() || requestToForeignAuthorityReason.get().isBlank())) {
+            taskErrorService.addEventError(INTERNATIONAL_ELEMENT,
+                                           INTERNATIONAL_ELEMENT_ERROR,
+                                           INTERNATIONAL_ELEMENT_ERROR.getError());
+            isStartedRfa = true;
         }
 
-        if (isStartedHR || isStartedJI || isStartedRFA) {
+        if (isStartedHR || isStartedJI || isStartedRfa) {
             taskErrorService.addEventError(
                 INTERNATIONAL_ELEMENT,
                 INTERNATIONAL_ELEMENT_ERROR,
@@ -101,25 +110,4 @@ public class InternationalElementChecker implements EventChecker {
         return false;
     }
 
-    public boolean addErrorAndReturnTrue() {
-        taskErrorService.addEventError(INTERNATIONAL_ELEMENT, INTERNATIONAL_ELEMENT_ERROR, INTERNATIONAL_ELEMENT_ERROR.getError());
-        return true;
-    }
-
-//    public void removeValidationErrors(CaseData caseData) {
-//        Optional<YesOrNo> habitualResidence = ofNullable(caseData.getHabitualResidentInOtherState());
-//        Optional<String> habitualResidenceReason = ofNullable(caseData.getHabitualResidentInOtherStateGiveReason());
-//
-//        Optional<YesOrNo> jurisdictionIssue = ofNullable(caseData.getJurisdictionIssue());
-//        Optional<String> jurisdictionIssueReason = ofNullable(caseData.getJurisdictionIssueGiveReason());
-//
-//        Optional<YesOrNo> requestToForeignAuthority = ofNullable(caseData.getRequestToForeignAuthority());
-//        Optional<String> requestToForeignAuthorityReason = ofNullable(caseData.getRequestToForeignAuthorityGiveReason());
-//
-//        if ((habitualResidence.isPresent() && habitualResidenceReason.isPresent()) ||
-//            (jurisdictionIssue.isPresent() && jurisdictionIssueReason.isPresent()) ||
-//            (requestToForeignAuthority.isPresent() && requestToForeignAuthorityReason.isPresent())) {
-//
-//            taskErrorService.removeError(INTERNATIONAL_ELEMENT_ERROR);
-//        }
 }
