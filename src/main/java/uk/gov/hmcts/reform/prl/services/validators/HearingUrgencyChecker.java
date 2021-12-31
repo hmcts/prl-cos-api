@@ -2,26 +2,20 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
-
 import java.util.List;
-
 
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.HEARING_URGENCY_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
-import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
-
-
+import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
-public class HearingUrgencyChecker implements EventChecker{
+public class HearingUrgencyChecker implements EventChecker {
 
     @Autowired
     TaskErrorService taskErrorService;
@@ -59,11 +53,15 @@ public class HearingUrgencyChecker implements EventChecker{
                 }
             }
         }
+        taskErrorService.addEventError(HEARING_URGENCY,
+                                       HEARING_URGENCY_ERROR,
+                                       HEARING_URGENCY_ERROR.getError());
         return false;
     }
+
     @Override
     public boolean isStarted(CaseData caseData) {
-        boolean isStarted =  anyNonEmpty(
+        return anyNonEmpty(
             caseData.getCaseUrgencyTimeAndReason(),
             caseData.getEffortsMadeWithRespondents(),
             caseData.getDoYouNeedAWithoutNoticeHearing(),
@@ -72,11 +70,6 @@ public class HearingUrgencyChecker implements EventChecker{
             caseData.getSetOutReasonsBelow(),
             caseData.getAreRespondentsAwareOfProceedings()
         );
-        if (isStarted) {
-            taskErrorService.addEventError(HEARING_URGENCY, HEARING_URGENCY_ERROR, HEARING_URGENCY_ERROR.getError());
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -97,12 +90,14 @@ public class HearingUrgencyChecker implements EventChecker{
 
                     for (Object field : mandatoryFields) {
                         if (field == null) {
-                            fieldsComplete = false;
+                            return false;
                         }
-                        return fieldsComplete;
                     }
+                    return true;
                 case NO:
                     return true;
+                default:
+                    return false;
             }
         }
         return false;
