@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;

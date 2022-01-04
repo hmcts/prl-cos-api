@@ -39,7 +39,7 @@ import static org.junit.Assert.assertEquals;
 @ExtendWith(PactConsumerTestExt.class)
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@PactTestFor(providerName = "FeesRegister-api", port = "")
+@PactTestFor(providerName = "FeesRegister-api")
 @PactFolder("pacts")
 @SpringBootTest({
     "fees-register.api.url : http://fees-register-api-aat.service.core-compute-aat.internal"

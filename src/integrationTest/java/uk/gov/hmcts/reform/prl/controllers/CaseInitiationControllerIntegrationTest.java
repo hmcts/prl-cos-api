@@ -6,17 +6,20 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringBootTest(classes = TaskListControllerIntegrationTest.class)
+@SpringBootTest(classes = {CaseInitiationControllerIntegrationTest.class, Application.class})
 public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
@@ -25,6 +28,9 @@ public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
     private final String caseInitiationControllerEndpoint = "/case-initiation/submitted";
 
     private final String validBody = "controller/valid-request-body.json";
+
+    @Autowired
+    CoreCaseDataService coreCaseDataService;
 
     @Test
     public void whenInvalidRequestFormat_Return400() throws IOException {
@@ -41,7 +47,7 @@ public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
 
         HttpPost httpPost = new HttpPost(serviceUrl + caseInitiationControllerEndpoint);
         String requestBody = ResourceLoader.loadJson(validBody);
-        httpPost.addHeader("Authorization", "TestAuth");
+        httpPost.addHeader("Authorization", "Bearer testauthtoken");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);

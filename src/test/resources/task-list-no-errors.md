@@ -103,25 +103,3 @@
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
 </div>
-
-<details class='govuk-details'>
-
-<summary class='govuk-details__summary'>
-
-<span class='govuk-details__summary-text'>
-
-Why can't I submit my application?
-
-</span>
-
-</summary>
-
-<div class='govuk-details__text'>
-
-ALLEGATIONS_OF_HARM_ERROR in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm</a>
-
-ATTENDING_THE_HEARING_ERROR in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing</a>
-
-</div>
-
-</details>

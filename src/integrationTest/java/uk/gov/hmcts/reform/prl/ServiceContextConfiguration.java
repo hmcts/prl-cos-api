@@ -27,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import uk.gov.hmcts.reform.prl.util.CosApiClient;
 
+
 @Configuration
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform.prl.*", "uk.gov.hmcts.reform.prl.services.*",
     "uk.gov.hmcts.reform.prl.controllers.*", "uk.gov.hmcts.reform.idam.client"})
@@ -73,6 +74,5 @@ public class ServiceContextConfiguration {
 
         return objectMapper;
     }
-
 
 }
