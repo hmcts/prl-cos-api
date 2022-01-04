@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-
-
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
@@ -11,6 +9,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
@@ -18,7 +17,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringBootTest(classes = TaskListControllerIntegrationTest.class)
+@SpringBootTest(classes = {TaskListControllerIntegrationTest.class, Application.class})
 public class TaskListControllerIntegrationTest extends IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
@@ -52,7 +51,5 @@ public class TaskListControllerIntegrationTest extends IntegrationTest {
             HttpStatus.SC_OK,
             httpResponse.getStatusLine().getStatusCode());
     }
-
-
 
 }

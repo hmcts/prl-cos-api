@@ -29,8 +29,6 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     @Autowired
     private final ObjectMapper objectMapper;
 
-
-
     @PostMapping(path = "/create-payment-service-request", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to create Fee and Pay service request . Returns service request reference if "
         + "successful")

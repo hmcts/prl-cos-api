@@ -66,7 +66,6 @@ public abstract class IntegrationTest {
     private String paymentCallBackUrl;
 
 
-
     private String idamUsername;
 
     private int responseCode;
@@ -98,13 +97,12 @@ public abstract class IntegrationTest {
     }
 
     private synchronized String getUserToken() {
-        username = "simulate-delivered" + UUID.randomUUID() + "@testhmcts.net";
+        username =  "simulate-delivered" + UUID.randomUUID() + "@mailinator.com";
 
         if (userToken == null) {
             createCaseworkerUserInIdam(username, aatPassword);
-            userToken = generateUserTokenWithNoRoles(username, aatPassword);
+            userToken = generateUserTokenWithNoRoles(username, "genericPassword123");
         }
-
         return userToken;
     }
 
@@ -126,6 +124,15 @@ public abstract class IntegrationTest {
             .header("Content-Type", "application/json")
             .body(ResourceLoader.objectToJson(userRequest))
             .post(idamCreateUrl());
+    }
+
+    public Response callInvalidPrePopulateFeeAndSolicitorName(String requestBody) {
+        return PrePopulateFeeAndSolicitorUtil
+            .prePopulateFeeAndSolicitorName(
+                requestBody,
+                prePopulateUri,
+                getUserToken()
+            );
     }
 
     public String generateUserTokenWithNoRoles(String username, String password) {
@@ -208,5 +215,4 @@ public abstract class IntegrationTest {
             throw new RuntimeException(e);
         }
     }
-
 }
