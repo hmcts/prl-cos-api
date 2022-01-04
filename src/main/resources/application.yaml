@@ -112,36 +112,6 @@ idam:
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
     secret: W7supXKMJgcEWKBS
 
-
-core_case_data:
-  api:
-    url: ${CORE_CASE_DATA_API_URL:}
-
-prl:
-  system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
-
-# NEW BELOW THIS LINE
-
-
-idam:
-  s2s-auth:
-    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
-    microservice: prl_cos_api
-    totp-secret: GT2V6PLQ34XGPTPM
-  api:
-    url: https://idam-api.aat.platform.hmcts.net
-  client:
-    id: prl-cos-api
-    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: W7supXKMJgcEWKBS
-
-
-core_case_data:
-  api:
-    url: ${CORE_CASE_DATA_API_URL:}
-
 prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
