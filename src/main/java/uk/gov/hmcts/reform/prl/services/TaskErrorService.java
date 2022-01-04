@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TaskErrorService {
@@ -36,6 +37,7 @@ public class TaskErrorService {
                                     .errors(Collections.singletonList(error))
                                     .build());
     }
+
 
     public void removeError(EventErrorsEnum errorType) {
         eventErrors.remove(errorType);

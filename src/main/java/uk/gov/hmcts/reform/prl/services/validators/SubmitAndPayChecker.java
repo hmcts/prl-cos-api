@@ -36,7 +36,7 @@ public class SubmitAndPayChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        return !hasMandatoryCompleted(caseData);
+        return false;
     }
 
     @Override
@@ -53,10 +53,13 @@ public class SubmitAndPayChecker implements EventChecker {
         mandatoryEvents.put(MIAM, eventsChecker.miamChecker);
         mandatoryEvents.put(ALLEGATIONS_OF_HARM, eventsChecker.allegationsOfHarmChecker);
 
-        boolean mandatoryFinished = false;
+        boolean mandatoryFinished;
 
         for (Map.Entry<Event, EventChecker> e : mandatoryEvents.entrySet()) {
             mandatoryFinished = e.getValue().isFinished(caseData);
+            if (!mandatoryFinished) {
+                return false;
+            }
         }
 
         EnumMap<Event, EventChecker> optionalEvents = new EnumMap<Event, EventChecker>(Event.class);
@@ -77,6 +80,6 @@ public class SubmitAndPayChecker implements EventChecker {
             }
         }
 
-        return mandatoryFinished;
+        return true;
     }
 }

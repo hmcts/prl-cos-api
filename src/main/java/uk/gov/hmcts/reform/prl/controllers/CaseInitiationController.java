@@ -3,10 +3,8 @@ package uk.gov.hmcts.reform.prl.controllers;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -31,15 +29,10 @@ public class CaseInitiationController extends AbstractCallbackController {
     private final TaskListRenderer taskListRenderer;
 
     @PostMapping("/submitted")
-    public void handleSubmitted(@RequestBody CallbackRequest callbackRequest,
-                                @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation) {
-
+    public void handleSubmitted(@RequestBody CallbackRequest callbackRequest) {
 
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
         final CaseData caseData = getCaseData(caseDetails);
-
-
         publishEvent(new CaseDataChanged(caseData));
     }
 }
