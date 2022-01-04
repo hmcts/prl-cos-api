@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -15,10 +16,10 @@ import java.util.Map;
 @Slf4j
 @Service
 @ConditionalOnProperty(prefix = "prl-dgs-api", name = "url")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DgsService {
 
-    @Autowired
-    private DgsApiClient dgsApiClient;
+    private final DgsApiClient dgsApiClient;
 
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
 
