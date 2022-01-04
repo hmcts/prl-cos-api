@@ -107,21 +107,22 @@ public class ChildCheckerTest {
             .applicantsRelationshipToChild(SPECIAL_GUARDIAN)
             .respondentsRelationshipToChild(FATHER)
             .childLiveWith(Collections.singletonList(RESPONDENT))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
             .build();
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        CaseData caseData = CaseData.builder().children(listOfChildren).build();
+        CaseData caseData = CaseData.builder()
+            .children(listOfChildren)
+            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
+            .childrenKnownToLocalAuthorityTextArea("TestString")
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.DONT_KNOW)
+            .build();
+
 
         assert childChecker.isFinished(caseData);
 
     }
-
-
 
 
 }
