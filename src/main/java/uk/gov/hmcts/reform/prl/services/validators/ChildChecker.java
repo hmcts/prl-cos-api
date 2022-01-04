@@ -41,7 +41,7 @@ public class ChildChecker implements EventChecker {
                 .collect(Collectors.toList());
 
             for (Child c : children) {
-                if (!(validateMandatoryFieldsCompleted(c))) {
+                if (!(validateMandatoryFieldsCompleted(c)) && !(validateAdditionalFieldsCompleted(caseData))) {
                     taskErrorService.addEventError(CHILD_DETAILS, CHILD_DETAILS_ERROR, CHILD_DETAILS_ERROR.getError());
                     return false;
                 }
@@ -102,16 +102,24 @@ public class ChildChecker implements EventChecker {
         if (childLivesWith.isPresent() && childLivesWith.get().contains(ANOTHER_PERSON)) {
             fields.add(ofNullable(child.getOtherPersonWhoLivesWithChild()));
         }
-        Optional<YesNoDontKnow> childLocalAuth = ofNullable(child.getChildrenKnownToLocalAuthority());
-        fields.add(childLocalAuth);
-        if (childLocalAuth.isPresent() && childLocalAuth.get().equals(YES)) {
-            fields.add(ofNullable(child.getChildrenKnownToLocalAuthorityTextArea()));
-        }
-        fields.add(ofNullable(child.getChildrenSubjectOfChildProtectionPlan()));
 
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 
+    }
+
+    private boolean validateAdditionalFieldsCompleted(CaseData caseData) {
+        List<Optional> fields = new ArrayList<>();
+
+        Optional<YesNoDontKnow> childLocalAuth = ofNullable(caseData.getChildrenKnownToLocalAuthority());
+        fields.add(childLocalAuth);
+        if (childLocalAuth.isPresent() && childLocalAuth.get().equals(YES)) {
+            fields.add(ofNullable(caseData.getChildrenKnownToLocalAuthorityTextArea()));
+        }
+        fields.add(ofNullable(caseData.getChildrenSubjectOfChildProtectionPlan()));
+
+        return fields.stream().noneMatch(Optional::isEmpty)
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
     }
 
     private boolean validateAnyFieldStarted(Child c) {
