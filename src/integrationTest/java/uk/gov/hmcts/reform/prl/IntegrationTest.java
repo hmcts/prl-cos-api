@@ -98,6 +98,7 @@ public abstract class IntegrationTest {
                 getUserToken()
             );
     }
+
     public Response callDocGenerateAndSave(String requestBody) {
         return DocumentGenerateUtil
                 .documentGenerate(
