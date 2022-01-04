@@ -6,13 +6,13 @@ import static io.restassured.RestAssured.given;
 
 public class DocumentGenerateUtil {
 
-    static Response documentGenerate(final String requestBody, final String generateDocURI, final String userToken) {
+    static Response documentGenerate(final String requestBody, final String generateDocUri, final String userToken) {
         return given()
             .contentType("application/json")
             .header("Authorization", userToken)
             .body(requestBody)
             .when()
-            .post(generateDocURI)
+            .post(generateDocUri)
             .andReturn();
     }
 }
