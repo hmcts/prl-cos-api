@@ -1,1 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><testsuite errors="0" failures="0" name="uk.gov.hmcts.reform.prl.controllers.GetWelcomeTest" skipped="0" tests="1" time="0.09" timestamp="2021-12-23 01:23:19"><testcase classname="uk.gov.hmcts.reform.prl.controllers.GetWelcomeTest" name="Welcome root endpoint"/></testsuite>
