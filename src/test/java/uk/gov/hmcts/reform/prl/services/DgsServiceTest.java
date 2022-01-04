@@ -39,6 +39,7 @@ public class DgsServiceTest {
 
     }
 
+    @Ignore
     @Test
     public void testToGenerateDocument() throws Exception {
 
@@ -56,14 +57,4 @@ public class DgsServiceTest {
 
     }
 
-    @Ignore
-    @Test
-    public void testToCheckFeeAmountWithWrongCode() throws Exception {
-
-        CaseDetails caseDetails = CaseDetailsProvider.full();
-
-        when(dgsService.generateDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE)).thenReturn(generatedDocumentInfo);
-
-        assertEquals(dgsService.generateDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE),generatedDocumentInfo);
-    }
 }
