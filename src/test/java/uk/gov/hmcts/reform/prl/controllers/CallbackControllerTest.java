@@ -44,7 +44,7 @@ public class CallbackControllerTest {
     private GeneratedDocumentInfo generatedDocumentInfo;
 
     public static final String authToken = "Bearer TestAuthToken";
-    public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-TRY-FINAL-11.docx";
+    public static final String PRL_DRAFT_TEMPLATE = "FL-DIV-GOR-ENG-00062.docx";
 
     @Before
     public void setUp() {
@@ -99,7 +99,7 @@ public class CallbackControllerTest {
                                .documentUrl(generatedDocumentInfo.getUrl())
                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                .documentHash(generatedDocumentInfo.getHashToken())
-                               .documentFileName("PRL-DRAFT-TRY-FINAL-11.docx")
+                               .documentFileName("FL-DIV-GOR-ENG-00062.docx")
                                .build())
             .build();
 
