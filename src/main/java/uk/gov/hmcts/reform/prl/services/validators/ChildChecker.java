@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -41,7 +42,7 @@ public class ChildChecker implements EventChecker {
                 .collect(Collectors.toList());
 
             for (Child c : children) {
-                if (!(validateMandatoryFieldsCompleted(c)) && !(validateAdditionalFieldsCompleted(caseData))) {
+                if (!(validateMandatoryFieldsCompleted(c)) || !(validateAdditionalFieldsCompleted(caseData))) {
                     taskErrorService.addEventError(CHILD_DETAILS, CHILD_DETAILS_ERROR, CHILD_DETAILS_ERROR.getError());
                     return false;
                 }
@@ -101,6 +102,13 @@ public class ChildChecker implements EventChecker {
         }
         if (childLivesWith.isPresent() && childLivesWith.get().contains(ANOTHER_PERSON)) {
             fields.add(ofNullable(child.getOtherPersonWhoLivesWithChild()));
+            Optional<YesOrNo> isAddressKnown = ofNullable(child.getIsChildCurrentAddressKnown());
+            fields.add(isAddressKnown);
+            if (isAddressKnown.isPresent() && isAddressKnown.get().equals(YesOrNo.YES)) {
+                fields.add(ofNullable(child.getAddress().getAddressLine1()));
+                fields.add(ofNullable(child.getIsChildAddressConfidential()));
+            }
+
         }
 
         return fields.stream().noneMatch(Optional::isEmpty)
