@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 public class DgsServiceTest {
@@ -39,8 +39,7 @@ public class DgsServiceTest {
 
     }
 
-    @Ignore
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testToGenerateDocument() throws Exception {
 
         CaseDetails caseDetails = CaseDetailsProvider.full();
@@ -54,6 +53,17 @@ public class DgsServiceTest {
         when(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE)).thenReturn(generatedDocumentInfo);
 
         assertEquals(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE),generatedDocumentInfo);
+
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testToGenerateDocumentWithNoData() throws Exception {
+
+        CaseDetails caseDetails = CaseDetailsProvider.full();
+
+        when(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE)).thenReturn(generatedDocumentInfo);
+
+        assertNull(dgsService);
 
     }
 
