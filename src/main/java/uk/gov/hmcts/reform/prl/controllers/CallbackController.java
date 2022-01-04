@@ -32,7 +32,7 @@ import static org.springframework.http.ResponseEntity.ok;
 public class CallbackController {
 
     private static final String DRAFT_C_100_APPLICATION = "Draft C100 application";
-    public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-TRY-FINAL-11.docx";
+    public static final String PRL_DRAFT_TEMPLATE = "FL-DIV-GOR-ENG-00062.docx";
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
