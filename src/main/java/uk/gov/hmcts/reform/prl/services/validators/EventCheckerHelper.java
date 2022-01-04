@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import org.apache.commons.lang3.ObjectUtils;
 import uk.gov.hmcts.reform.prl.models.Address;
 
+
 import java.util.stream.Stream;
 
 public class EventCheckerHelper {
@@ -20,6 +21,7 @@ public class EventCheckerHelper {
             address.getCountry(),
             address.getPostCode());
     }
+
 
     public static boolean allEmpty(Object... properties) {
         return Stream.of(properties).allMatch(ObjectUtils::isEmpty);

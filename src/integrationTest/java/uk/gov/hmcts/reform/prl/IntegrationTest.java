@@ -32,9 +32,6 @@ public abstract class IntegrationTest {
     @Value("${case.orchestration.prepopulate.uri}")
     protected String prePopulateUri;
 
-    @Value("${case.orchestration.documentgenerate.uri}")
-    protected String documentGenerateUri;
-
     @Value("${http.proxy:#{null}}")
     protected String httpProxy;
 
@@ -69,7 +66,6 @@ public abstract class IntegrationTest {
     private String paymentCallBackUrl;
 
 
-
     private String idamUsername;
 
     private int responseCode;
@@ -91,6 +87,13 @@ public abstract class IntegrationTest {
         }
     }
 
+    public Response callPrePopulateFeeAndSolicitorName(String requestBody) {
+        return PrePopulateFeeAndSolicitorUtil
+            .prePopulateFeeAndSolicitorName(
+                requestBody,
+                prePopulateUri,
+                getUserToken()
+            );
     public Response callDocGenerateAndSave(String requestBody) {
         return DocumentGenerateUtil
                 .documentGenerate(
@@ -105,9 +108,8 @@ public abstract class IntegrationTest {
 
         if (userToken == null) {
             createCaseworkerUserInIdam(username, aatPassword);
-            userToken = generateUserTokenWithNoRoles(username, aatPassword);
+            userToken = generateUserTokenWithNoRoles(username, "genericPassword123");
         }
-
         return userToken;
     }
 
@@ -129,6 +131,15 @@ public abstract class IntegrationTest {
             .header("Content-Type", "application/json")
             .body(ResourceLoader.objectToJson(userRequest))
             .post(idamCreateUrl());
+    }
+
+    public Response callInvalidPrePopulateFeeAndSolicitorName(String requestBody) {
+        return PrePopulateFeeAndSolicitorUtil
+            .prePopulateFeeAndSolicitorName(
+                requestBody,
+                prePopulateUri,
+                getUserToken()
+            );
     }
 
     public String generateUserTokenWithNoRoles(String username, String password) {

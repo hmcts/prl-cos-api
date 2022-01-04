@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
-//import uk.gov.hmcts.reform.prl.models.submission.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskSection;
