@@ -228,7 +228,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
         }
     }
 
-    private boolean validateBehaviour(Behaviours behaviour) {
+    public boolean validateBehaviour(Behaviours behaviour) {
 
         Optional<String> abuseNatureDescription = ofNullable(behaviour.getAbuseNatureDescription());
         Optional<String> behavioursStartDateAndLength = ofNullable(behaviour.getBehavioursStartDateAndLength());
