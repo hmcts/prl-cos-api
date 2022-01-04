@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -151,7 +152,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
             Optional<List<Element<Behaviours>>> behavioursWrapped = ofNullable(caseData.getBehaviours());
 
             behaviourRequired = behavioursWrapped.isPresent()
-                             && behavioursWrapped.get().size() > 0;
+                && behavioursWrapped.get().size() > 0;
 
         }
         return abuseVictimCompleted & behaviourRequired;
@@ -243,9 +244,9 @@ public class AllegationsOfHarmChecker implements EventChecker {
             && (behavioursNature.isPresent() && !(behavioursNature.get().isBlank()));
 
         if (behavioursApplicantSoughtHelp.isPresent() && behavioursApplicantSoughtHelp.get().equals(YES)) {
-            behaviourCompleted = 
+            behaviourCompleted =
                 (behavioursApplicantHelpSoughtWho.isPresent() && !(behavioursApplicantHelpSoughtWho.get().isBlank()))
-                && (behavioursApplicantHelpAction.isPresent() && !(behavioursApplicantHelpAction.get().isBlank()));
+                    && (behavioursApplicantHelpAction.isPresent() && !(behavioursApplicantHelpAction.get().isBlank()));
         }
         return behaviourCompleted;
     }
@@ -328,21 +329,14 @@ public class AllegationsOfHarmChecker implements EventChecker {
         Optional<String> allegationsOfHarmOtherConcernsDetails = ofNullable(caseData.getAllegationsOfHarmOtherConcernsDetails());
         Optional<String> allegationsOfHarmOtherConcernsCourtActions = ofNullable(caseData.getAllegationsOfHarmOtherConcernsCourtActions());
 
-        if (allegationsOfHarmOtherConcerns.isPresent() && allegationsOfHarmOtherConcerns.get().equals(NO)) {
-            return true;
-        }
-
-
-        boolean otherConcernsCompleted = true;
-
+        List<Optional> fields = new ArrayList<>();
+        fields.add(allegationsOfHarmOtherConcerns);
         if (allegationsOfHarmOtherConcerns.isPresent() && allegationsOfHarmOtherConcerns.get().equals(YES)) {
-            otherConcernsCompleted = allegationsOfHarmOtherConcernsDetails.isPresent()
-                && allegationsOfHarmOtherConcernsCourtActions.isPresent();;
-        } else {
-            otherConcernsCompleted = allegationsOfHarmOtherConcerns.isPresent()
-                && allegationsOfHarmOtherConcernsCourtActions.isPresent();
+            fields.add(allegationsOfHarmOtherConcernsDetails);
         }
+        fields.add(allegationsOfHarmOtherConcernsCourtActions);
 
-        return otherConcernsCompleted;
+        return fields.stream().noneMatch(Optional::isEmpty)
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
     }
 }
