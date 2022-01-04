@@ -1,17 +1,15 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.response.Response;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import uk.gov.hmcts.reform.prl.DocumentGenerateUtil;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
+import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.util.CosApiClient;
-import uk.gov.hmcts.reform.prl.ResourceLoader;
 
 import static org.junit.Assert.assertEquals;
 
