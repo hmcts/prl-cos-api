@@ -32,6 +32,9 @@ public abstract class IntegrationTest {
     @Value("${case.orchestration.prepopulate.uri}")
     protected String prePopulateUri;
 
+    @Value("${case.orchestration.documentgenerate.uri}")
+    protected String documentGenerateUri;
+
     @Value("${http.proxy:#{null}}")
     protected String httpProxy;
 
@@ -94,6 +97,7 @@ public abstract class IntegrationTest {
                 prePopulateUri,
                 getUserToken()
             );
+    }
     public Response callDocGenerateAndSave(String requestBody) {
         return DocumentGenerateUtil
                 .documentGenerate(
@@ -108,7 +112,7 @@ public abstract class IntegrationTest {
 
         if (userToken == null) {
             createCaseworkerUserInIdam(username, aatPassword);
-            userToken = generateUserTokenWithNoRoles(username, "genericPassword123");
+            userToken = generateUserTokenWithNoRoles(username, aatPassword);
         }
         return userToken;
     }
