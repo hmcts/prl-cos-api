@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -237,18 +238,19 @@ public class AllegationsOfHarmChecker implements EventChecker {
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(behaviour.getBehavioursApplicantHelpSoughtWho());
         Optional<String> behavioursApplicantHelpAction = ofNullable(behaviour.getBehavioursApplicantHelpAction());
 
-        boolean behaviourCompleted;
-
-        behaviourCompleted = abuseNatureDescription.isPresent() && !(abuseNatureDescription.get().isBlank())
-            && behavioursStartDateAndLength.isPresent()
-            && (behavioursNature.isPresent() && !(behavioursNature.get().isBlank()));
-
+        List<Optional> fields = new ArrayList<>();
+        fields.add(abuseNatureDescription);
+        fields.add(behavioursStartDateAndLength);
+        fields.add(behavioursNature);
+        fields.add(behavioursApplicantSoughtHelp);
         if (behavioursApplicantSoughtHelp.isPresent() && behavioursApplicantSoughtHelp.get().equals(YES)) {
-            behaviourCompleted =
-                (behavioursApplicantHelpSoughtWho.isPresent() && !(behavioursApplicantHelpSoughtWho.get().isBlank()))
-                    && (behavioursApplicantHelpAction.isPresent() && !(behavioursApplicantHelpAction.get().isBlank()));
+            fields.add(behavioursApplicantHelpSoughtWho);
+            fields.add(behavioursApplicantHelpAction);
         }
-        return behaviourCompleted;
+
+        return fields.stream().noneMatch(Optional::isEmpty)
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+
     }
 
 
