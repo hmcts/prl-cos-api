@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.response.Response;
 import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
+import net.serenitybdd.rest.SerenityRest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
@@ -12,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
@@ -28,7 +31,7 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
     @Autowired
     private CosApiClient cosApiClient;
 
-    @Value("${case.orchestration.documentgenerate.uri}")
+    @Value("${prl.document.generate.uri}")
     protected String documentGenerateUri;
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
@@ -49,18 +52,12 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
 
         Response response = callDocGenerateAndSave(requestBody);
 
-        assertEquals(200, response.getStatusCode());
-
-        /*HttpPost httpPost = new HttpPost(documentGenerateUri);
-        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-        httpPost.addHeader("Authorization", "Bearer testauthtoken");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        HttpGet httpGet = new HttpGet(documentGenerateUri);
+        httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);
         assertEquals(
             HttpStatus.SC_OK,
-            httpResponse.getStatusLine().getStatusCode());*/
+            httpResponse.getStatusLine().getStatusCode());
 
     }
 
@@ -72,6 +69,17 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
         assertEquals(
             httpResponse.getStatusLine().getStatusCode(),
             HttpStatus.SC_NOT_FOUND);
+    }
+
+    @Test
+    public void testHealthForDgsApi() throws Exception {
+
+        Response response = SerenityRest.given()
+            .when()
+            .get( "http://prl-dgs-aat.service.core-compute-aat.internal/health")
+            .andReturn();
+        assertEquals(response.getStatusCode(), HttpStatus.SC_OK);
+
     }
 
 }
