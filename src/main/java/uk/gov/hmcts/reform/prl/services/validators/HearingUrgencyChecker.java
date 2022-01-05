@@ -51,8 +51,7 @@ public class HearingUrgencyChecker implements EventChecker {
         if (finished) {
             taskErrorService.removeError(HEARING_URGENCY_ERROR);
             return true;
-        }
-        else {
+        } else {
             taskErrorService.addEventError(HEARING_URGENCY,
                                            HEARING_URGENCY_ERROR,
                                            HEARING_URGENCY_ERROR.getError());
