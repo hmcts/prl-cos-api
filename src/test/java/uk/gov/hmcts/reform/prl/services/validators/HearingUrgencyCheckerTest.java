@@ -34,9 +34,9 @@ public class HearingUrgencyCheckerTest {
     public void finishedWhenIsCaseUrgentSetToNo() {
 
         CaseData casedata = CaseData.builder().isCaseUrgent(NO)
-            .doYouNeedAWithoutNoticeHearing(YES)
+            .doYouNeedAWithoutNoticeHearing(NO)
             .areRespondentsAwareOfProceedings(NO)
-            .doYouRequireAHearingWithReducedNotice(YES)
+            .doYouRequireAHearingWithReducedNotice(NO)
             .build();
 
         boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
