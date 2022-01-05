@@ -76,7 +76,7 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
 
         Response response = SerenityRest.given()
             .when()
-            .get( "http://prl-dgs-aat.service.core-compute-aat.internal/health")
+            .get("http://prl-dgs-aat.service.core-compute-aat.internal/health")
             .andReturn();
         assertEquals(response.getStatusCode(), HttpStatus.SC_OK);
 
