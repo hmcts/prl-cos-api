@@ -32,10 +32,12 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
     private CosApiClient cosApiClient;
 
     @Value("${prl.document.generate.uri}")
+    protected String documentPrlGenerateUri;
+
+    @Value("${case.orchestration.documentgenerate.uri}")
     protected String documentGenerateUri;
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
-
 
     @DisplayName("temporary test to verify gov UK notifications integration")
     @Test
@@ -52,7 +54,7 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
 
         Response response = callDocGenerateAndSave(requestBody);
 
-        HttpGet httpGet = new HttpGet(documentGenerateUri);
+        HttpGet httpGet = new HttpGet(documentPrlGenerateUri);
         httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);
         assertEquals(
@@ -62,7 +64,7 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void givenRequestBodyAndInvalidAuthToken_ReturnStatus401() throws Exception {
+    public void givenRequestBodyAndInvalidUrlReturnStatus404() throws Exception {
 
         HttpPost httpPost = new HttpPost(documentGenerateUri + "test");
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
