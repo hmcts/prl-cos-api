@@ -2,16 +2,18 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.HEARING_URGENCY_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
-import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
@@ -23,40 +25,39 @@ public class HearingUrgencyChecker implements EventChecker {
     @Override
     public boolean isFinished(CaseData caseData) {
 
-        if (caseData.getIsCaseUrgent() != null) {
-            if (caseData.getIsCaseUrgent().equals(NO)) {
+        List<Optional> fields = new ArrayList<>();
 
-                boolean noOptionCompleted = allNonEmpty(
-                    caseData.getDoYouNeedAWithoutNoticeHearing(),
-                    caseData.getDoYouRequireAHearingWithReducedNotice(),
-                    caseData.getAreRespondentsAwareOfProceedings()
-                );
-                if (noOptionCompleted) {
-                    taskErrorService.removeError(HEARING_URGENCY_ERROR);
-                    return true;
-                }
-
-            } else {
-                boolean yesOptionCompleted =  allNonEmpty(
-                    caseData.getCaseUrgencyTimeAndReason(),
-                    caseData.getEffortsMadeWithRespondents(),
-                    caseData.getDoYouNeedAWithoutNoticeHearing(),
-                    caseData.getReasonsForApplicationWithoutNotice(),
-                    caseData.getDoYouRequireAHearingWithReducedNotice(),
-                    caseData.getSetOutReasonsBelow(),
-                    caseData.getAreRespondentsAwareOfProceedings()
-                );
-
-                if (yesOptionCompleted) {
-                    taskErrorService.removeError(HEARING_URGENCY_ERROR);
-                    return true;
-                }
-            }
+        Optional<YesOrNo> isCaseUrgent = ofNullable(caseData.getIsCaseUrgent());
+        fields.add(isCaseUrgent);
+        if (isCaseUrgent.isPresent() && isCaseUrgent.get().equals(YES)) {
+            fields.add(ofNullable(caseData.getCaseUrgencyTimeAndReason()));
+            fields.add(ofNullable(caseData.getEffortsMadeWithRespondents()));
         }
-        taskErrorService.addEventError(HEARING_URGENCY,
-                                       HEARING_URGENCY_ERROR,
-                                       HEARING_URGENCY_ERROR.getError());
-        return false;
+        Optional<YesOrNo> withoutNoticeHearing = ofNullable(caseData.getDoYouNeedAWithoutNoticeHearing());
+        fields.add(withoutNoticeHearing);
+        if (withoutNoticeHearing.isPresent() && withoutNoticeHearing.get().equals(YES)) {
+            fields.add(ofNullable(caseData.getReasonsForApplicationWithoutNotice()));
+        }
+        Optional<YesOrNo> reducedNoticeHearing = ofNullable(caseData.getDoYouRequireAHearingWithReducedNotice());
+        fields.add(reducedNoticeHearing);
+        if (reducedNoticeHearing.isPresent() && reducedNoticeHearing.get().equals(YES)) {
+            fields.add(ofNullable(caseData.getSetOutReasonsBelow()));
+        }
+        fields.add(ofNullable(caseData.getAreRespondentsAwareOfProceedings()));
+
+        boolean finished = fields.stream().noneMatch(Optional::isEmpty)
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+
+        if (finished) {
+            taskErrorService.removeError(HEARING_URGENCY_ERROR);
+            return true;
+        }
+        else {
+            taskErrorService.addEventError(HEARING_URGENCY,
+                                           HEARING_URGENCY_ERROR,
+                                           HEARING_URGENCY_ERROR.getError());
+            return false;
+        }
     }
 
     @Override
@@ -74,33 +75,7 @@ public class HearingUrgencyChecker implements EventChecker {
 
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
-
-        if (caseData.getIsCaseUrgent() != null) {
-            switch (caseData.getIsCaseUrgent()) {
-                case YES:
-                    List<Object> mandatoryFields = new ArrayList<>();
-                    mandatoryFields.add(caseData.getCaseUrgencyTimeAndReason());
-                    mandatoryFields.add(caseData.getEffortsMadeWithRespondents());
-                    mandatoryFields.add(caseData.getDoYouNeedAWithoutNoticeHearing());
-                    mandatoryFields.add(caseData.getReasonsForApplicationWithoutNotice());
-                    mandatoryFields.add(caseData.getDoYouRequireAHearingWithReducedNotice());
-                    mandatoryFields.add(caseData.getSetOutReasonsBelow());
-
-                    boolean fieldsComplete = true;
-
-                    for (Object field : mandatoryFields) {
-                        if (field == null) {
-                            return false;
-                        }
-                    }
-                    return true;
-                case NO:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-        return false;
+        return  ofNullable(caseData.getIsCaseUrgent()).isPresent();
     }
 
 }
