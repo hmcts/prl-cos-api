@@ -63,6 +63,10 @@ withPipeline(type, product, component) {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
   }
 
+  onPreview() {
+    enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
+  }
+  
   onMaster() {
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
