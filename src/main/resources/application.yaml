@@ -143,7 +143,7 @@ auth:
 
 resources:
   images:
-    baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/task-list-and-submit-and-pay-combined/resources/'
+    baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
 
 prl-dgs-api:
   url: http://prl-dgs-aat.service.core-compute-aat.internal
