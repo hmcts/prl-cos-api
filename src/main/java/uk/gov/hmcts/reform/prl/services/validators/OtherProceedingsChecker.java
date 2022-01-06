@@ -2,17 +2,13 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,10 +16,12 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.OTHER_PROCEEDINGS_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.*;
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.DONT_KNOW;
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.NO;
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.YES;
 
 @Service
-public class OtherProceedingsChecker implements EventChecker{
+public class OtherProceedingsChecker implements EventChecker {
 
     @Autowired
     TaskErrorService taskErrorService;
@@ -35,13 +33,13 @@ public class OtherProceedingsChecker implements EventChecker{
         Optional<YesNoDontKnow> otherProceedings = ofNullable(caseData.getPreviousOrOngoingProceedingsForChildren());
         boolean otherProceedingsCompleted = otherProceedings.isPresent();
 
-        if (otherProceedingsCompleted &&
-            (otherProceedings.get().equals(NO) || otherProceedings.get().equals(DONT_KNOW))) {
+        if (otherProceedingsCompleted
+            && (otherProceedings.get().equals(NO) || otherProceedings.get().equals(DONT_KNOW))) {
             taskErrorService.removeError(OTHER_PROCEEDINGS_ERROR);
             return  true;
         }
 
-        Optional<List<Element<ProceedingDetails>>> proceedingDetails = ofNullable(caseData.getOtherProceedings());
+        Optional<List<Element<ProceedingDetails>>> proceedingDetails = ofNullable(caseData.getExistingProceedings());
 
         if (proceedingDetails.isPresent()) {
             List<ProceedingDetails> allProceedings = proceedingDetails.get()
@@ -50,7 +48,7 @@ public class OtherProceedingsChecker implements EventChecker{
                                                 .collect(Collectors.toList());
 
             //if a collection item is added and then removed the collection exists as length 0
-            if (allProceedings.size() == 0){
+            if (allProceedings.size() == 0) {
                 return false;
             }
 

@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeAll;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
 
@@ -14,13 +16,19 @@ import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.domestic
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 
+
+@RunWith(MockitoJUnitRunner.class)
 public class MiamCheckerTest {
+
+    @Mock
+    TaskErrorService taskErrorService;
+
+    @InjectMocks
+    MiamChecker miamChecker;
 
     @Test
     public void whenNoCaseDataThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
-
-        MiamChecker miamChecker = new MiamChecker();
 
         assert !miamChecker.isStarted(caseData);
     }
@@ -33,7 +41,6 @@ public class MiamCheckerTest {
             .familyMediatorMiam(NO)
             .build();
 
-        MiamChecker miamChecker = new MiamChecker();
 
         assert miamChecker.isStarted(caseData);
     }
@@ -42,16 +49,12 @@ public class MiamCheckerTest {
     public void whenNoDataHasMandatoryCompletedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        MiamChecker miamChecker = new MiamChecker();
-
         assert !miamChecker.hasMandatoryCompleted(caseData);
     }
 
     @Test
     public void whenNoDataIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
-
-        MiamChecker miamChecker = new MiamChecker();
 
         assert !miamChecker.isFinished(caseData);
     }
@@ -65,8 +68,6 @@ public class MiamCheckerTest {
             .soleTraderName("Trade Sole")
             .miamCertificationDocumentUpload(MiamDocument.builder().build())
             .build();
-
-        MiamChecker miamChecker = new MiamChecker();
 
         assert miamChecker.isFinished(caseData);
     }
@@ -83,8 +84,6 @@ public class MiamCheckerTest {
             .miamCertificationDocumentUpload1(MiamDocument.builder().build())
             .build();
 
-        MiamChecker miamChecker = new MiamChecker();
-
         assert miamChecker.isFinished(caseData);
     }
 
@@ -97,8 +96,6 @@ public class MiamCheckerTest {
             .miamExemptionsChecklist(Collections.singletonList(domesticViolence))
             .miamDomesticViolenceChecklist(Collections.singletonList(MiamDomesticViolenceChecklistEnum_Value_1))
             .build();
-
-            MiamChecker miamChecker = new MiamChecker();
 
             assert miamChecker.isFinished(caseData);
 

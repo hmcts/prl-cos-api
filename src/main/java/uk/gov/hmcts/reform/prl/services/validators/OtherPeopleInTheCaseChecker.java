@@ -69,52 +69,38 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
 
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
-//
-//        if (caseData.getOthersToNotify() != null && caseData.getOthersToNotify().size() != 0) {
-//            List<PartyDetails> others = caseData.getOthersToNotify()
-//                .stream().map(Element::getValue)
-//                .collect(Collectors.toList());
-//
-//            boolean allMandatoryCompleted = true;
-//
-//            for (PartyDetails party:others){
-//                allMandatoryCompleted = validateMandatoryPartyDetailsForOtherPerson(party);
-//            }
-//            return allMandatoryCompleted;
-//        }
         return false;
     }
 
 
     public boolean validateMandatoryPartyDetailsForOtherPerson(PartyDetails party) {
-        boolean baseFields = allNonEmpty(
-                                party.getFirstName(),
-                                party.getLastName(),
-                                party.getIsDateOfBirthKnown(),
-                                party.getGender(),
-                                party.getIsCurrentAddressKnown(),
-                                party.getCanYouProvideEmailAddress(),
-                                party.getCanYouProvidePhoneNumber()
-        );
         boolean additionalFields = true;
 
         YesOrNo dob = party.getIsDateOfBirthKnown();
-        YesOrNo currAdd = party.getIsCurrentAddressKnown();
-        YesOrNo canProvideEmail = party.getCanYouProvideEmailAddress();
-        YesOrNo canProvideTel = party.getCanYouProvidePhoneNumber();
-
-        if (dob != null && dob.equals(YES) ) {
+        if (dob != null && dob.equals(YES)) {
             additionalFields = party.getDateOfBirth() != null;
         }
+        YesOrNo currAdd = party.getIsCurrentAddressKnown();
         if (currAdd != null && currAdd.equals(YES)) {
             additionalFields = party.getAddress().getAddressLine1() != null;
         }
+        YesOrNo canProvideEmail = party.getCanYouProvideEmailAddress();
         if (canProvideEmail != null && canProvideEmail.equals(YES)) {
             additionalFields = party.getEmail() != null;
         }
+        YesOrNo canProvideTel = party.getCanYouProvidePhoneNumber();
         if (canProvideTel != null && canProvideTel.equals(YES)) {
             additionalFields = party.getPhoneNumber() != null;
         }
+        boolean baseFields = allNonEmpty(
+            party.getFirstName(),
+            party.getLastName(),
+            party.getIsDateOfBirthKnown(),
+            party.getGender(),
+            party.getIsCurrentAddressKnown(),
+            party.getCanYouProvideEmailAddress(),
+            party.getCanYouProvidePhoneNumber()
+        );
         return baseFields && additionalFields;
     }
 

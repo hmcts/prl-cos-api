@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
-import org.junit.Test;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
@@ -14,7 +14,7 @@ public class PdfCheckerTest {
     public void whenNoCaseDataFinishedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        PDFChecker pdfChecker = new PDFChecker();
+        PdfChecker pdfChecker = new PdfChecker();
         assert !pdfChecker.isFinished(caseData);
 
     }
@@ -23,7 +23,7 @@ public class PdfCheckerTest {
     public void whenNoCaseDataStartedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        PDFChecker pdfChecker = new PDFChecker();
+        PdfChecker pdfChecker = new PdfChecker();
         assert !pdfChecker.isStarted(caseData);
 
     }
@@ -32,7 +32,7 @@ public class PdfCheckerTest {
     public void whenNoCaseDataHasMandatoryCompletedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        PDFChecker pdfChecker = new PDFChecker();
+        PdfChecker pdfChecker = new PdfChecker();
         assert !pdfChecker.hasMandatoryCompleted(caseData);
 
     }
@@ -46,7 +46,7 @@ public class PdfCheckerTest {
             .jurisdictionIssue(NO)
             .build();
 
-        PDFChecker pdfChecker = new PDFChecker();
+        PdfChecker pdfChecker = new PdfChecker();
         assert !pdfChecker.isFinished(caseData);
 
     }
@@ -60,7 +60,7 @@ public class PdfCheckerTest {
             .jurisdictionIssue(NO)
             .build();
 
-        PDFChecker pdfChecker = new PDFChecker();
+        PdfChecker pdfChecker = new PdfChecker();
         assert !pdfChecker.isStarted(caseData);
 
     }
@@ -75,7 +75,7 @@ public class PdfCheckerTest {
             .build();
 
 
-        PDFChecker pdfChecker = new PDFChecker();
+        PdfChecker pdfChecker = new PdfChecker();
         assert !pdfChecker.hasMandatoryCompleted(caseData);
 
     }

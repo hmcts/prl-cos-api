@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.services;
+package uk.gov.hmcts.reform.prl.clients;
 
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

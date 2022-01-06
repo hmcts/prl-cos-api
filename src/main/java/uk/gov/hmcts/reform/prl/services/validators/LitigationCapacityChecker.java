@@ -31,11 +31,11 @@ public class LitigationCapacityChecker implements EventChecker {
 
         Optional<YesOrNo> litigationOther = ofNullable(caseData.getLitigationCapacityOtherFactors());
 
-        if ((litigationOtherComplete && litigationOtherDetailsComplete) ||
-            (litigationOtherComplete && litigationOther.get().equals(NO))) {
+        if ((litigationOtherComplete && litigationOtherDetailsComplete)
+            || (litigationOtherComplete && (litigationOther.isPresent() && litigationOther.get().equals(NO)))) {
             taskErrorService.removeError(LITIGATION_CAPACITY_ERROR);
             return true;
-            }
+        }
 
         if (!litigationOtherComplete && (litigationFactorsComplete || litigationReferralsComplete)) {
             taskErrorService.removeError(LITIGATION_CAPACITY_ERROR);
@@ -49,7 +49,7 @@ public class LitigationCapacityChecker implements EventChecker {
     public boolean isStarted(CaseData caseData) {
         Optional<YesOrNo> otherFactors = ofNullable(caseData.getLitigationCapacityOtherFactors());
         if (otherFactors.isPresent() && otherFactors.get().equals(YES)) {
-            if(ofNullable(caseData.getLitigationCapacityOtherFactorsDetails()).isEmpty()) {
+            if (ofNullable(caseData.getLitigationCapacityOtherFactorsDetails()).isEmpty()) {
                 taskErrorService.addEventError(LITIGATION_CAPACITY, LITIGATION_CAPACITY_ERROR,
                                                LITIGATION_CAPACITY_ERROR.getError());
                 return true;

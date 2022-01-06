@@ -249,7 +249,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: versions.springBoot
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry'
-  implementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
+  implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.6'
   implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-httpcomponents', version: versions.reformsJavaLogging
@@ -267,7 +267,6 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
 
   implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.6'
-  implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '4.0.0'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
@@ -438,10 +437,13 @@ jacocoTestCoverageVerification {
 project.tasks['sonarqube'].dependsOn jacocoTestReport
 
 def sonarExclusions = [
-  '**uk/gov/hmcts/reform/prl/models/**/*',
+  '**uk/gov/hmcts/reform/prl/models/**/*',\
+  '**uk/gov/hmcts/reform/prl/enums/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/SslVerificationDisabler.*',
-  '**uk/gov/hmcts/reform/prl/Application.*'
+  '**uk/gov/hmcts/reform/prl/Application.*',
+  '**uk/gov/hmcts/reform/prl/services/validators/*.*'
+
 ]
 
 sonarqube {

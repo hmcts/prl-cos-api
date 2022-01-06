@@ -8,8 +8,20 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.EnumMap;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.enums.Event.*;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
+import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
+import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
+import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
+import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 
 @Service
 public class SubmitAndPayChecker implements EventChecker {
@@ -24,7 +36,7 @@ public class SubmitAndPayChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        return !hasMandatoryCompleted(caseData);
+        return false;
     }
 
     @Override
@@ -41,10 +53,13 @@ public class SubmitAndPayChecker implements EventChecker {
         mandatoryEvents.put(MIAM, eventsChecker.miamChecker);
         mandatoryEvents.put(ALLEGATIONS_OF_HARM, eventsChecker.allegationsOfHarmChecker);
 
-        boolean mandatoryFinished = false;
+        boolean mandatoryFinished;
 
         for (Map.Entry<Event, EventChecker> e : mandatoryEvents.entrySet()) {
             mandatoryFinished = e.getValue().isFinished(caseData);
+            if (!mandatoryFinished) {
+                return false;
+            }
         }
 
         EnumMap<Event, EventChecker> optionalEvents = new EnumMap<Event, EventChecker>(Event.class);
@@ -65,6 +80,6 @@ public class SubmitAndPayChecker implements EventChecker {
             }
         }
 
-        return mandatoryFinished;
+        return true;
     }
 }
