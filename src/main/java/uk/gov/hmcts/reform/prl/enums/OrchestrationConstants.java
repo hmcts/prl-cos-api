@@ -15,8 +15,16 @@ public class OrchestrationConstants {
     public static final String DAYS = "days";
     public static final String HOURS = "hours";
 
-    public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMIAM";
-    public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
+    public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMiam";
+    public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMiam";
+
+    //Fee and Pay integration related constants
+    public static final String JURISDICTION = "PRIVATELAW";
+    public static final String CASE_TYPE = "C100";
+
+    public static final String PAYMENT_ACTION = "payment";
+    public static final String FEE_VERSION = "1";
+    public static final Integer FEE_VOLUME = 1;
 
 
 }

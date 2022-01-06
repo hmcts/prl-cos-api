@@ -50,4 +50,7 @@ public class PartyDetails {
     private final String sendSignUpLink;
     private final String solicitorEmail;
 
+
+
+
 }
