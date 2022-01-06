@@ -18,8 +18,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONException;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-
+@Ignore
 @ExtendWith(PactConsumerTestExt.class)
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -95,7 +95,6 @@ public class PrePopulateFeeDetailsConsumerTest {
             .toPact();
     }
 
-    @Test
     @PactTestFor(pactMethod = "getFeeDetails")
     public void verifyGetUserDetailsDataPact(MockServer mockServer) throws JSONException, IOException {
 
