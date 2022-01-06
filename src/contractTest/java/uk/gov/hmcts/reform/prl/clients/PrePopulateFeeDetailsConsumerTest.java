@@ -96,7 +96,6 @@ public class PrePopulateFeeDetailsConsumerTest {
             .toPact();
     }
 
-    @Test
     @PactTestFor(pactMethod = "getFeeDetails")
     public void verifyGetUserDetailsDataPact(MockServer mockServer) throws JSONException, IOException {
 
