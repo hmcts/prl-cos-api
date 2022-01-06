@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
+import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
 import static org.mockito.Mockito.verify;
@@ -32,6 +33,9 @@ public class CallbackControllerTest {
     @Mock
     private ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
 
+    @Mock
+    private ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
+
     @InjectMocks
     private CallbackController callbackController;
 
@@ -45,7 +49,7 @@ public class CallbackControllerTest {
     private GeneratedDocumentInfo generatedDocumentInfo;
 
     public static final String authToken = "Bearer TestAuthToken";
-    public static final String PRL_DRAFT_TEMPLATE = "FL-DIV-GOR-ENG-00062.docx";
+    public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-TRY-FINAL-13.docx";
 
     @Before
     public void setUp() {
@@ -75,6 +79,23 @@ public class CallbackControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.builder().build();
 
 
+        when(applicationConsiderationTimetableValidationWorkflow.run(callbackRequest))
+            .thenReturn(workflowResult);
+
+        callbackController.validateApplicationConsiderationTimetable(callbackRequest);
+
+        verify(applicationConsiderationTimetableValidationWorkflow).run(callbackRequest);
+        verifyNoMoreInteractions(applicationConsiderationTimetableValidationWorkflow);
+
+    }
+
+    @Test
+    public void testvalidateApplicationConsiderationTimetable() throws WorkflowException {
+        CaseDetails caseDetails  = CaseDetailsProvider.full();
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.builder().build();
+
+
         when(validateMiamApplicationOrExemptionWorkflow.run(callbackRequest))
             .thenReturn(workflowResult);
 
@@ -85,7 +106,7 @@ public class CallbackControllerTest {
 
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testGenerateAndStoreDocument() throws Exception {
         //CaseDetails caseDetails  = CaseDetailsProvider.full();
 
@@ -101,7 +122,7 @@ public class CallbackControllerTest {
                                .documentUrl(generatedDocumentInfo.getUrl())
                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                .documentHash(generatedDocumentInfo.getHashToken())
-                               .documentFileName("FL-DIV-GOR-ENG-00062.docx")
+                               .documentFileName("PRL-DRAFT-TRY-FINAL-13.docx")
                                .build())
             .build())
             .build();
@@ -112,7 +133,7 @@ public class CallbackControllerTest {
                                          .documentUrl(generatedDocumentInfo.getUrl())
                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                          .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("FL-DIV-GOR-ENG-00062.docx")
+                                         .documentFileName("PRL-DRAFT-TRY-FINAL-13.docx")
                                          .build())
                       .build())
             .build();
