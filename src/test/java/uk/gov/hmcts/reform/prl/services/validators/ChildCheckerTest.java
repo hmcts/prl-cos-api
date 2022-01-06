@@ -1,14 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Test;
-
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.Gender;
-import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
-import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -110,18 +107,25 @@ public class ChildCheckerTest {
             .applicantsRelationshipToChild(SPECIAL_GUARDIAN)
             .respondentsRelationshipToChild(FATHER)
             .childLiveWith(Collections.singletonList(RESPONDENT))
+            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
+            .childrenKnownToLocalAuthorityTextArea("Test")
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
             .build();
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        CaseData caseData = CaseData.builder().children(listOfChildren).build();
+        CaseData caseData = CaseData.builder()
+            .children(listOfChildren)
+            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
+            .childrenKnownToLocalAuthorityTextArea("TestString")
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.DONT_KNOW)
+            .build();
+
 
         assert childChecker.isFinished(caseData);
 
     }
-
-
 
 
 }

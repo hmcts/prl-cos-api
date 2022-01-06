@@ -1,13 +1,11 @@
 package uk.gov.hmcts.reform.prl.services;
 
-
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -19,7 +17,7 @@ import java.util.Map;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class CoreCaseDataServiceTest {
 
     private final String jurisdiction = "PRIVATELAW";
@@ -41,13 +39,13 @@ public class CoreCaseDataServiceTest {
     @InjectMocks
     CoreCaseDataService coreCaseDataService;
 
-    @BeforeEach
-    void setup() {
+    @Before
+    public void setup() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
     }
 
-    @BeforeEach
-    void setUp() {
+    @Before
+    public void setUp() {
         when(systemUserService.getUserId(userToken)).thenReturn(systemUserId);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
 
@@ -57,7 +55,7 @@ public class CoreCaseDataServiceTest {
     }
 
     @Test
-    void shouldStartAndSubmitEventWithEventData() {
+    public void shouldStartAndSubmitEventWithEventData() {
         Map<String, Object> eventData = Map.of("A", "B");
         coreCaseDataService.triggerEvent(jurisdiction, caseType, caseId, eventName, eventData);
 

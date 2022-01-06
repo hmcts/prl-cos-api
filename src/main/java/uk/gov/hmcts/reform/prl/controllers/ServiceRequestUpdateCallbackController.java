@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -23,11 +22,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequiredArgsConstructor
 public class ServiceRequestUpdateCallbackController {
 
-    private final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
+    private final String serviceAuth = "ServiceAuthorization";
     private final RequestUpdateCallbackService requestUpdateCallbackService;
     private final AuthTokenGenerator authTokenGenerator;
-
-
 
     @PostMapping(path = "/service-request-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Ways to pay will call this API and send the status of payment with other details")
@@ -36,12 +33,12 @@ public class ServiceRequestUpdateCallbackController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public void serviceRequestUpdate(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization,
+        @RequestHeader(serviceAuth) String serviceAuthorization,
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws Exception {
         try {
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-        }catch(Exception ex) {
+        } catch (Exception ex) {
             log.error(
                 "Payment callback is unsuccessful for the CaseID: {}",
                 serviceRequestUpdateDto.getCcdCaseNumber()

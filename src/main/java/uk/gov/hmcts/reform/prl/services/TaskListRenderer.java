@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
-//import uk.gov.hmcts.reform.prl.models.submission.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskSection;
@@ -20,7 +19,22 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
-import static uk.gov.hmcts.reform.prl.enums.Event.*;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
+import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
+import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
+import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
+import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
+import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskSection.newSection;
 
 @Service
@@ -74,7 +88,7 @@ public class TaskListRenderer {
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
         final TaskSection pdfApplication = newSection("View PDF application")
-            .withTask(tasks.get(VIEW_PDF_APPLICATION));
+            .withTask(tasks.get(VIEW_PDF_DOCUMENT));
 
         final TaskSection submitAndPay = newSection("Submit and pay")
             .withTask(tasks.get(SUBMIT_AND_PAY));
@@ -113,14 +127,12 @@ public class TaskListRenderer {
         switch (task.getState()) {
 
             case NOT_STARTED:
-                if (task.getEvent().equals(VIEW_PDF_APPLICATION)) {
+                if (task.getEvent().equals(VIEW_PDF_DOCUMENT)) {
                     lines.add(taskListRenderElements.renderLink(task));
-                }
-                else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
-                    lines.add(taskListRenderElements.renderLink(task)
+                } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
+                    lines.add(taskListRenderElements.renderDisabledLink(task)
                                   + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
-                }
-                else {
+                } else {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("not-started.png", "Not started"));
                 }
@@ -130,15 +142,14 @@ public class TaskListRenderer {
                               + taskListRenderElements.renderImage("in-progress.png", "In progress"));
                 break;
             case MANDATORY_COMPLETED:
-                    lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage("information-added.png", "Information added"));
+                lines.add(taskListRenderElements.renderLink(task)
+                              + taskListRenderElements.renderImage("information-added.png", "Information added"));
                 break;
             case FINISHED:
                 if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
-                }
-                else {
+                } else {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("finished.png", "Finished"));
                 }

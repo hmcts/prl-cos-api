@@ -151,9 +151,7 @@ public class CaseData {
     /**
      * Allegations of harm.
      */
-    /**
-     * Allegations of harm
-     */
+
     private final YesOrNo allegationsOfHarmYesNo;
     private final YesOrNo allegationsOfHarmDomesticAbuseYesNo;
     private final List<ApplicantOrChildren> physicalAbuseVictim;
@@ -227,7 +225,7 @@ public class CaseData {
      */
 
     private final YesNoDontKnow previousOrOngoingProceedingsForChildren;
-    private final List<Element<ProceedingDetails>> otherProceedings;
+    private final List<Element<ProceedingDetails>> existingProceedings;
 
 
     /**

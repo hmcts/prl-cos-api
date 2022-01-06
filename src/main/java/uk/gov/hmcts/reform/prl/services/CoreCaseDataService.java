@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 
 import java.util.Map;
 
-
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CoreCaseDataService {
