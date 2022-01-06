@@ -84,9 +84,9 @@ public class CallbackControllerTest {
 
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testGenerateAndStoreDocument() throws Exception {
-        CaseDetails caseDetails  = CaseDetailsProvider.full();
+        //CaseDetails caseDetails  = CaseDetailsProvider.full();
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -94,13 +94,15 @@ public class CallbackControllerTest {
             .hashToken("testHashToken")
             .build();
 
-        CaseData caseData = CaseData.builder()
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseData(CaseData.builder()
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                .documentHash(generatedDocumentInfo.getHashToken())
                                .documentFileName("FL-DIV-GOR-ENG-00062.docx")
                                .build())
+            .build())
             .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
