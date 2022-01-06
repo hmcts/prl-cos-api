@@ -16,6 +16,7 @@ def component = "cos"
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
 withPipeline(type, product, component) {
+  pipelineConf = config;
   enableAksStagingDeployment()
   disableLegacyDeployment()
 
@@ -47,11 +48,12 @@ withPipeline(type, product, component) {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
   }
 
-  onPreview() {
+  onMaster() {
+    env.ENV = 'aat'
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
-
-  onMaster() {
+  onPR() {
+    env.ENV = 'preview'
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }
