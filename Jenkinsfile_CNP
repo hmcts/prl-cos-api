@@ -22,8 +22,6 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 def secrets = [
-  'prl-${env}': [
-    ]
 ]
 
 // Vars for Kubernetes
