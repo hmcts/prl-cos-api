@@ -111,7 +111,6 @@ public class PaymentServiceRequestConsumerTest {
     }
 
 
-    @Test
     @PactTestFor(pactMethod = "getServiceRequest")
     public void verifyPaymentServiceRequestDataPact(MockServer mockServer) throws JSONException, IOException {
 
