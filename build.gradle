@@ -29,7 +29,7 @@ def versions = [
   commonsLang3                 : '3.9',
   commonsMath3                 : '3.6.1',
   dumbster                     : '1.7.1',
-  feignHttpClient              : '10.3.0',
+  //feignHttpClient              : '10.3.0',
   googleAuth                   : '1.5.0',
   guava                        : '30.1-jre',
   hmctsNotify                  : '3.14.1-RELEASE',
@@ -235,9 +235,10 @@ dependencies {
   implementation group: 'com.github.kirviq', name: 'dumbster', version: versions.dumbster
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
   implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
-  implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
+  implementation group: 'io.github.openfeign', name: 'feign-httpclient'
   implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
+  implementation group: 'io.springfox', name: 'springfox-spring-webflux', version: versions.springfoxSwagger
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.0.0'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
   implementation group: 'org.apache.commons', name: 'commons-math3', version: versions.commonsMath3
@@ -248,7 +249,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: versions.springBoot
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry'
-  implementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
+  implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.6'
   implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-httpcomponents', version: versions.reformsJavaLogging
@@ -263,6 +264,19 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz'
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
+  implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
+
+  implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.6'
+  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '4.0.0'
+//  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
+//
+  implementation group: 'org.springframework.security', name: 'spring-security-web'
+//  implementation group: 'org.springframework.security', name: 'spring-security-config'
+//  // CVE-2021-22112 - Privilege Escalation
+  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.5.2'
+//  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
+//  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
+
 
   implementation(group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign')
     {
@@ -423,11 +437,13 @@ jacocoTestCoverageVerification {
 project.tasks['sonarqube'].dependsOn jacocoTestReport
 
 def sonarExclusions = [
-  '**uk/gov/hmcts/reform/prl/models/**/*',
+  '**uk/gov/hmcts/reform/prl/models/**/*',\
+  '**uk/gov/hmcts/reform/prl/enums/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/SslVerificationDisabler.*',
   '**uk/gov/hmcts/reform/prl/Application.*',
-  '**uk/gov/hmcts/reform/prl/enums/**/*'
+  '**uk/gov/hmcts/reform/prl/services/validators/*.*'
+
 ]
 
 sonarqube {

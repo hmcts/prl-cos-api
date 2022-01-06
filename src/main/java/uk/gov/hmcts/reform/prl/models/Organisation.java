@@ -1,4 +1,3 @@
-
 package uk.gov.hmcts.reform.prl.models;
 
 import com.fasterxml.jackson.annotation.JsonInclude;

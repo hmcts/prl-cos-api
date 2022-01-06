@@ -1,4 +1,32 @@
 java:
-  # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
+  keyVaults:
+    prl:
+      secrets:
+        - name: prl-cos-idam-client-secret
+          alias: IDAM_CLIENT_SECRET
+        - name: microservicekey-prl-cos-api
+          alias: IDAM_S2S_AUTH_TOTP_SECRET
+        - name: system-update-user-username
+          alias: SYSTEM_UPDATE_USER_USERNAME
+        - name: system-update-user-password
+          alias: PRL_SYSTEM_UPDATE_PASSWORD
+  environment:
+    PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    PAY_CALLBACK_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/service-request
+    RUNS_LOCALLY: false
+    IDAM_CLIENT_ID: prl-cos-api
+    IDAM_CLIENT_REDIRECT_URI: https://prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/oauth2/callback
+    IDAM_API_URL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
+    IDAM_S2S_AUTH_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    CORE_CASE_DATA_API_URL: http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
+    AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    DOCMOSIS_SERVICE_BASE_URL: https://docmosis.aat.platform.hmcts.net
+    CCD_CASE_DOCS_AM_API: http://ccd-case-document-am-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    REFORM_SERVICE_NAME: prl_cos_api
+    AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE: prl_cos_api
+    AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS: 900
+    IDAM_S2S_AUTH_MICROSERVICE: prl_cos_api

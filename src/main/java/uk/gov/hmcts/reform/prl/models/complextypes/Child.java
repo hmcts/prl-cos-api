@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 
@@ -29,6 +30,9 @@ public class Child {
     private final RelationshipsEnum  respondentsRelationshipToChild;
     private final String otherRespondentsRelationshipToChild;
     private final List<LiveWithEnum> childLiveWith;
+    private final YesNoDontKnow childrenKnownToLocalAuthority;
+    private final String childrenKnownToLocalAuthorityTextArea;
+    private final YesNoDontKnow childrenSubjectOfChildProtectionPlan;
     private final String otherPersonWhoLivesWithChild;
     private final YesOrNo isChildCurrentAddressKnown;
     private final Address address;

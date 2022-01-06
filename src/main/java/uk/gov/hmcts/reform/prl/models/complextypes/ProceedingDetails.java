@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.documents.ProceedingOrderDocument;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,6 +24,6 @@ public class ProceedingDetails {
     private final String nameOfChildrenInvolved;
     private final String nameOfGuardian;
     private final String nameAndOffice;
-    private final Document uploadRelevantOrder;
+    private final ProceedingOrderDocument uploadRelevantOrder;
 
 }
