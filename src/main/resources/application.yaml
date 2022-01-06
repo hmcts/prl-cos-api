@@ -87,7 +87,7 @@ payments:
 
 fees-register:
   api:
-    url: http://fees-register-api-demo.service.core-compute-demo.internal
+    url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}
   parameters:
     C100_SUBMISSION_FEE:
       channel: default
@@ -146,4 +146,4 @@ resources:
     baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
 
 prl-dgs-api:
-  url: http://prl-dgs-aat.service.core-compute-aat.internal
+  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
