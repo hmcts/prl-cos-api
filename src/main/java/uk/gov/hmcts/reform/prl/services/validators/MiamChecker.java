@@ -18,6 +18,7 @@ import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.domestic
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.other;
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.previousMIAMattendance;
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.urgency;
+import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.childProtectionConcern;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
@@ -109,6 +110,7 @@ public class MiamChecker implements EventChecker {
         boolean urgencyCompleted = true;
         boolean prevAttendCompleted = true;
         boolean otherCompleted = true;
+        boolean childProtectionCompleted = true;
 
         if (exceptions.isPresent() && exceptions.get().contains(domesticViolence)) {
             dvCompleted = anyNonEmpty(caseData.getMiamDomesticViolenceChecklist());
@@ -122,8 +124,11 @@ public class MiamChecker implements EventChecker {
         if (exceptions.isPresent() && exceptions.get().contains(other)) {
             otherCompleted = anyNonEmpty(caseData.getMiamOtherGroundsChecklist());
         }
+        if (exceptions.isPresent() && exceptions.get().contains(childProtectionConcern)) {
+            childProtectionCompleted = anyNonEmpty(caseData.getMiamChildProtectionConcernList());
+        }
 
-        return dvCompleted && urgencyCompleted && prevAttendCompleted && otherCompleted;
+        return dvCompleted && urgencyCompleted && prevAttendCompleted && otherCompleted && childProtectionCompleted;
 
     }
 
