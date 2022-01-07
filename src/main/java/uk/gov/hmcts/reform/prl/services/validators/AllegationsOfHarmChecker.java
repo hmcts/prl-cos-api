@@ -202,10 +202,10 @@ public class AllegationsOfHarmChecker implements EventChecker {
 
                 boolean abductionChildPassportPosessionCompleted = abductionChildPassportPosession.isPresent();
 
-                if(abductionChildPassportPosessionCompleted) {
+                if (abductionChildPassportPosessionCompleted) {
                     if (abductionChildPassportPosession.get().equals(OTHER)) {
                         passportPossessionCompleted = abductionChildPassportPosessionOtherDetail.isPresent();
-                    }else{
+                    } else {
                         passportPossessionCompleted = true;
                     }
                 }
@@ -348,7 +348,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
     }
 
-    public boolean validateChildContact(CaseData caseData){
+    public boolean validateChildContact(CaseData caseData) {
 
         Optional<YesOrNo> agreeChildUnsupervisedTime = ofNullable(caseData.getAgreeChildUnsupervisedTime());
         Optional<YesOrNo> agreeChildSupervisedTime = ofNullable(caseData.getAgreeChildSupervisedTime());
@@ -361,7 +361,6 @@ public class AllegationsOfHarmChecker implements EventChecker {
         fields.add(agreeChildOtherContact);
 
         return fields.stream().noneMatch(Optional::isEmpty);
-            //&& fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 
     }
 
