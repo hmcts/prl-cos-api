@@ -31,9 +31,6 @@ public class CoreCaseDataService {
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);
 
-        log.info("UserToken: " + userToken);
-        log.info("System Update User ID " + systemUpdateUserId);
-
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             userToken,
             authTokenGenerator.generate(),
@@ -42,10 +39,6 @@ public class CoreCaseDataService {
             caseType,
             caseId.toString(),
             eventName);
-
-        log.info(startEventResponse.getToken());
-        log.info(startEventResponse.toString());
-
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
