@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.tasks.emails;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -12,6 +13,9 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.tasks.emails.generics.SendEmailTask;
 
+import java.util.stream.Collectors;
+
+@Slf4j
 @Component
 public class SolicitorEmailTask extends SendEmailTask {
 
@@ -42,15 +46,22 @@ public class SolicitorEmailTask extends SendEmailTask {
             .getCaseData()
             .getApplicants()
             .stream()
-            .map(element -> element.getValue().getFirstName() + element.getValue().getLastName()).toString();
-        return SolicitorEmail.builder()
+            .map(element -> element.getValue().getFirstName() + element.getValue().getLastName())
+                .collect(Collectors.toList()).toString();
+
+
+        SolicitorEmail email = SolicitorEmail.builder()
             .caseReference(caseDetails.getCaseId())
             .caseName(caseDetails.getCaseData().getApplicantCaseName())
             .applicantName(applicantName)
             .courtName("court name")
             .fullName("userDetails.getFullName()")
             .courtEmail("C100applications@justice.gov.uk")
+            .caseLink("http://localhost:3333/cases/case-details/" + caseDetails.getCaseId())
             .build();
+
+
+        return email;
     }
     @Override
     protected LanguagePreference getLanguage(CaseDetails caseDetails) {
