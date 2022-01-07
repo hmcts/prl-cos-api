@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum.OTHER;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
@@ -103,7 +105,8 @@ public class AllegationsOfHarmChecker implements EventChecker {
                 && previousOrders
                 && behavioursCompleted
                 && validateAbductionSection(caseData)
-                && validateOtherConcerns(caseData);
+                && validateOtherConcerns(caseData)
+                && validateChildContact(caseData);
 
         } else {
             isFinished = allegationsOfHarmYesNo.isPresent();
@@ -166,17 +169,18 @@ public class AllegationsOfHarmChecker implements EventChecker {
         Optional<YesOrNo> previousAbductionThreats = ofNullable(caseData.getPreviousAbductionThreats());
         Optional<String> previousAbductionThreatsDetails = ofNullable(caseData.getPreviousAbductionThreatsDetails());
         Optional<YesOrNo> abductionPassportOfficeNotified = ofNullable(caseData.getAbductionPassportOfficeNotified());
+        Optional<YesOrNo> abductionChildHasPassport = ofNullable(caseData.getAbductionChildHasPassport());
+        Optional<AbductionChildPassportPossessionEnum> abductionChildPassportPosession = ofNullable(caseData.getAbductionChildPassportPosession());
+        Optional<String> abductionChildPassportPosessionOtherDetail = ofNullable(caseData.getAbductionChildPassportPosessionOtherDetail());
         Optional<YesOrNo> abductionPreviousPoliceInvolvement = ofNullable(caseData.getAbductionPreviousPoliceInvolvement());
         Optional<String> abductionPreviousPoliceInvolvementDetails = ofNullable(caseData.getAbductionPreviousPoliceInvolvementDetails());
-        Optional<YesOrNo> abductionOtherSafetyConcerns = ofNullable(caseData.getAbductionOtherSafetyConcerns());
-        Optional<String> abductionOtherSafetyConcernsDetails = ofNullable(caseData.getAbductionOtherSafetyConcernsDetails());
-        Optional<String> abductionCourtStepsRequested = ofNullable(caseData.getAbductionCourtStepsRequested());
 
         boolean abductionSectionCompleted;
         boolean previousThreatSectionComplete = false;
         boolean passportCompleted = abductionPassportOfficeNotified.isPresent();
+        boolean hasPassportCompleted = abductionChildHasPassport.isPresent();
+        boolean passportPossessionCompleted = false;
         boolean policeCompleted = false;
-        boolean otherCompleted = false;
 
         if (childAbduction.isPresent() && childAbduction.get().equals(NO)) {
             return true;
@@ -196,6 +200,16 @@ public class AllegationsOfHarmChecker implements EventChecker {
                     }
                 }
 
+                boolean abductionChildPassportPosessionCompleted = abductionChildPassportPosession.isPresent();
+
+                if(abductionChildPassportPosessionCompleted) {
+                    if (abductionChildPassportPosession.get().equals(OTHER)) {
+                        passportPossessionCompleted = abductionChildPassportPosessionOtherDetail.isPresent();
+                    }else{
+                        passportPossessionCompleted = true;
+                    }
+                }
+
                 boolean abductionPreviousPoliceInvolvementCompleted = abductionPreviousPoliceInvolvement.isPresent();
 
                 if (abductionPreviousPoliceInvolvementCompleted) {
@@ -206,23 +220,16 @@ public class AllegationsOfHarmChecker implements EventChecker {
                     }
                 }
 
-                boolean abductionOtherConcernsCompleted = abductionOtherSafetyConcerns.isPresent();
-
-                if (abductionOtherConcernsCompleted) {
-                    if (abductionOtherSafetyConcerns.get().equals(YES)) {
-                        otherCompleted = abductionOtherSafetyConcernsDetails.isPresent();
-                    } else {
-                        otherCompleted = true;
-                    }
-                }
             } else {
-                abductionSectionCompleted = abductionCourtStepsRequested.isPresent();
+                abductionSectionCompleted = true;
             }
             return abductionSectionCompleted
                 && previousThreatSectionComplete
                 && passportCompleted
-                && policeCompleted
-                && otherCompleted;
+                && hasPassportCompleted
+                && passportPossessionCompleted
+                && policeCompleted;
+
         } else {
             return false;
         }
@@ -340,4 +347,23 @@ public class AllegationsOfHarmChecker implements EventChecker {
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
     }
+
+    public boolean validateChildContact(CaseData caseData){
+
+        Optional<YesOrNo> agreeChildUnsupervisedTime = ofNullable(caseData.getAgreeChildUnsupervisedTime());
+        Optional<YesOrNo> agreeChildSupervisedTime = ofNullable(caseData.getAgreeChildSupervisedTime());
+        Optional<YesOrNo> agreeChildOtherContact = ofNullable(caseData.getAgreeChildOtherContact());
+
+
+        List<Optional> fields = new ArrayList<>();
+        fields.add(agreeChildUnsupervisedTime);
+        fields.add(agreeChildSupervisedTime);
+        fields.add(agreeChildOtherContact);
+
+        return fields.stream().noneMatch(Optional::isEmpty);
+            //&& fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+
+    }
+
+
 }
