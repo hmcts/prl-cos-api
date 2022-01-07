@@ -22,8 +22,8 @@ public class SolicitorEmailTask extends SendEmailTask {
 //    protected String getRecipientEmail(UserDetails userDetails) {
 //
 //        return "prl_caseworker_solicitor@mailinator.com";
-
-    }
+//
+//    }
     @Override
     protected EmailTemplateNames getTemplate() {
         return EmailTemplateNames.EXAMPLE;

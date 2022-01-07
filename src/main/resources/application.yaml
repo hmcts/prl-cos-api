@@ -67,7 +67,7 @@ uk:
   gov:
     notify:
       api:
-        key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxxx}
+        key: ${UK_GOV_NOTIFY_API_KEY:8D25AD1438DE4FF51EA43A4558161}
         baseUrl: https://api.notifications.service.gov.uk
       email:
         templates:
@@ -124,10 +124,6 @@ resources:
   images:
     baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/'
 
-
-notify:
-  api-key: XXX
-  baseUrl: www.email.com
 
 
 prl:
