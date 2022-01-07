@@ -67,14 +67,14 @@ uk:
   gov:
     notify:
       api:
-        key: ${UK_GOV_NOTIFY_API_KEY:8D25AD1438DE4FF51EA43A4558161}
+        key: ${UK_GOV_NOTIFY_API_KEY:}
         baseUrl: https://api.notifications.service.gov.uk
       email:
         templates:
           english:
-            EXAMPLE: 2e00903c-46f4-46d6-9d94-d419ee30b927
+            EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
           welsh:
-            EXAMPLE: example-template-id-222
+            EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
 
 
 
