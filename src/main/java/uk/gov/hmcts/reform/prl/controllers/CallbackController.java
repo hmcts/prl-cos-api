@@ -14,9 +14,11 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
+import uk.gov.hmcts.reform.prl.workflows.SolicitorEmailWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -30,6 +32,7 @@ public class CallbackController {
     private final ExampleService exampleService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
     private final ObjectMapper objectMapper;
+    private final SolicitorEmailWorkflow solicitorEmailWorkflow;
 
 
     /**
@@ -82,6 +85,23 @@ public class CallbackController {
                 .errors(workflowResult.getErrors())
                 .build()
 
+        );
+    }
+
+    @PostMapping(path = "/validate-miam-application-or-exemption", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public ResponseEntity<uk.gov.hmcts.reform.ccd.client.model.CallbackResponse> sendSolicitorEmail(
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) throws WorkflowException {
+
+        solicitorEmailWorkflow.run(callbackRequest.getCaseDetails());
+
+        return ok(
+            CallbackResponse.builder()
+
+                .build()
         );
     }
 
