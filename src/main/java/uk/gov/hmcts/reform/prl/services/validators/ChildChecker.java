@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
@@ -109,7 +110,11 @@ public class ChildChecker implements EventChecker {
             personWhoLivesWithChildList.get().stream().map(Element::getValue).forEach(eachRow -> {
                 fields.add(ofNullable(eachRow.getFirstName()));
                 fields.add(ofNullable(eachRow.getLastName()));
-                fields.add(ofNullable(eachRow.getAddress()));
+                Optional<Address> address = ofNullable(eachRow.getAddress());
+                fields.add(ofNullable(address));
+                if (address.isPresent() && ofNullable(address.get().getAddressLine1()).isEmpty()) {
+                    fields.add(Optional.empty());
+                }
                 fields.add(ofNullable(eachRow.getRelationshipToChildDetails()));
                 fields.add(ofNullable(eachRow.getIsPersonIdentityConfidential()));
             });
