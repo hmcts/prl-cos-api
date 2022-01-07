@@ -88,21 +88,20 @@ public class CallbackController {
         );
     }
 
-    @PostMapping(path = "/validate-miam-application-or-exemption", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/send-solicitor-email", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public ResponseEntity<uk.gov.hmcts.reform.ccd.client.model.CallbackResponse> sendSolicitorEmail(
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    public ResponseEntity<CallbackResponse> sendSolicitorEmail(
+        @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
 
         solicitorEmailWorkflow.run(callbackRequest.getCaseDetails());
 
         return ok(
-            CallbackResponse.builder()
-
-                .build()
+            CallbackResponse.builder().build()
         );
+
     }
 
 
