@@ -163,6 +163,7 @@ public class ChildCheckerTest {
     public void whenAllChildDataPresentAndChoosenAnotherPersonNotListedWithPersonDetails() {
 
         Address address = Address.builder()
+            .addressLine1("address")
             .postTown("London")
             .build();
 
