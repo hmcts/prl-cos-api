@@ -4,10 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -80,6 +82,10 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         if (dob != null && dob.equals(YES)) {
             additionalFields = party.getDateOfBirth() != null;
         }
+        YesOrNo placeOfBirth = party.getIsPlaceOfBirthKnown();
+        if (placeOfBirth != null && placeOfBirth.equals(YES)) {
+            additionalFields = party.getPlaceOfBirth() != null;
+        }
         YesOrNo currAdd = party.getIsCurrentAddressKnown();
         if (currAdd != null && currAdd.equals(YES)) {
             additionalFields = party.getAddress().getAddressLine1() != null;
@@ -92,10 +98,17 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         if (canProvideTel != null && canProvideTel.equals(YES)) {
             additionalFields = party.getPhoneNumber() != null;
         }
+
+        Optional<List<Element<OtherPersonRelationshipToChild>>> otherPersonRelationshipList = ofNullable(party.getPersonRelationshipWithChild());
+        if(otherPersonRelationshipList != null && otherPersonRelationshipList.get().equals(Collections.emptyList())) {
+            additionalFields = party.getRelationshipToChildren() != null;
+        }
+
         boolean baseFields = allNonEmpty(
             party.getFirstName(),
             party.getLastName(),
             party.getIsDateOfBirthKnown(),
+            party.getIsPlaceOfBirthKnown(),
             party.getGender(),
             party.getIsCurrentAddressKnown(),
             party.getCanYouProvideEmailAddress(),
