@@ -7,9 +7,11 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -39,6 +41,7 @@ public class PartyDetails {
     private final YesOrNo isCurrentAddressKnown;
     private final YesOrNo canYouProvidePhoneNumber;
     private final YesOrNo isPlaceOfBirthKnown;
+    private final List<Element<OtherPersonRelationshipToChild>> personRelationshipWithChild;
     private final Organisation solicitorOrg;
     private final Address solicitorAddress;
     private final String dxNumber;
@@ -49,6 +52,7 @@ public class PartyDetails {
     private final YesNoDontKnow doTheyHaveLegalRepresentation;
     private final String sendSignUpLink;
     private final String solicitorEmail;
+
 
 
 
