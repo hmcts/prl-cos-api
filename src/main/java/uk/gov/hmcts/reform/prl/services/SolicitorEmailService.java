@@ -45,7 +45,7 @@ public class SolicitorEmailService {
             .collect(Collectors.toList());
 
         List<String> applicantNamesList = applicants.stream()
-            .map(element-> element.getFirstName() + " " + element.getLastName())
+            .map(element -> element.getFirstName() + " " + element.getLastName())
             .collect(Collectors.toList());
 
         String applicantNames = String.join(", ", applicantNamesList);
@@ -65,7 +65,7 @@ public class SolicitorEmailService {
     }
 
 
-    public void sendEmail (CaseDetails caseDetails, UserDetails userDetails){
+    public void sendEmail(CaseDetails caseDetails, UserDetails userDetails) {
 
         EmailTemplateVars emailTemplateVars = buildEmail(caseDetails, userDetails);
 
@@ -78,11 +78,13 @@ public class SolicitorEmailService {
         );
 
     }
+
     public String getRecipientEmail(UserDetails userDetails) {
 
         return userDetails.getEmail() != null ? userDetails.getEmail() : "prl_caseworker_solicitor@mailinator.com";
 
     }
+
     public void send(String email,
                      EmailTemplateNames templateName,
                      EmailTemplateVars templateVars,

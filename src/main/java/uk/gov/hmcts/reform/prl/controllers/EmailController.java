@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -36,7 +35,7 @@ public class EmailController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public ResponseEntity<CallbackResponse> sendSolicitorEmail(
         @RequestBody CallbackRequest callbackRequest,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation){
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         solicitorEmailService.sendEmail(caseDetails, userService.getUserDetails(authorisation));
