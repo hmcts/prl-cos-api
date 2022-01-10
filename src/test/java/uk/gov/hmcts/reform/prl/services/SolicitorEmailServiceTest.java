@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import org.jose4j.jwk.Use;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
+import uk.gov.hmcts.reform.idam.client.models.User;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -66,75 +68,16 @@ public class SolicitorEmailServiceTest {
     @Mock
     private EmailTemplatesConfig emailTemplatesConfig;
 
-    @Mock
+    @InjectMocks
     private SolicitorEmailService solicitorEmailService;
 
-    @InjectMocks
+    @Mock
     private EmailService emailService;
 
     @Mock
     UserService userService;
 
     private Map<String, String> expectedEmailVarsAsMap;
-
-    @Before
-    public void setup() throws NotificationClientException {
-        when(emailTemplatesConfig.getTemplates())
-            .thenReturn(
-                ImmutableMap.of(
-                    LanguagePreference.ENGLISH, ImmutableMap.of(EmailTemplateNames.EXAMPLE, EMAIL_TEMPLATE_ID_1),
-                    LanguagePreference.WELSH, ImmutableMap.of(EmailTemplateNames.EXAMPLE, EMAIL_TEMPLATE_ID_2)
-                )
-            );
-        when(notificationClient.sendEmail(any(), any(), any(), any())).thenReturn(mock(SendEmailResponse.class));
-        expectedEmailVarsAsMap = new HashMap<>();
-
-        expectedEmailVarsAsMap.put("caseReference", "123");
-        expectedEmailVarsAsMap.put("caseName", "Case 123");
-        expectedEmailVarsAsMap.put("applicantName", "applicantName");
-        expectedEmailVarsAsMap.put("courtName", "court name");
-        expectedEmailVarsAsMap.put("fullName", "Full name");
-        expectedEmailVarsAsMap.put("courtEmail", "C@justice.gov.uk");
-        expectedEmailVarsAsMap.put("caseLink", "http://localhost:3333/");
-        when(objectMapper.convertValue(expectedEmailVars, Map.class)).thenReturn(expectedEmailVarsAsMap);
-    }
-
-    @Test
-    public void sendShouldCallNotifyApi() throws NotificationClientException {
-        emailService.send(
-            TEST_EMAIL,
-            EmailTemplateNames.EXAMPLE,
-            expectedEmailVars,
-            LanguagePreference.ENGLISH
-        );
-
-        verify(notificationClient).sendEmail(
-            eq(EMAIL_TEMPLATE_ID_1),
-            eq(TEST_EMAIL),
-            eq(expectedEmailVarsAsMap),
-            anyString()
-        );
-    }
-
-    @Test
-    public void sendShouldHandleNotificationClientExceptionAndRethrow() throws NotificationClientException {
-        when(notificationClient.sendEmail(eq(EMAIL_TEMPLATE_ID_2), any(), any(), any()))
-            .thenThrow(NotificationClientException.class);
-
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> emailService.send(
-                TEST_EMAIL, EmailTemplateNames.EXAMPLE, expectedEmailVars, LanguagePreference.WELSH
-            )
-        );
-
-        verify(notificationClient).sendEmail(
-            eq(EMAIL_TEMPLATE_ID_2),
-            eq(TEST_EMAIL),
-            eq(expectedEmailVarsAsMap),
-            anyString()
-        );
-    }
 
     @Test
     public void whenUserDetailsProvidedThenValidEmailReturned() {
@@ -144,8 +87,6 @@ public class SolicitorEmailServiceTest {
                                                                 .build());
 
         UserDetails userDetails = userService.getUserDetails("Auth");
-
-        when(solicitorEmailService.getRecipientEmail(userDetails)).thenReturn("test@email.com");
 
         assertEquals(solicitorEmailService.getRecipientEmail(userDetails), "test@email.com");
     }
@@ -185,10 +126,20 @@ public class SolicitorEmailServiceTest {
             .caseLink(manageCaseUrl + caseDetails.getCaseId())
                 .build();
 
-        when(solicitorEmailService.buildEmail(caseDetails, userDetails)).thenReturn(email);
-
         assertEquals(solicitorEmailService.buildEmail(caseDetails, userDetails), email);
 
+    }
+
+    @Test
+    public void testGetRecipientDetails() {
+
+        UserDetails userDetails = UserDetails.builder()
+            .email("test@email.com")
+            .build();
+
+        String expected = "test@email.com";
+
+        assertEquals(solicitorEmailService.getRecipientEmail(userDetails), expected);
     }
 
 }
