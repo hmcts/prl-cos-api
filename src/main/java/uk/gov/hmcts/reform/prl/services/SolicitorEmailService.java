@@ -71,7 +71,7 @@ public class SolicitorEmailService {
 
         send(
             getRecipientEmail(userDetails),
-            EmailTemplateNames.EXAMPLE,
+            EmailTemplateNames.SOLICITOR,
             emailTemplateVars,
             LanguagePreference.ENGLISH,
             caseDetails.getCaseId()
