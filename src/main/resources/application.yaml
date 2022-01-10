@@ -76,6 +76,7 @@ uk:
       email:
         templates:
           english:
+            SOLICITOR: a080f4ce-a07f-43ec-a3f0-f196d83f7730
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
