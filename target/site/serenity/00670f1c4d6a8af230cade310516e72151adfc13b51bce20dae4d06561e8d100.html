@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>When valid request format return200</title>
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="57x57" href="apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+<!--[if IE 7]>
+<!--<link rel="stylesheet" href="font-awesome/css/font-awesome-ie7.min.css">-->
+
+<link rel="stylesheet" type="text/css" href="fontawesome-free-5.7.2-web/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="fontawesome-free-5.7.2-web/css/v4-shims.min.css">
+
+<!-- JQuery -->
+<script type="text/javascript" src="scripts/jquery-1.11.1.min.js"></script><link rel="stylesheet" type="text/css" href="chartist/chartist-plugin-tooltip/dist/chartist-plugin-tooltip.min.css">
+<link rel="stylesheet" type="text/css" href="chartist/dist/chartist.min.css">
+<script src="chartist/dist/chartist.min.js"></script>
+<script src="chartist/chartist-plugin-tooltip/dist/chartist-plugin-tooltip.min.js"></script>
+<!-- Required Stylesheets -->
+<link href="bootstrap-treeview/dist/bootstrap-treeview.min.css" rel="stylesheet">
+
+<!-- Required Javascript -->
+<script src="bootstrap-treeview/dist/bootstrap-treeview.min.js"></script><!-- DataTables -->
+<link type="text/css" href="datatables/1.10.20/datatables.min.css" rel="stylesheet" />
+<script type="text/javascript" src="datatables/1.10.20/datatables.min.js"></script>
+<script type="text/javascript" src="datatables/1.10.20/time-elapsed-dhms.js"></script>
+
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<script src="bootstrap/js/bootstrap.min.js"></script>
+
+<script type="text/javascript" src="datatables/1.10.20/datatables.bootstrap4.min.js"></script>
+<link type="text/css" href="datatables/1.10.20/datatables.bootstrap4.min.css" rel="stylesheet" />
+
+<script>
+    jQuery.fn.dataTable.ext.type.order['time-elapsed-dhms-pre'] = function(data) {
+
+        var matches = data.match(/^(\d+(?:\.\d+)?)\s*([a-z]+)/i);
+        var multipliers = {
+            ms: 1,
+            s: 1000,
+            m: 60000,
+            h: 3600000,
+            d: 86400000
+        };
+
+        if (matches) {
+            var multiplier = multipliers[matches[2].toLowerCase()];
+            return parseFloat(matches[1]) * multiplier;
+        } else {
+            return -1;
+        };
+    };
+</script>
+<link rel="stylesheet" href="css/core.css"/>
+<link rel="stylesheet" href="css/link.css"/>
+<link type="text/css" media="screen" href="css/screen.css" rel="Stylesheet"/><!-- JQuery-UI -->
+<link type="text/css" href="jqueryui/1.11.2-start/jquery-ui.min.css" rel="Stylesheet" />
+<script type="text/javascript" src="jqueryui/1.11.2-start/jquery-ui.min.js"></script><!-- DataTables -->
+<link type="text/css" href="datatables/1.10.20/datatables.min.css" rel="stylesheet" />
+<script type="text/javascript" src="datatables/1.10.20/datatables.min.js"></script>
+<script type="text/javascript" src="datatables/1.10.20/time-elapsed-dhms.js"></script>
+
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<script src="bootstrap/js/bootstrap.min.js"></script>
+
+<script type="text/javascript" src="datatables/1.10.20/datatables.bootstrap4.min.js"></script>
+<link type="text/css" href="datatables/1.10.20/datatables.bootstrap4.min.css" rel="stylesheet" />
+
+<script>
+    jQuery.fn.dataTable.ext.type.order['time-elapsed-dhms-pre'] = function(data) {
+
+        var matches = data.match(/^(\d+(?:\.\d+)?)\s*([a-z]+)/i);
+        var multipliers = {
+            ms: 1,
+            s: 1000,
+            m: 60000,
+            h: 3600000,
+            d: 86400000
+        };
+
+        if (matches) {
+            var multiplier = multipliers[matches[2].toLowerCase()];
+            return parseFloat(matches[1]) * multiplier;
+        } else {
+            return -1;
+        };
+    };
+</script>
+<!-- ImgPreview -->
+<script src="scripts/imgpreview.full.jquery.js" type="text/javascript"></script>
+</head>
+
+<body class="results-page">
+
+
+<div id="topheader">
+    <div id="topbanner">
+        <div id="logo"><a href="index.html"><img src="images/serenity-logo.png" border="0"/></a></div>
+        <div id="projectname-banner" style="float:right">
+            <span class="projectname">
+                <span class="projecttitle"></span>
+                <span class="projectsubtitle"></span>
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="middlecontent">
+    <div id="contenttop">
+        <div class="middlebg">
+        <span class="breadcrumbs">
+            <a href="index.html" class="breadcrumbs">Home</a>
+
+        > When valid request format return200
+        </span>
+        </div>
+        <div class="rightbg"></div>
+    </div>
+
+    <div class="clr"></div>
+
+    <!--/* starts second table*/-->
+<div>
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="active">
+            <a href="#"><i class="fa fa-check-square-o"></i> Overall Test Results</a>
+        </li>
+        <li >
+            <a href="capabilities.html"><i class="fa fa-book"></i> Requirements</a>
+        </li>
+    </ul>
+    <span class="date-and-time"><a href="build-info.html"><i class="fa fa-info-circle"></i></a> Report generated 10-01-2022 12:50</span>
+    <br style="clear:left"/>
+</div>
+    <div class="clr"></div>
+
+
+    <div id="contentbody">
+        <div class="titlebar">
+            <div class="story-title">
+                <table class="outcome-header">
+                    <tr>
+                        <td>
+                                <div>
+                                    <h3 class="discreet-story-header">
+                                        <i class="fa fa-2x fa-comments-o"></i>
+                                        <span class="story-header-title">Email Controller Integration Test</span>
+                                    </h3>
+                                </div>
+
+                        </td>
+                        <td valign="top">
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="story-title">
+                <table class="outcome-header">
+                    <tr>
+                        <td colspan="2" class="test-title-bar">
+                            <span class="outcome-icon"><a href='##beforetable'><i class='fa fa-times-circle failure-icon fa-2x' title='FAILURE'></i></a></span>
+                            <span class="test-case-title">
+                                <span class="failing-color">
+                                    When valid request format return200
+                                        <span class="related-issue-title"></span>
+                                </span>
+                            </span>
+
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+
+
+        </div>
+    </div>
+
+    <div class="clr"></div>
+
+
+    <div id="beforetable"></div>
+
+
+    <div id="tablecontents">
+        <div>
+            <table class="step-table">
+                <tr class="step-titles">
+                    <th width="65">
+                    </th>
+                    <th class="step-description-column greentext">
+                        Steps
+                    </th>
+
+                    <th width="130" class="greentext">Outcome</th>
+                    <th width="100" class="greentext"><i title="Duration" class="far fa-clock"></i></th>
+                </tr>
+                <tr class="step-table-separator">
+                    <td colspan="5"></td>
+                </tr>
+
+                    <tr class="test-SUCCESS">
+
+                        <td width="50" class="step-icon">
+                            <a name="0"></a>
+                                <span style="margin-left: 20px;"
+                                      class="top-level-icon"><a href='##beforetable'><i class='fa fa-check-circle-o success-icon ' title='SUCCESS'></i></a>
+                                </span>
+                        </td>
+
+                        <td class="step-description-column">
+                            <div class="step-description">
+                                    <span class="top-level-step">
+                                                POST https://idam-api.aat.platform.hmcts.net/testing-support/accounts
+                                        </span>
+                                <span class="evidence">
+                                        <span class="piece-of-evidence">
+                    <span>
+                        <button type="button" class="btn btn-success btn-sm" data-toggle="collapse"
+                                data-target="#restModal-REST-1">
+                            REST Query
+                        </button>
+                    </span>
+                    <!-- Modal -->
+                    <div class="rest-query-details">
+                        <div class="collapse multi-collapse" id="restModal-REST-1">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4>Response</h4>
+                                        <p>Status code: 201</p>
+                                        <p>Content Type: application/json</p>
+                                        <h4>Request Headers</h4>
+                                        <pre>Accept=*/*<br>Content-Type=application/json; charset=UTF-8</pre>
+                                        <h4>Content Body</h4>
+                                        <pre>{<br>    &quot;email&quot;: &quot;simulate-delivered39dc98b8-68ad-4a74-901b-9eae59908141@mailinator.com&quot;,<br>    &quot;password&quot;: &quot;genericPassword123&quot;,<br>    &quot;forename&quot;: &quot;Henry&quot;,<br>    &quot;surname&quot;: &quot;Harper&quot;,<br>    &quot;roles&quot;: [<br>        {<br>            &quot;code&quot;: &quot;caseworker-privatelaw-solicitor&quot;<br>        }<br>    ]<br>}</pre>
+                                        <h4>Response Headers</h4>
+                                        <pre>Date: Mon, 10 Jan 2022 12:50:23 GMT<br>Content-Type: application/json<br>Content-Length: 310<br>Connection: keep-alive<br>Cache-Control: no-cache, no-store, max-age=0, must-revalidate<br>Expires: 0<br>Pragma: no-cache<br>Request-Context: appId=cid-v1:0d196103-84f6-43c7-9124-898486b5197c<br>Strict-Transport-Security: max-age=31536000 ; includeSubDomains<br>X-Content-Type-Options: nosniff<br>X-Frame-Options: DENY<br>X-Xss-Protection: 1; mode=block</pre>
+                                    <h4>Response Body</h4>
+                                        <pre>{<br>    &quot;id&quot;: &quot;d01223c4-cae5-41f6-825b-9e328676afce&quot;,<br>    &quot;forename&quot;: &quot;Henry&quot;,<br>    &quot;surname&quot;: &quot;Harper&quot;,<br>    &quot;email&quot;: &quot;simulate-delivered39dc98b8-68ad-4a74-901b-9eae59908141@mailinator.com&quot;,<br>    &quot;active&quot;: true,<br>    &quot;locked&quot;: false,<br>    &quot;roles&quot;: [<br>        &quot;caseworker-privatelaw-solicitor&quot;<br>    ],<br>    &quot;ssoProvider&quot;: &quot;testing-support&quot;,<br>    &quot;lastModified&quot;: &quot;2022-01-10T12:50:23.638Z&quot;<br>}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                                        </span>
+                                </span>
+                            </div>
+                        </td>
+
+                        <td width="130"><span class="top-level-step">SUCCESS</span></td>
+                        <td width="100"><span class="top-level-step">0s</span></td>
+                    </tr>
+                    <tr class="test-SUCCESS">
+
+                        <td width="50" class="step-icon">
+                            <a name="1"></a>
+                                <span style="margin-left: 20px;"
+                                      class="top-level-icon"><a href='##beforetable'><i class='fa fa-check-circle-o success-icon ' title='SUCCESS'></i></a>
+                                </span>
+                        </td>
+
+                        <td class="step-description-column">
+                            <div class="step-description">
+                                    <span class="top-level-step">
+                                                POST https://idam-api.aat.platform.hmcts.net/oauth2/authorize?response_type=code&amp;client_id=xuiwebapp&amp;redirect_uri=https%3A%2F%2Fmanage-case.aat.platform.hmcts.net%2Foauth2%2Fcallback
+                                        </span>
+                                <span class="evidence">
+                                        <span class="piece-of-evidence">
+                    <span>
+                        <button type="button" class="btn btn-success btn-sm" data-toggle="collapse"
+                                data-target="#restModal-REST-2">
+                            REST Query
+                        </button>
+                    </span>
+                    <!-- Modal -->
+                    <div class="rest-query-details">
+                        <div class="collapse multi-collapse" id="restModal-REST-2">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4>Response</h4>
+                                        <p>Status code: 200</p>
+                                        <p>Content Type: application/x-www-form-urlencoded</p>
+                                        <h4>Request Headers</h4>
+                                        <pre>Authorization=Basic c2ltdWxhdGUtZGVsaXZlcmVkMzlkYzk4YjgtNjhhZC00YTc0LTkwMWItOWVhZTU5OTA4MTQxQG1haWxpbmF0b3IuY29tOmdlbmVyaWNQYXNzd29yZDEyMw==<br>Accept=*/*<br>Content-Type=application/x-www-form-urlencoded; charset=ISO-8859-1</pre>
+                                        <h4>Response Headers</h4>
+                                        <pre>Date: Mon, 10 Jan 2022 12:50:24 GMT<br>Content-Type: application/json<br>Content-Length: 38<br>Connection: keep-alive<br>Cache-Control: no-cache, no-store, max-age=0, must-revalidate<br>Expires: 0<br>Pragma: no-cache<br>Request-Context: appId=cid-v1:0d196103-84f6-43c7-9124-898486b5197c<br>Strict-Transport-Security: max-age=31536000 ; includeSubDomains<br>X-Content-Type-Options: nosniff<br>X-Frame-Options: DENY<br>X-Xss-Protection: 1; mode=block</pre>
+                                    <h4>Response Body</h4>
+                                        <pre>{<br>    &quot;code&quot;: &quot;oG7WZu0ew3JZbbne3pzKY0Z00fQ&quot;<br>}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                                        </span>
+                                </span>
+                            </div>
+                        </td>
+
+                        <td width="130"><span class="top-level-step">SUCCESS</span></td>
+                        <td width="100"><span class="top-level-step">0s</span></td>
+                    </tr>
+                    <tr class="test-SUCCESS">
+
+                        <td width="50" class="step-icon">
+                            <a name="2"></a>
+                                <span style="margin-left: 20px;"
+                                      class="top-level-icon"><a href='##beforetable'><i class='fa fa-check-circle-o success-icon ' title='SUCCESS'></i></a>
+                                </span>
+                        </td>
+
+                        <td class="step-description-column">
+                            <div class="step-description">
+                                    <span class="top-level-step">
+                                                POST https://idam-api.aat.platform.hmcts.net/oauth2/token?code=oG7WZu0ew3JZbbne3pzKY0Z00fQ&amp;client_id=xuiwebapp&amp;client_secret=DBssSOq0KKLNBf2z&amp;redirect_uri=https%3A%2F%2Fmanage-case.aat.platform.hmcts.net%2Foauth2%2Fcallback&amp;grant_type=authorization_code
+                                        </span>
+                                <span class="evidence">
+                                        <span class="piece-of-evidence">
+                    <span>
+                        <button type="button" class="btn btn-success btn-sm" data-toggle="collapse"
+                                data-target="#restModal-REST-3">
+                            REST Query
+                        </button>
+                    </span>
+                    <!-- Modal -->
+                    <div class="rest-query-details">
+                        <div class="collapse multi-collapse" id="restModal-REST-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4>Response</h4>
+                                        <p>Status code: 200</p>
+                                        <p>Content Type: application/x-www-form-urlencoded</p>
+                                        <h4>Request Headers</h4>
+                                        <pre>Accept=*/*<br>Content-Type=application/x-www-form-urlencoded; charset=ISO-8859-1</pre>
+                                        <h4>Response Headers</h4>
+                                        <pre>Date: Mon, 10 Jan 2022 12:50:24 GMT<br>Content-Type: application/json<br>Transfer-Encoding: chunked<br>Connection: keep-alive<br>Cache-Control: no-cache, no-store, max-age=0, must-revalidate<br>Expires: 0<br>Pragma: no-cache<br>Request-Context: appId=cid-v1:0d196103-84f6-43c7-9124-898486b5197c<br>Strict-Transport-Security: max-age=31536000 ; includeSubDomains<br>X-Content-Type-Options: nosniff<br>X-Frame-Options: DENY<br>X-Xss-Protection: 1; mode=block</pre>
+                                    <h4>Response Body</h4>
+                                        <pre>{<br>    &quot;access_token&quot;: &quot;eyJ0eXAiOiJKV1QiLCJ6aXAiOiJOT05FIiwia2lkIjoiMWVyMFdSd2dJT1RBRm9qRTRyQy9mYmVLdTNJPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJzaW11bGF0ZS1kZWxpdmVyZWQzOWRjOThiOC02OGFkLTRhNzQtOTAxYi05ZWFlNTk5MDgxNDFAbWFpbGluYXRvci5jb20iLCJjdHMiOiJPQVVUSDJfU1RBVEVMRVNTX0dSQU5UIiwiYXV0aF9sZXZlbCI6MCwiYXVkaXRUcmFja2luZ0lkIjoiMDNiNDAwNDYtM2Y0OS00NDljLWJjOWQtODcwZjYzYzk2NGNjLTExMTUyMTAzNSIsImlzcyI6Imh0dHBzOi8vZm9yZ2Vyb2NrLWFtLnNlcnZpY2UuY29yZS1jb21wdXRlLWlkYW0tYWF0Mi5pbnRlcm5hbDo4NDQzL29wZW5hbS9vYXV0aDIvcmVhbG1zL3Jvb3QvcmVhbG1zL2htY3RzIiwidG9rZW5OYW1lIjoiYWNjZXNzX3Rva2VuIiwidG9rZW5fdHlwZSI6IkJlYXJlciIsImF1dGhHcmFudElkIjoiMDA3ZC1KS0Y1eVVueVZZZ0JmRHA5YmtJSnFZIiwiYXVkIjoieHVpd2ViYXBwIiwibmJmIjoxNjQxODE5MDI0LCJncmFudF90eXBlIjoiYXV0aG9yaXphdGlvbl9jb2RlIiwic2NvcGUiOlsib3BlbmlkIiwicHJvZmlsZSIsInJvbGVzIl0sImF1dGhfdGltZSI6MTY0MTgxOTAyNCwicmVhbG0iOiIvaG1jdHMiLCJleHAiOjE2NDE4NDc4MjQsImlhdCI6MTY0MTgxOTAyNCwiZXhwaXJlc19pbiI6Mjg4MDAsImp0aSI6InNCb0xMUzl1eGFOSS1OMVZ1bEQ3c3BjS0V3RSJ9.HYEnCV0XhnEYHeny3QzYhFiSVz5_dv4M0SK69ht5BW2601NU5J6j6q9R0DwfNp-RMVUNr3elCBPumnfDeDnWU-MaelVHLYZDnzsNlH36iwwcezZAwGC6fOEP4_ZgiIKE6AqgNbgS-172cD_Kv1aD-3tgBZ8MUibTXQ8y-HEOjFDhTMzXJlABR9JEGXBUHD1gMFXSJVUBg8gmNOMk2DLLg4h-ptvykJdD8LVouerMmReMxktmh4dSWVT0VxpDzecmWjzYuWKSojaWCWKklj0-YXyCPAbWeNfWlwFd_2oMyt_tss8rLdtNEm0Th2NtCuiPbPMLvS0wOUIrssl919YW-A&quot;,<br>    &quot;refresh_token&quot;: &quot;eyJ0eXAiOiJKV1QiLCJ6aXAiOiJOT05FIiwia2lkIjoiMWVyMFdSd2dJT1RBRm9qRTRyQy9mYmVLdTNJPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJzaW11bGF0ZS1kZWxpdmVyZWQzOWRjOThiOC02OGFkLTRhNzQtOTAxYi05ZWFlNTk5MDgxNDFAbWFpbGluYXRvci5jb20iLCJjdHMiOiJPQVVUSDJfU1RBVEVMRVNTX0dSQU5UIiwiYXV0aF9sZXZlbCI6MCwiYXVkaXRUcmFja2luZ0lkIjoiMDNiNDAwNDYtM2Y0OS00NDljLWJjOWQtODcwZjYzYzk2NGNjLTExMTUyMTAzNCIsImlzcyI6Imh0dHBzOi8vZm9yZ2Vyb2NrLWFtLnNlcnZpY2UuY29yZS1jb21wdXRlLWlkYW0tYWF0Mi5pbnRlcm5hbDo4NDQzL29wZW5hbS9vYXV0aDIvcmVhbG1zL3Jvb3QvcmVhbG1zL2htY3RzIiwidG9rZW5OYW1lIjoicmVmcmVzaF90b2tlbiIsImF1dGhNb2R1bGVzIjoiRGF0YVN0b3JlIiwidG9rZW5fdHlwZSI6IkJlYXJlciIsImF1dGhHcmFudElkIjoiMDA3ZC1KS0Y1eVVueVZZZ0JmRHA5YmtJSnFZIiwiYXVkIjoieHVpd2ViYXBwIiwiYWNyIjoiMCIsIm5iZiI6MTY0MTgxOTAyNCwiZ3JhbnRfdHlwZSI6ImF1dGhvcml6YXRpb25fY29kZSIsInNjb3BlIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJyb2xlcyJdLCJhdXRoX3RpbWUiOjE2NDE4MTkwMjQsInJlYWxtIjoiL2htY3RzIiwiZXhwIjoxNjQyNDIzODI0LCJpYXQiOjE2NDE4MTkwMjQsImV4cGlyZXNfaW4iOjYwNDgwMCwianRpIjoiUGR5Znk4Y29aSHJFOW12RWk3bUR6R0E3Qm9vIn0.m4FE1kz8KMK0H-H92kLYcEIAb9PoYNQxbxgFg4j4PO40CwAECDDhGjBd50FTeLypYxrRhfSwNBo2jXzConYL1mw6422mq7QU-oSZspRF9m1DnhxJUu91QF3MAECQOGbIP_LR4itUE5EYlObSaEpUY88zG3gemYCC0M2QBHmv8Zb9cinqWaarKBkqPhF8P5E9eNdO3F_XWRnC-OxhkqZaU-L9SY2ugy20W6HdVWKZzowV99mk2PPch_RRE7PatatUlTTJasOb_DwmoqwLE2kJMRR8DIYexwEoe9vQY6G3Iu-MFiunSwzdM6Ni_r85UFyxgjnqvno33A8ahCaLKQvHwA&quot;,<br>    &quot;scope&quot;: &quot;openid profile roles&quot;,<br>    &quot;id_token&quot;: &quot;eyJ0eXAiOiJKV1QiLCJraWQiOiIxZXIwV1J3Z0lPVEFGb2pFNHJDL2ZiZUt1M0k9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoibThTUjR6LS10b2JmOUlBNjlOUUtpdyIsInN1YiI6InNpbXVsYXRlLWRlbGl2ZXJlZDM5ZGM5OGI4LTY4YWQtNGE3NC05MDFiLTllYWU1OTkwODE0MUBtYWlsaW5hdG9yLmNvbSIsImF1ZGl0VHJhY2tpbmdJZCI6IjAzYjQwMDQ2LTNmNDktNDQ5Yy1iYzlkLTg3MGY2M2M5NjRjYy0xMTE1MjEwMzYiLCJyb2xlcyI6WyJjYXNld29ya2VyLXByaXZhdGVsYXctc29saWNpdG9yIl0sImlzcyI6Imh0dHBzOi8vZm9yZ2Vyb2NrLWFtLnNlcnZpY2UuY29yZS1jb21wdXRlLWlkYW0tYWF0Mi5pbnRlcm5hbDo4NDQzL29wZW5hbS9vYXV0aDIvcmVhbG1zL3Jvb3QvcmVhbG1zL2htY3RzIiwidG9rZW5OYW1lIjoiaWRfdG9rZW4iLCJnaXZlbl9uYW1lIjoiSGVucnkiLCJ1aWQiOiJkMDEyMjNjNC1jYWU1LTQxZjYtODI1Yi05ZTMyODY3NmFmY2UiLCJhdWQiOiJ4dWl3ZWJhcHAiLCJjX2hhc2giOiJfUVpXSmN0SjRjdjJiLXJMUVJ0enB3IiwiYWNyIjoiMCIsImF6cCI6Inh1aXdlYmFwcCIsImF1dGhfdGltZSI6MTY0MTgxOTAyNCwibmFtZSI6IkhlbnJ5IEhhcnBlciIsInJlYWxtIjoiL2htY3RzIiwiZXhwIjoxNjQxODIyNjI0LCJ0b2tlblR5cGUiOiJKV1RUb2tlbiIsImZhbWlseV9uYW1lIjoiSGFycGVyIiwiaWF0IjoxNjQxODE5MDI0fQ.NBOTCP0pbTpFX5TAkgmf9sAeVMmi2NNjWCWl9NxBtHRlwD9IZzt4zWyCg00WLSGzY8M5ArDx4twhJzQzVZzCOxs9a3kRuskdNEGJ9fLe91Mg_BFw0v8xoDYDaC5da2qwmTegO8oIsCP8WBtEyvaCM05MFJdr1eOLi5vhCqsYKh-dEQGJniAtCm0tvzu82MLTEkSF5k5iGZz-dlfiqglvgksjVpv8FHkBmj1J4f-Pwtn5tZ5St3LTR_aMKCSvP_8wS5d2eoElM8-zGURRTbhwghMZusaeCs87odJ7U3WArMbkGoijDviUA2W-V5n5S_PVQzMs-usfDdBTxlFHRTcAWA&quot;,<br>    &quot;token_type&quot;: &quot;Bearer&quot;,<br>    &quot;expires_in&quot;: &quot;28799&quot;<br>}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                                        </span>
+                                </span>
+                            </div>
+                        </td>
+
+                        <td width="130"><span class="top-level-step">SUCCESS</span></td>
+                        <td width="100"><span class="top-level-step">0s</span></td>
+                    </tr>
+                    <tr class="test-FAILURE">
+                        <td width="40"><a href='##beforetable'><i class='fa fa-times-circle failure-icon ' title='FAILURE'></i></a></td>
+                        <td width="%" colspan="1">
+                                <span class="top-level-step">expected:<200> but was:<500></span>
+                        </td>
+                        <td width="130"><span
+                                    class="top-level-step">FAILURE</span>
+                        </td>
+                        <td width="100"><span class="top-level-step">10.61s</span></td>
+                    </tr>
+                    <tr class="test-FAILURE">
+                        <td width="40">&nbsp</td>
+                        <td width="%" colspan="3">
+
+    <div style="display:block">
+        <div class="table">
+            <div class="row">
+                <div class="col-sm-10" style="padding-left:1.5em; padding-top:0.5em; padding-bottom:0.5em;">
+                    <span class="error-message error-message-title">expected:(200) but was:(500)</span>
+                </div>
+                <div class="col-sm-2">
+                    <a class="btn btn-warning details-button" data-toggle="collapse" href="#stacktraceModal-overall""
+                       role="button" aria-expanded="false" aria-controls="multiCollapseExample1"><i class="far fa-eye"></i> More details</a>
+                </div>
+             </div>
+        </div>
+    <div>
+
+    <!-- Details Section -->
+    <div class="row stacktrace-details">
+      <div class="col">
+        <div class="collapse multi-collapse" id="stacktraceModal-overall">
+            <div class="card">
+                <div class="card-header">
+                    <h4>java.lang.AssertionError </h4>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <pre>uk.gov.hmcts.reform.prl.controllers.EmailControllerIntegrationTest.whenValidRequestFormat_Return200(EmailControllerIntegrationTest.java:50)<br />org.springframework.test.context.junit4.statements.RunBeforeTestMethodCallbacks.evaluate(RunBeforeTestMethodCallbacks.java:75)<br />org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks.evaluate(RunAfterTestMethodCallbacks.java:86)<br /></pre>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+                        </td>
+                    </tr>
+                <tr class="test-FAILURE">
+                        <td colspan="2"></td>
+                    <td width="130"><span class="top-level-step"><em>FAILURE</em></span></td>
+                    <td width="100"><span class="top-level-step"><em>10.61s</em></span></td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+    <div id="beforefooter"></div>
+
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12">
+                <span class="version">Serenity BDD version 2.3.10</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        function toggleDiv(divId) {
+            $("#" + divId).toggle();
+            var imgsrc = $(".img" + divId).attr('src');
+            if (imgsrc == 'images/plus.png') {
+                $(".img" + divId).attr("src", function () {
+                    return "images/minus.png";
+                });
+
+            } else {
+                $(".img" + divId).attr("src", function () {
+                    return "images/plus.png";
+                });
+            }
+        }
+    </script>
+
+
+    <script type="text/javascript">
+        //<![CDATA[
+
+        $(document).ready(function () {
+            $('img.screenshot').imgPreview({
+                imgCSS: {
+                    width: '500px'
+                },
+                distanceFromCursor: {top: 10, left: -200}
+            });
+        });
+
+        //]]>
+    </script>
+    <div id="imgPreviewContainer" style="position: absolute; top: 612px; left: 355px; display: none; " class=""><img
+                src="" style="display: none; "></div>
+    <div id="imgPreviewContainer2" style="position: absolute; top: 925px; left: 320px; display: none; " class="">
+        <img style="width: 200px; display: none; " src=""></div>
+    <div id="imgPreviewWithStyles" style="position: absolute; top: 1272px; left: 321px; display: none; " class="">
+        <img style="height: 200px; opacity: 1; display: none; " src=""></div>
+    <div id="imgPreviewWithStyles2" style="display: none; position: absolute; "><img style="height: 200px; "></div>
+    <div id="imgPreviewWithStyles3" style="display: none; position: absolute; "><img style="height: 200px; "></div>
+
+</div>
+</body>
+</html>

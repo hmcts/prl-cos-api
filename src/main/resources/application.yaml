@@ -59,6 +59,10 @@ pba:
       api:
         baseurl: ${PRD_API_BASEURL:http://localhost:8892}
 
+
+xui:
+  url: ${XUI_URL:http://localhost:3333/}
+
 feature-toggle:
   toggle:
     example: ${FEATURE_EXAMPLE:false}
@@ -67,7 +71,7 @@ uk:
   gov:
     notify:
       api:
-        key: ${UK_GOV_NOTIFY_API_KEY:}
+        key: ${UK_GOV_NOTIFY_API_KEY:prlcosapitestkey-be03d538-db4c-4efe-8d36-b2a8c9d5131b-1d7ee1e2-f6eb-46f5-a1c8-3856424e57b1}
         baseUrl: https://api.notifications.service.gov.uk
       email:
         templates:
