@@ -71,7 +71,7 @@ uk:
   gov:
     notify:
       api:
-        key: ${UK_GOV_NOTIFY_API_KEY:prlcosapitestkey-be03d538-db4c-4efe-8d36-b2a8c9d5131b-1d7ee1e2-f6eb-46f5-a1c8-3856424e57b1}
+        key: ${UK_GOV_NOTIFY_API_KEY:prlcosemail-be03d538-db4c-4efe-8d36-b2a8c9d5131b-6e0f1f54-5348-4cbf-80ab-f18a7c8bc331}
         baseUrl: https://api.notifications.service.gov.uk
       email:
         templates:
