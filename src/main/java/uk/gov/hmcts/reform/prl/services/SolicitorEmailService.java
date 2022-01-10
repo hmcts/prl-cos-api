@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
@@ -28,10 +29,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SolicitorEmailService {
 
+    @Value("${xui.url}")
+    String manageCaseUrl;
+
     private final NotificationClient notificationClient;
     private final EmailTemplatesConfig emailTemplatesConfig;
     private final ObjectMapper objectMapper;
     public void buildAndSendEmail (CaseDetails caseDetails, UserDetails userDetails){
+
 
         List<PartyDetails> applicants = caseDetails.getCaseData()
             .getApplicants()
@@ -52,7 +57,7 @@ public class SolicitorEmailService {
             .courtName("court name")
             .fullName(userDetails.getFullName())
             .courtEmail("C100applications@justice.gov.uk")
-            .caseLink("http://localhost:3333/cases/case-details/"+caseDetails.getCaseId())
+            .caseLink(manageCaseUrl + caseDetails.getCaseId())
             .build();
 
         send(

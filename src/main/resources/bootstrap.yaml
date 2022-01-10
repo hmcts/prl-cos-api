@@ -18,4 +18,5 @@ spring:
         auth-provider-service-client-baseurl: AUTH_PROVIDER_SERVICE_CLIENT_BASEURL
         auth-idam-client-baseurl: AUTH_IDAM_CLIENT_BASEURL
         idam-client-id: IDAM_CLIENT_ID
+        xui-url: XUI_URL
 
