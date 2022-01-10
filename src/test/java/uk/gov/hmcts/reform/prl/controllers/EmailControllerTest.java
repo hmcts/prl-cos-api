@@ -6,12 +6,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,7 +18,7 @@ import static org.mockito.Mockito.when;
 public class EmailControllerTest {
 
     @Mock
-    UserService userService;
+    private UserService userService;
 
     @Mock
     private SolicitorEmailService solicitorEmailService;
@@ -32,13 +30,27 @@ public class EmailControllerTest {
     @Test
     public void testSendEmail() {
         CaseDetails caseDetails = CaseDetails.builder()
+            .caseData(null)
+            .caseId(null)
+            .state(null)
             .build();
 
-        when(userService.getUserDetails("Authorisation")).thenReturn(UserDetails.builder().build());
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest callbackRequest = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest
+                                                    .builder()
+                                                    .caseDetails(caseDetails)
+                                                    .build();
 
-        emailController.sendSolicitorEmail(CallbackRequest.builder().build(), "Authorisation");
+        UserDetails userDetails = UserDetails.builder().build();
 
-        verify(solicitorEmailService, times(1));
+        when(userService.getUserDetails("Authorisation")).thenReturn(userDetails);
+
+
+
+        emailController.sendSolicitorEmail(callbackRequest, "Authorisation");
+
+        //verify(solicitorEmailService, times(1));
+
+        verify(solicitorEmailService).sendEmail(caseDetails, userDetails);
 
     }
 
