@@ -31,9 +31,6 @@ public class CallbackController {
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
-    private final ObjectMapper objectMapper;
-    private final SolicitorEmailWorkflow solicitorEmailWorkflow;
-
 
     /**
      * It's just an example - to be removed when there are real tasks sending emails.
@@ -87,24 +84,5 @@ public class CallbackController {
 
         );
     }
-
-    @PostMapping(path = "/send-solicitor-email", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public ResponseEntity<CallbackResponse> sendSolicitorEmail(
-        @RequestBody CallbackRequest callbackRequest
-    ) throws WorkflowException {
-
-        solicitorEmailWorkflow.run(callbackRequest.getCaseDetails());
-
-        return ok(
-            CallbackResponse.builder().build()
-        );
-
-    }
-
-
-
 
 }

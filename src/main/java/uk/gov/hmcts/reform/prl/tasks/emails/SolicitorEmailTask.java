@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.tasks.emails;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.tasks.emails.generics.SendEmailTask;
 
 import java.util.stream.Collectors;
@@ -23,11 +25,7 @@ public class SolicitorEmailTask extends SendEmailTask {
         super(emailService);
     }
 
-//    protected String getRecipientEmail(UserDetails userDetails) {
-//
-//        return "prl_caseworker_solicitor@mailinator.com";
-//
-//    }
+
     @Override
     protected EmailTemplateNames getTemplate() {
         return EmailTemplateNames.EXAMPLE;
@@ -41,16 +39,14 @@ public class SolicitorEmailTask extends SendEmailTask {
 
     @Override
     protected EmailTemplateVars getPersonalisation(TaskContext context, CaseDetails caseDetails) {
-        // This is fake, we should get these details from CaseDetails case data, but it's just to show a concept
-        String applicantName = caseDetails
-            .getCaseData()
-            .getApplicants()
-            .stream()
-            .map(element -> element.getValue().getFirstName() + element.getValue().getLastName())
-                .collect(Collectors.toList()).toString();
+        String applicantName = String.valueOf(caseDetails
+                      .getCaseData()
+                      .getApplicants()
+                      .stream()
+                      .map(element -> element.getValue().getFirstName() + element.getValue().getLastName())
+                      .findFirst());
 
-
-        SolicitorEmail email = SolicitorEmail.builder()
+        EmailTemplateVars emailTemplateVars = SolicitorEmail.builder()
             .caseReference(caseDetails.getCaseId())
             .caseName(caseDetails.getCaseData().getApplicantCaseName())
             .applicantName(applicantName)
@@ -61,7 +57,7 @@ public class SolicitorEmailTask extends SendEmailTask {
             .build();
 
 
-        return email;
+        return emailTemplateVars;
     }
     @Override
     protected LanguagePreference getLanguage(CaseDetails caseDetails) {
