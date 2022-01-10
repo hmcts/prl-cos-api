@@ -35,9 +35,9 @@ public class SolicitorEmailService {
     private final NotificationClient notificationClient;
     private final EmailTemplatesConfig emailTemplatesConfig;
     private final ObjectMapper objectMapper;
-    public void buildAndSendEmail (CaseDetails caseDetails, UserDetails userDetails){
 
 
+    public EmailTemplateVars buildEmail(CaseDetails caseDetails, UserDetails userDetails) {
         List<PartyDetails> applicants = caseDetails.getCaseData()
             .getApplicants()
             .stream()
@@ -59,6 +59,15 @@ public class SolicitorEmailService {
             .courtEmail("C100applications@justice.gov.uk")
             .caseLink(manageCaseUrl + caseDetails.getCaseId())
             .build();
+
+        return emailTemplateVars;
+
+    }
+
+
+    public void sendEmail (CaseDetails caseDetails, UserDetails userDetails){
+
+        EmailTemplateVars emailTemplateVars = buildEmail(caseDetails, userDetails);
 
         send(
             getRecipientEmail(userDetails),

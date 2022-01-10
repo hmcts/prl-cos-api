@@ -39,7 +39,7 @@ public class EmailController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation){
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        solicitorEmailService.buildAndSendEmail(caseDetails, userService.getUserDetails(authorisation));
+        solicitorEmailService.sendEmail(caseDetails, userService.getUserDetails(authorisation));
 
         return ok(
             CallbackResponse.builder().build()
