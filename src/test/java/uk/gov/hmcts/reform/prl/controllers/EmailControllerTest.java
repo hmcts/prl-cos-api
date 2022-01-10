@@ -44,11 +44,7 @@ public class EmailControllerTest {
 
         when(userService.getUserDetails("Authorisation")).thenReturn(userDetails);
 
-
-
         emailController.sendSolicitorEmail(callbackRequest, "Authorisation");
-
-        //verify(solicitorEmailService, times(1));
 
         verify(solicitorEmailService).sendEmail(caseDetails, userDetails);
 
