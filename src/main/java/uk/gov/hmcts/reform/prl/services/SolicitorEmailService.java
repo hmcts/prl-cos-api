@@ -67,12 +67,10 @@ public class SolicitorEmailService {
 
     public void sendEmail(CaseDetails caseDetails, UserDetails userDetails) {
 
-        EmailTemplateVars emailTemplateVars = buildEmail(caseDetails, userDetails);
-
         send(
             getRecipientEmail(userDetails),
             EmailTemplateNames.SOLICITOR,
-            emailTemplateVars,
+            buildEmail(caseDetails, userDetails),
             LanguagePreference.ENGLISH,
             caseDetails.getCaseId()
         );
@@ -80,9 +78,7 @@ public class SolicitorEmailService {
     }
 
     public String getRecipientEmail(UserDetails userDetails) {
-
         return userDetails.getEmail() != null ? userDetails.getEmail() : "prl_caseworker_solicitor@mailinator.com";
-
     }
 
     public void send(String email,
@@ -90,6 +86,7 @@ public class SolicitorEmailService {
                      EmailTemplateVars templateVars,
                      LanguagePreference languagePreference,
                      String caseReference) {
+
 
         final String reference = caseReference;
 
@@ -125,10 +122,6 @@ public class SolicitorEmailService {
             "CaseId: {}: attempting to send email {} to {}. Reference = {}",
             caseId, name, EmailObfuscator.obfuscate(email), reference
         );
-    }
-
-    private String generateReference() {
-        return UUID.randomUUID().toString();
     }
 
     private String getTemplateId(EmailTemplateNames templateName, LanguagePreference languagePreference) {
