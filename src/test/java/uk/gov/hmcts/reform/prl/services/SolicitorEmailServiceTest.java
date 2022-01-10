@@ -1,44 +1,25 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
-import org.jose4j.jwk.Use;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
-import uk.gov.hmcts.reform.idam.client.models.User;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
-import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SolicitorEmail;
-import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.service.notify.NotificationClient;
-import uk.gov.service.notify.NotificationClientException;
-import uk.gov.service.notify.SendEmailResponse;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_EMAIL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorEmailServiceTest {
@@ -60,22 +41,13 @@ public class SolicitorEmailServiceTest {
 
 
     @Mock
-    private NotificationClient notificationClient;
-
-    @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
-    private EmailTemplatesConfig emailTemplatesConfig;
-
-    @InjectMocks
-    private SolicitorEmailService solicitorEmailService;
-
-    @Mock
     private EmailService emailService;
 
     @Mock
     UserService userService;
+
+    @InjectMocks
+    private SolicitorEmailService solicitorEmailService;
 
     private Map<String, String> expectedEmailVarsAsMap;
 
