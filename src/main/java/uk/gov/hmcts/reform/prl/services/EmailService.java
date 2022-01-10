@@ -29,7 +29,7 @@ public class EmailService {
                      EmailTemplateNames templateName,
                      EmailTemplateVars templateVars,
                      LanguagePreference languagePreference) {
-        final String reference = generateReference();
+        final String reference = templateVars.getCaseReference();
         onBeforeLog(email, templateName, templateVars.getCaseReference(), reference);
         final String templateId = getTemplateId(templateName, languagePreference);
 
