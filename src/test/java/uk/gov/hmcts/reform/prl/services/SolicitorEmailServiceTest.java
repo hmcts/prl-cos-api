@@ -66,8 +66,11 @@ public class SolicitorEmailServiceTest {
     @Mock
     private EmailTemplatesConfig emailTemplatesConfig;
 
+    @Mock
+    private SolicitorEmailService solicitorEmailService;
+
     @InjectMocks
-    private SolicitorEmailService emailService;
+    private EmailService emailService;
 
     @Mock
     UserService userService;
@@ -102,7 +105,7 @@ public class SolicitorEmailServiceTest {
             TEST_EMAIL,
             EmailTemplateNames.EXAMPLE,
             expectedEmailVars,
-            LanguagePreference.ENGLISH,"123"
+            LanguagePreference.ENGLISH
         );
 
         verify(notificationClient).sendEmail(
@@ -121,7 +124,7 @@ public class SolicitorEmailServiceTest {
         assertThrows(
             IllegalArgumentException.class,
             () -> emailService.send(
-                TEST_EMAIL, EmailTemplateNames.EXAMPLE, expectedEmailVars, LanguagePreference.WELSH,"123"
+                TEST_EMAIL, EmailTemplateNames.EXAMPLE, expectedEmailVars, LanguagePreference.WELSH
             )
         );
 
@@ -142,7 +145,9 @@ public class SolicitorEmailServiceTest {
 
         UserDetails userDetails = userService.getUserDetails("Auth");
 
-        assertEquals(emailService.getRecipientEmail(userDetails), "test@email.com");
+        when(solicitorEmailService.getRecipientEmail(userDetails)).thenReturn("test@email.com");
+
+        assertEquals(solicitorEmailService.getRecipientEmail(userDetails), "test@email.com");
     }
 
 
@@ -180,7 +185,9 @@ public class SolicitorEmailServiceTest {
             .caseLink(manageCaseUrl + caseDetails.getCaseId())
                 .build();
 
-        assertEquals(emailService.buildEmail(caseDetails, userDetails), email);
+        when(solicitorEmailService.buildEmail(caseDetails, userDetails)).thenReturn(email);
+
+        assertEquals(solicitorEmailService.buildEmail(caseDetails, userDetails), email);
 
     }
 
