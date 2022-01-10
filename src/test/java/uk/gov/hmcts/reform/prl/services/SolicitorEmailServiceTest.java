@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -31,9 +30,13 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static uk.gov.hmcts.reform.prl.utils.TestConstants.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_EMAIL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorEmailServiceTest {
@@ -51,7 +54,7 @@ public class SolicitorEmailServiceTest {
             .fullName("Full name")
         .courtEmail("C@justice.gov.uk")
             .caseLink("http://localhost:3333/")
-        .build();;
+        .build();
 
 
     @Mock
@@ -69,6 +72,8 @@ public class SolicitorEmailServiceTest {
     @Mock
     UserService userService;
 
+    private Map<String, String> expectedEmailVarsAsMap;
+
     @Before
     public void setup() throws NotificationClientException {
         when(emailTemplatesConfig.getTemplates())
@@ -79,7 +84,7 @@ public class SolicitorEmailServiceTest {
                 )
             );
         when(notificationClient.sendEmail(any(), any(), any(), any())).thenReturn(mock(SendEmailResponse.class));
-        Map<String, String> expectedEmailVarsAsMap = new HashMap<>();
+        expectedEmailVarsAsMap = new HashMap<>();
 
         expectedEmailVarsAsMap.put("caseReference", "123");
         expectedEmailVarsAsMap.put("caseName", "Case 123");
@@ -99,15 +104,6 @@ public class SolicitorEmailServiceTest {
             expectedEmailVars,
             LanguagePreference.ENGLISH,"123"
         );
-        Map<String, String> expectedEmailVarsAsMap = new HashMap<>();
-
-        expectedEmailVarsAsMap.put("caseReference", "123");
-        expectedEmailVarsAsMap.put("caseName", "Case 123");
-        expectedEmailVarsAsMap.put("applicantName", "applicantName");
-        expectedEmailVarsAsMap.put("courtName", "court name");
-        expectedEmailVarsAsMap.put("fullName", "Full name");
-        expectedEmailVarsAsMap.put("courtEmail", "C@justice.gov.uk");
-        expectedEmailVarsAsMap.put("caseLink", "http://localhost:3333/");
 
         verify(notificationClient).sendEmail(
             eq(EMAIL_TEMPLATE_ID_1),
@@ -121,15 +117,6 @@ public class SolicitorEmailServiceTest {
     public void sendShouldHandleNotificationClientExceptionAndRethrow() throws NotificationClientException {
         when(notificationClient.sendEmail(eq(EMAIL_TEMPLATE_ID_2), any(), any(), any()))
             .thenThrow(NotificationClientException.class);
-        Map<String, String> expectedEmailVarsAsMap = new HashMap<>();
-
-        expectedEmailVarsAsMap.put("caseReference", "123");
-        expectedEmailVarsAsMap.put("caseName", "Case 123");
-        expectedEmailVarsAsMap.put("applicantName", "applicantName");
-        expectedEmailVarsAsMap.put("courtName", "court name");
-        expectedEmailVarsAsMap.put("fullName", "Full name");
-        expectedEmailVarsAsMap.put("courtEmail", "C@justice.gov.uk");
-        expectedEmailVarsAsMap.put("caseLink", "http://localhost:3333/");
 
         assertThrows(
             IllegalArgumentException.class,
