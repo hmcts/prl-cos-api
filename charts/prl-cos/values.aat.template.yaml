@@ -25,7 +25,7 @@ java:
     REFORM_SERVICE_NAME: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE: prl-cos-api
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS: 900
-    PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    PRL_DGS_API_URL: https://prl-dgs-pr-45.service.core-compute-preview.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_CALLBACK_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/service-request
     FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
