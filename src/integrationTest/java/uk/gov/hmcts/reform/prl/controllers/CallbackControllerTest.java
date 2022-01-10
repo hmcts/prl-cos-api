@@ -13,14 +13,4 @@ import uk.gov.hmcts.reform.prl.util.CosApiClient;
 @SpringBootTest(classes = {Application.class, CallbackController.class})
 public class CallbackControllerTest extends IntegrationTest {
 
-    @Autowired
-    private CosApiClient cosApiClient;
-
-    @DisplayName("temporary test to verify gov UK notifications integration")
-    @Test
-    public void sendEmail() {
-        cosApiClient.sendEmail(CallbackRequest.builder()
-                                   .caseDetails(CaseDetails.builder().build())
-                                   .build());
-    }
 }
