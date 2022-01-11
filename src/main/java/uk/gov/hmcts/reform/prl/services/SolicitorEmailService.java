@@ -31,8 +31,14 @@ public class SolicitorEmailService {
     @Autowired
     private EmailService emailService;
 
+    @Value("${uk.gov.notify.email.application.email-id}")
+    private  String courtEmail;
+
+    @Value("${uk.gov.notify.email.application.court-name}")
+    private  String courtName;
+
     @Value("${xui.url}")
-    String manageCaseUrl;
+    private String manageCaseUrl;
 
     public EmailTemplateVars buildEmail(CaseDetails caseDetails, UserDetails userDetails) {
         List<PartyDetails> applicants = caseDetails.getCaseData()
@@ -51,9 +57,9 @@ public class SolicitorEmailService {
             .caseReference(caseDetails.getCaseId())
             .caseName(caseDetails.getCaseData().getApplicantCaseName())
             .applicantName(applicantNames)
-            .courtName("court name")
+            .courtName(courtName)
             .fullName(userDetails.getFullName())
-            .courtEmail("C100applications@justice.gov.uk")
+            .courtEmail(courtEmail)
             .caseLink(manageCaseUrl + caseDetails.getCaseId())
             .build();
 

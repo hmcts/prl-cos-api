@@ -5,7 +5,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -24,9 +23,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorEmailServiceTest {
 
-    @Value("${xui.url}")
-    String manageCaseUrl;
 
+    private static final String manageCaseUrl = null;
     public static final String EMAIL_TEMPLATE_ID_1 = "111";
     public static final String EMAIL_TEMPLATE_ID_2 = "222";
     public static final SolicitorEmail expectedEmailVars =  SolicitorEmail.builder()
@@ -92,9 +90,7 @@ public class SolicitorEmailServiceTest {
             .caseReference(caseDetails.getCaseId())
             .caseName(caseDetails.getCaseData().getApplicantCaseName())
             .applicantName(applicantNames)
-            .courtName("court name")
             .fullName(userDetails.getFullName())
-            .courtEmail("C100applications@justice.gov.uk")
             .caseLink(manageCaseUrl + caseDetails.getCaseId())
                 .build();
 

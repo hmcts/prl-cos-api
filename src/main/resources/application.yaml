@@ -63,6 +63,9 @@ feature-toggle:
   toggle:
     example: ${FEATURE_EXAMPLE:false}
 
+xui:
+  url: https://manage-case.aat.platform.hmcts.net/
+
 uk:
   gov:
     notify:
@@ -76,6 +79,10 @@ uk:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
+        application:
+          email-id: C100applications@justice.gov.uk
+          court-name: Court Name
+
 
 notify:
   api-key: fake-key
