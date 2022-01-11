@@ -27,7 +27,6 @@ public class OtherPeopleInTheCaseCheckerTest {
     @InjectMocks
     OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
 
-
     @Test
     public void whenNoCaseDataThenIsStartedReturnsFalse() {
 
@@ -70,7 +69,21 @@ public class OtherPeopleInTheCaseCheckerTest {
 
     @Test
     public void whenIncompleteCaseDataValidateMandatoryFieldsForOtherReturnsFalse() {
-        PartyDetails other = PartyDetails.builder().firstName("TestName").build();
+
+        OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
+            .personRelationshipToChild("Test relationship")
+            .build();
+
+        Element<OtherPersonRelationshipToChild> wrappedList = Element.<OtherPersonRelationshipToChild>builder()
+            .value(personRelationshipToChild).build();
+        List<Element<OtherPersonRelationshipToChild>> otherPersonRelationChildList = Collections
+            .singletonList(wrappedList);
+
+        PartyDetails other = PartyDetails.builder()
+            .firstName("TestName")
+            .personRelationshipWithChild(otherPersonRelationChildList)
+            .build();
+
 
         assert !otherPeopleInTheCaseChecker.validateMandatoryPartyDetailsForOtherPerson(other);
 
@@ -78,6 +91,15 @@ public class OtherPeopleInTheCaseCheckerTest {
 
     @Test
     public void whenOtherPeopleInTheCasePresentExceptPlaceOfBirth() {
+
+        OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
+            .personRelationshipToChild("Test relationship")
+            .build();
+
+        Element<OtherPersonRelationshipToChild> wrappedList = Element.<OtherPersonRelationshipToChild>builder()
+            .value(personRelationshipToChild).build();
+        List<Element<OtherPersonRelationshipToChild>> otherPersonRelationTChildList = Collections
+            .singletonList(wrappedList);
 
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
@@ -92,6 +114,10 @@ public class OtherPeopleInTheCaseCheckerTest {
             .dxNumber("123456")
             .gender(Gender.FEMALE)
             .lastName("lastName")
+            .previousName("testPreviousname")
+            .isDateOfBirthKnown(YesOrNo.YES)
+            .isCurrentAddressKnown(YesOrNo.NO)
+            .personRelationshipWithChild(otherPersonRelationTChildList)
             .build();
 
         Element<PartyDetails> partyWrapped = Element.<PartyDetails>builder().value(partyDetails).build();
