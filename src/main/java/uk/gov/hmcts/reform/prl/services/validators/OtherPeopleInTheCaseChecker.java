@@ -9,10 +9,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -78,6 +75,8 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
     public boolean validateMandatoryPartyDetailsForOtherPerson(PartyDetails party) {
         boolean additionalFields = true;
 
+        List<Optional> childFields = new ArrayList<>();
+
         YesOrNo dob = party.getIsDateOfBirthKnown();
         if (dob != null && dob.equals(YES)) {
             additionalFields = party.getDateOfBirth() != null;
@@ -100,9 +99,15 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         }
 
         Optional<List<Element<OtherPersonRelationshipToChild>>> otherPersonRelationshipList = ofNullable(party.getPersonRelationshipWithChild());
-        if(otherPersonRelationshipList != null && otherPersonRelationshipList.get().equals(Collections.emptyList())) {
-            additionalFields = party.getRelationshipToChildren() != null;
+        if(otherPersonRelationshipList.isEmpty() || otherPersonRelationshipList.get().equals(Collections.emptyList())) {
+                return false;
         }
+
+        otherPersonRelationshipList.get().stream().map(Element::getValue).forEach(everyChild -> {
+            childFields.add(ofNullable(everyChild.getPersonRelationshipToChild()));
+        });
+
+        childFields.add(ofNullable(party.getPersonRelationshipWithChild()));
 
         boolean baseFields = allNonEmpty(
             party.getFirstName(),
@@ -114,7 +119,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             party.getCanYouProvideEmailAddress(),
             party.getCanYouProvidePhoneNumber()
         );
-        return baseFields && additionalFields;
+        return baseFields && additionalFields && childFields.stream().anyMatch(Optional::isPresent);
     }
 
 }
