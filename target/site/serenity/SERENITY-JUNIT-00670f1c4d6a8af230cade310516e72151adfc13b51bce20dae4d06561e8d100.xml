@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><testsuite errors="0" failures="1" name="uk.gov.hmcts.reform.prl.controllers.EmailControllerIntegrationTest" skipped="0" tests="1" time="8.47" timestamp="2022-01-11 09:49:51"><testcase classname="uk.gov.hmcts.reform.prl.controllers.EmailControllerIntegrationTest" name="When valid request format return200"><failure message="expected:&lt;200&gt; but was:&lt;500&gt;" type="java.lang.AssertionError">expected:&lt;200&gt; but was:&lt;500&gt;</failure><system-err>expected:&lt;200&gt; but was:&lt;500&gt;
-uk.gov.hmcts.reform.prl.controllers.EmailControllerIntegrationTest.whenValidRequestFormat_Return200(EmailControllerIntegrationTest.java:53)
-org.springframework.test.context.junit4.statements.RunBeforeTestMethodCallbacks.evaluate(RunBeforeTestMethodCallbacks.java:75)
-org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks.evaluate(RunAfterTestMethodCallbacks.java:86)
-</system-err></testcase></testsuite>
