@@ -102,15 +102,14 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         List<Optional> childFields = new ArrayList<>();
 
         Optional<List<Element<OtherPersonRelationshipToChild>>> otherPersonRelationshipList = ofNullable(party.getPersonRelationshipWithChild());
-        if (otherPersonRelationshipList.isPresent() && otherPersonRelationshipList.get().equals(Collections.emptyList())) {
+        if (!otherPersonRelationshipList.isPresent() || (otherPersonRelationshipList.isPresent()
+            && otherPersonRelationshipList.get().equals(Collections.emptyList()))) {
             return false;
         }
 
         otherPersonRelationshipList.get().stream().map(Element::getValue).forEach(everyChild -> {
             childFields.add(ofNullable(everyChild.getPersonRelationshipToChild()));
         });
-
-        childFields.add(ofNullable(party.getPersonRelationshipWithChild()));
 
         boolean baseFields = allNonEmpty(
             party.getFirstName(),
