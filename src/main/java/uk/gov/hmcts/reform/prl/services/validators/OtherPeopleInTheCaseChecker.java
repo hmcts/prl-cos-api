@@ -102,7 +102,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         List<Optional> childFields = new ArrayList<>();
 
         Optional<List<Element<OtherPersonRelationshipToChild>>> otherPersonRelationshipList = ofNullable(party.getPersonRelationshipWithChild());
-        if (otherPersonRelationshipList.isEmpty() || otherPersonRelationshipList.get().equals(Collections.emptyList())) {
+        if (otherPersonRelationshipList.isPresent() && otherPersonRelationshipList.get().equals(Collections.emptyList())) {
             return false;
         }
 
