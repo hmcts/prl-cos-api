@@ -31,6 +31,7 @@ public class EmailControllerIntegrationTest extends IntegrationTest {
     public void whenInvalidRequestFormat_Return400() throws IOException {
 
         HttpPost httpPost = new HttpPost(serviceUrl + emailControllerEndPoint);
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(
             httpResponse.getStatusLine().getStatusCode(),
