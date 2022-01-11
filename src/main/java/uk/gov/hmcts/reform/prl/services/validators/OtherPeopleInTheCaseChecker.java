@@ -102,8 +102,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         List<Optional> childFields = new ArrayList<>();
 
         Optional<List<Element<OtherPersonRelationshipToChild>>> otherPersonRelationshipList = ofNullable(party.getPersonRelationshipWithChild());
-        if (!otherPersonRelationshipList.isPresent() || (otherPersonRelationshipList.isPresent()
-            && otherPersonRelationshipList.get().equals(Collections.emptyList()))) {
+        if (otherPersonRelationshipList.isEmpty() || otherPersonRelationshipList.get().equals(Collections.emptyList())) {
             return false;
         }
 
@@ -121,7 +120,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             party.getCanYouProvideEmailAddress(),
             party.getCanYouProvidePhoneNumber()
         );
-        return baseFields && additionalFields && childFields.stream().anyMatch(Optional::isPresent);
+        return baseFields && additionalFields && (childFields.size() > 0);
     }
 
 }
