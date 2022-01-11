@@ -41,7 +41,7 @@ public class PartyDetails {
     private final YesOrNo isCurrentAddressKnown;
     private final YesOrNo canYouProvidePhoneNumber;
     private final YesOrNo isPlaceOfBirthKnown;
-    private final List<Element<OtherPersonRelationshipToChild>> personRelationshipWithChild;
+    private final List<Element<OtherPersonRelationshipToChild>> otherPersonRelationshipToChildren;
     private final Organisation solicitorOrg;
     private final Address solicitorAddress;
     private final String dxNumber;

@@ -81,7 +81,7 @@ public class OtherPeopleInTheCaseCheckerTest {
 
         PartyDetails other = PartyDetails.builder()
             .firstName("TestName")
-            .personRelationshipWithChild(otherPersonRelationChildList)
+            .otherPersonRelationshipToChildren(otherPersonRelationChildList)
             .build();
 
 
@@ -117,7 +117,7 @@ public class OtherPeopleInTheCaseCheckerTest {
             .previousName("testPreviousname")
             .isDateOfBirthKnown(YesOrNo.YES)
             .isCurrentAddressKnown(YesOrNo.NO)
-            .personRelationshipWithChild(otherPersonRelationTChildList)
+            .otherPersonRelationshipToChildren(otherPersonRelationTChildList)
             .build();
 
         Element<PartyDetails> partyWrapped = Element.<PartyDetails>builder().value(partyDetails).build();
@@ -154,7 +154,7 @@ public class OtherPeopleInTheCaseCheckerTest {
             .dxNumber("123456")
             .gender(Gender.FEMALE)
             .lastName("lastName")
-            .personRelationshipWithChild(otherPersonRelationTChildList)
+            .otherPersonRelationshipToChildren(otherPersonRelationTChildList)
             .build();
 
         Element<PartyDetails> partyWrapped = Element.<PartyDetails>builder().value(partyDetails).build();
