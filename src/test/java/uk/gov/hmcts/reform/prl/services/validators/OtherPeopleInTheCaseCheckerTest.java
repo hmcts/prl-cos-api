@@ -1,15 +1,22 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import org.apache.commons.math3.analysis.function.Add;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -69,6 +76,71 @@ public class OtherPeopleInTheCaseCheckerTest {
 
         assert !otherPeopleInTheCaseChecker.validateMandatoryPartyDetailsForOtherPerson(other);
 
+    }
+
+    @Test
+    public void whenOtherPeopleInTheCasePresentExceptPlaceOfBirth() {
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("Test")
+            .address(Address.builder()
+                         .addressLine1("address")
+                         .postTown("London")
+                         .build())
+            .addressLivedLessThan5YearsDetails("yes")
+            .dateOfBirth(LocalDate.of(1999, 12, 10))
+            .canYouProvideEmailAddress(YesOrNo.YES)
+            .canYouProvidePhoneNumber(YesOrNo.YES)
+            .dxNumber("123456")
+            .gender(Gender.FEMALE)
+            .lastName("lastName")
+            .build();
+
+
+        Element<PartyDetails> partyWrapped = Element.<PartyDetails>builder().value(partyDetails).build();
+        List<Element<PartyDetails>> listOfParty = Collections.singletonList(partyWrapped);
+
+        CaseData caseData = CaseData.builder().othersToNotify(listOfParty)
+            .build();
+
+        assert !otherPeopleInTheCaseChecker.isFinished(caseData);
+    }
+
+    @Test
+    public void whenOtherPeopleInTheCasePresentNotWithRelationshipToChild() {
+
+        OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
+            .personRelationshipToChild("Test relationship")
+            .build();
+
+        Element<OtherPersonRelationshipToChild> wrappedList = Element.<OtherPersonRelationshipToChild>builder().value(personRelationshipToChild).build();
+        List<Element<OtherPersonRelationshipToChild>> otherPersonRelationTChildList = Collections.singletonList(wrappedList);
+
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("Test")
+            .address(Address.builder()
+                         .addressLine1("address")
+                         .postTown("London")
+                         .build())
+            .addressLivedLessThan5YearsDetails("yes")
+            .dateOfBirth(LocalDate.of(1999, 12, 10))
+            .canYouProvideEmailAddress(YesOrNo.YES)
+            .canYouProvidePhoneNumber(YesOrNo.YES)
+            .dxNumber("123456")
+            .gender(Gender.FEMALE)
+            .lastName("lastName")
+            .personRelationshipWithChild(otherPersonRelationTChildList)
+            .build();
+
+
+        Element<PartyDetails> partyWrapped = Element.<PartyDetails>builder().value(partyDetails).build();
+        List<Element<PartyDetails>> listOfParty = Collections.singletonList(partyWrapped);
+
+        CaseData caseData = CaseData.builder().othersToNotify(listOfParty)
+            .build();
+
+        assert !otherPeopleInTheCaseChecker.isFinished(caseData);
     }
 
 }
