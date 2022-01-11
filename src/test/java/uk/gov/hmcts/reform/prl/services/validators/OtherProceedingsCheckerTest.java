@@ -75,4 +75,20 @@ public class OtherProceedingsCheckerTest {
         assert (!isFinished);
     }
 
+    @Test
+    public void whenNameOfCourtExistValidateMandatoryFieldsForOtherReturnsTrue() {
+        ProceedingDetails proceedingDetails = ProceedingDetails.builder().nameOfCourt("TestCourtName").build();
+
+        assert otherProceedingsChecker.validateMandatoryProceedingDetailsForOtherProceedings(proceedingDetails);
+
+    }
+
+    @Test
+    public void whenNameOfCourtMissingValidateMandatoryFieldsForOtherReturnsFalse() {
+        ProceedingDetails proceedingDetails = ProceedingDetails.builder().build();
+
+        assert !otherProceedingsChecker.validateMandatoryProceedingDetailsForOtherProceedings(proceedingDetails);
+
+    }
+
 }

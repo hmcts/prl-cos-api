@@ -19,6 +19,7 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.OTHER_PROCEEDINGS_ER
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.DONT_KNOW;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.YES;
+import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
 @Service
 public class OtherProceedingsChecker implements EventChecker {
@@ -62,6 +63,9 @@ public class OtherProceedingsChecker implements EventChecker {
                     allMandatoryFieldsDone = false;
                     break;
                 }
+
+                allMandatoryFieldsDone = validateMandatoryProceedingDetailsForOtherProceedings(proceeding);
+
             }
             if (allMandatoryFieldsDone) {
                 taskErrorService.removeError(OTHER_PROCEEDINGS_ERROR);
@@ -88,5 +92,13 @@ public class OtherProceedingsChecker implements EventChecker {
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
         return false;
+    }
+
+    public boolean validateMandatoryProceedingDetailsForOtherProceedings(ProceedingDetails proceeding) {
+
+        boolean fields = allNonEmpty(
+            proceeding.getNameOfCourt()
+        );
+        return fields;
     }
 }
