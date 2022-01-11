@@ -117,6 +117,7 @@ public abstract class IntegrationTest {
             .password(password)
             .forename("Henry")
             .surname("Harper")
+            .email("fprl_caseworker_solicitor@mailinator.com")
             .roles(new UserCode[]{UserCode.builder().code("caseworker-privatelaw-solicitor").build()})
             .build();
 
