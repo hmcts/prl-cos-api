@@ -19,4 +19,5 @@ spring:
         auth-idam-client-baseurl: AUTH_IDAM_CLIENT_BASEURL
         idam-client-id: IDAM_CLIENT_ID
         xui-url: XUI_URL
+        fees-register-api-url: FEE_URL
 
