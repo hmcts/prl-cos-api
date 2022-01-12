@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
 
-import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum.MIAMChildProtectionConcernChecklistEnum_value_1;
 import static uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum.MiamDomesticViolenceChecklistEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.childProtectionConcern;
@@ -115,7 +114,7 @@ public class MiamCheckerTest {
             .miamChildProtectionConcernList(Collections.singletonList(MIAMChildProtectionConcernChecklistEnum_value_1))
             .build();
 
-        assertTrue(miamChecker.isFinished(caseData));
+            assert (miamChecker.isFinished(caseData));
 
     }
 
