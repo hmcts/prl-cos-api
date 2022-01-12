@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
@@ -30,7 +31,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TaskListService {
@@ -47,7 +48,10 @@ public class TaskListService {
     }
 
     private TaskState getTaskState(CaseData caseData, Event event) {
+        log.info("=====CCD Reference number= {}", caseData.getId());
+        log.info("=====CCD Case Name= {}", caseData.getApplicantCaseName());
         if (eventsChecker.isFinished(event, caseData)) {
+            log.info("*******Tasklist status= {}*******",TaskState.FINISHED);
             return TaskState.FINISHED;
         }
         if (eventsChecker.hasMandatoryCompleted(event, caseData)) {
