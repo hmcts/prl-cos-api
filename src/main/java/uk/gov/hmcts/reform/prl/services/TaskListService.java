@@ -48,10 +48,7 @@ public class TaskListService {
     }
 
     private TaskState getTaskState(CaseData caseData, Event event) {
-        log.info("=====CCD Reference number= {}", caseData.getId());
-        log.info("=====CCD Case Name= {}", caseData.getApplicantCaseName());
         if (eventsChecker.isFinished(event, caseData)) {
-            log.info("*******Tasklist status= {}*******",TaskState.FINISHED);
             return TaskState.FINISHED;
         }
         if (eventsChecker.hasMandatoryCompleted(event, caseData)) {
