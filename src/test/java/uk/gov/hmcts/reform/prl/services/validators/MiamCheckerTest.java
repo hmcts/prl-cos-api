@@ -113,7 +113,7 @@ public class MiamCheckerTest {
             .miamChildProtectionConcernList(Collections.singletonList(MIAMChildProtectionConcernChecklistEnum_value_1))
             .build();
 
-            assert miamChecker.isFinished(caseData);
+            Assertions.assertTrue(miamChecker.isFinished(caseData));
 
     }
 
