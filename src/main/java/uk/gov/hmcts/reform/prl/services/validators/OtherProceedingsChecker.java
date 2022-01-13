@@ -19,7 +19,6 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.OTHER_PROCEEDINGS_ER
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.DONT_KNOW;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.YES;
-import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
 @Service
 public class OtherProceedingsChecker implements EventChecker {
