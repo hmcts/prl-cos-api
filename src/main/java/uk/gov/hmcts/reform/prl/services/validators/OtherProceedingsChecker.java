@@ -64,8 +64,6 @@ public class OtherProceedingsChecker implements EventChecker {
                     break;
                 }
 
-                allMandatoryFieldsDone = validateMandatoryProceedingDetailsForOtherProceedings(proceeding);
-
             }
             if (allMandatoryFieldsDone) {
                 taskErrorService.removeError(OTHER_PROCEEDINGS_ERROR);
@@ -94,11 +92,4 @@ public class OtherProceedingsChecker implements EventChecker {
         return false;
     }
 
-    public boolean validateMandatoryProceedingDetailsForOtherProceedings(ProceedingDetails proceeding) {
-
-        boolean fields = allNonEmpty(
-            proceeding.getNameOfCourt()
-        );
-        return fields;
-    }
 }
