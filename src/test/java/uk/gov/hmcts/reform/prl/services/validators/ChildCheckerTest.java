@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -156,7 +157,7 @@ public class ChildCheckerTest {
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
             .build();
 
-        assert !childChecker.isFinished(caseData);
+        Assertions.assertFalse(childChecker.isFinished(caseData));
     }
 
     @Test
@@ -198,7 +199,7 @@ public class ChildCheckerTest {
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
             .build();
 
-        assert childChecker.isFinished(caseData);
+        Assertions.assertTrue(childChecker.isFinished(caseData));
     }
 
     @Test
@@ -239,7 +240,7 @@ public class ChildCheckerTest {
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
             .build();
 
-        assert !childChecker.isFinished(caseData);
+        Assertions.assertFalse(childChecker.isFinished(caseData));
     }
 
 
@@ -290,7 +291,7 @@ public class ChildCheckerTest {
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
             .build();
 
-        assert !childChecker.isFinished(caseData);
+        Assertions.assertFalse(childChecker.isFinished(caseData));
     }
 
 
