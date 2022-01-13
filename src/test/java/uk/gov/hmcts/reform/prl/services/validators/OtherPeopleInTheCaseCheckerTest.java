@@ -18,6 +18,9 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(MockitoJUnitRunner.class)
 public class OtherPeopleInTheCaseCheckerTest {
 
@@ -32,7 +35,7 @@ public class OtherPeopleInTheCaseCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        assert !otherPeopleInTheCaseChecker.isStarted(caseData);
+        assertFalse(otherPeopleInTheCaseChecker.isStarted(caseData));
 
     }
 
@@ -41,7 +44,7 @@ public class OtherPeopleInTheCaseCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        assert !otherPeopleInTheCaseChecker.isFinished(caseData);
+        assertFalse(otherPeopleInTheCaseChecker.isFinished(caseData));
 
     }
 
@@ -50,7 +53,7 @@ public class OtherPeopleInTheCaseCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        assert !otherPeopleInTheCaseChecker.hasMandatoryCompleted(caseData);
+        assertFalse(otherPeopleInTheCaseChecker.hasMandatoryCompleted(caseData));
 
     }
 
@@ -64,7 +67,7 @@ public class OtherPeopleInTheCaseCheckerTest {
             .othersToNotify(otherList)
             .build();
 
-        assert otherPeopleInTheCaseChecker.isStarted(caseData);
+        assertTrue(otherPeopleInTheCaseChecker.isStarted(caseData));
     }
 
     @Test
@@ -85,7 +88,7 @@ public class OtherPeopleInTheCaseCheckerTest {
             .build();
 
 
-        assert !otherPeopleInTheCaseChecker.validateMandatoryPartyDetailsForOtherPerson(other);
+        assertFalse(otherPeopleInTheCaseChecker.validateMandatoryPartyDetailsForOtherPerson(other));
 
     }
 
@@ -126,7 +129,7 @@ public class OtherPeopleInTheCaseCheckerTest {
         CaseData caseData = CaseData.builder().othersToNotify(listOfParty)
             .build();
 
-        assert !otherPeopleInTheCaseChecker.isFinished(caseData);
+        assertFalse(otherPeopleInTheCaseChecker.isFinished(caseData));
     }
 
     @Test
@@ -163,7 +166,7 @@ public class OtherPeopleInTheCaseCheckerTest {
         CaseData caseData = CaseData.builder().othersToNotify(listOfParty)
             .build();
 
-        assert !otherPeopleInTheCaseChecker.isFinished(caseData);
+        assertFalse(otherPeopleInTheCaseChecker.isFinished(caseData));
     }
 
 }
