@@ -64,7 +64,7 @@ feature-toggle:
     example: ${FEATURE_EXAMPLE:false}
 
 xui:
-  url: https://manage-case.aat.platform.hmcts.net/
+  url: https://manage-case.aat.platform.hmcts.net/cases/case-details
 
 uk:
   gov:
@@ -76,6 +76,7 @@ uk:
         templates:
           english:
             SOLICITOR: a080f4ce-a07f-43ec-a3f0-f196d83f7730
+            CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
@@ -109,16 +110,16 @@ fees-register:
 
 
 idam:
-  s2s-auth:
-    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
-    microservice: prl_cos_api
-    totp-secret: GT2V6PLQ34XGPTPM
   api:
-    url: https://idam-api.aat.platform.hmcts.net
+    url: http://localhost:5000
+  s2s-auth:
+    url: http://localhost:4502
+    totp_secret: AABBCCDDEEFFGGHH
+    microservice: prl_cos_api
   client:
     id: prl-cos-api
-    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: W7supXKMJgcEWKBS
+    redirect_uri: https://localhost:9000/oauth2/callback
+    secret: OOOOOOOOOOOOOOOO
 
 
 core_case_data:
