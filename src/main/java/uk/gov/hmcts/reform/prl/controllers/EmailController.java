@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
@@ -26,6 +27,8 @@ import static org.springframework.http.ResponseEntity.ok;
 public class EmailController {
 
     private final SolicitorEmailService solicitorEmailService;
+    private final CaseWorkerEmailService caseWorkerEmailService;
+
     @Autowired
     private final UserService userService;
 
@@ -39,6 +42,7 @@ public class EmailController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         solicitorEmailService.sendEmail(caseDetails, userService.getUserDetails(authorisation));
+        caseWorkerEmailService.sendEmail(caseDetails,userService.getUserDetails(authorisation));
 
         return ok(
             CallbackResponse.builder().build()
