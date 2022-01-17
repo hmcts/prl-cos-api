@@ -5,8 +5,9 @@ spring:
       prefixed: true
       paths: /mnt/secrets/prl
       aliases:
+        prl.test-secret: TEST_SECRET
         prl.uk-gov-notify-api-key: UK_GOV_NOTIFY_API_KEY
-        microservicekey-prl-cos-api: IDAM_S2S_AUTH_TOTP_SECRET
+        prl.microservicekey-prl-cos-api: IDAM_S2S_AUTH_TOTP_SECRET
         system-update-user-password: PRL_SYSTEM_UPDATE_PASSWORD
         system-update-user-username: SYSTEM_UPDATE_USER_USERNAME
         prl-cos-idam-client-secret: IDAM_CLIENT_SECRET
@@ -18,5 +19,3 @@ spring:
         auth-provider-service-client-baseurl: AUTH_PROVIDER_SERVICE_CLIENT_BASEURL
         auth-idam-client-baseurl: AUTH_IDAM_CLIENT_BASEURL
         idam-client-id: IDAM_CLIENT_ID
-        test-secret: TEST_SECRET
-
