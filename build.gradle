@@ -50,7 +50,7 @@ def versions = [
   serenity                     : '2.3.10',
   serenityCucumber             : '1.9.50',
   serviceTokenGenerator        : '3.1.1',
-  springfoxSwagger             : '3.0.0',
+  springfoxSwagger             : '2.9.2',
   springSecurityCrypto         : '5.4.5',
   springSecurityRsa            : '1.0.9.RELEASE',
   springBoot                   : '2.5.4',
@@ -442,7 +442,9 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/SslVerificationDisabler.*',
   '**uk/gov/hmcts/reform/prl/Application.*',
-  '**uk/gov/hmcts/reform/prl/services/validators/*.*'
+  '**uk/gov/hmcts/reform/prl/services/validators/*.*',
+  '**uk/gov/hmcts/reform/prl/services/TestService',
+  '**uk/gov/hmcts/reform/prl/controller/TestController'
 
 ]
 
@@ -503,5 +505,12 @@ pact {
     pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
     tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
     version = project.pactVersion
+  }
+}
+
+bootRun {
+  doFirst() {
+      println("Loading secrets from vault")
+      systemProperty 'TEST_SECRET', getVaultSecret('test-secret')
   }
 }

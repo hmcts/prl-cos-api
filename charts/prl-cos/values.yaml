@@ -32,3 +32,5 @@ java:
           alias: SYSTEM_UPDATE_USER_USERNAME
         - name: system-update-user-password
           alias: PRL_SYSTEM_UPDATE_PASSWORD
+        - name: test-secret
+          alias: TEST_SECRET
