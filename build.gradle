@@ -443,7 +443,9 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/services/validators/*.*',
   '**uk/gov/hmcts/reform/prl/services/TestService',
-  '**uk/gov/hmcts/reform/prl/controller/TestController'
+  '**uk/gov/hmcts/reform/prl/services/FeatureToggleService',
+  '**uk/gov/hmcts/reform/prl/controller/TestController',
+
 
 ]
 

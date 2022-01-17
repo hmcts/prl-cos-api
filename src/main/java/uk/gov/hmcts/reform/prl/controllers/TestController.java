@@ -15,7 +15,7 @@ public class TestController {
     TestService testService;
 
     @GetMapping("/test")
-    public ResponseEntity<String> welcome() {
+    public ResponseEntity<String> testSecrets() {
 
         return ok(testService.testMethod());
     }
