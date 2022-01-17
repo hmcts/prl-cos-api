@@ -11,7 +11,7 @@ public enum OrderTypeEnum {
 
     childArrangementsOrder("Child Arrangements Order"),
     prohibitedStepsOrder("Prohibited Steps Order"),
-    specificIssueOrder("specificIssueOrder");
+    specificIssueOrder("Specific Issue Order");
 
     private final String displayedValue;
 
