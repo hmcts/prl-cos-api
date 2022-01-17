@@ -13,7 +13,7 @@ public enum PartyEnum {
     @JsonProperty("respondent")
     Respondent("Respondent"),
     @JsonProperty("other")
-    Other("Someone else");
+    Other("Other people in the case");
 
     private final String displayedValue;
 
