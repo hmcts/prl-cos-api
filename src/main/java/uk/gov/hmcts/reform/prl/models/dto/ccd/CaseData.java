@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
@@ -133,6 +134,7 @@ public class CaseData {
     private final List<MiamExemptionsChecklistEnum> miamExemptionsChecklist;
     private final List<MiamDomesticViolenceChecklistEnum> miamDomesticViolenceChecklist;
     private final List<MiamUrgencyReasonChecklistEnum> miamUrgencyReasonChecklist;
+    private final List<MiamChildProtectionConcernChecklistEnum> miamChildProtectionConcernList;
     private final MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceChecklist;
     private final MiamOtherGroundsChecklistEnum miamOtherGroundsChecklist;
     private final String mediatorRegistrationNumber;
