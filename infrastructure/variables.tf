@@ -1,17 +1,15 @@
-variable "common_tags" {
-  type = map
-}
+variable "product" {}
 
-variable "product" {
-  type = string
+variable "raw_product" {
   default = "prl"
 }
 
-variable "component" {
-  type = string
+variable "microservice" {
   default = "cos"
 }
 
-variable "env" {
-  type = string
+variable "location" {
+  default = "UK South"
 }
+
+variable "env" {}
