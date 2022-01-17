@@ -9,11 +9,11 @@ import lombok.RequiredArgsConstructor;
 public enum LiveWithEnum {
 
     @JsonProperty("applicant")
-    APPLICANT("applicant", "Applicant"),
+    applicant("applicant", "Applicant"),
     @JsonProperty("respondent")
-    RESPONDENT("respondent", "Respondent"),
+    respondent("respondent", "Respondent"),
     @JsonProperty("anotherPerson")
-    ANOTHER_PERSON("anotherPerson", "Another person not listed");
+    anotherPerson("anotherPerson", "Another person not listed");
 
     private final String id;
     private final String displayedValue;

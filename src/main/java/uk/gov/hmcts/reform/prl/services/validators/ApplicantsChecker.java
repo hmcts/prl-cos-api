@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.APPLICANTS_DETAILS_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.Gender.OTHER;
+import static uk.gov.hmcts.reform.prl.enums.Gender.other;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
@@ -110,7 +110,7 @@ public class ApplicantsChecker implements EventChecker {
         fields.add(ofNullable(applicant.getDateOfBirth()));
         Optional<Gender> gender = ofNullable(applicant.getGender());
         fields.add(gender);
-        if (gender.isPresent() && gender.get().equals(OTHER)) {
+        if (gender.isPresent() && gender.get().equals(other)) {
             fields.add(ofNullable(applicant.getOtherGender()));
         }
         fields.add(ofNullable(applicant.getPlaceOfBirth()));

@@ -9,9 +9,9 @@ import lombok.RequiredArgsConstructor;
 public enum ProceedingsEnum {
 
     @JsonProperty("ongoing")
-    ONGOING("ongoing", "Ongoing"),
+    ongoing("ongoing", "Ongoing"),
     @JsonProperty("previous")
-    PREVIOUS("previous", "Previous");
+    previous("previous", "Previous");
 
     private final String id;
     private final String displayedValue;

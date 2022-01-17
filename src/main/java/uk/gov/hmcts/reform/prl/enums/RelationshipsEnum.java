@@ -9,21 +9,21 @@ import lombok.RequiredArgsConstructor;
 public enum RelationshipsEnum {
 
     @JsonProperty("father")
-    FATHER("father", "Father"),
+    fether("father", "Father"),
     @JsonProperty("mother")
-    MOTHER("mother", "Mother"),
+    mother("mother", "Mother"),
     @JsonProperty("stepFather")
-    STEPFATHER("stepFather", "Step-father"),
+    stepFather("stepFather", "Step-father"),
     @JsonProperty("stepMother")
-    STEPMOTHER("stepMother", "Step-mother"),
+    stepMother("stepMother", "Step-mother"),
     @JsonProperty("grandParent")
-    GRANDPARENT("grandParent", "Grandparent"),
+    grandParent("grandParent", "Grandparent"),
     @JsonProperty("guardian")
-    GUARDIAN("guardian", "Guiardian"),
+    guardian("guardian", "Guiardian"),
     @JsonProperty("specialGuardian")
-    SPECIAL_GUARDIAN("specialGuardian", "Special Guardian"),
+    specialGuardian("specialGuardian", "Special Guardian"),
     @JsonProperty("other")
-    OTHER("other", "Other");
+    other("other", "Other");
 
     private final String id;
     private final String displayedValue;

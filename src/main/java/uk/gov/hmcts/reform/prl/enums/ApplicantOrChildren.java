@@ -9,9 +9,9 @@ import lombok.RequiredArgsConstructor;
 public enum ApplicantOrChildren {
 
     @JsonProperty("applicants")
-    APPLICANTS("applicants", "Applicant(s)"),
+    applicants("applicants", "Applicant(s)"),
     @JsonProperty("children")
-    CHILDREN("children", "Child(ren)");
+    children("children", "Child(ren)");
 
 
     private final String id;
