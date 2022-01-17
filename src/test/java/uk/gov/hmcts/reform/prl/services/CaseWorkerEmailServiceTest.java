@@ -29,6 +29,9 @@ public class CaseWorkerEmailServiceTest {
     private static final String manageCaseUrl = null;
     public static final String EMAIL_TEMPLATE_ID_1 = "111";
     public static final String EMAIL_TEMPLATE_ID_2 = "222";
+    private static final String URGENT_CASE = "Urgent Case";
+    private static final String WITHOUT_NOTICE = "Without Notice";
+    private static final String STANDARAD_HEARING = "Standard Hearing";
 
     public static final CaseWorkerEmail expectedEmailVars =  CaseWorkerEmail.builder()
         .caseReference("123")
@@ -111,6 +114,30 @@ public class CaseWorkerEmailServiceTest {
         UserDetails userDetails = UserDetails.builder()
             .build();
 
+        String caseUrgency = null;
+
+        if (caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.YES)) {
+            caseUrgency = URGENT_CASE;
+        } else if (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES)) {
+            caseUrgency = WITHOUT_NOTICE;
+        } else if ((caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.NO))
+            && (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES))
+            && (caseDetails.getCaseData().getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.NO))) {
+            caseUrgency = STANDARAD_HEARING;
+        }
+
+        final String[] typeOfOrder = new String[1];
+
+        caseDetails.getCaseData().getOrdersApplyingFor().forEach(orderType -> {
+            if (orderType.equals(OrderTypeEnum.childArrangementsOrder)) {
+                typeOfOrder[0] = OrderTypeEnum.childArrangementsOrder.getDisplayedValue();
+            } else if (orderType.equals(OrderTypeEnum.prohibitedStepsOrder)) {
+                typeOfOrder[0] = OrderTypeEnum.prohibitedStepsOrder.getDisplayedValue();
+            } else {
+                typeOfOrder[0] = OrderTypeEnum.specificIssueOrder.getDisplayedValue();
+            }
+        });
+
         EmailTemplateVars email = CaseWorkerEmail.builder()
             .caseReference(caseDetails.getCaseId())
             .caseName(caseDetails.getCaseData().getApplicantCaseName())
@@ -166,6 +193,30 @@ public class CaseWorkerEmailServiceTest {
         UserDetails userDetails = UserDetails.builder()
             .build();
 
+        String caseUrgency = null;
+
+        if (caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.YES)) {
+            caseUrgency = URGENT_CASE;
+        } else if (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES)) {
+            caseUrgency = WITHOUT_NOTICE;
+        } else if ((caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.NO))
+            && (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES))
+            && (caseDetails.getCaseData().getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.NO))) {
+            caseUrgency = STANDARAD_HEARING;
+        }
+
+        final String[] typeOfOrder = new String[1];
+
+        caseDetails.getCaseData().getOrdersApplyingFor().forEach(orderType -> {
+            if (orderType.equals(OrderTypeEnum.childArrangementsOrder)) {
+                typeOfOrder[0] = OrderTypeEnum.childArrangementsOrder.getDisplayedValue();
+            } else if (orderType.equals(OrderTypeEnum.prohibitedStepsOrder)) {
+                typeOfOrder[0] = OrderTypeEnum.prohibitedStepsOrder.getDisplayedValue();
+            } else {
+                typeOfOrder[0] = OrderTypeEnum.specificIssueOrder.getDisplayedValue();
+            }
+        });
+
         EmailTemplateVars email = CaseWorkerEmail.builder()
             .caseReference(caseDetails.getCaseId())
             .caseName(caseDetails.getCaseData().getApplicantCaseName())
@@ -203,7 +254,6 @@ public class CaseWorkerEmailServiceTest {
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
 
-
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -221,6 +271,30 @@ public class CaseWorkerEmailServiceTest {
 
         UserDetails userDetails = UserDetails.builder()
             .build();
+
+        String caseUrgency = null;
+
+        if (caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.YES)) {
+            caseUrgency = URGENT_CASE;
+        } else if (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES)) {
+            caseUrgency = WITHOUT_NOTICE;
+        } else if ((caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.NO))
+            && (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES))
+            && (caseDetails.getCaseData().getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.NO))) {
+            caseUrgency = STANDARAD_HEARING;
+        }
+
+        final String[] typeOfOrder = new String[1];
+
+        caseDetails.getCaseData().getOrdersApplyingFor().forEach(orderType -> {
+            if (orderType.equals(OrderTypeEnum.childArrangementsOrder)) {
+                typeOfOrder[0] = OrderTypeEnum.childArrangementsOrder.getDisplayedValue();
+            } else if (orderType.equals(OrderTypeEnum.prohibitedStepsOrder)) {
+                typeOfOrder[0] = OrderTypeEnum.prohibitedStepsOrder.getDisplayedValue();
+            } else {
+                typeOfOrder[0] = OrderTypeEnum.specificIssueOrder.getDisplayedValue();
+            }
+        });
 
         EmailTemplateVars email = CaseWorkerEmail.builder()
             .caseReference(caseDetails.getCaseId())
