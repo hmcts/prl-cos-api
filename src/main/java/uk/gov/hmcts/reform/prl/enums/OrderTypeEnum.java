@@ -13,7 +13,7 @@ public enum OrderTypeEnum {
     @JsonProperty("prohibitedStepsOrder")
     prohibitedStepsOrder("Prohibited Steps Order"),
     @JsonProperty("specificIssueOrder")
-    specificIssueOrder("specificIssueOrder");
+    specificIssueOrder("Specific Issue Order");
 
     private final String displayedValue;
 

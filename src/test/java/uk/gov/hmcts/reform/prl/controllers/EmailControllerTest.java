@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
@@ -23,12 +24,15 @@ public class EmailControllerTest {
     @Mock
     private SolicitorEmailService solicitorEmailService;
 
+    @Mock
+    private CaseWorkerEmailService caseWorkerEmailService;
+
     @InjectMocks
     private EmailController emailController;
 
 
     @Test
-    public void testSendEmail() {
+    public void testSendSolicitorEmail() {
         CaseDetails caseDetails = CaseDetails.builder()
             .caseData(null)
             .caseId(null)
@@ -47,6 +51,29 @@ public class EmailControllerTest {
         emailController.sendSolicitorEmail(callbackRequest, "Authorisation");
 
         verify(solicitorEmailService).sendEmail(caseDetails, userDetails);
+
+    }
+
+    @Test
+    public void testSendCaseWorkerEmail() {
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseData(null)
+            .caseId(null)
+            .state(null)
+            .build();
+
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest callbackRequest = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest
+            .builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        UserDetails userDetails = UserDetails.builder().build();
+
+        when(userService.getUserDetails("Authorisation")).thenReturn(userDetails);
+
+        emailController.sendSolicitorEmail(callbackRequest, "Authorisation");
+
+        verify(caseWorkerEmailService).sendEmail(caseDetails, userDetails);
 
     }
 

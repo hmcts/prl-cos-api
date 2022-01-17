@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
-import uk.gov.hmcts.reform.prl.models.dto.notify.SolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.service.notify.NotificationClient;
 
@@ -49,6 +48,7 @@ public class CaseWorkerEmailService {
     private String manageCaseUrl;
 
     public EmailTemplateVars buildEmail(CaseDetails caseDetails, UserDetails userDetails) {
+
         List<PartyDetails> applicants = caseDetails.getCaseData()
             .getApplicants()
             .stream()
@@ -58,8 +58,6 @@ public class CaseWorkerEmailService {
         List<String> applicantNamesList = applicants.stream()
             .map(element -> element.getFirstName() + " " + element.getLastName())
             .collect(Collectors.toList());
-
-        String applicantNames = String.join(", ", applicantNamesList);
 
         List<PartyDetails> respondents = caseDetails.getCaseData()
             .getRespondents()
@@ -71,27 +69,32 @@ public class CaseWorkerEmailService {
             .map(PartyDetails::getLastName)
             .collect(Collectors.toList());
 
-        String respondentNames = String.join(", ", respondentsList);
-
-        String caseUrgency;
+        String caseUrgency = null;
 
         if (caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.YES)) {
             caseUrgency = URGENT_CASE;
         } else if (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES)) {
             caseUrgency = WITHOUT_NOTICE;
-        } else {
+        } else if ((caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.NO))
+                && (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES))
+                && (caseDetails.getCaseData().getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.NO))) {
             caseUrgency = STANDARAD_HEARING;
         }
 
-        String typeOfOrder;
+        final String[] typeOfOrder = new String[1];
 
-        if(caseDetails.getCaseData().getOrdersApplyingFor().equals(OrderTypeEnum.childArrangementsOrder)) {
-            typeOfOrder = String.valueOf(OrderTypeEnum.childArrangementsOrder);
-        } else if(caseDetails.getCaseData().getOrdersApplyingFor().equals(OrderTypeEnum.prohibitedStepsOrder)) {
-            typeOfOrder = String.valueOf(OrderTypeEnum.prohibitedStepsOrder);
-        } else {
-            typeOfOrder = String.valueOf(OrderTypeEnum.specificIssueOrder);
-        }
+        caseDetails.getCaseData().getOrdersApplyingFor().forEach(orderType -> {
+            if (orderType.equals(OrderTypeEnum.childArrangementsOrder)) {
+                typeOfOrder[0] = OrderTypeEnum.childArrangementsOrder.getDisplayedValue();
+            } else if (orderType.equals(OrderTypeEnum.prohibitedStepsOrder)) {
+                typeOfOrder[0] = OrderTypeEnum.prohibitedStepsOrder.getDisplayedValue();
+            } else {
+                typeOfOrder[0] = OrderTypeEnum.specificIssueOrder.getDisplayedValue();
+            }
+        });
+
+        String applicantNames = String.join(", ", applicantNamesList);
+        String respondentNames = String.join(", ", respondentsList);
 
         EmailTemplateVars emailTemplateVars = CaseWorkerEmail.builder()
             .caseReference(caseDetails.getCaseId())
@@ -99,7 +102,7 @@ public class CaseWorkerEmailService {
             .applicantName(applicantNames)
             .respondentLastName(respondentNames)
             .hearingDateRequested("  ")
-            .ordersApplyingFor(typeOfOrder)
+            .ordersApplyingFor(typeOfOrder[0])
             .typeOfHearing(caseUrgency)
             .courtEmail(courtEmail)
             .caseLink(manageCaseUrl + "/" + caseDetails.getCaseId())
