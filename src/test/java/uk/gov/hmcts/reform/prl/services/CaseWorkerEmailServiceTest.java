@@ -69,7 +69,7 @@ public class CaseWorkerEmailServiceTest {
 
         UserDetails userDetails = userService.getUserDetails("Auth");
 
-        assertEquals(caseWorkerEmailService.getRecipientEmail(userDetails), "test@email.com");
+        assertEquals("test@email.com", caseWorkerEmailService.getRecipientEmail(userDetails));
 
     }
 
@@ -111,9 +111,6 @@ public class CaseWorkerEmailServiceTest {
             .caseData(caseData)
             .build();
 
-        UserDetails userDetails = UserDetails.builder()
-            .build();
-
         String caseUrgency = null;
 
         if (caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.YES)) {
@@ -149,7 +146,7 @@ public class CaseWorkerEmailServiceTest {
             .caseLink(manageCaseUrl + "/" + caseDetails.getCaseId())
             .build();
 
-        assertEquals(caseWorkerEmailService.buildEmail(caseDetails, userDetails), email);
+        assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
 
     }
 
@@ -190,9 +187,6 @@ public class CaseWorkerEmailServiceTest {
             .caseData(caseData)
             .build();
 
-        UserDetails userDetails = UserDetails.builder()
-            .build();
-
         String caseUrgency = null;
 
         if (caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.YES)) {
@@ -228,7 +222,7 @@ public class CaseWorkerEmailServiceTest {
             .caseLink(manageCaseUrl + "/" + caseDetails.getCaseId())
             .build();
 
-        assertEquals(caseWorkerEmailService.buildEmail(caseDetails, userDetails), email);
+        assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
 
     }
 
@@ -269,9 +263,6 @@ public class CaseWorkerEmailServiceTest {
             .caseData(caseData)
             .build();
 
-        UserDetails userDetails = UserDetails.builder()
-            .build();
-
         String caseUrgency = null;
 
         if (caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.YES)) {
@@ -307,7 +298,7 @@ public class CaseWorkerEmailServiceTest {
             .caseLink(manageCaseUrl + "/" + caseDetails.getCaseId())
             .build();
 
-        assertEquals(caseWorkerEmailService.buildEmail(caseDetails, userDetails), email);
+        assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
     }
 
     @Test
@@ -319,6 +310,6 @@ public class CaseWorkerEmailServiceTest {
 
         String expected = "test@email.com";
 
-        assertEquals(caseWorkerEmailService.getRecipientEmail(userDetails), expected);
+        assertEquals(expected, caseWorkerEmailService.getRecipientEmail(userDetails));
     }
 }

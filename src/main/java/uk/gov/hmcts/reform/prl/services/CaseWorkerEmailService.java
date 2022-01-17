@@ -47,7 +47,7 @@ public class CaseWorkerEmailService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
-    public EmailTemplateVars buildEmail(CaseDetails caseDetails, UserDetails userDetails) {
+    public EmailTemplateVars buildEmail(CaseDetails caseDetails) {
 
         List<PartyDetails> applicants = caseDetails.getCaseData()
             .getApplicants()
@@ -96,7 +96,7 @@ public class CaseWorkerEmailService {
         String applicantNames = String.join(", ", applicantNamesList);
         String respondentNames = String.join(", ", respondentsList);
 
-        EmailTemplateVars emailTemplateVars = CaseWorkerEmail.builder()
+        return CaseWorkerEmail.builder()
             .caseReference(caseDetails.getCaseId())
             .caseName(caseDetails.getCaseData().getApplicantCaseName())
             .applicantName(applicantNames)
@@ -108,8 +108,6 @@ public class CaseWorkerEmailService {
             .caseLink(manageCaseUrl + "/" + caseDetails.getCaseId())
             .build();
 
-        return emailTemplateVars;
-
     }
 
     public void sendEmail(CaseDetails caseDetails, UserDetails userDetails) {
@@ -117,7 +115,7 @@ public class CaseWorkerEmailService {
         emailService.send(
             getRecipientEmail(userDetails),
             EmailTemplateNames.CASEWORKER,
-            buildEmail(caseDetails, userDetails),
+            buildEmail(caseDetails),
             LanguagePreference.ENGLISH
         );
 
