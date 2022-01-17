@@ -26,8 +26,8 @@ public enum MiamExemptionsChecklistEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static MiamExemptionsChecklistEnum getValue(String key) {
+        return MiamExemptionsChecklistEnum.valueOf(key);
     }
 
 }

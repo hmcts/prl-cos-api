@@ -19,7 +19,7 @@ public enum PassportPossessionEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static PassportPossessionEnum getValue(String key) {
+        return PassportPossessionEnum.valueOf(key);
     }
 }

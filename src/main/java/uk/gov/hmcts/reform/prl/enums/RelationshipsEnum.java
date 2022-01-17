@@ -34,8 +34,8 @@ public enum RelationshipsEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static RelationshipsEnum getValue(String key) {
+        return RelationshipsEnum.valueOf(key);
     }
 
 }

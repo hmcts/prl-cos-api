@@ -25,8 +25,8 @@ public enum ApplicantOrChildren {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static ApplicantOrChildren getValue(String key) {
+        return ApplicantOrChildren.valueOf(key);
     }
 
 }

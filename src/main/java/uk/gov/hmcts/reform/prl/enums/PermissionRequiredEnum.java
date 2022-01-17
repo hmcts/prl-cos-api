@@ -19,8 +19,8 @@ public enum PermissionRequiredEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static PermissionRequiredEnum getValue(String key) {
+        return PermissionRequiredEnum.valueOf(key);
     }
 
 }

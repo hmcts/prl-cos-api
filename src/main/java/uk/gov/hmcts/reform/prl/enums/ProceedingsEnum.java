@@ -22,8 +22,8 @@ public enum ProceedingsEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static ProceedingsEnum getValue(String key) {
+        return ProceedingsEnum.valueOf(key);
     }
 
 }

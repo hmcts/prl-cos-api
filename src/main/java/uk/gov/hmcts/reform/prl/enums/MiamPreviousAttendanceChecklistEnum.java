@@ -42,8 +42,8 @@ public enum MiamPreviousAttendanceChecklistEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static MiamPreviousAttendanceChecklistEnum getValue(String key) {
+        return MiamPreviousAttendanceChecklistEnum.valueOf(key);
     }
 
 

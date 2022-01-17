@@ -30,8 +30,8 @@ public enum EventErrorsEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static EventErrorsEnum getValue(String key) {
+        return EventErrorsEnum.valueOf(key);
     }
 
 }

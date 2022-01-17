@@ -19,8 +19,8 @@ public enum WhoChildrenLiveWith {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static WhoChildrenLiveWith getValue(String key) {
+        return WhoChildrenLiveWith.valueOf(key);
     }
 
 }

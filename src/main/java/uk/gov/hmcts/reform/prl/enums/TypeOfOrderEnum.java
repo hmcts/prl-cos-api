@@ -43,7 +43,7 @@ public enum TypeOfOrderEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static TypeOfOrderEnum getValue(String key) {
+        return TypeOfOrderEnum.valueOf(key);
     }
 }
