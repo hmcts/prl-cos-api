@@ -13,5 +13,6 @@ public class InterpreterNeed {
     private final List<PartyEnum> party;
     private final String name;
     private final String language;
+    private final String otherAssistance;
 
 }
