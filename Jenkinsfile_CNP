@@ -24,7 +24,7 @@ static Map<String, Object> secret(String secretName, String envVariable) {
 }
 
 def secrets = [
-       'prl-${env}'    :[
+       'prl-aat'    :[
                secret('test-secret', 'TEST_SECRET')
        ]
 ]
