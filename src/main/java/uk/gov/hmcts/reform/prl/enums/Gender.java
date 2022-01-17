@@ -9,11 +9,11 @@ import lombok.RequiredArgsConstructor;
 public enum Gender {
 
     @JsonProperty("female")
-    FEMALE("female", "Female"),
+    female("female", "Female"),
     @JsonProperty("male")
-    MALE("male", "Male"),
+    male("male", "Male"),
     @JsonProperty("other")
-    OTHER("other", "They identify in another way");
+    other("other", "They identify in another way");
 
     private final String id;
     private final String displayedValue;

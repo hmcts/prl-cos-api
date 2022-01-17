@@ -9,11 +9,11 @@ import lombok.RequiredArgsConstructor;
 public enum PartyEnum {
 
     @JsonProperty("applicant")
-    Applicant("Applicant"),
+    applicant("Applicant"),
     @JsonProperty("respondent")
-    Respondent("Respondent"),
+    respondent("Respondent"),
     @JsonProperty("other")
-    Other("Someone else");
+    other("Someone else");
 
     private final String displayedValue;
 
