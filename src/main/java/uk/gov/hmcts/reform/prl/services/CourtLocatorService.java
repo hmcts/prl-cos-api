@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
@@ -36,6 +37,10 @@ public class CourtLocatorService {
 
         return "X";
 
+    }
+
+    public Optional<String> getPostcode(PartyDetails party) {
+        return ofNullable(party.getAddress().getPostCode());
     }
 
 
