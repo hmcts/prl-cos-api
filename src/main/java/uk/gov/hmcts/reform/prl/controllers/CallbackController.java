@@ -97,8 +97,12 @@ public class CallbackController {
     @ApiOperation(value = "Callback to generate and store document")
     public CallbackResponse generateAndStoreDocument(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody @ApiParam("CaseData") CallbackRequest request
+        @RequestBody @ApiParam("CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest request
     ) throws Exception {
+
+
+
+
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             request.getCaseDetails(),
