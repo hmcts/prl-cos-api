@@ -58,7 +58,7 @@ public class CourtLocatorServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
 
-        assert(courtLocatorService.whichPostCodeToUse(caseData).equals("AB12 3AL"));
+        assert(courtLocatorService.getCorrectPartyPostcode(caseData).equals("AB12 3AL"));
 
     }
 
@@ -79,6 +79,36 @@ public class CourtLocatorServiceTest {
         assertThat(postcode.get(), is("AB12 3AL"));
     }
 
+    @Test
+    public void givenCompleteAddress_whenPostcodePresent_thenReturnTrue() {
+        Address respondentAddress = Address.builder()
+            .addressLine1("145 Test Address")
+            .postTown("London")
+            .country("UK")
+            .postCode("DG12 5BB")
+            .build();
+
+        PartyDetails respondent = PartyDetails.builder()
+            .address(respondentAddress)
+            .build();
+
+        assertThat(courtLocatorService.isPostCodePresent(respondent), is(true));
+    }
+
+    @Test
+    public void givenCompleteAddress_whenPostcodeNotPresent_thenReturnFalse() {
+        Address respondentAddress = Address.builder()
+            .addressLine1("145 Test Address")
+            .postTown("London")
+            .country("UK")
+            .build();
+
+        PartyDetails respondent = PartyDetails.builder()
+            .address(respondentAddress)
+            .build();
+
+        assertThat(courtLocatorService.isPostCodePresent(respondent), is(false));
+    }
 
 
 

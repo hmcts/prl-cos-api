@@ -15,6 +15,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.checkerframework.checker.nullness.Opt.isPresent;
+import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.APPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.RESPONDENT;
 
 @Service
 @Slf4j
@@ -22,25 +25,37 @@ import static java.util.Optional.ofNullable;
 public class CourtLocatorService {
 
 
-    public String whichPostCodeToUse(CaseData caseData) {
 
-//        List<Child> children = caseData.getChildren()
-//            .stream()
-//            .map(Element::getValue)
-//            .collect(Collectors.toList());
-//
-//        Optional<Child> child = ofNullable(children.get(0));
-//
-//        if (child.isPresent()) {
-//            List<LiveWithEnum> childLivesWith = child.get().getChildLiveWith();
-//        }
 
-        return "X";
+    public String getCorrectPartyPostcode(CaseData caseData) {
 
+        //current requirements use the first child if multiple children present
+        Child child = caseData.getChildren()
+            .stream()
+            .map(Element::getValue)
+            .findFirst()
+            .get();
+
+        if (child.getChildLiveWith().contains(APPLICANT)){
+            return caseData.getApplicants().get(0).getValue().getAddress().getPostCode();
+        }
+        else if (child.getChildLiveWith().contains(RESPONDENT)){
+            return caseData.getRespondents().get(0).getValue().getAddress().getPostCode();
+        }
+        else {
+            if (ofNullable(child.getAddress().getPostCode()).isPresent()) {
+                return child.getAddress().getPostCode();
+            }
+            return caseData.getApplicants().get(0).getValue().getAddress().getPostCode();
+        }
     }
 
     public Optional<String> getPostcode(PartyDetails party) {
         return ofNullable(party.getAddress().getPostCode());
+    }
+
+    public boolean isPostCodePresent(PartyDetails partyDetails) {
+        return isPresent(partyDetails.getAddress().getPostCode());
     }
 
 
