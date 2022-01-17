@@ -67,8 +67,4 @@ withPipeline(type, product, component) {
     env.ENV = 'aat'
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
-  onPR() {
-    env.ENV = 'preview'
-    enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
-  }
 }
