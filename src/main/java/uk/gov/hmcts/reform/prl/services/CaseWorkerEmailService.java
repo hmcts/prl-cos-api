@@ -76,7 +76,7 @@ public class CaseWorkerEmailService {
         } else if (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES)) {
             caseUrgency = WITHOUT_NOTICE;
         } else if ((caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.NO))
-                && (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES))
+                && (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.NO))
                 && (caseDetails.getCaseData().getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.NO))) {
             caseUrgency = STANDARAD_HEARING;
         }
