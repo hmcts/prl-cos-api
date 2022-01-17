@@ -24,9 +24,9 @@ static Map<String, Object> secret(String secretName, String envVariable) {
 }
 
 def secrets = [
-       'prl-aat'    :[
-               secret('test-secret', 'TEST_SECRET')
-       ]
+   'prl-${env}':[
+      secret('test-secret', 'TEST_SECRET')
+   ]
 ]
 
 withPipeline(type, product, component) {
@@ -66,5 +66,13 @@ withPipeline(type, product, component) {
   onMaster() {
     env.ENV = 'aat'
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
+  }
+
+  onPR {
+    env.ENVIRONMENT="preview"
+  }
+
+  onMaster {
+    env.ENVIRONMENT="aat"
   }
 }
