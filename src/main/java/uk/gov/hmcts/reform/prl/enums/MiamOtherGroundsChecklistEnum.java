@@ -103,8 +103,8 @@ public enum MiamOtherGroundsChecklistEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static MiamOtherGroundsChecklistEnum getValue(String key) {
+        return MiamOtherGroundsChecklistEnum.valueOf(key);
     }
 
 }

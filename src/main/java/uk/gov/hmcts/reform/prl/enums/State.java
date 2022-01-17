@@ -19,8 +19,8 @@ public enum State {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static State getValue(String key) {
+        return State.valueOf(key);
     }
 
 }

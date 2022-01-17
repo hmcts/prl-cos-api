@@ -24,7 +24,7 @@ public enum LiveWithEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static LiveWithEnum getValue(String key) {
+        return LiveWithEnum.valueOf(key);
     }
 }

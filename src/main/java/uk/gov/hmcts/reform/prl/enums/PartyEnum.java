@@ -23,8 +23,8 @@ public enum PartyEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static PartyEnum getValue(String key) {
+        return PartyEnum.valueOf(key);
     }
 
 }

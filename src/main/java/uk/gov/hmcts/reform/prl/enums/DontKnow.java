@@ -17,8 +17,8 @@ public enum DontKnow {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static DontKnow getValue(String key) {
+        return DontKnow.valueOf(key);
     }
 
 }

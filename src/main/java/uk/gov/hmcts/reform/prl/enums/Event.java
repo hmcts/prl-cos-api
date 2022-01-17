@@ -37,8 +37,8 @@ public enum Event {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static Event getValue(String key) {
+        return Event.valueOf(key);
     }
 
 }

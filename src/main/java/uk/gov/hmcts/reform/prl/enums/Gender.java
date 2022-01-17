@@ -24,8 +24,8 @@ public enum Gender {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static Gender getValue(String key) {
+        return Gender.valueOf(key);
     }
 
 }

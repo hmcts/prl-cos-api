@@ -131,8 +131,8 @@ public enum MiamDomesticViolenceChecklistEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static MiamDomesticViolenceChecklistEnum getValue(String key) {
+        return MiamDomesticViolenceChecklistEnum.valueOf(key);
     }
 
 }

@@ -23,8 +23,8 @@ public enum SpokenOrWrittenWelshEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static SpokenOrWrittenWelshEnum getValue(String key) {
+        return SpokenOrWrittenWelshEnum.valueOf(key);
     }
 
 }

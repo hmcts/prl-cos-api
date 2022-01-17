@@ -37,8 +37,8 @@ public enum MiamUrgencyReasonChecklistEnum {
     }
 
     @JsonCreator
-    public static OrderTypeEnum getValue(String key) {
-        return OrderTypeEnum.valueOf(key);
+    public static MiamUrgencyReasonChecklistEnum getValue(String key) {
+        return MiamUrgencyReasonChecklistEnum.valueOf(key);
     }
 
 
