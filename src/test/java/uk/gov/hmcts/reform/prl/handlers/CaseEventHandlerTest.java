@@ -21,10 +21,11 @@ import java.util.Map;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.FINISHED;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 
@@ -51,6 +52,7 @@ public class CaseEventHandlerTest {
     public void shouldUpdateTaskListForCasesInOpenState() {
         final CaseData caseData = CaseData.builder()
             .id(nextLong())
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         final CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
         final List<Task> tasks = List.of(
