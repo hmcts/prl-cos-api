@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.models.documents.CorrespondenceDocument;
 import uk.gov.hmcts.reform.prl.models.documents.FurtherEvidenceDocument;
 
+import java.util.List;
+
 @Data
 @Builder
 public class Correspondence {
@@ -16,5 +18,5 @@ public class Correspondence {
     @JsonProperty("notes")
     private final String notes;
     private final CorrespondenceDocument documentCorrespondence;
-    private final RestrictToCafcassHmcts restrictCheckboxCorrespondence;
+    private final List<RestrictToCafcassHmcts> restrictCheckboxCorrespondence;
 }
