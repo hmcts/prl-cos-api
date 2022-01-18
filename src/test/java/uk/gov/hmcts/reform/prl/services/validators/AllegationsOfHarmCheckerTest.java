@@ -133,6 +133,25 @@ public class AllegationsOfHarmCheckerTest {
     }
 
     @Test
+    public void whenNoCaseDataThenValidateChildContactIsFalse() {
+        CaseData caseData = CaseData.builder().build();
+
+        assert !allegationsOfHarmChecker.validateChildContact(caseData);
+
+    }
+
+    @Test
+    public void whenChildContactPresentThenValidateChildContactTrue() {
+        CaseData caseData = CaseData.builder()
+            .agreeChildUnsupervisedTime(YES)
+            .agreeChildSupervisedTime(YES)
+            .agreeChildOtherContact(YES)
+            .build();
+
+        assert allegationsOfHarmChecker.validateChildContact(caseData);
+    }
+
+    @Test
     public void whenNonMolestationOrderCurrentReturnTrue() {
         CaseData caseData = CaseData.builder()
             .ordersNonMolestation(YES)
