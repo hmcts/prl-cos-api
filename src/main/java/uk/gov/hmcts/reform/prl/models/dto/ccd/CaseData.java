@@ -277,7 +277,7 @@ public class CaseData {
     private final String feeCode;
 
     /**
-     * Court details
+     * Court details.
      */
 
     private Court court;

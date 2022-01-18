@@ -49,13 +49,11 @@ public class CourtFinderService {
             .findFirst()
             .get();
 
-        if (child.getChildLiveWith().contains(APPLICANT)){
+        if (child.getChildLiveWith().contains(APPLICANT)) {
             return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
-        }
-        else if (child.getChildLiveWith().contains(RESPONDENT)){
+        } else if (child.getChildLiveWith().contains(RESPONDENT)) {
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
-        }
-        else {
+        } else {
             if (ofNullable(child.getAddress().getPostCode()).isPresent()) {
                 return child.getAddress().getPostCode();
             }

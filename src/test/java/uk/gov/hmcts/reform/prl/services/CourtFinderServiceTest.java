@@ -37,7 +37,11 @@ public class CourtFinderServiceTest {
     @Mock
     CourtFinderApi courtFinderApi;
 
-    private Court londonCourt, westLondonCourt, newcastleCourt;
+    private Court londonCourt;
+
+    private Court westLondonCourt;
+
+    private Court newcastleCourt;
 
     @Before
     public void init() {
@@ -185,7 +189,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenChildLivesWithApplicant_thenReturnCourtClosestToApplicant(){
+    public void givenValidCaseData_whenChildLivesWithApplicant_thenReturnCourtClosestToApplicant() {
 
         Address applicantAddress = Address.builder()
             .addressLine1("123 Test Address")
@@ -228,7 +232,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCaseDataWithMultipleApplicants_whenChildLivesWithApplicant_thenReturnCourtClosestToFirstApplicant(){
+    public void givenValidCaseDataWithMultipleApplicants_whenChildLivesWithApplicant_thenReturnCourtClosestToFirstApplicant() {
 
         Address applicant1Address = Address.builder()
             .addressLine1("123 Test Address")
@@ -350,7 +354,7 @@ public class CourtFinderServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
 
-        assert(courtFinderService.getCorrectPartyPostcode(caseData).equals("AB12 3AL"));
+        assert (courtFinderService.getCorrectPartyPostcode(caseData).equals("AB12 3AL"));
 
     }
 

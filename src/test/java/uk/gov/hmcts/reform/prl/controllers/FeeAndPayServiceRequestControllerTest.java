@@ -20,7 +20,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-
+@PropertySource(value = "classpath:application.yaml")
+@RunWith(SpringRunner.class)
 public class FeeAndPayServiceRequestControllerTest {
 
     private MockMvc mockMvc;
@@ -33,6 +34,7 @@ public class FeeAndPayServiceRequestControllerTest {
 
     @Mock
     private FeeService feesService;
+
     @Mock
     private ObjectMapper objectMapper;
 
