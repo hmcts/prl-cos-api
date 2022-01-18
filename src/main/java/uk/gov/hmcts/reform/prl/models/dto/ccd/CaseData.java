@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
@@ -274,5 +275,11 @@ public class CaseData {
     private final String feeAmount;
     @JsonProperty("feeCode")
     private final String feeCode;
+
+    /**
+     * Court details
+     */
+
+    private Court court;
 
 }
