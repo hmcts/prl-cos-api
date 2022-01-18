@@ -446,7 +446,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/CaseWorkerEmailService.java',
   '**uk/gov/hmcts/reform/prl/services/SolicitorEmailService.java',
   '**uk/gov/hmcts/reform/prl/services/RequestUpdateCallbackService.java',
-  '**uk/gov/hmcts/reform/prl/services/EmailService.java'
+  '**uk/gov/hmcts/reform/prl/servicesEmailService.java'
 
 ]
 
