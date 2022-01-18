@@ -6,15 +6,16 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum PartyEnum {
+public enum AbductionChildPassportPossessionEnum {
 
-    @JsonProperty("applicant")
-    Applicant("Applicant"),
-    @JsonProperty("respondent")
-    Respondent("Respondent"),
+    @JsonProperty("mother")
+    MOTHER("mother", "Mother"),
+    @JsonProperty("father")
+    FATHER("father", "Father"),
     @JsonProperty("other")
-    Other("Other people in the case");
+    OTHER("other", "Other");
 
+    private final String id;
     private final String displayedValue;
 
 }
