@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -11,7 +12,10 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
 
+import static org.junit.Assert.assertTrue;
+import static uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum.MIAMChildProtectionConcernChecklistEnum_value_1;
 import static uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum.MiamDomesticViolenceChecklistEnum_Value_1;
+import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.childProtectionConcern;
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.domesticViolence;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
@@ -101,6 +105,19 @@ public class MiamCheckerTest {
 
     }
 
+    @Test
+    public void whenApplicantHasNotAttendedMiamButHasCompletedExemptionsSectionSubmittedChildProtectionConcernIsFinishedReturnsTrue() {
+        CaseData caseData = CaseData.builder()
+            .applicantAttendedMiam(NO)
+            .claimingExemptionMiam(YES)
+            .familyMediatorMiam(NO)
+            .miamExemptionsChecklist(Collections.singletonList(childProtectionConcern))
+            .miamChildProtectionConcernList(Collections.singletonList(MIAMChildProtectionConcernChecklistEnum_value_1))
+            .build();
+
+        assertTrue(miamChecker.isFinished(caseData));
+
+    }
 
 
 }
