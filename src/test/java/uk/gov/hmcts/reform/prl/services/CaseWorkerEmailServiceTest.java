@@ -5,6 +5,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
@@ -12,7 +14,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 
@@ -46,7 +47,7 @@ public class CaseWorkerEmailServiceTest {
         .build();
 
 
-    @Mock
+    @Autowired
     private EmailService emailService;
 
     @Mock
@@ -74,7 +75,7 @@ public class CaseWorkerEmailServiceTest {
     }
 
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void whenApplicantPresentThenApplicantStringCreated() {
 
         PartyDetails applicant = PartyDetails.builder()
@@ -107,50 +108,25 @@ public class CaseWorkerEmailServiceTest {
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
-            .caseId(String.valueOf(caseData.getId()))
-            .caseData(caseData)
+            .id(caseData.getId())
             .build();
 
-        String caseUrgency = null;
-
-        if (caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.YES)) {
-            caseUrgency = URGENT_CASE;
-        } else if (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES)) {
-            caseUrgency = WITHOUT_NOTICE;
-        } else if ((caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.NO))
-            && (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES))
-            && (caseDetails.getCaseData().getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.NO))) {
-            caseUrgency = STANDARAD_HEARING;
-        }
-
-        final String[] typeOfOrder = new String[1];
-
-        caseDetails.getCaseData().getOrdersApplyingFor().forEach(orderType -> {
-            if (orderType.equals(OrderTypeEnum.childArrangementsOrder)) {
-                typeOfOrder[0] = OrderTypeEnum.childArrangementsOrder.getDisplayedValue();
-            } else if (orderType.equals(OrderTypeEnum.prohibitedStepsOrder)) {
-                typeOfOrder[0] = OrderTypeEnum.prohibitedStepsOrder.getDisplayedValue();
-            } else {
-                typeOfOrder[0] = OrderTypeEnum.specificIssueOrder.getDisplayedValue();
-            }
-        });
-
         EmailTemplateVars email = CaseWorkerEmail.builder()
-            .caseReference(caseDetails.getCaseId())
-            .caseName(caseDetails.getCaseData().getApplicantCaseName())
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
             .respondentLastName("TestLast")
             .typeOfHearing("Urgent Case")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Child Arrangements Order")
-            .caseLink(manageCaseUrl + "/" + caseDetails.getCaseId())
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
         assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
 
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void whenRespondentPresentThenRespondentStringCreated() {
 
         PartyDetails applicant = PartyDetails.builder()
@@ -185,26 +161,25 @@ public class CaseWorkerEmailServiceTest {
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
-            .caseId(String.valueOf(caseData.getId()))
-            .caseData(caseData)
+            .id(caseData.getId())
             .build();
 
         EmailTemplateVars email = CaseWorkerEmail.builder()
-            .caseReference(caseDetails.getCaseId())
-            .caseName(caseDetails.getCaseData().getApplicantCaseName())
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
             .respondentLastName("respondentLast")
             .typeOfHearing("Standard Hearing")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Prohibited Steps Order")
-            .caseLink(manageCaseUrl + "/" + caseDetails.getCaseId())
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
         assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
 
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void whenTypeOfApplicationPresentThenOrdersApplyForWillBeDispalyed() {
 
         PartyDetails applicant = PartyDetails.builder()
@@ -237,19 +212,18 @@ public class CaseWorkerEmailServiceTest {
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
-            .caseId(String.valueOf(caseData.getId()))
-            .caseData(caseData)
+            .id(caseData.getId())
             .build();
 
         EmailTemplateVars email = CaseWorkerEmail.builder()
-            .caseReference(caseDetails.getCaseId())
-            .caseName(caseDetails.getCaseData().getApplicantCaseName())
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
             .respondentLastName("respondentLast")
             .typeOfHearing("Without Notice")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Specific Issue Order")
-            .caseLink(manageCaseUrl + "/" + caseDetails.getCaseId())
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
         assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));

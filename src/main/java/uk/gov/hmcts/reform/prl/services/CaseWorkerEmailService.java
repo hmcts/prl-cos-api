@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -13,12 +14,12 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.service.notify.NotificationClient;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,7 @@ public class CaseWorkerEmailService {
 
     private static final String URGENT_CASE = "Urgent Case";
     private static final String WITHOUT_NOTICE = "Without Notice";
+    private static final String REDUCED_NOTICE = "Reduced Notice";
     private static final String STANDARAD_HEARING = "Standard Hearing";
 
     @Autowired
@@ -49,7 +51,7 @@ public class CaseWorkerEmailService {
 
     public EmailTemplateVars buildEmail(CaseDetails caseDetails) {
 
-        List<PartyDetails> applicants = caseDetails.getCaseData()
+        List<PartyDetails> applicants = emailService.getCaseData(caseDetails)
             .getApplicants()
             .stream()
             .map(Element::getValue)
@@ -59,7 +61,9 @@ public class CaseWorkerEmailService {
             .map(element -> element.getFirstName() + " " + element.getLastName())
             .collect(Collectors.toList());
 
-        List<PartyDetails> respondents = caseDetails.getCaseData()
+        final String applicantNames = String.join(", ", applicantNamesList);
+
+        List<PartyDetails> respondents = emailService.getCaseData(caseDetails)
             .getRespondents()
             .stream()
             .map(Element::getValue)
@@ -69,43 +73,51 @@ public class CaseWorkerEmailService {
             .map(PartyDetails::getLastName)
             .collect(Collectors.toList());
 
-        String caseUrgency = null;
+        final String respondentNames = String.join(", ", respondentsList);
 
-        if (caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.YES)) {
-            caseUrgency = URGENT_CASE;
-        } else if (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES)) {
-            caseUrgency = WITHOUT_NOTICE;
-        } else if ((caseDetails.getCaseData().getIsCaseUrgent().equals(YesOrNo.NO))
-                && (caseDetails.getCaseData().getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.NO))
-                && (caseDetails.getCaseData().getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.NO))) {
-            caseUrgency = STANDARAD_HEARING;
+        List<String> typeOfHearing = new ArrayList<>();
+
+        if (emailService.getCaseData(caseDetails).getIsCaseUrgent().equals(YesOrNo.YES)) {
+            typeOfHearing.add(URGENT_CASE);
+        }
+        if (emailService.getCaseData(caseDetails).getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES)) {
+            typeOfHearing.add(WITHOUT_NOTICE);
+        }
+        if (emailService.getCaseData(caseDetails).getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.YES)) {
+            typeOfHearing.add(REDUCED_NOTICE);
+        }
+        if ((emailService.getCaseData(caseDetails).getIsCaseUrgent().equals(YesOrNo.NO))
+                && (emailService.getCaseData(caseDetails).getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.NO))
+                && (emailService.getCaseData(caseDetails).getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.NO))) {
+            typeOfHearing.add(STANDARAD_HEARING);
         }
 
-        final String[] typeOfOrder = new String[1];
+        final String typeOfHearings = String.join(", ", typeOfHearing);
 
-        caseDetails.getCaseData().getOrdersApplyingFor().forEach(orderType -> {
-            if (orderType.equals(OrderTypeEnum.childArrangementsOrder)) {
-                typeOfOrder[0] = OrderTypeEnum.childArrangementsOrder.getDisplayedValue();
-            } else if (orderType.equals(OrderTypeEnum.prohibitedStepsOrder)) {
-                typeOfOrder[0] = OrderTypeEnum.prohibitedStepsOrder.getDisplayedValue();
-            } else {
-                typeOfOrder[0] = OrderTypeEnum.specificIssueOrder.getDisplayedValue();
-            }
-        });
+        List<String> typeOfOrder = new ArrayList<>();
 
-        String applicantNames = String.join(", ", applicantNamesList);
-        String respondentNames = String.join(", ", respondentsList);
+        if (emailService.getCaseData(caseDetails).getOrdersApplyingFor().contains(OrderTypeEnum.childArrangementsOrder)) {
+            typeOfOrder.add(OrderTypeEnum.childArrangementsOrder.getDisplayedValue());
+        }
+        if (emailService.getCaseData(caseDetails).getOrdersApplyingFor().contains(OrderTypeEnum.prohibitedStepsOrder)) {
+            typeOfOrder.add(OrderTypeEnum.prohibitedStepsOrder.getDisplayedValue());
+        }
+        if (emailService.getCaseData(caseDetails).getOrdersApplyingFor().contains(OrderTypeEnum.specificIssueOrder)) {
+            typeOfOrder.add(OrderTypeEnum.specificIssueOrder.getDisplayedValue());
+        }
+
+        String typeOfOrders = String.join(", ", typeOfOrder);
 
         return CaseWorkerEmail.builder()
-            .caseReference(caseDetails.getCaseId())
-            .caseName(caseDetails.getCaseData().getApplicantCaseName())
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
             .applicantName(applicantNames)
             .respondentLastName(respondentNames)
             .hearingDateRequested("  ")
-            .ordersApplyingFor(typeOfOrder[0])
-            .typeOfHearing(caseUrgency)
+            .ordersApplyingFor(typeOfOrders)
+            .typeOfHearing(typeOfHearings)
             .courtEmail(courtEmail)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getCaseId())
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
     }
