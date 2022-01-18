@@ -32,10 +32,10 @@ public class CaseWorkerEmailService {
     private final EmailTemplatesConfig emailTemplatesConfig;
     private final ObjectMapper objectMapper;
 
-    private static final String URGENT_CASE = "Urgent Case";
-    private static final String WITHOUT_NOTICE = "Without Notice";
-    private static final String REDUCED_NOTICE = "Reduced Notice";
-    private static final String STANDARAD_HEARING = "Standard Hearing";
+    private static final String URGENT_CASE = "Urgent ";
+    private static final String WITHOUT_NOTICE = "Without notice";
+    private static final String REDUCED_NOTICE = "Reduced notice";
+    private static final String STANDARAD_HEARING = "Standard hearing";
 
     @Autowired
     private EmailService emailService;
@@ -91,7 +91,6 @@ public class CaseWorkerEmailService {
                 && (emailService.getCaseData(caseDetails).getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.NO))) {
             typeOfHearing.add(STANDARAD_HEARING);
         }
-
         final String typeOfHearings = String.join(", ", typeOfHearing);
 
         List<String> typeOfOrder = new ArrayList<>();
@@ -106,7 +105,13 @@ public class CaseWorkerEmailService {
             typeOfOrder.add(OrderTypeEnum.specificIssueOrder.getDisplayedValue());
         }
 
-        String typeOfOrders = String.join(", ", typeOfOrder);
+        final String typeOfOrders;
+
+        if( typeOfHearing.size() == 2) {
+            typeOfOrders = String.join(" and ", typeOfOrder);
+        } else {
+            typeOfOrders = String.join(", ", typeOfOrder);
+        }
 
         return CaseWorkerEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))

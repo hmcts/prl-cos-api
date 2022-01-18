@@ -18,7 +18,7 @@ spring:
   config:
     import: "optional:configtree:/mnt/secrets/"
   application:
-    name: Spring Boot Template
+    name: Prl cos api
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
@@ -59,49 +59,76 @@ pba:
       api:
         baseurl: ${PRD_API_BASEURL:http://localhost:8892}
 
-
-xui:
-  url: ${XUI_URL:http://localhost:3333/}
-
 feature-toggle:
   toggle:
     example: ${FEATURE_EXAMPLE:false}
+
+xui:
+  url: https://manage-case.aat.platform.hmcts.net/cases/case-details
 
 uk:
   gov:
     notify:
       api:
-        key: ${UK_GOV_NOTIFY_API_KEY:prlcosemail-be03d538-db4c-4efe-8d36-b2a8c9d5131b-6e0f1f54-5348-4cbf-80ab-f18a7c8bc331}
+        key: ${UK_GOV_NOTIFY_API_KEY:prltest-be03d538-db4c-4efe-8d36-b2a8c9d5131b-66fc91de-593f-440e-9f13-16524e72aec4}
         baseUrl: https://api.notifications.service.gov.uk
       email:
         templates:
           english:
             SOLICITOR: a080f4ce-a07f-43ec-a3f0-f196d83f7730
+            CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
+        application:
+          email-id: C100applications@justice.gov.uk
+          court-name: Court Name
 
 
+notify:
+  api-key: fake-key
+  baseUrl: https://api.notifications.service.gov.uk
+
+payments:
+  api:
+    url: ${PAY_URL:}
+    callback-url: ${PAY_CALLBACK_URL:}
+
+fees-register:
+  api:
+    url: ${FEE_URL:http://fees-register-api-demo.service.core-compute-demo.internal}
+  parameters:
+    C100_SUBMISSION_FEE:
+      channel: default
+      event: miscellaneous
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: ChildArrangement
+      service: private law
 
 # NEW BELOW THIS LINE
 
 idam:
-  api:
-    url: http://localhost:5000
   s2s-auth:
-    url: http://localhost:4502
-    totp_secret: AABBCCDDEEFFGGHH
+    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
+    totp-secret: GT2V6PLQ34XGPTPM
+  api:
+    url: https://idam-api.aat.platform.hmcts.net
   client:
-    id: prl
-    redirect_uri: https://localhost:9000/oauth2/callback
-    secret: OOOOOOOOOOOOOOOO
+    id: prl-cos-api
+    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
+    secret: W7supXKMJgcEWKBS
 
 
 core_case_data:
   api:
-    url: http://localhost:4452
+    url: ${CORE_CASE_DATA_API_URL:}
 
+prl:
+  system-update:
+    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
 
 security:
   oauth2:
@@ -118,37 +145,14 @@ security:
 auth:
   idam:
     client:
-      baseUrl: http://localhost:5000
+      baseUrl: ${AUTH_IDAM_CLIENT_BASEURL:}
   provider:
     service:
       client:
-        baseUrl: http://localhost:4502
+        baseUrl: ${AUTH_PROVIDER_SERVICE_CLIENT_BASEURL:}
 
 
 resources:
   images:
-    baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/'
+    baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
 
-
-
-prl:
-  system-update:
-    username: privatelaw-system-update@mailnesia.com
-    password: Password12!
-
-payments:
-  api:
-    url: ${PAY_URL:}
-    callback-url: ${PAY_CALLBACK_URL:}
-
-fees-register:
-  api:
-    url: http://fees-register-api-demo.service.core-compute-demo.internal
-  parameters:
-    C100_SUBMISSION_FEE:
-      channel: default
-      event: miscellaneous
-      jurisdiction1: family
-      jurisdiction2: family court
-      keyword: ChildArrangement
-      service: private law
