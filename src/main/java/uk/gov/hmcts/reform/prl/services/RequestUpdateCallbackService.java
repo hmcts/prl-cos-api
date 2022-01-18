@@ -34,8 +34,11 @@ public class RequestUpdateCallbackService {
     private final ObjectMapper objectMapper;
     private final CoreCaseDataApi coreCaseDataApi;
     private final SystemUserService systemUserService;
+    private final SolicitorEmailService solicitorEmailService;
+    private final CaseWorkerEmailService caseWorkerEmailService;
+    private final UserService userService;
 
-    public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
+    public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto, String authorisation) throws Exception {
 
         log.info("Processing the callback for the caseId {} with status {}", serviceRequestUpdateDto.getCcdCaseNumber(),
                  serviceRequestUpdateDto.getServiceRequestStatus()
@@ -50,9 +53,13 @@ public class RequestUpdateCallbackService {
 
         if (!Objects.isNull(caseDetails.getId())) {
             createEvent(serviceRequestUpdateDto, userToken, systemUpdateUserId,
-                        serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
-                            ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
+                serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
+                           ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
             );
+
+            solicitorEmailService.sendEmail(caseDetails, userService.getUserDetails(authorisation));
+            caseWorkerEmailService.sendEmail(caseDetails, userService.getUserDetails(authorisation));
+
         } else {
             log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());
             throw new Exception("Case not present");

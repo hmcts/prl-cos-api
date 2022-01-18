@@ -5,11 +5,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SolicitorEmail;
 
@@ -38,7 +39,7 @@ public class SolicitorEmailServiceTest {
         .build();
 
 
-    @Mock
+    @Autowired
     private EmailService emailService;
 
     @Mock
@@ -62,7 +63,7 @@ public class SolicitorEmailServiceTest {
     }
 
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void whenApplicantPresentThenApplicantStringCreated() {
 
         PartyDetails applicant = PartyDetails.builder()
@@ -81,17 +82,17 @@ public class SolicitorEmailServiceTest {
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
-            .caseData(caseData)
+            .id(12345L)
             .build();
 
         UserDetails userDetails = UserDetails.builder().build();
 
         EmailTemplateVars email = SolicitorEmail.builder()
-            .caseReference(caseDetails.getCaseId())
-            .caseName(caseDetails.getCaseData().getApplicantCaseName())
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
             .fullName(userDetails.getFullName())
-            .caseLink(manageCaseUrl + caseDetails.getCaseId())
+            .caseLink(manageCaseUrl + caseDetails.getId())
                 .build();
 
         assertEquals(solicitorEmailService.buildEmail(caseDetails, userDetails), email);

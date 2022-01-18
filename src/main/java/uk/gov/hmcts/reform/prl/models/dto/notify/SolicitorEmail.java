@@ -26,7 +26,6 @@ public class SolicitorEmail extends EmailTemplateVars {
 
     private final String caseLink;
 
-
     @Builder
     public SolicitorEmail(String caseReference,
                           String caseName,

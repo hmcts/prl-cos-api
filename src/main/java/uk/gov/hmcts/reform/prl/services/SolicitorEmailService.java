@@ -6,12 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -23,11 +23,12 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class SolicitorEmailService {
+public class SolicitorEmailService  {
 
     private final NotificationClient notificationClient;
     private final EmailTemplatesConfig emailTemplatesConfig;
     private final ObjectMapper objectMapper;
+
     @Autowired
     private EmailService emailService;
 
@@ -41,7 +42,8 @@ public class SolicitorEmailService {
     private String manageCaseUrl;
 
     public EmailTemplateVars buildEmail(CaseDetails caseDetails, UserDetails userDetails) {
-        List<PartyDetails> applicants = caseDetails.getCaseData()
+
+        List<PartyDetails> applicants = emailService.getCaseData(caseDetails)
             .getApplicants()
             .stream()
             .map(Element::getValue)
@@ -54,13 +56,13 @@ public class SolicitorEmailService {
         String applicantNames = String.join(", ", applicantNamesList);
 
         EmailTemplateVars emailTemplateVars = SolicitorEmail.builder()
-            .caseReference(caseDetails.getCaseId())
-            .caseName(caseDetails.getCaseData().getApplicantCaseName())
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
             .applicantName(applicantNames)
             .courtName(courtName)
             .fullName(userDetails.getFullName())
             .courtEmail(courtEmail)
-            .caseLink(manageCaseUrl + caseDetails.getCaseId())
+            .caseLink(manageCaseUrl + caseDetails.getId())
             .build();
 
         return emailTemplateVars;
