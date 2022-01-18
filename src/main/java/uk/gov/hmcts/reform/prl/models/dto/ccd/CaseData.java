@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,8 @@ import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
+import uk.gov.hmcts.reform.prl.enums.ConfidentialityStatementDisclaimerEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
@@ -53,9 +56,21 @@ public class CaseData {
     private final YesOrNo languagePreferenceWelsh;
 
     /**
+     * Case Type Of Application.
+     */
+    private final String caseTypeOfApplication;
+
+    /**
      * Case name.
      */
+    @JsonAlias({"applicantCaseName", "applicantOrRespondentCaseName"})
     private final String applicantCaseName;
+
+    /**
+     * Confidential Disclaimer.
+     */
+    private final List<ConfidentialityStatementDisclaimerEnum> confidentialityStatementDisclaimer;
+    private final List<ConfidentialityChecksDisclaimerEnum> confidentialityChecksDisclaimer;
 
     /**
      * Upload documents.
