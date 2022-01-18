@@ -5,7 +5,6 @@ spring:
       prefixed: true
       paths: /mnt/secrets/prl
       aliases:
-        prl.test-secret: TEST_SECRET
         prl.microservicekey-prl-cos-api: IDAM_S2S_AUTH_TOTP_SECRET
         prl.system-update-user-password: PRL_SYSTEM_UPDATE_PASSWORD
         prl.system-update-user-username: SYSTEM_UPDATE_USER_USERNAME
