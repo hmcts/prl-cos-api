@@ -107,7 +107,7 @@ public class CaseWorkerEmailService {
 
         final String typeOfOrders;
 
-        if( typeOfHearing.size() == 2) {
+        if (typeOfHearing.size() == 2) {
             typeOfOrders = String.join(" and ", typeOfOrder);
         } else {
             typeOfOrders = String.join(", ", typeOfOrder);
