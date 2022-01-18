@@ -28,4 +28,3 @@ java:
         - microservicekey-prl-cos-api
         - system-update-user-username
         - system-update-user-password
-        - test-secret
