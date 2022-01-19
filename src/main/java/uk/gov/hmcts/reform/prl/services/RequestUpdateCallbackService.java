@@ -45,11 +45,15 @@ public class RequestUpdateCallbackService {
         );
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);
+        log.info("sys user id: === {}", systemUpdateUserId);
+
         CaseDetails caseDetails = coreCaseDataApi.getCase(
-            userToken,
+            authorisation,
             authTokenGenerator.generate(),
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
+
+        log.info("casedetails: === {}", caseDetails);
 
         if (!Objects.isNull(caseDetails.getId())) {
             createEvent(serviceRequestUpdateDto, userToken, systemUpdateUserId,
@@ -78,6 +82,9 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getCcdCaseNumber(),
             eventId
         );
+
+        log.info("Case Data: === {}", caseData);
+
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
@@ -118,6 +125,7 @@ public class RequestUpdateCallbackService {
                                      .build()).build()).build(),
             CaseData.class
         );
+
     }
 
 
