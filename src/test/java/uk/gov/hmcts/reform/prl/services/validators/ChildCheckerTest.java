@@ -20,12 +20,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.prl.enums.Gender.FEMALE;
-import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.ANOTHER_PERSON;
-import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.RESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.Gender.female;
+import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
+import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
-import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.FATHER;
-import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.SPECIAL_GUARDIAN;
+import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
+import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChildCheckerTest {
@@ -106,14 +106,15 @@ public class ChildCheckerTest {
             .firstName("Test")
             .lastName("Name")
             .dateOfBirth(LocalDate.of(2000, 12, 22))
-            .gender(FEMALE)
+            .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(SPECIAL_GUARDIAN)
-            .respondentsRelationshipToChild(FATHER)
-            .childLiveWith(Collections.singletonList(RESPONDENT))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(respondent))
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
+
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .parentalResponsibilityDetails("test")
             .build();
 
@@ -122,9 +123,9 @@ public class ChildCheckerTest {
 
         CaseData caseData = CaseData.builder()
             .children(listOfChildren)
-            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("TestString")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.DONT_KNOW)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
             .build();
 
 
@@ -138,23 +139,23 @@ public class ChildCheckerTest {
             .firstName("Test")
             .lastName("Name")
             .dateOfBirth(LocalDate.of(2000, 12, 22))
-            .gender(FEMALE)
+            .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(SPECIAL_GUARDIAN)
-            .respondentsRelationshipToChild(FATHER)
-            .childLiveWith(Collections.singletonList(ANOTHER_PERSON))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .parentalResponsibilityDetails("test")
             .build();
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        CaseData caseData = CaseData.builder().children(listOfChildren).childrenKnownToLocalAuthority(YesNoDontKnow.YES)
+        CaseData caseData = CaseData.builder().children(listOfChildren).childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
 
         Assertions.assertFalse(childChecker.isFinished(caseData));
@@ -179,14 +180,14 @@ public class ChildCheckerTest {
             .firstName("Test")
             .lastName("Name")
             .dateOfBirth(LocalDate.of(2000, 12, 22))
-            .gender(FEMALE)
+            .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(SPECIAL_GUARDIAN)
-            .respondentsRelationshipToChild(FATHER)
-            .childLiveWith(Collections.singletonList(ANOTHER_PERSON))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("test")
             .build();
@@ -194,9 +195,9 @@ public class ChildCheckerTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        CaseData caseData = CaseData.builder().children(listOfChildren).childrenKnownToLocalAuthority(YesNoDontKnow.YES)
+        CaseData caseData = CaseData.builder().children(listOfChildren).childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
 
         Assertions.assertTrue(childChecker.isFinished(caseData));
@@ -220,14 +221,14 @@ public class ChildCheckerTest {
             .firstName("Test")
             .lastName("Name")
             .dateOfBirth(LocalDate.of(2000, 12, 22))
-            .gender(FEMALE)
+            .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(SPECIAL_GUARDIAN)
-            .respondentsRelationshipToChild(FATHER)
-            .childLiveWith(Collections.singletonList(ANOTHER_PERSON))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("")
             .build();
@@ -235,9 +236,9 @@ public class ChildCheckerTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        CaseData caseData = CaseData.builder().children(listOfChildren).childrenKnownToLocalAuthority(YesNoDontKnow.YES)
+        CaseData caseData = CaseData.builder().children(listOfChildren).childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
 
         Assertions.assertFalse(childChecker.isFinished(caseData));
@@ -271,14 +272,14 @@ public class ChildCheckerTest {
             .firstName("Test")
             .lastName("Name")
             .dateOfBirth(LocalDate.of(2000, 12, 22))
-            .gender(FEMALE)
+            .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(SPECIAL_GUARDIAN)
-            .respondentsRelationshipToChild(FATHER)
-            .childLiveWith(Collections.singletonList(ANOTHER_PERSON))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("test")
             .build();
@@ -286,9 +287,9 @@ public class ChildCheckerTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        CaseData caseData = CaseData.builder().children(listOfChildren).childrenKnownToLocalAuthority(YesNoDontKnow.YES)
+        CaseData caseData = CaseData.builder().children(listOfChildren).childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
 
         Assertions.assertFalse(childChecker.isFinished(caseData));

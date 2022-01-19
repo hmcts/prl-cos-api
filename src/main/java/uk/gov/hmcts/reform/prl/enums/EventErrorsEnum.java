@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.enums;
 
 
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @RequiredArgsConstructor
 public enum EventErrorsEnum {
 
@@ -23,5 +23,15 @@ public enum EventErrorsEnum {
     ALLEGATIONS_OF_HARM_ERROR("Add details about allegations of harm");
 
     private final String error;
+
+    @JsonValue
+    public String getError() {
+        return error;
+    }
+
+    @JsonCreator
+    public static EventErrorsEnum getValue(String key) {
+        return EventErrorsEnum.valueOf(key);
+    }
 
 }
