@@ -12,8 +12,8 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
 
-import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.APPLICANTS;
-import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.CHILDREN;
+import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.applicants;
+import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.children;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
 
@@ -108,7 +108,7 @@ public class AllegationsOfHarmCheckerTest {
     public void whenAbuseDataPresentThenAbusePresentReturnsTrue() {
         CaseData caseData = CaseData.builder()
             .allegationsOfHarmDomesticAbuseYesNo(YES)
-            .physicalAbuseVictim(Collections.singletonList(APPLICANTS))
+            .physicalAbuseVictim(Collections.singletonList(applicants))
             .build();
 
     }
@@ -264,7 +264,7 @@ public class AllegationsOfHarmCheckerTest {
 
         CaseData caseData = CaseData.builder()
             .allegationsOfHarmDomesticAbuseYesNo(YES)
-            .sexualAbuseVictim(Collections.singletonList(CHILDREN))
+            .sexualAbuseVictim(Collections.singletonList(children))
             .behaviours(Collections.singletonList(wrappedBehaviour))
             .build();
 

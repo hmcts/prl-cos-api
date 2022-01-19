@@ -90,7 +90,7 @@ public class RespondentsChecker implements EventChecker {
         }
         Optional<Gender> gender = ofNullable(respondent.getGender());
         fields.add(gender);
-        if (gender.isPresent() && gender.get().equals(Gender.OTHER)) {
+        if (gender.isPresent() && gender.get().equals(Gender.other)) {
             fields.add(ofNullable(respondent.getOtherGender()));
         }
         Optional<YesOrNo> isPlaceOfBirthKnown = ofNullable(respondent.getIsPlaceOfBirthKnown());
@@ -105,7 +105,7 @@ public class RespondentsChecker implements EventChecker {
         }
         Optional<YesNoDontKnow> isAtAddressLessThan5YearsWithDontKnow = ofNullable(respondent.getIsAtAddressLessThan5YearsWithDontKnow());
         fields.add(isAtAddressLessThan5YearsWithDontKnow);
-        if (isAtAddressLessThan5YearsWithDontKnow.isPresent() && isAtAddressLessThan5YearsWithDontKnow.get().equals(YesNoDontKnow.YES)) {
+        if (isAtAddressLessThan5YearsWithDontKnow.isPresent() && isAtAddressLessThan5YearsWithDontKnow.get().equals(YesNoDontKnow.yes)) {
             fields.add(ofNullable(respondent.getAddressLivedLessThan5YearsDetails()));
         }
         Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(respondent.getCanYouProvideEmailAddress());
@@ -120,7 +120,7 @@ public class RespondentsChecker implements EventChecker {
         }
         Optional<YesNoDontKnow> doTheyHaveLegalRepresentation = ofNullable(respondent.getDoTheyHaveLegalRepresentation());
         fields.add(doTheyHaveLegalRepresentation);
-        if (doTheyHaveLegalRepresentation.isPresent() && doTheyHaveLegalRepresentation.get().equals(YesNoDontKnow.YES)) {
+        if (doTheyHaveLegalRepresentation.isPresent() && doTheyHaveLegalRepresentation.get().equals(YesNoDontKnow.yes)) {
             fields.add(ofNullable(respondent.getSolicitorEmail()));
         }
 
