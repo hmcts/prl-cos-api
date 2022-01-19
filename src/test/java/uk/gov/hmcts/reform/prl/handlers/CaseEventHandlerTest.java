@@ -74,7 +74,7 @@ public class CaseEventHandlerTest {
             CASE_TYPE,
             caseData.getId(),
             "internal-update-task-list",
-            Map.of("taskList", renderedTaskLists)
+            Map.of("taskList", renderedTaskLists,"id",String.valueOf(caseData.getId()))
         );
     }
 }
