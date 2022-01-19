@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
-import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
+import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
