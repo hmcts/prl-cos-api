@@ -107,9 +107,6 @@ public class ChildCheckerTest {
             .applicantsRelationshipToChild(SPECIAL_GUARDIAN)
             .respondentsRelationshipToChild(FATHER)
             .childLiveWith(Collections.singletonList(RESPONDENT))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
             .build();
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();

@@ -11,9 +11,12 @@ import java.util.List;
 @Builder
 public class Court {
 
-    private String name;
-    private String slug;
+    @JsonProperty("name")
+    private String courtName;
+    @JsonProperty("slug")
+    private String courtId;
     private boolean open;
+    @JsonProperty("county_location_code")
     private long countyLocationCode;
     @JsonProperty("types")
     private List<String> courtTypes;

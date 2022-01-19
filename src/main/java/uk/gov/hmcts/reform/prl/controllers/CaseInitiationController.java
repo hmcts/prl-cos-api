@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
 
+@Slf4j
 @Api
 @RestController
 @RequestMapping("/case-initiation")
@@ -31,8 +33,14 @@ public class CaseInitiationController extends AbstractCallbackController {
     @PostMapping("/submitted")
     public void handleSubmitted(@RequestBody CallbackRequest callbackRequest) {
 
+
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         final CaseData caseData = getCaseData(caseDetails);
         publishEvent(new CaseDataChanged(caseData));
+
+
+        log.info(caseData.getChildrenKnownToLocalAuthority().toString());
+        log.info(caseData.getChildrenKnownToLocalAuthorityTextArea());
+        log.info(caseData.getChildrenSubjectOfChildProtectionPlan().toString());
     }
 }

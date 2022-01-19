@@ -46,8 +46,8 @@ public class CourtFinderServiceTest {
     @Before
     public void init() {
         londonCourt = Court.builder()
-            .name("Central Family Court")
-            .slug("central-family-court")
+            .courtName("Central Family Court")
+            .courtId("central-family-court")
             .areasOfLaw(Collections.singletonList(AreaOfLaw.builder().build()))
             .gbs("TESTGBS")
             .dxNumber(Collections.singletonList("160010 Kingsway 7"))
@@ -57,8 +57,8 @@ public class CourtFinderServiceTest {
             .build();
 
         newcastleCourt = Court.builder()
-            .name("Newcastle Civil & Family Courts and Tribunals Centre")
-            .slug("newcastle-civil-family-courts-and-tribunals-centre")
+            .courtName("Newcastle Civil & Family Courts and Tribunals Centre")
+            .courtId("newcastle-civil-family-courts-and-tribunals-centre")
             .dxNumber(Collections.singletonList("336901 Newcastle upon Tyne 55"))
             .inPerson(true)
             .accessScheme(true)
@@ -66,8 +66,8 @@ public class CourtFinderServiceTest {
             .build();
 
         westLondonCourt = Court.builder()
-            .name("West London Family Court")
-            .slug("west-london-family-court")
+            .courtName("West London Family Court")
+            .courtId("west-london-family-court")
             .dxNumber(Collections.singletonList("310601 Feltham 4"))
             .inPerson(true)
             .accessScheme(true)
@@ -295,14 +295,14 @@ public class CourtFinderServiceTest {
     public void givenValidCourtSlug_thenReturnsCourtDetails() {
 
         Court basicCourt = Court.builder()
-            .slug("central-family-court")
+            .courtId("central-family-court")
             .build();
 
-        String courtSlug = basicCourt.getSlug();
+        String courtSlug = basicCourt.getCourtId();
 
         Court completeCourt = Court.builder()
-            .name("Central Family Court")
-            .slug("central-family-court")
+            .courtName("Central Family Court")
+            .courtId("central-family-court")
             .areasOfLaw(Collections.singletonList(AreaOfLaw.builder().build()))
             .gbs("TESTGBS")
             .dxNumber(Collections.singletonList("160010 Kingsway 7"))
@@ -355,6 +355,69 @@ public class CourtFinderServiceTest {
             .build();
 
         assert (courtFinderService.getCorrectPartyPostcode(caseData).equals("AB12 3AL"));
+
+    }
+
+    @Test
+    public void givenCaseDataWithCourtDetails_thenCourtDetailsNotChanged() {
+
+        Court completeCourt = Court.builder()
+            .courtName("Central Family Court")
+            .courtId("central-family-court")
+            .areasOfLaw(Collections.singletonList(AreaOfLaw.builder().build()))
+            .gbs("TESTGBS")
+            .dxNumber(Collections.singletonList("160010 Kingsway 7"))
+            .inPerson(true)
+            .accessScheme(true)
+            .address(Collections.singletonList(CourtAddress.builder().build()))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .courtName("Test Court Name")
+            .courtId("test-court-id")
+            .build();
+
+        CaseData caseDataUpdated = courtFinderService.setCourtUnlessCourtAlreadyPresent(caseData, completeCourt);
+
+        assert (caseData.equals(caseDataUpdated));
+
+    }
+
+    @Test
+    public void givenCaseDataWithNoCourtDetails_thenCourtDetailsUpdated() {
+
+        Address applicant1Address = Address.builder()
+            .addressLine1("123 Test Address")
+            .postTown("London")
+            .country("UK")
+            .postCode("AB12 3AL")
+            .build();
+
+        PartyDetails applicant1 = PartyDetails.builder()
+            .address(applicant1Address)
+            .build();
+
+
+        Child child = Child.builder()
+            .childLiveWith(Collections.singletonList(APPLICANT))
+            .build();
+
+        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();;
+        Element<PartyDetails> wrappedApplicant1 = Element.<PartyDetails>builder().value(applicant1).build();
+
+        CaseData caseData = CaseData.builder()
+            .children(Collections.singletonList(wrappedChild))
+            .applicants(Collections.singletonList(wrappedApplicant1))
+            .build();
+
+        CaseData updatedCaseData = CaseData.builder()
+            .children(Collections.singletonList(wrappedChild))
+            .applicants(Collections.singletonList(wrappedApplicant1))
+            .courtName("Newcastle Civil & Family Courts and Tribunals Centre")
+            .courtId("newcastle-civil-family-courts-and-tribunals-centre")
+            .build();
+
+        assert (courtFinderService.setCourtNameAndId(caseData, newcastleCourt).equals(updatedCaseData));
 
     }
 

@@ -282,4 +282,7 @@ public class CaseData {
 
     private Court court;
 
+    private String courtName;
+    private String courtId;
+
 }

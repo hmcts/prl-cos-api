@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.Optional;
+
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.APPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.RESPONDENT;
@@ -23,6 +25,16 @@ public class CourtFinderService {
     @Autowired
     private CourtFinderApi courtFinderApi;
 
+    public CaseData setCourtUnlessCourtAlreadyPresent(CaseData caseData, Court court) {
+        Optional<String> courtName = ofNullable(caseData.getCourtName());
+        Optional<String> courtId = ofNullable(caseData.getCourtId());
+
+        if ((courtName.isEmpty() && courtId.isEmpty()) || (courtName.get().isBlank() && courtId.get().isBlank())) {
+            setCourtNameAndId(caseData, court);
+        }
+        return caseData;
+    }
+
     public Court getClosestChildArrangementsCourt(CaseData caseData)  {
 
         String postcode = getCorrectPartyPostcode(caseData);
@@ -32,7 +44,7 @@ public class CourtFinderService {
         String courtSlug = courtFinderApi.findClosestChildArrangementsCourtByPostcode(postcode)
             .getCourts()
             .get(0)
-            .getSlug();
+            .getCourtId();
 
         return getCourtDetails(courtSlug);
     }
@@ -59,6 +71,12 @@ public class CourtFinderService {
             }
             return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
         }
+    }
+
+    public CaseData setCourtNameAndId(CaseData caseData, Court court) {
+        caseData.setCourtName(court.getCourtName());
+        caseData.setCourtId(court.getCourtId());
+        return caseData;
     }
 
     private String getPostcodeFromWrappedParty(Element<PartyDetails> party) {
