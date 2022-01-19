@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 public enum RelationshipsEnum {
 
     @JsonProperty("father")
-    fether("father", "Father"),
+    father("father", "Father"),
     @JsonProperty("mother")
     mother("mother", "Mother"),
     @JsonProperty("stepFather")
@@ -19,7 +19,7 @@ public enum RelationshipsEnum {
     @JsonProperty("grandParent")
     grandParent("grandParent", "Grandparent"),
     @JsonProperty("guardian")
-    guardian("guardian", "Guiardian"),
+    guardian("guardian", "Guardian"),
     @JsonProperty("specialGuardian")
     specialGuardian("specialGuardian", "Special Guardian"),
     @JsonProperty("other")

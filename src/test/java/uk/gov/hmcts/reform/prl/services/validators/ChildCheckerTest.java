@@ -18,7 +18,7 @@ import java.util.List;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
-import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.fether;
+import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -105,7 +105,7 @@ public class ChildCheckerTest {
             .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
             .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(fether)
+            .respondentsRelationshipToChild(father)
             .childLiveWith(Collections.singletonList(respondent))
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
