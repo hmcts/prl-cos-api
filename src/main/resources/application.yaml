@@ -144,6 +144,7 @@ auth:
         baseUrl: ${AUTH_PROVIDER_SERVICE_CLIENT_BASEURL:}
 
 
+
 resources:
   images:
     baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
