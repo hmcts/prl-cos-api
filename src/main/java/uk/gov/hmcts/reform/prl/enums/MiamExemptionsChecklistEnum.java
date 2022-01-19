@@ -16,7 +16,9 @@ public enum MiamExemptionsChecklistEnum {
     @JsonProperty("previousMIAMattendance")
     previousMIAMattendance("Previous MIAM attendance or previous MIAM exemption"),
     @JsonProperty("other")
-    other("Other");
+    other("Other"),
+    @JsonProperty("childProtectionConcern")
+    childProtectionConcern("Child Protection Concern");
 
     private final String displayedValue;
 
