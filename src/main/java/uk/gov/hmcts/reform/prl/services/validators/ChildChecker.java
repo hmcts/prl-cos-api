@@ -5,9 +5,10 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -101,16 +102,24 @@ public class ChildChecker implements EventChecker {
             return false;
         }
         if (childLivesWith.isPresent() && childLivesWith.get().contains(anotherPerson)) {
-            fields.add(ofNullable(child.getOtherPersonWhoLivesWithChild()));
-            Optional<YesOrNo> isAddressKnown = ofNullable(child.getIsChildCurrentAddressKnown());
-            fields.add(isAddressKnown);
-            if (isAddressKnown.isPresent() && isAddressKnown.get().equals(YesOrNo.YES)) {
-                fields.add(ofNullable(child.getAddress().getAddressLine1()));
-                fields.add(ofNullable(child.getIsChildAddressConfidential()));
+            Optional<List<Element<OtherPersonWhoLivesWithChild>>> personWhoLivesWithChildList =  ofNullable(child.getPersonWhoLivesWithChild());
+            if (!personWhoLivesWithChildList.isPresent() || (personWhoLivesWithChildList.isPresent()
+                && personWhoLivesWithChildList.get().equals(Collections.emptyList()))) {
+                return false;
             }
-
+            personWhoLivesWithChildList.get().stream().map(Element::getValue).forEach(eachRow -> {
+                fields.add(ofNullable(eachRow.getFirstName()));
+                fields.add(ofNullable(eachRow.getLastName()));
+                Optional<Address> address = ofNullable(eachRow.getAddress());
+                fields.add(ofNullable(address));
+                if (address.isPresent() && ofNullable(address.get().getAddressLine1()).isEmpty()) {
+                    fields.add(Optional.empty());
+                }
+                fields.add(ofNullable(eachRow.getRelationshipToChildDetails()));
+                fields.add(ofNullable(eachRow.getIsPersonIdentityConfidential()));
+            });
         }
-
+        fields.add(ofNullable(child.getParentalResponsibilityDetails()));
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 
@@ -144,6 +153,7 @@ public class ChildChecker implements EventChecker {
         fields.add(ofNullable(c.getChildLiveWith()));
         fields.add(ofNullable(c.getChildrenKnownToLocalAuthority()));
         fields.add(ofNullable(c.getChildrenSubjectOfChildProtectionPlan()));
+        fields.add(ofNullable(c.getParentalResponsibilityDetails()));
 
         return  fields.stream().anyMatch(Optional::isPresent);
     }

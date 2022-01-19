@@ -62,6 +62,7 @@ public class OtherProceedingsChecker implements EventChecker {
                     allMandatoryFieldsDone = false;
                     break;
                 }
+
             }
             if (allMandatoryFieldsDone) {
                 taskErrorService.removeError(OTHER_PROCEEDINGS_ERROR);
@@ -89,4 +90,5 @@ public class OtherProceedingsChecker implements EventChecker {
     public boolean hasMandatoryCompleted(CaseData caseData) {
         return false;
     }
+
 }
