@@ -19,8 +19,8 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @Slf4j
 @Component

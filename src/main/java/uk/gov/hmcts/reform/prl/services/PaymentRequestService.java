@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
-import uk.gov.hmcts.reform.prl.enums.OrchestrationConstants;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -45,7 +45,7 @@ public class PaymentRequestService {
                                          PaymentServiceRequest.builder()
             .callBackUrl(callBackUrl)
             .casePaymentRequest(CasePaymentRequestDto.builder()
-                                    .action(OrchestrationConstants.PAYMENT_ACTION)
+                                    .action(PrlAppsConstants.PAYMENT_ACTION)
                                     .responsibleParty(caseData.getApplicantCaseName()).build())
             .caseReference(String.valueOf(caseData.getId()))
             .ccdCaseNumber(String.valueOf(caseData.getId()))
