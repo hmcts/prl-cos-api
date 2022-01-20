@@ -7,9 +7,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
@@ -133,6 +135,7 @@ public class CaseData {
     private final List<MiamExemptionsChecklistEnum> miamExemptionsChecklist;
     private final List<MiamDomesticViolenceChecklistEnum> miamDomesticViolenceChecklist;
     private final List<MiamUrgencyReasonChecklistEnum> miamUrgencyReasonChecklist;
+    private final List<MiamChildProtectionConcernChecklistEnum> miamChildProtectionConcernList;
     private final MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceChecklist;
     private final MiamOtherGroundsChecklistEnum miamOtherGroundsChecklist;
     private final String mediatorRegistrationNumber;
@@ -162,11 +165,11 @@ public class CaseData {
     private final String previousAbductionThreatsDetails;
     private final String childrenLocationNow;
     private final YesOrNo abductionPassportOfficeNotified;
+    private final YesOrNo abductionChildHasPassport;
+    private final AbductionChildPassportPossessionEnum abductionChildPassportPosession;
+    private final String abductionChildPassportPosessionOtherDetail;
     private final YesOrNo abductionPreviousPoliceInvolvement;
     private final String abductionPreviousPoliceInvolvementDetails;
-    private final YesOrNo abductionOtherSafetyConcerns;
-    private final String abductionOtherSafetyConcernsDetails;
-    private final String abductionCourtStepsRequested;
     private final YesOrNo allegationsOfHarmChildAbuseYesNo;
     private final YesOrNo allegationsOfHarmSubstanceAbuseYesNo;
     private final YesOrNo allegationsOfHarmOtherConcernsYesNo;
@@ -210,6 +213,9 @@ public class CaseData {
     private final YesOrNo allegationsOfHarmOtherConcerns;
     private final String allegationsOfHarmOtherConcernsDetails;
     private final String allegationsOfHarmOtherConcernsCourtActions;
+    private final YesOrNo agreeChildUnsupervisedTime;
+    private final YesOrNo agreeChildSupervisedTime;
+    private final YesOrNo agreeChildOtherContact;
 
 
     /**
