@@ -23,7 +23,7 @@ public class ReturnApplicationReturnMessageTaskTest {
 
     @Test
     public void whenNoOptionSelectedThenNoRejectReasonSelectedReturnTrue() {
-        CaseData casedata = CaseData.builder().build();
+        casedata = CaseData.builder().build();
 
         assert returnMessageTask.noRejectReasonSelected(casedata);
     }
