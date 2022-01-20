@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
+import uk.gov.hmcts.reform.prl.services.ReturnApplicationReturnMessageService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
@@ -30,6 +31,7 @@ public class CallbackController {
     private final ExampleService exampleService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
     private final ObjectMapper objectMapper;
+    private final ReturnApplicationReturnMessageService returnApplicationReturnMessageService;
 
 
     /**
@@ -85,7 +87,21 @@ public class CallbackController {
         );
     }
 
-
+    @PostMapping(path = "return-application-return-message", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to send email")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public ResponseEntity<CallbackResponse> returnMessage(
+        @RequestBody @ApiParam("CaseData") CallbackRequest request
+    ) throws WorkflowException {
+        return ok(
+            CallbackResponse.builder()
+                .data(returnApplicationReturnMessageService.executeReturnMessageWorkflow(request.getCaseDetails()))
+                //.data(exampleService.executeExampleWorkflow(request.getCaseDetails()))
+                .build()
+        );
+    }
 
 
 }
