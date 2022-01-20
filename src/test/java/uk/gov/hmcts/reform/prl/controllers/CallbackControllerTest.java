@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
+import uk.gov.hmcts.reform.prl.services.ReturnApplicationReturnMessageService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
@@ -31,6 +32,9 @@ public class CallbackControllerTest {
 
     @Mock
     private WorkflowResult workflowResult;
+
+    @Mock
+    private ReturnApplicationReturnMessageService returnMessageService;
 
     @Test
     public void testSendEmail() throws WorkflowException {
@@ -58,5 +62,17 @@ public class CallbackControllerTest {
         verify(validateMiamApplicationOrExemptionWorkflow).run(callbackRequest);
         verifyNoMoreInteractions(validateMiamApplicationOrExemptionWorkflow);
 
+    }
+
+    @Test
+    public void testReturnMessage() throws WorkflowException {
+        CaseDetails caseDetails  = CaseDetailsProvider.full();
+
+        when(returnMessageService.executeReturnMessageWorkflow(caseDetails)).thenReturn(caseDetails.getCaseData());
+
+        callbackController.returnMessage(CallbackRequest.builder().caseDetails(caseDetails).build());
+
+        verify(returnMessageService).executeReturnMessageWorkflow(caseDetails);
+        verifyNoMoreInteractions(returnMessageService);
     }
 }
