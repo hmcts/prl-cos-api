@@ -43,8 +43,8 @@ public class PrePopulateFeeAndSolicitorNameController {
     private ObjectMapper objectMapper;
 
     private final DgsService dgsService;
-    public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-TRY-FINAL-13.docx";
-    private static final String DRAFT_C_100_APPLICATION = "Draft C100 application";
+    public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
+    private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
 
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to get Solicitor name and fee amount. ")
@@ -75,7 +75,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                 //   .id(1639057496134831)
                 .solicitorName(userDetails.getFullName())
                 .feeAmount(feeResponse.getAmount().toString())
-                .draftOrderDoc(Document.builder()
+                .submitAndPayDownloadApplicationLink(Document.builder()
                                    .documentUrl(generatedDocumentInfo.getUrl())
                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                    .documentHash(generatedDocumentInfo.getHashToken())

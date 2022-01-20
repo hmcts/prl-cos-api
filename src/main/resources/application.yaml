@@ -104,11 +104,13 @@ idam:
   s2s-auth:
     url: http://localhost:4502
     microservice: prl_cos_api
-    totp_secret: GT2V6PLQ34XGPTPM
+    totp_secret: AABBCCDDEEFFGGHH
   api:
     url: http://localhost:5000
   client:
-    secret: W7supXKMJgcEWKBS
+    id: prl_cos_api
+    redirect_uri: https://localhost:9000/oauth2/callback
+    secret: OOOOOOOOOOOOOOOO
 
 
 core_case_data:
@@ -117,8 +119,8 @@ core_case_data:
 
 prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:privatelaw-system-update@mailnesia.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:Password12!}
 
 security:
   oauth2:
