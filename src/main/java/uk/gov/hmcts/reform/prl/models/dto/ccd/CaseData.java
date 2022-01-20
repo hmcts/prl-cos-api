@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
+import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -280,5 +281,12 @@ public class CaseData {
     private final String feeAmount;
     @JsonProperty("feeCode")
     private final String feeCode;
+
+
+    /**
+     * Return Application.
+     */
+    private final List<RejectReasonEnum> rejectReason;
+    private String returnMessage;
 
 }
