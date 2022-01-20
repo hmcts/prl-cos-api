@@ -19,7 +19,7 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.all
 @Component
 public class ReturnApplicaitonReturnMessageTask implements Task<CaseDetails> {
 
-    protected boolean noRejectReasonSelected(CaseData caseData) {
+    public boolean noRejectReasonSelected(CaseData caseData) {
 
         boolean noOptionSelected = true;
 
@@ -41,12 +41,9 @@ public class ReturnApplicaitonReturnMessageTask implements Task<CaseDetails> {
             log.info("There are no reject reason selected.");
         } else {
             log.info("Preparing pre-filled text for return message");
-            caseData.setReturnMessage("Testing");
-            String caseName = caseData.getApplicantCaseName();
             List<RejectReasonEnum> listOfReasons = caseData.getRejectReason();
 
             StringBuilder returnMsgStr = new StringBuilder();
-
 
             returnMsgStr.append("Subject line: Application returned: <Case Name>\n")
                 .append("Case name: <Case Name>\n")
