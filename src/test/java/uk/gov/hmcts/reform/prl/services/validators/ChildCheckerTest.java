@@ -140,9 +140,6 @@ public class ChildCheckerTest {
             .applicantsRelationshipToChild(SPECIAL_GUARDIAN)
             .respondentsRelationshipToChild(FATHER)
             .childLiveWith(Collections.singletonList(ANOTHER_PERSON))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
             .parentalResponsibilityDetails("test")
             .build();
 
@@ -181,9 +178,6 @@ public class ChildCheckerTest {
             .applicantsRelationshipToChild(SPECIAL_GUARDIAN)
             .respondentsRelationshipToChild(FATHER)
             .childLiveWith(Collections.singletonList(ANOTHER_PERSON))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("test")
             .build();
@@ -222,9 +216,6 @@ public class ChildCheckerTest {
             .applicantsRelationshipToChild(SPECIAL_GUARDIAN)
             .respondentsRelationshipToChild(FATHER)
             .childLiveWith(Collections.singletonList(ANOTHER_PERSON))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("")
             .build();
@@ -273,9 +264,6 @@ public class ChildCheckerTest {
             .applicantsRelationshipToChild(SPECIAL_GUARDIAN)
             .respondentsRelationshipToChild(FATHER)
             .childLiveWith(Collections.singletonList(ANOTHER_PERSON))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.YES)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.YES)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("test")
             .build();
