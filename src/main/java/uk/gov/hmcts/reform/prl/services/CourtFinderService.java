@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,14 +31,14 @@ public class CourtFinderService {
         Optional<String> courtName = ofNullable(caseData.getCourtName());
         Optional<String> courtId = ofNullable(caseData.getCourtId());
 
-        if ((courtName.isEmpty() && courtId.isEmpty()) || (courtName.get().isBlank() && courtId.get().isBlank())
+        if ((courtName.isEmpty() && courtId.isEmpty()) || courtNameAndIdAreBlank(courtName, courtId)
             || !(courtsAreTheSame(caseData.getCourt(), court))) {
             setCourtNameAndId(caseData, court);
         }
         return caseData;
     }
 
-    public Court getClosestChildArrangementsCourt(CaseData caseData)  {
+    public Court getClosestChildArrangementsCourt(CaseData caseData) throws NotFoundException {
 
         String postcode = getCorrectPartyPostcode(caseData);
 
@@ -60,22 +61,25 @@ public class CourtFinderService {
         return courtFinderApi.getCourtDetails(courtSlug);
     }
 
-    public String getCorrectPartyPostcode(CaseData caseData) {
+    public String getCorrectPartyPostcode(CaseData caseData) throws NotFoundException {
         //current requirements use the first child if multiple children present
-        Child child = caseData.getChildren()
+        Optional<Child> childOptional = caseData.getChildren()
             .stream()
             .map(Element::getValue)
-            .findFirst()
-            .get();
+            .findFirst();
+
+        if (childOptional.isEmpty()) {
+            throw new NotFoundException("No child details found");
+        }
+        Child child = childOptional.get();
 
         if (child.getChildLiveWith().contains(APPLICANT)) {
             return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
         } else if (child.getChildLiveWith().contains(RESPONDENT)) {
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
-        } else if (child.getChildLiveWith().contains(ANOTHER_PERSON)) {
-            if (ofNullable(child.getAddress().getPostCode()).isPresent()) {
-                return child.getAddress().getPostCode();
-            }
+        } else if (child.getChildLiveWith().contains(ANOTHER_PERSON)
+                    && ofNullable(child.getAddress().getPostCode()).isPresent()) {
+            return child.getAddress().getPostCode();
         }
         //default to the applicant postcode
         return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
@@ -89,6 +93,13 @@ public class CourtFinderService {
 
     private String getPostcodeFromWrappedParty(Element<PartyDetails> party) {
         return party.getValue().getAddress().getPostCode();
+    }
+
+    public boolean courtNameAndIdAreBlank(Optional<String> courtName, Optional<String> courtId) {
+        return courtName.isPresent()
+            && courtId.isPresent()
+            && courtName.get().isBlank()
+            && courtId.get().isBlank();
     }
 
 }

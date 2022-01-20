@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class CourtFinderController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public CallbackResponse getChildArrangementsCourtAndAddToCaseData(@RequestBody CallbackRequest callbackRequest) {
+    public CallbackResponse getChildArrangementsCourtAndAddToCaseData(@RequestBody CallbackRequest callbackRequest) throws NotFoundException {
 
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class);
         Court court = courtLocatorService.getClosestChildArrangementsCourt(caseData);

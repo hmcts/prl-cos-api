@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +48,7 @@ public class CourtFinderControllerTest {
     }
 
     @Test
-    public void testCallBackResponseContainsCourtData() {
+    public void testCallBackResponseContainsCourtData() throws NotFoundException {
 
         CaseData caseData = CaseData.builder().build();
 
@@ -77,7 +78,7 @@ public class CourtFinderControllerTest {
 
 
     @Test
-    public void verifyInteractionWithCourtFinderService() {
+    public void verifyInteractionWithCourtFinderService() throws NotFoundException {
 
         CaseData caseData = CaseData.builder().build();
 

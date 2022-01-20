@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,8 +22,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.ANOTHER_PERSON;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.APPLICANT;
@@ -102,7 +106,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenChildLivesWithRespondent_thenReturnCourtClosestToRespondent() {
+    public void givenValidCaseData_whenChildLivesWithRespondent_thenReturnCourtClosestToRespondent() throws NotFoundException {
         Address applicantAddress = Address.builder()
             .addressLine1("123 Test Address")
             .postTown("London")
@@ -144,7 +148,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenChildLivesWithOther_thenReturnCourtClosestToOther() {
+    public void givenValidCaseData_whenChildLivesWithOther_thenReturnCourtClosestToOther() throws NotFoundException {
         Address applicantAddress = Address.builder()
             .addressLine1("123 Test Address")
             .postTown("London")
@@ -189,7 +193,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCaseData_whenChildLivesWithApplicant_thenReturnCourtClosestToApplicant() {
+    public void givenValidCaseData_whenChildLivesWithApplicant_thenReturnCourtClosestToApplicant() throws NotFoundException {
 
         Address applicantAddress = Address.builder()
             .addressLine1("123 Test Address")
@@ -232,7 +236,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenValidCaseDataWithMultipleApplicants_whenChildLivesWithApplicant_thenReturnCourtClosestToFirstApplicant() {
+    public void givenValidCaseData_whenChildLivesWithApp_thenReturnCourtClosestToFirstApp() throws NotFoundException {
 
         Address applicant1Address = Address.builder()
             .addressLine1("123 Test Address")
@@ -317,7 +321,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenChildPresent_whenLivesWithApplicant_thenReturnApplicantPostcode() {
+    public void givenChildPresent_whenLivesWithApplicant_thenReturnApplicantPostcode() throws NotFoundException {
         Address applicantAddress = Address.builder()
             .addressLine1("123 Test Address")
             .postTown("London")
@@ -354,7 +358,7 @@ public class CourtFinderServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
 
-        assert (courtFinderService.getCorrectPartyPostcode(caseData).equals("AB12 3AL"));
+        assertEquals(courtFinderService.getCorrectPartyPostcode(caseData), "AB12 3AL");
 
     }
 
@@ -380,7 +384,7 @@ public class CourtFinderServiceTest {
 
         CaseData caseDataUpdated = courtFinderService.setCourtUnlessCourtAlreadyPresent(caseData, completeCourt);
 
-        assert (caseData.equals(caseDataUpdated));
+        assertEquals(caseData, caseDataUpdated);
 
     }
 
@@ -418,7 +422,7 @@ public class CourtFinderServiceTest {
             .courtId("newcastle-civil-family-courts-and-tribunals-centre")
             .build();
 
-        assert (courtFinderService.setCourtNameAndId(caseData, newcastleCourt).equals(updatedCaseData));
+        assertEquals(courtFinderService.setCourtNameAndId(caseData, newcastleCourt), updatedCaseData);
 
     }
 
@@ -446,8 +450,20 @@ public class CourtFinderServiceTest {
             .address(Collections.singletonList(CourtAddress.builder().build()))
             .build();
 
-        assert (courtFinderService.courtsAreTheSame(c1, c2));
+        assertTrue(courtFinderService.courtsAreTheSame(c1, c2));
 
+    }
+
+    @Test
+    public void returnTrueWhenCourtDetailsAreBlank() {
+
+        Court c1 = Court.builder()
+            .courtName("")
+            .courtId("")
+            .build();
+
+        assertTrue(courtFinderService.courtNameAndIdAreBlank(ofNullable(c1.getCourtName()),
+                                                             ofNullable(c1.getCourtName())));
     }
 
 }
