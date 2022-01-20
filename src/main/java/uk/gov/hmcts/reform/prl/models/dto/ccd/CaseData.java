@@ -281,4 +281,8 @@ public class CaseData {
     @JsonProperty("feeCode")
     private final String feeCode;
 
+    /**
+     * Add case number.
+     */
+    private final String familymanCaseNumber;
 }
