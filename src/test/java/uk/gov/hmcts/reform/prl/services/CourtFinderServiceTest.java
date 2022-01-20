@@ -373,6 +373,7 @@ public class CourtFinderServiceTest {
             .build();
 
         CaseData caseData = CaseData.builder()
+            .court(completeCourt)
             .courtName("Test Court Name")
             .courtId("test-court-id")
             .build();
@@ -418,6 +419,34 @@ public class CourtFinderServiceTest {
             .build();
 
         assert (courtFinderService.setCourtNameAndId(caseData, newcastleCourt).equals(updatedCaseData));
+
+    }
+
+    @Test
+    public void givenIdenticalCourts_whenComparing_returnsTrue() {
+        Court c1 = Court.builder()
+            .courtName("Central Family Court")
+            .courtId("central-family-court")
+            .areasOfLaw(Collections.singletonList(AreaOfLaw.builder().build()))
+            .gbs("TESTGBS")
+            .dxNumber(Collections.singletonList("160010 Kingsway 7"))
+            .inPerson(true)
+            .accessScheme(true)
+            .address(Collections.singletonList(CourtAddress.builder().build()))
+            .build();
+
+        Court c2 = Court.builder()
+            .courtName("Central Family Court")
+            .courtId("central-family-court")
+            .areasOfLaw(Collections.singletonList(AreaOfLaw.builder().build()))
+            .gbs("TESTGBS")
+            .dxNumber(Collections.singletonList("160010 Kingsway 7"))
+            .inPerson(true)
+            .accessScheme(true)
+            .address(Collections.singletonList(CourtAddress.builder().build()))
+            .build();
+
+        assert (courtFinderService.courtsAreTheSame(c1, c2));
 
     }
 

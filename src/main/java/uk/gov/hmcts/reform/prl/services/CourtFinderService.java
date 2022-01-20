@@ -30,7 +30,8 @@ public class CourtFinderService {
         Optional<String> courtName = ofNullable(caseData.getCourtName());
         Optional<String> courtId = ofNullable(caseData.getCourtId());
 
-        if ((courtName.isEmpty() && courtId.isEmpty()) || (courtName.get().isBlank() && courtId.get().isBlank())) {
+        if ((courtName.isEmpty() && courtId.isEmpty()) || (courtName.get().isBlank() && courtId.get().isBlank())
+            || !(courtsAreTheSame(caseData.getCourt(), court))) {
             setCourtNameAndId(caseData, court);
         }
         return caseData;
@@ -48,6 +49,11 @@ public class CourtFinderService {
             .getCourtId();
 
         return getCourtDetails(courtSlug);
+    }
+
+    public boolean courtsAreTheSame(Court c1, Court c2) {
+        return c1.getCourtName().equals(c2.getCourtName())
+            && c1.getCourtId().equals(c2.getCourtId());
     }
 
     public Court getCourtDetails(String courtSlug) {

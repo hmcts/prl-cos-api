@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -60,8 +59,12 @@ public class CourtFinderControllerTest {
 
         Court court = Court.builder().build();
 
+        caseData.setCourt(court);
+
         when(courtFinderService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails().getCaseData()))
             .thenReturn(court);
+
+        when(courtFinderService.setCourtUnlessCourtAlreadyPresent(caseData, court)).thenReturn(caseData);
 
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData);
@@ -71,6 +74,7 @@ public class CourtFinderControllerTest {
         Assert.assertNotNull(response.getData().getCourt());
 
     }
+
 
     @Test
     public void verifyInteractionWithCourtFinderService() {
@@ -91,10 +95,13 @@ public class CourtFinderControllerTest {
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData);
 
+        when(courtFinderService.setCourtUnlessCourtAlreadyPresent(caseData, court)).thenReturn(caseData);
+
         courtFinderController.getChildArrangementsCourtAndAddToCaseData(callbackRequest);
 
         verify(courtFinderService).getClosestChildArrangementsCourt(caseData);
-        verifyNoMoreInteractions(courtFinderService);
+        verify(courtFinderService).setCourtUnlessCourtAlreadyPresent(caseData, court);
+
     }
 
 
