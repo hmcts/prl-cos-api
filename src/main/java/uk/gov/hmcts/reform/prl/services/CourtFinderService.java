@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.ANOTHER_PERSON;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.APPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.RESPONDENT;
 
@@ -65,12 +66,13 @@ public class CourtFinderService {
             return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
         } else if (child.getChildLiveWith().contains(RESPONDENT)) {
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
-        } else {
+        } else if (child.getChildLiveWith().contains(ANOTHER_PERSON)) {
             if (ofNullable(child.getAddress().getPostCode()).isPresent()) {
                 return child.getAddress().getPostCode();
             }
-            return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
         }
+        //default to the applicant postcode
+        return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
     }
 
     public CaseData setCourtNameAndId(CaseData caseData, Court court) {

@@ -38,9 +38,5 @@ public class CaseInitiationController extends AbstractCallbackController {
         final CaseData caseData = getCaseData(caseDetails);
         publishEvent(new CaseDataChanged(caseData));
 
-
-        log.info(caseData.getChildrenKnownToLocalAuthority().toString());
-        log.info(caseData.getChildrenKnownToLocalAuthorityTextArea());
-        log.info(caseData.getChildrenSubjectOfChildProtectionPlan().toString());
     }
 }
