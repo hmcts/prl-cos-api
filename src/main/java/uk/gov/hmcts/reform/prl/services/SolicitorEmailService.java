@@ -55,7 +55,7 @@ public class SolicitorEmailService  {
 
         String applicantNames = String.join(", ", applicantNamesList);
 
-        EmailTemplateVars emailTemplateVars = SolicitorEmail.builder()
+        return SolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
             .applicantName(applicantNames)
@@ -64,8 +64,6 @@ public class SolicitorEmailService  {
             .courtEmail(courtEmail)
             .caseLink(manageCaseUrl + caseDetails.getId())
             .build();
-
-        return emailTemplateVars;
 
     }
 

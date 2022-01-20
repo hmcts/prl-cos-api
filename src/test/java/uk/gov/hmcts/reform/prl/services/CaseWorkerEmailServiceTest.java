@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -19,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -47,7 +48,7 @@ public class CaseWorkerEmailServiceTest {
         .build();
 
 
-    @Autowired
+    @Mock
     private EmailService emailService;
 
     @Mock
@@ -59,7 +60,10 @@ public class CaseWorkerEmailServiceTest {
     @InjectMocks
     private CaseWorkerEmailService caseWorkerEmailService;
 
-    private Map<String, String> expectedEmailVarsAsMap;
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Test
     public void whenUserDetailsProvidedThenValidEmailReturned() {
@@ -105,6 +109,8 @@ public class CaseWorkerEmailServiceTest {
             .respondents(listOfRespondents)
             .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.childArrangementsOrder))
             .isCaseUrgent(YesOrNo.YES)
+            .doYouNeedAWithoutNoticeHearing(YesOrNo.NO)
+            .doYouRequireAHearingWithReducedNotice(YesOrNo.NO)
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
@@ -116,13 +122,15 @@ public class CaseWorkerEmailServiceTest {
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
             .respondentLastName("TestLast")
-            .typeOfHearing("Urgent Case")
+            .typeOfHearing("Urgent ")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Child Arrangements Order")
             .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
+
         assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
     }
 
@@ -169,13 +177,15 @@ public class CaseWorkerEmailServiceTest {
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
             .respondentLastName("respondentLast")
-            .typeOfHearing("Standard Hearing")
+            .typeOfHearing("Standard hearing")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Prohibited Steps Order")
             .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
         assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
 
     }
 
@@ -209,6 +219,7 @@ public class CaseWorkerEmailServiceTest {
             .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.specificIssueOrder))
             .isCaseUrgent(YesOrNo.NO)
             .doYouNeedAWithoutNoticeHearing(YesOrNo.YES)
+            .doYouRequireAHearingWithReducedNotice(YesOrNo.NO)
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
@@ -220,13 +231,68 @@ public class CaseWorkerEmailServiceTest {
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
             .respondentLastName("respondentLast")
-            .typeOfHearing("Without Notice")
+            .typeOfHearing("Without notice")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Specific Issue Order")
             .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
         assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void whenTypeOfApplicationIsReducedNoticeThenOrdersApplyForWillBeDispalyed() {
+
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .lastName("respondentLast")
+            .build();
+
+        String respondentNames = "TestLast";
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicants(listOfApplicants)
+            .respondents(listOfRespondents)
+            .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.specificIssueOrder))
+            .isCaseUrgent(YesOrNo.NO)
+            .doYouNeedAWithoutNoticeHearing(YesOrNo.NO)
+            .doYouRequireAHearingWithReducedNotice(YesOrNo.YES)
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .build();
+
+        EmailTemplateVars email = CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .applicantName(applicantNames)
+            .respondentLastName("respondentLast")
+            .typeOfHearing("Reduced notice")
+            .hearingDateRequested("  ")
+            .ordersApplyingFor("Specific Issue Order")
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+        assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
     }
 
     @Test
