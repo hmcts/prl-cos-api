@@ -98,7 +98,6 @@ public class CallbackController {
         return ok(
             CallbackResponse.builder()
                 .data(returnApplicationReturnMessageService.executeReturnMessageWorkflow(request.getCaseDetails()))
-                //.data(exampleService.executeExampleWorkflow(request.getCaseDetails()))
                 .build()
         );
     }
