@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.utils.TaskContextProvider;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
-import static uk.gov.hmcts.reform.prl.enums.RejectReasonEnum.ConsentOrderNotProvided;
+import static uk.gov.hmcts.reform.prl.enums.RejectReasonEnum.consentOrderNotProvided;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReturnApplicationReturnMessageTaskTest {
@@ -32,7 +32,7 @@ public class ReturnApplicationReturnMessageTaskTest {
     public void whenHasOptionSelectedThenNoRejectReasonSelectedReturnFalse() {
 
         casedata = CaseData.builder()
-            .rejectReason(Collections.singletonList(ConsentOrderNotProvided))
+            .rejectReason(Collections.singletonList(consentOrderNotProvided))
             .build();
 
         assert !returnMessageTask.noRejectReasonSelected(casedata);
@@ -43,7 +43,7 @@ public class ReturnApplicationReturnMessageTaskTest {
         returnMessageTask.execute(TaskContextProvider.empty(), CaseDetailsProvider.empty());
 
         casedata = CaseData.builder()
-            .rejectReason(Collections.singletonList(ConsentOrderNotProvided))
+            .rejectReason(Collections.singletonList(consentOrderNotProvided))
             .build();
 
         StringBuilder returnMsgStr = new StringBuilder();
@@ -55,7 +55,7 @@ public class ReturnApplicationReturnMessageTaskTest {
             .append("Thank you for your application."
                         + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n");
 
-        returnMsgStr.append(ConsentOrderNotProvided.getReturnMsgText().toString());
+        returnMsgStr.append(consentOrderNotProvided.getReturnMsgText().toString());
 
         returnMsgStr.append("Please resolve these issues and resubmit your application.\n\n")
             .append("Kind regards,\n")
