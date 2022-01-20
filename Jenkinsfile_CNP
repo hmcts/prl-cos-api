@@ -15,9 +15,28 @@ def component = "cos"
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
+static Map<String, Object> secret(String secretName, String envVariable) {
+ [$class     : 'AzureKeyVaultSecret',
+  secretType : 'Secret',
+  name       : secretName,
+  envVariable: envVariable
+ ]
+}
+
+def secrets = [
+   'prl-${env}':[
+      secret('prl-cos-idam-client-secret', 'IDAM_CLIENT_SECRET'),
+      secret('system-update-user-username', 'SYSTEM_UPDATE_USER_USERNAME'),
+      secret('system-update-user-password', 'PRL_SYSTEM_UPDATE_PASSWORD'),
+      secret('microservicekey-prl-cos-api', 'IDAM_S2S_AUTH_TOTP_SECRET')
+   ]
+]
+
 withPipeline(type, product, component) {
   pipelineConf = config;
+  loadVaultSecrets(secrets)
   enableAksStagingDeployment()
+  enableSlackNotifications('#prl-tech')
   disableLegacyDeployment()
 
   after('checkout') {

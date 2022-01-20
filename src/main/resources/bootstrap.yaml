@@ -20,4 +20,7 @@ spring:
         idam-client-id: IDAM_CLIENT_ID
         xui-url: XUI_URL
         fees-register-api-url: FEE_URL
-
+        prl.microservicekey-prl-cos-api: IDAM_S2S_AUTH_TOTP_SECRET
+        prl.system-update-user-password: PRL_SYSTEM_UPDATE_PASSWORD
+        prl.system-update-user-username: SYSTEM_UPDATE_USER_USERNAME
+        prl.prl-cos-idam-client-secret: IDAM_CLIENT_SECRET
