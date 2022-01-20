@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -39,7 +41,7 @@ public class SolicitorEmailServiceTest {
         .build();
 
 
-    @Autowired
+    @Mock
     private EmailService emailService;
 
     @Mock
@@ -50,6 +52,12 @@ public class SolicitorEmailServiceTest {
 
     private Map<String, String> expectedEmailVarsAsMap;
 
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+
+    }
+
     @Test
     public void whenUserDetailsProvidedThenValidEmailReturned() {
 
@@ -59,7 +67,7 @@ public class SolicitorEmailServiceTest {
 
         UserDetails userDetails = userService.getUserDetails("Auth");
 
-        assertEquals(solicitorEmailService.getRecipientEmail(userDetails), "test@email.com");
+        assertEquals("test@email.com", solicitorEmailService.getRecipientEmail(userDetails));
     }
 
 
@@ -77,25 +85,32 @@ public class SolicitorEmailServiceTest {
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
 
         CaseData caseData = CaseData.builder()
+            .id(12345L)
             .applicantCaseName("TestCaseName")
             .applicants(listOfApplicants)
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345L)
+            .id(caseData.getId())
             .build();
 
-        UserDetails userDetails = UserDetails.builder().build();
+        UserDetails userDetails = UserDetails.builder()
+            .forename("testFirstname")
+            .surname("testSurname")
+            .build();
 
         EmailTemplateVars email = SolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
-            .fullName(userDetails.getFullName())
+            .fullName(userDetails.getSurname() + userDetails.getFullName())
+            .courtName("Court Name")
+            .courtEmail("C@justice.gov.uk")
             .caseLink(manageCaseUrl + caseDetails.getId())
                 .build();
 
         assertEquals(solicitorEmailService.buildEmail(caseDetails, userDetails), email);
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
     }
 
