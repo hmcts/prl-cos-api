@@ -7,9 +7,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.workflows.ReturnApplicationReturnMessageWorkflow;
 
-/**
- * This class is added only as a java service example. It can be deleted when more services is added.
- */
 @Component
 @RequiredArgsConstructor
 public class ReturnApplicationReturnMessageService {
