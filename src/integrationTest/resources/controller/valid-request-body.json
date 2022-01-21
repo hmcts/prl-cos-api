@@ -1,66 +1,10 @@
 {
   "case_details": {
     "callback_response_status": "string",
-    "case_data": {
-      "applicants": [
-        {
-          "id": "baee9000-b6ce-426a-9449-fedec8fdd83b",
-          "value": {
-            "lastName": "Doe",
-            "placeOfBirth": "London",
-            "isAddressConfidential": "No",
-            "isPhoneNumberConfidential": "No",
-            "address": {
-              "AddressLine3": "",
-              "AddressLine2": "",
-              "AddressLine1": "Home",
-              "Country": "",
-              "PostTown": "",
-              "PostCode": "",
-              "County": ""
-            },
-            "gender": "male",
-            "solicitorOrg": {},
-            "dateOfBirth": "1989-11-30",
-            "firstName": "James",
-            "phoneNumber": "02086658857",
-            "isAtAddressLessThan5Years": "No",
-            "canYouProvideEmailAddress": "No",
-            "solicitorAddress": {}
-          }
-        },
-        {
-          "id": "40817743-c6b8-4296-bff8-4c6aee3e89e3",
-          "value": {
-            "lastName": "Doe",
-            "placeOfBirth": "London",
-            "isAddressConfidential": "No",
-            "isPhoneNumberConfidential": "Yes",
-            "address": {
-              "AddressLine3": "",
-              "AddressLine2": "",
-              "AddressLine1": "Home",
-              "Country": "",
-              "PostTown": "",
-              "PostCode": "",
-              "County": ""
-            },
-            "gender": "male",
-            "solicitorOrg": {},
-            "dateOfBirth": "1990-10-20",
-            "firstName": "Jim",
-            "phoneNumber": "02086658844",
-            "isAtAddressLessThan5Years": "No",
-            "canYouProvideEmailAddress": "No",
-            "solicitorAddress": {}
-          }
-        }
-      ],
-      "taskList": "<div class='width-50'>\n\n<br/>\n\n## Add application details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/selectApplicationType/selectApplicationType1'>Type of application<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/hearingUrgency/hearingUrgency1'>Hearing urgency<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add people to the case\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/in-progress.png' title='In progress'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetails/childDetails1'>Child details<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add required details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/miam/miam1'>MIAM<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add additional information\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Only complete if relevant<\/div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCase/otherPeopleInTheCase1'>Other people in the case<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherProceedings/otherProceedings1'>Other proceedings<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/internationalElement/internationalElement1'>International element<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/litigationCapacity/litigationCapacity1'>Litigation capacity<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/welshLanguageRequirements/welshLanguageRequirements1'>Welsh language requirements<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## View PDF application\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/viewPdfDocument/viewPdfDocument1'>View PDF application<\/a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Submit and pay\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a>Submit and pay<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/cannot-start-yet.png' title='Cannot start yet'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<\/div>\n\n<details class='govuk-details'>\n\n<summary class='govuk-details__summary'>\n\n<span class='govuk-details__summary-text'>\n\nWhy can't I submit my application?\n\n<\/span>\n\n<\/summary>\n\n<div class='govuk-details__text'>\n\nAdd details about allegations of harm in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm<\/a>\n\nAdd applicant details in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details<\/a>\n\nAdd hearing urgency details in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/hearingUrgency/hearingUrgency1'>Hearing urgency<\/a>\n\nAdd MIAM details in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/miam/miam1'>MIAM<\/a>\n\nAdd respondent details in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details<\/a>\n\nAdd child details in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetails/childDetails1'>Child details<\/a>\n\nAdd details about the type of application in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/selectApplicationType/selectApplicationType1'>Type of application<\/a>\n\n<\/div>\n\n<\/details>",
-      "applicantCaseName": "John Smith"},
+    "case_data": {},
     "case_type_id": "string",
     "created_date": "2021-12-16T13:18:30.307Z",
-    "id": 1641894514039345,
+    "id": 1641406584214862,
     "jurisdiction": "string",
     "last_modified": "2021-12-16T13:18:30.307Z",
     "locked_by_user_id": 0,
@@ -70,66 +14,10 @@
   },
   "case_details_before": {
     "callback_response_status": "string",
-    "case_data": {
-      "applicants": [
-        {
-          "id": "baee9000-b6ce-426a-9449-fedec8fdd83b",
-          "value": {
-            "lastName": "Doe",
-            "placeOfBirth": "London",
-            "isAddressConfidential": "No",
-            "isPhoneNumberConfidential": "No",
-            "address": {
-              "AddressLine3": "",
-              "AddressLine2": "",
-              "AddressLine1": "Home",
-              "Country": "",
-              "PostTown": "",
-              "PostCode": "",
-              "County": ""
-            },
-            "gender": "male",
-            "solicitorOrg": {},
-            "dateOfBirth": "1989-11-30",
-            "firstName": "James",
-            "phoneNumber": "02086658857",
-            "isAtAddressLessThan5Years": "No",
-            "canYouProvideEmailAddress": "No",
-            "solicitorAddress": {}
-          }
-        },
-        {
-          "id": "40817743-c6b8-4296-bff8-4c6aee3e89e3",
-          "value": {
-            "lastName": "Doe",
-            "placeOfBirth": "London",
-            "isAddressConfidential": "No",
-            "isPhoneNumberConfidential": "Yes",
-            "address": {
-              "AddressLine3": "",
-              "AddressLine2": "",
-              "AddressLine1": "Home",
-              "Country": "",
-              "PostTown": "",
-              "PostCode": "",
-              "County": ""
-            },
-            "gender": "male",
-            "solicitorOrg": {},
-            "dateOfBirth": "1990-10-20",
-            "firstName": "Jim",
-            "phoneNumber": "02086658844",
-            "isAtAddressLessThan5Years": "No",
-            "canYouProvideEmailAddress": "No",
-            "solicitorAddress": {}
-          }
-        }
-      ],
-      "taskList": "<div class='width-50'>\n\n<br/>\n\n## Add application details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/selectApplicationType/selectApplicationType1'>Type of application<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/hearingUrgency/hearingUrgency1'>Hearing urgency<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add people to the case\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/in-progress.png' title='In progress'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetails/childDetails1'>Child details<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add required details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/miam/miam1'>MIAM<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add additional information\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Only complete if relevant<\/div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCase/otherPeopleInTheCase1'>Other people in the case<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherProceedings/otherProceedings1'>Other proceedings<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/internationalElement/internationalElement1'>International element<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/litigationCapacity/litigationCapacity1'>Litigation capacity<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/welshLanguageRequirements/welshLanguageRequirements1'>Welsh language requirements<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## View PDF application\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/viewPdfDocument/viewPdfDocument1'>View PDF application<\/a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Submit and pay\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a>Submit and pay<\/a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/cannot-start-yet.png' title='Cannot start yet'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<\/div>\n\n<details class='govuk-details'>\n\n<summary class='govuk-details__summary'>\n\n<span class='govuk-details__summary-text'>\n\nWhy can't I submit my application?\n\n<\/span>\n\n<\/summary>\n\n<div class='govuk-details__text'>\n\nAdd details about allegations of harm in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm<\/a>\n\nAdd applicant details in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details<\/a>\n\nAdd hearing urgency details in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/hearingUrgency/hearingUrgency1'>Hearing urgency<\/a>\n\nAdd MIAM details in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/miam/miam1'>MIAM<\/a>\n\nAdd respondent details in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details<\/a>\n\nAdd child details in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetails/childDetails1'>Child details<\/a>\n\nAdd details about the type of application in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/selectApplicationType/selectApplicationType1'>Type of application<\/a>\n\n<\/div>\n\n<\/details>",
-      "applicantCaseName": "John Smith"},
+    "case_data": {},
     "case_type_id": "string",
     "created_date": "2021-12-16T13:18:30.307Z",
-    "id": 1641894514039345,
+    "id": 1641406584214862,
     "jurisdiction": "string",
     "last_modified": "2021-12-16T13:18:30.307Z",
     "locked_by_user_id": 0,
