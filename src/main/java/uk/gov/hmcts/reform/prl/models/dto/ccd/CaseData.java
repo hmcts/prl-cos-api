@@ -73,7 +73,7 @@ public class CaseData {
     private final Address childrenAddress;
     private final YesNoDontKnow isChildrenKnownToAuthority;
     private final String childAndLocalAuthority;
-    private final YesOrNo isChildrenUnderChildProtection;
+    private final YesNoDontKnow isChildrenUnderChildProtection;
     private final YesNoDontKnow isChildrenWithSameParents;
     private final String parentsAndTheirChildren;
     private final String parentalResponsibilities;
