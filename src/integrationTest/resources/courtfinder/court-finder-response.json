@@ -81,25 +81,10 @@
             "respondent",
             "applicant"
           ],
-          "childrenKnownToLocalAuthority": null,
-          "childrenKnownToLocalAuthorityTextArea": null,
-          "childrenSubjectOfChildProtectionPlan": null,
-          "otherPersonWhoLivesWithChild": null,
-          "isChildCurrentAddressKnown": "Yes",
-          "address": {
-            "AddressLine1": "reqwrew",
-            "AddressLine2": null,
-            "AddressLine3": null,
-            "PostTown": null,
-            "County": null,
-            "Country": null,
-            "PostCode": "EN1 2NG"
-          },
-          "isChildAddressConfidential": "No",
-          "childUnsupervisedTime": "No",
-          "childContactFromOtherRecipients": "No",
+          "personWhoLivesWithChild": null,
           "relationshipToApplicant": null,
-          "relationshipToRespondent": null
+          "relationshipToRespondent": null,
+          "parentalResponsibilityDetails": null
         }
       }
     ],
@@ -160,76 +145,8 @@
         }
       }
     ],
-    "court": {
-      "name": "Central Family Court",
-      "slug": "central-family-court",
-      "open": true,
-      "countyLocationCode": 0,
-      "gbs": "P631",
-      "types": [
-        "Family Court"
-      ],
-      "addresses": [
-        {
-          "postcode": "WC1V 6NP",
-          "town": "London",
-          "type": "Visit or contact us",
-          "address_lines": [
-            "First Avenue House",
-            "42-49 High Holborn"
-          ]
-        }
-      ],
-      "dx_number": [
-        "160010 Kingsway 7"
-      ],
-      "areas_of_law": [
-        {
-          "name": "Adoption",
-          "external_link": "https://www.gov.uk/child-adoption",
-          "display_url": null,
-          "external_link_desc": "Adoption"
-        },
-        {
-          "name": "Children",
-          "external_link": "",
-          "display_url": null,
-          "external_link_desc": null
-        },
-        {
-          "name": "Divorce",
-          "external_link": "https://www.gov.uk/divorce",
-          "display_url": null,
-          "external_link_desc": "Information about getting a divorce"
-        },
-        {
-          "name": "Domestic violence",
-          "external_link": "",
-          "display_url": null,
-          "external_link_desc": null
-        },
-        {
-          "name": "FGM",
-          "external_link": "https://www.gov.uk/government/collections/female-genital-mutilation",
-          "display_url": null,
-          "external_link_desc": null
-        },
-        {
-          "name": "Financial Remedy",
-          "external_link": "https://www.gov.uk/money-property-when-relationship-ends",
-          "display_url": null,
-          "external_link_desc": null
-        },
-        {
-          "name": "Forced marriage",
-          "external_link": "https://www.gov.uk/apply-forced-marriage-protection-order",
-          "display_url": null,
-          "external_link_desc": "Information about forced marriage protection orders"
-        }
-      ],
-      "in_person": true,
-      "access_scheme": true
-    }
+    "courtName": "Central Family Court",
+    "courtId": "central-family-court"
   },
   "errors": null,
   "warnings": null,
