@@ -78,9 +78,10 @@ public class CourtFinderService {
             return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
         } else if (child.getChildLiveWith().contains(RESPONDENT)) {
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
-        } else if (child.getChildLiveWith().contains(ANOTHER_PERSON)
-                    && getFirstOtherPersonOptional(child).isPresent()) {
-            return getFirstOtherPersonOptional(child).get().getAddress().getPostCode();
+        } else if (child.getChildLiveWith().contains(ANOTHER_PERSON)) {
+            if (getFirstOtherPersonOptional(child).isPresent()) {
+                return getFirstOtherPersonOptional(child).get().getAddress().getPostCode();
+            }
         }
         //default to the applicant postcode
         return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
