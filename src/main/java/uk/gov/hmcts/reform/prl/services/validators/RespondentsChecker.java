@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RESPONDENT_DETAILS_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.yes;
 
 @Service
 public class RespondentsChecker implements EventChecker {
@@ -85,7 +85,7 @@ public class RespondentsChecker implements EventChecker {
         fields.add(ofNullable(respondent.getLastName()));
         Optional<YesOrNo> isDateOfBirthKnown = ofNullable(respondent.getIsDateOfBirthKnown());
         fields.add(isDateOfBirthKnown);
-        if (isDateOfBirthKnown.isPresent() && isDateOfBirthKnown.get().equals(YES)) {
+        if (isDateOfBirthKnown.isPresent() && isDateOfBirthKnown.get().equals(yes)) {
             fields.add(ofNullable(respondent.getDateOfBirth()));
         }
         Optional<Gender> gender = ofNullable(respondent.getGender());
@@ -95,12 +95,12 @@ public class RespondentsChecker implements EventChecker {
         }
         Optional<YesOrNo> isPlaceOfBirthKnown = ofNullable(respondent.getIsPlaceOfBirthKnown());
         fields.add(isPlaceOfBirthKnown);
-        if (isPlaceOfBirthKnown.isPresent() && isPlaceOfBirthKnown.get().equals(YES)) {
+        if (isPlaceOfBirthKnown.isPresent() && isPlaceOfBirthKnown.get().equals(yes)) {
             fields.add(ofNullable(respondent.getPlaceOfBirth()));
         }
         Optional<YesOrNo> isCurrentAddressKnown = ofNullable(respondent.getIsCurrentAddressKnown());
         fields.add(isCurrentAddressKnown);
-        if (isCurrentAddressKnown.isPresent() && isCurrentAddressKnown.get().equals(YES)) {
+        if (isCurrentAddressKnown.isPresent() && isCurrentAddressKnown.get().equals(yes)) {
             fields.add(ofNullable(respondent.getAddress().getAddressLine1()));
         }
         Optional<YesNoDontKnow> isAtAddressLessThan5YearsWithDontKnow = ofNullable(respondent.getIsAtAddressLessThan5YearsWithDontKnow());
@@ -110,12 +110,12 @@ public class RespondentsChecker implements EventChecker {
         }
         Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(respondent.getCanYouProvideEmailAddress());
         fields.add(canYouProvideEmailAddress);
-        if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(YES)) {
+        if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(yes)) {
             fields.add(ofNullable(respondent.getEmail()));
         }
         Optional<YesOrNo> canYouProvidePhoneNumber = ofNullable(respondent.getCanYouProvidePhoneNumber());
         fields.add(canYouProvidePhoneNumber);
-        if (canYouProvidePhoneNumber.isPresent() && canYouProvidePhoneNumber.get().equals(YES)) {
+        if (canYouProvidePhoneNumber.isPresent() && canYouProvidePhoneNumber.get().equals(yes)) {
             fields.add(ofNullable(respondent.getPhoneNumber()));
         }
         Optional<YesNoDontKnow> doTheyHaveLegalRepresentation = ofNullable(respondent.getDoTheyHaveLegalRepresentation());

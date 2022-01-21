@@ -4,8 +4,8 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.no;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.yes;
 
 public class PdfCheckerTest {
 
@@ -40,10 +40,10 @@ public class PdfCheckerTest {
     @Test
     public void whenCaseDataPresentFinishedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name")
-            .isCaseUrgent(YES)
+            .isCaseUrgent(yes)
             .childAbductionReasons("Test string")
             .caseUrgencyTimeAndReason("Random String")
-            .jurisdictionIssue(NO)
+            .jurisdictionIssue(no)
             .build();
 
         PdfChecker pdfChecker = new PdfChecker();
@@ -54,10 +54,10 @@ public class PdfCheckerTest {
     @Test
     public void whenCaseDataPresentStartedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name")
-            .isCaseUrgent(YES)
+            .isCaseUrgent(yes)
             .childAbductionReasons("Test string")
             .caseUrgencyTimeAndReason("Random String")
-            .jurisdictionIssue(NO)
+            .jurisdictionIssue(no)
             .build();
 
         PdfChecker pdfChecker = new PdfChecker();
@@ -68,10 +68,10 @@ public class PdfCheckerTest {
     @Test
     public void whenCaseDataPresentHasMandatoryCompletedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name")
-            .isCaseUrgent(YES)
+            .isCaseUrgent(yes)
             .childAbductionReasons("Test string")
             .caseUrgencyTimeAndReason("Random String")
-            .jurisdictionIssue(NO)
+            .jurisdictionIssue(no)
             .build();
 
 

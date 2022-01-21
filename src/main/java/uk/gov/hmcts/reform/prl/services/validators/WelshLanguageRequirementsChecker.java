@@ -14,8 +14,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.WELSH_LANGUAGE_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.ENGLISH;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.WELSH;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.no;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.yes;
 
 @Service
 public class WelshLanguageRequirementsChecker implements EventChecker {
@@ -31,7 +31,7 @@ public class WelshLanguageRequirementsChecker implements EventChecker {
         Optional<YesOrNo> englishRequirements = ofNullable(caseData.getWelshLanguageRequirementApplicationNeedEnglish());
         Optional<YesOrNo> welshRequirements = ofNullable(caseData.getLanguageRequirementApplicationNeedWelsh());
 
-        if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(NO)) {
+        if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(no)) {
             taskErrorService.removeError(WELSH_LANGUAGE_ERROR);
             return true;
         }
@@ -55,7 +55,7 @@ public class WelshLanguageRequirementsChecker implements EventChecker {
 
         Optional<YesOrNo> welshLanguageRequirement = ofNullable(caseData.getWelshLanguageRequirement());
 
-        if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(YES)) {
+        if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(yes)) {
             taskErrorService.addEventError(WELSH_LANGUAGE_REQUIREMENTS, WELSH_LANGUAGE_ERROR,
                                            WELSH_LANGUAGE_ERROR.getError());
             return true;

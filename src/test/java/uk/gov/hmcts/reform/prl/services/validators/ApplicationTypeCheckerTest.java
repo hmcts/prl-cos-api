@@ -12,7 +12,7 @@ import java.util.Collections;
 
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum.noNotRequired;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.yes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicationTypeCheckerTest {
@@ -40,7 +40,7 @@ public class ApplicationTypeCheckerTest {
         CaseData caseData = CaseData.builder()
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
-            .consentOrder(YES)
+            .consentOrder(yes)
             .applicationPermissionRequired(noNotRequired)
             .applicationDetails("Test details")
             .build();
@@ -84,7 +84,7 @@ public class ApplicationTypeCheckerTest {
         CaseData caseData = CaseData.builder()
             .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
             .natureOfOrder("Test")
-            .consentOrder(YES)
+            .consentOrder(yes)
             .applicationPermissionRequired(noNotRequired)
             .applicationDetails("Test details")
             .build();

@@ -13,7 +13,7 @@ public enum YesOrNo {
     @JsonProperty("yes")
     yes("Yes"),
 
-    @JsonProperty("yes")
+    @JsonProperty("no")
     no("No");
 
     private final String value;
