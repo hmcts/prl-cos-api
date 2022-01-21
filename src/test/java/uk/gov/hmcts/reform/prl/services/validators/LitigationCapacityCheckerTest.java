@@ -37,7 +37,7 @@ public class LitigationCapacityCheckerTest {
 
     @Test
     public void startedWithFieldOtherFactors() {
-        CaseData caseData = CaseData.builder().litigationCapacityOtherFactors(YesOrNo.yes).build();
+        CaseData caseData = CaseData.builder().litigationCapacityOtherFactors(YesOrNo.Yes).build();
         boolean isStarted = litigationCapacityChecker.isStarted(caseData);
         assert (isStarted);
     }
@@ -52,7 +52,7 @@ public class LitigationCapacityCheckerTest {
     @Test
     public void finishedWithLitigationOtherFactors() {
         CaseData caseData = CaseData.builder()
-            .litigationCapacityOtherFactors(YesOrNo.yes)
+            .litigationCapacityOtherFactors(YesOrNo.Yes)
             .litigationCapacityOtherFactorsDetails("")
             .build();
         boolean isFinished = litigationCapacityChecker.isFinished(caseData);
@@ -62,7 +62,7 @@ public class LitigationCapacityCheckerTest {
     @Test
     public void finishedWithLitigationFactorsOrReferrals() {
         CaseData caseData = CaseData.builder()
-            .litigationCapacityOtherFactors(YesOrNo.no)
+            .litigationCapacityOtherFactors(YesOrNo.No)
             .litigationCapacityFactors("Test")
             .litigationCapacityReferrals("test ")
             .build();
@@ -73,7 +73,7 @@ public class LitigationCapacityCheckerTest {
     @Test
     public void finishedWithOtherFactorsAsNo() {
         CaseData caseData = CaseData.builder()
-            .litigationCapacityOtherFactors(YesOrNo.no)
+            .litigationCapacityOtherFactors(YesOrNo.No)
             .build();
         boolean isFinished = litigationCapacityChecker.isFinished(caseData);
         assert (isFinished);

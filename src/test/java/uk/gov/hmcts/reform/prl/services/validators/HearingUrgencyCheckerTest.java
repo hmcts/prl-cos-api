@@ -8,8 +8,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.no;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingUrgencyCheckerTest {
@@ -33,10 +33,10 @@ public class HearingUrgencyCheckerTest {
     @Test
     public void finishedWhenIsCaseUrgentSetToNo() {
 
-        CaseData casedata = CaseData.builder().isCaseUrgent(no)
-            .doYouNeedAWithoutNoticeHearing(no)
-            .areRespondentsAwareOfProceedings(no)
-            .doYouRequireAHearingWithReducedNotice(no)
+        CaseData casedata = CaseData.builder().isCaseUrgent(No)
+            .doYouNeedAWithoutNoticeHearing(No)
+            .areRespondentsAwareOfProceedings(No)
+            .doYouRequireAHearingWithReducedNotice(No)
             .build();
 
         boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
@@ -47,14 +47,14 @@ public class HearingUrgencyCheckerTest {
     @Test
     public void finishedWhenIsCaseUrgentSetToYes() {
 
-        CaseData casedata = CaseData.builder().isCaseUrgent(yes)
-            .doYouNeedAWithoutNoticeHearing(yes)
+        CaseData casedata = CaseData.builder().isCaseUrgent(Yes)
+            .doYouNeedAWithoutNoticeHearing(Yes)
             .caseUrgencyTimeAndReason("reason")
             .effortsMadeWithRespondents("efforts")
             .reasonsForApplicationWithoutNotice("test")
             .setOutReasonsBelow("test")
-            .areRespondentsAwareOfProceedings(no)
-            .doYouRequireAHearingWithReducedNotice(no)
+            .areRespondentsAwareOfProceedings(No)
+            .doYouRequireAHearingWithReducedNotice(No)
             .build();
 
 
@@ -100,7 +100,7 @@ public class HearingUrgencyCheckerTest {
     @Test
     public void mandatoryCompletedIfIsCaseUrgentSetToNo() {
 
-        CaseData casedata = CaseData.builder().isCaseUrgent(no).build();
+        CaseData casedata = CaseData.builder().isCaseUrgent(No).build();
 
         boolean isMandatory = hearingUrgencyChecker.hasMandatoryCompleted(casedata);
 

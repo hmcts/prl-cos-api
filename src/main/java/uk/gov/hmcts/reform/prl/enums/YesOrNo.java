@@ -9,11 +9,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum YesOrNo {
 
-    @JsonProperty("yes")
-    yes("Yes"),
+    @JsonProperty("Yes")
+    Yes("Yes"),
 
-    @JsonProperty("no")
-    no("No");
+    @JsonProperty("No")
+    No("No");
 
     private final String value;
 
@@ -29,6 +29,6 @@ public enum YesOrNo {
 
     @JsonIgnore
     public boolean toBoolean() {
-        return yes.name().equalsIgnoreCase(this.name());
+        return Yes.name().equalsIgnoreCase(this.name());
     }
 }
