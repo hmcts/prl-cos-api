@@ -27,6 +27,7 @@ import static java.util.Optional.ofNullable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.ANOTHER_PERSON;
@@ -472,6 +473,20 @@ public class CourtFinderServiceTest {
 
         assertTrue(courtFinderService.courtNameAndIdAreBlank(ofNullable(c1.getCourtName()),
                                                              ofNullable(c1.getCourtName())));
+    }
+
+    @Test
+    public void returFalseIfObjectNull() {
+
+        Court c1 = Court.builder()
+            .courtName("")
+            .courtId("")
+            .build();
+
+        Court c2 = null;
+
+        assertFalse(courtFinderService.courtsAreTheSame(c1, c2));
+
     }
 
 }
