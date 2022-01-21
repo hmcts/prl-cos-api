@@ -27,8 +27,4 @@ public enum YesOrNo {
         return value;
     }
 
-    @JsonIgnore
-    public boolean toBoolean() {
-        return Yes.name().equalsIgnoreCase(this.name());
-    }
 }
