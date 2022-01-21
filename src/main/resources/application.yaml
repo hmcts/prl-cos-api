@@ -148,3 +148,8 @@ resources:
   images:
     baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
 
+send-letter:
+  url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
+
+case_document_am:
+  url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
