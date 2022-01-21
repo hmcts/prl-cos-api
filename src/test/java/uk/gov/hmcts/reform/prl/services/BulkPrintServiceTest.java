@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
@@ -26,7 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-public class BulkPintServiceTest {
+public class BulkPrintServiceTest {
 
     @Mock
     private SendLetterApi sendLetterApi;
@@ -36,6 +37,9 @@ public class BulkPintServiceTest {
 
     @InjectMocks
     private BulkPrintService bulkPrintService;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
 
     private UUID uuid;
 
@@ -55,28 +59,27 @@ public class BulkPintServiceTest {
             .mimeType("xyz")
             .hashToken("testHashToken")
             .build();
-
-
     }
 
     @Test
     public void senLetterServiceWithValidInput() {
-        Resource expectedResource = new ClassPathResource("CallbackRequest.json");
+        Resource expectedResource = new ClassPathResource("task-list-markdown.md");
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
         SendLetterResponse sendLetterResponse = new SendLetterResponse(uuid);
         when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
 
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, "TestUrl"))
             .thenReturn(expectedResponse);
-        assertEquals(bulkPrintService.send("123", authToken, s2sToken, "abc",
+        assertEquals(bulkPrintService.send("123", authToken, "abc",
                                            List.of(generatedDocumentInfo)), uuid);
 
     }
 
     @Test(expected = NullPointerException.class)
     public void senLetterServiceWithInValidInput() {
-        assertEquals(bulkPrintService.send("123", authToken, s2sToken, "abc", null), uuid);
+        assertEquals(bulkPrintService.send("123", authToken, "abc", null), uuid);
 
     }
 
