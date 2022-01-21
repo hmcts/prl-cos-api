@@ -19,6 +19,7 @@ public enum YesNoDontKnow {
     private final String id;
     private final String displayedValue;
 
+
     @JsonValue
     public String getDisplayedValue() {
         return displayedValue;
