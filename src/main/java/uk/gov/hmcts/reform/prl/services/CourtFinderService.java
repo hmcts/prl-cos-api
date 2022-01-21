@@ -55,6 +55,10 @@ public class CourtFinderService {
     }
 
     public boolean courtsAreTheSame(Court c1, Court c2) {
+        if (c1 == null || c2 == null) {
+            return false;
+        }
+
         return c1.getCourtName().equals(c2.getCourtName())
             && c1.getCourtId().equals(c2.getCourtId());
     }
