@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
