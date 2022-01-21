@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.AreaOfLaw;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -171,11 +172,18 @@ public class CourtFinderServiceTest {
             .address(respondentAddress)
             .build();
 
-        Child child = Child.builder()
-            .childLiveWith(Collections.singletonList(ANOTHER_PERSON))
+        OtherPersonWhoLivesWithChild person = OtherPersonWhoLivesWithChild.builder()
             .address(Address.builder()
                          .postCode("W9 3HE")
                          .build())
+            .build();
+
+        Element<OtherPersonWhoLivesWithChild> wrappedPerson = Element.<OtherPersonWhoLivesWithChild>builder()
+                                                                                .value(person).build();
+
+        Child child = Child.builder()
+            .childLiveWith(Collections.singletonList(ANOTHER_PERSON))
+            .personWhoLivesWithChild(Collections.singletonList(wrappedPerson))
             .build();
 
         Element<Child> wrappedChild = Element.<Child>builder().value(child).build();;

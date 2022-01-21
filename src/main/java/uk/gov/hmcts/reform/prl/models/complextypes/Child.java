@@ -30,12 +30,7 @@ public class Child {
     private final RelationshipsEnum  respondentsRelationshipToChild;
     private final String otherRespondentsRelationshipToChild;
     private final List<LiveWithEnum> childLiveWith;
-    private final YesOrNo isChildCurrentAddressKnown;
     private final List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild;
-    private final Address address;
-    private final YesOrNo isChildAddressConfidential;
-    private final YesOrNo childUnsupervisedTime;
-    private final YesOrNo childContactFromOtherRecipients;
     private final String relationshipToApplicant;
     private final String relationshipToRespondent;
     private final String parentalResponsibilityDetails;

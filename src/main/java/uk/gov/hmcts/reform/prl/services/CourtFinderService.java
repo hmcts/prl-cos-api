@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -78,8 +80,8 @@ public class CourtFinderService {
         } else if (child.getChildLiveWith().contains(RESPONDENT)) {
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
         } else if (child.getChildLiveWith().contains(ANOTHER_PERSON)
-                    && ofNullable(child.getAddress().getPostCode()).isPresent()) {
-            return child.getAddress().getPostCode();
+                    && getFirstOtherPersonOptional(child).isPresent()) {
+            return getFirstOtherPersonOptional(child).get().getAddress().getPostCode();
         }
         //default to the applicant postcode
         return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
@@ -100,6 +102,14 @@ public class CourtFinderService {
             && courtId.isPresent()
             && courtName.get().isBlank()
             && courtId.get().isBlank();
+    }
+
+    public Optional<OtherPersonWhoLivesWithChild> getFirstOtherPersonOptional(Child c) {
+        return c.getPersonWhoLivesWithChild()
+            .stream()
+            .map(Element::getValue)
+            .findFirst();
+
     }
 
 }
