@@ -80,7 +80,8 @@ public class CourtFinderService {
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
         } else if (child.getChildLiveWith().contains(ANOTHER_PERSON)) {
             if (getFirstOtherPersonOptional(child).isPresent()) {
-                return getFirstOtherPersonOptional(child).get().getAddress().getPostCode();
+                OtherPersonWhoLivesWithChild personWhoLivesWithChild = getFirstOtherPersonOptional(child).get();
+                return personWhoLivesWithChild.getAddress().getPostCode();
             }
         }
         //default to the applicant postcode
