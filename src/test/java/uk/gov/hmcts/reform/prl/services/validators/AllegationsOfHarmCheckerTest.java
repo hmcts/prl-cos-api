@@ -14,8 +14,8 @@ import java.util.Collections;
 
 import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.applicants;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.children;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.no;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AllegationsOfHarmCheckerTest {
@@ -38,7 +38,7 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenPartialCaseDataThenIsStartedTrue() {
         CaseData casedata = CaseData.builder()
-            .allegationsOfHarmYesNo(yes)
+            .allegationsOfHarmYesNo(Yes)
             .build();
 
         assert  allegationsOfHarmChecker.isStarted(casedata);
@@ -60,7 +60,7 @@ public class AllegationsOfHarmCheckerTest {
     public void finishedFieldsValidatedToTrue() {
 
         CaseData casedata = CaseData.builder()
-            .allegationsOfHarmYesNo(no)
+            .allegationsOfHarmYesNo(No)
             .build();
 
         boolean isFinished = allegationsOfHarmChecker.isFinished(casedata);
@@ -90,7 +90,7 @@ public class AllegationsOfHarmCheckerTest {
     public void whenFinishedCaseDataThenHasMandatoryFalse() {
 
         CaseData casedata = CaseData.builder()
-            .allegationsOfHarmYesNo(no)
+            .allegationsOfHarmYesNo(No)
             .build();
 
         assert !allegationsOfHarmChecker.hasMandatoryCompleted(casedata);
@@ -107,7 +107,7 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenAbuseDataPresentThenAbusePresentReturnsTrue() {
         CaseData caseData = CaseData.builder()
-            .allegationsOfHarmDomesticAbuseYesNo(yes)
+            .allegationsOfHarmDomesticAbuseYesNo(Yes)
             .physicalAbuseVictim(Collections.singletonList(applicants))
             .build();
 
@@ -124,7 +124,7 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenOtherConcernsPresentThenValidateOtherConcernsTrue() {
         CaseData caseData = CaseData.builder()
-            .allegationsOfHarmOtherConcernsYesNo(yes)
+            .allegationsOfHarmOtherConcernsYesNo(Yes)
             .allegationsOfHarmOtherConcernsDetails("Details")
             .allegationsOfHarmOtherConcernsCourtActions("Court actions")
             .build();
@@ -143,9 +143,9 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenChildContactPresentThenValidateChildContactTrue() {
         CaseData caseData = CaseData.builder()
-            .agreeChildUnsupervisedTime(yes)
-            .agreeChildSupervisedTime(yes)
-            .agreeChildOtherContact(yes)
+            .agreeChildUnsupervisedTime(Yes)
+            .agreeChildSupervisedTime(Yes)
+            .agreeChildOtherContact(Yes)
             .build();
 
         assert allegationsOfHarmChecker.validateChildContact(caseData);
@@ -154,8 +154,8 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenNonMolestationOrderCurrentReturnTrue() {
         CaseData caseData = CaseData.builder()
-            .ordersNonMolestation(yes)
-            .ordersNonMolestationCurrent(yes)
+            .ordersNonMolestation(Yes)
+            .ordersNonMolestationCurrent(Yes)
             .build();
 
         assert allegationsOfHarmChecker.validateNonMolestationOrder(caseData);
@@ -164,8 +164,8 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenOccupationOrderCurrentReturnTrue() {
         CaseData caseData = CaseData.builder()
-            .ordersOccupation(yes)
-            .ordersOccupationCurrent(yes)
+            .ordersOccupation(Yes)
+            .ordersOccupationCurrent(Yes)
             .build();
 
         assert allegationsOfHarmChecker.validateOccupationOrder(caseData);
@@ -174,8 +174,8 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenForcedMarriageOrderCurrentReturnTrue() {
         CaseData caseData = CaseData.builder()
-            .ordersForcedMarriageProtection(yes)
-            .ordersForcedMarriageProtectionCurrent(yes)
+            .ordersForcedMarriageProtection(Yes)
+            .ordersForcedMarriageProtectionCurrent(Yes)
             .build();
 
         assert allegationsOfHarmChecker.validateForcedMarriageProtectionOrder(caseData);
@@ -184,8 +184,8 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenRestrainingOrderOrderCurrentReturnTrue() {
         CaseData caseData = CaseData.builder()
-            .ordersRestraining(yes)
-            .ordersRestrainingCurrent(yes)
+            .ordersRestraining(Yes)
+            .ordersRestrainingCurrent(Yes)
             .build();
 
         assert allegationsOfHarmChecker.validateRestrainingOrder(caseData);
@@ -194,8 +194,8 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenOtherInjunctiveOrderCurrentReturnTrue() {
         CaseData caseData = CaseData.builder()
-            .ordersOtherInjunctive(yes)
-            .ordersOtherInjunctiveCurrent(yes)
+            .ordersOtherInjunctive(Yes)
+            .ordersOtherInjunctiveCurrent(Yes)
             .build();
 
         assert allegationsOfHarmChecker.validateOtherInjunctiveOrder(caseData);
@@ -204,8 +204,8 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenUndertakingOrderCurrentReturnTrue() {
         CaseData caseData = CaseData.builder()
-            .ordersUndertakingInPlace(yes)
-            .ordersUndertakingInPlaceCurrent(yes)
+            .ordersUndertakingInPlace(Yes)
+            .ordersUndertakingInPlaceCurrent(Yes)
             .build();
 
         assert allegationsOfHarmChecker.validateUndertakingInPlaceOrder(caseData);
@@ -221,7 +221,7 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenAnyAbusePresentThenReturnTrue() {
         CaseData caseData = CaseData.builder()
-            .allegationsOfHarmDomesticAbuseYesNo(yes)
+            .allegationsOfHarmDomesticAbuseYesNo(Yes)
             .build();
 
         assert allegationsOfHarmChecker.abusePresent(caseData);
@@ -244,7 +244,7 @@ public class AllegationsOfHarmCheckerTest {
             .abuseNatureDescription("Test")
             .behavioursStartDateAndLength("5 days")
             .behavioursNature("Testing")
-            .behavioursApplicantSoughtHelp(yes)
+            .behavioursApplicantSoughtHelp(Yes)
             .behavioursApplicantHelpSoughtWho("Who from")
             .behavioursApplicantHelpAction("Action")
             .build();
@@ -263,7 +263,7 @@ public class AllegationsOfHarmCheckerTest {
             .build();
 
         CaseData caseData = CaseData.builder()
-            .allegationsOfHarmDomesticAbuseYesNo(yes)
+            .allegationsOfHarmDomesticAbuseYesNo(Yes)
             .sexualAbuseVictim(Collections.singletonList(children))
             .behaviours(Collections.singletonList(wrappedBehaviour))
             .build();
@@ -276,7 +276,7 @@ public class AllegationsOfHarmCheckerTest {
     public void whenAbuseInCompleteReturnFalse() {
 
         CaseData caseData = CaseData.builder()
-            .allegationsOfHarmDomesticAbuseYesNo(yes)
+            .allegationsOfHarmDomesticAbuseYesNo(Yes)
             .build();
 
         assert !allegationsOfHarmChecker.validateDomesticAbuseSection(caseData);
@@ -286,7 +286,7 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenOrderPresentButIncompleteReturnsFalse() {
         CaseData caseData = CaseData.builder()
-            .ordersRestraining(yes)
+            .ordersRestraining(Yes)
             .ordersRestrainingCourtName("Test Court Name")
             .build();
 
@@ -296,8 +296,8 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenOrderPresentAndCompleteMandatoryDataReturnTrue() {
         CaseData caseData = CaseData.builder()
-            .ordersOtherInjunctiveCurrent(yes)
-            .ordersOtherInjunctiveCurrent(no)
+            .ordersOtherInjunctiveCurrent(Yes)
+            .ordersOtherInjunctiveCurrent(No)
             .build();
 
         assert allegationsOfHarmChecker.validateOrders(caseData);

@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.OTHER_PEOPLE_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
 @Service
@@ -77,19 +77,19 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         boolean additionalFields = true;
 
         YesOrNo dob = party.getIsDateOfBirthKnown();
-        if (dob != null && dob.equals(yes)) {
+        if (dob != null && dob.equals(Yes)) {
             additionalFields = party.getDateOfBirth() != null;
         }
         YesOrNo currAdd = party.getIsCurrentAddressKnown();
-        if (currAdd != null && currAdd.equals(yes)) {
+        if (currAdd != null && currAdd.equals(Yes)) {
             additionalFields = party.getAddress().getAddressLine1() != null;
         }
         YesOrNo canProvideEmail = party.getCanYouProvideEmailAddress();
-        if (canProvideEmail != null && canProvideEmail.equals(yes)) {
+        if (canProvideEmail != null && canProvideEmail.equals(Yes)) {
             additionalFields = party.getEmail() != null;
         }
         YesOrNo canProvideTel = party.getCanYouProvidePhoneNumber();
-        if (canProvideTel != null && canProvideTel.equals(yes)) {
+        if (canProvideTel != null && canProvideTel.equals(Yes)) {
             additionalFields = party.getPhoneNumber() != null;
         }
         boolean baseFields = allNonEmpty(

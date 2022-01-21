@@ -8,7 +8,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InternationalElementCheckerTest {
@@ -39,8 +39,8 @@ public class InternationalElementCheckerTest {
     @Test
     public void notFinishedWithFieldValuesYes() {
 
-        CaseData caseData = CaseData.builder().habitualResidentInOtherState(yes).jurisdictionIssue(yes)
-            .requestToForeignAuthority(yes).build();
+        CaseData caseData = CaseData.builder().habitualResidentInOtherState(Yes).jurisdictionIssue(Yes)
+            .requestToForeignAuthority(Yes).build();
         boolean isFinished = internationalElementChecker.isFinished(caseData);
         assert (!isFinished);
     }
@@ -49,11 +49,11 @@ public class InternationalElementCheckerTest {
     public void finishedWithFieldValuesYes() {
 
         CaseData caseData = CaseData.builder()
-            .habitualResidentInOtherState(yes)
+            .habitualResidentInOtherState(Yes)
             .habitualResidentInOtherStateGiveReason("reason")
-            .jurisdictionIssue(yes)
+            .jurisdictionIssue(Yes)
             .jurisdictionIssueGiveReason("reason")
-            .requestToForeignAuthority(yes)
+            .requestToForeignAuthority(Yes)
             .requestToForeignAuthorityGiveReason("reason")
             .build();
         boolean isFinished = internationalElementChecker.isFinished(caseData);

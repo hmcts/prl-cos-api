@@ -11,8 +11,8 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.LITIGATION_CAPACITY_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.no;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Service
 public class LitigationCapacityChecker implements EventChecker {
@@ -32,7 +32,7 @@ public class LitigationCapacityChecker implements EventChecker {
         Optional<YesOrNo> litigationOther = ofNullable(caseData.getLitigationCapacityOtherFactors());
 
         if ((litigationOtherComplete && litigationOtherDetailsComplete)
-            || (litigationOtherComplete && (litigationOther.isPresent() && litigationOther.get().equals(no)))) {
+            || (litigationOtherComplete && (litigationOther.isPresent() && litigationOther.get().equals(No)))) {
             taskErrorService.removeError(LITIGATION_CAPACITY_ERROR);
             return true;
         }
@@ -48,7 +48,7 @@ public class LitigationCapacityChecker implements EventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
         Optional<YesOrNo> otherFactors = ofNullable(caseData.getLitigationCapacityOtherFactors());
-        if (otherFactors.isPresent() && otherFactors.get().equals(yes)) {
+        if (otherFactors.isPresent() && otherFactors.get().equals(Yes)) {
             if (ofNullable(caseData.getLitigationCapacityOtherFactorsDetails()).isEmpty()) {
                 taskErrorService.addEventError(LITIGATION_CAPACITY, LITIGATION_CAPACITY_ERROR,
                                                LITIGATION_CAPACITY_ERROR.getError());

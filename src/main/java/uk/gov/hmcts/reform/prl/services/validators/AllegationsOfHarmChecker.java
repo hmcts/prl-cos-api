@@ -20,8 +20,8 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum.OTHER;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.no;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
@@ -50,7 +50,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
 
         Optional<YesOrNo> allegationsOfHarm = ofNullable(caseData.getAllegationsOfHarmYesNo());
 
-        return allegationsOfHarm.isPresent() && allegationsOfHarm.get().equals(yes);
+        return allegationsOfHarm.isPresent() && allegationsOfHarm.get().equals(Yes);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
 
         boolean isFinished;
 
-        if (allegationsOfHarmYesNo.isPresent() && allegationsOfHarmYesNo.get().equals(yes)) {
+        if (allegationsOfHarmYesNo.isPresent() && allegationsOfHarmYesNo.get().equals(Yes)) {
 
             boolean behavioursCompleted = true;
 
@@ -145,7 +145,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
         boolean abuseVictimCompleted = true;
         boolean behaviourRequired = true;
 
-        if (domesticAbuse.isPresent() && domesticAbuse.get().equals(yes)) {
+        if (domesticAbuse.isPresent() && domesticAbuse.get().equals(Yes)) {
             abuseVictimCompleted = physicalAbuseVictim.isPresent() && !(physicalAbuseVictim.get().equals(emptyList))
                 || emotionalAbuseVictim.isPresent() && !(emotionalAbuseVictim.get().equals(emptyList))
                 || psychologicalAbuseVictim.isPresent() && !(psychologicalAbuseVictim.get().equals(emptyList))
@@ -182,18 +182,18 @@ public class AllegationsOfHarmChecker implements EventChecker {
         boolean passportPossessionCompleted = false;
         boolean policeCompleted = false;
 
-        if (childAbduction.isPresent() && childAbduction.get().equals(no)) {
+        if (childAbduction.isPresent() && childAbduction.get().equals(No)) {
             return true;
         }
 
         if (childAbduction.isPresent()) {
-            if (childAbduction.get().equals(yes)) {
+            if (childAbduction.get().equals(Yes)) {
                 abductionSectionCompleted = childAbductionReasons.isPresent();
 
                 boolean previousAbductionThreatsCompleted = previousAbductionThreats.isPresent();
 
                 if (previousAbductionThreatsCompleted) {
-                    if (previousAbductionThreats.get().equals(yes)) {
+                    if (previousAbductionThreats.get().equals(Yes)) {
                         previousThreatSectionComplete = previousAbductionThreatsDetails.isPresent();
                     } else {
                         previousThreatSectionComplete = true;
@@ -213,7 +213,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
                 boolean abductionPreviousPoliceInvolvementCompleted = abductionPreviousPoliceInvolvement.isPresent();
 
                 if (abductionPreviousPoliceInvolvementCompleted) {
-                    if (abductionPreviousPoliceInvolvement.get().equals(yes)) {
+                    if (abductionPreviousPoliceInvolvement.get().equals(Yes)) {
                         policeCompleted = abductionPreviousPoliceInvolvementDetails.isPresent();
                     } else {
                         policeCompleted = true;
@@ -249,7 +249,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
         fields.add(behavioursStartDateAndLength);
         fields.add(behavioursNature);
         fields.add(behavioursApplicantSoughtHelp);
-        if (behavioursApplicantSoughtHelp.isPresent() && behavioursApplicantSoughtHelp.get().equals(yes)) {
+        if (behavioursApplicantSoughtHelp.isPresent() && behavioursApplicantSoughtHelp.get().equals(Yes)) {
             fields.add(behavioursApplicantHelpSoughtWho);
             fields.add(behavioursApplicantHelpAction);
         }
@@ -300,27 +300,27 @@ public class AllegationsOfHarmChecker implements EventChecker {
         boolean underComplete = true;
 
         Optional<YesOrNo> ordersNonMolestation = ofNullable(caseData.getOrdersNonMolestation());
-        if (ordersNonMolestation.isPresent() && ordersNonMolestation.get().equals(yes)) {
+        if (ordersNonMolestation.isPresent() && ordersNonMolestation.get().equals(Yes)) {
             nonMolesComplete = validateNonMolestationOrder(caseData);
         }
         Optional<YesOrNo> ordersOccupation = ofNullable(caseData.getOrdersOccupation());
-        if (ordersOccupation.isPresent() && ordersOccupation.get().equals(yes)) {
+        if (ordersOccupation.isPresent() && ordersOccupation.get().equals(Yes)) {
             occupationComplete = validateOccupationOrder(caseData);
         }
         Optional<YesOrNo> ordersForcedMarriageProtection = ofNullable(caseData.getOrdersForcedMarriageProtection());
-        if (ordersForcedMarriageProtection.isPresent() && ordersForcedMarriageProtection.get().equals(yes)) {
+        if (ordersForcedMarriageProtection.isPresent() && ordersForcedMarriageProtection.get().equals(Yes)) {
             forcedMarComplete = validateForcedMarriageProtectionOrder(caseData);
         }
         Optional<YesOrNo> ordersRestraining = ofNullable(caseData.getOrdersRestraining());
-        if (ordersRestraining.isPresent() && ordersRestraining.get().equals(yes)) {
+        if (ordersRestraining.isPresent() && ordersRestraining.get().equals(Yes)) {
             restrainComplete = validateRestrainingOrder(caseData);
         }
         Optional<YesOrNo> ordersOtherInjunctive = ofNullable(caseData.getOrdersOtherInjunctive());
-        if (ordersOtherInjunctive.isPresent() && ordersOtherInjunctive.get().equals(yes)) {
+        if (ordersOtherInjunctive.isPresent() && ordersOtherInjunctive.get().equals(Yes)) {
             otherComplete = validateOtherInjunctiveOrder(caseData);
         }
         Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(caseData.getOrdersUndertakingInPlace());
-        if (ordersUndertakingInPlace.isPresent() && ordersUndertakingInPlace.get().equals(yes)) {
+        if (ordersUndertakingInPlace.isPresent() && ordersUndertakingInPlace.get().equals(Yes)) {
             underComplete = validateUndertakingInPlaceOrder(caseData);
         }
 
@@ -339,7 +339,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
 
         List<Optional> fields = new ArrayList<>();
         fields.add(allegationsOfHarmOtherConcerns);
-        if (allegationsOfHarmOtherConcerns.isPresent() && allegationsOfHarmOtherConcerns.get().equals(yes)) {
+        if (allegationsOfHarmOtherConcerns.isPresent() && allegationsOfHarmOtherConcerns.get().equals(Yes)) {
             fields.add(allegationsOfHarmOtherConcernsDetails);
         }
         fields.add(allegationsOfHarmOtherConcernsCourtActions);

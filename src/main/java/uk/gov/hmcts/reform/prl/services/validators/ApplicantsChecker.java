@@ -20,7 +20,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.APPLICANTS_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.Gender.other;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
 @Service
@@ -122,12 +122,12 @@ public class ApplicantsChecker implements EventChecker {
         fields.add(ofNullable(applicant.getIsAddressConfidential()));
         Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
         fields.add(isAtAddressLessThan5Years);
-        if (isAtAddressLessThan5Years.isPresent() && isAtAddressLessThan5Years.get().equals(yes)) {
+        if (isAtAddressLessThan5Years.isPresent() && isAtAddressLessThan5Years.get().equals(Yes)) {
             fields.add(ofNullable(applicant.getAddressLivedLessThan5YearsDetails()));
         }
         Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(applicant.getCanYouProvideEmailAddress());
         fields.add(canYouProvideEmailAddress);
-        if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(yes)) {
+        if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(Yes)) {
             fields.add(ofNullable(applicant.getEmail()));
             fields.add(ofNullable(applicant.getIsAddressConfidential()));
         }

@@ -17,8 +17,8 @@ import static uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistE
 import static uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.childProtectionConcern;
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.domesticViolence;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.no;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,9 +40,9 @@ public class MiamCheckerTest {
     @Test
     public void whenBasicMiamCaseDataPresentThenIsStartedReturnsTrue() {
         CaseData caseData = CaseData.builder()
-            .applicantAttendedMiam(yes)
-            .claimingExemptionMiam(no)
-            .familyMediatorMiam(no)
+            .applicantAttendedMiam(Yes)
+            .claimingExemptionMiam(No)
+            .familyMediatorMiam(No)
             .build();
 
 
@@ -66,7 +66,7 @@ public class MiamCheckerTest {
     @Test
     public void whenApplicantHasAttendedMiamAndDetailsProvidedIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
-            .applicantAttendedMiam(yes)
+            .applicantAttendedMiam(Yes)
             .mediatorRegistrationNumber("123456")
             .familyMediatorServiceName("Test Name")
             .soleTraderName("Trade Sole")
@@ -79,9 +79,9 @@ public class MiamCheckerTest {
     @Test
     public void whenApplicantHasNotAttendedMiamButHasApprovedExemptionIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
-            .applicantAttendedMiam(no)
-            .claimingExemptionMiam(yes)
-            .familyMediatorMiam(yes)
+            .applicantAttendedMiam(No)
+            .claimingExemptionMiam(Yes)
+            .familyMediatorMiam(Yes)
             .mediatorRegistrationNumber1("123456")
             .familyMediatorServiceName1("Test Name")
             .soleTraderName1("Trade Sole")
@@ -94,9 +94,9 @@ public class MiamCheckerTest {
     @Test
     public void whenApplicantHasNotAttendedMiamButHasCompletedExemptionsSectionIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
-            .applicantAttendedMiam(no)
-            .claimingExemptionMiam(yes)
-            .familyMediatorMiam(no)
+            .applicantAttendedMiam(No)
+            .claimingExemptionMiam(Yes)
+            .familyMediatorMiam(No)
             .miamExemptionsChecklist(Collections.singletonList(domesticViolence))
             .miamDomesticViolenceChecklist(Collections.singletonList(miamDomesticViolenceChecklistEnum_Value_1))
             .build();
@@ -108,9 +108,9 @@ public class MiamCheckerTest {
     @Test
     public void whenApplicantHasNotAttendedMiamButHasCompletedExemptionsSectionSubmittedChildProtectionConcernIsFinishedReturnsTrue() {
         CaseData caseData = CaseData.builder()
-            .applicantAttendedMiam(no)
-            .claimingExemptionMiam(yes)
-            .familyMediatorMiam(no)
+            .applicantAttendedMiam(No)
+            .claimingExemptionMiam(Yes)
+            .familyMediatorMiam(No)
             .miamExemptionsChecklist(Collections.singletonList(childProtectionConcern))
             .miamChildProtectionConcernList(Collections.singletonList(MIAMChildProtectionConcernChecklistEnum_value_1))
             .build();

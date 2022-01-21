@@ -13,7 +13,7 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.HEARING_URGENCY_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
@@ -29,18 +29,18 @@ public class HearingUrgencyChecker implements EventChecker {
 
         Optional<YesOrNo> isCaseUrgent = ofNullable(caseData.getIsCaseUrgent());
         fields.add(isCaseUrgent);
-        if (isCaseUrgent.isPresent() && isCaseUrgent.get().equals(yes)) {
+        if (isCaseUrgent.isPresent() && isCaseUrgent.get().equals(Yes)) {
             fields.add(ofNullable(caseData.getCaseUrgencyTimeAndReason()));
             fields.add(ofNullable(caseData.getEffortsMadeWithRespondents()));
         }
         Optional<YesOrNo> withoutNoticeHearing = ofNullable(caseData.getDoYouNeedAWithoutNoticeHearing());
         fields.add(withoutNoticeHearing);
-        if (withoutNoticeHearing.isPresent() && withoutNoticeHearing.get().equals(yes)) {
+        if (withoutNoticeHearing.isPresent() && withoutNoticeHearing.get().equals(Yes)) {
             fields.add(ofNullable(caseData.getReasonsForApplicationWithoutNotice()));
         }
         Optional<YesOrNo> reducedNoticeHearing = ofNullable(caseData.getDoYouRequireAHearingWithReducedNotice());
         fields.add(reducedNoticeHearing);
-        if (reducedNoticeHearing.isPresent() && reducedNoticeHearing.get().equals(yes)) {
+        if (reducedNoticeHearing.isPresent() && reducedNoticeHearing.get().equals(Yes)) {
             fields.add(ofNullable(caseData.getSetOutReasonsBelow()));
         }
         fields.add(ofNullable(caseData.getAreRespondentsAwareOfProceedings()));
