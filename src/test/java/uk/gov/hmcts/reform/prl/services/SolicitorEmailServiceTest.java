@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.User;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -71,7 +72,7 @@ public class SolicitorEmailServiceTest {
     }
 
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void whenApplicantPresentThenApplicantStringCreated() {
 
         PartyDetails applicant = PartyDetails.builder()
@@ -95,22 +96,21 @@ public class SolicitorEmailServiceTest {
             .build();
 
         UserDetails userDetails = UserDetails.builder()
-            .forename("testFirstname")
-            .surname("testSurname")
+            .forename("userFirst")
+            .surname("userLast")
             .build();
 
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
         EmailTemplateVars email = SolicitorEmail.builder()
-            .caseReference(String.valueOf(caseDetails.getId()))
-            .caseName(caseData.getApplicantCaseName())
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
             .applicantName(applicantNames)
-            .fullName(userDetails.getSurname() + userDetails.getFullName())
-            .courtName("Court Name")
-            .courtEmail("C@justice.gov.uk")
+            .fullName(userDetails.getFullName())
             .caseLink(manageCaseUrl + caseDetails.getId())
-                .build();
+            .build();
 
         assertEquals(solicitorEmailService.buildEmail(caseDetails, userDetails), email);
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
     }
 
