@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.ANOTHER_PERSON;
@@ -79,9 +80,8 @@ public class CourtFinderService {
         } else if (child.getChildLiveWith().contains(RESPONDENT)) {
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
         } else if (child.getChildLiveWith().contains(ANOTHER_PERSON)) {
-            if (getFirstOtherPersonOptional(child).isPresent()) {
-                OtherPersonWhoLivesWithChild personWhoLivesWithChild = getFirstOtherPersonOptional(child).get();
-                return personWhoLivesWithChild.getAddress().getPostCode();
+            if (ofNullable(getFirstOtherPerson(child)).isPresent()) {
+                return getFirstOtherPerson(child).getAddress().getPostCode();
             }
         }
         //default to the applicant postcode
@@ -105,11 +105,12 @@ public class CourtFinderService {
             && courtId.get().isBlank();
     }
 
-    public Optional<OtherPersonWhoLivesWithChild> getFirstOtherPersonOptional(Child c) {
+    public OtherPersonWhoLivesWithChild getFirstOtherPerson(Child c) {
         return c.getPersonWhoLivesWithChild()
             .stream()
             .map(Element::getValue)
-            .findFirst();
+            .collect(Collectors.toList())
+            .get(0);
 
     }
 
