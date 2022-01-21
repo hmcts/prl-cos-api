@@ -65,7 +65,10 @@ public class ReturnApplicationReturnMessageController {
             String caseName = caseData.getApplicantCaseName();
             String ccdId = callbackRequest.getCaseDetails().getCaseId();
 
-            String legalName = caseData.getSolicitorName();
+            String legalFirstName = caseData.getApplicants().stream().findFirst().get().getValue().getRepresentativeFirstName();
+            String legalLastName = caseData.getApplicants().stream().findFirst().get().getValue().getRepresentativeLastName();
+
+            String legalName = legalFirstName + " " + legalLastName;
             String caseWorkerName = userDetails.getFullName();
 
             List<RejectReasonEnum> listOfReasons = caseData.getRejectReason();
