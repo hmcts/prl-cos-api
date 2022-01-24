@@ -33,6 +33,8 @@ public class CallbackController {
 
     private static final String DRAFT_C_100_APPLICATION = "Draft C100 application";
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
+    private static final String C8_DOC = "C8 Document";
+    public static final String PRL_C8_TEMPLATE = "PRL-C8-Final.docx";
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
@@ -111,6 +113,27 @@ public class CallbackController {
                                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                        .documentHash(generatedDocumentInfo.getHashToken())
                                                        .documentFileName(DRAFT_C_100_APPLICATION).build()).build())
+            .build();
+    }
+
+    @PostMapping(path = "/generate-c8-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to generate and store document")
+    public CallbackResponse generateC8Document(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody @ApiParam("CaseData") CallbackRequest request
+    ) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            authorisation,
+            request.getCaseDetails(),
+            PRL_C8_TEMPLATE
+        );
+        return CallbackResponse
+            .builder()
+            .data(CaseData.builder().draftOrderDoc(Document.builder()
+                                                       .documentUrl(generatedDocumentInfo.getUrl())
+                                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                       .documentHash(generatedDocumentInfo.getHashToken())
+                                                       .documentFileName(C8_DOC).build()).build())
             .build();
     }
 
