@@ -50,7 +50,7 @@ public class ReturnApplicationReturnMessageController {
         return noOptionSelected;
     }
 
-    public String getLegalFullName(CaseData caseData){
+    public String getLegalFullName(CaseData caseData) {
 
         String legalName = "[Legal representative name]";
 
@@ -62,10 +62,10 @@ public class ReturnApplicationReturnMessageController {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
 
-                String legalFirstName = caseData.getApplicants().stream().findFirst().get().getValue().getRepresentativeFirstName();
-                String legalLastName = caseData.getApplicants().stream().findFirst().get().getValue().getRepresentativeLastName();
+            String legalFirstName = applicants.get(0).getRepresentativeFirstName().toString();
+            String legalLastName = applicants.get(0).getRepresentativeLastName().toString();
 
-                legalName = legalFirstName + " " + legalLastName;
+            legalName = legalFirstName + " " + legalLastName;
         }
 
         return legalName;
