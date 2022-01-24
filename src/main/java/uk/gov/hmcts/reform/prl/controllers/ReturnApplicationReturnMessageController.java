@@ -79,7 +79,7 @@ public class ReturnApplicationReturnMessageController {
             String ccdId = callbackRequest.getCaseDetails().getCaseId();
 
             //String legalName = getLegalFullName(caseData);
-            String legalName = "";
+            String legalName = "[Legal representative name]";
             String caseWorkerName = userDetails.getFullName();
 
             List<RejectReasonEnum> listOfReasons = caseData.getRejectReason();
