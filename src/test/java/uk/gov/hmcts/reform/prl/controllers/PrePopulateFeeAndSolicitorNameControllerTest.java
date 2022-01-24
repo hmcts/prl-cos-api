@@ -77,7 +77,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
-        when(dgsService.generateDocument( authToken,
+        when(dgsService.generateDocument(authToken,
                                           callbackRequest.getCaseDetails(),
                                           "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
 
@@ -91,6 +91,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         verifyNoMoreInteractions(userService);
 
     }
+
     @Test
     public void testWhenControllerCalledOneInvokeToDgsService() throws Exception {
         CaseDetails caseDetails = CaseDetailsProvider.full();
@@ -99,7 +100,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
-        when(dgsService.generateDocument( authToken,
+        when(dgsService.generateDocument(authToken,
                                           callbackRequest.getCaseDetails(),
                                           "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
 
@@ -115,6 +116,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         verifyNoMoreInteractions(dgsService);
 
     }
+
     @Test
     public void testFeeDetailsForFeeAmount() throws Exception {
         CaseDetails caseDetails = CaseDetailsProvider.full();
@@ -122,7 +124,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
-        when(dgsService.generateDocument( authToken,
+        when(dgsService.generateDocument(authToken,
                                           callbackRequest.getCaseDetails(),
                                           "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
