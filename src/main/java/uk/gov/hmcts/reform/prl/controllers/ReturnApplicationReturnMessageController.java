@@ -39,11 +39,9 @@ public class ReturnApplicationReturnMessageController {
 
         boolean noOptionSelected = true;
 
-        Optional<List<RejectReasonEnum>> selectedReason = ofNullable(caseData.getRejectReason());
-
         boolean hasSelectedOption = allNonEmpty(caseData.getRejectReason());
 
-        if (selectedReason.isPresent() && hasSelectedOption) {
+        if (hasSelectedOption) {
             noOptionSelected = false;
         }
 
@@ -56,7 +54,7 @@ public class ReturnApplicationReturnMessageController {
 
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
-        if (applicantsWrapped.isPresent() && applicantsWrapped.get().size() != 0) {
+        if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
             List<PartyDetails> applicants = applicantsWrapped.get()
                 .stream()
                 .map(Element::getValue)
