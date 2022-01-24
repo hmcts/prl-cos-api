@@ -104,7 +104,7 @@ public class ReturnApplicationReturnMessageController {
                             + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n");
 
             for (RejectReasonEnum reasonEnum : listOfReasons) {
-                returnMsgStr.append(reasonEnum.getReturnMsgText().toString());
+                returnMsgStr.append(reasonEnum.getReturnMsgText());
             }
 
             returnMsgStr.append("Please resolve these issues and resubmit your application.\n\n")
