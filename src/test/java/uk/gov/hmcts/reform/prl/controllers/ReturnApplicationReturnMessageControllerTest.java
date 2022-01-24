@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.prl.enums.RejectReasonEnum.consentOrderNotProvided;
 
 
@@ -42,5 +43,13 @@ public class ReturnApplicationReturnMessageControllerTest {
 
         assert !returnApplicationReturnMessageController.noRejectReasonSelected(casedata);
     }
+
+    @Test
+    public void whenNoApplicantGetLegalFullNameReturnConstantString(){
+        casedata = CaseData.builder().build();
+
+        assertEquals(returnApplicationReturnMessageController.getLegalFullName(casedata), "[Legal representative name]");
+    }
+
 
 }

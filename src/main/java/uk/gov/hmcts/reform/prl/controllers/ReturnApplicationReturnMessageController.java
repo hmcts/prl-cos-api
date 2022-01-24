@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -19,6 +21,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -51,11 +54,19 @@ public class ReturnApplicationReturnMessageController {
 
         String legalName = "[Legal representative name]";
 
+        Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
-        String legalFirstName = caseData.getApplicants().stream().findFirst().get().getValue().getRepresentativeFirstName();
-        String legalLastName = caseData.getApplicants().stream().findFirst().get().getValue().getRepresentativeLastName();
+        if (applicantsWrapped.isPresent() && applicantsWrapped.get().size() != 0) {
+            List<PartyDetails> applicants = applicantsWrapped.get()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
 
-        legalName = legalFirstName + " " + legalLastName;
+                String legalFirstName = caseData.getApplicants().stream().findFirst().get().getValue().getRepresentativeFirstName();
+                String legalLastName = caseData.getApplicants().stream().findFirst().get().getValue().getRepresentativeLastName();
+
+                legalName = legalFirstName + " " + legalLastName;
+        }
 
         return legalName;
     }
@@ -78,8 +89,7 @@ public class ReturnApplicationReturnMessageController {
             String caseName = caseData.getApplicantCaseName();
             String ccdId = callbackRequest.getCaseDetails().getCaseId();
 
-            //String legalName = getLegalFullName(caseData);
-            String legalName = "[Legal representative name]";
+            String legalName = getLegalFullName(caseData);
             String caseWorkerName = userDetails.getFullName();
 
             List<RejectReasonEnum> listOfReasons = caseData.getRejectReason();
