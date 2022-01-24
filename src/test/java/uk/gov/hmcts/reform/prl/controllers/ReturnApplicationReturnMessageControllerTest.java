@@ -18,7 +18,9 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.RejectReasonEnum.consentOrderNotProvided;
 
 
@@ -80,13 +82,13 @@ public class ReturnApplicationReturnMessageControllerTest {
 
         Assertions.assertEquals("[Legal representative name]",returnApplicationReturnMessageController.getLegalFullName(casedata));
     }
+
     @Test
     public void whenHasApplicantNoRepresentativeNameGetLegalFullNameReturnConstantString() {
         casedata = CaseData.builder().applicants(null).build();
 
         Assertions.assertEquals("[Legal representative name]",returnApplicationReturnMessageController.getLegalFullName(casedata));
     }
-
 
     @Test
     public void whenHasApplicantRepresentativeNameGetLegalFullNameReturnLegalRepresentativeFullName() {
