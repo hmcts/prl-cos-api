@@ -49,7 +49,7 @@ public class ReturnApplicationReturnMessageController {
 
     public String getLegalFullName(CaseData caseData){
 
-        String legalName = null;
+        String legalName = "[Legal representative name]";
 
 
         String legalFirstName = caseData.getApplicants().stream().findFirst().get().getValue().getRepresentativeFirstName();
