@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.springframework.context.annotation.PropertySource;
@@ -34,7 +35,7 @@ public class ReturnApplicationReturnMessageControllerTest {
     public void whenNoOptionSelectedThenNoRejectReasonSelectedReturnTrue() {
         casedata = CaseData.builder().build();
 
-        assert returnApplicationReturnMessageController.noRejectReasonSelected(casedata);
+        Assertions.assertTrue(returnApplicationReturnMessageController.noRejectReasonSelected(casedata));
     }
 
     @Test
@@ -44,14 +45,14 @@ public class ReturnApplicationReturnMessageControllerTest {
             .rejectReason(Collections.singletonList(consentOrderNotProvided))
             .build();
 
-        assert !returnApplicationReturnMessageController.noRejectReasonSelected(casedata);
+        Assertions.assertFalse(returnApplicationReturnMessageController.noRejectReasonSelected(casedata));
     }
 
     @Test
     public void whenNoApplicantGetLegalFullNameReturnConstantString() {
         casedata = CaseData.builder().build();
 
-        assertEquals(returnApplicationReturnMessageController.getLegalFullName(casedata), "[Legal representative name]");
+        Assertions.assertEquals("[Legal representative name]",returnApplicationReturnMessageController.getLegalFullName(casedata));
     }
 
 
@@ -63,6 +64,6 @@ public class ReturnApplicationReturnMessageControllerTest {
 
         casedata = CaseData.builder().applicants(applicantList).build();
 
-        assertEquals(returnApplicationReturnMessageController.getLegalFullName(casedata), "John Smith");
+        Assertions.assertEquals("John Smith",returnApplicationReturnMessageController.getLegalFullName(casedata));
     }
 }
