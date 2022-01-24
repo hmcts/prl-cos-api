@@ -50,6 +50,7 @@ public class CallbackControllerTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
+    public static final String PRL_C8_TEMPLATE = "PRL-C8-Final.docx";
 
     @Before
     public void setUp() {
@@ -146,6 +147,48 @@ public class CallbackControllerTest {
         callbackController.generateAndStoreDocument(authToken, callbackRequest);
 
         verify(dgsService).generateDocument(authToken,null,PRL_DRAFT_TEMPLATE);
+        verifyNoMoreInteractions(dgsService);
+
+    }
+
+    @Test
+    public void testGenerateAndStoreC8Document() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseData(CaseData.builder()
+                          .draftOrderDoc(Document.builder()
+                                             .documentUrl(generatedDocumentInfo.getUrl())
+                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                             .documentHash(generatedDocumentInfo.getHashToken())
+                                             .documentFileName(PRL_C8_TEMPLATE)
+                                             .build())
+                          .build())
+            .build();
+
+        CallbackResponse callbackResponse = CallbackResponse.builder()
+            .data(CaseData.builder()
+                      .draftOrderDoc(Document.builder()
+                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                         .documentFileName(PRL_C8_TEMPLATE)
+                                         .build())
+                      .build())
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().build();
+
+        when(dgsService.generateDocument(authToken,null,PRL_C8_TEMPLATE))
+            .thenReturn(generatedDocumentInfo);
+
+        callbackController.generateC8Document(authToken, callbackRequest);
+
+        verify(dgsService).generateDocument(authToken,null,PRL_C8_TEMPLATE);
         verifyNoMoreInteractions(dgsService);
 
     }
