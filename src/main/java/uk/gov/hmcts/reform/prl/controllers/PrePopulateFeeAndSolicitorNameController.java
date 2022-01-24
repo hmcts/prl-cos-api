@@ -41,8 +41,8 @@ public class PrePopulateFeeAndSolicitorNameController {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    private final DgsService dgsService;
+    @Autowired
+    private DgsService dgsService;
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
     private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
 
