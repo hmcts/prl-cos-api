@@ -47,6 +47,19 @@ public class ReturnApplicationReturnMessageController {
         return noOptionSelected;
     }
 
+    public String getLegalFullName(CaseData caseData){
+
+        String legalName = null;
+
+
+        String legalFirstName = caseData.getApplicants().stream().findFirst().get().getValue().getRepresentativeFirstName();
+        String legalLastName = caseData.getApplicants().stream().findFirst().get().getValue().getRepresentativeLastName();
+
+        legalName = legalFirstName + " " + legalLastName;
+
+        return legalName;
+    }
+
     @PostMapping(path = "/return-application-return-message", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to get return message of the return application ")
     @ApiResponses(value = {
@@ -65,10 +78,8 @@ public class ReturnApplicationReturnMessageController {
             String caseName = caseData.getApplicantCaseName();
             String ccdId = callbackRequest.getCaseDetails().getCaseId();
 
-            String legalFirstName = caseData.getApplicants().stream().findFirst().get().getValue().getRepresentativeFirstName();
-            String legalLastName = caseData.getApplicants().stream().findFirst().get().getValue().getRepresentativeLastName();
-
-            String legalName = legalFirstName + " " + legalLastName;
+            //String legalName = getLegalFullName(caseData);
+            String legalName = "";
             String caseWorkerName = userDetails.getFullName();
 
             List<RejectReasonEnum> listOfReasons = caseData.getRejectReason();
