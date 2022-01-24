@@ -62,8 +62,8 @@ public class ReturnApplicationReturnMessageController {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
 
-            String legalFirstName = applicants.get(0).getRepresentativeFirstName().toString();
-            String legalLastName = applicants.get(0).getRepresentativeLastName().toString();
+            String legalFirstName = applicants.get(0).getRepresentativeFirstName();
+            String legalLastName = applicants.get(0).getRepresentativeLastName();
 
             legalName = legalFirstName + " " + legalLastName;
         }
