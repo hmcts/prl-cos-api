@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.reform.prl.enums.RejectReasonEnum.consentOrderNotProvided;
 
 
@@ -51,6 +50,12 @@ public class ReturnApplicationReturnMessageControllerTest {
     @Test
     public void whenNoApplicantGetLegalFullNameReturnConstantString() {
         casedata = CaseData.builder().build();
+
+        Assertions.assertEquals("[Legal representative name]",returnApplicationReturnMessageController.getLegalFullName(casedata));
+    }
+    @Test
+    public void whenHasApplicantNoRepresentativeNameGetLegalFullNameReturnConstantString() {
+        casedata = CaseData.builder().applicants(null).build();
 
         Assertions.assertEquals("[Legal representative name]",returnApplicationReturnMessageController.getLegalFullName(casedata));
     }
