@@ -87,7 +87,7 @@ payments:
 
 fees-register:
   api:
-    url: http://fees-register-api-demo.service.core-compute-demo.internal
+    url: url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}
   parameters:
     C100_SUBMISSION_FEE:
       channel: default
