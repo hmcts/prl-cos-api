@@ -11,7 +11,7 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.INTERNATIONAL_ELEMENT_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Service
 public class InternationalElementChecker implements EventChecker {
@@ -39,13 +39,13 @@ public class InternationalElementChecker implements EventChecker {
         boolean fieldsCompletedJI = true;
         boolean fieldsCompletedRfa = true;
 
-        if (habitualResidence.isPresent() && habitualResidence.get().equals(YES)) {
+        if (habitualResidence.isPresent() && habitualResidence.get().equals(Yes)) {
             fieldsCompletedHR = habitualResidenceReason.isPresent();
         }
-        if (jurisdictionIssue.isPresent() && jurisdictionIssue.get().equals(YES)) {
+        if (jurisdictionIssue.isPresent() && jurisdictionIssue.get().equals(Yes)) {
             fieldsCompletedJI = jurisdictionIssueReason.isPresent();
         }
-        if (requestToForeignAuthority.isPresent() && requestToForeignAuthority.get().equals(YES)) {
+        if (requestToForeignAuthority.isPresent() && requestToForeignAuthority.get().equals(Yes)) {
             fieldsCompletedRfa = requestToForeignAuthorityReason.isPresent();
         }
 
