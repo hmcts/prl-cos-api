@@ -283,5 +283,7 @@ public class CaseData {
     private final String feeCode;
     @JsonProperty("draftOrderDoc")
     private final Document draftOrderDoc;
+    @JsonProperty("c8Document")
+    private final Document c8Document;
 
 }

@@ -172,7 +172,7 @@ public class CallbackControllerTest {
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
             .data(CaseData.builder()
-                      .draftOrderDoc(Document.builder()
+                      .c8Document(Document.builder()
                                          .documentUrl(generatedDocumentInfo.getUrl())
                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                          .documentHash(generatedDocumentInfo.getHashToken())

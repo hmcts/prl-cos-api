@@ -129,7 +129,7 @@ public class CallbackController {
         );
         return CallbackResponse
             .builder()
-            .data(CaseData.builder().draftOrderDoc(Document.builder()
+            .data(CaseData.builder().c8Document(Document.builder()
                                                        .documentUrl(generatedDocumentInfo.getUrl())
                                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                        .documentHash(generatedDocumentInfo.getHashToken())
