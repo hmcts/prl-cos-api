@@ -83,7 +83,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             additionalFields = party.getDateOfBirth() != null;
         }
         YesOrNo placeOfBirth = party.getIsPlaceOfBirthKnown();
-        if (placeOfBirth != null && placeOfBirth.equals(YES)) {
+        if (placeOfBirth != null && placeOfBirth.equals(Yes)) {
             additionalFields = party.getPlaceOfBirth() != null;
         }
         YesOrNo currAdd = party.getIsCurrentAddressKnown();
