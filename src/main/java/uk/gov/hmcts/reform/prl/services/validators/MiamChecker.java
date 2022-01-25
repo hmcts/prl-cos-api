@@ -19,8 +19,8 @@ import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.domestic
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.other;
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.previousMIAMattendance;
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.urgency;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 
@@ -44,7 +44,7 @@ public class MiamChecker implements EventChecker {
         Optional<String> mediatorSoleTrader = ofNullable(caseData.getSoleTraderName());
         Optional<MiamDocument> miamCertDocument = ofNullable(caseData.getMiamCertificationDocumentUpload());
 
-        if (applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(YES)) {
+        if (applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(Yes)) {
             finished = mediatorRegNumber.isPresent()
                 && mediatorServiceName.isPresent()
                 && mediatorSoleTrader.isPresent()
@@ -54,9 +54,9 @@ public class MiamChecker implements EventChecker {
                 taskErrorService.removeError(MIAM_ERROR);
                 return true;
             }
-        } else if ((applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(NO))
-            && (claimingExemptionMiam.isPresent() && claimingExemptionMiam.get().equals(YES))
-            && (familyMediatiorMiam.isPresent() && familyMediatiorMiam.get().equals(YES))) {
+        } else if ((applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(No))
+            && (claimingExemptionMiam.isPresent() && claimingExemptionMiam.get().equals(Yes))
+            && (familyMediatiorMiam.isPresent() && familyMediatiorMiam.get().equals(Yes))) {
 
             Optional<String> mediatorRegNumber1 = ofNullable(caseData.getMediatorRegistrationNumber1());
             Optional<String> mediatorServiceName1 = ofNullable(caseData.getFamilyMediatorServiceName1());
