@@ -1,20 +1,25 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
@@ -26,10 +31,12 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequiredArgsConstructor
 public class CallbackController {
 
+    private static final String DRAFT_C_100_APPLICATION = "Draft C100 application";
+    public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
-    private final ObjectMapper objectMapper;
+    private final DgsService dgsService;
 
 
     /**
@@ -86,6 +93,25 @@ public class CallbackController {
     }
 
 
-
+    @PostMapping(path = "/generate-save-draft-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to generate and store document")
+    public CallbackResponse generateAndStoreDocument(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody @ApiParam("CaseData") CallbackRequest request
+    ) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            authorisation,
+            request.getCaseDetails(),
+            PRL_DRAFT_TEMPLATE
+        );
+        return CallbackResponse
+            .builder()
+            .data(CaseData.builder().draftOrderDoc(Document.builder()
+                                                       .documentUrl(generatedDocumentInfo.getUrl())
+                                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                       .documentHash(generatedDocumentInfo.getHashToken())
+                                                       .documentFileName(DRAFT_C_100_APPLICATION).build()).build())
+            .build();
+    }
 
 }

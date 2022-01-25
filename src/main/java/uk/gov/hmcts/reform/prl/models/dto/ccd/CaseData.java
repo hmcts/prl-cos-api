@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
 
@@ -76,7 +77,7 @@ public class CaseData {
     private final Address childrenAddress;
     private final YesNoDontKnow isChildrenKnownToAuthority;
     private final String childAndLocalAuthority;
-    private final YesOrNo isChildrenUnderChildProtection;
+    private final YesNoDontKnow isChildrenUnderChildProtection;
     private final YesNoDontKnow isChildrenWithSameParents;
     private final String parentsAndTheirChildren;
     private final String parentalResponsibilities;
@@ -284,6 +285,8 @@ public class CaseData {
     private final String feeAmount;
     @JsonProperty("feeCode")
     private final String feeCode;
+    @JsonProperty("draftOrderDoc")
+    private final Document draftOrderDoc;
 
     /**
      *  Manage Documents.
