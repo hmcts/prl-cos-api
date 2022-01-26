@@ -64,13 +64,13 @@ feature-toggle:
     example: ${FEATURE_EXAMPLE:false}
 
 xui:
-  url: https://manage-case.aat.platform.hmcts.net/cases/case-details
+  url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
 uk:
   gov:
     notify:
       api:
-        key: ${UK_GOV_NOTIFY_API_KEY:prltest-be03d538-db4c-4efe-8d36-b2a8c9d5131b-66fc91de-593f-440e-9f13-16524e72aec4}
+        key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxx}
         baseUrl: https://api.notifications.service.gov.uk
       email:
         templates:
@@ -123,13 +123,13 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: GT2V6PLQ34XGPTPM
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: W7supXKMJgcEWKBS
+    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
 
 prl:
   system-update:
