@@ -25,7 +25,7 @@ public class UserService {
             .firstName(idamClientUserDetails.getFullName())
             .lastName(idamClientUserDetails.getSurname().get())
             .emailAddress(idamClientUserDetails.getEmail())
-            .role(roleName)
+            .role(roleName.name())
             .build();
     }
 }

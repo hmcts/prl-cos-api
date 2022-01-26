@@ -13,6 +13,6 @@ public class UserInfo {
     private String idamId;
     private String firstName;
     private String lastName;
-    private UserRoles role;
+    private String role;
     private String emailAddress;
 }
