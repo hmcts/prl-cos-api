@@ -26,7 +26,7 @@ public class OtherProceedingsCheckerTest {
     @Test
     public void startedWithPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
-            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.YES)
+            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .build();
         boolean isStarted = otherProceedingsChecker.isStarted(caseData);
         assert (isStarted);
@@ -35,7 +35,7 @@ public class OtherProceedingsCheckerTest {
     @Test
     public void notStartedWithoutPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
-            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.NO)
+            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.no)
             .build();
         boolean isStarted = otherProceedingsChecker.isStarted(caseData);
         assert (!isStarted);
@@ -44,7 +44,7 @@ public class OtherProceedingsCheckerTest {
     @Test
     public void finishedIfNoPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
-            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.NO)
+            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.no)
             .build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
         assert (isFinished);
@@ -53,7 +53,7 @@ public class OtherProceedingsCheckerTest {
     @Test
     public void notFinishedWithPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
-            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.YES)
+            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
         assert (!isFinished);
@@ -68,7 +68,7 @@ public class OtherProceedingsCheckerTest {
 
 
         CaseData caseData = CaseData.builder()
-            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.YES)
+            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .existingProceedings(listOfProceedings)
             .build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);

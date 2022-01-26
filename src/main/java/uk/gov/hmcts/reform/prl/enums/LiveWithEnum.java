@@ -1,21 +1,30 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @RequiredArgsConstructor
 public enum LiveWithEnum {
 
     @JsonProperty("applicant")
-    APPLICANT("applicant", "Applicant"),
+    applicant("applicant", "Applicant"),
     @JsonProperty("respondent")
-    RESPONDENT("respondent", "Respondent"),
+    respondent("respondent", "Respondent"),
     @JsonProperty("anotherPerson")
-    ANOTHER_PERSON("anotherPerson", "Another person not listed");
+    anotherPerson("anotherPerson", "Another person not listed");
 
     private final String id;
     private final String displayedValue;
 
+    @JsonValue
+    public String getDisplayedValue() {
+        return displayedValue;
+    }
+
+    @JsonCreator
+    public static LiveWithEnum getValue(String key) {
+        return LiveWithEnum.valueOf(key);
+    }
 }
