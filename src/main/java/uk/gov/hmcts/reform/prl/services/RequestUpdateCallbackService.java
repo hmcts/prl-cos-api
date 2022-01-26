@@ -38,7 +38,7 @@ public class RequestUpdateCallbackService {
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final UserService userService;
 
-    public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto, String authorisation) throws Exception {
+    public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
 
         log.info("Processing the callback for the caseId {} with status {}", serviceRequestUpdateDto.getCcdCaseNumber(),
                  serviceRequestUpdateDto.getServiceRequestStatus()
@@ -47,7 +47,7 @@ public class RequestUpdateCallbackService {
         String systemUpdateUserId = systemUserService.getUserId(userToken);
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(
-            authorisation,
+            userToken,
             authTokenGenerator.generate(),
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
@@ -57,9 +57,6 @@ public class RequestUpdateCallbackService {
                 serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
                            ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
             );
-
-            solicitorEmailService.sendEmail(caseDetails, userService.getUserDetails(authorisation));
-            caseWorkerEmailService.sendEmail(caseDetails, userService.getUserDetails(authorisation));
 
         } else {
             log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());

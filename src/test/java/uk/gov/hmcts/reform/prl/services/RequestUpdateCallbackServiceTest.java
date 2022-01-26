@@ -55,7 +55,7 @@ public class RequestUpdateCallbackServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void shouldStartAndSubmitEventWithCaseDetails() throws Exception {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).build();
         when(coreCaseDataApi.getCase(userToken,serviceAuthToken,caseId.toString())).thenReturn(caseDetails);
@@ -76,7 +76,7 @@ public class RequestUpdateCallbackServiceTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto,userToken);
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
 
         verify(coreCaseDataApi).startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, Long.toString(caseId), eventName);
@@ -95,7 +95,7 @@ public class RequestUpdateCallbackServiceTest {
         assertThrows(Exception.class,() -> {
             serviceRequestUpdateDto = ServiceRequestUpdateDto.builder().ccdCaseNumber("123").serviceRequestStatus("Paid").build();
 
-            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto, userToken);
+            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         });
 
     }
