@@ -442,7 +442,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/SslVerificationDisabler.*',
   '**uk/gov/hmcts/reform/prl/Application.*',
-  '**uk/gov/hmcts/reform/prl/services/validators/*.*'
+  '**uk/gov/hmcts/reform/prl/services/validators/*.*',
+  '**uk/gov/hmcts/reform/prl/services/DgsService.java'
 
 ]
 
