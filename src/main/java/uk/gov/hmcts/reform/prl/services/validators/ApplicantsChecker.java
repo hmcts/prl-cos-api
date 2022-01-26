@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.APPLICANTS_DETAILS_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.Gender.OTHER;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
+import static uk.gov.hmcts.reform.prl.enums.Gender.other;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
 @Service
@@ -110,7 +110,7 @@ public class ApplicantsChecker implements EventChecker {
         fields.add(ofNullable(applicant.getDateOfBirth()));
         Optional<Gender> gender = ofNullable(applicant.getGender());
         fields.add(gender);
-        if (gender.isPresent() && gender.get().equals(OTHER)) {
+        if (gender.isPresent() && gender.get().equals(other)) {
             fields.add(ofNullable(applicant.getOtherGender()));
         }
         fields.add(ofNullable(applicant.getPlaceOfBirth()));
@@ -122,12 +122,12 @@ public class ApplicantsChecker implements EventChecker {
         fields.add(ofNullable(applicant.getIsAddressConfidential()));
         Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
         fields.add(isAtAddressLessThan5Years);
-        if (isAtAddressLessThan5Years.isPresent() && isAtAddressLessThan5Years.get().equals(YES)) {
+        if (isAtAddressLessThan5Years.isPresent() && isAtAddressLessThan5Years.get().equals(Yes)) {
             fields.add(ofNullable(applicant.getAddressLivedLessThan5YearsDetails()));
         }
         Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(applicant.getCanYouProvideEmailAddress());
         fields.add(canYouProvideEmailAddress);
-        if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(YES)) {
+        if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(Yes)) {
             fields.add(ofNullable(applicant.getEmail()));
             fields.add(ofNullable(applicant.getIsAddressConfidential()));
         }
