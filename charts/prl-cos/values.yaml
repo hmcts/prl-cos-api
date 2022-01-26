@@ -20,15 +20,13 @@ java:
     IDAM_S2S_AUTH_MICROSERVICE: prl_cos_api
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_CALLBACK_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/service-request
+    PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
 
   keyVaults:
     prl:
       secrets:
-        - name: prl-cos-idam-client-secret
-          alias: IDAM_CLIENT_SECRET
-        - name: microservicekey-prl-cos-api
-          alias: IDAM_S2S_AUTH_TOTP_SECRET
-        - name: system-update-user-username
-          alias: SYSTEM_UPDATE_USER_USERNAME
-        - name: system-update-user-password
-          alias: PRL_SYSTEM_UPDATE_PASSWORD
+        - prl-cos-idam-client-secret
+        - microservicekey-prl-cos-api
+        - system-update-user-username
+        - system-update-user-password
