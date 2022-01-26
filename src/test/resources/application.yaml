@@ -146,8 +146,11 @@ auth:
 
 resources:
   images:
-    baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/task-list-and-submit-and-pay-combined/resources/'
+    baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
 
+courtfinder:
+  api:
+    url: http://fact-api-aat.service.core-compute-aat.internal/
 
 send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal

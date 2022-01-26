@@ -140,6 +140,9 @@ auth:
         client:
           baseUrl: http://localhost:4502
 
+courtfinder:
+  api:
+    url: http://fact-api-aat.service.core-compute-aat.internal/
 
 
 resources:
