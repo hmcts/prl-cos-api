@@ -106,9 +106,6 @@ public class CaseWorkerEmailService {
         }
 
         String typeOfOrders;
-        if (typeOfOrder.size() == 1) {
-            typeOfOrders = String.join("", typeOfOrder);
-        }
         if (typeOfOrder.size() == 2) {
             typeOfOrders = String.join(" and ", typeOfOrder);
         } else {
