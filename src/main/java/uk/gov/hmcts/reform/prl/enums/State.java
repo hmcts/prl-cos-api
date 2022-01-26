@@ -1,12 +1,11 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 
-
 @RequiredArgsConstructor
-@Getter
 public enum State {
 
     @JsonProperty("AWAITING_SUBMISSION_TO_HMCTS")
@@ -14,6 +13,16 @@ public enum State {
     @JsonProperty("AWAITING_FL401_SUBMISSION_TO_HMCTS")
     AWAITING_FL401_SUBMISSION_TO_HMCTS("AWAITING_FL401_SUBMISSION_TO_HMCTS");
 
-    private final String value;
+    private final String displayedValue;
+
+    @JsonValue
+    public String getDisplayedValue() {
+        return displayedValue;
+    }
+
+    @JsonCreator
+    public static State getValue(String key) {
+        return State.valueOf(key);
+    }
 
 }

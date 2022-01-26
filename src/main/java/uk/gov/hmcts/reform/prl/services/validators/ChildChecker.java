@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILD_DETAILS_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.Gender.OTHER;
-import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.ANOTHER_PERSON;
-import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.YES;
+import static uk.gov.hmcts.reform.prl.enums.Gender.other;
+import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Service
 public class ChildChecker implements EventChecker {
@@ -91,7 +91,7 @@ public class ChildChecker implements EventChecker {
         fields.add(ofNullable(child.getDateOfBirth()));
         Optional<Gender> gender = ofNullable(child.getGender());
         fields.add(gender);
-        if (gender.isPresent() && gender.get().equals(OTHER)) {
+        if (gender.isPresent() && gender.get().equals(other)) {
             fields.add(ofNullable(child.getOtherGender()));
         }
         fields.add(ofNullable(child.getOrderAppliedFor()));
@@ -101,7 +101,7 @@ public class ChildChecker implements EventChecker {
         if (childLivesWith.isPresent() && childLivesWith.get().equals(Collections.emptyList())) {
             return false;
         }
-        if (childLivesWith.isPresent() && childLivesWith.get().contains(ANOTHER_PERSON)) {
+        if (childLivesWith.isPresent() && childLivesWith.get().contains(anotherPerson)) {
             Optional<List<Element<OtherPersonWhoLivesWithChild>>> personWhoLivesWithChildList =  ofNullable(child.getPersonWhoLivesWithChild());
             if (!personWhoLivesWithChildList.isPresent() || (personWhoLivesWithChildList.isPresent()
                 && personWhoLivesWithChildList.get().equals(Collections.emptyList()))) {
@@ -130,7 +130,7 @@ public class ChildChecker implements EventChecker {
 
         Optional<YesNoDontKnow> childLocalAuth = ofNullable(caseData.getChildrenKnownToLocalAuthority());
         fields.add(childLocalAuth);
-        if (childLocalAuth.isPresent() && childLocalAuth.get().equals(YES)) {
+        if (childLocalAuth.isPresent() && childLocalAuth.get().equals(yes)) {
             fields.add(ofNullable(caseData.getChildrenKnownToLocalAuthorityTextArea()));
         }
         fields.add(ofNullable(caseData.getChildrenSubjectOfChildProtectionPlan()));
