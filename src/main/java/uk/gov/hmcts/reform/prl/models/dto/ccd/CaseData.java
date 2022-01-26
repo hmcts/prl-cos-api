@@ -290,6 +290,11 @@ public class CaseData {
     private final Document draftOrderDoc;
 
     /**
+     * Add case number.
+     */
+    private final String familymanCaseNumber;
+
+    /**
      *  Manage Documents.
      */
     private final DocumentCategoryEnum documentCategory;
@@ -301,9 +306,11 @@ public class CaseData {
 
     private final List<Element<OtherDocuments>> otherDocuments;
 
+
     /**
      * Return Application.
      */
     private final List<RejectReasonEnum> rejectReason;
     private String returnMessage;
+
 }
