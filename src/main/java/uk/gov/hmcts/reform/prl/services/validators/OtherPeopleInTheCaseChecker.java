@@ -4,10 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -72,13 +75,16 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         return false;
     }
 
-
     public boolean validateMandatoryPartyDetailsForOtherPerson(PartyDetails party) {
         boolean additionalFields = true;
 
         YesOrNo dob = party.getIsDateOfBirthKnown();
         if (dob != null && dob.equals(Yes)) {
             additionalFields = party.getDateOfBirth() != null;
+        }
+        YesOrNo placeOfBirth = party.getIsPlaceOfBirthKnown();
+        if (placeOfBirth != null && placeOfBirth.equals(Yes)) {
+            additionalFields = party.getPlaceOfBirth() != null;
         }
         YesOrNo currAdd = party.getIsCurrentAddressKnown();
         if (currAdd != null && currAdd.equals(Yes)) {
@@ -92,16 +98,31 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         if (canProvideTel != null && canProvideTel.equals(Yes)) {
             additionalFields = party.getPhoneNumber() != null;
         }
+
+        List<Optional> childFields = new ArrayList<>();
+
+        Optional<List<Element<OtherPersonRelationshipToChild>>> otherPersonRelationshipList
+                                    = ofNullable(party.getOtherPersonRelationshipToChildren());
+        if (!otherPersonRelationshipList.isPresent() || (otherPersonRelationshipList.isPresent()
+            && otherPersonRelationshipList.get().equals(Collections.emptyList()))) {
+            return false;
+        }
+
+        otherPersonRelationshipList.get().stream().map(Element::getValue).forEach(everyChild -> {
+            childFields.add(ofNullable(everyChild.getPersonRelationshipToChild()));
+        });
+
         boolean baseFields = allNonEmpty(
             party.getFirstName(),
             party.getLastName(),
             party.getIsDateOfBirthKnown(),
+            party.getIsPlaceOfBirthKnown(),
             party.getGender(),
             party.getIsCurrentAddressKnown(),
             party.getCanYouProvideEmailAddress(),
             party.getCanYouProvidePhoneNumber()
         );
-        return baseFields && additionalFields;
+        return baseFields && additionalFields && childFields.stream().anyMatch(Optional::isPresent);
     }
 
 }

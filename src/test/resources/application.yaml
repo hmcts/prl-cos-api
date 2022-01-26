@@ -148,5 +148,13 @@ resources:
   images:
     baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/task-list-and-submit-and-pay-combined/resources/'
 
+
+send-letter:
+  url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
+
+case_document_am:
+  url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
+
 prl-dgs-api:
   url: http://localhost:4007
+
