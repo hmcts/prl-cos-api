@@ -108,9 +108,9 @@ public class CaseWorkerEmailServiceTest {
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
             .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.childArrangementsOrder))
-            .isCaseUrgent(YesOrNo.YES)
-            .doYouNeedAWithoutNoticeHearing(YesOrNo.NO)
-            .doYouRequireAHearingWithReducedNotice(YesOrNo.NO)
+            .isCaseUrgent(YesOrNo.Yes)
+            .doYouNeedAWithoutNoticeHearing(YesOrNo.No)
+            .doYouRequireAHearingWithReducedNotice(YesOrNo.No)
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
@@ -164,9 +164,9 @@ public class CaseWorkerEmailServiceTest {
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
             .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.prohibitedStepsOrder))
-            .isCaseUrgent(YesOrNo.NO)
-            .doYouNeedAWithoutNoticeHearing(YesOrNo.NO)
-            .doYouRequireAHearingWithReducedNotice(YesOrNo.NO)
+            .isCaseUrgent(YesOrNo.No)
+            .doYouNeedAWithoutNoticeHearing(YesOrNo.No)
+            .doYouRequireAHearingWithReducedNotice(YesOrNo.No)
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
@@ -219,9 +219,9 @@ public class CaseWorkerEmailServiceTest {
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
             .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.specificIssueOrder))
-            .isCaseUrgent(YesOrNo.NO)
-            .doYouNeedAWithoutNoticeHearing(YesOrNo.YES)
-            .doYouRequireAHearingWithReducedNotice(YesOrNo.NO)
+            .isCaseUrgent(YesOrNo.No)
+            .doYouNeedAWithoutNoticeHearing(YesOrNo.Yes)
+            .doYouRequireAHearingWithReducedNotice(YesOrNo.No)
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
@@ -273,9 +273,9 @@ public class CaseWorkerEmailServiceTest {
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
             .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.specificIssueOrder))
-            .isCaseUrgent(YesOrNo.NO)
-            .doYouNeedAWithoutNoticeHearing(YesOrNo.NO)
-            .doYouRequireAHearingWithReducedNotice(YesOrNo.YES)
+            .isCaseUrgent(YesOrNo.No)
+            .doYouNeedAWithoutNoticeHearing(YesOrNo.No)
+            .doYouRequireAHearingWithReducedNotice(YesOrNo.Yes)
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()

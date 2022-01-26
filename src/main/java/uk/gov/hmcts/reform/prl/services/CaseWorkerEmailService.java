@@ -77,18 +77,18 @@ public class CaseWorkerEmailService {
 
         List<String> typeOfHearing = new ArrayList<>();
 
-        if (emailService.getCaseData(caseDetails).getIsCaseUrgent().equals(YesOrNo.YES)) {
+        if (emailService.getCaseData(caseDetails).getIsCaseUrgent().equals(YesOrNo.Yes)) {
             typeOfHearing.add(URGENT_CASE);
         }
-        if (emailService.getCaseData(caseDetails).getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.YES)) {
+        if (emailService.getCaseData(caseDetails).getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.Yes)) {
             typeOfHearing.add(WITHOUT_NOTICE);
         }
-        if (emailService.getCaseData(caseDetails).getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.YES)) {
+        if (emailService.getCaseData(caseDetails).getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.Yes)) {
             typeOfHearing.add(REDUCED_NOTICE);
         }
-        if ((emailService.getCaseData(caseDetails).getIsCaseUrgent().equals(YesOrNo.NO))
-                && (emailService.getCaseData(caseDetails).getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.NO))
-                && (emailService.getCaseData(caseDetails).getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.NO))) {
+        if ((emailService.getCaseData(caseDetails).getIsCaseUrgent().equals(YesOrNo.No))
+                && (emailService.getCaseData(caseDetails).getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.No))
+                && (emailService.getCaseData(caseDetails).getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.No))) {
             typeOfHearing.add(STANDARAD_HEARING);
         }
         final String typeOfHearings = String.join(", ", typeOfHearing);
