@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
@@ -46,7 +47,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-public class CaseData {
+public class CaseData implements MappableObject {
 
     private final long id;
 
