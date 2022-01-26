@@ -293,6 +293,7 @@ public class CaseData {
      */
     private final String familymanCaseNumber;
 
+    /**
      *  Manage Documents.
      */
     private final DocumentCategoryEnum documentCategory;
