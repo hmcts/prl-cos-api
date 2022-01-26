@@ -287,6 +287,13 @@ public class CaseData {
     private final String feeCode;
     @JsonProperty("draftOrderDoc")
     private final Document draftOrderDoc;
+    @JsonProperty("submitAndPayDownloadApplicationLink")
+    private final Document submitAndPayDownloadApplicationLink;
+
+    /**
+     * Add case number.
+     */
+    private final String familymanCaseNumber;
 
     /**
      *  Manage Documents.
@@ -299,4 +306,5 @@ public class CaseData {
     private final List<Element<Correspondence>> correspondence;
 
     private final List<Element<OtherDocuments>> otherDocuments;
+
 }
