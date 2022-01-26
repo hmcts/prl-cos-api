@@ -37,7 +37,7 @@ public class ServiceRequestUpdateCallbackController {
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws Exception {
         try {
-            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto, authorisation);
+            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         } catch (Exception ex) {
             log.error(
                 "Payment callback is unsuccessful for the CaseID: {}",
