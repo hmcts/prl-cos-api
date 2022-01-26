@@ -291,6 +291,11 @@ public class CaseData {
     private final Document submitAndPayDownloadApplicationLink;
 
     /**
+     * Add case number.
+     */
+    private final String familymanCaseNumber;
+
+    /**
      *  Manage Documents.
      */
     private final DocumentCategoryEnum documentCategory;
@@ -301,4 +306,5 @@ public class CaseData {
     private final List<Element<Correspondence>> correspondence;
 
     private final List<Element<OtherDocuments>> otherDocuments;
+
 }
