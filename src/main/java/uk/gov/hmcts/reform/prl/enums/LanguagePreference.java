@@ -19,7 +19,7 @@ public enum LanguagePreference {
 
     public static LanguagePreference getLanguagePreference(CaseData caseData) {
         boolean preferredLanguageIsWelsh = Optional.ofNullable(caseData.getLanguagePreferenceWelsh())
-            .map(YesOrNo.YES::equals)
+            .map(YesOrNo.Yes::equals)
             .orElse(false);
 
         return preferredLanguageIsWelsh ? LanguagePreference.WELSH : LanguagePreference.ENGLISH;
