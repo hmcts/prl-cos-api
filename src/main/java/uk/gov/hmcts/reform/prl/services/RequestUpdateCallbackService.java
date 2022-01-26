@@ -80,9 +80,6 @@ public class RequestUpdateCallbackService {
             eventId
         );
 
-        log.info("Case Data: === {}", caseData);
-
-
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
