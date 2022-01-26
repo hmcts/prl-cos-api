@@ -37,7 +37,6 @@ public class ServiceRequestUpdateCallbackController {
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws Exception {
         try {
-            log.info("Auth Token:======= {}",authorisation);
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto, authorisation);
         } catch (Exception ex) {
             log.error(
