@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityStatementDisclaimerEnum;
+import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
@@ -29,13 +30,17 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
+import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
 
@@ -87,7 +92,7 @@ public class CaseData {
     private final Address childrenAddress;
     private final YesNoDontKnow isChildrenKnownToAuthority;
     private final String childAndLocalAuthority;
-    private final YesOrNo isChildrenUnderChildProtection;
+    private final YesNoDontKnow isChildrenUnderChildProtection;
     private final YesNoDontKnow isChildrenWithSameParents;
     private final String parentsAndTheirChildren;
     private final String parentalResponsibilities;
@@ -295,5 +300,24 @@ public class CaseData {
     private final String feeAmount;
     @JsonProperty("feeCode")
     private final String feeCode;
+    @JsonProperty("draftOrderDoc")
+    private final Document draftOrderDoc;
+
+    /**
+     * Add case number.
+     */
+    private final String familymanCaseNumber;
+
+    /**
+     *  Manage Documents.
+     */
+    private final DocumentCategoryEnum documentCategory;
+    private final List<Element<FurtherEvidence>> furtherEvidences;
+    @JsonProperty("giveDetails")
+    private final String giveDetails;
+
+    private final List<Element<Correspondence>> correspondence;
+
+    private final List<Element<OtherDocuments>> otherDocuments;
 
 }
