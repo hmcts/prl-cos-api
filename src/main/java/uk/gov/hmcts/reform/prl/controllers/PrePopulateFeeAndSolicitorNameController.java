@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.user.UserInfo;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -70,16 +72,20 @@ public class PrePopulateFeeAndSolicitorNameController {
             callbackRequest.getCaseDetails(),
             PRL_DRAFT_TEMPLATE
         );
+
+        List<UserInfo> userInfoList = new ArrayList<>();
+        userInfoList.add(userService.getUserInfo(authorisation, UserRoles.SOLICITOR));
+
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()
-                //   .id(1639057496134831)
                 .solicitorName(userDetails.getFullName())
+                .userInfo(userInfoList)
                 .feeAmount(feeResponse.getAmount().toString())
                 .submitAndPayDownloadApplicationLink(Document.builder()
-                                   .documentUrl(generatedDocumentInfo.getUrl())
-                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                   .documentHash(generatedDocumentInfo.getHashToken())
-                                   .documentFileName(DRAFT_C_100_APPLICATION).build())
+                                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                                         .documentFileName(DRAFT_C_100_APPLICATION).build())
                 .build(),
             CaseData.class
         );

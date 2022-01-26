@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
+import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -296,7 +297,7 @@ public class CaseData {
     private final String familymanCaseNumber;
 
     /**
-     *  Manage Documents.
+     * Manage Documents.
      */
     private final DocumentCategoryEnum documentCategory;
     private final List<Element<FurtherEvidence>> furtherEvidences;
@@ -306,5 +307,7 @@ public class CaseData {
     private final List<Element<Correspondence>> correspondence;
 
     private final List<Element<OtherDocuments>> otherDocuments;
+
+    private final List<UserInfo> userInfo;
 
 }
