@@ -170,7 +170,7 @@ public class ChildCheckerTest {
             .build();
 
         OtherPersonWhoLivesWithChild personWhoLivesWithChild = OtherPersonWhoLivesWithChild.builder()
-            .isPersonIdentityConfidential(YesOrNo.YES).relationshipToChildDetails("test")
+            .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
             .firstName("test First Name").lastName("test Last Name").address(address).build();
 
         Element<OtherPersonWhoLivesWithChild> wrappedList = Element.<OtherPersonWhoLivesWithChild>builder().value(personWhoLivesWithChild).build();
@@ -211,7 +211,7 @@ public class ChildCheckerTest {
             .build();
 
         OtherPersonWhoLivesWithChild personWhoLivesWithChild = OtherPersonWhoLivesWithChild.builder()
-            .isPersonIdentityConfidential(YesOrNo.YES).relationshipToChildDetails("test")
+            .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
             .firstName("test First Name").lastName("test Last Name").address(address).build();
 
         Element<OtherPersonWhoLivesWithChild> wrappedList = Element.<OtherPersonWhoLivesWithChild>builder().value(personWhoLivesWithChild).build();
@@ -253,11 +253,11 @@ public class ChildCheckerTest {
             .build();
 
         OtherPersonWhoLivesWithChild personWhoLivesWithChildFirstRow = OtherPersonWhoLivesWithChild.builder()
-            .isPersonIdentityConfidential(YesOrNo.YES).relationshipToChildDetails("test")
+            .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
             .firstName("test First Name").lastName("test Last Name").address(address).build();
 
         OtherPersonWhoLivesWithChild personWhoLivesWithChildSecondRow = OtherPersonWhoLivesWithChild.builder()
-            .isPersonIdentityConfidential(YesOrNo.YES).relationshipToChildDetails("test")
+            .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
             .firstName("").lastName("test Last Name").address(address).build();
 
         Element<OtherPersonWhoLivesWithChild> firstWrappedList = Element.<OtherPersonWhoLivesWithChild>builder()
