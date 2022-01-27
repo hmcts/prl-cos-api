@@ -36,7 +36,9 @@ public class CallbackController {
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
+
     private final DgsService dgsService;
+
 
 
     /**
