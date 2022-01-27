@@ -125,7 +125,7 @@ allprojects {
       }
 
       // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
-      dependencySet(group: 'io.netty', version: '4.1.73.Final') {
+      dependencySet(group: 'io.netty', version: '4.1.71.Final') {
         entry 'netty-buffer'
         entry 'netty-codec'
         entry 'netty-codec-http'
@@ -143,8 +143,7 @@ allprojects {
         entry 'tomcat-embed-el'
       }
       //CVE-2017-18640
-      dependency group: 'org.yaml',name: 'snakeyaml', version: '1.30'
-
+      dependency group: 'org.yaml',name: 'snakeyaml', version: '1.26'
     }
   }
 }
