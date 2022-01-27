@@ -81,7 +81,7 @@ public class TaskListRendererTest {
         }
 
         String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(tasks, errors);
+        String actualTaskList = taskListRenderer.render(tasks, errors, true);
 
         assert expectedTaskList.equals(actualTaskList);
 
@@ -103,7 +103,7 @@ public class TaskListRendererTest {
         }
 
         String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(tasks, emptyErrors);
+        String actualTaskList = taskListRenderer.render(tasks, emptyErrors, true);
 
         assert expectedTaskList.equals(actualTaskList);
 
