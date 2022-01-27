@@ -130,7 +130,7 @@ public class TaskListRenderer {
                 if (task.getEvent().equals(VIEW_PDF_DOCUMENT)) {
                     lines.add(taskListRenderElements.renderLink(task));
                 } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
-                    lines.add(taskListRenderElements.renderDisabledLink(task)
+                    lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
