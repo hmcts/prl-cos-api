@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.services.validators.EventsChecker;
@@ -43,7 +44,7 @@ public class TaskListServiceTest {
     @Test
     public void getTasksShouldReturnListOfTasks() {
 
-        CaseData caseData = CaseData.builder().build();
+        CaseData caseData = CaseData.builder().caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
 
         List<Task> expectedTasks = List.of(
             Task.builder().event(CASE_NAME).state(NOT_STARTED).state(NOT_STARTED).build(),

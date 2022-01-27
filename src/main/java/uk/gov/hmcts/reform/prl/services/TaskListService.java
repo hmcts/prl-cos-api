@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
@@ -19,6 +20,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
@@ -61,7 +63,11 @@ public class TaskListService {
     }
 
     private List<Event> getEvents(CaseData caseData) {
+        return caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)
+            ? getFL401Events() : getC100Events();
+    }
 
+    private List<Event> getC100Events() {
         final List<Event> events = new ArrayList<>(List.of(
             CASE_NAME,
             TYPE_OF_APPLICATION,
@@ -80,6 +86,19 @@ public class TaskListService {
             VIEW_PDF_DOCUMENT,
             SUBMIT_AND_PAY
         ));
+
+        return events;
+    }
+
+    private List<Event> getFL401Events() {
+        final List<Event> events = new ArrayList<>(List.of(
+            FL401_CASE_NAME,
+            APPLICANT_DETAILS,
+            RESPONDENT_DETAILS,
+            OTHER_PROCEEDINGS,
+            INTERNATIONAL_ELEMENT,
+            WELSH_LANGUAGE_REQUIREMENTS,
+            VIEW_PDF_DOCUMENT));
 
         return events;
     }
