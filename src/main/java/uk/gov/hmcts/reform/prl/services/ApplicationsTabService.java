@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -60,7 +61,7 @@ public class ApplicationsTabService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        for (PartyDetails respondent : currentApplicants) {
+        for (PartyDetails respondent : currentRespondents) {
             Respondent r = objectMapper.convertValue(respondent, Respondent.class);
             Element<Respondent> res = Element.<Respondent>builder().value(r).build();
             respondents.add(res);
@@ -80,9 +81,9 @@ public class ApplicationsTabService {
             Map.of("hearingUrgencyTable", hearingUrgencyMap,
                    "applicantTable", applicants,
                    "respondentTable", respondents,
-                   "declarationTable",declarationMap,
-                   "typeOfApplicationTable",toMap(typeOfApplication))
-        );
+                   "declarationTable",declarationMap
+//                   "typeOfApplicationTable",toMap(typeOfApplication))
+            ));
     }
 
     private Map<String, Object> toMap(Object object) {
@@ -101,6 +102,14 @@ public class ApplicationsTabService {
 
         addressFields.removeIf(Optional::isEmpty);
         return addressFields.stream().map(Optional::get).collect(Collectors.joining(","));
+
+    }
+
+    private Map<String, Object> getTypeOfApplicationTable(CaseData caseData) {
+
+        List<String> ordersApplyingFor = objectMapper.convertValue(caseData, TypeOfApplication.class);
+
+
 
     }
 
