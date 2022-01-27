@@ -11,8 +11,8 @@ import java.util.List;
 @Data
 public class TypeOfApplication {
 
-    private final List<String> ordersApplyingFor;
-    private final ChildArrangementOrderTypeEnum typeOfChildArrangementsOrder;
+    private final String ordersApplyingFor;
+    private final String typeOfChildArrangementsOrder;
     private final String natureOfOrder;
 
 }
