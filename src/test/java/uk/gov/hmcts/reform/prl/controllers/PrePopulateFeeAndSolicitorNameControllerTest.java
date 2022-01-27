@@ -12,8 +12,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
@@ -37,6 +39,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private DgsService dgsService;
     @Mock
     private FeeService feesService;
 
@@ -62,13 +66,20 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         feeResponse = FeeResponse.builder()
             .amount(BigDecimal.valueOf(232.00))
             .build();
+
     }
 
     @Test
     public void testUserDetailsForSolicitorName() throws Exception {
         CaseDetails caseDetails = CaseDetailsProvider.full();
 
+
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
+
+        when(dgsService.generateDocument(authToken,
+                                          callbackRequest.getCaseDetails(),
+                                          "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
 
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
@@ -82,11 +93,40 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     }
 
     @Test
+    public void testWhenControllerCalledOneInvokeToDgsService() throws Exception {
+        CaseDetails caseDetails = CaseDetailsProvider.full();
+
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().build();
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
+
+        when(dgsService.generateDocument(authToken,
+                                          callbackRequest.getCaseDetails(),
+                                          "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
+
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+
+        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
+
+        verify(dgsService).generateDocument(authToken,
+                                            callbackRequest.getCaseDetails(),
+                                            "PRL-DRAFT-C100-20.docx");
+        verifyNoMoreInteractions(dgsService);
+
+    }
+
+    @Test
     public void testFeeDetailsForFeeAmount() throws Exception {
         CaseDetails caseDetails = CaseDetailsProvider.full();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
+        when(dgsService.generateDocument(authToken,
+                                          callbackRequest.getCaseDetails(),
+                                          "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);

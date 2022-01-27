@@ -130,6 +130,7 @@ public class CallbackControllerTest {
 
     }
 
+
     @Test
     public void testGenerateAndStoreDocument() throws Exception {
         //CaseDetails caseDetails  = CaseDetailsProvider.full();
@@ -173,7 +174,7 @@ public class CallbackControllerTest {
         verifyNoMoreInteractions(dgsService);
 
     }
-
+  
     @Test
     public void testGenerateAndStoreC8Document() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
