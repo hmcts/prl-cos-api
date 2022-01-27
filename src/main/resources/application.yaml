@@ -146,6 +146,7 @@ resources:
   images:
     baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
 
+
 send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
 
@@ -154,3 +155,4 @@ case_document_am:
 
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
+
