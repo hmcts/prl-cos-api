@@ -298,7 +298,7 @@ public class CaseData {
     private final String familymanCaseNumber;
 
     /**
-     *  Manage Documents.
+     * Manage Documents.
      */
     private final DocumentCategoryEnum documentCategory;
     private final List<Element<FurtherEvidence>> furtherEvidences;
@@ -309,7 +309,7 @@ public class CaseData {
 
     private final List<Element<OtherDocuments>> otherDocuments;
 
-    private final List<UserInfo> userInfo;
+    private final List<Element<UserInfo>> userInfo;
 
 
     /**

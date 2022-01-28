@@ -1,0 +1,93 @@
+package uk.gov.hmcts.reform.prl.utils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.hmcts.reform.prl.models.Element;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
+public class ElementUtils {
+
+    private ElementUtils() {
+    }
+
+    @SafeVarargs
+    public static <T> List<Element<T>> wrapElements(T... elements) {
+        return Stream.of(elements)
+            .filter(Objects::nonNull)
+            .map(element -> Element.<T>builder().value(element).build())
+            .collect(toList());
+    }
+
+    public static <T> List<Element<T>> wrapElements(List<T> elements) {
+        return nullSafeCollection(elements).stream()
+            .filter(Objects::nonNull)
+            .map(element -> Element.<T>builder().value(element).build())
+            .collect(toList());
+    }
+
+    public static <T> List<T> unwrapElements(List<Element<T>> elements) {
+        return nullSafeCollection(elements)
+            .stream()
+            .map(Element::getValue)
+            .filter(Objects::nonNull)
+            .collect(toUnmodifiableList());
+    }
+
+    public static <T> Element<T> element(T element) {
+        return Element.<T>builder()
+            .id(UUID.randomUUID())
+            .value(element)
+            .build();
+    }
+
+    public static <T> Element<T> element(UUID id, T element) {
+        return Element.<T>builder()
+            .id(id)
+            .value(element)
+            .build();
+    }
+
+    public static <T> Element<T> getElement(UUID id, List<Element<T>> elements) {
+        return findElement(id, elements).orElseThrow();
+    }
+
+    public static <T> Optional<Element<T>> findElement(UUID id, List<Element<T>> elements) {
+        return nullSafeCollection(elements).stream()
+            .filter(element -> Objects.equals(element.getId(), id))
+            .findFirst();
+    }
+
+    public static <T> List<Element<T>> findElements(T elementToFind, List<Element<T>> elements) {
+        return nullSafeCollection(elements).stream()
+            .filter(element -> Objects.equals(element.getValue(), elementToFind))
+            .collect(Collectors.toList());
+    }
+
+    public static <T> List<UUID> findElementsId(T elementToFind, List<Element<T>> elements) {
+        return findElements(elementToFind, elements).stream()
+            .map(Element::getId)
+            .collect(toList());
+    }
+
+    private static <T> Collection<T> nullSafeCollection(Collection<T> collection) {
+        return defaultIfNull(collection, emptyList());
+    }
+
+    public static <T> List<T> nullSafeList(List<T> collection) {
+        return defaultIfNull(collection, emptyList());
+    }
+}
