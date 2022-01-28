@@ -183,6 +183,7 @@ public class TaskListRenderer {
 
         final TaskSection applicationDetails = newSection("Add application details")
             .withTask(tasks.get(FL401_CASE_NAME));
+            //.withTask(tasks.get(FL401_TYPE_OF_APPLICATION));
 
         final TaskSection peopleInTheCase = newSection("Add people to the case")
             .withTask(tasks.get(APPLICANT_DETAILS))

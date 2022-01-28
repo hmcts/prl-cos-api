@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.EnumMap;
 import javax.annotation.PostConstruct;
+import java.util.EnumMap;
 
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
@@ -77,6 +77,9 @@ public class EventsChecker {
     @Autowired
     SubmitAndPayChecker submitAndPayChecker;
 
+    //@Autowired
+    //private FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
+
     private EnumMap<Event, EventChecker> eventStatus = new EnumMap<Event, EventChecker>(Event.class);
 
     @PostConstruct
@@ -99,6 +102,7 @@ public class EventsChecker {
         eventStatus.put(SUBMIT_AND_PAY, submitAndPayChecker);
 
         eventStatus.put(FL401_CASE_NAME, caseNameChecker);
+        //eventStatus.put(FL401_TYPE_OF_APPLICATION, fl401ApplicationTypeChecker);
     }
 
     public boolean isFinished(Event event, CaseData caseData) {
