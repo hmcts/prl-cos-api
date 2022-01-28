@@ -75,7 +75,7 @@ public class ReturnApplicationReturnMessageController {
         @ApiResponse(code = 200, message = "Callback proceeded"),
         @ApiResponse(code = 400, message = "Bad Request")})
     public CallbackResponse returnApplicationReturnMessage(@RequestHeader("Authorization") String authorisation,
-                                                           @RequestBody CallbackRequest callbackRequest) {
+                                                         @RequestBody CallbackRequest callbackRequest) {
 
         CaseData caseData = callbackRequest.getCaseDetails().getCaseData();
         UserDetails userDetails = userService.getUserDetails(authorisation);
