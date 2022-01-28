@@ -58,6 +58,9 @@ public class RequestUpdateCallbackService {
                            ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
             );
 
+            solicitorEmailService.sendEmail(caseDetails, userService.getUserDetails(userToken));
+            caseWorkerEmailService.sendEmail(caseDetails, userService.getUserDetails(userToken));
+
         } else {
             log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());
             throw new Exception("Case not present");
