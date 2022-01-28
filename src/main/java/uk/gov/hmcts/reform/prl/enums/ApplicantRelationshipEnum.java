@@ -28,6 +28,10 @@ public enum ApplicantRelationshipEnum {
     private final String id;
     private final String displayedValue;
 
+    public String getId() {
+        return id;
+    }
+
     @JsonValue
     public String getDisplayedValue() {
         return displayedValue;
