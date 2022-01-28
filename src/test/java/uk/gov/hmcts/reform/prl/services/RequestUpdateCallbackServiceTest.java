@@ -76,7 +76,7 @@ public class RequestUpdateCallbackServiceTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto, userToken);
 
         verify(coreCaseDataApi).startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, Long.toString(caseId), eventName);
@@ -95,7 +95,7 @@ public class RequestUpdateCallbackServiceTest {
         assertThrows(Exception.class,() -> {
             serviceRequestUpdateDto = ServiceRequestUpdateDto.builder().ccdCaseNumber("123").serviceRequestStatus("Paid").build();
 
-            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto, userToken);
         });
 
     }
