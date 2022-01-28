@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
 
@@ -61,14 +62,23 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
         try {
             final CaseDetails caseDetails = callbackRequest.getCaseDetails();
             final CaseData caseData = getCaseData(caseDetails);
+            PaymentDto paymentDto = PaymentDto.builder()
+                .paymentAmount("232")
+                .paymentReference("PAY_REF")
+                .paymentMethod("PBA")
+                .caseReference(String.valueOf(caseData.getId()))
+                .accountNumber("111111")
+                .build();
             ServiceRequestUpdateDto serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
                 .serviceRequestReference(String.valueOf(caseData.getId()))
                 .ccdCaseNumber(String.valueOf(caseData.getId()))
-                .serviceRequestAmount("100")
+                .serviceRequestAmount("232")
                 .serviceRequestStatus("Paid")
+                .payment(paymentDto)
                 .build();
 
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());
         }
