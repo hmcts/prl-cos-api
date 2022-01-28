@@ -93,6 +93,7 @@ public class TaskListService {
     private List<Event> getFL401Events() {
         final List<Event> events = new ArrayList<>(List.of(
             FL401_CASE_NAME,
+            //FL401_TYPE_OF_APPLICATION,
             APPLICANT_DETAILS,
             RESPONDENT_DETAILS,
             OTHER_PROCEEDINGS,
