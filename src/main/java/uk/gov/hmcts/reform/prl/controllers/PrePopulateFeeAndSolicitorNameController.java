@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
 @RestController
@@ -73,13 +74,10 @@ public class PrePopulateFeeAndSolicitorNameController {
             PRL_DRAFT_TEMPLATE
         );
 
-        List<UserInfo> userInfoList = new ArrayList<>();
-        userInfoList.add(userService.getUserInfo(authorisation, UserRoles.SOLICITOR));
-
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()
                 .solicitorName(userDetails.getFullName())
-                .userInfo(userInfoList)
+                .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
                 .feeAmount(feeResponse.getAmount().toString())
                 .submitAndPayDownloadApplicationLink(Document.builder()
                                                          .documentUrl(generatedDocumentInfo.getUrl())
