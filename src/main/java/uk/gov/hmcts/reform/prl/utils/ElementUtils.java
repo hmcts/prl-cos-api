@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.util.Collection;
@@ -8,13 +7,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
-import static java.util.Objects.isNull;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
