@@ -1,19 +1,19 @@
 server:
-  port: 4044
+    port: 4044
 
 runs-locally: ${RUNS_LOCALLY:true}
 
 management:
-  endpoint:
-    health:
-      show-details: "always"
-  endpoints:
-    web:
-      base-path: /
-      exposure:
-        include: health, info, prometheus
+    endpoint:
+      health:
+        show-details: "always"
+    endpoints:
+      web:
+        base-path: /
+        exposure:
+          include: health, info, prometheus
 
-#If you use a database then uncomment below lines and update db properties accordingly
+  #If you use a database then uncomment below lines and update db properties accordingly
 spring:
   config:
     import: "optional:configtree:/mnt/secrets/"
@@ -42,39 +42,39 @@ spring:
 #            non_contextual_creation: true
 
 azure:
-  application-insights:
-    instrumentation-key: ${rpe.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+    application-insights:
+      instrumentation-key: ${rpe.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
 
 logging:
-  level:
-    org.springframework.web: DEBUG
-    uk.gov.hmcts.reform.prl: DEBUG
-    au.com.dius.pact: DEBUG
-  pattern:
-    console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
+    level:
+      org.springframework.web: DEBUG
+      uk.gov.hmcts.reform.prl: DEBUG
+      au.com.dius.pact: DEBUG
+    pattern:
+      console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
 
 pba:
-  validation:
-    service:
-      api:
-        baseurl: ${PRD_API_BASEURL:http://localhost:8892}
+    validation:
+      service:
+        api:
+          baseurl: ${PRD_API_BASEURL:http://localhost:8892}
 
 feature-toggle:
-  toggle:
-    example: ${FEATURE_EXAMPLE:false}
+    toggle:
+      example: ${FEATURE_EXAMPLE:false}
 
 uk:
-  gov:
-    notify:
-      api:
-        key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxxx}
-        baseUrl: https://api.notifications.service.gov.uk
-      email:
-        templates:
-          english:
-            EXAMPLE: 2e00903c-46f4-46d6-9d94-d419ee30b927
-          welsh:
-            EXAMPLE: example-template-id-222
+    gov:
+      notify:
+        api:
+          key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxxx}
+          baseUrl: https://api.notifications.service.gov.uk
+        email:
+          templates:
+            english:
+              EXAMPLE: 2e00903c-46f4-46d6-9d94-d419ee30b927
+            welsh:
+              EXAMPLE: example-template-id-222
 
 notify:
   api-key: fake-key
@@ -87,7 +87,7 @@ payments:
 
 fees-register:
   api:
-    url: http://fees-register-api-demo.service.core-compute-demo.internal
+    url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}
   parameters:
     C100_SUBMISSION_FEE:
       channel: default
@@ -112,36 +112,33 @@ idam:
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
     secret: W7supXKMJgcEWKBS
 
-
-core_case_data:
-  api:
-    url: ${CORE_CASE_DATA_API_URL:}
-
 prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
 
 security:
-  oauth2:
-    client:
-      provider:
-        oidc:
-          issuer-uri: ${idam.web.url}/o
-      registration:
-        oidc:
-          client-id: internal
-          client-secret: internal
-
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: ${idam.web.url}/o
+        registration:
+          oidc:
+            client-id: internal
+            client-secret: internal
+core_case_data:
+  api:
+    url: http://localhost:4452
 
 auth:
-  idam:
-    client:
-      baseUrl: ${AUTH_IDAM_CLIENT_BASEURL:}
-  provider:
-    service:
+    idam:
       client:
-        baseUrl: ${AUTH_PROVIDER_SERVICE_CLIENT_BASEURL:}
+        baseUrl: http://localhost:5000
+    provider:
+      service:
+        client:
+          baseUrl: http://localhost:4502
 
 
 
@@ -149,7 +146,19 @@ resources:
   images:
     baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
 
+
 courtfinder:
   api:
     url: http://fact-api-aat.service.core-compute-aat.internal/
+
+
+send-letter:
+  url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
+
+case_document_am:
+  url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
+
+prl-dgs-api:
+  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
+
 

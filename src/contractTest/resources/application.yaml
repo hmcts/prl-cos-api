@@ -13,7 +13,7 @@ management:
       exposure:
         include: health, info, prometheus
 
-#If you use a database then uncomment below lines and update db properties accordingly
+  #If you use a database then uncomment below lines and update db properties accordingly
 spring:
   config:
     import: "optional:configtree:/mnt/secrets/"
@@ -87,7 +87,7 @@ payments:
 
 fees-register:
   api:
-    url: http://fees-register-api-demo.service.core-compute-demo.internal
+    url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}
   parameters:
     C100_SUBMISSION_FEE:
       channel: default
@@ -117,6 +117,7 @@ core_case_data:
   api:
     url: ${CORE_CASE_DATA_API_URL:}
 
+
 prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
@@ -132,16 +133,16 @@ security:
         oidc:
           client-id: internal
           client-secret: internal
-
+          
 
 auth:
   idam:
     client:
-      baseUrl: ${AUTH_IDAM_CLIENT_BASEURL:}
+      baseUrl: http://localhost:5000
   provider:
     service:
       client:
-        baseUrl: ${AUTH_PROVIDER_SERVICE_CLIENT_BASEURL:}
+        baseUrl: http://localhost:4502
 
 
 
@@ -149,7 +150,17 @@ resources:
   images:
     baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
 
+
 courtfinder:
   api:
     url: http://fact-api-aat.service.core-compute-aat.internal/
 
+send-letter:
+  url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
+
+case_document_am:
+  url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
+
+
+prl-dgs-api:
+  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
