@@ -13,6 +13,7 @@ public enum Event {
     APPLICANT_DETAILS("applicantsDetails", "Applicant details"),
     CHILD_DETAILS("childDetails", "Child details"),
     RESPONDENT_DETAILS("respondentsDetails", "Respondent details"),
+    RELATIONSHIP_TO_RESPONDENT("respondentRelationship","Relationship to respondent"),
     MIAM("miam", "MIAM"),
     ALLEGATIONS_OF_HARM("allegationsOfHarm", "Allegations of harm"),
     OTHER_PEOPLE_IN_THE_CASE("otherPeopleInTheCase", "Other people in the case"),

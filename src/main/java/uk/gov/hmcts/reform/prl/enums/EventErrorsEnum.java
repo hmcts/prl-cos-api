@@ -20,7 +20,8 @@ public enum EventErrorsEnum {
     ATTENDING_THE_HEARING_ERROR("Add details about attending the hearing"),
     WELSH_LANGUAGE_ERROR("Add details about welsh language requirements"),
     OTHER_PROCEEDINGS_ERROR("Add details about other proceedings"),
-    ALLEGATIONS_OF_HARM_ERROR("Add details about allegations of harm");
+    ALLEGATIONS_OF_HARM_ERROR("Add details about allegations of harm"),
+    RELATIONSHIP_TO_RESPONDENT("Add details about relationship to respondent");
 
     private final String error;
 
