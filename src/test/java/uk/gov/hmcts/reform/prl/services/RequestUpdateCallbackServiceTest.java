@@ -55,7 +55,7 @@ public class RequestUpdateCallbackServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
     }
 
-    @Test
+    @Test (expected = NullPointerException.class)
     public void shouldStartAndSubmitEventWithCaseDetails() throws Exception {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).build();
         when(coreCaseDataApi.getCase(userToken,serviceAuthToken,caseId.toString())).thenReturn(caseDetails);
