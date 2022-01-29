@@ -18,12 +18,10 @@ public abstract class AbstractCallbackController {
 
     protected CaseData getCaseData(CaseDetails caseDetails) {
 
-        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
             .id(caseDetails.getId())
             .build();
-
-        return caseData;
     }
 
 
