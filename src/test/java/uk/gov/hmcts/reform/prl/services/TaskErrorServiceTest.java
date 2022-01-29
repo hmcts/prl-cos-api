@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
@@ -39,14 +39,14 @@ public class TaskErrorServiceTest {
         EventErrorsEnum newEventError = MIAM_ERROR;
 
         taskErrorService.addEventError(newEvent, newEventError, errorString);
-        assertThat(taskErrorService.eventErrors.size()).isEqualTo(previousMapSize + 1);
+        assertThat(taskErrorService.eventErrors).hasSize(previousMapSize + 1);
         assertTrue(taskErrorService.eventErrors.containsKey(newEventError));
     }
 
     @Test
     public void whenRemoveEventErrorCalledThenMapDecreasesInSize() {
         taskErrorService.removeError(error);
-        assertThat(taskErrorService.eventErrors.size()).isEqualTo(previousMapSize - 1);
+        assertThat(taskErrorService.eventErrors).hasSize(previousMapSize - 1);
         assertTrue(!taskErrorService.eventErrors.containsKey(error));
     }
 
