@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -24,22 +25,19 @@ public class AttendingTheHearingCheckerTest {
     @Test
     public void whenNoCaseDataThenIsStartedFalse() {
         CaseData caseData = CaseData.builder().build();
-        assert !attendingTheHearingChecker.isStarted(caseData);
-
+        assertTrue(!attendingTheHearingChecker.isStarted(caseData));
     }
 
     @Test
     public void whenPartialCaseDataThenIsStartedTrue() {
         CaseData caseData = CaseData.builder().isDisabilityPresent(Yes).build();
         assert attendingTheHearingChecker.isStarted(caseData);
-
     }
 
     @Test
     public void whenNoCaseDataThenIsFinishedFalse() {
         CaseData caseData = CaseData.builder().build();
         assert !attendingTheHearingChecker.isFinished(caseData);
-
     }
 
     @Test
@@ -50,7 +48,6 @@ public class AttendingTheHearingCheckerTest {
             .isInterpreterNeeded(Yes)
             .build();
         assert !attendingTheHearingChecker.isFinished(caseData);
-
     }
 
     @Test
@@ -64,7 +61,6 @@ public class AttendingTheHearingCheckerTest {
             .build();
 
         assert attendingTheHearingChecker.isFinished(caseData);
-
     }
 
     @Test

@@ -14,6 +14,9 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicantsCheckerTest {
 
@@ -32,7 +35,7 @@ public class ApplicantsCheckerTest {
 
         CaseData caseData = CaseData.builder().applicants(applicantList).build();
 
-        assert !applicantsChecker.isFinished(caseData);
+        assertFalse(applicantsChecker.isFinished(caseData));
 
     }
 
@@ -41,7 +44,7 @@ public class ApplicantsCheckerTest {
 
         CaseData caseData = CaseData.builder().applicants(null).build();
 
-        assert !applicantsChecker.isFinished(caseData);
+        assertFalse(applicantsChecker.isFinished(caseData));
 
     }
 
@@ -54,7 +57,7 @@ public class ApplicantsCheckerTest {
 
         CaseData caseData = CaseData.builder().applicants(applicantList).build();
 
-        assert applicantsChecker.isStarted(caseData);
+        assertTrue(applicantsChecker.isStarted(caseData));
 
     }
 
@@ -63,7 +66,7 @@ public class ApplicantsCheckerTest {
 
         CaseData caseData = CaseData.builder().applicants(null).build();
 
-        assert !applicantsChecker.isStarted(caseData);
+        assertFalse(applicantsChecker.isStarted(caseData));
 
     }
 
@@ -76,7 +79,7 @@ public class ApplicantsCheckerTest {
 
         CaseData caseData = CaseData.builder().applicants(applicantList).build();
 
-        assert !applicantsChecker.hasMandatoryCompleted(caseData);
+        assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
 
     }
 
@@ -85,7 +88,7 @@ public class ApplicantsCheckerTest {
 
         CaseData caseData = CaseData.builder().applicants(null).build();
 
-        assert !applicantsChecker.hasMandatoryCompleted(caseData);
+        assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
 
     }
 
@@ -96,7 +99,7 @@ public class ApplicantsCheckerTest {
             .country("UK")
             .build();
 
-       assert !applicantsChecker.verifyAddressCompleted(address);
+        assertFalse(applicantsChecker.verifyAddressCompleted(address));
     }
 
     @Test
@@ -111,9 +114,8 @@ public class ApplicantsCheckerTest {
             .postCode("N14 5EF")
             .build();
 
-        assert applicantsChecker.verifyAddressCompleted(address);
+        assertTrue(applicantsChecker.verifyAddressCompleted(address));
     }
-
 
 
 }
