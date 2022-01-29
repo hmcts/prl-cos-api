@@ -36,27 +36,27 @@ public class PaymentRequestService {
     public PaymentServiceResponse createServiceRequest(CallbackRequest callbackRequest, String authorisation) throws Exception {
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder().applicantCaseName(callbackRequest.getCaseDetails().getCaseData().getApplicantCaseName())
-            .id(Long.valueOf(callbackRequest.getCaseDetails().getCaseId())).build(),
+                .id(Long.valueOf(callbackRequest.getCaseDetails().getCaseId())).build(),
             CaseData.class
         );
         FeeResponse feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
-        PaymentServiceResponse paymentServiceResponse = paymentApi
-            .createPaymentServiceRequest(authorisation,authTokenGenerator.generate(),
+        return paymentApi
+            .createPaymentServiceRequest(authorisation, authTokenGenerator.generate(),
                                          PaymentServiceRequest.builder()
-            .callBackUrl(callBackUrl)
-            .casePaymentRequest(CasePaymentRequestDto.builder()
-                                    .action(OrchestrationConstants.PAYMENT_ACTION)
-                                    .responsibleParty(caseData.getApplicantCaseName()).build())
-            .caseReference(String.valueOf(caseData.getId()))
-            .ccdCaseNumber(String.valueOf(caseData.getId()))
-            .fees(new FeeDto[]{
-                FeeDto.builder()
-                    .calculatedAmount(feeResponse.getAmount())
-                    .code(feeResponse.getCode())
-                    .version(feeResponse.getVersion())
-                    .volume(1).build()
-            })
-            .build());
-        return  paymentServiceResponse;
+                                             .callBackUrl(callBackUrl)
+                                             .casePaymentRequest(CasePaymentRequestDto.builder()
+                                                                     .action(OrchestrationConstants.PAYMENT_ACTION)
+                                                                     .responsibleParty(caseData.getApplicantCaseName()).build())
+                                             .caseReference(String.valueOf(caseData.getId()))
+                                             .ccdCaseNumber(String.valueOf(caseData.getId()))
+                                             .fees(new FeeDto[]{
+                                                 FeeDto.builder()
+                                                     .calculatedAmount(feeResponse.getAmount())
+                                                     .code(feeResponse.getCode())
+                                                     .version(feeResponse.getVersion())
+                                                     .volume(1).build()
+                                             })
+                                             .build()
+            );
     }
 }
