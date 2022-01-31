@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 public class LinkToCA {
 
     @JsonProperty("linkToCAApplication")
-    private final YesOrNo linkToCAApplication;
+    private final YesOrNo linkToCaApplication;
     @JsonProperty("childArrangementsApplicationNumber")
     private final String childArrangementsApplicationNumber;
 }
