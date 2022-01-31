@@ -126,10 +126,10 @@ public class CaseWorkerEmailService {
 
     }
 
-    public void sendEmail(CaseDetails caseDetails, UserDetails userDetails) {
+    public void sendEmail(CaseDetails caseDetails) {
 
         emailService.send(
-            getRecipientEmail(userDetails),
+            caseDetails.getData().get("caseworkerEmailAddress").toString(),
             EmailTemplateNames.CASEWORKER,
             buildEmail(caseDetails),
             LanguagePreference.ENGLISH

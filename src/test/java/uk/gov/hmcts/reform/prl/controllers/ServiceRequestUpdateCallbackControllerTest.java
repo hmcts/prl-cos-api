@@ -70,7 +70,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
 
         serviceRequestUpdateCallbackController.serviceRequestUpdate(authToken,serviceAuthToken,serviceRequestUpdateDto);
 
-        verify(requestUpdateCallbackService).processCallback(serviceRequestUpdateDto, authToken);
+        verify(requestUpdateCallbackService).processCallback(serviceRequestUpdateDto);
         verifyNoMoreInteractions(requestUpdateCallbackService);
 
     }
