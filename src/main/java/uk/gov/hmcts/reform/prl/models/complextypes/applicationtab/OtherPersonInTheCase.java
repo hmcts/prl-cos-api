@@ -20,7 +20,7 @@ public class OtherPersonInTheCase {
     private final String previousName;
     private final YesOrNo isDateOfBirthKnown;
     private final LocalDate dateOfBirth;
-    private final Gender gender;
+    private final String gender;
     private final String otherGender;
     private final YesOrNo isPlaceOfBirthKnown;
     private final String placeOfBirth;
