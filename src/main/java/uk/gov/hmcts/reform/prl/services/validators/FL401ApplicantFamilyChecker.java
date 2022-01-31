@@ -106,7 +106,7 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
         fields.add(ofNullable(applicantChild.getFullName()));
         fields.add(ofNullable(applicantChild.getDateOfBirth()));
         fields.add(ofNullable(applicantChild.getApplicantChildRelationship()));
-        fields.add(ofNullable(applicantChild.getApplicantRespondentShareParental()));
+        fields.add(applicantRespondentShareParental);
 
         if (applicantRespondentShareParental.isPresent() && applicantRespondentShareParental.get().equals(Yes)) {
             fields.add(ofNullable(applicantChild.getRespondentChildRelationship()));
