@@ -12,8 +12,6 @@ import uk.gov.hmcts.reform.prl.config.SystemUserConfiguration;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SystemUserService {
-
-
     private final OAuth2Configuration auth;
 
     private final SystemUserConfiguration userConfig;
