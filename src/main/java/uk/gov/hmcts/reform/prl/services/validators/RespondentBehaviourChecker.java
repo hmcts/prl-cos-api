@@ -1,19 +1,27 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.APPLICANTS_DETAILS_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RESPONDENT_BEHAVIOUR_ERROR;
 
 
 @Service
 public class RespondentBehaviourChecker implements EventChecker {
+
+    @Autowired
+    TaskErrorService taskErrorService;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -30,8 +38,14 @@ public class RespondentBehaviourChecker implements EventChecker {
             finished = otherReason.isPresent()
                 && applicantStopRespondentList.get().size() != 0;
             if (finished) {
+                taskErrorService.removeError(RESPONDENT_BEHAVIOUR_ERROR);
                 return true;
             }
+        } else {
+            taskErrorService.addEventError(RESPONDENT_BEHAVIOUR,
+                                           RESPONDENT_BEHAVIOUR_ERROR,
+                                           RESPONDENT_BEHAVIOUR_ERROR.getError());
+
         }
         return false;
     }
