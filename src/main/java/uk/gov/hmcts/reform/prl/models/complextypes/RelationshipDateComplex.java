@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Data
 @Builder
 @Jacksonized
-public class RespondentRelationDateInfo {
-    private  final  RelationshipDateComplex RelationshipDateComplex;
-    private final LocalDate applicantRelationshipDate;
+public class RelationshipDateComplex {
+    private final LocalDate RelationshipDateComplexStartDate;
+    private final LocalDate RelationshipDateComplexEndDate;
 }
