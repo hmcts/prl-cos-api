@@ -29,7 +29,6 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
 
     @Override
     public boolean isFinished(CaseData caseData) {
-
         boolean finished = validateObjectFields(caseData);
 
         if (finished) {
@@ -43,7 +42,6 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-
         Optional<ApplicantFamilyDetails> applicantFamilyDetailsWrapped = ofNullable(caseData.getApplicantFamilyDetails());
 
         if (applicantFamilyDetailsWrapped.isPresent() && !applicantFamilyDetailsWrapped.isEmpty()) {
@@ -61,7 +59,6 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
     }
 
     public boolean validateObjectFields(CaseData caseData) {
-
         boolean isFinished = false;
 
         Optional<ApplicantFamilyDetails> applicantFamilyDetailsWrapped = ofNullable(caseData.getApplicantFamilyDetails());
@@ -73,7 +70,6 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
     }
 
     public boolean validateFields(CaseData caseData) {
-
         boolean isFinished = false;
 
         Optional<YesOrNo> doesApplicantHasChild = ofNullable(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren());
@@ -117,7 +113,6 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
         }
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
-
     }
 
 }
