@@ -25,13 +25,16 @@ public class CourtFinderController {
     @Autowired
     private final CourtFinderService courtLocatorService;
 
+    @Autowired
+    private final ObjectMapper objectMapper;
+
     @PostMapping(path = "/find-child-arrangements-court")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
     public CallbackResponse getChildArrangementsCourtAndAddToCaseData(@RequestBody CallbackRequest callbackRequest) throws NotFoundException {
 
-        CaseData caseData = callbackRequest.getCaseDetails().getCaseData();
+        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class);
         Court court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
         CaseData updatedCaseData = courtLocatorService.setCourtUnlessCourtAlreadyPresent(caseData, court);
 
