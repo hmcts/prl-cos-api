@@ -1,8 +1,9 @@
-package uk.gov.hmcts.reform.prl.models.complextypes.applicationtab;
+package uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm;
 
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
 
 @Data
 @Builder
