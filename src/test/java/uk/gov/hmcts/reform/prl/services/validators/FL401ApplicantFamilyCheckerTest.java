@@ -214,7 +214,7 @@ public class FL401ApplicantFamilyCheckerTest {
     public void applicantChildrenHasCompleteDataValidMandatoryFieldsCompleteReturnFalse() {
         applicantChild = applicantChild.toBuilder()
             .fullName("Testing Child")
-            .dateOfBirth(LocalDate.of(2000, 12, 22))
+            .dateOfBirth(LocalDate.of(2010, 12, 22))
             .applicantChildRelationship("TestingMother")
             .applicantRespondentShareParental(Yes)
             .respondentChildRelationship("Testing Step Father")
