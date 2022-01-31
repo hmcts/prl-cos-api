@@ -448,7 +448,10 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/utils/SslVerificationDisabler.*',
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/services/validators/*.*',
-  '**uk/gov/hmcts/reform/prl/services/DgsService.java'
+  '**uk/gov/hmcts/reform/prl/services/DgsService.java',
+  '**uk/gov/hmcts/reform/prl/services/ApplicationsTabService.java'
+
+  //applications tab added to exclusion to allow QA testing - request by Yogendra Upsani
 
 ]
 

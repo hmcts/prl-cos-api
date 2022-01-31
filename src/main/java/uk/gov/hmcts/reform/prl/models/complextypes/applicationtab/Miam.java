@@ -15,6 +15,6 @@ public class Miam {
     private final String familyMediatorServiceName;
     private final String soleTraderName;
 
-    
+
 
 }
