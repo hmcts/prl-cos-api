@@ -36,9 +36,8 @@ public class RequestUpdateCallbackService {
     private final SystemUserService systemUserService;
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
-    private final UserService userService;
 
-    public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto, String authorisation) throws Exception {
+    public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
 
         log.info("Processing the callback for the caseId {} with status {}", serviceRequestUpdateDto.getCcdCaseNumber(),
                  serviceRequestUpdateDto.getServiceRequestStatus()
@@ -47,19 +46,19 @@ public class RequestUpdateCallbackService {
         String systemUpdateUserId = systemUserService.getUserId(userToken);
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(
-            authorisation,
+            userToken,
             authTokenGenerator.generate(),
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
 
         if (!Objects.isNull(caseDetails.getId())) {
             createEvent(serviceRequestUpdateDto, userToken, systemUpdateUserId,
-                serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
-                           ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
+                        serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
+                            ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
             );
 
-            solicitorEmailService.sendEmail(caseDetails, userService.getUserDetails(authorisation));
-            caseWorkerEmailService.sendEmail(caseDetails, userService.getUserDetails(authorisation));
+            solicitorEmailService.sendEmail(caseDetails);
+            caseWorkerEmailService.sendEmail(caseDetails);
 
         } else {
             log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());
@@ -105,18 +104,18 @@ public class RequestUpdateCallbackService {
             CaseData.builder()
                 .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
                 .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
-                 .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
-                 .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
-                 .serviceRequestAmount(serviceRequestUpdateDto.getServiceRequestAmount())
-                 .serviceRequestStatus(serviceRequestUpdateDto.getServiceRequestStatus())
-                 .callBackUpdateTimestamp(LocalDateTime.now())
-                        .payment(CcdPayment.builder().paymentAmount(
-                              serviceRequestUpdateDto.getPayment().getPaymentAmount())
-                                     .paymentReference(serviceRequestUpdateDto.getPayment().getPaymentReference())
-                                     .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
-                                     .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
-                                     .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
-                                     .build()).build()).build(),
+                                                         .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
+                                                         .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
+                                                         .serviceRequestAmount(serviceRequestUpdateDto.getServiceRequestAmount())
+                                                         .serviceRequestStatus(serviceRequestUpdateDto.getServiceRequestStatus())
+                                                         .callBackUpdateTimestamp(LocalDateTime.now())
+                                                         .payment(CcdPayment.builder().paymentAmount(
+                                                             serviceRequestUpdateDto.getPayment().getPaymentAmount())
+                                                                      .paymentReference(serviceRequestUpdateDto.getPayment().getPaymentReference())
+                                                                      .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
+                                                                      .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
+                                                                      .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
+                                                                      .build()).build()).build(),
             CaseData.class
         );
 

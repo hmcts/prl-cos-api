@@ -104,11 +104,10 @@ public class SolicitorEmailServiceTest {
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
             .applicantName(applicantNames)
-            .fullName(userDetails.getFullName())
             .caseLink(manageCaseUrl + caseDetails.getId())
             .build();
 
-        assertEquals(solicitorEmailService.buildEmail(caseDetails, userDetails), email);
+        assertEquals(solicitorEmailService.buildEmail(caseDetails), email);
 
     }
 

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class SolicitorEmailService  {
+public class SolicitorEmailService {
 
     private final NotificationClient notificationClient;
     private final EmailTemplatesConfig emailTemplatesConfig;
@@ -33,15 +33,15 @@ public class SolicitorEmailService  {
     private EmailService emailService;
 
     @Value("${uk.gov.notify.email.application.email-id}")
-    private  String courtEmail;
+    private String courtEmail;
 
     @Value("${uk.gov.notify.email.application.court-name}")
-    private  String courtName;
+    private String courtName;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
 
-    public EmailTemplateVars buildEmail(CaseDetails caseDetails, UserDetails userDetails) {
+    public EmailTemplateVars buildEmail(CaseDetails caseDetails) {
 
         List<PartyDetails> applicants = emailService.getCaseData(caseDetails)
             .getApplicants()
@@ -60,19 +60,19 @@ public class SolicitorEmailService  {
             .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
             .applicantName(applicantNames)
             .courtName(courtName)
-            .fullName(userDetails.getFullName())
+            //.fullName(userDetails.getFullName())
             .courtEmail(courtEmail)
             .caseLink(manageCaseUrl + caseDetails.getId())
             .build();
 
     }
 
-    public void sendEmail(CaseDetails caseDetails, UserDetails userDetails) {
+    public void sendEmail(CaseDetails caseDetails) {
 
         emailService.send(
-            getRecipientEmail(userDetails),
+            caseDetails.getData().get("applicantSolicitorEmailAddress").toString(),
             EmailTemplateNames.SOLICITOR,
-            buildEmail(caseDetails, userDetails),
+            buildEmail(caseDetails),
             LanguagePreference.ENGLISH
         );
 

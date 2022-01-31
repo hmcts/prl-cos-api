@@ -318,4 +318,12 @@ public class CaseData {
     private final List<RejectReasonEnum> rejectReason;
     private String returnMessage;
 
+    /**
+     * This field contains Application Submitter solicitor email address.
+     */
+    private final String applicantSolicitorEmailAddress;
+    private final String respondentSolicitorEmailAddress;
+    private final String caseworkerEmailAddress;
+
+
 }
