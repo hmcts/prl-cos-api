@@ -41,8 +41,8 @@ public class FL401ApplicationTypeChecker implements EventChecker {
 
         boolean finished;
 
-        if (ordersOptional.isPresent() && (ordersOptional.get().equals(FL401OrderTypeEnum.nonMolestationOrder)
-            || ordersOptional.get().equals(FL401OrderTypeEnum.occupationOrder))) {
+        if (ordersOptional.isPresent() && (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)
+            || ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder))) {
 
             if (applicationTypeLinkToCA.isPresent() && applicationTypeLinkToCA.get().getLinkToCAApplication().equals(
                 YesOrNo.Yes)) {
