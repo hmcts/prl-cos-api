@@ -11,9 +11,9 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RELATIONSHIP_TO_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RELATIONSHIP_TO_RESPONDENT_ERROR;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
-
 
 @Service
 public class RespondentRelationshipChecker implements EventChecker {
@@ -34,14 +34,16 @@ public class RespondentRelationshipChecker implements EventChecker {
             if (respondentRelationObjectType.get().equals(ApplicantRelationshipEnum.valueOf("noneOfTheAbove"))) {
                 finished = respondentRelationOptionsInfo.isPresent();
             } else {
+                taskErrorService.removeError(RELATIONSHIP_TO_RESPONDENT_ERROR);
                 return true;
             }
 
             if (finished) {
-                taskErrorService.removeError(RELATIONSHIP_TO_RESPONDENT);
+                taskErrorService.removeError(RELATIONSHIP_TO_RESPONDENT_ERROR);
                 return true;
             }
         }
+        taskErrorService.addEventError(RELATIONSHIP_TO_RESPONDENT,RELATIONSHIP_TO_RESPONDENT_ERROR,RELATIONSHIP_TO_RESPONDENT_ERROR.getError());
         return false;
     }
 
