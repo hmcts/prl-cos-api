@@ -7,17 +7,18 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildCondensed;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.InternationalElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.LitigationCapacity;
@@ -80,8 +81,9 @@ public class ApplicationsTabService {
         applicationTab.put("allegationsOfHarmDomesticAbuseTable", getDomesticAbuseTable(caseData));
         applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
         applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
-        applicationTab.put("childTable", getChildrenTable(caseData));
+        applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
 
+        //TODO: add child details (currently using standard child complex type)
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
@@ -91,7 +93,6 @@ public class ApplicationsTabService {
             applicationTab
         );
     }
-
 
     private Map<String, Object> toMap(Object object) {
         return objectMapper.convertValue(object, Map.class);
@@ -103,9 +104,11 @@ public class ApplicationsTabService {
         Optional<List<Element<PartyDetails>>> checkApplicants = ofNullable(caseData.getApplicants());
 
         if (checkApplicants.isEmpty()) {
+            Applicant a = Applicant.builder().build();
+            Element<Applicant> app = Element.<Applicant>builder().value(a).build();
+            applicants.add(app);
             return applicants;
         }
-
         List<PartyDetails> currentApplicants = caseData.getApplicants().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
@@ -121,11 +124,12 @@ public class ApplicationsTabService {
     public List<Element<Respondent>> getRespondentsTable(CaseData caseData) {
         List<Element<Respondent>> respondents = new ArrayList<>();
         Optional<List<Element<PartyDetails>>> checkRespondents = ofNullable(caseData.getApplicants());
-
         if (checkRespondents.isEmpty()) {
+            Respondent r = Respondent.builder().build();
+            Element<Respondent> app = Element.<Respondent>builder().value(r).build();
+            respondents.add(app);
             return respondents;
         }
-
         List<PartyDetails> currentRespondents = caseData.getRespondents().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
@@ -142,7 +146,6 @@ public class ApplicationsTabService {
         Map<String, Object> declarationMap = new HashMap<>();
 
         //TODO: fetch solicitor name from idam
-
         String declarationText = "I understand that proceedings for contempt of court may be brought"
             + " against anyone who makes, or causes to be made, a false statement in a document verified"
             + " by a statement of truth without an honest belief in its truth. The applicant believes "
@@ -155,43 +158,16 @@ public class ApplicationsTabService {
         return declarationMap;
     }
 
-    private Map<String, Object> getHearingUrgencyTable(CaseData caseData) {
+    public Map<String, Object> getHearingUrgencyTable(CaseData caseData) {
         HearingUrgency hearingUrgency = objectMapper.convertValue(caseData, HearingUrgency.class);
         return toMap(hearingUrgency);
     }
 
-    private List<Element<ChildCondensed>> getChildrenTable(CaseData caseData) {
-        List<Element<ChildCondensed>> childrenMapped = new ArrayList<>();
-        List<Child> children = caseData.getChildren().stream().map(Element::getValue).collect(Collectors.toList());
-
-        for (Child c : children) {
-
-            ChildCondensed ch = ChildCondensed.builder()
-                .firstName(c.getFirstName())
-                .lastName(c.getLastName())
-                .dateOfBirth(c.getDateOfBirth())
-                .gender(c.getGender())
-                .otherGender(c.getOtherGender())
-                .applicantsRelationshipToChild(c.getApplicantsRelationshipToChild())
-                .respondentsRelationshipToChild(c.getRespondentsRelationshipToChild())
-                .childLiveWith(c.getChildLiveWith())
-                .personWhoLivesWithChild(c.getPersonWhoLivesWithChild())
-                .parentalResponsibilityDetails(c.getParentalResponsibilityDetails())
-                .build();
-
-            Element<ChildCondensed> kid = Element.<ChildCondensed>builder().value(ch).build();
-            childrenMapped.add(kid);
-
-        }
-        return childrenMapped;
-
-    }
 
 
-    private Map<String, Object> getTypeOfApplicationTable(CaseData caseData) {
+    public Map<String, Object> getTypeOfApplicationTable(CaseData caseData) {
 
         Optional<List<OrderTypeEnum>> checkOrders = ofNullable(caseData.getOrdersApplyingFor());
-
         if (checkOrders.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -212,41 +188,65 @@ public class ApplicationsTabService {
         return toMap(typeOfApplication);
     }
 
-    private Map<String, Object> getAllegationsOfHarmOverviewTable(CaseData caseData) {
+    public Map<String, Object> getAllegationsOfHarmOverviewTable(CaseData caseData) {
         AllegationsOfHarmOverview allegationsOfHarmOverview = objectMapper
             .convertValue(caseData, AllegationsOfHarmOverview.class);
-
         return toMap(allegationsOfHarmOverview);
 
     }
 
-    private Map<String, Object> getMiamTable(CaseData caseData) {
+    public Map<String, Object> getMiamTable(CaseData caseData) {
         Miam miam = objectMapper.convertValue(caseData, Miam.class);
         return toMap(miam);
     }
 
-    private Map<String, Object> getMiamExemptionsTable(CaseData caseData) {
+    public Map<String, Object> getMiamExemptionsTable(CaseData caseData) {
         //check if first screen is empty and return empty map if true
         Optional<List<MiamExemptionsChecklistEnum>> miamExemptionsCheck = ofNullable(caseData.getMiamExemptionsChecklist());
 
-        if (miamExemptionsCheck.isEmpty()) {
-            return Collections.emptyMap();
+        String reasonsForMiamExemption;
+        if (miamExemptionsCheck.isPresent()) {
+            reasonsForMiamExemption = caseData.getMiamExemptionsChecklist()
+                .stream().map(MiamExemptionsChecklistEnum::getDisplayedValue).collect(Collectors.joining(", "));
+        } else {
+            reasonsForMiamExemption = "";
         }
 
-        //TODO: add null checks
-        String reasonsForMiamExemption = caseData.getMiamExemptionsChecklist()
-            .stream().map(MiamExemptionsChecklistEnum::getDisplayedValue).collect(Collectors.joining(", "));
+        String domesticViolenceEvidence;
+        Optional<List<MiamDomesticViolenceChecklistEnum>> domesticViolenceCheck = ofNullable(caseData.getMiamDomesticViolenceChecklist());
+        if (domesticViolenceCheck.isPresent()) {
+            domesticViolenceEvidence = caseData.getMiamDomesticViolenceChecklist()
+                .stream().map(MiamDomesticViolenceChecklistEnum::getDisplayedValue)
+                .collect(Collectors.joining("\n"));
+        } else {
+            domesticViolenceEvidence = "";
+        }
 
-        String domesticViolenceEvidence = caseData.getMiamDomesticViolenceChecklist()
-            .stream().map(MiamDomesticViolenceChecklistEnum::getDisplayedValue)
-            .collect(Collectors.joining("\n"));
+        String urgencyEvidence;
+        Optional<List<MiamUrgencyReasonChecklistEnum>> urgencyCheck = ofNullable(caseData.getMiamUrgencyReasonChecklist());
+        if (urgencyCheck.isPresent()) {
+            urgencyEvidence = caseData.getMiamUrgencyReasonChecklist()
+                .stream().map(MiamUrgencyReasonChecklistEnum::getDisplayedValue)
+                .collect(Collectors.joining("\n"));
+        } else {
+            urgencyEvidence = "";
+        }
 
-        String urgencyEvidence = caseData.getMiamUrgencyReasonChecklist()
-            .stream().map(MiamUrgencyReasonChecklistEnum::getDisplayedValue)
-            .collect(Collectors.joining("\n"));
+        String previousAttendenceEvidence;
+        Optional<MiamPreviousAttendanceChecklistEnum> prevCheck = ofNullable(caseData.getMiamPreviousAttendanceChecklist());
+        if (prevCheck.isPresent()) {
+            previousAttendenceEvidence = caseData.getMiamPreviousAttendanceChecklist().getDisplayedValue();
+        } else {
+            previousAttendenceEvidence = "";
+        }
 
-        String previousAttendenceEvidence = caseData.getMiamPreviousAttendanceChecklist().getDisplayedValue();
-        String otherGroundsEvidence = caseData.getMiamOtherGroundsChecklist().getDisplayedValue();
+        String otherGroundsEvidence;
+        Optional<MiamOtherGroundsChecklistEnum> othCheck = ofNullable(caseData.getMiamOtherGroundsChecklist());
+        if (othCheck.isPresent()) {
+            otherGroundsEvidence = caseData.getMiamOtherGroundsChecklist().getDisplayedValue();
+        } else {
+            otherGroundsEvidence = "";
+        }
 
         MiamExemptions miamExemptions = MiamExemptions.builder()
             .reasonsForMiamExemption(reasonsForMiamExemption)
@@ -260,28 +260,27 @@ public class ApplicationsTabService {
 
     }
 
-    private Map<String, Object> getOtherProceedingsTable(CaseData caseData) {
-        return Collections.singletonMap("previousOrOngoingProceedings",
-                                        caseData.getPreviousOrOngoingProceedingsForChildren().getDisplayedValue());
+    public Map<String, Object> getOtherProceedingsTable(CaseData caseData) {
+        Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getPreviousOrOngoingProceedingsForChildren());
+        if (proceedingCheck.isPresent()) {
+            return Collections.singletonMap("previousOrOngoingProceedings",
+                                            caseData.getPreviousOrOngoingProceedingsForChildren().getDisplayedValue());
+        }
+        return Collections.singletonMap("previousOrOngoingProceedings", "");
     }
 
-
-
-    private List<Element<OtherProceedingsDetails>> getOtherProceedingsDetailsTable(CaseData caseData) {
-
+    public List<Element<OtherProceedingsDetails>> getOtherProceedingsDetailsTable(CaseData caseData) {
         Optional<List<Element<ProceedingDetails>>> proceedingsCheck = ofNullable(caseData.getExistingProceedings());
-
         if (proceedingsCheck.isEmpty()) {
-            return Collections.emptyList();
+            OtherProceedingsDetails op = OtherProceedingsDetails.builder().build();
+            Element<OtherProceedingsDetails> other = Element.<OtherProceedingsDetails>builder().value(op).build();
+            return Collections.singletonList(other);
         }
-
         List<ProceedingDetails> proceedings = caseData.getExistingProceedings().stream()
             .map(Element::getValue).collect(Collectors.toList());
-
         List<Element<OtherProceedingsDetails>> otherProceedingsDetailsList = new ArrayList<>();
 
         for (ProceedingDetails p : proceedings) {
-
             String ordersMade = p.getTypeOfOrder().stream().map(TypeOfOrderEnum::getDisplayedValue)
                 .collect(Collectors.joining(", "));
 
@@ -301,44 +300,43 @@ public class ApplicationsTabService {
 
             Element<OtherProceedingsDetails> details = Element.<OtherProceedingsDetails>builder()
                 .value(otherProceedingsDetails).build();
-
-
             otherProceedingsDetailsList.add(details);
         }
         return otherProceedingsDetailsList;
     }
 
-    private Map<String, Object> getInternationalElementTable(CaseData caseData) {
+    public Map<String, Object> getInternationalElementTable(CaseData caseData) {
         InternationalElement internationalElement = objectMapper.convertValue(caseData, InternationalElement.class);
         return toMap(internationalElement);
     }
 
-    private Map<String, Object> getAttendingTheHearingTable(CaseData caseData) {
+    public Map<String, Object> getAttendingTheHearingTable(CaseData caseData) {
         AttendingTheHearing attendingTheHearing = objectMapper.convertValue(caseData, AttendingTheHearing.class);
         return toMap(attendingTheHearing);
     }
 
-    private Map<String, Object> getLitigationCapacityDetails(CaseData caseData) {
+    public Map<String, Object> getLitigationCapacityDetails(CaseData caseData) {
         LitigationCapacity litigationCapacity = objectMapper.convertValue(caseData, LitigationCapacity.class);
         return toMap(litigationCapacity);
     }
 
-    private Map<String, Object> getWelshLanguageRequirementsTable(CaseData caseData) {
+    public Map<String, Object> getWelshLanguageRequirementsTable(CaseData caseData) {
         WelshLanguageRequirements welshLanguageRequirements = objectMapper
             .convertValue(caseData, WelshLanguageRequirements.class);
         return toMap(welshLanguageRequirements);
     }
 
-    private Map<String, Object> getAllegationsOfHarmOrdersTable(CaseData caseData) {
+    public Map<String, Object> getAllegationsOfHarmOrdersTable(CaseData caseData) {
         AllegationsOfHarmOrders allegationsOfHarmOrders = objectMapper
             .convertValue(caseData, AllegationsOfHarmOrders.class);
-
         getSpecificOrderDetails(allegationsOfHarmOrders, caseData);
         return toMap(allegationsOfHarmOrders);
     }
 
-    private AllegationsOfHarmOrders getSpecificOrderDetails(AllegationsOfHarmOrders allegationsOfHarmOrders, CaseData caseData) {
-        if (allegationsOfHarmOrders.getOrdersNonMolestation().equals(YesOrNo.Yes)) {
+    public AllegationsOfHarmOrders getSpecificOrderDetails(AllegationsOfHarmOrders allegationsOfHarmOrders, CaseData caseData) {
+
+        Optional<YesOrNo> nonMolYesNo = ofNullable(allegationsOfHarmOrders.getOrdersNonMolestation());
+        if (nonMolYesNo.isPresent() && nonMolYesNo.get().equals(YesOrNo.Yes)) {
             Order nonMolOrder = Order.builder()
                 .dateIssued(caseData.getOrdersNonMolestationDateIssued())
                 .endDate(caseData.getOrdersNonMolestationEndDate())
@@ -348,7 +346,8 @@ public class ApplicationsTabService {
             allegationsOfHarmOrders.setNonMolestationOrder(nonMolOrder);
         }
 
-        if (allegationsOfHarmOrders.getOrdersOccupation().equals(YesOrNo.Yes)) {
+        Optional<YesOrNo> occYesNo = ofNullable(allegationsOfHarmOrders.getOrdersOccupation());
+        if (occYesNo.isPresent() && occYesNo.get().equals(YesOrNo.Yes)) {
             Order occOrder = Order.builder()
                 .dateIssued(caseData.getOrdersOccupationDateIssued())
                 .endDate(caseData.getOrdersOccupationEndDate())
@@ -358,7 +357,8 @@ public class ApplicationsTabService {
             allegationsOfHarmOrders.setOccupationOrder(occOrder);
         }
 
-        if (allegationsOfHarmOrders.getOrdersForcedMarriageProtection().equals(YesOrNo.Yes)) {
+        Optional<YesOrNo> forcedYesNo = ofNullable(allegationsOfHarmOrders.getOrdersForcedMarriageProtection());
+        if (forcedYesNo.isPresent() && forcedYesNo.get().equals(YesOrNo.Yes)) {
             Order forOrder = Order.builder()
                 .dateIssued(caseData.getOrdersForcedMarriageProtectionDateIssued())
                 .endDate(caseData.getOrdersForcedMarriageProtectionEndDate())
@@ -368,7 +368,8 @@ public class ApplicationsTabService {
             allegationsOfHarmOrders.setForcedMarriageOrder(forOrder);
         }
 
-        if (allegationsOfHarmOrders.getOrdersRestraining().equals(YesOrNo.Yes)) {
+        Optional<YesOrNo> resYesNo = ofNullable(allegationsOfHarmOrders.getOrdersRestraining());
+        if (resYesNo.isPresent() && resYesNo.get().equals(YesOrNo.Yes)) {
             Order resOrder = Order.builder()
                 .dateIssued(caseData.getOrdersRestrainingDateIssued())
                 .endDate(caseData.getOrdersRestrainingEndDate())
@@ -378,7 +379,8 @@ public class ApplicationsTabService {
             allegationsOfHarmOrders.setRestrainingOrder(resOrder);
         }
 
-        if (allegationsOfHarmOrders.getOrdersOtherInjunctive().equals(YesOrNo.Yes)) {
+        Optional<YesOrNo> othYesNo = ofNullable(allegationsOfHarmOrders.getOrdersOtherInjunctive());
+        if (othYesNo.isPresent() && othYesNo.get().equals(YesOrNo.Yes)) {
             Order othOrder = Order.builder()
                 .dateIssued(caseData.getOrdersOtherInjunctiveDateIssued())
                 .endDate(caseData.getOrdersOtherInjunctiveEndDate())
@@ -388,7 +390,8 @@ public class ApplicationsTabService {
             allegationsOfHarmOrders.setOtherInjunctiveOrder(othOrder);
         }
 
-        if (allegationsOfHarmOrders.getOrdersUndertakingInPlace().equals(YesOrNo.Yes)) {
+        Optional<YesOrNo> undYesNo = ofNullable(allegationsOfHarmOrders.getOrdersUndertakingInPlace());
+        if (undYesNo.isPresent() && undYesNo.get().equals(YesOrNo.Yes)) {
             Order undOrder = Order.builder()
                 .dateIssued(caseData.getOrdersUndertakingInPlaceDateIssued())
                 .endDate(caseData.getOrdersUndertakingInPlaceEndDate())
@@ -401,55 +404,84 @@ public class ApplicationsTabService {
         return allegationsOfHarmOrders;
     }
 
-    private Map<String, Object> getDomesticAbuseTable(CaseData caseData) {
+    public Map<String, Object> getDomesticAbuseTable(CaseData caseData) {
 
+        Optional<List<ApplicantOrChildren>> physVictm = ofNullable(caseData.getPhysicalAbuseVictim());
+        String physVictimString = "";
+        if (physVictm.isPresent()) {
+            physVictimString = caseData.getPhysicalAbuseVictim().stream()
+                .map(ApplicantOrChildren::getDisplayedValue)
+                .collect(Collectors.joining(", "));
+        }
 
+        Optional<List<ApplicantOrChildren>> emoVictim = ofNullable(caseData.getEmotionalAbuseVictim());
+        String emoVictimString = "";
+        if (physVictm.isPresent()) {
+            emoVictimString = caseData.getEmotionalAbuseVictim().stream()
+                .map(ApplicantOrChildren::getDisplayedValue)
+                .collect(Collectors.joining(", "));
+        }
+
+        Optional<List<ApplicantOrChildren>> psyVictim = ofNullable(caseData.getPsychologicalAbuseVictim());
+        String psyVictimString = "";
+        if (psyVictim.isPresent()) {
+            psyVictimString = caseData.getPhysicalAbuseVictim().stream()
+                .map(ApplicantOrChildren::getDisplayedValue)
+                .collect(Collectors.joining(", "));
+        }
+
+        Optional<List<ApplicantOrChildren>> sexVictim = ofNullable(caseData.getSexualAbuseVictim());
+        String sexVictimString = "";
+        if (physVictm.isPresent()) {
+            sexVictimString = caseData.getSexualAbuseVictim().stream()
+                .map(ApplicantOrChildren::getDisplayedValue)
+                .collect(Collectors.joining(", "));
+        }
+
+        Optional<List<ApplicantOrChildren>> finVictim = ofNullable(caseData.getFinancialAbuseVictim());
+        String finVictimString = "";
+        if (finVictim.isPresent()) {
+            finVictimString = caseData.getPhysicalAbuseVictim().stream()
+                .map(ApplicantOrChildren::getDisplayedValue)
+                .collect(Collectors.joining(", "));
+        }
 
         DomesticAbuseVictim domesticAbuseVictim = DomesticAbuseVictim.builder()
-            .physicalAbuseVictim(caseData.getPhysicalAbuseVictim().stream()
-                                     .map(ApplicantOrChildren::getDisplayedValue)
-                                     .collect(Collectors.joining(", ")))
-            .emotionalAbuseVictim(caseData.getEmotionalAbuseVictim().stream()
-                                      .map(ApplicantOrChildren::getDisplayedValue)
-                                      .collect(Collectors.joining(", ")))
-            .psychologicalAbuseVictim(caseData.getPsychologicalAbuseVictim().stream()
-                                          .map(ApplicantOrChildren::getDisplayedValue)
-                                          .collect(Collectors.joining(", ")))
-            .sexualAbuseVictim(caseData.getSexualAbuseVictim().stream()
-                                   .map(ApplicantOrChildren::getDisplayedValue)
-                                   .collect(Collectors.joining(", ")))
-            .financialAbuseVictim(caseData.getFinancialAbuseVictim().stream()
-                                      .map(ApplicantOrChildren::getDisplayedValue)
-                                      .collect(Collectors.joining(", ")))
+            .physicalAbuseVictim(physVictimString)
+            .emotionalAbuseVictim(emoVictimString)
+            .psychologicalAbuseVictim(psyVictimString)
+            .sexualAbuseVictim(sexVictimString)
+            .financialAbuseVictim(finVictimString)
             .build();
-
 
         return toMap(domesticAbuseVictim);
 
     }
 
-    private Map<String, Object> getChildAbductionTable(CaseData caseData) {
+    public Map<String, Object> getChildAbductionTable(CaseData caseData) {
         ChildAbductionDetails childAbductionDetails = objectMapper.convertValue(caseData, ChildAbductionDetails.class);
         return toMap(childAbductionDetails);
     }
 
 
-    private Map<String, Object> getAllegationsOfHarmOtherConcerns(CaseData caseData) {
+    public Map<String, Object> getAllegationsOfHarmOtherConcerns(CaseData caseData) {
         AllegationsOfHarmOtherConcerns allegationsOfHarmOtherConcerns = objectMapper
             .convertValue(caseData, AllegationsOfHarmOtherConcerns.class);
         return toMap(allegationsOfHarmOtherConcerns);
     }
 
-    private List<Element<OtherPersonInTheCase>> getOtherPeopleInTheCaseTable(CaseData caseData) {
-
+    public List<Element<OtherPersonInTheCase>> getOtherPeopleInTheCaseTable(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> otherPeopleCheck = ofNullable(caseData.getOthersToNotify());
+        List<Element<OtherPersonInTheCase>> otherPersonsInTheCase = new ArrayList<>();
 
-        if(otherPeopleCheck.isEmpty()) {
-            return Collections.emptyList();
+        if (otherPeopleCheck.isEmpty()) {
+            OtherPersonInTheCase op = OtherPersonInTheCase.builder().build();
+            Element<OtherPersonInTheCase> other = Element.<OtherPersonInTheCase>builder().value(op).build();
+            otherPersonsInTheCase.add(other);
+            return  otherPersonsInTheCase;
         }
 
         List<PartyDetails> otherPeople = caseData.getOthersToNotify().stream().map(Element::getValue).collect(Collectors.toList());
-        List<Element<OtherPersonInTheCase>> otherPersonsInTheCase = new ArrayList<>();
 
         for (PartyDetails p : otherPeople) {
             OtherPersonInTheCase other = objectMapper.convertValue(p, OtherPersonInTheCase.class);
@@ -462,5 +494,24 @@ public class ApplicationsTabService {
         return otherPersonsInTheCase;
     }
 
+    public Map<String, Object> getExtraChildDetailsTable(CaseData caseData) {
+        Map<String, Object> childExtraDetails = new HashMap<>();
+        Optional<YesNoDontKnow> childrenKnownToLocalAuthority = ofNullable(caseData.getChildrenKnownToLocalAuthority());
+        childrenKnownToLocalAuthority.ifPresent(yesNoDontKnow -> childExtraDetails.put(
+            "childrenKnownToLocalAuthority",
+            yesNoDontKnow.getDisplayedValue()
+        ));
+        Optional<String> childrenKnownToLocalAuthorityTextArea = ofNullable(caseData.getChildrenKnownToLocalAuthorityTextArea());
+        childrenKnownToLocalAuthorityTextArea.ifPresent(s -> childExtraDetails.put(
+            "childrenKnownToLocalAuthorityTextArea",
+            s
+        ));
+        Optional<YesNoDontKnow> childrenSubjectOfChildProtectionPlan = ofNullable(caseData.getChildrenSubjectOfChildProtectionPlan());
+        childrenSubjectOfChildProtectionPlan.ifPresent(yesNoDontKnow -> childExtraDetails.put(
+            "childrenSubjectOfChildProtectionPlan",
+            yesNoDontKnow.getDisplayedValue()
+        ));
+        return childExtraDetails;
+    }
 
 }
