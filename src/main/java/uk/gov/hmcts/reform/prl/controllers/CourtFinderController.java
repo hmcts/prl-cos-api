@@ -34,7 +34,7 @@ public class CourtFinderController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public CallbackResponse getChildArrangementsCourtAndAddToCaseData(@RequestBody CallbackRequest callbackRequest) throws NotFoundException {
 
-        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class);
+        CaseData caseData = callbackRequest.getCaseDetails().getCaseData();
         Court court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
         CaseData updatedCaseData = courtLocatorService.setCourtUnlessCourtAlreadyPresent(caseData, court);
 
