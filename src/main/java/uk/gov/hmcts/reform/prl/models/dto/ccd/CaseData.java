@@ -331,9 +331,6 @@ public class CaseData {
     private final List<RejectReasonEnum> rejectReason;
     private String returnMessage;
 
-    /**
-     * FL401 Applicant Family.
-     */
     @JsonProperty("applicantFamilyDetails")
     private final ApplicantFamilyDetails applicantFamilyDetails;
 }
