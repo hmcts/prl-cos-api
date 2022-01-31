@@ -52,7 +52,7 @@ public class FL401ApplicationTypeCheckerTest {
             .build();
 
         LinkToCA linkToCA = LinkToCA.builder()
-            .linkToCAApplication(YesOrNo.Yes)
+            .linkToCaApplication(YesOrNo.Yes)
             .childArrangementsApplicationNumber("123")
             .build();
 
@@ -77,7 +77,7 @@ public class FL401ApplicationTypeCheckerTest {
             .build();
 
         LinkToCA linkToCA = LinkToCA.builder()
-            .linkToCAApplication(YesOrNo.Yes)
+            .linkToCaApplication(YesOrNo.Yes)
             .childArrangementsApplicationNumber("123")
             .build();
 
