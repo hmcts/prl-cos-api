@@ -36,6 +36,7 @@ public class CourtFinderControllerTest {
 
     @Before
     public void setUp() {
+
         CaseData caseData = CaseData.builder()
             .court(Court.builder().build())
             .build();
@@ -43,11 +44,14 @@ public class CourtFinderControllerTest {
         callbackResponse = CallbackResponse.builder()
             .data(caseData)
             .build();
+
     }
 
     @Test
     public void testCallBackResponseContainsCourtData() throws NotFoundException {
+
         CaseData caseData = CaseData.builder().build();
+
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .caseData(caseData)
@@ -55,37 +59,54 @@ public class CourtFinderControllerTest {
             .build();
 
         Court court = Court.builder().build();
+
         caseData.setCourt(court);
 
         when(courtFinderService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails().getCaseData()))
             .thenReturn(court);
+
         when(courtFinderService.setCourtUnlessCourtAlreadyPresent(caseData, court)).thenReturn(caseData);
+
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData);
 
         CallbackResponse response = courtFinderController.getChildArrangementsCourtAndAddToCaseData(callbackRequest);
+
         Assert.assertNotNull(response.getData().getCourt());
+
     }
 
 
     @Test
     public void verifyInteractionWithCourtFinderService() throws NotFoundException {
+
         CaseData caseData = CaseData.builder().build();
+
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .caseData(caseData)
                              .build())
             .build();
+
         Court court = Court.builder().build();
 
         when(courtFinderService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails().getCaseData()))
             .thenReturn(court);
+
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData);
+
         when(courtFinderService.setCourtUnlessCourtAlreadyPresent(caseData, court)).thenReturn(caseData);
 
         courtFinderController.getChildArrangementsCourtAndAddToCaseData(callbackRequest);
+
         verify(courtFinderService).getClosestChildArrangementsCourt(caseData);
         verify(courtFinderService).setCourtUnlessCourtAlreadyPresent(caseData, court);
+
     }
+
+
+
+
 }
+
