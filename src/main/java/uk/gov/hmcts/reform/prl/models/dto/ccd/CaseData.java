@@ -325,7 +325,7 @@ public class CaseData {
     /**
      * FL401 Respondents relationship.
      */
-    private final RespondentRelationObjectType respondentRelationObjectType;
-    private final RespondentRelationDateInfo respondentRelationDateInfo;
-    private final RespondentRelationOptionsInfo respondentRelationOptionsInfo;
+    private final RespondentRelationObjectType respondentRelationObject;
+    private final RespondentRelationDateInfo respondentRelationDateInfoObject;
+    private final RespondentRelationOptionsInfo respondentRelationOptions;
 }

@@ -18,8 +18,8 @@ public enum ApplicantRelationshipEnum {
     formerlyEngagedOrProposed("formerlyEngagedOrProposed", "Formerly engaged or proposed civil partnership"),
     @JsonProperty("liveTogether")
     liveTogether("liveTogether", "Live together as a couple"),
-    @JsonProperty("formerlyLivedTogether")
-    formerlyLivedTogether("formerlyLivedTogether", "Formerly lived together as a couple"),
+    @JsonProperty("foremerlyLivedTogether")
+    foremerlyLivedTogether("foremerlyLivedTogether", "Formerly lived together as a couple"),
     @JsonProperty("bfGfOrPartnerNotLivedTogether")
     bfGfOrPartnerNotLivedTogether("bfGfOrPartnerNotLivedTogether", "Formerly boyfriend, girlfriend or partner who has not lived with them"),
     @JsonProperty("noneOfTheAbove")
