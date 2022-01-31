@@ -1,14 +1,11 @@
-package uk.gov.hmcts.reform.prl.models.complextypes.applicationtab;
+package uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm;
 
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
-
-import java.util.List;
 
 @Builder
 @Data
-public class DomesticAbuse {
+public class DomesticAbuseVictim {
 
     private final String physicalAbuseVictim;
     private final String emotionalAbuseVictim;
