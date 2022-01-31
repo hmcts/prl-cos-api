@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -25,12 +26,12 @@ public class RespondentRelationshipChecker implements EventChecker {
 
         boolean finished;
 
-        Optional<RespondentRelationObjectType> respondentRelationObjectType = ofNullable(caseData.getRespondentRelationObjectType());
-        Optional<RespondentRelationOptionsInfo> respondentRelationOptionsInfo = ofNullable(caseData.getRespondentRelationOptionsInfo());
+        Optional<RespondentRelationObjectType> respondentRelationObjectType = ofNullable(caseData.getRespondentRelationObject());
+        Optional<RespondentRelationOptionsInfo> respondentRelationOptionsInfo = ofNullable(caseData.getRespondentRelationOptions());
 
         if (respondentRelationObjectType.isPresent()) {
 
-            if (respondentRelationObjectType.get().getApplicantRelationshipEnum().getId().equalsIgnoreCase("noneOfTheAbove")) {
+            if (respondentRelationObjectType.get().equals(ApplicantRelationshipEnum.valueOf("noneOfTheAbove"))) {
                 finished = respondentRelationOptionsInfo.isPresent();
             } else {
                 return true;
@@ -47,7 +48,7 @@ public class RespondentRelationshipChecker implements EventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
         return anyNonEmpty(
-            caseData.getRespondentRelationObjectType()
+            caseData.getRespondentRelationObject()
         );
     }
 
