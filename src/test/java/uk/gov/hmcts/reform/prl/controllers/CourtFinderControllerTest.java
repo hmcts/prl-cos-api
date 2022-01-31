@@ -31,9 +31,6 @@ public class CourtFinderControllerTest {
     @Mock
     CallbackResponse callbackResponse;
 
-    @Mock
-    ObjectMapper objectMapper;
-
     @Before
     public void setUp() {
 
@@ -67,9 +64,6 @@ public class CourtFinderControllerTest {
 
         when(courtFinderService.setCourtUnlessCourtAlreadyPresent(caseData, court)).thenReturn(caseData);
 
-        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
-            .thenReturn(caseData);
-
         CallbackResponse response = courtFinderController.getChildArrangementsCourtAndAddToCaseData(callbackRequest);
 
         Assert.assertNotNull(response.getData().getCourt());
@@ -92,9 +86,6 @@ public class CourtFinderControllerTest {
 
         when(courtFinderService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails().getCaseData()))
             .thenReturn(court);
-
-        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
-            .thenReturn(caseData);
 
         when(courtFinderService.setCourtUnlessCourtAlreadyPresent(caseData, court)).thenReturn(caseData);
 
