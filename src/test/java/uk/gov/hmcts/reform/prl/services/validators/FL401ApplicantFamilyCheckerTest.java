@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -16,6 +15,9 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -39,18 +41,35 @@ public class FL401ApplicantFamilyCheckerTest {
         caseData = CaseData.builder().build();
         applicantFamilyDetails = ApplicantFamilyDetails.builder().build();
         applicantChild = ApplicantChild.builder().build();
-
     }
 
     @Test
     public void whenNoCaseDataThenIsStartedIsFalse() {
+        assertFalse(fl401ApplicantFamilyChecker.isStarted(caseData));
+    }
 
-        Assertions.assertFalse(fl401ApplicantFamilyChecker.isStarted(caseData));
+    @Test
+    public void whenNoCaseDataThenNotFinished() {
+        assertFalse(fl401ApplicantFamilyChecker.isFinished(caseData));
+    }
+
+    @Test
+    public void whenNoCaseDataThenHasMandatoryFalse() {
+        assertFalse(fl401ApplicantFamilyChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenNoCaseDateValidateObjectFieldsReturnFalse() {
+        assertFalse(fl401ApplicantFamilyChecker.validateObjectFields(caseData));
+    }
+
+    @Test
+    public void applicantChildrenEmptyValidMandatoryFieldsCompleteReturnFalse() {
+        assertFalse(fl401ApplicantFamilyChecker.validateMandatoryFieldsCompleted(applicantChild));
     }
 
     @Test
     public void whenPartialCaseDataWhenApplicantHasFamilyDetailsThenIsStartedTrue() {
-
         applicantFamilyDetails = applicantFamilyDetails.toBuilder()
             .doesApplicantHaveChildren(Yes)
             .build();
@@ -59,19 +78,11 @@ public class FL401ApplicantFamilyCheckerTest {
             .applicantFamilyDetails(applicantFamilyDetails)
             .build();
 
-
-        Assertions.assertTrue(fl401ApplicantFamilyChecker.isStarted(caseData));
-    }
-
-    @Test
-    public void whenNoCaseDataThenNotFinished() {
-
-        Assertions.assertFalse(fl401ApplicantFamilyChecker.isFinished(caseData));
+        assertTrue(fl401ApplicantFamilyChecker.isStarted(caseData));
     }
 
     @Test
     public void finishedFieldsValidatedToTrue() {
-
         applicantFamilyDetails = applicantFamilyDetails.toBuilder()
             .doesApplicantHaveChildren(No)
             .build();
@@ -80,18 +91,11 @@ public class FL401ApplicantFamilyCheckerTest {
             .applicantFamilyDetails(applicantFamilyDetails)
             .build();
 
-        Assertions.assertTrue(fl401ApplicantFamilyChecker.isFinished(caseData));
-    }
-
-    @Test
-    public void whenNoCaseDataThenHasMandatoryFalse() {
-
-        Assertions.assertFalse(fl401ApplicantFamilyChecker.hasMandatoryCompleted(caseData));
+        assertTrue(fl401ApplicantFamilyChecker.isFinished(caseData));
     }
 
     @Test
     public void whenFinishedCaseDataThenHasMandatoryFalse() {
-
         applicantFamilyDetails = applicantFamilyDetails.toBuilder()
             .doesApplicantHaveChildren(No)
             .build();
@@ -100,38 +104,29 @@ public class FL401ApplicantFamilyCheckerTest {
             .applicantFamilyDetails(applicantFamilyDetails)
             .build();
 
-        Assertions.assertFalse(fl401ApplicantFamilyChecker.hasMandatoryCompleted(caseData));
-    }
-
-    @Test
-    public void whenNoCaseDateValidateObjectFieldsReturnFalse() {
-
-        Assertions.assertFalse(fl401ApplicantFamilyChecker.validateObjectFields(caseData));
+        assertFalse(fl401ApplicantFamilyChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
     public void whenNullApplicantFamilyDetailsPresentValidateObjectFieldsReturnFalse() {
-
         caseData = caseData.toBuilder()
             .applicantFamilyDetails(applicantFamilyDetails)
             .build();
 
-        Assertions.assertFalse(fl401ApplicantFamilyChecker.validateObjectFields(caseData));
+        assertFalse(fl401ApplicantFamilyChecker.validateObjectFields(caseData));
     }
 
     @Test
     public void whenNoCaseDataValidateFieldsReturnsFalse() {
-
         caseData = caseData.toBuilder()
             .applicantFamilyDetails(applicantFamilyDetails)
             .build();
 
-        Assertions.assertFalse(fl401ApplicantFamilyChecker.validateFields(caseData));
+        assertFalse(fl401ApplicantFamilyChecker.validateFields(caseData));
     }
 
     @Test
     public void whenApplicationHasChildWithEmptyApplicantChildValidateFieldsReturnsFalse() {
-
         Element<ApplicantChild> wrappedApplicantChild = Element.<ApplicantChild>builder().value(applicantChild).build();
         List<Element<ApplicantChild>> listOfApplicantChild = Collections.singletonList(wrappedApplicantChild);
 
@@ -144,7 +139,7 @@ public class FL401ApplicantFamilyCheckerTest {
             .applicantFamilyDetails(applicantFamilyDetails)
             .build();
 
-        Assertions.assertFalse(fl401ApplicantFamilyChecker.validateFields(caseData));
+        assertFalse(fl401ApplicantFamilyChecker.validateFields(caseData));
     }
 
     @Test
@@ -166,7 +161,7 @@ public class FL401ApplicantFamilyCheckerTest {
             .applicantFamilyDetails(applicantFamilyDetails)
             .build();
 
-        Assertions.assertFalse(fl401ApplicantFamilyChecker.validateFields(caseData));
+        assertFalse(fl401ApplicantFamilyChecker.validateFields(caseData));
     }
 
     @Test
@@ -191,13 +186,7 @@ public class FL401ApplicantFamilyCheckerTest {
             .applicantFamilyDetails(applicantFamilyDetails)
             .build();
 
-        Assertions.assertTrue(fl401ApplicantFamilyChecker.validateFields(caseData));
-    }
-
-    @Test
-    public void applicantChildrenEmptyValidMandatoryFieldsCompleteReturnFalse() {
-
-        Assertions.assertFalse(fl401ApplicantFamilyChecker.validateMandatoryFieldsCompleted(applicantChild));
+        assertTrue(fl401ApplicantFamilyChecker.validateFields(caseData));
     }
 
     @Test
@@ -207,7 +196,7 @@ public class FL401ApplicantFamilyCheckerTest {
             .applicantChildRelationship("Mother")
             .build();
 
-        Assertions.assertFalse(fl401ApplicantFamilyChecker.validateMandatoryFieldsCompleted(applicantChild));
+        assertFalse(fl401ApplicantFamilyChecker.validateMandatoryFieldsCompleted(applicantChild));
     }
 
     @Test
@@ -220,6 +209,6 @@ public class FL401ApplicantFamilyCheckerTest {
             .respondentChildRelationship("Testing Step Father")
             .build();
 
-        Assertions.assertTrue(fl401ApplicantFamilyChecker.validateMandatoryFieldsCompleted(applicantChild));
+        assertTrue(fl401ApplicantFamilyChecker.validateMandatoryFieldsCompleted(applicantChild));
     }
 }
