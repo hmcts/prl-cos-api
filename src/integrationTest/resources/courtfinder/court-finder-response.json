@@ -11,7 +11,7 @@
           "previousName": null,
           "dateOfBirth": "1989-11-30",
           "isDateOfBirthUnknown": null,
-          "gender": "male",
+          "gender": "Male",
           "otherGender": null,
           "placeOfBirth": "London",
           "address": {
@@ -38,6 +38,7 @@
           "isCurrentAddressKnown": null,
           "canYouProvidePhoneNumber": null,
           "isPlaceOfBirthKnown": null,
+          "otherPersonRelationshipToChildren": null,
           "solicitorOrg": {},
           "solicitorAddress": {
             "AddressLine1": null,
@@ -67,21 +68,36 @@
           "lastName": "Child",
           "dateOfBirth": "2000-10-10",
           "isDateOfBirthUnknown": null,
-          "gender": "male",
+          "gender": "Male",
           "otherGender": null,
           "orderAppliedFor": [
-            "childArrangementsOrder"
+            "Child Arrangements Order"
           ],
-          "applicantsRelationshipToChild": "grandParent",
+          "applicantsRelationshipToChild": "Grandparent",
           "otherApplicantsRelationshipToChild": null,
-          "respondentsRelationshipToChild": "mother",
+          "respondentsRelationshipToChild": "Mother",
           "otherRespondentsRelationshipToChild": null,
           "childLiveWith": [
-            "anotherPerson",
-            "respondent",
-            "applicant"
+            "Another person not listed",
+            "Respondent",
+            "Applicant"
           ],
+          "childrenKnownToLocalAuthority": null,
+          "childrenKnownToLocalAuthorityTextArea": null,
+          "childrenSubjectOfChildProtectionPlan": null,
           "personWhoLivesWithChild": null,
+          "address": {
+            "AddressLine1": "reqwrew",
+            "AddressLine2": null,
+            "AddressLine3": null,
+            "PostTown": null,
+            "County": null,
+            "Country": null,
+            "PostCode": "EN1 2NG"
+          },
+          "isChildAddressConfidential": "No",
+          "childUnsupervisedTime": "No",
+          "childContactFromOtherRecipients": "No",
           "relationshipToApplicant": null,
           "relationshipToRespondent": null,
           "parentalResponsibilityDetails": null
@@ -97,7 +113,7 @@
           "previousName": null,
           "dateOfBirth": null,
           "isDateOfBirthUnknown": null,
-          "gender": "female",
+          "gender": "Female",
           "otherGender": null,
           "placeOfBirth": null,
           "address": {
@@ -124,6 +140,7 @@
           "isCurrentAddressKnown": "Yes",
           "canYouProvidePhoneNumber": "No",
           "isPlaceOfBirthKnown": "No",
+          "otherPersonRelationshipToChildren": null,
           "solicitorOrg": {},
           "solicitorAddress": {
             "AddressLine1": null,
@@ -138,8 +155,8 @@
           "solicitorReference": null,
           "representativeFirstName": null,
           "representativeLastName": null,
-          "isAtAddressLessThan5YearsWithDontKnow": "dontKnow",
-          "doTheyHaveLegalRepresentation": "no",
+          "isAtAddressLessThan5YearsWithDontKnow": "Don't know",
+          "doTheyHaveLegalRepresentation": "No",
           "sendSignUpLink": null,
           "solicitorEmail": null
         }
