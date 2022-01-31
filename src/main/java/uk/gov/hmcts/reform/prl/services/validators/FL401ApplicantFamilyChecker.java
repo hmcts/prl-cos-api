@@ -109,12 +109,17 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
     }
 
     public boolean validateMandatoryFieldsCompleted(ApplicantChild applicantChild) {
+        Optional<YesOrNo> applicantRespondentShareParental = ofNullable(applicantChild.getApplicantRespondentShareParental());
+
         List<Optional> fields = new ArrayList<>();
         fields.add(ofNullable(applicantChild.getFullName()));
         fields.add(ofNullable(applicantChild.getDateOfBirth()));
         fields.add(ofNullable(applicantChild.getApplicantChildRelationship()));
         fields.add(ofNullable(applicantChild.getApplicantRespondentShareParental()));
-        fields.add(ofNullable(applicantChild.getRespondentChildRelationship()));
+
+        if (applicantRespondentShareParental.isPresent() && applicantRespondentShareParental.get().equals(Yes)) {
+            fields.add(ofNullable(applicantChild.getRespondentChildRelationship()));
+        }
 
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
