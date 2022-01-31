@@ -13,6 +13,7 @@ import java.util.List;
 public class ApplicantFamilyDetails {
 
     private final YesOrNo doesApplicantHaveChildren;
+
     @JsonProperty("applicantChild")
     private final List<Element<ApplicantChild>> applicantChildren;
 }
