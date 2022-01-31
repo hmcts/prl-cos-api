@@ -38,7 +38,6 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
         }
         taskErrorService.addEventError(FL401_APPLICANT_FAMILY_DETAILS, FL401_APPLICANT_FAMILY_ERROR,
                                        FL401_APPLICANT_FAMILY_ERROR.getError());
-
         return false;
     }
 
@@ -53,9 +52,7 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
                 return true;
             }
         }
-
         return false;
-
     }
 
     @Override
@@ -72,11 +69,11 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
         if (applicantFamilyDetailsWrapped.isPresent() && !applicantFamilyDetailsWrapped.isEmpty()) {
             isFinished = validateFields(caseData);
         }
-
         return isFinished;
     }
 
     public boolean validateFields(CaseData caseData) {
+
         boolean isFinished = false;
 
         Optional<YesOrNo> doesApplicantHasChild = ofNullable(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren());
@@ -100,11 +97,9 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
                     }
                 }
             }
-
         } else {
             isFinished = doesApplicantHasChild.isPresent();
         }
-
         return isFinished;
     }
 
@@ -120,7 +115,6 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
         if (applicantRespondentShareParental.isPresent() && applicantRespondentShareParental.get().equals(Yes)) {
             fields.add(ofNullable(applicantChild.getRespondentChildRelationship()));
         }
-
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 
