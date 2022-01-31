@@ -117,13 +117,14 @@ public class ApplicationsTabService {
             Applicant a = objectMapper.convertValue(applicant, Applicant.class);
             Element<Applicant> app = Element.<Applicant>builder().value(a).build();
             applicants.add(app);
+
         }
         return applicants;
     }
 
     public List<Element<Respondent>> getRespondentsTable(CaseData caseData) {
         List<Element<Respondent>> respondents = new ArrayList<>();
-        Optional<List<Element<PartyDetails>>> checkRespondents = ofNullable(caseData.getApplicants());
+        Optional<List<Element<PartyDetails>>> checkRespondents = ofNullable(caseData.getRespondents());
         if (checkRespondents.isEmpty()) {
             Respondent r = Respondent.builder().build();
             Element<Respondent> app = Element.<Respondent>builder().value(r).build();
@@ -162,8 +163,6 @@ public class ApplicationsTabService {
         HearingUrgency hearingUrgency = objectMapper.convertValue(caseData, HearingUrgency.class);
         return toMap(hearingUrgency);
     }
-
-
 
     public Map<String, Object> getTypeOfApplicationTable(CaseData caseData) {
 

@@ -17,7 +17,7 @@ public class Applicant {
     private final String lastName;
     private final String previousName;
     private final LocalDate dateOfBirth;
-    private final Gender gender;
+    private final String gender;
     private final String otherGender;
     private final Address address;
     private final YesOrNo isAddressConfidential;
