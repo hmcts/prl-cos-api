@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
+import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -40,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
+import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -296,7 +298,7 @@ public class CaseData {
     private final String familymanCaseNumber;
 
     /**
-     *  Manage Documents.
+     * Manage Documents.
      */
     private final DocumentCategoryEnum documentCategory;
     private final List<Element<FurtherEvidence>> furtherEvidences;
@@ -306,5 +308,14 @@ public class CaseData {
     private final List<Element<Correspondence>> correspondence;
 
     private final List<Element<OtherDocuments>> otherDocuments;
+
+    private final List<Element<UserInfo>> userInfo;
+
+
+    /**
+     * Return Application.
+     */
+    private final List<RejectReasonEnum> rejectReason;
+    private String returnMessage;
 
 }
