@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -33,6 +33,7 @@ import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class CallbackController {
@@ -44,6 +45,7 @@ public class CallbackController {
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
 
     private final DgsService dgsService;
+    private final ObjectMapper objectMapper;
 
 
 
@@ -127,18 +129,25 @@ public class CallbackController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public ResponseEntity<CallbackResponse> eventInitiationAddCaseTypeOfApplication(
-        @RequestBody @ApiParam("CaseData") CallbackRequest request
+    public AboutToStartOrSubmitCallbackResponse eventInitiationAddCaseTypeOfApplication(
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) throws WorkflowException {
-        CaseData caseData = request.getCaseDetails().getCaseData();
+
+        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)
+            .toBuilder()
+            .id(callbackRequest.getCaseDetails().getId())
+            .build();
+
 
         String caseOfApplicant = caseData.getCaseTypeOfApplication();
 
-        return ok(
-            CallbackResponse.builder()
-                .data( caseData.toBuilder().textApplicants(caseOfApplicant).build())
-                .build()
-        );
+        log.info("caseOfApplicant: " + caseOfApplicant);
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("textApplicants", caseOfApplicant);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+
     }
 
 }
