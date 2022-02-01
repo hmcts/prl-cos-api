@@ -52,9 +52,7 @@ public class FL401ApplicationTypeCheckerTest {
 
     @Test
     public void whenFieldsPartiallyCompleteIsFinishedReturnsFalse() {
-
         assertFalse(fl401ApplicationTypeChecker.isFinished(caseData));
-
     }
 
     @Test
@@ -67,7 +65,6 @@ public class FL401ApplicationTypeCheckerTest {
 
         when(fl401ApplicationTypeChecker.isFinished(caseData)).thenReturn(true);
         assertTrue(fl401ApplicationTypeChecker.isFinished(caseData));
-
     }
 
     @Test
@@ -94,21 +91,16 @@ public class FL401ApplicationTypeCheckerTest {
         when(fl401ApplicationTypeChecker.isFinished(caseData)).thenReturn(true);
 
         assertTrue(fl401ApplicationTypeChecker.isFinished(caseData));
-
     }
 
     @Test
     public void whenNoCaseDataThenIsStartedReturnsFalse() {
-
         assertFalse(fl401ApplicationTypeChecker.isStarted(caseData));
-
     }
 
     @Test
     public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
-
         assertFalse(fl401ApplicationTypeChecker.hasMandatoryCompleted(caseData));
-
     }
 
     @Test
@@ -124,6 +116,5 @@ public class FL401ApplicationTypeCheckerTest {
             .build();
 
         assertFalse(fl401ApplicationTypeChecker.hasMandatoryCompleted(caseData));
-
     }
 }
