@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
@@ -27,11 +28,17 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.InternationalElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.LitigationCapacity;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamExemptions;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherProceedingsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Respondent;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.TypeOfApplication;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.WelshLanguageRequirements;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOverview;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.ChildAbductionDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.DomesticAbuseVictim;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
@@ -41,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -53,12 +59,18 @@ public class ApplicantTabServiceTest {
     @Mock
     ObjectMapper objectMapper;
 
+    @Mock
+    CoreCaseDataService coreCaseDataService;
+
 
     CaseData caseDataWithParties;
     CaseData emptyCaseData;
     Address address;
     List<Element<PartyDetails>> partyList;
     PartyDetails partyDetails;
+    Order order;
+    AllegationsOfHarmOrders allegationsOfHarmOrders;
+    AllegationsOfHarmOrders emptyAllegationOfHarmOrder;
 
     @Before
     public void setup() {
@@ -81,6 +93,37 @@ public class ApplicantTabServiceTest {
         Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(partyDetails).build();
         partyList = Collections.singletonList(partyDetailsElement);
 
+        order = Order.builder()
+            .dateIssued(LocalDate.of(1990, 8, 1))
+            .endDate(LocalDate.of(1991, 8, 1))
+            .orderCurrent(YesOrNo.Yes)
+            .courtName("Court name")
+            .build();
+
+        allegationsOfHarmOrders = AllegationsOfHarmOrders.builder()
+            .ordersNonMolestation(YesOrNo.Yes)
+            .nonMolestationOrder(order)
+            .ordersOccupation(YesOrNo.Yes)
+            .occupationOrder(order)
+            .ordersForcedMarriageProtection(YesOrNo.Yes)
+            .forcedMarriageOrder(order)
+            .ordersRestraining(YesOrNo.Yes)
+            .restrainingOrder(order)
+            .ordersOtherInjunctive(YesOrNo.Yes)
+            .otherInjunctiveOrder(order)
+            .ordersUndertakingInPlace(YesOrNo.Yes)
+            .undertakingInPlaceOrder(order)
+            .build();
+
+        emptyAllegationOfHarmOrder = AllegationsOfHarmOrders.builder()
+            .ordersNonMolestation(YesOrNo.Yes)
+            .ordersOccupation(YesOrNo.Yes)
+            .ordersForcedMarriageProtection(YesOrNo.Yes)
+            .ordersRestraining(YesOrNo.Yes)
+            .ordersOtherInjunctive(YesOrNo.Yes)
+            .ordersUndertakingInPlace(YesOrNo.Yes)
+            .build();
+
         ProceedingDetails proceedingDetails = ProceedingDetails.builder()
             .previousOrOngoingProceedings(ProceedingsEnum.previous)
             .caseNumber("12345")
@@ -94,11 +137,13 @@ public class ApplicantTabServiceTest {
             .nameOfGuardian("Guardian")
             .build();
 
-        Element<ProceedingDetails> proceedingDetailsElement = Element.<ProceedingDetails>builder().value(proceedingDetails).build();
+        Element<ProceedingDetails> proceedingDetailsElement = Element.<ProceedingDetails>builder()
+            .value(proceedingDetails).build();
 
         caseDataWithParties = CaseData.builder()
             .applicants(partyList)
             .respondents(partyList)
+            .othersToNotify(partyList)
             //type of application
             .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.childArrangementsOrder))
             .typeOfChildArrangementsOrder(ChildArrangementOrderTypeEnum.spendTimeWithOrder)
@@ -133,6 +178,54 @@ public class ApplicantTabServiceTest {
             //litigation capacity
             .litigationCapacityFactors("Test")
             .litigationCapacityOtherFactors(YesOrNo.Yes)
+            //allegations of harm
+            .ordersNonMolestation(YesOrNo.Yes)
+            .ordersNonMolestationCurrent(YesOrNo.Yes)
+            .ordersNonMolestationDateIssued(LocalDate.of(1990, 8, 1))
+            .ordersNonMolestationEndDate(LocalDate.of(1991, 8, 1))
+            .ordersNonMolestationCourtName("Court name")
+            .ordersOccupation(YesOrNo.Yes)
+            .ordersOccupationCurrent(YesOrNo.Yes)
+            .ordersOccupationDateIssued(LocalDate.of(1990, 8, 1))
+            .ordersOccupationEndDate(LocalDate.of(1991, 8, 1))
+            .ordersOccupationCourtName("Court name")
+            .ordersForcedMarriageProtection(YesOrNo.Yes)
+            .ordersForcedMarriageProtectionCurrent(YesOrNo.Yes)
+            .ordersForcedMarriageProtectionDateIssued(LocalDate.of(1990, 8, 1))
+            .ordersForcedMarriageProtectionEndDate(LocalDate.of(1991, 8, 1))
+            .ordersForcedMarriageProtectionCourtName("Court name")
+            .ordersRestraining(YesOrNo.Yes)
+            .ordersRestrainingCurrent(YesOrNo.Yes)
+            .ordersRestrainingDateIssued(LocalDate.of(1990, 8, 1))
+            .ordersRestrainingEndDate(LocalDate.of(1991, 8, 1))
+            .ordersRestrainingCourtName("Court name")
+            .ordersOtherInjunctive(YesOrNo.Yes)
+            .ordersOtherInjunctiveCurrent(YesOrNo.Yes)
+            .ordersOtherInjunctiveDateIssued(LocalDate.of(1990, 8, 1))
+            .ordersOtherInjunctiveEndDate(LocalDate.of(1991, 8, 1))
+            .ordersOtherInjunctiveCourtName("Court name")
+            .ordersUndertakingInPlace(YesOrNo.Yes)
+            .ordersUndertakingInPlaceCurrent(YesOrNo.Yes)
+            .ordersUndertakingInPlaceDateIssued(LocalDate.of(1990, 8, 1))
+            .ordersUndertakingInPlaceEndDate(LocalDate.of(1991, 8, 1))
+            .ordersUndertakingInPlaceCourtName("Court name")
+            .physicalAbuseVictim(Collections.singletonList(ApplicantOrChildren.children))
+            .emotionalAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
+            .psychologicalAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
+            .sexualAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
+            .financialAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
+            .previousAbductionThreats(YesOrNo.Yes)
+            .previousAbductionThreatsDetails("Details")
+            .abductionPreviousPoliceInvolvement(YesOrNo.No)
+            .allegationsOfHarmOtherConcerns(YesOrNo.Yes)
+            .allegationsOfHarmOtherConcernsDetails("Test String")
+            .agreeChildUnsupervisedTime(YesOrNo.No)
+            //welsh language requirements
+            .welshLanguageRequirement(YesOrNo.Yes)
+            .languageRequirementApplicationNeedWelsh(YesOrNo.No)
+            //child details
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .childrenKnownToLocalAuthorityTextArea("Test string")
             .build();
 
         emptyCaseData = CaseData.builder().build();
@@ -271,27 +364,6 @@ public class ApplicantTabServiceTest {
         assertEquals(miamMap, applicationsTabService.getMiamTable(caseDataWithParties));
     }
 
-//    @Test
-//    public void testMiamExemptionsTableMapper() {
-//        MiamExemptions miamExemptions = MiamExemptions.builder()
-//            .reasonsForMiamExemption(MiamExemptionsChecklistEnum.domesticViolence.getDisplayedValue())
-//            .domesticViolenceEvidence(MiamDomesticViolenceChecklistEnum
-//                                          .miamDomesticViolenceChecklistEnum_Value_4.getDisplayedValue())
-//            .otherGroundsEvidence(MiamOtherGroundsChecklistEnum
-//                                      .miamOtherGroundsChecklistEnum_Value_2.getDisplayedValue())
-//            .build();
-//        Map<String, Object> miamExemptionsMap = Map.of(
-//            "reasonsForMiamExemption", MiamExemptionsChecklistEnum.domesticViolence.getDisplayedValue(),
-//            "domesticViolenceEvidence", MiamDomesticViolenceChecklistEnum
-//                .miamDomesticViolenceChecklistEnum_Value_4.getDisplayedValue(),
-//            "otherGroundsEvidence", MiamOtherGroundsChecklistEnum
-//                .miamOtherGroundsChecklistEnum_Value_2.getDisplayedValue()
-//        );
-//
-//        when(objectMapper.convertValue(miamExemptions, Map.class)).thenReturn(miamExemptionsMap);
-//        assertEquals(miamExemptionsMap, applicationsTabService.getMiamExemptionsTable(caseDataWithParties));
-//    }
-
     @Test
     public void testOtherProceedingsOverviewTableMapper() {
         Map<String, Object> completeOverviewMap = Map.of("previousOrOngoingProceedings",
@@ -318,12 +390,12 @@ public class ApplicantTabServiceTest {
             .nameOfChildrenInvolved("Children")
             .nameOfGuardian("Guardian")
             .build();
-        Element<OtherProceedingsDetails> otherProceedingsDetailsElement = Element.
-            <OtherProceedingsDetails>builder().value(otherProceedingsDetails).build();
+        Element<OtherProceedingsDetails> otherProceedingsDetailsElement = Element
+            .<OtherProceedingsDetails>builder().value(otherProceedingsDetails).build();
 
         OtherProceedingsDetails emptyProceeding = OtherProceedingsDetails.builder().build();
-        Element<OtherProceedingsDetails> emptyProceedingElement = Element.
-            <OtherProceedingsDetails>builder().value(emptyProceeding).build();
+        Element<OtherProceedingsDetails> emptyProceedingElement = Element
+            .<OtherProceedingsDetails>builder().value(emptyProceeding).build();
 
         assertEquals(Collections.singletonList(otherProceedingsDetailsElement),
                      applicationsTabService.getOtherProceedingsDetailsTable(caseDataWithParties));
@@ -385,6 +457,124 @@ public class ApplicantTabServiceTest {
             .thenReturn(litigationCapacity);
         when(objectMapper.convertValue(litigationCapacity, Map.class)).thenReturn(litigationCapacityMap);
         assertEquals(litigationCapacityMap, applicationsTabService.getLitigationCapacityDetails(caseDataWithParties));
+    }
+
+    @Test
+    public void testSpecificOrderMapping() {
+        assertEquals(allegationsOfHarmOrders, applicationsTabService
+            .getSpecificOrderDetails(emptyAllegationOfHarmOrder, caseDataWithParties));
+    }
+
+    @Test
+    public void testAllegationsOfHarmDomesticAbuseTableMapper() {
+        String abuseVictim = ApplicantOrChildren.children.getDisplayedValue();
+        DomesticAbuseVictim domesticAbuseVictim = DomesticAbuseVictim.builder()
+            .physicalAbuseVictim(abuseVictim)
+            .emotionalAbuseVictim(abuseVictim)
+            .psychologicalAbuseVictim(abuseVictim)
+            .sexualAbuseVictim(abuseVictim)
+            .financialAbuseVictim(abuseVictim)
+            .build();
+        Map<String, Object> abuseMap = Map.of(
+            "physicalAbuseVictim", abuseVictim,
+            "emotionalAbuseVictim", abuseVictim,
+            "psychologicalAbuseVictim", abuseVictim,
+            "sexualAbuseVictim", abuseVictim,
+            "financialAbuseVictim", abuseVictim
+        );
+
+        when(objectMapper.convertValue(domesticAbuseVictim, Map.class)).thenReturn(abuseMap);
+        assertEquals(abuseMap, applicationsTabService.getDomesticAbuseTable(caseDataWithParties));
+    }
+
+    @Test
+    public void testWelshLanguageTableMapper() {
+        WelshLanguageRequirements welshLanguageRequirements = WelshLanguageRequirements.builder()
+            .welshLanguageRequirement(YesOrNo.Yes)
+            .languageRequirementApplicationNeedWelsh(YesOrNo.No)
+            .build();
+
+        Map<String, Object> welshMap = Map.of(
+            "welshLanguageRequirement", YesOrNo.Yes,
+            "languageRequirementApplicationNeedWelsh", YesOrNo.No
+        );
+        when(objectMapper.convertValue(caseDataWithParties, WelshLanguageRequirements.class))
+            .thenReturn(welshLanguageRequirements);
+        when(objectMapper.convertValue(welshLanguageRequirements, Map.class)).thenReturn(welshMap);
+        assertEquals(welshMap, applicationsTabService.getWelshLanguageRequirementsTable(caseDataWithParties));
+
+    }
+
+    @Test
+    public void testChildAbuductionTableMapper() {
+        ChildAbductionDetails childAbductionDetails = ChildAbductionDetails.builder()
+            .previousAbductionThreats(YesOrNo.Yes)
+            .previousAbductionThreatsDetails("Details")
+            .abductionPreviousPoliceInvolvement(YesOrNo.No)
+            .build();
+        Map<String, Object> abductionMap = Map.of(
+            "previousAbductionThreats", YesOrNo.Yes,
+            "previousAbductionThreatsDetails", "Details",
+            "abductionPreviousPoliceInvolvement", YesOrNo.No
+        );
+
+        when(objectMapper.convertValue(caseDataWithParties, ChildAbductionDetails.class))
+            .thenReturn(childAbductionDetails);
+        when(objectMapper.convertValue(childAbductionDetails, Map.class)).thenReturn(abductionMap);
+        assertEquals(abductionMap, applicationsTabService.getChildAbductionTable(caseDataWithParties));
+    }
+
+    @Test
+    public void testAllegationsOfHarmOtherConcernsMapper() {
+        AllegationsOfHarmOtherConcerns allegationsOfHarmOtherConcerns = AllegationsOfHarmOtherConcerns.builder()
+            .allegationsOfHarmOtherConcerns(YesOrNo.Yes)
+            .allegationsOfHarmOtherConcernsDetails("Test String")
+            .agreeChildUnsupervisedTime(YesOrNo.No)
+            .build();
+        Map<String, Object> concernMap = Map.of(
+            "allegationsOfHarmOtherConcerns", YesOrNo.Yes,
+            "allegationsOfHarmOtherConcernsDetails", "Test String",
+            "agreeChildUnsupervisedTime", YesOrNo.No
+        );
+
+        when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOtherConcerns.class))
+            .thenReturn(allegationsOfHarmOtherConcerns);
+        when(objectMapper.convertValue(allegationsOfHarmOtherConcerns, Map.class)).thenReturn(concernMap);
+        assertEquals(concernMap, applicationsTabService.getAllegationsOfHarmOtherConcerns(caseDataWithParties));
+    }
+
+    @Test
+    public void testOtherPeopleInTheCaseMapper() {
+        OtherPersonInTheCase otherPerson = OtherPersonInTheCase.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender("Male") //the new POJOs use strings as the enums are causing errors
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@test.com")
+            .build();
+
+        Element<OtherPersonInTheCase> otherPersonElement = Element.<OtherPersonInTheCase>builder()
+            .value(otherPerson).build();
+        List<Element<OtherPersonInTheCase>> expectedList =  Collections.singletonList(otherPersonElement);
+        OtherPersonInTheCase emptyOtherPerson = OtherPersonInTheCase.builder().build();
+        Element<OtherPersonInTheCase> emptyOtherElement = Element.<OtherPersonInTheCase>builder()
+            .value(emptyOtherPerson).build();
+        List<Element<OtherPersonInTheCase>> expectedEmptyList =  Collections.singletonList(emptyOtherElement);
+
+        when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class)).thenReturn(otherPerson);
+        assertEquals(expectedList, applicationsTabService.getOtherPeopleInTheCaseTable(caseDataWithParties));
+        assertEquals(expectedEmptyList, applicationsTabService.getOtherPeopleInTheCaseTable(emptyCaseData));
+    }
+
+    @Test
+    public void testOtherChildFieldsMapper() {
+        Map<String, Object> extraMap = Map.of(
+            "childrenKnownToLocalAuthority", YesNoDontKnow.yes.getDisplayedValue(),
+            "childrenKnownToLocalAuthorityTextArea", "Test string"
+        );
+        assertEquals(extraMap, applicationsTabService.getExtraChildDetailsTable(caseDataWithParties));
     }
 
 
