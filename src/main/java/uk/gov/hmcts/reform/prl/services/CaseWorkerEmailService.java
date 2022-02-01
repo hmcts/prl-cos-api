@@ -126,9 +126,9 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-
+        String caseworkerEmailId = caseDetails.getData().get("caseworkerEmailAddress").toString();
         emailService.send(
-            caseDetails.getData().get("caseworkerEmailAddress").toString(),
+            caseworkerEmailId,
             EmailTemplateNames.CASEWORKER,
             buildEmail(caseDetails),
             LanguagePreference.ENGLISH
