@@ -41,10 +41,10 @@ public class CaseWorkerEmailService {
     private EmailService emailService;
 
     @Value("${uk.gov.notify.email.application.email-id}")
-    private  String courtEmail;
+    private String courtEmail;
 
     @Value("${uk.gov.notify.email.application.court-name}")
-    private  String courtName;
+    private String courtName;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -87,8 +87,8 @@ public class CaseWorkerEmailService {
             typeOfHearing.add(REDUCED_NOTICE);
         }
         if ((emailService.getCaseData(caseDetails).getIsCaseUrgent().equals(YesOrNo.No))
-                && (emailService.getCaseData(caseDetails).getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.No))
-                && (emailService.getCaseData(caseDetails).getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.No))) {
+            && (emailService.getCaseData(caseDetails).getDoYouNeedAWithoutNoticeHearing().equals(YesOrNo.No))
+            && (emailService.getCaseData(caseDetails).getDoYouRequireAHearingWithReducedNotice().equals(YesOrNo.No))) {
             typeOfHearing.add(STANDARAD_HEARING);
         }
         final String typeOfHearings = String.join(", ", typeOfHearing);
@@ -135,9 +135,5 @@ public class CaseWorkerEmailService {
             LanguagePreference.ENGLISH
         );
 
-    }
-
-    public String getRecipientEmail(UserDetails userDetails) {
-        return userDetails.getEmail() != null ? userDetails.getEmail() : "prl_caseworker_solicitor@mailinator.com";
     }
 }
