@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
@@ -13,8 +14,10 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import java.time.LocalDate;
 import java.util.List;
 
+
 @Data
 @Builder
+@AllArgsConstructor
 public class PartyDetails {
 
     private final String firstName;
