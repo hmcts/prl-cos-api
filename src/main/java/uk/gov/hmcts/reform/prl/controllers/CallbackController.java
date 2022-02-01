@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -24,6 +26,10 @@ import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -114,6 +120,25 @@ public class CallbackController {
                                                        .documentHash(generatedDocumentInfo.getHashToken())
                                                        .documentFileName(DRAFT_C_100_APPLICATION).build()).build())
             .build();
+    }
+
+    @PostMapping(path = "/event-initiation-add-case-type-of-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to add case type of application before event start")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public ResponseEntity<CallbackResponse> eventInitiationAddCaseTypeOfApplication(
+        @RequestBody @ApiParam("CaseData") CallbackRequest request
+    ) throws WorkflowException {
+        CaseData caseData = request.getCaseDetails().getCaseData();
+
+        String caseOfApplicant = caseData.getCaseTypeOfApplication();
+
+        return ok(
+            CallbackResponse.builder()
+                .data( caseData.toBuilder().textApplicants(caseOfApplicant).build())
+                .build()
+        );
     }
 
 }

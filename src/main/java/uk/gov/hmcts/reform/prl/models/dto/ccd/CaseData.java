@@ -131,7 +131,10 @@ public class CaseData {
     /**
      * Applicant details.
      */
+    @JsonProperty("applicantsFL401")
+    private final PartyDetails applicantsFL401;
     private final List<Element<PartyDetails>> applicants;
+    private final String textApplicants;
 
     /**
      * Child details.

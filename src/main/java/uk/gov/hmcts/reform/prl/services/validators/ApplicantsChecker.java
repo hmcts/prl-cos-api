@@ -31,6 +31,7 @@ public class ApplicantsChecker implements EventChecker {
 
     @Override
     public boolean isFinished(CaseData caseData) {
+
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
 
