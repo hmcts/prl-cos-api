@@ -41,7 +41,7 @@ public class SolicitorEmailService {
     private String manageCaseUrl;
 
     public EmailTemplateVars buildEmail(CaseDetails caseDetails) {
-
+        log.info("building email");
         List<PartyDetails> applicants = emailService.getCaseData(caseDetails)
             .getApplicants()
             .stream()
@@ -54,6 +54,26 @@ public class SolicitorEmailService {
 
         String applicantNames = String.join(", ", applicantNamesList);
 
+        log.info(
+            "emailService.getCaseData(caseDetails).getApplicantCaseName() {}",
+            emailService.getCaseData(caseDetails).getApplicantCaseName()
+        );
+        log.info(
+            "applicantNames {}",
+            applicantNames
+        );
+        log.info(
+            "courtName {}",
+            courtName
+        );
+        log.info(
+            "courtEmail {}",
+            courtEmail
+        );
+        log.info(
+            "manageCaseUrl {}",
+            manageCaseUrl
+        );
         return SolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
