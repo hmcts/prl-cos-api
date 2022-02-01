@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
@@ -56,11 +57,12 @@ public class RequestUpdateCallbackServiceTest {
     }
 
     @Test
-    public void shouldStartAndSubmitEventWithCaseDetails() throws Exception {
+    public void shouldStartAndSubmitEventWithCaseDetails() {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).build();
-        when(coreCaseDataApi.getCase(userToken,serviceAuthToken,caseId.toString())).thenReturn(caseDetails);
+        when(coreCaseDataApi.getCase(userToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, Long.toString(caseId), eventName))
+                                                     caseType, Long.toString(caseId), eventName
+        ))
             .thenReturn(buildStartEventResponse(eventName, eventToken));
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(caseId.toString())
@@ -79,25 +81,41 @@ public class RequestUpdateCallbackServiceTest {
         requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
 
         verify(coreCaseDataApi).startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                        caseType, Long.toString(caseId), eventName);
+                                                        caseType, Long.toString(caseId), eventName
+        );
         verify(coreCaseDataApi).submitEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
                                                          caseType, Long.toString(caseId), true,
-                                                         buildCaseDataContent(eventName, eventToken, null));
+                                                         buildCaseDataContent(eventName, eventToken, null)
+        );
     }
 
     @Test
-    public void shouldNotStartOrSubmitEventWithoutCaseDetails() throws Exception {
+    public void shouldNotStartOrSubmitEventWithoutCaseDetails() {
 
         CaseDetails caseDetails = CaseDetails.builder()
             .build();
-        when(coreCaseDataApi.getCase(userToken,serviceAuthToken,"123")).thenReturn(caseDetails);
+        when(coreCaseDataApi.getCase(userToken, serviceAuthToken, "123")).thenReturn(caseDetails);
 
-        assertThrows(Exception.class,() -> {
-            serviceRequestUpdateDto = ServiceRequestUpdateDto.builder().ccdCaseNumber("123").serviceRequestStatus("Paid").build();
+        assertThrows(Exception.class, () -> {
+            serviceRequestUpdateDto = ServiceRequestUpdateDto.builder().ccdCaseNumber("123")
+                .serviceRequestStatus("Paid").build();
 
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         });
 
+    }
+
+    @Test(expected = CaseNotFoundException.class)
+    public void shouldThrowExceptionWhenInvalidCaseNumberIsSent() {
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .build();
+        when(coreCaseDataApi.getCase(userToken, serviceAuthToken, "123")).thenReturn(caseDetails);
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder().ccdCaseNumber("123")
+            .serviceRequestStatus("Paid").build();
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
     }
 
     private CaseDataContent buildCaseDataContent(String eventId, String eventToken, Object caseData) {
