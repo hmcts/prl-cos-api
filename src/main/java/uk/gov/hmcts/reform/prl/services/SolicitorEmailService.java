@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -42,6 +43,8 @@ public class SolicitorEmailService {
 
     public EmailTemplateVars buildEmail(CaseDetails caseDetails) {
         log.info("building email");
+        CaseData cd = emailService.getCaseData(caseDetails);
+        log.info("cddddd  {}", cd);
         List<PartyDetails> applicants = emailService.getCaseData(caseDetails)
             .getApplicants()
             .stream()
