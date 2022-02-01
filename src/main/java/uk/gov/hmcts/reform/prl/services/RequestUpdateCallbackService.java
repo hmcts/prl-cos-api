@@ -93,11 +93,6 @@ public class RequestUpdateCallbackService {
                 "Updating the Case data with payment information for caseId {}",
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
-            createEventForFeeAndPayBypass(serviceRequestUpdateDto, userToken, systemUpdateUserId,
-                                          serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
-                                              ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK,
-                                          authorisation
-            );
 
             solicitorEmailService.sendEmail(caseDetails);
             caseWorkerEmailService.sendEmail(caseDetails);
