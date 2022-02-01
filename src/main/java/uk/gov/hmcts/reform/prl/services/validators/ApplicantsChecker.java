@@ -7,11 +7,14 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import javax.servlet.http.Part;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,6 +38,13 @@ public class ApplicantsChecker implements EventChecker {
 
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
+        if(caseData.getCaseTypeOfApplication().equals("FL401")){
+            PartyDetails fl401ApplicantDetails = caseData.getApplicantsFL401();
+
+            Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(fl401ApplicantDetails).build();
+            applicantsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
+
+        }
 
         if (applicantsWrapped.isEmpty()) {
             return false;
@@ -50,7 +60,7 @@ public class ApplicantsChecker implements EventChecker {
         for (PartyDetails applicant : applicants) {
             Optional<String> dxNumber = ofNullable(applicant.getDxNumber());
 
-            boolean mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant);
+            boolean mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant, caseData);
             boolean dxCompleted = (dxNumber.isPresent() && !(dxNumber.get().isBlank()));
 
             if (!(mandatoryCompleted && dxCompleted)) {
@@ -70,7 +80,10 @@ public class ApplicantsChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        return caseData.getApplicants() != null;
+
+        return (caseData.getCaseTypeOfApplication().equals("FL401")
+            ? caseData.getApplicantsFL401() != null
+            : caseData.getApplicants() != null);
     }
 
     @Override
@@ -87,7 +100,7 @@ public class ApplicantsChecker implements EventChecker {
                 .collect(Collectors.toList());
 
             for (PartyDetails applicant : applicants) {
-                mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant);
+                mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant, caseData);
                 if (!mandatoryCompleted) {
                     break;
                 }
@@ -103,7 +116,7 @@ public class ApplicantsChecker implements EventChecker {
         return false;
     }
 
-    private boolean mandatoryApplicantFieldsAreCompleted(PartyDetails applicant) {
+    private boolean mandatoryApplicantFieldsAreCompleted(PartyDetails applicant, CaseData caseData) {
 
 
         List<Optional> fields = new ArrayList<>();
@@ -115,17 +128,21 @@ public class ApplicantsChecker implements EventChecker {
         if (gender.isPresent() && gender.get().equals(other)) {
             fields.add(ofNullable(applicant.getOtherGender()));
         }
-        fields.add(ofNullable(applicant.getPlaceOfBirth()));
+        if (caseData.getCaseTypeOfApplication().equals("C100"))
+            fields.add(ofNullable(applicant.getPlaceOfBirth()));
         Optional<Address> address = ofNullable(applicant.getAddress());
         fields.add(address);
         if (address.isPresent() && !verifyAddressCompleted(address.get())) {
             return false;
         }
         fields.add(ofNullable(applicant.getIsAddressConfidential()));
-        Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
-        fields.add(isAtAddressLessThan5Years);
-        if (isAtAddressLessThan5Years.isPresent() && isAtAddressLessThan5Years.get().equals(Yes)) {
-            fields.add(ofNullable(applicant.getAddressLivedLessThan5YearsDetails()));
+
+        if (caseData.getCaseTypeOfApplication().equals("C100")) {
+            Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
+            fields.add(isAtAddressLessThan5Years);
+            if (isAtAddressLessThan5Years.isPresent() && isAtAddressLessThan5Years.get().equals(Yes)) {
+                fields.add(ofNullable(applicant.getAddressLivedLessThan5YearsDetails()));
+            }
         }
         Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(applicant.getCanYouProvideEmailAddress());
         fields.add(canYouProvideEmailAddress);
