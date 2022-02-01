@@ -10,6 +10,6 @@ import java.time.LocalDate;
 @Builder
 @Jacksonized
 public class RespondentRelationDateInfo {
-    private  final  RelationshipDateComplex RelationshipDateComplex;
+    private  final  RelationshipDateComplex relationStartAndEndComplexType;
     private final LocalDate applicantRelationshipDate;
 }

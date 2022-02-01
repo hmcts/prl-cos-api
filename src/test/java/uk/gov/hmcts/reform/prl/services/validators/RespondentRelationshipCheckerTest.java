@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
-import static org.mockito.Mockito.when;
+import  static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RespondentRelationshipCheckerTest {
@@ -28,9 +28,7 @@ public class RespondentRelationshipCheckerTest {
     @Test
     public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
-
-        assert !respondentRelationshipChecker.isStarted(caseData);
-
+        assertTrue(!respondentRelationshipChecker.isStarted(caseData));
     }
 
     @Test
@@ -39,7 +37,7 @@ public class RespondentRelationshipCheckerTest {
             .respondentRelationObject(RespondentRelationObjectType.builder().build())
             .build();
 
-        assert respondentRelationshipChecker.isStarted(caseData);
+        assertTrue(respondentRelationshipChecker.isStarted(caseData));
     }
 
     @Test
@@ -49,14 +47,14 @@ public class RespondentRelationshipCheckerTest {
                                               .applicantRelationshipEnum(ApplicantRelationshipEnum.noneOfTheAbove)
                                               .build())
             .build();
-        assert respondentRelationshipChecker.isStarted(caseData);
+        assertTrue(respondentRelationshipChecker.isStarted(caseData));
     }
 
     @Test
     public void whenNoCaseDataPresentThenIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assert !respondentRelationshipChecker.isFinished(caseData);
+        assertTrue(!respondentRelationshipChecker.isFinished(caseData));
 
     }
 
@@ -68,7 +66,7 @@ public class RespondentRelationshipCheckerTest {
                                               .build())
             .build();
 
-        assert !respondentRelationshipChecker.isFinished(caseData);
+        assertTrue(!respondentRelationshipChecker.isFinished(caseData));
 
     }
 
@@ -83,7 +81,7 @@ public class RespondentRelationshipCheckerTest {
                                                .applicantRelationshipOptionsEnum(ApplicantRelationshipOptionsEnum.aunt)
                                                .build())
             .build();
-        assert respondentRelationshipChecker.isFinished(caseData);
+        assertTrue(respondentRelationshipChecker.isFinished(caseData));
     }
 
     @Test
@@ -94,7 +92,7 @@ public class RespondentRelationshipCheckerTest {
                                               .applicantRelationshipEnum(ApplicantRelationshipEnum.formerlyEngagedOrProposed)
                                               .build())
             .build();
-        assert respondentRelationshipChecker.isFinished(caseData);
+        assertTrue(respondentRelationshipChecker.isFinished(caseData));
     }
 
 }
