@@ -22,12 +22,14 @@ public class Respondent {
     private final String placeOfBirth;
     private final YesOrNo isCurrentAddressKnown;
     private final Address address;
-    private final YesOrNo isAtAddressLessThan5Years;
+    private final String isAtAddressLessThan5YearsWithDontKnow;
     private final String addressLivedLessThan5YearsDetails;
     private final YesOrNo canYouProvideEmailAddress;
     private final String email;
+    private final YesOrNo canYouProvidePhoneNumber;
     private final String phoneNumber;
 
+    private final String doTheyHaveLegalRepresentation;
     private final String representativeFirstName;
     private final String representativeLastName;
     private final String solicitorEmail;

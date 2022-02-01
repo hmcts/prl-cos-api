@@ -56,8 +56,7 @@ public class ApplicationsTabService {
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
-    @Autowired
-    ObjectMapper objectMapper;
+    ObjectMapper objectMapper = new ObjectMapper();
 
     public void updateApplicationTabData(CaseData caseData) {
 
@@ -94,7 +93,7 @@ public class ApplicationsTabService {
         );
     }
 
-    private Map<String, Object> toMap(Object object) {
+    public Map<String, Object> toMap(Object object) {
         return objectMapper.convertValue(object, Map.class);
     }
 
