@@ -7,7 +7,7 @@ import org.mockito.MockitoAnnotations;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
-import uk.gov.hmcts.reform.prl.models.complextypes.Orders;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 public class FL401ApplicationTypeCheckerTest {
@@ -25,17 +26,32 @@ public class FL401ApplicationTypeCheckerTest {
     @Mock
     private FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
 
+    private CaseData caseData;
+    private TypeOfApplicationOrders orders;
+    private LinkToCA linkToCA;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+
+        caseData = CaseData.builder().build();
+        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+
+        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+
+        orders = TypeOfApplicationOrders.builder()
+            .orderType(orderList)
+            .build();
+
+        linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.Yes)
+            .childArrangementsApplicationNumber("123")
+            .build();
 
     }
 
     @Test
     public void whenFieldsPartiallyCompleteIsFinishedReturnsFalse() {
-
-        CaseData caseData = CaseData.builder()
-            .build();
 
         assertFalse(fl401ApplicationTypeChecker.isFinished(caseData));
 
@@ -43,18 +59,6 @@ public class FL401ApplicationTypeCheckerTest {
 
     @Test
     public void whenAllRequiredFieldsCompletedThenIsFinishedReturnsTrue() {
-        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-
-        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
-
-        Orders orders = Orders.builder()
-            .orderType(orderList)
-            .build();
-
-        LinkToCA linkToCA = LinkToCA.builder()
-            .linkToCaApplication(YesOrNo.Yes)
-            .childArrangementsApplicationNumber("123")
-            .build();
 
         CaseData caseData = CaseData.builder()
             .typeOfApplicationOrders(orders)
@@ -62,6 +66,7 @@ public class FL401ApplicationTypeCheckerTest {
             .build();
 
         when(fl401ApplicationTypeChecker.isFinished(caseData)).thenReturn(true);
+        assertTrue(fl401ApplicationTypeChecker.isFinished(caseData));
 
     }
 
@@ -72,7 +77,7 @@ public class FL401ApplicationTypeCheckerTest {
         orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
         orderList.add(FL401OrderTypeEnum.occupationOrder);
 
-        Orders orders = Orders.builder()
+        TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder()
             .orderType(orderList)
             .build();
 
@@ -88,12 +93,12 @@ public class FL401ApplicationTypeCheckerTest {
 
         when(fl401ApplicationTypeChecker.isFinished(caseData)).thenReturn(true);
 
+        assertTrue(fl401ApplicationTypeChecker.isFinished(caseData));
+
     }
 
     @Test
     public void whenNoCaseDataThenIsStartedReturnsFalse() {
-
-        CaseData caseData = CaseData.builder().build();
 
         assertFalse(fl401ApplicationTypeChecker.isStarted(caseData));
 
@@ -102,8 +107,6 @@ public class FL401ApplicationTypeCheckerTest {
     @Test
     public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
 
-        CaseData caseData = CaseData.builder().build();
-
         assertFalse(fl401ApplicationTypeChecker.hasMandatoryCompleted(caseData));
 
     }
@@ -111,16 +114,13 @@ public class FL401ApplicationTypeCheckerTest {
     @Test
     public void whenCaseDataPresentThenHasMandatoryReturnsFalse() {
 
-        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-
-        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
-
-        Orders orders = Orders.builder()
-            .orderType(orderList)
+        LinkToCA linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.No)
             .build();
 
         CaseData caseData = CaseData.builder()
             .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
             .build();
 
         assertFalse(fl401ApplicationTypeChecker.hasMandatoryCompleted(caseData));

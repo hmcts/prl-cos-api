@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @Builder
 @Jacksonized
-public class Orders {
+public class TypeOfApplicationOrders {
 
     private final List<FL401OrderTypeEnum> orderType;
 }
