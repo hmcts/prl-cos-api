@@ -200,9 +200,7 @@ public class ApplicationsTabService {
     }
 
     public Map<String, Object> getMiamExemptionsTable(CaseData caseData) {
-        //check if first screen is empty and return empty map if true
         Optional<List<MiamExemptionsChecklistEnum>> miamExemptionsCheck = ofNullable(caseData.getMiamExemptionsChecklist());
-
         String reasonsForMiamExemption;
         if (miamExemptionsCheck.isPresent()) {
             reasonsForMiamExemption = caseData.getMiamExemptionsChecklist()
