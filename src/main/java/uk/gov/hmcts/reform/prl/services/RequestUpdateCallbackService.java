@@ -111,7 +111,7 @@ public class RequestUpdateCallbackService {
     // todo this method will be deleted once we wipe out fee and pay bypass
     private void createEventForFeeAndPayBypass(ServiceRequestUpdateDto serviceRequestUpdateDto, String userToken,
                                                String systemUpdateUserId, String eventId, String authorisation) {
-        CaseData caseData = setCaseData(serviceRequestUpdateDto);
+        CaseData caseData = setCaseDataFeeAndPayBypass(serviceRequestUpdateDto, authorisation);
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             userToken,
             authTokenGenerator.generate(),
