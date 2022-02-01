@@ -23,7 +23,7 @@ public class Applicant {
     private final YesOrNo isAddressConfidential;
     private final YesOrNo isAtAddressLessThan5Years;
     private final String addressLivedLessThan5YearsDetails;
-    private final String canYouProvideEmailAddress;
+    private final YesOrNo canYouProvideEmailAddress;
     private final String email;
     private final YesOrNo isEmailAddressConfidential;
     private final String phoneNumber;
