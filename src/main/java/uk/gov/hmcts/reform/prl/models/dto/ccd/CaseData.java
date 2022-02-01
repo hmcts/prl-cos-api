@@ -34,10 +34,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
@@ -329,5 +333,18 @@ public class CaseData {
      */
     private final List<RejectReasonEnum> rejectReason;
     private String returnMessage;
+
+
+    /**
+     * Without Notice Order.
+     */
+    @JsonProperty("orderWithoutGivingNoticeToRespondent")
+    private final WithoutNoticeOrderDetails orderWithoutGivingNoticeToRespondent;
+    @JsonProperty("reasonForOrderWithoutGivingNotice")
+    private final ReasonForWithoutNoticeOrder reasonForOrderWithoutGivingNotice;
+    @JsonProperty("bailDetails")
+    private final RespondentBailConditionDetails bailDetails;
+    @JsonProperty("anyOtherDtailsForWithoutNoticeOrder")
+    private final OtherDetailsOfWithoutNoticeOrder anyOtherDtailsForWithoutNoticeOrder;
 
 }
