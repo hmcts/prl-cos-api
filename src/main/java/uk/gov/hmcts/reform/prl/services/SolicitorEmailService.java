@@ -67,7 +67,7 @@ public class SolicitorEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-        log.info("Sending the email to solicitor for caseId {}", serviceRequestUpdateDto.getCcdCaseNumber()
+        log.info("Sending the email to solicitor for caseId {}", caseDetails.getId()
         );
         emailService.send(
             caseDetails.getData().get("applicantSolicitorEmailAddress").toString(),
