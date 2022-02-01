@@ -7,12 +7,10 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
-import javax.servlet.http.Part;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +18,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.APPLICANTS_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.Gender.other;
@@ -38,7 +38,7 @@ public class ApplicantsChecker implements EventChecker {
 
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
-        if(caseData.getCaseTypeOfApplication().equals("FL401")){
+        if(caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)){
             PartyDetails fl401ApplicantDetails = caseData.getApplicantsFL401();
 
             Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(fl401ApplicantDetails).build();
@@ -81,7 +81,7 @@ public class ApplicantsChecker implements EventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
 
-        return (caseData.getCaseTypeOfApplication().equals("FL401")
+        return (caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)
             ? caseData.getApplicantsFL401() != null
             : caseData.getApplicants() != null);
     }
@@ -128,7 +128,7 @@ public class ApplicantsChecker implements EventChecker {
         if (gender.isPresent() && gender.get().equals(other)) {
             fields.add(ofNullable(applicant.getOtherGender()));
         }
-        if (caseData.getCaseTypeOfApplication().equals("C100"))
+        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE))
             fields.add(ofNullable(applicant.getPlaceOfBirth()));
         Optional<Address> address = ofNullable(applicant.getAddress());
         fields.add(address);
@@ -137,7 +137,7 @@ public class ApplicantsChecker implements EventChecker {
         }
         fields.add(ofNullable(applicant.getIsAddressConfidential()));
 
-        if (caseData.getCaseTypeOfApplication().equals("C100")) {
+        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
             Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
             fields.add(isAtAddressLessThan5Years);
             if (isAtAddressLessThan5Years.isPresent() && isAtAddressLessThan5Years.get().equals(Yes)) {
