@@ -56,7 +56,8 @@ public class ApplicationsTabService {
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    ObjectMapper objectMapper;
 
     public void updateApplicationTabData(CaseData caseData) {
 
