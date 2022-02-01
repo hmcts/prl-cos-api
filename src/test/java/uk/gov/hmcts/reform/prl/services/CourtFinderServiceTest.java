@@ -280,7 +280,7 @@ public class CourtFinderServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
 
-        assertEquals(courtFinderService.getCorrectPartyPostcode(caseData), "AB12 3AL");
+        assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
     }
 
     @Test
