@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
@@ -321,5 +322,10 @@ public class CaseData implements MappableObject {
      */
     private final List<RejectReasonEnum> rejectReason;
     private String returnMessage;
+
+    /**
+     * Issue and send to local court'.
+     */
+    private final List<Element<LocalCourtAdminEmail>> localCourtAdminEmail;
 
 }
