@@ -30,8 +30,9 @@ public class RespondentRelationshipChecker implements EventChecker {
         Optional<RespondentRelationOptionsInfo> respondentRelationOptionsInfo = ofNullable(caseData.getRespondentRelationOptions());
 
         if (respondentRelationObjectType.isPresent()) {
-
-            if (respondentRelationObjectType.get().equals(ApplicantRelationshipEnum.valueOf("noneOfTheAbove"))) {
+            if (respondentRelationObjectType.get().equals(RespondentRelationObjectType.builder()
+                                                              .applicantRelationshipEnum(ApplicantRelationshipEnum.noneOfTheAbove)
+                                                              .build())) {
                 finished = respondentRelationOptionsInfo.isPresent();
             } else {
                 taskErrorService.removeError(RELATIONSHIP_TO_RESPONDENT_ERROR);
