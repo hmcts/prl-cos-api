@@ -37,7 +37,7 @@ public class ApplicantsChecker implements EventChecker {
 
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
-        if(caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)){
+        if (caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)) {
             PartyDetails fl401ApplicantDetails = caseData.getApplicantsFL401();
 
             Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(fl401ApplicantDetails).build();
@@ -127,8 +127,9 @@ public class ApplicantsChecker implements EventChecker {
         if (gender.isPresent() && gender.get().equals(other)) {
             fields.add(ofNullable(applicant.getOtherGender()));
         }
-        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE))
+        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
             fields.add(ofNullable(applicant.getPlaceOfBirth()));
+        }
         Optional<Address> address = ofNullable(applicant.getAddress());
         fields.add(address);
         if (address.isPresent() && !verifyAddressCompleted(address.get())) {
