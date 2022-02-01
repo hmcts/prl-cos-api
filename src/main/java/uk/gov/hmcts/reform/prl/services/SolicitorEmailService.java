@@ -89,7 +89,7 @@ public class SolicitorEmailService {
     public void sendEmail(CaseDetails caseDetails) {
         log.info("Sending the email to solicitor for caseId {}", caseDetails.getId()
         );
-        log.info("caseDetails.getData() {}", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+        log.info("caseDetails.getDatan print() {}", caseDetails.getData().toString());
         emailService.send(
             caseDetails.getData().get("applicantSolicitorEmailAddress").toString(),
             EmailTemplateNames.SOLICITOR,
