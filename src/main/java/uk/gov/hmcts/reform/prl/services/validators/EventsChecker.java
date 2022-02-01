@@ -13,6 +13,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
@@ -96,6 +97,8 @@ public class EventsChecker {
         eventStatus.put(WELSH_LANGUAGE_REQUIREMENTS, welshLanguageRequirementsChecker);
         eventStatus.put(VIEW_PDF_DOCUMENT, pdfChecker);
         eventStatus.put(SUBMIT_AND_PAY, submitAndPayChecker);
+
+        eventStatus.put(FL401_CASE_NAME, caseNameChecker);
     }
 
     public boolean isFinished(Event event, CaseData caseData) {
