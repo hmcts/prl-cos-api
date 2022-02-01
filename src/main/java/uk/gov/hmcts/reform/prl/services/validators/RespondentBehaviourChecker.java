@@ -13,7 +13,6 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.APPLICANTS_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RESPONDENT_BEHAVIOUR_ERROR;
 
 
@@ -25,22 +24,17 @@ public class RespondentBehaviourChecker implements EventChecker {
 
     @Override
     public boolean isFinished(CaseData caseData) {
-        boolean finished;
         RespondentBehaviour respondentBehaviourData = caseData.getRespondentBehaviourData();
         if (respondentBehaviourData == null) {
             return false;
         }
+
         Optional<String>  otherReason = ofNullable(respondentBehaviourData.getOtherReasonApplicantWantToStopFromRespondentDoing());
         Optional<List<ApplicantStopFromRespondentDoingEnum>> applicantStopRespondentList
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoing());
-
         if (otherReason.isPresent() && applicantStopRespondentList.get().size() != 0) {
-            finished = otherReason.isPresent()
-                && applicantStopRespondentList.get().size() != 0;
-            if (finished) {
-                taskErrorService.removeError(RESPONDENT_BEHAVIOUR_ERROR);
-                return true;
-            }
+            taskErrorService.removeError(RESPONDENT_BEHAVIOUR_ERROR);
+            return true;
         } else {
             taskErrorService.addEventError(RESPONDENT_BEHAVIOUR,
                                            RESPONDENT_BEHAVIOUR_ERROR,
@@ -63,8 +57,8 @@ public class RespondentBehaviourChecker implements EventChecker {
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoingToChild());
         boolean anyStarted = false;
 
-        if (otherReason.isPresent() || applicantStopRespondentList.get().size() != 0
-            || applicantStopFromRespondentDoingToChildList.get().size() != 0) {
+        if (otherReason.isPresent() || (applicantStopRespondentList.isPresent() && applicantStopRespondentList.get().size() != 0)
+            || (applicantStopFromRespondentDoingToChildList.isPresent() && applicantStopFromRespondentDoingToChildList.get().size() != 0)) {
             anyStarted = true;
         }
 
@@ -82,7 +76,7 @@ public class RespondentBehaviourChecker implements EventChecker {
         Optional<List<ApplicantStopFromRespondentDoingEnum>> applicantStopRespondentList
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoing());
         return otherReason.isPresent()
-            && applicantStopRespondentList.get().size() != 0;
+            && applicantStopRespondentList.isPresent() && applicantStopRespondentList.get().size() != 0;
     }
 
 }
