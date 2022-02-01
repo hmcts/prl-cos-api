@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
-import uk.gov.hmcts.reform.prl.models.complextypes.Orders;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -36,7 +36,7 @@ public class FL401ApplicationTypeChecker implements EventChecker {
     @Override
     public boolean isFinished(CaseData caseData) {
 
-        Optional<Orders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
+        Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
         Optional<LinkToCA> applicationTypeLinkToCA = ofNullable(caseData.getTypeOfApplicationLinkToCA());
 
         boolean finished;
