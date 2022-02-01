@@ -166,3 +166,7 @@ case_document_am:
 prl-dgs-api:
   url: http://localhost:4007
 
+courtfinder:
+  api:
+    url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal/}
+

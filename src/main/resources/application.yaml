@@ -4,14 +4,14 @@ server:
 runs-locally: ${RUNS_LOCALLY:true}
 
 management:
-    endpoint:
-      health:
-        show-details: "always"
-    endpoints:
-      web:
-        base-path: /
-        exposure:
-          include: health, info, prometheus
+  endpoint:
+    health:
+      show-details: "always"
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health, info, prometheus
 
   #If you use a database then uncomment below lines and update db properties accordingly
 spring:
@@ -119,6 +119,7 @@ fees-register:
 
 # NEW BELOW THIS LINE
 
+
 idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
@@ -175,3 +176,8 @@ case_document_am:
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
 
+
+
+courtfinder:
+  api:
+    url: http://fact-api-aat.service.core-compute-aat.internal/
