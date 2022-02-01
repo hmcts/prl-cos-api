@@ -116,6 +116,7 @@ prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
+authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:}
 
 security:
     oauth2:
