@@ -16,8 +16,8 @@ import uk.gov.hmcts.reform.prl.services.TaskListService;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 
@@ -33,15 +33,13 @@ public class CaseEventHandler {
     @EventListener
     public void handleCaseDataChange(final CaseDataChanged event) {
         final CaseData caseData = event.getCaseData();
-        // TODO: this has to be removed once tasklist is done for FL401. For now No Task List for FL401.
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)) {
-            return;
-        }
+
         final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
 
         List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors();
 
-        final String taskList = taskListRenderer.render(tasks, eventErrors);
+        final String taskList = taskListRenderer
+            .render(tasks, eventErrors, caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE));
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
