@@ -58,19 +58,6 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void whenUserDetailsProvidedThenValidEmailReturned() {
-
-        when(userService.getUserDetails("Auth")).thenReturn(UserDetails.builder()
-                                                                .email("test@email.com")
-                                                                .build());
-
-        UserDetails userDetails = userService.getUserDetails("Auth");
-
-        assertEquals("test@email.com", solicitorEmailService.getRecipientEmail(userDetails));
-    }
-
-
-    @Test
     public void whenApplicantPresentThenApplicantStringCreated() {
 
         PartyDetails applicant = PartyDetails.builder()
@@ -110,18 +97,5 @@ public class SolicitorEmailServiceTest {
         assertEquals(solicitorEmailService.buildEmail(caseDetails), email);
 
     }
-
-    @Test
-    public void testGetRecipientDetails() {
-
-        UserDetails userDetails = UserDetails.builder()
-            .email("test@email.com")
-            .build();
-
-        String expected = "test@email.com";
-
-        assertEquals(solicitorEmailService.getRecipientEmail(userDetails), expected);
-    }
-
 }
 
