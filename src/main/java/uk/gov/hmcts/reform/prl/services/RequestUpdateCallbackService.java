@@ -44,7 +44,8 @@ public class RequestUpdateCallbackService {
         );
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);
-
+        log.info("Fetching the Case details based on caseId {}", serviceRequestUpdateDto.getCcdCaseNumber()
+        );
         CaseDetails caseDetails = coreCaseDataApi.getCase(
             userToken,
             authTokenGenerator.generate(),
@@ -52,6 +53,9 @@ public class RequestUpdateCallbackService {
         );
 
         if (!Objects.isNull(caseDetails.getId())) {
+            log.info("Updating the Case data with payment information for caseId {}",
+                     serviceRequestUpdateDto.getCcdCaseNumber()
+            );
             createEvent(serviceRequestUpdateDto, userToken, systemUpdateUserId,
                         serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
                             ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
