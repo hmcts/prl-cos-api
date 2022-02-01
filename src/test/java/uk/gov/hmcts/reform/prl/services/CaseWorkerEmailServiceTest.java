@@ -19,7 +19,9 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -34,7 +36,7 @@ public class CaseWorkerEmailServiceTest {
     private static final String WITHOUT_NOTICE = "Without Notice";
     private static final String STANDARAD_HEARING = "Standard Hearing";
 
-    public static final CaseWorkerEmail expectedEmailVars =  CaseWorkerEmail.builder()
+    public static final CaseWorkerEmail expectedEmailVars = CaseWorkerEmail.builder()
         .caseReference("123")
         .caseName("Case 123")
         .applicantName("applicantName")
@@ -282,6 +284,63 @@ public class CaseWorkerEmailServiceTest {
 
         assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
 
+    }
+
+    @Test
+    public void sendEmailSuccessfully() {
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .lastName("respondentLast")
+            .build();
+
+        String respondentNames = "TestLast";
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicants(listOfApplicants)
+            .respondents(listOfRespondents)
+            .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.specificIssueOrder))
+            .isCaseUrgent(YesOrNo.No)
+            .doYouNeedAWithoutNoticeHearing(YesOrNo.No)
+            .caseworkerEmailAddress("test@test.com")
+            .doYouRequireAHearingWithReducedNotice(YesOrNo.Yes)
+            .build();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("caseworkerEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        EmailTemplateVars email = CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .applicantName(applicantNames)
+            .respondentLastName("respondentLast")
+            .typeOfHearing("Reduced notice")
+            .hearingDateRequested("  ")
+            .ordersApplyingFor("Specific Issue Order")
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+        caseWorkerEmailService.sendEmail(caseDetails);
+        assertEquals(caseDetails.getData().get("caseworkerEmailAddress").toString(), "test@test.com");
     }
 }
 
