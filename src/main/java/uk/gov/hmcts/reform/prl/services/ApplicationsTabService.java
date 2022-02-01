@@ -83,7 +83,6 @@ public class ApplicationsTabService {
         applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
         applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
 
-        //TODO: add child details (currently using standard child complex type)
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
@@ -143,10 +142,9 @@ public class ApplicationsTabService {
         return respondents;
     }
 
-    public Map<String, Object> getDeclarationTable(CaseData caseData) {
+    public Map<String, Object> getDeclarationTable() {
         Map<String, Object> declarationMap = new HashMap<>();
 
-        //TODO: fetch solicitor name from idam
         String declarationText = "I understand that proceedings for contempt of court may be brought"
             + " against anyone who makes, or causes to be made, a false statement in a document verified"
             + " by a statement of truth without an honest belief in its truth. The applicant believes "
@@ -413,7 +411,7 @@ public class ApplicationsTabService {
 
         Optional<List<ApplicantOrChildren>> emoVictim = ofNullable(caseData.getEmotionalAbuseVictim());
         String emoVictimString = "";
-        if (physVictm.isPresent()) {
+        if (emoVictim.isPresent()) {
             emoVictimString = caseData.getEmotionalAbuseVictim().stream()
                 .map(ApplicantOrChildren::getDisplayedValue)
                 .collect(Collectors.joining(", "));
@@ -429,7 +427,7 @@ public class ApplicationsTabService {
 
         Optional<List<ApplicantOrChildren>> sexVictim = ofNullable(caseData.getSexualAbuseVictim());
         String sexVictimString = "";
-        if (physVictm.isPresent()) {
+        if (sexVictim.isPresent()) {
             sexVictimString = caseData.getSexualAbuseVictim().stream()
                 .map(ApplicantOrChildren::getDisplayedValue)
                 .collect(Collectors.joining(", "));

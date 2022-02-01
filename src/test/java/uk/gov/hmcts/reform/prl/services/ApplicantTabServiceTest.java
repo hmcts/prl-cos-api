@@ -289,7 +289,7 @@ public class ApplicantTabServiceTest {
         expectedDeclarationMap.put("declarationText", declarationText);
         expectedDeclarationMap.put("agreedBy", "<Solicitor name>");
 
-        assertEquals(expectedDeclarationMap, applicationsTabService.getDeclarationTable(caseDataWithParties));
+        assertEquals(expectedDeclarationMap, applicationsTabService.getDeclarationTable());
     }
 
     @Test
