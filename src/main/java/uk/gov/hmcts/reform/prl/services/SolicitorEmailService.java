@@ -77,9 +77,4 @@ public class SolicitorEmailService {
         );
 
     }
-
-    public String getRecipientEmail(UserDetails userDetails) {
-        return userDetails.getEmail() != null ? userDetails.getEmail() : "prl_caseworker_solicitor@mailinator.com";
-    }
-
 }
