@@ -35,7 +35,6 @@ public class ApplicantsChecker implements EventChecker {
     @Override
     public boolean isFinished(CaseData caseData) {
 
-
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
         if(caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)){
@@ -169,8 +168,6 @@ public class ApplicantsChecker implements EventChecker {
         return fields.stream().noneMatch(Optional::isEmpty)
 
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
-
-
     }
 
     public boolean verifyAddressCompleted(Address address) {
