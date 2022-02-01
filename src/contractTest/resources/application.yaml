@@ -173,3 +173,8 @@ case_document_am:
 
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
+
+courtfinder:
+  api:
+    url: http://fact-api-aat.service.core-compute-aat.internal/
+
