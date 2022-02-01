@@ -26,10 +26,8 @@ import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -141,13 +139,10 @@ public class CallbackController {
 
         String caseOfApplicant = caseData.getCaseTypeOfApplication();
 
-        log.info("caseOfApplicant: " + caseOfApplicant);
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("textApplicants", caseOfApplicant);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-
     }
 
 }

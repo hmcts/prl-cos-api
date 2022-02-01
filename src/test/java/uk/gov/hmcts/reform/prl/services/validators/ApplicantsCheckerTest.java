@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -124,7 +123,7 @@ public class ApplicantsCheckerTest {
             .country("UK")
             .build();
 
-       assertFalse(applicantsChecker.verifyAddressCompleted(address));
+        assertFalse(applicantsChecker.verifyAddressCompleted(address));
     }
 
     @Test
