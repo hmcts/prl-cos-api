@@ -10,7 +10,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -64,20 +63,6 @@ public class CaseWorkerEmailServiceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
-
-    @Test
-    public void whenUserDetailsProvidedThenValidEmailReturned() {
-
-        when(userService.getUserDetails("Auth")).thenReturn(UserDetails.builder()
-                                                                .email("test@email.com")
-                                                                .build());
-
-        UserDetails userDetails = userService.getUserDetails("Auth");
-
-        assertEquals("test@email.com", caseWorkerEmailService.getRecipientEmail(userDetails));
-
-    }
-
 
     @Test
     public void whenApplicantPresentThenApplicantStringCreated() {
@@ -297,18 +282,6 @@ public class CaseWorkerEmailServiceTest {
 
         assertEquals(email, caseWorkerEmailService.buildEmail(caseDetails));
 
-    }
-
-    @Test
-    public void testGetRecipientDetails() {
-
-        UserDetails userDetails = UserDetails.builder()
-            .email("test@email.com")
-            .build();
-
-        String expected = "test@email.com";
-
-        assertEquals(expected, caseWorkerEmailService.getRecipientEmail(userDetails));
     }
 }
 
