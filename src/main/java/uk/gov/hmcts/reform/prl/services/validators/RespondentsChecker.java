@@ -35,7 +35,7 @@ public class RespondentsChecker implements EventChecker {
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
 
-            if(caseData.getRespondentsFL401() != null){
+            if (caseData.getRespondentsFL401() != null) {
                 Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getRespondentsFL401()).build();
                 respondentsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
             }
@@ -67,7 +67,7 @@ public class RespondentsChecker implements EventChecker {
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
 
-            if(caseData.getRespondentsFL401() != null){
+            if (caseData.getRespondentsFL401() != null) {
                 Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getRespondentsFL401()).build();
                 respondentWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
             }

@@ -73,7 +73,7 @@ public class RespondentsCheckerTest {
         CaseData caseData = CaseData.builder().caseTypeOfApplication("Test")
             .build();
 
-        assertFalse (respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData.getCaseTypeOfApplication()));
+        assertFalse(respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData.getCaseTypeOfApplication()));
 
     }
 
