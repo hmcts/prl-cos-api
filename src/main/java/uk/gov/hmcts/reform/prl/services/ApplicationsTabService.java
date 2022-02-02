@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
+import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
@@ -168,17 +169,19 @@ public class ApplicationsTabService {
     }
 
     public Map<String, Object> getTypeOfApplicationTable(CaseData caseData) {
-
         Optional<List<OrderTypeEnum>> checkOrders = ofNullable(caseData.getOrdersApplyingFor());
         if (checkOrders.isEmpty()) {
             return Collections.emptyMap();
         }
-
         List<String> ordersApplyingFor = caseData.getOrdersApplyingFor().stream()
             .map(OrderTypeEnum::getDisplayedValue)
             .collect(Collectors.toList());
 
-        String typeOfChildArrangementsOrder = caseData.getTypeOfChildArrangementsOrder().getDisplayedValue();
+        String typeOfChildArrangementsOrder = "";
+        Optional<ChildArrangementOrderTypeEnum> childArrangementCheck = ofNullable(caseData.getTypeOfChildArrangementsOrder());
+        if (childArrangementCheck.isPresent()) {
+            typeOfChildArrangementsOrder = caseData.getTypeOfChildArrangementsOrder().getDisplayedValue();
+        }
         String natureOfOrder = caseData.getNatureOfOrder();
 
         TypeOfApplication typeOfApplication = TypeOfApplication.builder()
