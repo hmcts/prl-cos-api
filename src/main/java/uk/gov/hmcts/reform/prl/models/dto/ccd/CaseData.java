@@ -148,6 +148,9 @@ public class CaseData {
      * Respondent details.
      */
     private final List<Element<PartyDetails>> respondents;
+    @JsonProperty("respondentsFL401")
+    private final PartyDetails respondentsFL401;
+
 
     /**
      * MIAM.

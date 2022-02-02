@@ -11,11 +11,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RESPONDENT_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -30,6 +33,13 @@ public class RespondentsChecker implements EventChecker {
     public boolean isFinished(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
 
+        if (caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)) {
+            PartyDetails fl401RespondentDetails = caseData.getApplicantsFL401();
+
+            Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(fl401RespondentDetails).build();
+            respondentsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
+        }
+
         if (respondentsWrapped.isPresent() && respondentsWrapped.get().size() != 0) {
             List<PartyDetails> respondents = respondentsWrapped.get()
                 .stream()
@@ -37,7 +47,7 @@ public class RespondentsChecker implements EventChecker {
                 .collect(Collectors.toList());
 
             for (PartyDetails p : respondents) {
-                if (!(validateMandatoryFieldsForRespondent(p))) {
+                if (!(validateMandatoryFieldsForRespondent(p, caseData))) {
                     taskErrorService.addEventError(RESPONDENT_DETAILS, RESPONDENT_DETAILS_ERROR, RESPONDENT_DETAILS_ERROR.getError());
                     return false;
                 }
@@ -77,7 +87,7 @@ public class RespondentsChecker implements EventChecker {
         return false;
     }
 
-    public boolean validateMandatoryFieldsForRespondent(PartyDetails respondent) {
+    public boolean validateMandatoryFieldsForRespondent(PartyDetails respondent, CaseData caseData) {
 
         List<Optional> fields = new ArrayList<>();
 
@@ -93,10 +103,12 @@ public class RespondentsChecker implements EventChecker {
         if (gender.isPresent() && gender.get().equals(Gender.other)) {
             fields.add(ofNullable(respondent.getOtherGender()));
         }
-        Optional<YesOrNo> isPlaceOfBirthKnown = ofNullable(respondent.getIsPlaceOfBirthKnown());
-        fields.add(isPlaceOfBirthKnown);
-        if (isPlaceOfBirthKnown.isPresent() && isPlaceOfBirthKnown.get().equals(Yes)) {
-            fields.add(ofNullable(respondent.getPlaceOfBirth()));
+        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+            Optional<YesOrNo> isPlaceOfBirthKnown = ofNullable(respondent.getIsPlaceOfBirthKnown());
+            fields.add(isPlaceOfBirthKnown);
+            if (isPlaceOfBirthKnown.isPresent() && isPlaceOfBirthKnown.get().equals(Yes)) {
+                fields.add(ofNullable(respondent.getPlaceOfBirth()));
+            }
         }
         Optional<YesOrNo> isCurrentAddressKnown = ofNullable(respondent.getIsCurrentAddressKnown());
         fields.add(isCurrentAddressKnown);
@@ -118,10 +130,12 @@ public class RespondentsChecker implements EventChecker {
         if (canYouProvidePhoneNumber.isPresent() && canYouProvidePhoneNumber.get().equals(Yes)) {
             fields.add(ofNullable(respondent.getPhoneNumber()));
         }
-        Optional<YesNoDontKnow> doTheyHaveLegalRepresentation = ofNullable(respondent.getDoTheyHaveLegalRepresentation());
-        fields.add(doTheyHaveLegalRepresentation);
-        if (doTheyHaveLegalRepresentation.isPresent() && doTheyHaveLegalRepresentation.get().equals(YesNoDontKnow.yes)) {
-            fields.add(ofNullable(respondent.getSolicitorEmail()));
+        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+            Optional<YesNoDontKnow> doTheyHaveLegalRepresentation = ofNullable(respondent.getDoTheyHaveLegalRepresentation());
+            fields.add(doTheyHaveLegalRepresentation);
+            if (doTheyHaveLegalRepresentation.isPresent() && doTheyHaveLegalRepresentation.get().equals(YesNoDontKnow.yes)) {
+                fields.add(ofNullable(respondent.getSolicitorEmail()));
+            }
         }
 
         return fields.stream().noneMatch(Optional::isEmpty)
