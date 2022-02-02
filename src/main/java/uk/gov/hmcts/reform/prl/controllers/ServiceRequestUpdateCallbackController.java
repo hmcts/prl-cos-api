@@ -65,6 +65,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) throws Exception {
         try {
+            log.info("**********************");
             final CaseDetails caseDetails = callbackRequest.getCaseDetails();
             final CaseData caseData = getCaseData(caseDetails);
             PaymentDto paymentDto = PaymentDto.builder()
@@ -83,9 +84,9 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
                 .build();
 
 
-
+            log.info("Before application tab service submission");
             applicationsTabService.updateApplicationTabData(caseData);
-
+            log.info("After application tab service");
             requestUpdateCallbackService.processCallbackForBypass(serviceRequestUpdateDto, authorisation);
 
         } catch (Exception ex) {
