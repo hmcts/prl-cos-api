@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
@@ -53,7 +54,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-public class CaseData {
+public class CaseData implements MappableObject {
 
     private final long id;
 
@@ -318,6 +319,14 @@ public class CaseData {
      */
     private final List<RejectReasonEnum> rejectReason;
     private String returnMessage;
+
+    /**
+     * This field contains Application Submitter solicitor email address.
+     */
+    private final String applicantSolicitorEmailAddress;
+    private final String respondentSolicitorEmailAddress;
+    private final String caseworkerEmailAddress;
+
 
 
     /**
