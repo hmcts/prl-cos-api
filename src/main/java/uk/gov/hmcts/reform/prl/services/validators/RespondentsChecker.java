@@ -34,10 +34,12 @@ public class RespondentsChecker implements EventChecker {
         Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
 
         if (caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)) {
-            PartyDetails fl401RespondentDetails = caseData.getApplicantsFL401();
+            PartyDetails fl401RespondentDetails = caseData.getRespondentsFL401();
 
-            Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(fl401RespondentDetails).build();
-            respondentsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
+            if(fl401RespondentDetails != null){
+                Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(fl401RespondentDetails).build();
+                respondentsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
+            }
         }
 
         if (respondentsWrapped.isPresent() && respondentsWrapped.get().size() != 0) {
@@ -63,6 +65,15 @@ public class RespondentsChecker implements EventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> respondentWrapped = ofNullable(caseData.getRespondents());
+
+        if (caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)) {
+            PartyDetails fl401RespondentDetails = caseData.getRespondentsFL401();
+
+            if(fl401RespondentDetails != null){
+                Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(fl401RespondentDetails).build();
+                respondentWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
+            }
+        }
 
         boolean anyStarted = false;
 
@@ -98,12 +109,12 @@ public class RespondentsChecker implements EventChecker {
         if (isDateOfBirthKnown.isPresent() && isDateOfBirthKnown.get().equals(Yes)) {
             fields.add(ofNullable(respondent.getDateOfBirth()));
         }
-        Optional<Gender> gender = ofNullable(respondent.getGender());
-        fields.add(gender);
-        if (gender.isPresent() && gender.get().equals(Gender.other)) {
-            fields.add(ofNullable(respondent.getOtherGender()));
-        }
         if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+            Optional<Gender> gender = ofNullable(respondent.getGender());
+            fields.add(gender);
+            if (gender.isPresent() && gender.get().equals(Gender.other)) {
+                fields.add(ofNullable(respondent.getOtherGender()));
+            }
             Optional<YesOrNo> isPlaceOfBirthKnown = ofNullable(respondent.getIsPlaceOfBirthKnown());
             fields.add(isPlaceOfBirthKnown);
             if (isPlaceOfBirthKnown.isPresent() && isPlaceOfBirthKnown.get().equals(Yes)) {
