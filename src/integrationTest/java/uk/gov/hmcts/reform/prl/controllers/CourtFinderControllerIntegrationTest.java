@@ -8,6 +8,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,7 +19,7 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 
 import static org.junit.Assert.assertEquals;
 
-
+@Ignore
 @SpringBootTest(classes = {CourtFinderControllerIntegrationTest.class, Application.class})
 public class CourtFinderControllerIntegrationTest extends IntegrationTest {
 
