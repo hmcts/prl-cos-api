@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
@@ -290,6 +291,9 @@ public class CaseData implements MappableObject {
     private final String feeCode;
     @JsonProperty("draftOrderDoc")
     private final Document draftOrderDoc;
+    @JsonProperty("c8Document")
+    private final Document c8Document;
+
     @JsonProperty("submitAndPayDownloadApplicationLink")
     private final Document submitAndPayDownloadApplicationLink;
 
@@ -320,12 +324,16 @@ public class CaseData implements MappableObject {
     private String returnMessage;
 
     /**
+     * Issue and send to local court'.
+     */
+    private final List<Element<LocalCourtAdminEmail>> localCourtAdminEmail;
+  
+    /**
      * This field contains Application Submitter solicitor email address.
      */
     private final String applicantSolicitorEmailAddress;
     private final String respondentSolicitorEmailAddress;
     private final String caseworkerEmailAddress;
-
 
 
     /**
