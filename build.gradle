@@ -41,7 +41,7 @@ def versions = [
   //  jsonPathAssert               : '2.2.0',
   junit                        : '4.13.1',
   junitPlatform                : '5.7.2',
-  lombok                       : '1.18.20',
+  lombok                       : '1.18.22',
   pact                         : '4.1.11',
   puppyCrawl                   : '8.43',
   reformPropertiesVolume       : '0.0.4',
