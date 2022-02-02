@@ -86,7 +86,7 @@ public class SolicitorEmailService {
         );
 
         emailService.send(
-            caseDetails.getData().get("applicantSolicitorEmailAddress").toString(),
+            "jason.llewelyn@justice.gov.uk",
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
             LanguagePreference.ENGLISH
