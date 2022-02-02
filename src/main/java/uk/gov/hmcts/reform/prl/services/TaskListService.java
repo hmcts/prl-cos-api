@@ -69,7 +69,7 @@ public class TaskListService {
     }
 
     private List<Event> getC100Events() {
-        final List<Event> events = new ArrayList<>(List.of(
+        return new ArrayList<>(List.of(
             CASE_NAME,
             TYPE_OF_APPLICATION,
             HEARING_URGENCY,
@@ -88,11 +88,10 @@ public class TaskListService {
             SUBMIT_AND_PAY
         ));
 
-        return events;
     }
 
     private List<Event> getFL401Events() {
-        final List<Event> events = new ArrayList<>(List.of(
+        return new ArrayList<>(List.of(
             FL401_CASE_NAME,
             FL401_TYPE_OF_APPLICATION,
             APPLICANT_DETAILS,
@@ -102,7 +101,6 @@ public class TaskListService {
             WELSH_LANGUAGE_REQUIREMENTS,
             VIEW_PDF_DOCUMENT));
 
-        return events;
     }
 
 }
