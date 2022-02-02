@@ -65,7 +65,7 @@ public class ApplicationsTabService {
         applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
         applicationTab.put("applicantTable", getApplicantsTable(caseData));
         applicationTab.put("respondentTable", getRespondentsTable(caseData));
-        applicationTab.put("declarationTable",getDeclarationTable(caseData));
+        applicationTab.put("declarationTable",getDeclarationTable());
         applicationTab.put("typeOfApplicationTable",getTypeOfApplicationTable(caseData));
         applicationTab.put("allegationsOfHarmOverviewTable", getAllegationsOfHarmOverviewTable(caseData));
         applicationTab.put("miamTable", getMiamTable(caseData));
