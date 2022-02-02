@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -16,6 +17,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.TYPE_OF_APPLICATION_ERROR;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
+@Slf4j
 @Service
 public class FL401ApplicationTypeChecker implements EventChecker {
 
@@ -47,6 +49,9 @@ public class FL401ApplicationTypeChecker implements EventChecker {
             if (applicationTypeLinkToCA.isPresent() && applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
                 YesOrNo.Yes)) {
                 finished = applicationTypeLinkToCA.get().getChildArrangementsApplicationNumber() != null;
+            } else if(applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
+                YesOrNo.No)){
+                return true;
             } else {
                 return false;
             }
