@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
+import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
@@ -50,6 +52,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicationsTabService {
@@ -84,6 +87,8 @@ public class ApplicationsTabService {
         applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
         applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
 
+        log.info("inside the application tab service update");
+        log.info(applicationTab.toString());
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
@@ -164,17 +169,19 @@ public class ApplicationsTabService {
     }
 
     public Map<String, Object> getTypeOfApplicationTable(CaseData caseData) {
-
         Optional<List<OrderTypeEnum>> checkOrders = ofNullable(caseData.getOrdersApplyingFor());
         if (checkOrders.isEmpty()) {
             return Collections.emptyMap();
         }
-
         List<String> ordersApplyingFor = caseData.getOrdersApplyingFor().stream()
             .map(OrderTypeEnum::getDisplayedValue)
             .collect(Collectors.toList());
 
-        String typeOfChildArrangementsOrder = caseData.getTypeOfChildArrangementsOrder().getDisplayedValue();
+        String typeOfChildArrangementsOrder = "";
+        Optional<ChildArrangementOrderTypeEnum> childArrangementCheck = ofNullable(caseData.getTypeOfChildArrangementsOrder());
+        if (childArrangementCheck.isPresent()) {
+            typeOfChildArrangementsOrder = caseData.getTypeOfChildArrangementsOrder().getDisplayedValue();
+        }
         String natureOfOrder = caseData.getNatureOfOrder();
 
         TypeOfApplication typeOfApplication = TypeOfApplication.builder()
