@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
+import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
@@ -243,9 +244,21 @@ public class ApplicationsTabService {
             otherGroundsEvidence = "";
         }
 
+        String childEvidence;
+        Optional<List<MiamChildProtectionConcernChecklistEnum>> childCheck = ofNullable(caseData
+                                                                                            .getMiamChildProtectionConcernList());
+        if (childCheck.isPresent()) {
+            childEvidence = caseData.getMiamChildProtectionConcernList()
+                .stream().map(MiamChildProtectionConcernChecklistEnum::getDisplayedValue)
+                .collect(Collectors.joining("\n"));
+        } else {
+            childEvidence = "";
+        }
+
         MiamExemptions miamExemptions = MiamExemptions.builder()
             .reasonsForMiamExemption(reasonsForMiamExemption)
             .domesticViolenceEvidence(domesticViolenceEvidence)
+            .childProtectionEvidence(childEvidence)
             .urgencyEvidence(urgencyEvidence)
             .previousAttendenceEvidence(previousAttendenceEvidence)
             .otherGroundsEvidence(otherGroundsEvidence)
