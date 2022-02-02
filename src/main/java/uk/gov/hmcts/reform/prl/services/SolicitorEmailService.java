@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,35 +44,41 @@ public class SolicitorEmailService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
-    @Autowired
     private final CourtFinderService courtLocatorService;
 
     public EmailTemplateVars buildEmail(CaseDetails caseDetails) {
-        CaseData caseData = emailService.getCaseData(caseDetails);
-        List<PartyDetails> applicants = caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
+        try {
+            CaseData caseData = emailService.getCaseData(caseDetails);
+            List<PartyDetails> applicants = caseData
+                .getApplicants()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
 
-        List<String> applicantNamesList = applicants.stream()
-            .map(element -> element.getFirstName() + " " + element.getLastName())
-            .collect(Collectors.toList());
+            List<String> applicantNamesList = applicants.stream()
+                .map(element -> element.getFirstName() + " " + element.getLastName())
+                .collect(Collectors.toList());
 
-        String applicantNames = String.join(", ", applicantNamesList);
+            String applicantNames = String.join(", ", applicantNamesList);
 
-        Court court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
+            Court court = null;
 
-        return SolicitorEmail.builder()
-            .caseReference(String.valueOf(caseDetails.getId()))
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-            .applicantName(applicantNames)
-            .courtName(court.getCourtName())
-            //.fullName(userDetails.getFullName())
-            .courtEmail(courtEmail)
-            .caseLink(manageCaseUrl + caseDetails.getId())
-            .build();
+            court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
 
+
+            return SolicitorEmail.builder()
+                .caseReference(String.valueOf(caseDetails.getId()))
+                .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+                .applicantName(applicantNames)
+                .courtName(court.getCourtName())
+                //.fullName(userDetails.getFullName())
+                .courtEmail(courtEmail)
+                .caseLink(manageCaseUrl + caseDetails.getId())
+                .build();
+        } catch (NotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public void sendEmail(CaseDetails caseDetails) {
