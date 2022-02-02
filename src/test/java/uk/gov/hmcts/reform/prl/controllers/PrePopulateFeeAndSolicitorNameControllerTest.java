@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
-import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -53,9 +52,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     @Mock
     private FeeResponse feeResponse;
-
-    @Mock
-    private ApplicationsTabService applicationsTabService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
