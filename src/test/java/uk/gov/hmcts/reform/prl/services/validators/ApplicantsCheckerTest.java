@@ -87,7 +87,7 @@ public class ApplicantsCheckerTest {
             .applicants(null)
             .build();
 
-        assert !applicantsChecker.isStarted(caseData);
+        assertFalse(applicantsChecker.isStarted(caseData));
     }
 
     @Test

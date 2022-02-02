@@ -182,7 +182,7 @@ public class CallbackControllerTest {
             callbackRequest
         );
 
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("textApplicants"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("typeOfApplication"));
 
     }
 

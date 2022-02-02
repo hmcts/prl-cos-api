@@ -37,11 +37,10 @@ public class ApplicantsChecker implements EventChecker {
 
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
-        if (caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)) {
-            PartyDetails fl401ApplicantDetails = caseData.getApplicantsFL401();
+        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
 
-            if(fl401ApplicantDetails != null){
-                Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(fl401ApplicantDetails).build();
+            if(caseData.getApplicantsFL401() != null){
+                Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getApplicantsFL401()).build();
                 applicantsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
             }
         }
@@ -60,7 +59,7 @@ public class ApplicantsChecker implements EventChecker {
         for (PartyDetails applicant : applicants) {
             Optional<String> dxNumber = ofNullable(applicant.getDxNumber());
 
-            boolean mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant, caseData);
+            boolean mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant, caseData.getCaseTypeOfApplication());
             boolean dxCompleted = (dxNumber.isPresent() && !(dxNumber.get().isBlank()));
 
             if (!(mandatoryCompleted && dxCompleted)) {
@@ -100,7 +99,7 @@ public class ApplicantsChecker implements EventChecker {
                 .collect(Collectors.toList());
 
             for (PartyDetails applicant : applicants) {
-                mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant, caseData);
+                mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant, caseData.getCaseTypeOfApplication());
                 if (!mandatoryCompleted) {
                     break;
                 }
@@ -116,7 +115,7 @@ public class ApplicantsChecker implements EventChecker {
         return false;
     }
 
-    private boolean mandatoryApplicantFieldsAreCompleted(PartyDetails applicant, CaseData caseData) {
+    private boolean mandatoryApplicantFieldsAreCompleted(PartyDetails applicant, String caseTypeOfApplication) {
 
 
         List<Optional> fields = new ArrayList<>();
@@ -128,7 +127,7 @@ public class ApplicantsChecker implements EventChecker {
         if (gender.isPresent() && gender.get().equals(other)) {
             fields.add(ofNullable(applicant.getOtherGender()));
         }
-        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+        if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
             fields.add(ofNullable(applicant.getPlaceOfBirth()));
         }
         Optional<Address> address = ofNullable(applicant.getAddress());
@@ -138,7 +137,7 @@ public class ApplicantsChecker implements EventChecker {
         }
         fields.add(ofNullable(applicant.getIsAddressConfidential()));
 
-        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+        if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
             Optional<YesOrNo> isAtAddressLessThan5Years = ofNullable(applicant.getIsAtAddressLessThan5Years());
             fields.add(isAtAddressLessThan5Years);
             if (isAtAddressLessThan5Years.isPresent() && isAtAddressLessThan5Years.get().equals(Yes)) {
