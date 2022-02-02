@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -11,12 +12,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
+import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
+import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -28,6 +33,10 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
     private final String serviceAuth = "ServiceAuthorization";
     private final RequestUpdateCallbackService requestUpdateCallbackService;
     private final AuthTokenGenerator authTokenGenerator;
+    private final ObjectMapper objectMapper;
+    private final UserService userService;
+    private final SolicitorEmailService solicitorEmailService;
+    private final CaseWorkerEmailService caseWorkerEmailService;
 
     @PostMapping(path = "/service-request-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Ways to pay will call this API and send the status of payment with other details")
@@ -50,6 +59,22 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
         }
     }
 
+    @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    public AboutToStartOrSubmitCallbackResponse aboutToSubmit(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                              @RequestBody CallbackRequest callbackRequest) {
+        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        final CaseData caseData = getCaseData(caseDetails);
+
+        CaseData caseDataUpdated = getCaseData(caseDetails).toBuilder()
+            .applicantSolicitorEmailAddress(userService.getUserDetails(authorisation).getEmail())
+            .caseworkerEmailAddress("yogendra.upasani@hmcts.net")
+            .build();
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated.toMap(objectMapper))
+            .build();
+    }
+
     @PostMapping(path = "/bypass-fee-pay", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Ways to pay will call this API and send the status of payment with other details")
     @ApiResponses(value = {
@@ -62,22 +87,10 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
         try {
             final CaseDetails caseDetails = callbackRequest.getCaseDetails();
             final CaseData caseData = getCaseData(caseDetails);
-            PaymentDto paymentDto = PaymentDto.builder()
-                .paymentAmount("232")
-                .paymentReference("PAY_REF")
-                .paymentMethod("PBA")
-                .caseReference(String.valueOf(caseData.getId()))
-                .accountNumber("111111")
-                .build();
-            ServiceRequestUpdateDto serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-                .serviceRequestReference(String.valueOf(caseData.getId()))
-                .ccdCaseNumber(String.valueOf(caseData.getId()))
-                .serviceRequestAmount("232")
-                .serviceRequestStatus("Paid")
-                .payment(paymentDto)
-                .build();
 
-            requestUpdateCallbackService.processCallbackForBypass(serviceRequestUpdateDto, authorisation);
+
+            solicitorEmailService.sendEmail(caseDetails);
+            caseWorkerEmailService.sendEmail(caseDetails);
 
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());
