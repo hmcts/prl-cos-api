@@ -236,6 +236,8 @@ public class ApplicantTabServiceTest {
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test string")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
+            //solicitor
+            .solicitorName("Test Solicitor")
             .build();
 
         emptyCaseData = CaseData.builder().build();
@@ -289,16 +291,17 @@ public class ApplicantTabServiceTest {
 
     @Test
     public void testDeclarationTable() {
+        String solicitor = caseDataWithParties.getSolicitorName();
         Map<String, Object> expectedDeclarationMap = new HashMap<>();
         String declarationText = "I understand that proceedings for contempt of court may be brought"
             + " against anyone who makes, or causes to be made, a false statement in a document verified"
             + " by a statement of truth without an honest belief in its truth. The applicant believes "
-            + "that the facts stated in this form and any continuation sheets are true. [Solicitor Name] "
-            + "is authorised by the applicant to sign this statement.";
+            + "that the facts stated in this form and any continuation sheets are true. " + solicitor
+            + " is authorised by the applicant to sign this statement.";
         expectedDeclarationMap.put("declarationText", declarationText);
-        expectedDeclarationMap.put("agreedBy", "<Solicitor name>");
+        expectedDeclarationMap.put("agreedBy", solicitor);
 
-        assertEquals(expectedDeclarationMap, applicationsTabService.getDeclarationTable());
+        assertEquals(expectedDeclarationMap, applicationsTabService.getDeclarationTable(caseDataWithParties));
     }
 
     @Test
