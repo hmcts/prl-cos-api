@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.DgsService;
-import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
@@ -27,8 +26,6 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 public class CallbackControllerTest {
 
-    @Mock
-    private ExampleService exampleService;
 
     @Mock
     private ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
@@ -59,17 +56,6 @@ public class CallbackControllerTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-    }
-
-    @Test
-    public void testSendEmail() throws WorkflowException {
-        CaseDetails caseDetails = CaseDetailsProvider.full();
-        when(exampleService.executeExampleWorkflow(caseDetails)).thenReturn(caseDetails.getCaseData());
-
-        callbackController.sendEmail(CallbackRequest.builder().caseDetails(caseDetails).build());
-
-        verify(exampleService).executeExampleWorkflow(caseDetails);
-        verifyNoMoreInteractions(exampleService);
     }
 
     @Test

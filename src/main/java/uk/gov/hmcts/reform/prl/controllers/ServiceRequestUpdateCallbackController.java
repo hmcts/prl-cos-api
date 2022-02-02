@@ -77,7 +77,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
                 .payment(paymentDto)
                 .build();
 
-            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+            requestUpdateCallbackService.processCallbackForBypass(serviceRequestUpdateDto, authorisation);
 
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());
