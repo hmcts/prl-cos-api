@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
@@ -50,6 +51,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicationsTabService {
@@ -84,6 +86,8 @@ public class ApplicationsTabService {
         applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
         applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
 
+        log.info("inside the application tab service update");
+        log.info(applicationTab.toString());
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
