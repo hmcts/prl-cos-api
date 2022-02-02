@@ -86,8 +86,6 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
     ) throws Exception {
         try {
             final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            final CaseData caseData = getCaseData(caseDetails);
-
 
             solicitorEmailService.sendEmail(caseDetails);
             caseWorkerEmailService.sendEmail(caseDetails);
