@@ -59,7 +59,7 @@ public class RespondentBehaviourChecker implements EventChecker {
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoingToChild());
         boolean anyStarted = false;
 
-        if ( otherReasonCompleted || (applicantStopRespondentList.isPresent() && applicantStopRespondentList.get().size() != 0)
+        if (otherReasonCompleted || (applicantStopRespondentList.isPresent() && applicantStopRespondentList.get().size() != 0)
             || (applicantStopFromRespondentDoingToChildList.isPresent() && applicantStopFromRespondentDoingToChildList.get().size() != 0)) {
             anyStarted = true;
         }
