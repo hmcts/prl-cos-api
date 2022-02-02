@@ -34,6 +34,9 @@ public class RequestUpdateCallbackService {
     private final ObjectMapper objectMapper;
     private final CoreCaseDataApi coreCaseDataApi;
     private final SystemUserService systemUserService;
+    private final SolicitorEmailService solicitorEmailService;
+    private final CaseWorkerEmailService caseWorkerEmailService;
+    private final UserService userService;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
 
@@ -42,6 +45,8 @@ public class RequestUpdateCallbackService {
         );
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);
+        log.info("Fetching the Case details based on caseId {}", serviceRequestUpdateDto.getCcdCaseNumber()
+        );
         CaseDetails caseDetails = coreCaseDataApi.getCase(
             userToken,
             authTokenGenerator.generate(),
@@ -49,14 +54,87 @@ public class RequestUpdateCallbackService {
         );
 
         if (!Objects.isNull(caseDetails.getId())) {
+            log.info(
+                "Updating the Case data with payment information for caseId {}",
+                serviceRequestUpdateDto.getCcdCaseNumber()
+            );
             createEvent(serviceRequestUpdateDto, userToken, systemUpdateUserId,
                         serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
                             ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
             );
+
+            solicitorEmailService.sendEmail(caseDetails);
+            caseWorkerEmailService.sendEmail(caseDetails);
+
         } else {
             log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());
             throw new Exception("Case not present");
         }
+    }
+
+    //todo This method will be deleted once we wipe out Fee and Pay Bypass
+    public void processCallbackForBypass(ServiceRequestUpdateDto serviceRequestUpdateDto, String authorisation) throws Exception {
+
+        log.info("Processing the callback for the caseId {} with status {}", serviceRequestUpdateDto.getCcdCaseNumber(),
+                 serviceRequestUpdateDto.getServiceRequestStatus()
+        );
+        String userToken = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(userToken);
+        log.info("Fetching the Case details based on caseId {}", serviceRequestUpdateDto.getCcdCaseNumber()
+        );
+        CaseDetails caseDetails = coreCaseDataApi.getCase(
+            userToken,
+            authTokenGenerator.generate(),
+            serviceRequestUpdateDto.getCcdCaseNumber()
+        );
+
+        if (!Objects.isNull(caseDetails.getId())) {
+            log.info(
+                "Updating the Case data with payment information for caseId {}",
+                serviceRequestUpdateDto.getCcdCaseNumber()
+            );
+
+            solicitorEmailService.sendEmailBypss(caseDetails, authorisation);
+            caseWorkerEmailService.sendEmail(caseDetails);
+
+        } else {
+            log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());
+            throw new Exception("Case not present");
+        }
+    }
+
+    // todo this method will be deleted once we wipe out fee and pay bypass
+    private void createEventForFeeAndPayBypass(ServiceRequestUpdateDto serviceRequestUpdateDto, String userToken,
+                                               String systemUpdateUserId, String eventId, String authorisation) {
+        CaseData caseData = setCaseDataFeeAndPayBypass(serviceRequestUpdateDto, authorisation);
+        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
+            userToken,
+            authTokenGenerator.generate(),
+            systemUpdateUserId,
+            JURISDICTION,
+            CASE_TYPE,
+            serviceRequestUpdateDto.getCcdCaseNumber(),
+            eventId
+        );
+
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(Event.builder()
+                       .id(startEventResponse.getEventId())
+                       .build())
+            .data(caseData)
+            .build();
+
+        coreCaseDataApi.submitEventForCaseWorker(
+            userToken,
+            authTokenGenerator.generate(),
+            systemUpdateUserId,
+            JURISDICTION,
+            CASE_TYPE,
+            serviceRequestUpdateDto.getCcdCaseNumber(),
+            true,
+            caseDataContent
+        );
     }
 
     private void createEvent(ServiceRequestUpdateDto serviceRequestUpdateDto, String userToken,
@@ -92,25 +170,52 @@ public class RequestUpdateCallbackService {
         );
     }
 
+
+    //todo this method will be deleted once we wipe out fee and pay bypass
+    private CaseData setCaseDataFeeAndPayBypass(ServiceRequestUpdateDto serviceRequestUpdateDto, String authorisation) {
+        return objectMapper.convertValue(
+            CaseData.builder()
+                .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
+                .applicantSolicitorEmailAddress(userService.getUserDetails(authorisation).getEmail())
+                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
+                .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
+                                                         .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
+                                                         .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
+                                                         .serviceRequestAmount(serviceRequestUpdateDto.getServiceRequestAmount())
+                                                         .serviceRequestStatus(serviceRequestUpdateDto.getServiceRequestStatus())
+                                                         .callBackUpdateTimestamp(LocalDateTime.now())
+                                                         .payment(CcdPayment.builder().paymentAmount(
+                                                             serviceRequestUpdateDto.getPayment().getPaymentAmount())
+                                                                      .paymentReference(serviceRequestUpdateDto.getPayment().getPaymentReference())
+                                                                      .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
+                                                                      .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
+                                                                      .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
+                                                                      .build()).build()).build(),
+            CaseData.class
+        );
+
+    }
+
     private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
         return objectMapper.convertValue(
             CaseData.builder()
                 .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
                 .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
-                 .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
-                 .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
-                 .serviceRequestAmount(serviceRequestUpdateDto.getServiceRequestAmount())
-                 .serviceRequestStatus(serviceRequestUpdateDto.getServiceRequestStatus())
-                 .callBackUpdateTimestamp(LocalDateTime.now())
-                        .payment(CcdPayment.builder().paymentAmount(
-                              serviceRequestUpdateDto.getPayment().getPaymentAmount())
-                                     .paymentReference(serviceRequestUpdateDto.getPayment().getPaymentReference())
-                                     .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
-                                     .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
-                                     .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
-                                     .build()).build()).build(),
+                                                         .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
+                                                         .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
+                                                         .serviceRequestAmount(serviceRequestUpdateDto.getServiceRequestAmount())
+                                                         .serviceRequestStatus(serviceRequestUpdateDto.getServiceRequestStatus())
+                                                         .callBackUpdateTimestamp(LocalDateTime.now())
+                                                         .payment(CcdPayment.builder().paymentAmount(
+                                                             serviceRequestUpdateDto.getPayment().getPaymentAmount())
+                                                                      .paymentReference(serviceRequestUpdateDto.getPayment().getPaymentReference())
+                                                                      .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
+                                                                      .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
+                                                                      .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
+                                                                      .build()).build()).build(),
             CaseData.class
         );
+
     }
 
 

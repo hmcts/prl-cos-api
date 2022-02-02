@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.response.Response;
 import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +19,7 @@ public class PrePopulateFeeAndSolicitorControllerIntegrationTest extends Integra
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
 
+    @Ignore
     @Test
     public void givenTemplateAndJsonInput_ReturnStatus200() throws Exception {
 
