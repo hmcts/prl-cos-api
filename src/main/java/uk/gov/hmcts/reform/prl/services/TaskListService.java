@@ -91,7 +91,7 @@ public class TaskListService {
     }
 
     private List<Event> getFL401Events() {
-        final List<Event> events = new ArrayList<>(List.of(
+        return new ArrayList<>(List.of(
             FL401_CASE_NAME,
             APPLICANT_DETAILS,
             RESPONDENT_DETAILS,
@@ -99,8 +99,6 @@ public class TaskListService {
             INTERNATIONAL_ELEMENT,
             WELSH_LANGUAGE_REQUIREMENTS,
             VIEW_PDF_DOCUMENT));
-
-        return events;
     }
 
 }
