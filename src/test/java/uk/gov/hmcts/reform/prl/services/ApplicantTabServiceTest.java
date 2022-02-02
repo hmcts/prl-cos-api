@@ -10,9 +10,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
@@ -28,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.InternationalElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.LitigationCapacity;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamExemptions;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherProceedingsDetails;
@@ -163,6 +167,11 @@ public class ApplicantTabServiceTest {
             .miamExemptionsChecklist(Collections.singletonList(MiamExemptionsChecklistEnum.domesticViolence))
             .miamDomesticViolenceChecklist(Collections.singletonList(
                 MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_4))
+            .miamUrgencyReasonChecklist(Collections.singletonList(MiamUrgencyReasonChecklistEnum
+                                                                      .miamUrgencyReasonChecklistEnum_Value_1))
+            .miamChildProtectionConcernList(Collections.singletonList(MiamChildProtectionConcernChecklistEnum
+                                                                          .MIAMChildProtectionConcernChecklistEnum_value_1))
+            .miamPreviousAttendanceChecklist(MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_1)
             .miamOtherGroundsChecklist(MiamOtherGroundsChecklistEnum.miamOtherGroundsChecklistEnum_Value_2)
             //other proceedings
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
@@ -226,11 +235,11 @@ public class ApplicantTabServiceTest {
             //child details
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test string")
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
 
         emptyCaseData = CaseData.builder().build();
     }
-
 
     @Test
     public void testApplicantTableMapper() {
@@ -364,7 +373,56 @@ public class ApplicantTabServiceTest {
         assertEquals(miamMap, applicationsTabService.getMiamTable(caseDataWithParties));
     }
 
+    @Test
+    public void testCompleteMiamExemptionsTableMapper() {
+        String exemptions = MiamExemptionsChecklistEnum.domesticViolence.getDisplayedValue();
+        String domestic = MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_4.getDisplayedValue();
+        String urgency = MiamUrgencyReasonChecklistEnum.miamUrgencyReasonChecklistEnum_Value_1.getDisplayedValue();
+        String previous = MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_1.getDisplayedValue();
+        String child = MiamChildProtectionConcernChecklistEnum.MIAMChildProtectionConcernChecklistEnum_value_1.getDisplayedValue();
+        String other = MiamOtherGroundsChecklistEnum.miamOtherGroundsChecklistEnum_Value_2.getDisplayedValue();
 
+        MiamExemptions miamExemptions = MiamExemptions.builder()
+            .reasonsForMiamExemption(exemptions)
+            .domesticViolenceEvidence(domestic)
+            .urgencyEvidence(urgency)
+            .previousAttendenceEvidence(previous)
+            .childProtectionEvidence(child)
+            .otherGroundsEvidence(other)
+            .build();
+        Map<String, Object> miamExemptionsMap = Map.of(
+            "reasonsForMiamExemption", exemptions,
+            "domesticViolenceEvidence", domestic,
+            "urgencyEvidence", urgency,
+            "previousAttendenceEvidence", previous,
+            "childProtectionEvidence", child,
+            "otherGroundsEvidence", other
+        );
+        when(objectMapper.convertValue(miamExemptions, Map.class)).thenReturn(miamExemptionsMap);
+        assertEquals(miamExemptionsMap, applicationsTabService.getMiamExemptionsTable(caseDataWithParties));
+    }
+
+    @Test
+    public void testEmptyMiamExemptionsTableMapper() {
+        MiamExemptions miamExemptions = MiamExemptions.builder()
+            .reasonsForMiamExemption("")
+            .domesticViolenceEvidence("")
+            .urgencyEvidence("")
+            .previousAttendenceEvidence("")
+            .childProtectionEvidence("")
+            .otherGroundsEvidence("")
+            .build();
+        Map<String, Object> miamExemptionsMap = Map.of(
+            "reasonsForMiamExemption", "",
+            "domesticViolenceEvidence", "",
+            "urgencyEvidence", "",
+            "previousAttendenceEvidence", "",
+            "childProtectionEvidence", "",
+            "otherGroundsEvidence", ""
+        );
+        when(objectMapper.convertValue(miamExemptions, Map.class)).thenReturn(miamExemptionsMap);
+        assertEquals(miamExemptionsMap, applicationsTabService.getMiamExemptionsTable(emptyCaseData));
+    }
 
     @Test
     public void testOtherProceedingsOverviewTableMapper() {
@@ -574,13 +632,11 @@ public class ApplicantTabServiceTest {
     public void testOtherChildFieldsMapper() {
         Map<String, Object> extraMap = Map.of(
             "childrenKnownToLocalAuthority", YesNoDontKnow.yes.getDisplayedValue(),
-            "childrenKnownToLocalAuthorityTextArea", "Test string"
+            "childrenKnownToLocalAuthorityTextArea", "Test string",
+            "childrenSubjectOfChildProtectionPlan", YesNoDontKnow.yes.getDisplayedValue()
+
         );
         assertEquals(extraMap, applicationsTabService.getExtraChildDetailsTable(caseDataWithParties));
     }
-
-
-
-
 
 }
