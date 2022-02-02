@@ -328,6 +328,14 @@ public class CaseData implements MappableObject {
      * Issue and send to local court'.
      */
     private final List<Element<LocalCourtAdminEmail>> localCourtAdminEmail;
+  
+    /**
+     * This field contains Application Submitter solicitor email address.
+     */
+    private final String applicantSolicitorEmailAddress;
+    private final String respondentSolicitorEmailAddress;
+    private final String caseworkerEmailAddress;
+
 
     /**
      * Court details.
