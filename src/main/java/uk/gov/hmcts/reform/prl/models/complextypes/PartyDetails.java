@@ -56,9 +56,6 @@ public class PartyDetails {
     private final String sendSignUpLink;
     private final String solicitorEmail;
     private final String caseTypeOfApplication;
-
-
-
-
+    private final YesOrNo respondentLivedWithApplicant;
 
 }

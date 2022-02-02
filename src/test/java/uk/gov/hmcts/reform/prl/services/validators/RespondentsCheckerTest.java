@@ -67,7 +67,10 @@ public class RespondentsCheckerTest {
     public void whenIncompleteCaseDataValidateMandatoryFieldsForRespondentReturnsFalse() {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName").build();
 
-        assert !respondentsChecker.validateMandatoryFieldsForRespondent(respondent);
+        CaseData caseData = CaseData.builder()
+            .build();
+
+        assert !respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData);
 
     }
 
