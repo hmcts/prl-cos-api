@@ -364,6 +364,8 @@ public class ApplicantTabServiceTest {
         assertEquals(miamMap, applicationsTabService.getMiamTable(caseDataWithParties));
     }
 
+
+
     @Test
     public void testOtherProceedingsOverviewTableMapper() {
         Map<String, Object> completeOverviewMap = Map.of("previousOrOngoingProceedings",
