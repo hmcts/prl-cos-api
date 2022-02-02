@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import org.junit.Assert;
 import org.junit.Test;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
@@ -11,9 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
@@ -100,7 +99,7 @@ public class TaskListRendererTest {
         String expectedTaskList = String.join("\n", lines);
         String actualTaskList = taskListRenderer.render(fl401Tasks, errors, false);
 
-        assertFalse(expectedTaskList.equals(actualTaskList));
+        Assert.assertNotEquals(expectedTaskList, actualTaskList);
 
     }
 
@@ -142,7 +141,7 @@ public class TaskListRendererTest {
         String expectedTaskList = String.join("\n", lines);
         String actualTaskList = taskListRenderer.render(tasks, emptyErrors, true);
 
-        assertTrue(expectedTaskList.equals(actualTaskList));
+        Assert.assertEquals(expectedTaskList, actualTaskList);
 
     }
 
