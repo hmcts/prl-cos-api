@@ -149,8 +149,6 @@ public class CourtFinderServiceTest {
 
     @Test
     public void givenValidCaseData_whenChildLivesWithRespondent_thenReturnCourtClosestToRespondent() throws NotFoundException {
-
-
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
