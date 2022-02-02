@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -40,6 +41,8 @@ public class PrePopulateFeeAndSolicitorNameController {
 
     @Autowired
     private UserService userService;
+
+    private final CourtFinderService courtLocatorService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -85,6 +88,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                          .documentHash(generatedDocumentInfo.getHashToken())
                                                          .documentFileName(DRAFT_C_100_APPLICATION).build())
+                .court(courtLocatorService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails().getCaseData()))
                 .build(),
             CaseData.class
         );
