@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SolicitorEmail;
@@ -42,11 +43,12 @@ public class SolicitorEmailService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
+    @Autowired
+    private final CourtFinderService courtLocatorService;
+
     public EmailTemplateVars buildEmail(CaseDetails caseDetails) {
-        log.info("building email");
-        CaseData cd = emailService.getCaseData(caseDetails);
-        log.info("cddddd  {}", cd);
-        List<PartyDetails> applicants = emailService.getCaseData(caseDetails)
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        List<PartyDetails> applicants = caseData
             .getApplicants()
             .stream()
             .map(Element::getValue)
@@ -58,31 +60,13 @@ public class SolicitorEmailService {
 
         String applicantNames = String.join(", ", applicantNamesList);
 
-        log.info(
-            "emailService.getCaseData(caseDetails).getApplicantCaseName() {}",
-            emailService.getCaseData(caseDetails).getApplicantCaseName()
-        );
-        log.info(
-            "applicantNames {}",
-            applicantNames
-        );
-        log.info(
-            "courtName {}",
-            courtName
-        );
-        log.info(
-            "courtEmail {}",
-            courtEmail
-        );
-        log.info(
-            "manageCaseUrl {}",
-            manageCaseUrl
-        );
+        Court court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
+
         return SolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
             .applicantName(applicantNames)
-            .courtName(courtName)
+            .courtName(court.getCourtName())
             //.fullName(userDetails.getFullName())
             .courtEmail(courtEmail)
             .caseLink(manageCaseUrl + caseDetails.getId())
@@ -93,7 +77,7 @@ public class SolicitorEmailService {
     public void sendEmail(CaseDetails caseDetails) {
         log.info("Sending the email to solicitor for caseId {}", caseDetails.getId()
         );
-        log.info("caseDetails.getDatan print() {}", caseDetails.getData().toString());
+
         emailService.send(
             caseDetails.getData().get("applicantSolicitorEmailAddress").toString(),
             EmailTemplateNames.SOLICITOR,
@@ -107,9 +91,7 @@ public class SolicitorEmailService {
      * Todo TO be removed once done with fee and pay bypass
      * */
     public void sendEmailBypss(CaseDetails caseDetails, String authorisation) {
-        log.info("Sending the email to solicitor for caseId {}", caseDetails.getId()
-        );
-        log.info("caseDetails.getDatan print() {}", caseDetails.getData().toString());
+
         emailService.send(
             userService.getUserDetails(authorisation).getEmail(),
             EmailTemplateNames.SOLICITOR,
