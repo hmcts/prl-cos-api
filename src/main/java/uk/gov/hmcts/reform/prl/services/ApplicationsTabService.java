@@ -66,7 +66,7 @@ public class ApplicationsTabService {
         applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
         applicationTab.put("applicantTable", getApplicantsTable(caseData));
         applicationTab.put("respondentTable", getRespondentsTable(caseData));
-        applicationTab.put("declarationTable",getDeclarationTable());
+        applicationTab.put("declarationTable",getDeclarationTable(caseData));
         applicationTab.put("typeOfApplicationTable",getTypeOfApplicationTable(caseData));
         applicationTab.put("allegationsOfHarmOverviewTable", getAllegationsOfHarmOverviewTable(caseData));
         applicationTab.put("miamTable", getMiamTable(caseData));
@@ -143,17 +143,18 @@ public class ApplicationsTabService {
         return respondents;
     }
 
-    public Map<String, Object> getDeclarationTable() {
+    public Map<String, Object> getDeclarationTable(CaseData caseData) {
         Map<String, Object> declarationMap = new HashMap<>();
+        String solicitor = caseData.getSolicitorName();
 
         String declarationText = "I understand that proceedings for contempt of court may be brought"
             + " against anyone who makes, or causes to be made, a false statement in a document verified"
             + " by a statement of truth without an honest belief in its truth. The applicant believes "
-            + "that the facts stated in this form and any continuation sheets are true. [Solicitor Name] "
-            + "is authorised by the applicant to sign this statement.";
+            + "that the facts stated in this form and any continuation sheets are true. " + solicitor
+            + " is authorised by the applicant to sign this statement.";
 
         declarationMap.put("declarationText", declarationText);
-        declarationMap.put("agreedBy", "<Solicitor name>");
+        declarationMap.put("agreedBy", solicitor);
 
         return declarationMap;
     }
