@@ -94,7 +94,7 @@ public class RequestUpdateCallbackService {
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
 
-            solicitorEmailService.sendEmail(caseDetails);
+            solicitorEmailService.sendEmailBypss(caseDetails, authorisation);
             caseWorkerEmailService.sendEmail(caseDetails);
 
         } else {
