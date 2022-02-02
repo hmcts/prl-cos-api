@@ -49,8 +49,8 @@ public class FL401ApplicationTypeChecker implements EventChecker {
             if (applicationTypeLinkToCA.isPresent() && applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
                 YesOrNo.Yes)) {
                 finished = applicationTypeLinkToCA.get().getChildArrangementsApplicationNumber() != null;
-            } else if(applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
-                YesOrNo.No)){
+            } else if (applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
+                YesOrNo.No)) {
                 return true;
             } else {
                 return false;
