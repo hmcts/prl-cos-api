@@ -40,9 +40,10 @@ public class ApplicantsChecker implements EventChecker {
         if (caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)) {
             PartyDetails fl401ApplicantDetails = caseData.getApplicantsFL401();
 
-            Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(fl401ApplicantDetails).build();
-            applicantsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
-
+            if(fl401ApplicantDetails != null){
+                Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(fl401ApplicantDetails).build();
+                applicantsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
+            }
         }
 
         if (applicantsWrapped.isEmpty()) {
