@@ -29,16 +29,6 @@ public class CourtFinderService {
     @Autowired
     private CourtFinderApi courtFinderApi;
 
-    public CaseData setCourtUnlessCourtAlreadyPresent(CaseData caseData, Court court) {
-        Optional<String> courtName = ofNullable(caseData.getCourtName());
-        Optional<String> courtId = ofNullable(caseData.getCourtId());
-
-        if ((courtName.isEmpty() && courtId.isEmpty()) || courtNameAndIdAreBlank(courtName, courtId)
-            || !(courtsAreTheSame(caseData.getCourt(), court))) {
-            setCourtNameAndId(caseData, court);
-        }
-        return caseData;
-    }
 
     public Court getClosestChildArrangementsCourt(CaseData caseData) throws NotFoundException {
 

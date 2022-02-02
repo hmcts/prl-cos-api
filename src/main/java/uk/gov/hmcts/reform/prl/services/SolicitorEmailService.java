@@ -98,7 +98,7 @@ public class SolicitorEmailService {
      * Todo TO be removed once done with fee and pay bypass
      * */
     public void sendEmailBypss(CaseDetails caseDetails, String authorisation) {
-
+        log.info("inside send email bypass");
         emailService.send(
             userService.getUserDetails(authorisation).getEmail(),
             EmailTemplateNames.SOLICITOR,
