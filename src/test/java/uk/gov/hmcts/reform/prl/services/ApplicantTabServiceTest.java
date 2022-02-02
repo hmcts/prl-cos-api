@@ -43,7 +43,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOverview;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.ChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.DomesticAbuseVictim;
-import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
@@ -641,19 +640,6 @@ public class ApplicantTabServiceTest {
 
         );
         assertEquals(extraMap, applicationsTabService.getExtraChildDetailsTable(caseDataWithParties));
-    }
-
-    @Test
-    public void testCourtDetails() {
-        Court court = Court.builder()
-            .courtName("Example court name for demo")
-            .build();
-        Map<String, Object> map = Map.of(
-            "courtName", "Example court name for demo"
-        );
-
-        when(objectMapper.convertValue(court, Map.class)).thenReturn(map);
-        assertEquals(map, applicationsTabService.getCourtDetails(caseDataWithParties));
     }
 
 }

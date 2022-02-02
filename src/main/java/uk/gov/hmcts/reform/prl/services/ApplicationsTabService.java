@@ -36,7 +36,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOverview;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.ChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.DomesticAbuseVictim;
-import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
@@ -84,7 +83,6 @@ public class ApplicationsTabService {
         applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
         applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
         applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
-        applicationTab.put("courtDetails", getCourtDetails(caseData));
 
 
         coreCaseDataService.triggerEvent(
@@ -99,14 +97,6 @@ public class ApplicationsTabService {
     public Map<String, Object> toMap(Object object) {
         return objectMapper.convertValue(object, Map.class);
     }
-
-    public Map<String, Object> getCourtDetails(CaseData caseData) {
-        Court court = Court.builder()
-            .courtName("Example court name for demo")
-            .build();
-        return toMap(court);
-    }
-
 
     public List<Element<Applicant>> getApplicantsTable(CaseData caseData) {
         List<Element<Applicant>> applicants = new ArrayList<>();
