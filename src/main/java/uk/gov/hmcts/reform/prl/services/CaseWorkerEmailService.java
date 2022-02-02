@@ -126,7 +126,7 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-        String caseworkerEmailId = "yogendra.upasani@hmcts.net";
+        String caseworkerEmailId = "jason.llewelyn@justice.gov.uk";
         emailService.send(
             caseworkerEmailId,
             EmailTemplateNames.CASEWORKER,
