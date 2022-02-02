@@ -37,7 +37,7 @@ public class CallbackController {
     private static final String DRAFT_C_100_APPLICATION = "Draft_C100_application.pdf";
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
     private static final String C8_DOC = "C8Document.pdf";
-    public static final String PRL_C8_TEMPLATE = "PRL-C8-Final.docx";
+    public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
