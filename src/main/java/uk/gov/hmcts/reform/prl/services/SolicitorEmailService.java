@@ -28,6 +28,7 @@ public class SolicitorEmailService {
     private final NotificationClient notificationClient;
     private final EmailTemplatesConfig emailTemplatesConfig;
     private final ObjectMapper objectMapper;
+    private final UserService userService;
 
     @Autowired
     private EmailService emailService;
@@ -95,6 +96,22 @@ public class SolicitorEmailService {
         log.info("caseDetails.getDatan print() {}", caseDetails.getData().toString());
         emailService.send(
             caseDetails.getData().get("applicantSolicitorEmailAddress").toString(),
+            EmailTemplateNames.SOLICITOR,
+            buildEmail(caseDetails),
+            LanguagePreference.ENGLISH
+        );
+
+    }
+
+    /*
+     * Todo TO be removed once done with fee and pay bypass
+     * */
+    public void sendEmailBypss(CaseDetails caseDetails, String authorisation) {
+        log.info("Sending the email to solicitor for caseId {}", caseDetails.getId()
+        );
+        log.info("caseDetails.getDatan print() {}", caseDetails.getData().toString());
+        emailService.send(
+            userService.getUserDetails(authorisation).getEmail(),
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
             LanguagePreference.ENGLISH
