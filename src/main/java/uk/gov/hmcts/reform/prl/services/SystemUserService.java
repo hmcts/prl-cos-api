@@ -20,9 +20,6 @@ public class SystemUserService {
 
     private final IdamClient idamClient;
 
-    private final String username = "privatelaw-system-update@mailnesia.com";
-    private final String password = "Password12!";
-
 
     public String getSysUserToken() {
         log.info("*******************************************************");
@@ -31,7 +28,7 @@ public class SystemUserService {
         log.info(auth.getRedirectUri());
         log.info(auth.getClientSecret());
         log.info("*******************************************************");
-        return idamClient.getAccessToken(username, password);
+        return idamClient.getAccessToken(userConfig.getUserName(), userConfig.getPassword());
     }
 
     public String getUserId(String userToken) {
