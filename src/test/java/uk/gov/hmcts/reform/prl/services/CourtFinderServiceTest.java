@@ -32,7 +32,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
-import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.applicant;
 
 @RunWith(SpringRunner.class)
 public class CourtFinderServiceTest {
@@ -281,30 +280,6 @@ public class CourtFinderServiceTest {
         assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
     }
 
-    @Test
-    public void givenCaseDataWithCourtDetails_thenCourtDetailsNotChanged() {
-        Court completeCourt = Court.builder()
-            .courtName("Central Family Court")
-            .courtId("central-family-court")
-            .areasOfLaw(Collections.singletonList(AreaOfLaw.builder().build()))
-            .gbs("TESTGBS")
-            .dxNumber(Collections.singletonList("160010 Kingsway 7"))
-            .inPerson(true)
-            .accessScheme(true)
-            .address(Collections.singletonList(CourtAddress.builder().build()))
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .court(completeCourt)
-            .courtName("Test Court Name")
-            .courtId("test-court-id")
-            .build();
-
-        CaseData caseDataUpdated = courtFinderService.setCourtUnlessCourtAlreadyPresent(caseData, completeCourt);
-
-        assertEquals(caseData, caseDataUpdated);
-
-    }
 
     @Test
     public void givenCaseDataWithNoCourtDetails_thenCourtDetailsUpdated() {
