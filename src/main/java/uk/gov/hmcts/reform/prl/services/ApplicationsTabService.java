@@ -280,7 +280,7 @@ public class ApplicationsTabService {
     public List<Element<OtherProceedingsDetails>> getOtherProceedingsDetailsTable(CaseData caseData) {
         Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getPreviousOrOngoingProceedingsForChildren());
         Optional<List<Element<ProceedingDetails>>> proceedingsCheck = ofNullable(caseData.getExistingProceedings());
-        if (proceedingsCheck.isEmpty() || proceedingCheck.isPresent() && !proceedingCheck.get().equals(YesNoDontKnow.yes)) {
+        if (proceedingsCheck.isEmpty() || (proceedingCheck.isPresent() && !proceedingCheck.get().equals(YesNoDontKnow.yes))) {
             OtherProceedingsDetails op = OtherProceedingsDetails.builder().build();
             Element<OtherProceedingsDetails> other = Element.<OtherProceedingsDetails>builder().value(op).build();
             return Collections.singletonList(other);
