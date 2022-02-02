@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +30,6 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class CallbackController {
@@ -136,11 +134,10 @@ public class CallbackController {
             .id(callbackRequest.getCaseDetails().getId())
             .build();
 
-
-        String caseOfApplicant = caseData.getCaseTypeOfApplication();
+        String caseTypeOfApplication = caseData.getCaseTypeOfApplication();
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("textApplicants", caseOfApplicant);
+        caseDataUpdated.put("typeOfApplication", caseTypeOfApplication);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

@@ -33,11 +33,10 @@ public class RespondentsChecker implements EventChecker {
     public boolean isFinished(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
 
-        if (caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)) {
-            PartyDetails fl401RespondentDetails = caseData.getRespondentsFL401();
+        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
 
-            if(fl401RespondentDetails != null){
-                Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(fl401RespondentDetails).build();
+            if(caseData.getRespondentsFL401() != null){
+                Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getRespondentsFL401()).build();
                 respondentsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
             }
         }
@@ -49,7 +48,7 @@ public class RespondentsChecker implements EventChecker {
                 .collect(Collectors.toList());
 
             for (PartyDetails p : respondents) {
-                if (!(validateMandatoryFieldsForRespondent(p, caseData))) {
+                if (!(validateMandatoryFieldsForRespondent(p, caseData.getCaseTypeOfApplication()))) {
                     taskErrorService.addEventError(RESPONDENT_DETAILS, RESPONDENT_DETAILS_ERROR, RESPONDENT_DETAILS_ERROR.getError());
                     return false;
                 }
@@ -66,11 +65,10 @@ public class RespondentsChecker implements EventChecker {
     public boolean isStarted(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> respondentWrapped = ofNullable(caseData.getRespondents());
 
-        if (caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)) {
-            PartyDetails fl401RespondentDetails = caseData.getRespondentsFL401();
+        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
 
-            if(fl401RespondentDetails != null){
-                Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(fl401RespondentDetails).build();
+            if(caseData.getRespondentsFL401() != null){
+                Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getRespondentsFL401()).build();
                 respondentWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
             }
         }
@@ -98,7 +96,7 @@ public class RespondentsChecker implements EventChecker {
         return false;
     }
 
-    public boolean validateMandatoryFieldsForRespondent(PartyDetails respondent, CaseData caseData) {
+    public boolean validateMandatoryFieldsForRespondent(PartyDetails respondent, String caseTypeOfApplication) {
 
         List<Optional> fields = new ArrayList<>();
 
@@ -109,7 +107,7 @@ public class RespondentsChecker implements EventChecker {
         if (isDateOfBirthKnown.isPresent() && isDateOfBirthKnown.get().equals(Yes)) {
             fields.add(ofNullable(respondent.getDateOfBirth()));
         }
-        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+        if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
             Optional<Gender> gender = ofNullable(respondent.getGender());
             fields.add(gender);
             if (gender.isPresent() && gender.get().equals(Gender.other)) {
@@ -141,7 +139,7 @@ public class RespondentsChecker implements EventChecker {
         if (canYouProvidePhoneNumber.isPresent() && canYouProvidePhoneNumber.get().equals(Yes)) {
             fields.add(ofNullable(respondent.getPhoneNumber()));
         }
-        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+        if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
             Optional<YesNoDontKnow> doTheyHaveLegalRepresentation = ofNullable(respondent.getDoTheyHaveLegalRepresentation());
             fields.add(doTheyHaveLegalRepresentation);
             if (doTheyHaveLegalRepresentation.isPresent() && doTheyHaveLegalRepresentation.get().equals(YesNoDontKnow.yes)) {
