@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.sf.saxon.functions.Count;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
