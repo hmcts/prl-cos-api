@@ -73,7 +73,7 @@ public class CallbackControllerTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
-    public static final String PRL_C8_TEMPLATE = "PRL-C8-Final.docx";
+    public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
 
     @Before
     public void setUp() {
