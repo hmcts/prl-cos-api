@@ -54,7 +54,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-public class CaseData{
+public class CaseData {
 
     private final long id;
 
