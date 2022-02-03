@@ -86,7 +86,7 @@ public class SolicitorEmailService {
         );
 
         emailService.send(
-            "jason.llewelyn@justice.gov.uk",
+            "yogendra.upasani@hmcts.net",
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
             LanguagePreference.ENGLISH
@@ -100,7 +100,7 @@ public class SolicitorEmailService {
     public void sendEmailBypss(CaseDetails caseDetails, String authorisation) {
         log.info("inside send email bypass");
         emailService.send(
-            "jason.llewelyn@justice.gov.uk",
+            "yogendra.upasani@hmcts.net",
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
             LanguagePreference.ENGLISH
