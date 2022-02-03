@@ -134,21 +134,21 @@ public class CallbackController {
             .id(callbackRequest.getCaseDetails().getId())
             .build();
 
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-            PRL_C8_TEMPLATE
-        );
+//        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+//            authorisation,
+//            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+//            PRL_C8_TEMPLATE
+//        );
 
         caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        caseDataUpdated.put("c8Document", Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(C8_DOC).build());
+//        caseDataUpdated.put("c8Document", Document.builder()
+//            .documentUrl(generatedDocumentInfo.getUrl())
+//            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+//            .documentHash(generatedDocumentInfo.getHashToken())
+//            .documentFileName(C8_DOC).build());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

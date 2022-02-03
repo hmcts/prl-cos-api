@@ -143,7 +143,7 @@ public class CaseWorkerEmailService {
     public void sendEmailToCourtAdmin(CaseDetails caseDetails) {
 
         List<LocalCourtAdminEmail> localCourtAdminEmails = emailService.getCaseData(caseDetails)
-            .getLocalCourtAdminEmail()
+            .getLocalCourtAdmin()
             .stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
