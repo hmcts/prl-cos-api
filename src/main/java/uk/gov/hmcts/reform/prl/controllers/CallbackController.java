@@ -25,8 +25,6 @@ import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
-import java.util.Map;
-
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -119,27 +117,4 @@ public class CallbackController {
                                                        .documentFileName(DRAFT_C_100_APPLICATION).build()).build())
             .build();
     }
-
-    @PostMapping(path = "/event-initiation-add-case-type-of-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to add case type of application before event start")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse eventInitiationAddCaseTypeOfApplication(
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws WorkflowException {
-
-        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)
-            .toBuilder()
-            .id(callbackRequest.getCaseDetails().getId())
-            .build();
-
-        String caseTypeOfApplication = caseData.getCaseTypeOfApplication();
-
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("typeOfApplication", caseTypeOfApplication);
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
 }

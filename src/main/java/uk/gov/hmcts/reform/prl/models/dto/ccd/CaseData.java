@@ -134,7 +134,6 @@ public class CaseData {
     private final List<Element<PartyDetails>> applicants;
     @JsonProperty("applicantsFL401")
     private final PartyDetails applicantsFL401;
-    private final String typeOfApplication;
 
     /**
      * Child details.
