@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -330,4 +331,8 @@ public class CaseData {
     private final List<RejectReasonEnum> rejectReason;
     private String returnMessage;
 
+    /**
+     * Home Situation DA.
+     */
+    private final Home Home;
 }

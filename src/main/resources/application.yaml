@@ -99,18 +99,17 @@ fees-register:
 
 # NEW BELOW THIS LINE
 
-
 idam:
-  s2s-auth:
-    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
-    microservice: prl_cos_api
-    totp-secret: GT2V6PLQ34XGPTPM
   api:
-    url: https://idam-api.aat.platform.hmcts.net
+    url: http://localhost:5000
+  s2s-auth:
+    url: http://localhost:4502
+    totp_secret: AABBCCDDEEFFGGHH
+    microservice: prl_cos_api
   client:
-    id: prl-cos-api
-    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: W7supXKMJgcEWKBS
+    id: prl_cos_api
+    redirect_uri: https://localhost:9000/oauth2/callback
+    secret: OOOOOOOOOOOOOOOO
 
 prl:
   system-update:
