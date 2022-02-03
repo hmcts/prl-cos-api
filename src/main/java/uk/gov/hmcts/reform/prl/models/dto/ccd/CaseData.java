@@ -265,6 +265,9 @@ public class CaseData {
     private final YesOrNo isIntermediaryNeeded;
     private final String reasonsForIntermediary;
 
+    private final WelshNeed fl401WelshNeeds;
+    private final InterpreterNeed fl401InterpreterNeeds;
+
     /**
      * International element.
      */

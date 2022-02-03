@@ -191,6 +191,7 @@ public class TaskListRenderer {
         final TaskSection additionalInformation = newSection("Add additional information")
             .withInfo("Only complete if relevant")
             .withTask(tasks.get(OTHER_PROCEEDINGS))
+            .withTask(tasks.get(ATTENDING_THE_HEARING))
             .withTask(tasks.get(INTERNATIONAL_ELEMENT))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
