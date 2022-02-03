@@ -96,6 +96,7 @@ public class TaskListService {
             APPLICANT_DETAILS,
             RESPONDENT_DETAILS,
             OTHER_PROCEEDINGS,
+            ATTENDING_THE_HEARING,
             INTERNATIONAL_ELEMENT,
             WELSH_LANGUAGE_REQUIREMENTS,
             VIEW_PDF_DOCUMENT));
