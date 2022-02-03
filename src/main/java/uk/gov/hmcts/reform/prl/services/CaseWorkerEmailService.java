@@ -126,6 +126,7 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
+        log.info("inside send email bypass for southampton visit cw");
         String caseworkerEmailId = "jason.llewelyn@justice.gov.uk";
         emailService.send(
             caseworkerEmailId,
