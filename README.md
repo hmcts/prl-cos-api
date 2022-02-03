@@ -35,7 +35,7 @@ Create docker image:
   docker-compose build
 ```
 
-Run the distribution (created in `build/install/prl-cos-api` directory)
+Run the distributions (created in `build/install/prl-cos-api` directory)
 by executing the following command:
 
 ```bash
