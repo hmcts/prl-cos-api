@@ -16,7 +16,7 @@ public enum ApplicantStopFromRespondentDoingToChildEnum {
         "Harassing or intimidating their child or children"),
     @JsonProperty("applicantStopFromRespondentDoingToChildEnum_Value_3")
     applicantStopFromRespondentDoingToChildEnum_Value_3(
-        "Posting or publishing anything about their child ir children in print or digitally"),
+        "Posting or publishing anything about their child or children in print or digitally"),
     @JsonProperty("applicantStopFromRespondentDoingToChildEnum_Value_4")
     applicantStopFromRespondentDoingToChildEnum_Value_4(
         "Contacting their child or children directly without the applicant’s consent"),
