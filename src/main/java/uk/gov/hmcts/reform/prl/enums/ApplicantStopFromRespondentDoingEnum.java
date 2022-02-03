@@ -25,12 +25,15 @@ public enum ApplicantStopFromRespondentDoingEnum {
         "Causing damage to their possessions"),
     @JsonProperty("applicantStopFromRespondentEnum_Value_6")
     applicantStopFromRespondentEnum_Value_6(
-        "Going to their home"),
+        "Causing damage to their home"),
     @JsonProperty("applicantStopFromRespondentEnum_Value_7")
     applicantStopFromRespondentEnum_Value_7(
-        "Going near their home"),
+        "Going to their home"),
     @JsonProperty("applicantStopFromRespondentEnum_Value_8")
     applicantStopFromRespondentEnum_Value_8(
+        "Going near their home"),
+    @JsonProperty("applicantStopFromRespondentEnum_Value_9")
+    applicantStopFromRespondentEnum_Value_9(
         "Going near their workplace");
 
 
