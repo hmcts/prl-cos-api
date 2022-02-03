@@ -341,7 +341,8 @@ public class CaseData implements MappableObject {
     /**
      * Issue and send to local court'.
      */
-    private final List<Element<LocalCourtAdminEmail>> localCourtAdminEmail;
+    @JsonProperty("localCourtAdmin")
+    private final List<Element<LocalCourtAdminEmail>> localCourtAdmin;
 
     /**
      * This field contains Application Submitter solicitor email address.
