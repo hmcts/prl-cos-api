@@ -1,14 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -23,16 +21,11 @@ import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
-@Slf4j
+
 @RunWith(SpringRunner.class)
 public class CallbackControllerTest {
 
@@ -162,27 +155,4 @@ public class CallbackControllerTest {
         verifyNoMoreInteractions(dgsService);
 
     }
-
-    @Test
-    public void testEventInitiationAddCaseTypeOfApplication() throws Exception {
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .build();
-
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .data(stringObjectMap).build()).build();
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        log.info("***********" + callbackRequest.getCaseDetails().getData());
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.eventInitiationAddCaseTypeOfApplication(
-            callbackRequest
-        );
-
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("typeOfApplication"));
-
-    }
-
 }
