@@ -12,12 +12,15 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.service.notify.NotificationClient;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,6 +38,7 @@ public class CaseWorkerEmailService {
     private static final String WITHOUT_NOTICE = "Without notice";
     private static final String REDUCED_NOTICE = "Reduced notice";
     private static final String STANDARAD_HEARING = "Standard hearing";
+    private static final String CONFIDENTIAL_INFO = "The case contains confidential contact details";
 
     @Autowired
     private EmailService emailService;
@@ -172,5 +176,66 @@ public class CaseWorkerEmailService {
             LanguagePreference.ENGLISH
         );
 
+    }
+
+    public void sendEmailToCourtAdmin(CaseDetails caseDetails) {
+
+        List<LocalCourtAdminEmail> localCourtAdminEmails = emailService.getCaseData(caseDetails)
+            .getLocalCourtAdminEmail()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> emailList = localCourtAdminEmails.stream()
+            .map(LocalCourtAdminEmail::getEmail)
+            .collect(Collectors.toList());
+
+        final String email = emailList.get(0);
+
+        emailService.send(
+            email,
+            EmailTemplateNames.COURTADMIN,
+            buildCourtAdminEmail(caseDetails),
+            LanguagePreference.ENGLISH
+        );
+
+    }
+
+    private EmailTemplateVars buildCourtAdminEmail(CaseDetails caseDetails) {
+
+        List<PartyDetails> applicants = emailService.getCaseData(caseDetails)
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<Child> child = emailService.getCaseData(caseDetails)
+            .getChildren()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        String isConfidential = "No";
+         if ((applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
+            || (child.stream().anyMatch(Child::hasConfidentialInfo)))
+             isConfidential = "Yes";
+
+        String typeOfHearing = " ";
+        String isCaseUrgent = "No";
+
+        if (emailService.getCaseData(caseDetails).getIsCaseUrgent().equals(YesOrNo.Yes)) {
+            typeOfHearing = URGENT_CASE;
+            isCaseUrgent = "Yes";
+        }
+
+        return CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .caseUrgency(typeOfHearing)
+            .isCaseUrgent(isCaseUrgent)
+            .issueDate(LocalDate.now())
+            .isConfidential(isConfidential)
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
     }
 }

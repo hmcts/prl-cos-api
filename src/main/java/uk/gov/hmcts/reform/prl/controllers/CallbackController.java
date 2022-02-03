@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -60,6 +61,8 @@ public class CallbackController {
 
     private final DgsService dgsService;
     private final ObjectMapper objectMapper;
+
+    private final CaseWorkerEmailService caseWorkerEmailService;
     private final AllTabServiceImpl allTabsService;
     private final UserService userService;
 
@@ -138,9 +141,9 @@ public class CallbackController {
             .build();
     }
 
-    @PostMapping(path = "/generate-c8-c1a-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/generate-c8-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to generate and store document")
-    public AboutToStartOrSubmitCallbackResponse generateC8AndOtherDocument(
+    public AboutToStartOrSubmitCallbackResponse generateC8Document(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
@@ -151,6 +154,7 @@ public class CallbackController {
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             PRL_C8_TEMPLATE
         );
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("Generate C1A if allegations of harm is set to Yes and the passed value is {}",
                  caseData.getAllegationsOfHarmYesNo());

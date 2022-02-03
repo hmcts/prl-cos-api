@@ -43,5 +43,8 @@ public class Child {
     private final String relationshipToRespondent;
     private final String parentalResponsibilityDetails;
 
+    public boolean hasConfidentialInfo () {
+        return this.isChildAddressConfidential.equals(YesOrNo.Yes);
+    }
 
 }
