@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
@@ -45,7 +46,7 @@ public class CallbackController {
     private final DgsService dgsService;
     private final ObjectMapper objectMapper;
 
-
+    private final CaseWorkerEmailService caseWorkerEmailService;
 
     /**
      * It's just an example - to be removed when there are real tasks sending emails.
@@ -138,6 +139,8 @@ public class CallbackController {
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             PRL_C8_TEMPLATE
         );
+
+        caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 

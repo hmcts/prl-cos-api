@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.time.LocalDate;
+
 @Getter
 @EqualsAndHashCode(callSuper = true)
 public class CaseWorkerEmail extends EmailTemplateVars {
@@ -32,6 +34,18 @@ public class CaseWorkerEmail extends EmailTemplateVars {
     private final String courtEmail;
 
 
+    @JsonProperty("issueDate")
+    private final LocalDate issueDate;
+
+    @JsonProperty("isCaseUrgent")
+    private final String isCaseUrgent;
+
+    @JsonProperty("isConfidential")
+    private final String isConfidential;
+
+    @JsonProperty("caseUrgency")
+    private final String caseUrgency;
+
     private final String caseLink;
 
 
@@ -40,7 +54,7 @@ public class CaseWorkerEmail extends EmailTemplateVars {
                            String caseName, String applicantName,
                            String ordersApplyingFor, String hearingDateRequested,
                            String typeOfHearing, String respondentLastName,
-                           String courtEmail, String caseLink) {
+                           String courtEmail, LocalDate issueDate, String isCaseUrgent, String isConfidential, String caseUrgency, String caseLink) {
         super(caseReference);
         this.caseName = caseName;
         this.applicantName = applicantName;
@@ -49,6 +63,10 @@ public class CaseWorkerEmail extends EmailTemplateVars {
         this.typeOfHearing = typeOfHearing;
         this.respondentLastName = respondentLastName;
         this.courtEmail = courtEmail;
+        this.issueDate = issueDate;
+        this.isCaseUrgent = isCaseUrgent;
+        this.isConfidential = isConfidential;
+        this.caseUrgency = caseUrgency;
         this.caseLink = caseLink;
     }
 }

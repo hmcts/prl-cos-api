@@ -73,7 +73,7 @@ public class SolicitorEmailService {
                 .courtName(court.getCourtName())
                 //.fullName(userDetails.getFullName())
                 .courtEmail(courtEmail)
-                .caseLink(manageCaseUrl + caseDetails.getId())
+                .caseLink(manageCaseUrl + "/" + caseDetails.getId())
                 .build();
         } catch (NotFoundException e) {
             e.printStackTrace();
