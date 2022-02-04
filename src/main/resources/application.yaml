@@ -134,8 +134,8 @@ idam:
 
 prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxx}
 
 security:
     oauth2:
