@@ -255,6 +255,7 @@ public class CaseData {
      * Attending the hearing.
      */
     private final YesOrNo isWelshNeeded;
+    @JsonAlias({"welshNeeds", "fl401WelshNeeds"})
     private final List<Element<WelshNeed>> welshNeeds;
     private final YesOrNo isInterpreterNeeded;
     private final List<Element<InterpreterNeed>> interpreterNeeds;
@@ -264,9 +265,6 @@ public class CaseData {
     private final String specialArrangementsRequired;
     private final YesOrNo isIntermediaryNeeded;
     private final String reasonsForIntermediary;
-
-    private final WelshNeed fl401WelshNeeds;
-    private final InterpreterNeed fl401InterpreterNeeds;
 
     /**
      * International element.
