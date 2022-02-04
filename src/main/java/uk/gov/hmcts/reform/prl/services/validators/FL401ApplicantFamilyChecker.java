@@ -77,7 +77,7 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
         if (doesApplicantHasChild.isPresent() && doesApplicantHasChild.get().equals(Yes)) {
 
             Optional<List<Element<ApplicantChild>>> applicantChildrenWrapped
-                = ofNullable(caseData.getApplicantFamilyDetails().getApplicantChildren());
+                = ofNullable(caseData.getApplicantChildDetails());
 
             if (applicantChildrenWrapped.isPresent() && applicantChildrenWrapped.get().size() != 0) {
                 List<ApplicantChild> applicantChildren = applicantChildrenWrapped.get()

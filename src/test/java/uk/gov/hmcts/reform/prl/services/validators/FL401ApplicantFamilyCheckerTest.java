@@ -131,11 +131,11 @@ public class FL401ApplicantFamilyCheckerTest {
 
         applicantFamilyDetails = applicantFamilyDetails.toBuilder()
             .doesApplicantHaveChildren(Yes)
-            .applicantChildren(listOfApplicantChild)
             .build();
 
         caseData = caseData.toBuilder()
             .applicantFamilyDetails(applicantFamilyDetails)
+            .applicantChildDetails(listOfApplicantChild)
             .build();
 
         assertFalse(fl401ApplicantFamilyChecker.validateFields(caseData));
@@ -153,11 +153,11 @@ public class FL401ApplicantFamilyCheckerTest {
 
         applicantFamilyDetails = applicantFamilyDetails.toBuilder()
             .doesApplicantHaveChildren(Yes)
-            .applicantChildren(listOfApplicantChild)
             .build();
 
         caseData = caseData.toBuilder()
             .applicantFamilyDetails(applicantFamilyDetails)
+            .applicantChildDetails(listOfApplicantChild)
             .build();
 
         assertFalse(fl401ApplicantFamilyChecker.validateFields(caseData));
@@ -178,11 +178,11 @@ public class FL401ApplicantFamilyCheckerTest {
 
         applicantFamilyDetails = applicantFamilyDetails.toBuilder()
             .doesApplicantHaveChildren(Yes)
-            .applicantChildren(listOfApplicantChild)
             .build();
 
         caseData = caseData.toBuilder()
             .applicantFamilyDetails(applicantFamilyDetails)
+            .applicantChildDetails(listOfApplicantChild)
             .build();
 
         assertTrue(fl401ApplicantFamilyChecker.validateFields(caseData));
