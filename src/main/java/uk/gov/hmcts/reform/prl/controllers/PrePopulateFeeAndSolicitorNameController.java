@@ -48,6 +48,8 @@ public class PrePopulateFeeAndSolicitorNameController {
     private ObjectMapper objectMapper;
     @Autowired
     private DgsService dgsService;
+
+
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
     private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
 
@@ -59,7 +61,6 @@ public class PrePopulateFeeAndSolicitorNameController {
     public CallbackResponse prePoppulateSolicitorAndFees(@RequestHeader("Authorization") String authorisation,
                                                          @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<String> errorList = new ArrayList<>();
-
         UserDetails userDetails = userService.getUserDetails(authorisation);
         FeeResponse feeResponse = null;
         try {
@@ -88,7 +89,8 @@ public class PrePopulateFeeAndSolicitorNameController {
                                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                          .documentHash(generatedDocumentInfo.getHashToken())
                                                          .documentFileName(DRAFT_C_100_APPLICATION).build())
-                .court(courtLocatorService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails().getCaseData()))
+                .courtName(courtLocatorService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
+                                                                                    .getCaseData()).getCourtName())
                 .build(),
             CaseData.class
         );
