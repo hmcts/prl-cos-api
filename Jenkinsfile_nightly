@@ -16,9 +16,11 @@ def component = "cos"
 def channel = '#prl-tech-notifications'
 
 def secrets = [
-  'prl-${env}': [
-    secret("microservicekey-prl-dgs-api", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
-    secret("docmosis-api-key", "DOCMOSIS_SERVICE_ACCESS_KEY")
+  'prl-${env}':[
+    secret('prl-cos-idam-client-secret', 'IDAM_CLIENT_SECRET'),
+    secret('system-update-user-username', 'SYSTEM_UPDATE_USER_USERNAME'),
+    secret('system-update-user-password', 'PRL_SYSTEM_UPDATE_PASSWORD'),
+    secret('microservicekey-prl-cos-api', 'IDAM_S2S_AUTH_TOTP_SECRET')
   ]
 ]
 
@@ -38,8 +40,8 @@ withNightlyPipeline(type, product, component) {
   loadVaultSecrets(secrets)
   enableSlackNotifications(channel)
 //  enableFortifyScan()
-//  enableMutationTest()
-//  enableFullFunctionalTest(200)
+  enableMutationTest()
+  enableFullFunctionalTest(200)
 
 
   after('fullFunctionalTest') {
