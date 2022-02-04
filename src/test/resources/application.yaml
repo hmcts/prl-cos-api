@@ -125,6 +125,11 @@ prl:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxx}
 
+
+core_case_data:
+  api:
+    url: ${CORE_CASE_DATA_API_URL:}
+
 security:
   oauth2:
     client:
