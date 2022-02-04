@@ -66,7 +66,6 @@ public class TaskListRendererTest {
         Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build(),
         Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
         Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build());
-        Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build());
 
     private final List<EventValidationErrors> errors = List.of(
         EventValidationErrors.builder().event(ALLEGATIONS_OF_HARM)
