@@ -14,12 +14,12 @@ public class LinkToCA {
 
     @JsonProperty("linkToCaApplication")
     private final YesOrNo linkToCaApplication;
-    @JsonProperty("childArrangementsApplicationNumber")
-    private final String childArrangementsApplicationNumber;
+    @JsonProperty("cAApplicationNumber")
+    private final String cAApplicationNumber;
 
     @JsonCreator
     public LinkToCA(YesOrNo linkToCaApplication, String childArrangementsApplicationNumber) {
         this.linkToCaApplication = linkToCaApplication;
-        this.childArrangementsApplicationNumber = childArrangementsApplicationNumber;
+        this.cAApplicationNumber = childArrangementsApplicationNumber;
     }
 }
