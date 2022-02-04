@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
-import java.util.List;
-
 @Data
 @Builder(toBuilder = true)
 public class ApplicantFamilyDetails {
