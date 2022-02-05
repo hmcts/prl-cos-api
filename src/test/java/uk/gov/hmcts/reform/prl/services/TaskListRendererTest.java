@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
@@ -64,6 +66,7 @@ public class TaskListRendererTest {
         Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build(),
         Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
         Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build());
+        Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build());
 
     private final List<EventValidationErrors> errors = List.of(
         EventValidationErrors.builder().event(ALLEGATIONS_OF_HARM)
@@ -100,6 +103,7 @@ public class TaskListRendererTest {
         String actualTaskList = taskListRenderer.render(fl401Tasks, errors, false);
 
         Assert.assertNotEquals(expectedTaskList, actualTaskList);
+        assertFalse(expectedTaskList.equals(actualTaskList));
 
     }
 
@@ -142,7 +146,9 @@ public class TaskListRendererTest {
         String actualTaskList = taskListRenderer.render(tasks, emptyErrors, true);
 
         Assert.assertEquals(expectedTaskList, actualTaskList);
+        assertTrue(expectedTaskList.equals(actualTaskList));
 
     }
 
 }
+
