@@ -21,7 +21,10 @@ public enum ApplicantRelationshipEnum {
     @JsonProperty("foremerlyLivedTogether")
     foremerlyLivedTogether("foremerlyLivedTogether", "Formerly lived together as a couple"),
     @JsonProperty("bfGfOrPartnerNotLivedTogether")
-    bfGfOrPartnerNotLivedTogether("bfGfOrPartnerNotLivedTogether", "Formerly boyfriend, girlfriend or partner who has not lived with them"),
+    bfGfOrPartnerNotLivedTogether("bfGfOrPartnerNotLivedTogether", "Boyfriend, girlfriend or partner who does not live with them"),
+    @JsonProperty("formerBfGfOrPartnerNotLivedTogether")
+    formerBfGfOrPartnerNotLivedTogether("formerBfGfOrPartnerNotLivedTogether", "Formerly boyfriend, girlfriend or"
+        + " partner who has not lived with them"),
     @JsonProperty("noneOfTheAbove")
     noneOfTheAbove("noneOfTheAbove", "None of the above");
 
