@@ -32,6 +32,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
@@ -188,7 +189,8 @@ public class TaskListRenderer {
         final TaskSection peopleInTheCase = newSection("Add people to the case")
             .withTask(tasks.get(APPLICANT_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS))
-            .withTask(tasks.get(RELATIONSHIP_TO_RESPONDENT));
+            .withTask(tasks.get(RELATIONSHIP_TO_RESPONDENT))
+            .withTask(tasks.get(RESPONDENT_BEHAVIOUR));
 
         final TaskSection additionalInformation = newSection("Add additional information")
             .withInfo("Only complete if relevant")
