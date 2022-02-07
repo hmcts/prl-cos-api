@@ -126,9 +126,10 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-        String caseworkerEmailId = "yogendra.upasani@hmcts.net";
+        String caseworkerEmailAddress = caseDetails.getData().get("caseworkerEmailAddress").toString();
+
         emailService.send(
-            caseworkerEmailId,
+            caseworkerEmailAddress,
             EmailTemplateNames.CASEWORKER,
             buildEmail(caseDetails),
             LanguagePreference.ENGLISH

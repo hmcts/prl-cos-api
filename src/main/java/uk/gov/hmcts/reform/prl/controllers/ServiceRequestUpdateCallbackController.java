@@ -89,10 +89,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
                 .payment(paymentDto)
                 .build();
 
-            applicationsTabService.updateApplicationTabData(caseData);
-            log.info("After application tab service");
-
-            requestUpdateCallbackService.processCallbackForBypass(serviceRequestUpdateDto, authorisation);
+            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
 
         } catch (Exception ex) {
             throw new Exception(ex.getMessage());
