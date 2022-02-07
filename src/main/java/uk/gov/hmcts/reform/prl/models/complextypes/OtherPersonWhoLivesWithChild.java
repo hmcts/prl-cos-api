@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 @Data
 @Builder
 public class OtherPersonWhoLivesWithChild {
+
     private final String firstName;
     private final String lastName;
     private final String relationshipToChildDetails;

@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -41,10 +42,14 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Autowired
     private UserService userService;
 
+    private final CourtFinderService courtLocatorService;
+
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
     private DgsService dgsService;
+
+
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
     private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
 
@@ -56,7 +61,6 @@ public class PrePopulateFeeAndSolicitorNameController {
     public CallbackResponse prePoppulateSolicitorAndFees(@RequestHeader("Authorization") String authorisation,
                                                          @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<String> errorList = new ArrayList<>();
-
         UserDetails userDetails = userService.getUserDetails(authorisation);
         FeeResponse feeResponse = null;
         try {
@@ -77,12 +81,16 @@ public class PrePopulateFeeAndSolicitorNameController {
             CaseData.builder()
                 .solicitorName(userDetails.getFullName())
                 .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
+                .applicantSolicitorEmailAddress(userDetails.getEmail())
+                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
                 .feeAmount(feeResponse.getAmount().toString())
                 .submitAndPayDownloadApplicationLink(Document.builder()
                                                          .documentUrl(generatedDocumentInfo.getUrl())
                                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                          .documentHash(generatedDocumentInfo.getHashToken())
                                                          .documentFileName(DRAFT_C_100_APPLICATION).build())
+                .courtName(courtLocatorService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
+                                                                                    .getCaseData()).getCourtName())
                 .build(),
             CaseData.class
         );

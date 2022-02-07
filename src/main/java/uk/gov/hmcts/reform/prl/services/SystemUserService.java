@@ -22,12 +22,6 @@ public class SystemUserService {
 
 
     public String getSysUserToken() {
-        log.info("*******************************************************");
-        log.info(auth.getClientId());
-        log.info(auth.getClientScope());
-        log.info(auth.getRedirectUri());
-        log.info(auth.getClientSecret());
-        log.info("*******************************************************");
         return idamClient.getAccessToken(userConfig.getUserName(), userConfig.getPassword());
     }
 
