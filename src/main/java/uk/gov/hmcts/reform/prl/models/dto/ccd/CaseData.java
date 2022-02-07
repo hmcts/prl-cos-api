@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
@@ -334,7 +335,6 @@ public class CaseData {
     private final List<RejectReasonEnum> rejectReason;
     private String returnMessage;
 
-
     /**
      * Without Notice Order.
      */
@@ -347,4 +347,8 @@ public class CaseData {
     @JsonProperty("anyOtherDtailsForWithoutNoticeOrder")
     private final OtherDetailsOfWithoutNoticeOrder anyOtherDtailsForWithoutNoticeOrder;
 
+    /**
+     * Respondent Behaviour.
+     */
+    private final RespondentBehaviour respondentBehaviourData;
 }
