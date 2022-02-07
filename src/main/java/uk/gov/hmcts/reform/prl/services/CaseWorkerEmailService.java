@@ -152,15 +152,13 @@ public class CaseWorkerEmailService {
             .map(LocalCourtAdminEmail::getEmail)
             .collect(Collectors.toList());
 
-        final String email = emailList.get(0);
 
-        emailService.send(
+        emailList.forEach(email ->   emailService.send(
             email,
             EmailTemplateNames.COURTADMIN,
             buildCourtAdminEmail(caseDetails),
             LanguagePreference.ENGLISH
-        );
-
+        ));
     }
 
     private EmailTemplateVars buildCourtAdminEmail(CaseDetails caseDetails) {
