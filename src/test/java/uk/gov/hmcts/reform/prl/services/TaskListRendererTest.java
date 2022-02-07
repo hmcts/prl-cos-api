@@ -65,7 +65,7 @@ public class TaskListRendererTest {
         Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
         Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build(),
         Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
-        Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build());
+        Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build());
 
 
