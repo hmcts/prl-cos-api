@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
@@ -339,4 +340,9 @@ public class CaseData {
     private final RespondentRelationObjectType respondentRelationObject;
     private final RespondentRelationDateInfo respondentRelationDateInfoObject;
     private final RespondentRelationOptionsInfo respondentRelationOptions;
+    
+    /**
+     * Respondent Behaviour.
+     */
+    private final RespondentBehaviour respondentBehaviourData;
 }
