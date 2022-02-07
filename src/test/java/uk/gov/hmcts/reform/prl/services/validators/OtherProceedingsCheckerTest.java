@@ -14,6 +14,9 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(MockitoJUnitRunner.class)
 public class OtherProceedingsCheckerTest {
 
@@ -29,7 +32,7 @@ public class OtherProceedingsCheckerTest {
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .build();
         boolean isStarted = otherProceedingsChecker.isStarted(caseData);
-        assert (isStarted);
+        assertTrue(isStarted);
     }
 
     @Test
@@ -38,7 +41,7 @@ public class OtherProceedingsCheckerTest {
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.no)
             .build();
         boolean isStarted = otherProceedingsChecker.isStarted(caseData);
-        assert (!isStarted);
+        assertFalse(isStarted);
     }
 
     @Test
@@ -47,7 +50,7 @@ public class OtherProceedingsCheckerTest {
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.no)
             .build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
-        assert (isFinished);
+        assertTrue(isFinished);
     }
 
     @Test
@@ -56,7 +59,7 @@ public class OtherProceedingsCheckerTest {
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
-        assert (!isFinished);
+        assertFalse(isFinished);
     }
 
     @Test
@@ -72,7 +75,6 @@ public class OtherProceedingsCheckerTest {
             .existingProceedings(listOfProceedings)
             .build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
-        assert (!isFinished);
+        assertFalse(isFinished);
     }
-
 }

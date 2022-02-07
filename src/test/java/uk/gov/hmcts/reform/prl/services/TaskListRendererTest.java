@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
@@ -57,7 +58,8 @@ public class TaskListRendererTest {
         Task.builder().event(LITIGATION_CAPACITY).state(FINISHED).build(),
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
         Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-        Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build());
+        Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build()
+    );
 
     private final List<EventValidationErrors> errors = List.of(
         EventValidationErrors.builder().event(ALLEGATIONS_OF_HARM)
@@ -65,7 +67,6 @@ public class TaskListRendererTest {
         EventValidationErrors.builder().event(ATTENDING_THE_HEARING)
             .errors(Collections.singletonList(ATTENDING_THE_HEARING_ERROR.toString())).build()
     );
-
 
     @Test
     public void shouldRenderTaskList() throws IOException {
@@ -83,13 +84,11 @@ public class TaskListRendererTest {
         String expectedTaskList = String.join("\n", lines);
         String actualTaskList = taskListRenderer.render(tasks, errors);
 
-        assert expectedTaskList.equals(actualTaskList);
-
+        assertThat(expectedTaskList).isEqualTo(actualTaskList);
     }
 
     @Test
     public void shouldRenderTaskListWithNoErrors() throws IOException {
-
         List<EventValidationErrors> emptyErrors = Collections.emptyList();
 
         BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/task-list-no-errors.md"));
@@ -105,11 +104,6 @@ public class TaskListRendererTest {
         String expectedTaskList = String.join("\n", lines);
         String actualTaskList = taskListRenderer.render(tasks, emptyErrors);
 
-        assert expectedTaskList.equals(actualTaskList);
-
+        assertThat(expectedTaskList).isEqualTo(actualTaskList);
     }
-
-
-
-
 }
