@@ -4,23 +4,20 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 
 @RequiredArgsConstructor
 public enum YesNoBothEnum {
 
     @JsonProperty("yesBothOfThem")
-    yesBothOfThem("yesBothOfThem","Yes, both of them"),
-
+    yesBothOfThem("Yes, both of them"),
     @JsonProperty("yesApplicant")
-    yesApplicant("yesApplicant","Yes, the applicant"),
-
+    yesApplicant("Yes, the applicant"),
     @JsonProperty("yesRespondent")
-    yesRespondent("yesRespondent","Yes, the respondent"),
+    yesRespondent("Yes, the respondent"),
+    @JsonProperty("No")
+    No("No");
 
-    @JsonProperty("no")
-    no("no","No");
-
-    private final String id;
     private final String displayedValue;
 
     @JsonValue
@@ -29,8 +26,7 @@ public enum YesNoBothEnum {
     }
 
     @JsonCreator
-    public static PeopleLivingAtThisAddressEnum getValue(String key) {
-        return PeopleLivingAtThisAddressEnum.valueOf(key);
+    public static YesNoBothEnum getValue(String key) {
+        return YesNoBothEnum.valueOf(key);
     }
-
 }
