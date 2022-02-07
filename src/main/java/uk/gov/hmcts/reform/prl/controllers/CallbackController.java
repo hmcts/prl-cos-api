@@ -38,13 +38,14 @@ public class CallbackController {
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
     private static final String C8_DOC = "C8Document.pdf";
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
+    public static final String PRL_C1A_TEMPLATE = "PRL-C1A.docx";
+    public static final String PRL_C1A_FILENAME = "C1A_Document";
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
 
     private final DgsService dgsService;
     private final ObjectMapper objectMapper;
-
 
 
     /**
@@ -122,7 +123,7 @@ public class CallbackController {
             .build();
     }
 
-    @PostMapping(path = "/generate-c8-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/generate-c8-c1a-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to generate and store document")
     public AboutToStartOrSubmitCallbackResponse generateC8Document(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -139,6 +140,12 @@ public class CallbackController {
             PRL_C8_TEMPLATE
         );
 
+        GeneratedDocumentInfo generatedC1ADocumentInfo = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+            PRL_C1A_TEMPLATE
+        );
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         caseDataUpdated.put("c8Document", Document.builder()
@@ -146,6 +153,11 @@ public class CallbackController {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(C8_DOC).build());
+        caseDataUpdated.put("c1ADocument", Document.builder()
+            .documentUrl(generatedC1ADocumentInfo.getUrl())
+            .documentBinaryUrl(generatedC1ADocumentInfo.getBinaryUrl())
+            .documentHash(generatedC1ADocumentInfo.getHashToken())
+            .documentFileName(PRL_C1A_FILENAME).build());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
