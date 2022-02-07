@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
@@ -92,16 +93,18 @@ public class TaskListService {
     }
 
     private List<Event> getFL401Events() {
-        return new ArrayList<>(List.of(
+        final List<Event> events = new ArrayList<>(List.of(
             FL401_CASE_NAME,
             APPLICANT_DETAILS,
             RESPONDENT_DETAILS,
+            RESPONDENT_BEHAVIOUR,
             FL401_APPLICANT_FAMILY_DETAILS,
             OTHER_PROCEEDINGS,
             INTERNATIONAL_ELEMENT,
             WELSH_LANGUAGE_REQUIREMENTS,
             VIEW_PDF_DOCUMENT));
 
+        return events;
     }
 
 }
