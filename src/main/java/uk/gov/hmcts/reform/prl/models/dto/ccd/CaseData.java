@@ -26,11 +26,13 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
@@ -52,7 +54,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-public class CaseData {
+public class CaseData implements MappableObject {
 
     private final long id;
 
@@ -289,6 +291,9 @@ public class CaseData {
     private final String feeCode;
     @JsonProperty("draftOrderDoc")
     private final Document draftOrderDoc;
+    @JsonProperty("c8Document")
+    private final Document c8Document;
+
     @JsonProperty("submitAndPayDownloadApplicationLink")
     private final Document submitAndPayDownloadApplicationLink;
 
@@ -318,4 +323,23 @@ public class CaseData {
     private final List<RejectReasonEnum> rejectReason;
     private String returnMessage;
 
+    /**
+     * Issue and send to local court'.
+     */
+    private final List<Element<LocalCourtAdminEmail>> localCourtAdminEmail;
+  
+    /**
+     * This field contains Application Submitter solicitor email address.
+     */
+    private final String applicantSolicitorEmailAddress;
+    private final String respondentSolicitorEmailAddress;
+    private final String caseworkerEmailAddress;
+
+
+    /**
+     * Court details.
+     */
+
+    private String courtName;
+    private String courtId;
 }

@@ -63,18 +63,38 @@ feature-toggle:
   toggle:
     example: ${FEATURE_EXAMPLE:false}
 
+xui:
+  url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
+
 uk:
   gov:
     notify:
       api:
-        key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxxx}
+        key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxx}
         baseUrl: https://api.notifications.service.gov.uk
       email:
         templates:
           english:
-            EXAMPLE: 2e00903c-46f4-46d6-9d94-d419ee30b927
+            SOLICITOR: a080f4ce-a07f-43ec-a3f0-f196d83f7730
+            CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
+            EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
           welsh:
-            EXAMPLE: example-template-id-222
+            EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
+        application:
+          email-id: C100applications@justice.gov.uk
+          court-name: Court Name
+
+    gov:
+      notify:
+        api:
+          key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxxx}
+          baseUrl: https://api.notifications.service.gov.uk
+        email:
+          templates:
+            english:
+              EXAMPLE: 2e00903c-46f4-46d6-9d94-d419ee30b927
+            welsh:
+              EXAMPLE: example-template-id-222
 
 notify:
   api-key: fake-key
@@ -99,18 +119,17 @@ fees-register:
 
 # NEW BELOW THIS LINE
 
-
 idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: GT2V6PLQ34XGPTPM
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: W7supXKMJgcEWKBS
+    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
 
 prl:
   system-update:
@@ -141,6 +160,7 @@ auth:
         baseUrl: http://localhost:4502
 
 
+
 resources:
   images:
     baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
@@ -153,3 +173,8 @@ case_document_am:
 
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
+
+courtfinder:
+  api:
+    url: http://fact-api-aat.service.core-compute-aat.internal/
+
