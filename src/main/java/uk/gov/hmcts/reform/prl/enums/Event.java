@@ -13,7 +13,6 @@ public enum Event {
     APPLICANT_DETAILS("applicantsDetails", "Applicant details"),
     CHILD_DETAILS("childDetails", "Child details"),
     RESPONDENT_DETAILS("respondentsDetails", "Respondent details"),
-    RELATIONSHIP_TO_RESPONDENT("respondentRelationship","Relationship to respondent"),
     MIAM("miam", "MIAM"),
     ALLEGATIONS_OF_HARM("allegationsOfHarm", "Allegations of harm"),
     OTHER_PEOPLE_IN_THE_CASE("otherPeopleInTheCase", "Other people in the case"),
@@ -26,6 +25,7 @@ public enum Event {
     SUBMIT_AND_PAY("submitAndPay", "Submit and pay"),
     // FL401 Events
     FL401_CASE_NAME("fl401CaseName", "Case name"),
+    RELATIONSHIP_TO_RESPONDENT("respondentRelationship","Relationship to respondent"),
     RESPONDENT_BEHAVIOUR("respondentBehaviour", "Respondent's Behaviour");
 
     private final String id;
