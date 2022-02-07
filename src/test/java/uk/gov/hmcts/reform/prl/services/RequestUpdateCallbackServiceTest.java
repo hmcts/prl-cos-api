@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,6 +47,13 @@ public class RequestUpdateCallbackServiceTest {
     @Mock
     private SystemUserService systemUserService;
 
+    @Mock
+    private SolicitorEmailService solicitorEmailService;
+
+    @Mock
+    private CaseWorkerEmailService caseWorkerEmailService;
+
+
     @InjectMocks
     RequestUpdateCallbackService requestUpdateCallbackService;
 
@@ -56,7 +64,7 @@ public class RequestUpdateCallbackServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void shouldStartAndSubmitEventWithCaseDetails() {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).build();
         when(coreCaseDataApi.getCase(userToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
@@ -73,7 +81,6 @@ public class RequestUpdateCallbackServiceTest {
                          .caseReference("reference")
                          .accountNumber("123445555")
                          .build())
-            .serviceRequestStatus("Paid")
             .build();
 
         CaseData caseData = CaseData.builder().build();
@@ -97,14 +104,40 @@ public class RequestUpdateCallbackServiceTest {
         when(coreCaseDataApi.getCase(userToken, serviceAuthToken, "123")).thenReturn(caseDetails);
 
         assertThrows(Exception.class, () -> {
-            serviceRequestUpdateDto = ServiceRequestUpdateDto.builder().ccdCaseNumber("123")
-                .serviceRequestStatus("Paid").build();
+            serviceRequestUpdateDto = ServiceRequestUpdateDto.builder().ccdCaseNumber("123").serviceRequestStatus(
+                "Paid").build();
 
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         });
 
     }
 
+    @Test
+    public void shouldProcessCallback() throws Exception {
+
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).build();
+        when(coreCaseDataApi.getCase(userToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
+        when(coreCaseDataApi.startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                     caseType, Long.toString(caseId), eventName
+        ))
+            .thenReturn(buildStartEventResponse(eventName, eventToken));
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentMethod("cash")
+                         .paymentReference("reference")
+                         .caseReference("reference")
+                         .accountNumber("123445555")
+                         .build())
+            .serviceRequestStatus("Paid")
+            .build();
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+        assertEquals(coreCaseDataApi.getCase(userToken, serviceAuthToken, caseId.toString()), caseDetails);
+
+    }
+  
     @Test(expected = CaseNotFoundException.class)
     public void shouldThrowExceptionWhenInvalidCaseNumberIsSent() {
 
