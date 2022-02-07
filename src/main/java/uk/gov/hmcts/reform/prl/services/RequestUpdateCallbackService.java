@@ -69,7 +69,7 @@ public class RequestUpdateCallbackService {
 
         } else {
             log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());
-            throw new Exception("Case not present");
+            throw new CaseNotFoundException("Case not present");
         }
     }
 
