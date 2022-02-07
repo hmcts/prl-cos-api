@@ -236,6 +236,12 @@ public class CallbackControllerTest {
                                       .documentHash(generatedDocumentInfo.getHashToken())
                                       .documentFileName(PRL_C8_TEMPLATE)
                                       .build())
+                      .c1ADocument(Document.builder()
+                                             .documentUrl(generatedDocumentInfo.getUrl())
+                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                             .documentHash(generatedDocumentInfo.getHashToken())
+                                             .documentFileName(PRL_C8_TEMPLATE)
+                                             .build())
                       .build())
             .build();
 
