@@ -22,4 +22,5 @@ public class CaseDataProvider {
     public static CaseData welsh() {
         return CaseData.builder().languagePreferenceWelsh(YesOrNo.Yes).build();
     }
+
 }
