@@ -222,6 +222,7 @@ public class CallbackControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
+            .allegationsOfHarmYesNo(YesOrNo.Yes)
             .allegationsOfHarmChildAbductionYesNo(YesOrNo.Yes)
             .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
             .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
@@ -253,7 +254,7 @@ public class CallbackControllerTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.generateC8Document(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.generateC8AndOtherDocument(
             authToken,
             callbackRequest
         );
