@@ -24,7 +24,8 @@ public enum Event {
     VIEW_PDF_DOCUMENT("viewPdfDocument", "View PDF application"),
     SUBMIT_AND_PAY("submitAndPay", "Submit and pay"),
     // FL401 Events
-    FL401_CASE_NAME("fl401CaseName", "Case name");
+    FL401_CASE_NAME("fl401CaseName", "Case name"),
+    FL401_HOME("fl401Home", "The Home");
 
     private final String id;
     private final String name;

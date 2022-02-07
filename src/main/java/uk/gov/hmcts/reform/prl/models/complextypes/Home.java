@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.*;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.util.List;
 
@@ -16,13 +18,13 @@ public class Home {
     private final YesNoBothEnum everLivedAtTheAddress;
     private final YesNoBothEnum everLivedAtTheAddressNo;
     private final YesOrNo doAnyChildrenLiveAtAddress;
-    private final ChildrenLiveAtAddress doAnyChildrenLiveAtAddressYes;
+    private final List<Element<ChildrenLiveAtAddress>> doAnyChildrenLiveAtAddressYes;
     private final YesOrNo propertyAdaptedYesOrNo;
     private final String propertyAdaptedYesOrNoYes;
     private final YesOrNo mortgageOnPropertyYesOrNo;
-    private final Mortgage mortgageOnPropertyYesOrNoIsYes;
+    private final List<Element<Mortgage>> mortgageOnPropertyYesOrNoIsYes;
     private final YesOrNo isPropertyRentedYesNo;
-    private final RentedProperty isPropertyRentedYesNoIsYes;
+    private final List<Element<RentedProperty>> isPropertyRentedYesNoIsYes;
     private final YesOrNo applicantHomeRightYesOrNo;
     private final List<LivingSituationEnum> livingSituation;
     private final List<FamilyHomeEnum> familyHome;

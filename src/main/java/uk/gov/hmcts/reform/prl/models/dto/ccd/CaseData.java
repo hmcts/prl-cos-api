@@ -334,5 +334,5 @@ public class CaseData {
     /**
      * Home Situation DA.
      */
-    private final Home Home;
+    private final Home home;
 }
