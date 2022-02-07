@@ -321,16 +321,17 @@ public class CaseData implements MappableObject {
      * Return Application.
      */
     private final List<RejectReasonEnum> rejectReason;
-    private String returnMessage;
+    private final String returnMessage;
 
     /**
      * Issue and send to local court'.
      */
     private final List<Element<LocalCourtAdminEmail>> localCourtAdminEmail;
-  
+
     /**
      * This field contains Application Submitter solicitor email address.
      */
+    @JsonProperty("applicantSolicitorEmailAddress")
     private final String applicantSolicitorEmailAddress;
     private final String respondentSolicitorEmailAddress;
     private final String caseworkerEmailAddress;
