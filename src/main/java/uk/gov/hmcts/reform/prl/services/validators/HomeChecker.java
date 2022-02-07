@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import org.checkerframework.checker.nullness.Opt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.*;
@@ -34,36 +35,51 @@ public class HomeChecker implements EventChecker {
 
         Optional<Home> home =ofNullable(caseData.getHome());
         if(home.isPresent()){
-            Address address = home.get().getAddress();
-            List<PeopleLivingAtThisAddressEnum> peopleLivingAtThisAddress = home.get().getPeopleLivingAtThisAddress();
-            String textAreaSomethingElse =home.get().getTextAreaSomethingElse();
-            YesNoBothEnum everLivedAtTheAddress=home.get().getEverLivedAtTheAddress();
-            YesNoBothEnum everLivedAtTheAddressNo = home.get().getEverLivedAtTheAddressNo();
-            YesOrNo doAnyChildrenLiveAtAddress = home.get().getDoAnyChildrenLiveAtAddress();
-            List<Element<ChildrenLiveAtAddress>> doAnyChildrenLiveAtAddressYes = home.get().getDoAnyChildrenLiveAtAddressYes();
-            YesOrNo propertyAdaptedYesOrNo = home.get().getPropertyAdaptedYesOrNo();
-            String propertyAdaptedYesOrNoYes = home.get().getPropertyAdaptedYesOrNoYes();
-            YesOrNo mortgageOnPropertyYesOrNo = home.get().getMortgageOnPropertyYesOrNo();
-            List<Element<Mortgage>> mortgageOnPropertyYesOrNoIsYes = home.get().getMortgageOnPropertyYesOrNoIsYes();
-            YesOrNo isPropertyRentedYesNo = home.get().getIsPropertyRentedYesNo();
-            List<Element<RentedProperty>> isPropertyRentedYesNoIsYes = home.get().getIsPropertyRentedYesNoIsYes();
-            YesOrNo applicantHomeRightYesOrNo = home.get().getApplicantHomeRightYesOrNo();
-            List<LivingSituationEnum> livingSituation = home.get().getLivingSituation();
-            List<FamilyHomeEnum> familyHome = home.get().getFamilyHome();
-            String furtherInformation = home.get().getFurtherInformation();
+            Optional<Address> address = ofNullable(home.get().getAddress());
+            Optional<List<PeopleLivingAtThisAddressEnum>> peopleLivingAtThisAddress = ofNullable(home.get().getPeopleLivingAtThisAddress());
+            Optional<String> textAreaSomethingElse =ofNullable(home.get().getTextAreaSomethingElse());
+            Optional<YesNoBothEnum> everLivedAtTheAddress=ofNullable(home.get().getEverLivedAtTheAddress());
+            Optional<YesNoBothEnum> everLivedAtTheAddressNo = ofNullable(home.get().getEverLivedAtTheAddressNo());
+            Optional<YesOrNo> doAnyChildrenLiveAtAddress = ofNullable(home.get().getDoAnyChildrenLiveAtAddress());
+            Optional<List<Element<ChildrenLiveAtAddress>>> doAnyChildrenLiveAtAddressYes = ofNullable(home.get().getDoAnyChildrenLiveAtAddressYes());
+            Optional<YesOrNo> propertyAdaptedYesOrNo = ofNullable(home.get().getPropertyAdaptedYesOrNo());
+            Optional<String> propertyAdaptedYesOrNoYes = ofNullable(home.get().getPropertyAdaptedYesOrNoYes());
+            Optional<YesOrNo> mortgageOnPropertyYesOrNo = ofNullable(home.get().getMortgageOnPropertyYesOrNo());
+            Optional<List<Element<Mortgage>>> mortgageOnPropertyYesOrNoIsYes = ofNullable(home.get().getMortgageOnPropertyYesOrNoIsYes());
+            Optional<YesOrNo> isPropertyRentedYesNo = ofNullable(home.get().getIsPropertyRentedYesNo());
+            Optional<List<Element<RentedProperty>>> isPropertyRentedYesNoIsYes = ofNullable(home.get().getIsPropertyRentedYesNoIsYes());
+            Optional<YesOrNo> applicantHomeRightYesOrNo = ofNullable(home.get().getApplicantHomeRightYesOrNo());
+            Optional<List<LivingSituationEnum>> livingSituation = ofNullable(home.get().getLivingSituation());
+            Optional<List<FamilyHomeEnum>> familyHome = ofNullable(home.get().getFamilyHome());
+            Optional<String> furtherInformation = ofNullable(home.get().getFurtherInformation());
 
-            List<ChildrenLiveAtAddress> childrenLiveAtAddress = doAnyChildrenLiveAtAddressYes
+            List<ChildrenLiveAtAddress> childrenLiveAtAddress = doAnyChildrenLiveAtAddressYes.get()
                 .stream()
                 .map(Element::getValue)
+                .collect(Collectors.toList());
+
+            List<Mortgage> mortgages = mortgageOnPropertyYesOrNoIsYes.get()
+                .stream()
+                .map(Element :: getValue)
+                .collect(Collectors.toList());
+
+            List<RentedProperty> landlords = isPropertyRentedYesNoIsYes.get()
+                .stream()
+                .map(Element :: getValue)
                 .collect(Collectors.toList());
 
             for (ChildrenLiveAtAddress child : childrenLiveAtAddress) {
                 Optional<YesOrNo> ischildDetailConfidential = ofNullable(child.getKeepChildrenInfoConfidential());
                 ofNullable(child.getChildsAge());
                 Optional<String> fullname=ofNullable(child.getChildFullName());
-                Optional<String> personResponsible=ofNullable(child.getPersonResponsible());
+                Optional<YesOrNo> isRespondentResponsisbleYesNo=ofNullable(child.getIsRespondentResponsisbleYesNo());
+            }
 
-
+            for (Mortgage mortgage : mortgages) {
+                Optional<Address> mortgageAddress = ofNullable(mortgage.getAddress());
+                Optional<String> mortgageNumber = ofNullable(mortgage.getMortgageNumber());
+                Optional<String> mortgageLenderName=ofNullable(mortgage.getMortgageLenderName());
+                Optional<String> isRespondentResponsisbleYesNo=ofNullable(mortgage.getTextAreaSomethingElse());
             }
         }
 
