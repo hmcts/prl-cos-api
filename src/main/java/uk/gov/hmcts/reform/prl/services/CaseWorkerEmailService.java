@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.service.notify.NotificationClient;
 
 import java.util.ArrayList;
@@ -137,6 +136,18 @@ public class CaseWorkerEmailService {
 
     }
 
+    private EmailTemplateVars buildReturnApplicationEmail(CaseDetails caseDetails) {
+
+        String returnMessage = emailService.getCaseData(caseDetails).getReturnMessage();
+
+        return CaseWorkerEmail.builder()
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .contentFromDev(returnMessage)
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+    }
+
     public void sendReturnApplicationEmailToSolicitor(CaseDetails caseDetails) {
 
         List<PartyDetails> applicants = emailService.getCaseData(caseDetails)
@@ -151,7 +162,7 @@ public class CaseWorkerEmailService {
 
         String email = applicantEmailList.get(0);
 
-        if (applicants.size() > 1){
+        if (applicants.size() > 1) {
             email = emailService.getCaseData(caseDetails).getApplicantSolicitorEmailAddress();
         }
         emailService.send(
@@ -160,18 +171,6 @@ public class CaseWorkerEmailService {
             buildReturnApplicationEmail(caseDetails),
             LanguagePreference.ENGLISH
         );
-
-    }
-
-    private EmailTemplateVars buildReturnApplicationEmail(CaseDetails caseDetails) {
-
-        String returnMessage = emailService.getCaseData(caseDetails).getReturnMessage();
-
-        return CaseWorkerEmail.builder()
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-            .contentFromDev(returnMessage)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
-            .build();
 
     }
 }

@@ -60,7 +60,7 @@ public class ReturnApplicationReturnMessageController {
 
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
-        if (applicantsWrapped.isPresent() && applicantsWrapped.get().size() == 1 ) {
+        if (applicantsWrapped.isPresent() && applicantsWrapped.get().size() == 1) {
             List<PartyDetails> applicants = applicantsWrapped.get()
                 .stream()
                 .map(Element::getValue)
