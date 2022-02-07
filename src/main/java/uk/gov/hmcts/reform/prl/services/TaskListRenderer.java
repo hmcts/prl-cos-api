@@ -189,7 +189,9 @@ public class TaskListRenderer {
         final TaskSection peopleInTheCase = newSection("Add people to the case")
             .withTask(tasks.get(APPLICANT_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS))
+            .withTask(tasks.get(FL401_APPLICANT_FAMILY_DETAILS))
             .withTask(tasks.get(RESPONDENT_BEHAVIOUR));
+
 
         final TaskSection additionalInformation = newSection("Add additional information")
             .withInfo("Only complete if relevant")
