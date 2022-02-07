@@ -21,6 +21,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
@@ -47,6 +48,9 @@ public class EventsChecker {
 
     @Autowired
     RespondentsChecker respondentsChecker;
+
+    @Autowired
+    RespondentBehaviourChecker respondentBehaviourChecker;
 
     @Autowired
     MiamChecker miamChecker;
@@ -104,6 +108,7 @@ public class EventsChecker {
 
         eventStatus.put(FL401_CASE_NAME, caseNameChecker);
         eventStatus.put(FL401_TYPE_OF_APPLICATION, fl401ApplicationTypeChecker);
+        eventStatus.put(RESPONDENT_BEHAVIOUR, respondentBehaviourChecker);
     }
 
     public boolean isFinished(Event event, CaseData caseData) {
