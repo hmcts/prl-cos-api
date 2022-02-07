@@ -84,9 +84,9 @@ public class SolicitorEmailService {
     public void sendEmail(CaseDetails caseDetails) {
         log.info("Sending the email to solicitor for caseId {}", caseDetails.getId()
         );
-
+        String applicantSolicitorEmailAddress = caseDetails.getData().get("applicantSolicitorEmailAddress").toString();
         emailService.send(
-            "yogendra.upasani@hmcts.net",
+            applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
             LanguagePreference.ENGLISH
