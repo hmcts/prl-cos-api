@@ -25,7 +25,7 @@ public enum Event {
     SUBMIT_AND_PAY("submitAndPay", "Submit and pay"),
     // FL401 Events
     FL401_CASE_NAME("fl401CaseName", "Case name"),
-    FL401_TYPE_OF_APPLICATION("fl401TypeOfApplication", "Type of application");
+    FL401_TYPE_OF_APPLICATION("fl401TypeOfApplication", "Type of application"),
     RESPONDENT_BEHAVIOUR("respondentBehaviour", "Respondent's Behaviour");
 
     private final String id;
