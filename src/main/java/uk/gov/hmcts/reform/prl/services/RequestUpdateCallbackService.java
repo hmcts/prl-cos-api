@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
@@ -38,7 +39,7 @@ public class RequestUpdateCallbackService {
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final UserService userService;
 
-    public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
+    public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
 
         log.info("Processing the callback for the caseId {} with status {}", serviceRequestUpdateDto.getCcdCaseNumber(),
                  serviceRequestUpdateDto.getServiceRequestStatus()
@@ -68,7 +69,7 @@ public class RequestUpdateCallbackService {
 
         } else {
             log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());
-            throw new Exception("Case not present");
+            throw new CaseNotFoundException("Case not present");
         }
     }
 
@@ -99,7 +100,7 @@ public class RequestUpdateCallbackService {
 
         } else {
             log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());
-            throw new Exception("Case not present");
+            throw new CaseNotFoundException("Case not found");
         }
     }
 

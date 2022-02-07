@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -30,6 +31,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
     private final String serviceAuth = "ServiceAuthorization";
     private final RequestUpdateCallbackService requestUpdateCallbackService;
     private final AuthTokenGenerator authTokenGenerator;
+    private final AuthorisationService authorisationService;
 
     @Autowired
     ApplicationsTabService applicationsTabService;
@@ -43,15 +45,9 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(serviceAuth) String serviceAuthorization,
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
-    ) throws Exception {
-        try {
+    ) {
+        if (authorisationService.authorise(serviceAuthorization)) {
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-        } catch (Exception ex) {
-            log.error(
-                "Payment callback is unsuccessful for the CaseID: {}",
-                serviceRequestUpdateDto.getCcdCaseNumber()
-            );
-            throw new Exception(ex.getMessage());
         }
     }
 

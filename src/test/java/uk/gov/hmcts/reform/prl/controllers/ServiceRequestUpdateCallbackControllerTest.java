@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,9 +12,11 @@ import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -37,7 +38,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
     private FeeService feesService;
 
     @Mock
-    private ObjectMapper objectMapper;
+    AuthorisationService authorisationService;
 
     @Mock
     private FeeResponse feeResponse;
@@ -66,6 +67,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
 
         FeeType feeType = null;
 
+        when(authorisationService.authorise(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         serviceRequestUpdateCallbackController.serviceRequestUpdate(authToken,serviceAuthToken,serviceRequestUpdateDto);
@@ -81,6 +83,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
+        when(authorisationService.authorise(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         serviceRequestUpdateCallbackController.serviceRequestUpdate(authToken, serviceAuthToken,serviceRequestUpdateDto);

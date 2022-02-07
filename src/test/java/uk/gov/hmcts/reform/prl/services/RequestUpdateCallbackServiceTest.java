@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
@@ -64,7 +65,7 @@ public class RequestUpdateCallbackServiceTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void shouldStartAndSubmitEventWithCaseDetails() throws Exception {
+    public void shouldStartAndSubmitEventWithCaseDetails() {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).build();
         when(coreCaseDataApi.getCase(userToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(coreCaseDataApi.startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
@@ -96,7 +97,7 @@ public class RequestUpdateCallbackServiceTest {
     }
 
     @Test
-    public void shouldNotStartOrSubmitEventWithoutCaseDetails() throws Exception {
+    public void shouldNotStartOrSubmitEventWithoutCaseDetails() {
 
         CaseDetails caseDetails = CaseDetails.builder()
             .build();
@@ -135,6 +136,19 @@ public class RequestUpdateCallbackServiceTest {
         requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         assertEquals(coreCaseDataApi.getCase(userToken, serviceAuthToken, caseId.toString()), caseDetails);
 
+    }
+  
+    @Test(expected = CaseNotFoundException.class)
+    public void shouldThrowExceptionWhenInvalidCaseNumberIsSent() {
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .build();
+        when(coreCaseDataApi.getCase(userToken, serviceAuthToken, "123")).thenReturn(caseDetails);
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder().ccdCaseNumber("123")
+            .serviceRequestStatus("Paid").build();
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
     }
 
     private CaseDataContent buildCaseDataContent(String eventId, String eventToken, Object caseData) {
