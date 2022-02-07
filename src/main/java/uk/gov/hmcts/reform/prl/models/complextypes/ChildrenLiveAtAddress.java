@@ -18,13 +18,13 @@ public class ChildrenLiveAtAddress {
     private final YesOrNo keepChildrenInfoConfidential;
     private final String childFullName;
     private final String childsAge;
-    private final String personResponsible;
+    private final YesOrNo isRespondentResponsisbleYesNo;
 
     @JsonCreator
-    public ChildrenLiveAtAddress(YesOrNo keepChildrenInfoConfidential, String childFullName, String childsAge, String personResponsible) {
+    public ChildrenLiveAtAddress(YesOrNo keepChildrenInfoConfidential, String childFullName, String childsAge, YesOrNo isRespondentResponsisbleYesNo) {
         this.keepChildrenInfoConfidential = keepChildrenInfoConfidential;
         this.childFullName = childFullName;
         this.childsAge = childsAge;
-        this.personResponsible = personResponsible;
+        this.isRespondentResponsisbleYesNo = isRespondentResponsisbleYesNo;
     }
 }
