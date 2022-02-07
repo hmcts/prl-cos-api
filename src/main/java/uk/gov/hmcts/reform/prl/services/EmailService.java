@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.EmailObfuscator;
@@ -29,9 +31,11 @@ public class EmailService {
                      EmailTemplateNames templateName,
                      EmailTemplateVars templateVars,
                      LanguagePreference languagePreference) {
-        final String reference = generateReference();
+        final String reference = templateVars.getCaseReference();
         onBeforeLog(email, templateName, templateVars.getCaseReference(), reference);
         final String templateId = getTemplateId(templateName, languagePreference);
+
+        log.info(toMap(templateVars).toString());
 
         try {
             SendEmailResponse response = notificationClient.sendEmail(templateId, email, toMap(templateVars),
@@ -67,5 +71,15 @@ public class EmailService {
 
     private String getTemplateId(EmailTemplateNames templateName, LanguagePreference languagePreference) {
         return emailTemplatesConfig.getTemplates().get(languagePreference).get(templateName);
+    }
+
+    protected CaseData getCaseData(CaseDetails caseDetails) {
+
+        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            .toBuilder()
+            .id(caseDetails.getId())
+            .build();
+
+        return caseData;
     }
 }

@@ -17,4 +17,5 @@ import java.util.Map;
 public class EmailTemplatesConfig {
 
     private final Map<LanguagePreference, Map<EmailTemplateNames, String>> templates = new HashMap<>();
+
 }
