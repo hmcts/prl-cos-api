@@ -85,7 +85,7 @@ uk:
           email-id: C100applications@justice.gov.uk
           court-name: Court Name
 
- gov:
+    gov:
       notify:
         api:
           key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxxx}
@@ -96,29 +96,10 @@ uk:
               EXAMPLE: 2e00903c-46f4-46d6-9d94-d419ee30b927
             welsh:
               EXAMPLE: example-template-id-222
-              
+
 notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
-
-
-prl:
-  system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
-  # NEW BELOW THIS LINE
-
-idam:
-  api:
-    url: http://localhost:5000
-  s2s-auth:
-    url: http://localhost:4502
-    totp_secret: AABBCCDDEEFFGGHH
-    microservice: prl_cos_api
-  client:
-    id: prl_cos_api
-    redirect_uri: https://localhost:9000/oauth2/callback
-    secret: OOOOOOOOOOOOOOOO
 
 payments:
   api:
@@ -137,33 +118,55 @@ fees-register:
       keyword: ChildArrangement
       service: private law
 
+# NEW BELOW THIS LINE
+
+
+idam:
+  s2s-auth:
+    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
+    microservice: prl_cos_api
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+  api:
+    url: https://idam-api.aat.platform.hmcts.net
+  client:
+    id: prl-cos-api
+    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
+    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+
+prl:
+  system-update:
+    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
+
 security:
-  oauth2:
-    client:
-      provider:
-        oidc:
-          issuer-uri: ${idam.web.url}/oauth2
-      registration:
-        oidc:
-          client-id: internal
-          client-secret: internal
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: ${idam.web.url}/o
+        registration:
+          oidc:
+            client-id: internal
+            client-secret: internal
 core_case_data:
   api:
     url: http://localhost:4452
 
 auth:
-  idam:
-    client:
-      baseUrl: http://localhost:5000
-  provider:
-    service:
+    idam:
       client:
-        baseUrl: http://localhost:4502
+        baseUrl: http://localhost:5000
+    provider:
+      service:
+        client:
+          baseUrl: http://localhost:4502
+
 
 
 resources:
   images:
     baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
+
 
 send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
@@ -173,6 +176,8 @@ case_document_am:
 
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
+
+
 
 courtfinder:
   api:
