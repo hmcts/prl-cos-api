@@ -16,6 +16,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
@@ -57,6 +58,7 @@ public class TaskListRendererTest {
         Task.builder().event(LITIGATION_CAPACITY).state(FINISHED).build(),
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
         Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_HOME).state(NOT_STARTED).build(),
         Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build());
 
     private final List<EventValidationErrors> errors = List.of(
@@ -106,10 +108,5 @@ public class TaskListRendererTest {
         String actualTaskList = taskListRenderer.render(tasks, emptyErrors, true);
 
         assert expectedTaskList.equals(actualTaskList);
-
     }
-
-
-
-
 }

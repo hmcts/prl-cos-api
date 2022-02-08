@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.models.complextypes;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 
 import java.util.List;

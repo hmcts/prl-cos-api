@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.jackson.Jacksonized;
 
 @RequiredArgsConstructor
 public enum YesNoBothEnum {
