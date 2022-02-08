@@ -160,7 +160,7 @@ public class CallbackControllerTest {
         verifyNoMoreInteractions(dgsService);
 
     }
-  
+
     @Test
     public void testGenerateAndStoreC8Document() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -224,7 +224,7 @@ public class CallbackControllerTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.generateC8Document(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
         );

@@ -123,9 +123,9 @@ public class CallbackController {
             .build();
     }
 
-    @PostMapping(path = "/generate-c8-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to generate and store document")
-    public AboutToStartOrSubmitCallbackResponse generateC8Document(
+    @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to Issue and send to local court")
+    public AboutToStartOrSubmitCallbackResponse issueAndSendToLocalCourt(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
@@ -134,21 +134,21 @@ public class CallbackController {
             .id(callbackRequest.getCaseDetails().getId())
             .build();
 
-//        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-//            authorisation,
-//            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-//            PRL_C8_TEMPLATE
-//        );
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+            PRL_C8_TEMPLATE
+        );
 
         caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-//        caseDataUpdated.put("c8Document", Document.builder()
-//            .documentUrl(generatedDocumentInfo.getUrl())
-//            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-//            .documentHash(generatedDocumentInfo.getHashToken())
-//            .documentFileName(C8_DOC).build());
+        caseDataUpdated.put("c8Document", Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(C8_DOC).build());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
