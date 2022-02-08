@@ -63,10 +63,6 @@ public class ApplicantTabServiceTest {
     @Mock
     ObjectMapper objectMapper;
 
-    @Mock
-    CoreCaseDataService coreCaseDataService;
-
-
     CaseData caseDataWithParties;
     CaseData emptyCaseData;
     Address address;
