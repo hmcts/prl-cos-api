@@ -64,7 +64,7 @@ feature-toggle:
     example: ${FEATURE_EXAMPLE:false}
 
 xui:
-  url: ${XUI_URL:http://localhost:3333/cases/case-details}
+  url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
 uk:
   gov:
@@ -79,25 +79,11 @@ uk:
             CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
             RETURNAPPLICATION: 41a7ffcd-a5ec-4377-ba50-59619ad0ac8c
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
-            RETURNAPPLICATION: 41a7ffcd-a5ec-4377-ba50-59619ad0ac8c
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
           email-id: C100applications@justice.gov.uk
           court-name: Court Name
-
-    gov:
-      notify:
-        api:
-          key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxxx}
-          baseUrl: https://api.notifications.service.gov.uk
-        email:
-          templates:
-            english:
-              EXAMPLE: 2e00903c-46f4-46d6-9d94-d419ee30b927
-            welsh:
-              EXAMPLE: example-template-id-222
-
 
 
 notify:
@@ -130,7 +116,7 @@ payments:
 
 fees-register:
   api:
-    url: http://fees-register-api-demo.service.core-compute-demo.internal
+    url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}
   parameters:
     C100_SUBMISSION_FEE:
       channel: default
