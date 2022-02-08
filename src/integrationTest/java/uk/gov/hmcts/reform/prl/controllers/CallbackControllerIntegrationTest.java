@@ -49,7 +49,6 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
                                    .build());
     }
 
-
     @Test
     public void testDocumentGenerate_return200() throws Exception {
 
