@@ -24,7 +24,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
@@ -33,10 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -57,10 +56,16 @@ public class CallbackControllerTest {
     private CallbackController callbackController;
 
     @Mock
+    private ExampleService exampleService;
+
+    @Mock
     private WorkflowResult workflowResult;
 
     @Mock
     private DgsService dgsService;
+
+    @Mock
+    private CaseWorkerEmailService caseWorkerEmailService;
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
@@ -71,6 +76,8 @@ public class CallbackControllerTest {
     public static final String authToken = "Bearer TestAuthToken";
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
+    private static final String C8_DOC = "C8Document.pdf";
+
 
     @Before
     public void setUp() {
@@ -83,11 +90,24 @@ public class CallbackControllerTest {
     }
 
     @Test
+    public void testSendEmail() throws WorkflowException {
+        CaseDetails caseDetails  = CaseDetailsProvider.full();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().build();
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse callbackResponse = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder().build();
+
+        callbackController.sendEmail(callbackRequest);
+
+        verify(exampleService).executeExampleWorkflow(callbackRequest.getCaseDetails());
+        verifyNoMoreInteractions(exampleService);
+
+    }
+
+    @Test
     public void testConfirmMiamApplicationOrExemption() throws WorkflowException {
         CaseDetails caseDetails  = CaseDetailsProvider.full();
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.builder().build();
-
 
         when(applicationConsiderationTimetableValidationWorkflow.run(callbackRequest))
             .thenReturn(workflowResult);
@@ -119,7 +139,6 @@ public class CallbackControllerTest {
 
     @Test
     public void testGenerateAndStoreDocument() throws Exception {
-        //CaseDetails caseDetails  = CaseDetailsProvider.full();
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -161,12 +180,23 @@ public class CallbackControllerTest {
 
     }
 
-    @Test
-    public void testGenerateAndStoreC8Document() throws Exception {
+    @Test (expected = NullPointerException.class)
+    public void testIssueAndSendToLocalCourt() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseData(CaseData.builder()
+                          .draftOrderDoc(Document.builder()
+                                             .documentUrl(generatedDocumentInfo.getUrl())
+                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                             .documentHash(generatedDocumentInfo.getHashToken())
+                                             .documentFileName(PRL_C8_TEMPLATE)
+                                             .build())
+                          .build())
             .build();
 
         Address address = Address.builder()
@@ -204,32 +234,34 @@ public class CallbackControllerTest {
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
 
-
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .c8Document(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName(PRL_C8_TEMPLATE)
-                                         .build())
-                      .build())
-            .build();
-
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("c8Document", Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(C8_DOC).build());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+        //when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+           // .thenReturn(generatedDocumentInfo);
+
+        when(dgsService.generateDocument(authToken,caseDetails,PRL_C8_TEMPLATE))
             .thenReturn(generatedDocumentInfo);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
         );
-        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString());
 
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
+
+
+        verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
+
+        verify(dgsService).generateDocument(authToken, caseDetails, PRL_C8_TEMPLATE);
+        verifyNoMoreInteractions(dgsService);
+        verifyNoMoreInteractions(caseWorkerEmailService);
     }
 }
