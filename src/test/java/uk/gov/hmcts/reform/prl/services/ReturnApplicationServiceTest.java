@@ -101,7 +101,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void testGetReturnMessage(){
+    public void testGetReturnMessage() {
         StringBuilder returnMsgStr = new StringBuilder();
 
         returnMsgStr

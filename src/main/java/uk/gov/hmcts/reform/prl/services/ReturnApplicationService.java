@@ -56,10 +56,10 @@ public class ReturnApplicationService {
         return noOptionSelected;
     }
 
-    public String getReturnMessage(CaseData caseData, UserDetails userDetails){
+    public String getReturnMessage(CaseData caseData, UserDetails userDetails) {
         StringBuilder returnMsgStr = new StringBuilder();
 
-        returnMsgStr//.append("Subject line: Application returned: " + caseName + "\n")
+        returnMsgStr
             .append("Case name: " + caseData.getApplicantCaseName() + "\n")
             .append("Reference code: " + String.valueOf(caseData.getId()) + "\n\n")
             .append("Dear " + getLegalFullName(caseData) + ",\n\n")
