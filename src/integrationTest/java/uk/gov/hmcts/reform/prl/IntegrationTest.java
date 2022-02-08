@@ -41,7 +41,7 @@ public abstract class IntegrationTest {
     @Value("${idam.user.genericpassword}")
     protected String aatPassword;
 
-    @Value("${idam.client.baseUrl}")
+    @Value("${idam.api.url}")
     private String idamUserBaseUrl;
 
     @Value("${idam.client.redirect_uri}")
@@ -143,7 +143,7 @@ public abstract class IntegrationTest {
             .prePopulateFeeAndSolicitorName(
                 requestBody,
                 prePopulateUri,
-                getUserToken()
+                "Bearer + TestAuthToken"
             );
     }
 
@@ -177,6 +177,7 @@ public abstract class IntegrationTest {
     }
 
     private String idamCreateUrl() {
+        System.out.println(idamUserBaseUrl + "/testing-support/accounts");
         return idamUserBaseUrl + "/testing-support/accounts";
     }
 
