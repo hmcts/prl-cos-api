@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,6 +18,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
@@ -67,7 +68,25 @@ public class TaskListServiceTest {
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
-
     }
 
+    @Test
+    public void getTasksShouldReturnFl401ListOfTasks() {
+
+        CaseData caseData = CaseData.builder().caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE).build();
+
+        List<Task> expectedTasks = List.of(
+            Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
+            Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(FL401_HOME).state(NOT_STARTED).build(),
+            Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
+            Task.builder().event(INTERNATIONAL_ELEMENT).state(NOT_STARTED).build(),
+            Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
+            Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build());
+
+        List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
+
+        assertThat(expectedTasks).isEqualTo(actualTasks);
+    }
 }
