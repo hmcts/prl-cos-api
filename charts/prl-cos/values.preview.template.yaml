@@ -9,6 +9,7 @@ java:
         - system-update-user-username
         - system-update-user-password
         - notification-client-api-key
+        - test-genericpassword
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
