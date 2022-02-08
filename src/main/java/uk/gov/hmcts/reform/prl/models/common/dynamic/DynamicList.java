@@ -35,7 +35,7 @@ public class DynamicList {
     }
 
     @JsonIgnore
-    public UUID getValueCodeAsUUID() {
+    public UUID getValueCodeAsUuid() {
         return Optional.ofNullable(getValueCode()).map(UUID::fromString).orElse(null);
     }
 

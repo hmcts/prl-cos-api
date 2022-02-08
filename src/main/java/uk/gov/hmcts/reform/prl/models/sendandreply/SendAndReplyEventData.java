@@ -1,12 +1,9 @@
 package uk.gov.hmcts.reform.prl.models.sendandreply;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 
 @Value
 @Builder

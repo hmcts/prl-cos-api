@@ -93,12 +93,11 @@ public class SendAndReplyController extends AbstractCallbackController {
         SendAndReplyEventData eventData = caseData.getSendAndReplyEventData();
         Map<String, Object> caseDataMap = toMap(caseData);
 
-        if(eventData.getChooseSendOrReply().equals(SEND)) {
+        if (eventData.getChooseSendOrReply().equals(SEND)) {
             Message newMessage = sendAndReplyService.buildNewSendMessage(caseData);
             List<Element<Message>> listOfMessages = sendAndReplyService.addNewMessage(caseData, newMessage);
             caseDataMap.putAll(sendAndReplyService.returnMapOfNewMessages(listOfMessages));
-        }
-        else {
+        } else {
             UUID selectedValue = ElementUtils
                 .getDynamicListSelectedValue(caseData.getSendAndReplyEventData()
                                                  .getReplyMessageDynamicList(), objectMapper);
@@ -106,8 +105,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
             if (eventData.getMessageReply().getIsReplying().equals(YesOrNo.No)) {
                 updatedMessageList = sendAndReplyService.closeMessage(selectedValue, caseData);
-            }
-            else {
+            } else {
                 updatedMessageList = sendAndReplyService.buildNewReplyMessage(
                     selectedValue,
                     eventData.getMessageReply(),

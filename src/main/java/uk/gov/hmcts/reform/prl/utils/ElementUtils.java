@@ -132,7 +132,7 @@ public class ElementUtils {
         }
 
         return ofNullable(mapper.convertValue(dynamicList, DynamicList.class))
-            .map(DynamicList::getValueCodeAsUUID)
+            .map(DynamicList::getValueCodeAsUuid)
             .orElse(null);
     }
 }
