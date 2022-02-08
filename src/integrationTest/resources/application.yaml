@@ -125,7 +125,7 @@ idam:
     token:
       context-path: /oauth2/token
   user:
-    genericpassword: genericPassword123
+    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
 
 core_case_data:
   api:
