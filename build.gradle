@@ -3,15 +3,15 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath("net.serenity-bdd:serenity-gradle-plugin:2.4.24")
+    classpath("net.serenity-bdd:serenity-gradle-plugin:2.4.34")
   }
 }
 
 plugins {
   id 'application'
   id 'checkstyle'
-  id 'com.github.ben-manes.versions' version '0.39.0'
-  id 'info.solidsoft.pitest' version '1.6.0'
+  id 'com.github.ben-manes.versions' version '0.41.0'
+  id 'info.solidsoft.pitest' version '1.7.0'
   id 'io.spring.dependency-management' version '1.0.11.RELEASE'
   id 'jacoco'
   id 'org.owasp.dependencycheck' version '6.2.2'
@@ -41,7 +41,7 @@ def versions = [
   //  jsonPathAssert               : '2.2.0',
   junit                        : '4.13.1',
   junitPlatform                : '5.7.2',
-  lombok                       : '1.18.20',
+  lombok                       : '1.18.22',
   pact                         : '4.1.11',
   puppyCrawl                   : '8.43',
   reformPropertiesVolume       : '0.0.4',
@@ -125,7 +125,7 @@ allprojects {
       }
 
       // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
-      dependencySet(group: 'io.netty', version: '4.1.71.Final') {
+      dependencySet(group: 'io.netty', version: '4.1.73.Final') {
         entry 'netty-buffer'
         entry 'netty-codec'
         entry 'netty-codec-http'
@@ -143,7 +143,7 @@ allprojects {
         entry 'tomcat-embed-el'
       }
       //CVE-2017-18640
-      dependency group: 'org.yaml',name: 'snakeyaml', version: '1.26'
+      dependency group: 'org.yaml',name: 'snakeyaml', version: '1.30'
     }
   }
 }
@@ -240,7 +240,7 @@ dependencies {
   implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
   implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
   implementation group: 'io.springfox', name: 'springfox-spring-webflux', version: versions.springfoxSwagger
-  implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.0.0'
+  implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.0.1'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
   implementation group: 'org.apache.commons', name: 'commons-math3', version: versions.commonsMath3
   implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.14'
@@ -256,7 +256,7 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-httpcomponents', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-spring', version: versions.reformsJavaLogging
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.15.0'
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.15.0'
+  implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.17.1'
   implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version: versions.reformPropertiesVolume
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
   implementation group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: versions.sendLetterClient
@@ -365,7 +365,7 @@ dependencies {
 
   contractTestCompile group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
 
-  compile 'org.junit.vintage:junit-vintage-engine:5.7.2'
+  compile 'org.junit.vintage:junit-vintage-engine:5.8.2'
   testRuntimeOnly "org.junit.platform:junit-platform-commons:1.8.2"
 
 
@@ -378,6 +378,14 @@ dependencies {
   contractTestCompile sourceSets.test.runtimeClasspath
 
   integrationTestImplementation(sourceSets.test.output)
+
+  testCompile 'com.github.hmcts:fortify-client:1.2.2:all'
+}
+
+task fortifyScan(type: JavaExec)  {
+  main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+  classpath += sourceSets.test.runtimeClasspath
+  jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {

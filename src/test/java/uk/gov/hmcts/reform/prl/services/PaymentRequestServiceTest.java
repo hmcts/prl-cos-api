@@ -119,7 +119,7 @@ public class PaymentRequestServiceTest {
 
         PaymentServiceResponse psr = paymentRequestService.createServiceRequest(callbackRequest, "test token");
         assertNotNull(psr);
-        assertEquals(psr.getServiceRequestReference(), "response");
+        assertEquals("response", psr.getServiceRequestReference());
 
     }
 

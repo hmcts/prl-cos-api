@@ -34,7 +34,7 @@ public class MiamCheckerTest {
     public void whenNoCaseDataThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assert !miamChecker.isStarted(caseData);
+        assertTrue(!miamChecker.isStarted(caseData));
     }
 
     @Test
@@ -46,21 +46,21 @@ public class MiamCheckerTest {
             .build();
 
 
-        assert miamChecker.isStarted(caseData);
+        assertTrue(miamChecker.isStarted(caseData));
     }
 
     @Test
     public void whenNoDataHasMandatoryCompletedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assert !miamChecker.hasMandatoryCompleted(caseData);
+        assertTrue(!miamChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
     public void whenNoDataIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assert !miamChecker.isFinished(caseData);
+        assertTrue(!miamChecker.isFinished(caseData));
     }
 
     @Test
@@ -73,7 +73,7 @@ public class MiamCheckerTest {
             .miamCertificationDocumentUpload(MiamDocument.builder().build())
             .build();
 
-        assert miamChecker.isFinished(caseData);
+        assertTrue(miamChecker.isFinished(caseData));
     }
 
     @Test
@@ -88,7 +88,7 @@ public class MiamCheckerTest {
             .miamCertificationDocumentUpload1(MiamDocument.builder().build())
             .build();
 
-        assert miamChecker.isFinished(caseData);
+        assertTrue(miamChecker.isFinished(caseData));
     }
 
     @Test
@@ -101,7 +101,7 @@ public class MiamCheckerTest {
             .miamDomesticViolenceChecklist(Collections.singletonList(miamDomesticViolenceChecklistEnum_Value_1))
             .build();
 
-            assert miamChecker.isFinished(caseData);
+        assertTrue(miamChecker.isFinished(caseData));
 
     }
 
@@ -116,8 +116,5 @@ public class MiamCheckerTest {
             .build();
 
         assertTrue(miamChecker.isFinished(caseData));
-
     }
-
-
 }
