@@ -104,7 +104,7 @@ public abstract class IntegrationTest {
                 .documentGenerate(
                 requestBody,
                 documentGenerateUri,
-                getUserToken()
+                "Bearer TestAuthToken"
             );
     }
 
@@ -143,7 +143,7 @@ public abstract class IntegrationTest {
             .prePopulateFeeAndSolicitorName(
                 requestBody,
                 prePopulateUri,
-                "Bearer + TestAuthToken"
+                "Bearer TestAuthToken"
             );
     }
 
@@ -177,7 +177,6 @@ public abstract class IntegrationTest {
     }
 
     private String idamCreateUrl() {
-        System.out.println(idamUserBaseUrl + "/testing-support/accounts");
         return idamUserBaseUrl + "/testing-support/accounts";
     }
 
