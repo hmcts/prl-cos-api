@@ -27,11 +27,11 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class ReturnApplicationReturnMessageController {
 
     @Autowired
-    UserService userService;
+    private UserService userService;
     @Autowired
     private ReturnApplicationService returnApplicationService;
     @Autowired
-    private final ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @Autowired
     private final CaseWorkerEmailService caseWorkerEmailService;
 
@@ -47,8 +47,6 @@ public class ReturnApplicationReturnMessageController {
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        CaseData caseData1 = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
 
         CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)
             .toBuilder()

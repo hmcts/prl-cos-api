@@ -26,8 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -67,6 +66,10 @@ public class ReturnApplicationReturnMessageControllerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
             .surname("Solicitor")
@@ -75,6 +78,7 @@ public class ReturnApplicationReturnMessageControllerTest {
         casedata = CaseData.builder()
             .applicantCaseName("TestCase")
             .id(123L)
+            .applicants(applicantList)
             .rejectReason(Collections.singletonList(consentOrderNotProvided))
             .build();
     }
@@ -83,7 +87,7 @@ public class ReturnApplicationReturnMessageControllerTest {
     public void shouldStartReturnApplicationReturnMessageWithCaseDetails() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("returnMessage", "Test");
-            //callbackRequest.getCaseDetails().getData();
+
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(123L)
@@ -91,15 +95,12 @@ public class ReturnApplicationReturnMessageControllerTest {
                              .build())
             .build();
 
-
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)).thenReturn(casedata);
-        //when(objectMapper.convertValue(anyMap(),eq(CaseData.class))).thenReturn(casedata);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = returnApplicationReturnMessageController.returnApplicationReturnMessage(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = returnApplicationReturnMessageController
+            .returnApplicationReturnMessage(
             authToken,
             callbackRequest);
-        verify(returnApplicationReturnMessageController.returnApplicationReturnMessage("",callbackRequest));
-        verify(aboutToStartOrSubmitCallbackResponse.getData().get("returnMessage"));
         verify(userService).getUserDetails(authToken);
         verifyNoMoreInteractions(userService);
     }
@@ -122,7 +123,9 @@ public class ReturnApplicationReturnMessageControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =returnApplicationReturnMessageController.returnApplicationEmailNotification(callbackRequest);
+        doNothing().when(caseWorkerEmailService).sendReturnApplicationEmailToSolicitor(callbackRequest.getCaseDetails());
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = returnApplicationReturnMessageController
+            .returnApplicationEmailNotification(callbackRequest);
 
     }
 }
