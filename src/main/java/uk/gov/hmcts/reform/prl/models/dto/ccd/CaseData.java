@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -43,6 +44,8 @@ import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
+import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -327,7 +330,7 @@ public class CaseData implements MappableObject {
      * Issue and send to local court'.
      */
     private final List<Element<LocalCourtAdminEmail>> localCourtAdminEmail;
-  
+
     /**
      * This field contains Application Submitter solicitor email address.
      */
@@ -342,4 +345,15 @@ public class CaseData implements MappableObject {
 
     private String courtName;
     private String courtId;
+
+    /**
+     * Send and reply to messages.
+     */
+
+
+    @JsonUnwrapped
+    private final SendAndReplyEventData sendAndReplyEventData;
+    @JsonProperty("messages")
+    private final List<Element<Message>> messages;
+
 }
