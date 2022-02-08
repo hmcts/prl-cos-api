@@ -42,7 +42,7 @@ public class CallbackController {
     private static final String C8_DOC = "C8Document.pdf";
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
     public static final String PRL_C1A_TEMPLATE = "PRL-C1A.docx";
-    public static final String PRL_C1A_FILENAME = "C1A_Document";
+    public static final String PRL_C1A_FILENAME = "C1A_Document.pdf";
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
