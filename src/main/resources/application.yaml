@@ -1,5 +1,5 @@
 server:
-    port: 4044
+  port: 4044
 
 runs-locally: ${RUNS_LOCALLY:true}
 
@@ -18,53 +18,53 @@ spring:
   config:
     import: "optional:configtree:/mnt/secrets/"
   application:
-    name: Prl cos api
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
-#    username: ${DB_USER_NAME}
-#    password: ${DB_PASSWORD}
-#    properties:
-#      charSet: UTF-8
-#    hikari:
-#      minimumIdle: 2
-#      maximumPoolSize: 10
-#      idleTimeout: 10000
-#      poolName: {to-be-defined}HikariCP
-#      maxLifetime: 7200000
-#      connectionTimeout: 30000
-#  jpa:
-#    properties:
-#      hibernate:
-#        jdbc:
-#          lob:
-#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
-#            non_contextual_creation: true
+    name: Spring Boot Template
+  #  datasource:
+  #    driver-class-name: org.postgresql.Driver
+  #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
+  #    username: ${DB_USER_NAME}
+  #    password: ${DB_PASSWORD}
+  #    properties:
+  #      charSet: UTF-8
+  #    hikari:
+  #      minimumIdle: 2
+  #      maximumPoolSize: 10
+  #      idleTimeout: 10000
+  #      poolName: {to-be-defined}HikariCP
+  #      maxLifetime: 7200000
+  #      connectionTimeout: 30000
+  #  jpa:
+  #    properties:
+  #      hibernate:
+  #        jdbc:
+  #          lob:
+  #            # silence the 'wall-of-text' - unnecessary exception throw about blob types
+  #            non_contextual_creation: true
 
 azure:
-    application-insights:
-      instrumentation-key: ${rpe.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+  application-insights:
+    instrumentation-key: ${rpe.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
 
 logging:
-    level:
-      org.springframework.web: DEBUG
-      uk.gov.hmcts.reform.prl: DEBUG
-      au.com.dius.pact: DEBUG
-    pattern:
-      console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
+  level:
+    org.springframework.web: DEBUG
+    uk.gov.hmcts.reform.prl: DEBUG
+    au.com.dius.pact: DEBUG
+  pattern:
+    console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
 
 pba:
-    validation:
-      service:
-        api:
-          baseurl: ${PRD_API_BASEURL:http://localhost:8892}
+  validation:
+    service:
+      api:
+        baseurl: ${PRD_API_BASEURL:http://localhost:8892}
 
 feature-toggle:
-    toggle:
-      example: ${FEATURE_EXAMPLE:false}
+  toggle:
+    example: ${FEATURE_EXAMPLE:false}
 
 xui:
-  url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
+  url: ${XUI_URL:https://localhost:3333/cases/case-details}
 
 uk:
   gov:
@@ -96,9 +96,29 @@ uk:
             welsh:
               EXAMPLE: example-template-id-222
 
+
 notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
+
+
+prl:
+  system-update:
+    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
+  # NEW BELOW THIS LINE
+
+idam:
+  api:
+    url: http://localhost:5000
+  s2s-auth:
+    url: http://localhost:4502
+    totp_secret: AABBCCDDEEFFGGHH
+    microservice: prl_cos_api
+  client:
+    id: prl_cos_api
+    redirect_uri: https://localhost:9000/oauth2/callback
+    secret: OOOOOOOOOOOOOOOO
 
 payments:
   api:
@@ -107,7 +127,7 @@ payments:
 
 fees-register:
   api:
-    url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}
+    url: http://fees-register-api-demo.service.core-compute-demo.internal
   parameters:
     C100_SUBMISSION_FEE:
       channel: default
@@ -117,67 +137,43 @@ fees-register:
       keyword: ChildArrangement
       service: private law
 
-# NEW BELOW THIS LINE
-
-
-idam:
-  s2s-auth:
-    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
-    microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
-  api:
-    url: https://idam-api.aat.platform.hmcts.net
-  client:
-    id: prl-cos-api
-    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
-
-prl:
-  system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
-
 security:
-    oauth2:
-      client:
-        provider:
-          oidc:
-            issuer-uri: ${idam.web.url}/o
-        registration:
-          oidc:
-            client-id: internal
-            client-secret: internal
+  oauth2:
+    client:
+      provider:
+        oidc:
+          issuer-uri: ${idam.web.url}/oauth2
+      registration:
+        oidc:
+          client-id: internal
+          client-secret: internal
 core_case_data:
   api:
     url: http://localhost:4452
 
 auth:
-    idam:
+  idam:
+    client:
+      baseUrl: http://localhost:5000
+  provider:
+    service:
       client:
-        baseUrl: http://localhost:5000
-    provider:
-      service:
-        client:
-          baseUrl: http://localhost:4502
-
+        baseUrl: http://localhost:4502
 
 
 resources:
   images:
-    baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
+    baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/PRL-443-adding-task-list/resources/'
 
+courtfinder:
+  api:
+    url: http://fact-api-aat.service.core-compute-aat.internal/
+
+prl-dgs-api:
+  url: ${PRL_DGS_API_URL:http://localhost:4007}
 
 send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
 
 case_document_am:
   url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
-
-prl-dgs-api:
-  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
-
-
-
-courtfinder:
-  api:
-    url: http://fact-api-aat.service.core-compute-aat.internal/

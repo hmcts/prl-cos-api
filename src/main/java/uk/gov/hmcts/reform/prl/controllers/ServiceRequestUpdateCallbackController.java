@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,8 +18,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
-import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
+import uk.gov.hmcts.reform.prl.services.tab.AllTabsService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -32,7 +33,8 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
     private final AuthTokenGenerator authTokenGenerator;
 
     @Autowired
-    ApplicationsTabService applicationsTabService;
+    @Qualifier("allTabsService")
+    AllTabsService tabService;
 
     @PostMapping(path = "/service-request-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Ways to pay will call this API and send the status of payment with other details")
@@ -71,7 +73,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
             final CaseData caseData = getCaseData(caseDetails);
 
             log.info("Before application tab service submission");
-            applicationsTabService.updateApplicationTabData(caseData);
+            tabService.updateAllTabs(caseData);
             log.info("After application tab service");
 
             PaymentDto paymentDto = PaymentDto.builder()
@@ -89,7 +91,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
                 .payment(paymentDto)
                 .build();
 
-            applicationsTabService.updateApplicationTabData(caseData);
+            tabService.updateAllTabs(caseData);
             log.info("After application tab service");
 
             requestUpdateCallbackService.processCallbackForBypass(serviceRequestUpdateDto, authorisation);
