@@ -30,20 +30,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.DgsService;
-import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
-import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -128,7 +122,7 @@ public class CallbackControllerTest {
 
     @Test
     public void testvalidateApplicationConsiderationTimetable() throws WorkflowException {
-        CaseDetails caseDetails = CaseDetailsProvider.full();
+        CaseDetails caseDetails  = CaseDetailsProvider.full();
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.builder().build();
 
@@ -156,13 +150,13 @@ public class CallbackControllerTest {
 
         CaseDetails caseDetails = CaseDetails.builder()
             .caseData(CaseData.builder()
-                          .draftOrderDoc(Document.builder()
-                                             .documentUrl(generatedDocumentInfo.getUrl())
-                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                             .documentHash(generatedDocumentInfo.getHashToken())
-                                             .documentFileName("PRL-DRAFT-C100-20.docx")
-                                             .build())
-                          .build())
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("PRL-DRAFT-C100-20.docx")
+                               .build())
+            .build())
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -178,12 +172,12 @@ public class CallbackControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
-        when(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE))
+        when(dgsService.generateDocument(authToken,null,PRL_DRAFT_TEMPLATE))
             .thenReturn(generatedDocumentInfo);
 
         callbackController.generateAndStoreDocument(authToken, callbackRequest);
 
-        verify(dgsService).generateDocument(authToken, null, PRL_DRAFT_TEMPLATE);
+        verify(dgsService).generateDocument(authToken,null,PRL_DRAFT_TEMPLATE);
         verifyNoMoreInteractions(dgsService);
 
     }

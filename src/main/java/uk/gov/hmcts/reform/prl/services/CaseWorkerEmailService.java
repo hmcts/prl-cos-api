@@ -190,7 +190,6 @@ public class CaseWorkerEmailService {
             .map(LocalCourtAdminEmail::getEmail)
             .collect(Collectors.toList());
 
-
         emailList.forEach(email ->   emailService.send(
             email,
             EmailTemplateNames.COURTADMIN,

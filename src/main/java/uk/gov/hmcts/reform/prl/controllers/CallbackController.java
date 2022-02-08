@@ -141,9 +141,9 @@ public class CallbackController {
             .build();
     }
 
-    @PostMapping(path = "/generate-c8-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to generate and store document")
-    public AboutToStartOrSubmitCallbackResponse generateC8Document(
+    @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to Issue and send to local court")
+    public AboutToStartOrSubmitCallbackResponse issueAndSendToLocalCourt(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
@@ -181,6 +181,7 @@ public class CallbackController {
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
 
         caseDataUpdated.putAll(allTabsFields);
+        caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -193,6 +194,7 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
 
         allTabsService.updateAllTabs(caseData);
     }
