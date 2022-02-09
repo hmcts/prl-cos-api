@@ -46,7 +46,7 @@ public class CallbackController {
     private final DgsService dgsService;
     private final ObjectMapper objectMapper;
 
-    private final AllTabsService tabService;
+    private final AllTabsService allTabsService;
 
     /**
      * It's just an example - to be removed when there are real tasks sending emails.
@@ -148,7 +148,7 @@ public class CallbackController {
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(C8_DOC).build());
 
-        tabService.updateAllTabs(caseData);
+        allTabsService.updateAllTabs(caseData);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -165,7 +165,7 @@ public class CallbackController {
             .id(callbackRequest.getCaseDetails().getId())
             .build();
 
-        tabService.updateAllTabs(caseData);
+        allTabsService.updateAllTabs(caseData);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
     }
