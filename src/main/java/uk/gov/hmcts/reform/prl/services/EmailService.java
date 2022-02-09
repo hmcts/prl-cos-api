@@ -25,7 +25,7 @@ public class EmailService {
 
     private final NotificationClient notificationClient;
     private final EmailTemplatesConfig emailTemplatesConfig;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public void send(String email,
                      EmailTemplateNames templateName,
@@ -63,10 +63,6 @@ public class EmailService {
             "CaseId: {}: attempting to send email {} to {}. Reference = {}",
             caseId, name, EmailObfuscator.obfuscate(email), reference
         );
-    }
-
-    private String generateReference() {
-        return UUID.randomUUID().toString();
     }
 
     private String getTemplateId(EmailTemplateNames templateName, LanguagePreference languagePreference) {

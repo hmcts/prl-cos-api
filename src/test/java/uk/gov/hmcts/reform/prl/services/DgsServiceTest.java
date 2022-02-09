@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,8 +12,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -68,7 +67,7 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testToGenerateDocumentWithNoDataExpectedException() throws Exception{
+    public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
 
         CaseDetails caseDetails = CaseDetailsProvider.full();
 
