@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.services.tab;
+package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 

@@ -19,9 +19,10 @@ public class UrgencyGenerator implements FieldGenerator {
 
     private String getUrgencyStatus(CaseData caseData) {
         String[] listOfValues = {
-            YesOrNo.Yes.equals(caseData.getIsCaseUrgent()) ? "Urgent" : "",
-            YesOrNo.Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing()) ? "Without notice" : "",
-            YesOrNo.Yes.equals(caseData.getDoYouRequireAHearingWithReducedNotice()) ? "Redued notice" : "" };
+            YesOrNo.Yes.equals(caseData.getIsCaseUrgent()) ? "Urgent" : "Not urgent",
+            YesOrNo.Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing()) ? "without notice" : "",
+            YesOrNo.Yes.equals(caseData.getDoYouRequireAHearingWithReducedNotice()) ? "reduced notice" : "" };
+
         List modifiableList = new ArrayList(Arrays.asList(listOfValues));
         modifiableList.removeAll(Arrays.asList("", null));
         return String.join(", ", modifiableList);

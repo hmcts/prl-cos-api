@@ -10,8 +10,8 @@ import java.util.stream.Stream;
 public enum State {
 
     AWAITING_SUBMISSION_TO_HMCTS("AWAITING_SUBMISSION_TO_HMCTS", "Draft"),
-    SUBMITTED_NOT_PAID("PENDING_CASE_ISSUED", "Pending"),
-    SUBMITTED("SUBMITTED", "Submitted"),
+    SUBMITTED_NOT_PAID("SUBMITTED_NOT_PAID", "Pending"),
+    SUBMITTED_PAID("SUBMITTED_PAID", "Submitted"),
     AWAITING_RESUBMISSION_TO_HMCTS("AWAITING_RESUBMISSION_TO_HMCTS", "Returned"),
     CASE_ISSUED("CASE_ISSUED", "Case Issued"),
     CASE_WITHDRAWN("CASE_WITHDRAWN", "Withdrawn"),
@@ -37,6 +37,10 @@ public enum State {
         return Stream.of(values())
             .filter(state -> state.value.equalsIgnoreCase(value))
             .findFirst();
+    }
+
+    public String getLabel() {
+        return label;
     }
 
 }

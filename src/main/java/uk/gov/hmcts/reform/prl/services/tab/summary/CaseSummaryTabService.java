@@ -7,9 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.TabService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllegationOfHarmGenerator;
@@ -88,19 +86,6 @@ public class CaseSummaryTabService implements TabService {
         summaryTabFields.put("otherProceedingsForSummaryTab", otherProceedingsGenerator.getOtherProceedingsDetails(caseData));
         summaryTabFields.put("otherProceedingEmptyTable", caseSummary.getOtherProceedingEmptyTable());
 
-        return summaryTabFields;
-    }
-
-    private Map<String, Object> removeOtherProceedigsIfEmpty(Map<String, Object> summaryTabFields) {
-        try {
-            List<Element<OtherProceedings>> otherProceedingDetails = (List<Element<OtherProceedings>>)
-                summaryTabFields.get("otherProceedingsForSummaryTab");
-            if (otherProceedingDetails.size() == 0) {
-                summaryTabFields.remove("otherProceedingsForSummaryTab");
-            }
-        } catch (Exception e) {
-            log.error("Error while removing the otherprocedding from map for Summary tab ", e.getMessage());
-        }
         return summaryTabFields;
     }
 

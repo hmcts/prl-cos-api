@@ -38,6 +38,9 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
                 .collect(Collectors.toList());
 
             for (Child c : children) {
+                if (YesOrNo.Yes.equals(c.getIsChildAddressConfidential())) {
+                    return YesOrNo.Yes.getDisplayedValue();
+                }
                 Optional<List<Element<OtherPersonWhoLivesWithChild>>> otherPersonWrapped = ofNullable(c.getPersonWhoLivesWithChild());
                 if (otherPersonWrapped.isPresent() && otherPersonWrapped.get().size() != 0) {
                     List<OtherPersonWhoLivesWithChild> otherPersonList = otherPersonWrapped.get()

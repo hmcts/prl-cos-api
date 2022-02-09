@@ -14,12 +14,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
-import uk.gov.hmcts.reform.prl.services.tab.AllTabsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -70,11 +71,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
             log.info("**********************");
 
             final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            final CaseData caseData = getCaseData(caseDetails);
-
-            log.info("Before application tab service submission");
-            tabService.updateAllTabs(caseData);
-            log.info("After application tab service");
+            final CaseData caseData = getCaseData(caseDetails, State.SUBMITTED_NOT_PAID);
 
             PaymentDto paymentDto = PaymentDto.builder()
                 .paymentAmount("232")
