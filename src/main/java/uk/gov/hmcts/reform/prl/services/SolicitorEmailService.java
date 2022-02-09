@@ -70,7 +70,6 @@ public class SolicitorEmailService {
                 .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
                 .applicantName(applicantNames)
                 .courtName(court.getCourtName())
-                //.fullName(userDetails.getFullName())
                 .courtEmail(courtEmail)
                 .caseLink(manageCaseUrl + caseDetails.getId())
                 .build();

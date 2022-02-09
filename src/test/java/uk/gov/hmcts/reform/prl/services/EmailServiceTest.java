@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 import uk.gov.hmcts.reform.prl.utils.CitizenEmailProvider;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
@@ -21,11 +22,14 @@ import uk.gov.service.notify.SendEmailResponse;
 
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CASE_ID;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_EMAIL;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_PETITIONER_NAME;
@@ -77,7 +81,6 @@ public class EmailServiceTest {
             LanguagePreference.ENGLISH
         );
 
-
         verify(notificationClient).sendEmail(
             eq(EMAIL_TEMPLATE_ID_1),
             eq(TEST_EMAIL),
@@ -92,20 +95,13 @@ public class EmailServiceTest {
             .thenThrow(NotificationClientException.class);
 
         assertThrows(
-            NullPointerException.class,
+            IllegalArgumentException.class,
             () -> emailService.send(
                 TEST_EMAIL, EmailTemplateNames.EXAMPLE, expectedEmailVars, LanguagePreference.WELSH
             )
         );
 
-        when(notificationClient.sendEmail(
-            eq(EMAIL_TEMPLATE_ID_1),
-            eq(TEST_EMAIL),
-            eq(expectedEmailVarsAsMap),
-            anyString()
-        )).thenReturn(mock(SendEmailResponse.class));
-
-        verify(notificationClient, times(1)).sendEmail(
+        verify(notificationClient).sendEmail(
             eq(EMAIL_TEMPLATE_ID_2),
             eq(TEST_EMAIL),
             eq(expectedEmailVarsAsMap),
@@ -113,19 +109,17 @@ public class EmailServiceTest {
         );
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void shouldGetCaseData() {
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
             .build();
-
-        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+        CaseData caseData = CaseDetailsProvider.full().getCaseData();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CaseData caseData1 = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
             .id(caseDetails.getId())
             .build();
-
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
+        assertEquals(emailService.getCaseData(caseDetails),caseData1);
     }
 }
