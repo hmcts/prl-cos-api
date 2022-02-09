@@ -10,8 +10,10 @@ public enum MortgageNamedAfterEnum {
 
     @JsonProperty("applicant")
     applicant("applicant", "The applicant"),
+
     @JsonProperty("respondent")
     respondent("respondent", "The respondent"),
+
     @JsonProperty("someoneElse")
     someoneElse("someoneElse", "Someone else - please specify");
 
@@ -27,5 +29,4 @@ public enum MortgageNamedAfterEnum {
     public static MortgageNamedAfterEnum getValue(String key) {
         return MortgageNamedAfterEnum.valueOf(key);
     }
-
 }
