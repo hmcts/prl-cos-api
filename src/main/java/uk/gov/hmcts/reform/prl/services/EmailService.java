@@ -25,7 +25,7 @@ public class EmailService {
 
     private final NotificationClient notificationClient;
     private final EmailTemplatesConfig emailTemplatesConfig;
-    private final ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     public void send(String email,
                      EmailTemplateNames templateName,
