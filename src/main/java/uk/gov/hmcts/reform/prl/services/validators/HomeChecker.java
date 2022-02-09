@@ -145,7 +145,7 @@ public class HomeChecker implements EventChecker {
             Optional<YesOrNo> ischildDetailConfidential = ofNullable(child.getKeepChildrenInfoConfidential());
             Optional<String> age = ofNullable(child.getChildsAge());
             Optional<String> fullname = ofNullable(child.getChildFullName());
-            Optional<YesOrNo> isRespondentResponsisbleYesNo = ofNullable(child.getIsRespondentResponsisbleForChild());
+            Optional<YesOrNo> isRespondentResponsisbleYesNo = ofNullable(child.getIsRespondentResponsibleForChild());
             mandatoryFields = ischildDetailConfidential.isPresent() && age.isPresent()
                     && fullname.isPresent() && isRespondentResponsisbleYesNo.isPresent();
             if (!mandatoryFields) {
