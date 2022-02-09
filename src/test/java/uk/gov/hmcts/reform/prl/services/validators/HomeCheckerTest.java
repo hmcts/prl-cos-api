@@ -16,8 +16,8 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
+import uk.gov.hmcts.reform.prl.models.complextypes.Landlord;
 import uk.gov.hmcts.reform.prl.models.complextypes.Mortgage;
-import uk.gov.hmcts.reform.prl.models.complextypes.RentedProperty;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -41,7 +41,7 @@ public class HomeCheckerTest {
     @Before
     public void setup() {
         home = Home.builder()
-            .applicantHomeRightYesOrNo(YesOrNo.Yes)
+            .doesApplicantHaveHomeRights(YesOrNo.Yes)
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
             .build();
     }
@@ -67,11 +67,11 @@ public class HomeCheckerTest {
     public void whenHomeIsFilledThenIsFinishedReturnsFalse() {
         Home homefull = Home.builder()
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .applicantHomeRightYesOrNo(YesOrNo.No)
+            .doesApplicantHaveHomeRights(YesOrNo.No)
             .doAnyChildrenLiveAtAddress(YesOrNo.No)
-            .isPropertyRentedYesNo(YesOrNo.No)
-            .mortgageOnPropertyYesOrNo(YesOrNo.No)
-            .propertyAdaptedYesOrNo(YesOrNo.No)
+            .isPropertyRented(YesOrNo.No)
+            .isThereMortgageOnProperty(YesOrNo.No)
+            .isPropertyAdapted(YesOrNo.No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
@@ -159,18 +159,18 @@ public class HomeCheckerTest {
             .keepChildrenInfoConfidential(YesOrNo.Yes)
             .childFullName("child")
             .childsAge("12")
-            .isRespondentResponsisbleYesNo(YesOrNo.Yes)
+            .isRespondentResponsisbleForChild(YesOrNo.Yes)
             .build();
 
         Home homefull = Home.builder()
             .address(Address.builder().addressLine1("123").build())
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .applicantHomeRightYesOrNo(YesOrNo.No)
+            .doesApplicantHaveHomeRights(YesOrNo.No)
             .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
-            .doAnyChildrenLiveAtAddressYes(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
-            .isPropertyRentedYesNo(YesOrNo.No)
-            .mortgageOnPropertyYesOrNo(YesOrNo.No)
-            .propertyAdaptedYesOrNo(YesOrNo.No)
+            .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
+            .isPropertyRented(YesOrNo.No)
+            .isThereMortgageOnProperty(YesOrNo.No)
+            .isPropertyAdapted(YesOrNo.No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
@@ -193,12 +193,12 @@ public class HomeCheckerTest {
         Home homefull = Home.builder()
             .address(address)
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .applicantHomeRightYesOrNo(YesOrNo.No)
+            .doesApplicantHaveHomeRights(YesOrNo.No)
             .doAnyChildrenLiveAtAddress(YesOrNo.No)
-            .isPropertyRentedYesNo(YesOrNo.No)
-            .mortgageOnPropertyYesOrNo(YesOrNo.Yes)
-            .mortgageOnPropertyYesOrNoIsYes(List.of(Element.<Mortgage>builder().value(mortgage).build()))
-            .propertyAdaptedYesOrNo(YesOrNo.No)
+            .isPropertyRented(YesOrNo.No)
+            .isThereMortgageOnProperty(YesOrNo.Yes)
+            .mortgages(List.of(Element.<Mortgage>builder().value(mortgage).build()))
+            .isPropertyAdapted(YesOrNo.No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
@@ -212,21 +212,21 @@ public class HomeCheckerTest {
     @Test
     public void whenLandlordDetailsFilledAlongWithOtherThenIsFinishedReturnsTrue() {
         Address address = Address.builder().addressLine1("123").build();
-        RentedProperty rentedProperty = RentedProperty.builder()
+        Landlord rentedProperty = Landlord.builder()
             .landlordName("Landlord")
             .address(address)
-            .rentalNamedAfter(List.of(MortgageNamedAfterEnum.applicant))
+            .mortgageNamedAfterList(List.of(MortgageNamedAfterEnum.applicant))
             .build();
 
         Home homefull = Home.builder()
             .address(address)
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
-            .applicantHomeRightYesOrNo(YesOrNo.No)
+            .doesApplicantHaveHomeRights(YesOrNo.No)
             .doAnyChildrenLiveAtAddress(YesOrNo.No)
-            .isPropertyRentedYesNo(YesOrNo.Yes)
-            .isPropertyRentedYesNoIsYes(List.of(Element.<RentedProperty>builder().value(rentedProperty).build()))
-            .mortgageOnPropertyYesOrNo(YesOrNo.No)
-            .propertyAdaptedYesOrNo(YesOrNo.No)
+            .isPropertyRented(YesOrNo.Yes)
+            .landlords(List.of(Element.<Landlord>builder().value(rentedProperty).build()))
+            .isThereMortgageOnProperty(YesOrNo.No)
+            .isPropertyAdapted(YesOrNo.No)
             .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
             .familyHome(List.of(FamilyHomeEnum.payForRepairs))
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))

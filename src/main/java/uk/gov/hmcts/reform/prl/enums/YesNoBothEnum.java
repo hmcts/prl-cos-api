@@ -10,10 +10,13 @@ public enum YesNoBothEnum {
 
     @JsonProperty("yesBothOfThem")
     yesBothOfThem("Yes, both of them"),
+
     @JsonProperty("yesApplicant")
     yesApplicant("Yes, the applicant"),
+
     @JsonProperty("yesRespondent")
     yesRespondent("Yes, the respondent"),
+
     @JsonProperty("No")
     No("No");
 
