@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -10,22 +11,25 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
+import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
+import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SolicitorEmail;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class SolicitorEmailServiceTest {
 
 
@@ -47,25 +51,52 @@ public class SolicitorEmailServiceTest {
     private EmailService emailService;
 
     @Mock
-    UserService userService;
+    private UserService userService;
+
+    @Mock
+    private CourtFinderService courtFinderService;
 
     @InjectMocks
     private SolicitorEmailService solicitorEmailService;
 
     private Map<String, String> expectedEmailVarsAsMap;
 
+    @Mock
+    private CourtFinderApi courtFinderApi;
+
+    @Mock
+    private Court court;
+
+    @Mock
+    private ServiceArea serviceArea;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        court = Court.builder()
+            .courtName("testcourt")
+            .build();
+
+        List<Court> courtList  = new ArrayList<>();
+        courtList.add(court);
+
+        serviceArea = ServiceArea.builder()
+            .courts(courtList)
+            .build();
+
+        when(courtFinderApi.findClosestChildArrangementsCourtByPostcode("SE1 9BA")).thenReturn(serviceArea);
     }
 
     @Test
-    public void whenApplicantPresentThenApplicantStringCreated() {
+    public void whenApplicantPresentThenApplicantStringCreated() throws NotFoundException {
 
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
+            .address(Address.builder()
+                         .postCode("SE1 9BA")
+                         .build())
             .build();
 
         String applicantNames = "TestFirst TestLast";
@@ -73,10 +104,25 @@ public class SolicitorEmailServiceTest {
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
 
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
             .applicants(listOfApplicants)
+            .children(listOfChildren)
+            .courtName("testcourt")
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
@@ -94,8 +140,11 @@ public class SolicitorEmailServiceTest {
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
             .applicantName(applicantNames)
-            .caseLink(manageCaseUrl + caseDetails.getId())
+            .courtName(court.getCourtName())
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
+
+        when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
 
         assertEquals(solicitorEmailService.buildEmail(caseDetails), email);
 

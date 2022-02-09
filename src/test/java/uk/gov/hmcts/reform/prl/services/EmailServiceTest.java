@@ -25,9 +25,7 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CASE_ID;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_EMAIL;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_PETITIONER_NAME;
@@ -79,6 +77,7 @@ public class EmailServiceTest {
             LanguagePreference.ENGLISH
         );
 
+
         verify(notificationClient).sendEmail(
             eq(EMAIL_TEMPLATE_ID_1),
             eq(TEST_EMAIL),
@@ -93,13 +92,20 @@ public class EmailServiceTest {
             .thenThrow(NotificationClientException.class);
 
         assertThrows(
-            IllegalArgumentException.class,
+            NullPointerException.class,
             () -> emailService.send(
                 TEST_EMAIL, EmailTemplateNames.EXAMPLE, expectedEmailVars, LanguagePreference.WELSH
             )
         );
 
-        verify(notificationClient).sendEmail(
+        when(notificationClient.sendEmail(
+            eq(EMAIL_TEMPLATE_ID_1),
+            eq(TEST_EMAIL),
+            eq(expectedEmailVarsAsMap),
+            anyString()
+        )).thenReturn(mock(SendEmailResponse.class));
+
+        verify(notificationClient, times(1)).sendEmail(
             eq(EMAIL_TEMPLATE_ID_2),
             eq(TEST_EMAIL),
             eq(expectedEmailVarsAsMap),

@@ -42,7 +42,7 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Autowired
     private UserService userService;
 
-    private final CourtFinderService courtLocatorService;
+    private CourtFinderService courtLocatorService;
 
     @Autowired
     private ObjectMapper objectMapper;

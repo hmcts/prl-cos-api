@@ -65,7 +65,6 @@ public class SolicitorEmailService {
 
             court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
 
-
             return SolicitorEmail.builder()
                 .caseReference(String.valueOf(caseDetails.getId()))
                 .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
