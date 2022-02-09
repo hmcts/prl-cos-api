@@ -10,10 +10,13 @@ public enum PeopleLivingAtThisAddressEnum {
 
     @JsonProperty("applicant")
     applicant("applicant", "The applicant"),
+
     @JsonProperty("respondent")
     respondent("respondent", "The respondent"),
+
     @JsonProperty("applicantChildren")
     applicantChildren("applicantChildren", "The applicant’s child or children"),
+
     @JsonProperty("someoneElse")
     someoneElse("someoneElse", "Someone else - please specify");
 
@@ -29,5 +32,4 @@ public enum PeopleLivingAtThisAddressEnum {
     public static PeopleLivingAtThisAddressEnum getValue(String key) {
         return PeopleLivingAtThisAddressEnum.valueOf(key);
     }
-
 }

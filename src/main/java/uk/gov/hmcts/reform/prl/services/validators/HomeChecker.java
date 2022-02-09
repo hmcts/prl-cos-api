@@ -10,9 +10,9 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
+import uk.gov.hmcts.reform.prl.models.complextypes.Landlord;
 import uk.gov.hmcts.reform.prl.models.complextypes.Mortgage;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.RentedProperty;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.HOME_ERROR_ENUM;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.HOME_ERROR;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
 @Service
@@ -39,11 +39,11 @@ public class HomeChecker implements EventChecker {
         boolean isMandatoryFilled = mandatoryHomeCompleted(home);
 
         if (isMandatoryFilled) {
-            taskErrorService.removeError(HOME_ERROR_ENUM);
+            taskErrorService.removeError(HOME_ERROR);
             return  isMandatoryFilled;
         }
 
-        taskErrorService.addEventError(FL401_HOME,HOME_ERROR_ENUM, HOME_ERROR_ENUM.getError());
+        taskErrorService.addEventError(FL401_HOME,HOME_ERROR, HOME_ERROR.getError());
         return false;
     }
 
@@ -61,12 +61,12 @@ public class HomeChecker implements EventChecker {
         mandatoryCompleted = mandatoryHomeCompleted(ofNullable(caseData.getHome()));
 
         if (mandatoryCompleted) {
-            taskErrorService.removeError(HOME_ERROR_ENUM);
+            taskErrorService.removeError(HOME_ERROR);
             return true;
         }
         taskErrorService.addEventError(FL401_HOME,
-                                       HOME_ERROR_ENUM,
-                                       HOME_ERROR_ENUM.getError());
+                                       HOME_ERROR,
+                                       HOME_ERROR.getError());
         return false;
     }
 
@@ -78,10 +78,10 @@ public class HomeChecker implements EventChecker {
             fields.add(ofNullable(home.get().getPeopleLivingAtThisAddress()));
             fields.add(ofNullable(home.get().getEverLivedAtTheAddress()));
             fields.add(ofNullable(home.get().getDoAnyChildrenLiveAtAddress()));
-            fields.add(ofNullable(home.get().getPropertyAdaptedYesOrNo()));
-            fields.add(ofNullable(home.get().getMortgageOnPropertyYesOrNo()));
-            fields.add(ofNullable(home.get().getIsPropertyRentedYesNo()));
-            fields.add(ofNullable(home.get().getApplicantHomeRightYesOrNo()));
+            fields.add(ofNullable(home.get().getIsPropertyAdapted()));
+            fields.add(ofNullable(home.get().getIsThereMortgageOnProperty()));
+            fields.add(ofNullable(home.get().getIsPropertyRented()));
+            fields.add(ofNullable(home.get().getDoesApplicantHaveHomeRights()));
             fields.add(ofNullable(home.get().getLivingSituation()));
             fields.add(ofNullable(home.get().getFamilyHome()));
 
@@ -93,35 +93,35 @@ public class HomeChecker implements EventChecker {
 
             if (ofNullable(home.get().getEverLivedAtTheAddress()).isPresent()) {
                 if (home.get().getEverLivedAtTheAddress().equals(YesNoBothEnum.No)) {
-                    fields.add(ofNullable(home.get().getEverLivedAtTheAddressNo()));
+                    fields.add(ofNullable(home.get().getIntendToLiveAtTheAddress()));
                 }
             }
 
             if (ofNullable(home.get().getDoAnyChildrenLiveAtAddress()).isPresent()) {
                 if (home.get().getDoAnyChildrenLiveAtAddress().equals(YesOrNo.Yes)) {
-                    if (!mandatoryChildDetailsAreCompleted(ofNullable(home.get().getDoAnyChildrenLiveAtAddressYes()))) {
+                    if (!mandatoryChildDetailsAreCompleted(ofNullable(home.get().getChildren()))) {
                         fields.add(ofNullable(null));
                     }
                 }
             }
 
-            if (ofNullable(home.get().getPropertyAdaptedYesOrNo()).isPresent()) {
-                if (home.get().getPropertyAdaptedYesOrNo().equals(YesOrNo.Yes)) {
-                    fields.add(ofNullable(home.get().getPropertyAdaptedYesOrNoYes()));
+            if (ofNullable(home.get().getIsPropertyAdapted()).isPresent()) {
+                if (home.get().getIsPropertyAdapted().equals(YesOrNo.Yes)) {
+                    fields.add(ofNullable(home.get().getHowIsThePropertyAdapted()));
                 }
             }
 
-            if (ofNullable(home.get().getMortgageOnPropertyYesOrNo()).isPresent()) {
-                if (home.get().getMortgageOnPropertyYesOrNo().equals(YesOrNo.Yes)) {
-                    if (!mandatoryMortgageDetailsAreCompleted(ofNullable(home.get().getMortgageOnPropertyYesOrNoIsYes()))) {
+            if (ofNullable(home.get().getIsThereMortgageOnProperty()).isPresent()) {
+                if (home.get().getIsThereMortgageOnProperty().equals(YesOrNo.Yes)) {
+                    if (!mandatoryMortgageDetailsAreCompleted(ofNullable(home.get().getMortgages()))) {
                         fields.add(ofNullable(null));
                     }
                 }
             }
 
-            if (ofNullable(home.get().getIsPropertyRentedYesNo()).isPresent()) {
-                if (home.get().getIsPropertyRentedYesNo().equals(YesOrNo.Yes)) {
-                    if (!mandatoryLandlordDetailsAreCompleted(ofNullable(home.get().getIsPropertyRentedYesNoIsYes()))) {
+            if (ofNullable(home.get().getIsPropertyRented()).isPresent()) {
+                if (home.get().getIsPropertyRented().equals(YesOrNo.Yes)) {
+                    if (!mandatoryLandlordDetailsAreCompleted(ofNullable(home.get().getLandlords()))) {
                         fields.add(ofNullable(null));
                     }
                 }
@@ -145,7 +145,7 @@ public class HomeChecker implements EventChecker {
             Optional<YesOrNo> ischildDetailConfidential = ofNullable(child.getKeepChildrenInfoConfidential());
             Optional<String> age = ofNullable(child.getChildsAge());
             Optional<String> fullname = ofNullable(child.getChildFullName());
-            Optional<YesOrNo> isRespondentResponsisbleYesNo = ofNullable(child.getIsRespondentResponsisbleYesNo());
+            Optional<YesOrNo> isRespondentResponsisbleYesNo = ofNullable(child.getIsRespondentResponsisbleForChild());
             mandatoryFields = ischildDetailConfidential.isPresent() && age.isPresent()
                     && fullname.isPresent() && isRespondentResponsisbleYesNo.isPresent();
             if (!mandatoryFields) {
@@ -155,9 +155,9 @@ public class HomeChecker implements EventChecker {
         return mandatoryFields;
     }
 
-    private boolean mandatoryMortgageDetailsAreCompleted(Optional<List<Element<Mortgage>>> mortgageOnPropertyYesOrNoIsYes) {
+    private boolean mandatoryMortgageDetailsAreCompleted(Optional<List<Element<Mortgage>>> mortgagesList) {
 
-        List<Mortgage> mortgages = mortgageOnPropertyYesOrNoIsYes.get()
+        List<Mortgage> mortgages = mortgagesList.get()
                 .stream()
                 .map(Element::getValue)
                 .collect(Collectors.toList());
@@ -178,22 +178,22 @@ public class HomeChecker implements EventChecker {
         return true;
     }
 
-    private boolean mandatoryLandlordDetailsAreCompleted(Optional<List<Element<RentedProperty>>> isPropertyRentedYesNoIsYes) {
+    private boolean mandatoryLandlordDetailsAreCompleted(Optional<List<Element<Landlord>>> isPropertyRentedYesNoIsYes) {
 
-        List<RentedProperty> landlords = isPropertyRentedYesNoIsYes.get()
+        List<Landlord> landlords = isPropertyRentedYesNoIsYes.get()
                 .stream()
                 .map(Element::getValue)
                 .collect(Collectors.toList());
         boolean mandatoryFields = false;
-        for (RentedProperty landlord : landlords) {
+        for (Landlord landlord : landlords) {
             Optional<String> landlordName = ofNullable(landlord.getLandlordName());
             Optional<Address> landlordAddress = ofNullable(landlord.getAddress());
-            Optional<List<MortgageNamedAfterEnum>> rentalNamedAfter = ofNullable(landlord.getRentalNamedAfter());
+            Optional<List<MortgageNamedAfterEnum>> mortgageNamedAfterList = ofNullable(landlord.getMortgageNamedAfterList());
             Optional<String> text = ofNullable(landlord.getTextAreaSomethingElse());
             mandatoryFields = landlordName.isPresent()
                     && (landlordAddress.isPresent() && verifyAddressCompleted(landlordAddress.get()))
-                    && (rentalNamedAfter.isPresent()
-                    && (!rentalNamedAfter.get().contains(MortgageNamedAfterEnum.someoneElse) || text.isPresent()));
+                    && (mortgageNamedAfterList.isPresent()
+                    && (!mortgageNamedAfterList.get().contains(MortgageNamedAfterEnum.someoneElse) || text.isPresent()));
             if (!mandatoryFields) {
                 return false;
             }

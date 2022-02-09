@@ -187,7 +187,9 @@ public class TaskListRenderer {
 
         final TaskSection peopleInTheCase = newSection("Add people to the case")
             .withTask(tasks.get(APPLICANT_DETAILS))
-            .withTask(tasks.get(RESPONDENT_DETAILS))
+            .withTask(tasks.get(RESPONDENT_DETAILS));
+
+        final TaskSection addCaseDetails = newSection("Add case details")
             .withTask(tasks.get(FL401_HOME));
 
         final TaskSection additionalInformation = newSection("Add additional information")
@@ -201,6 +203,7 @@ public class TaskListRenderer {
 
         return Stream.of(applicationDetails,
                          peopleInTheCase,
+                         addCaseDetails,
                          additionalInformation,
                          pdfApplication)
             .filter(TaskSection::hasAnyTask)

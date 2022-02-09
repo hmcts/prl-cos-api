@@ -21,7 +21,7 @@ public enum EventErrorsEnum {
     WELSH_LANGUAGE_ERROR("Add details about welsh language requirements"),
     OTHER_PROCEEDINGS_ERROR("Add details about other proceedings"),
     ALLEGATIONS_OF_HARM_ERROR("Add details about allegations of harm"),
-    HOME_ERROR_ENUM("Add details about home situation");
+    HOME_ERROR("Add details about home situation");
     private final String error;
 
     @JsonValue

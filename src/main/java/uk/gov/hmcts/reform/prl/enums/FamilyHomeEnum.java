@@ -10,8 +10,10 @@ public enum FamilyHomeEnum {
 
     @JsonProperty("payForRepairs")
     payForRepairs("payForRepairs", "The applicant needs the respondent to pay for or contribute to repairs or maintenance to the home"),
+
     @JsonProperty("payOrContributeRent")
     payOrContributeRent("payOrContributeRent", "The applicant needs the respondent to pay for or contribute to the rent or the mortgage"),
+
     @JsonProperty("useHouseholdContents")
     useHouseholdContents("useHouseholdContents", "The applicant needs the use of the furniture or other household contents");
 
@@ -27,5 +29,4 @@ public enum FamilyHomeEnum {
     public static FamilyHomeEnum getValue(String key) {
         return FamilyHomeEnum.valueOf(key);
     }
-
 }
