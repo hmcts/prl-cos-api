@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import java.time.LocalDate;
-
 @Getter
 @EqualsAndHashCode(callSuper = true)
 public class CaseWorkerEmail extends EmailTemplateVars {

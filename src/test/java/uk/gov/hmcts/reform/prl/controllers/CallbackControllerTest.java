@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValida
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -113,7 +114,8 @@ public class CallbackControllerTest {
         CaseDetails caseDetails  = CaseDetailsProvider.full();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
-        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse callbackResponse = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder().build();
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse callbackResponse =
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder().build();
 
         callbackController.sendEmail(callbackRequest);
 
@@ -124,7 +126,7 @@ public class CallbackControllerTest {
 
     @Test
     public void testConfirmMiamApplicationOrExemption() throws WorkflowException {
-        CaseDetails caseDetails = CaseDetailsProvider.full();
+        CaseDetails caseDetails  = CaseDetailsProvider.full();
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.builder().build();
 
@@ -292,6 +294,13 @@ public class CallbackControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("c8Document", Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(C8_DOC).build());
+
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
