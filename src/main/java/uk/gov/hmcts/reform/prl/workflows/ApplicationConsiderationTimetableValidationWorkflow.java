@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.framework.task.Task;
 import uk.gov.hmcts.reform.prl.framework.workflow.DefaultWorkflow;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.tasks.ApplicationTimetableEffortsValidationTask;
 import uk.gov.hmcts.reform.prl.tasks.ApplicationTimetableTimeValidationTask;
@@ -21,9 +20,8 @@ public class ApplicationConsiderationTimetableValidationWorkflow extends Default
     private final ObjectMapper objectMapper;
 
     public WorkflowResult run(CallbackRequest callbackRequest) throws WorkflowException {
-        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
         return this.execute(
-            new Task[] {
+            new Task[]{
                 applicationTimetableTimeValidationTask,
                 applicationTimetableEffortsValidationTask
             },

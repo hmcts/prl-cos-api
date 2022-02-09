@@ -13,13 +13,11 @@ import uk.gov.hmcts.reform.prl.config.SystemUserConfiguration;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SystemUserService {
 
-
     private final OAuth2Configuration auth;
 
     private final SystemUserConfiguration userConfig;
 
     private final IdamClient idamClient;
-
 
     public String getSysUserToken() {
         return idamClient.getAccessToken(userConfig.getUserName(), userConfig.getPassword());
@@ -28,5 +26,4 @@ public class SystemUserService {
     public String getUserId(String userToken) {
         return idamClient.getUserInfo(userToken).getUid();
     }
-
 }
