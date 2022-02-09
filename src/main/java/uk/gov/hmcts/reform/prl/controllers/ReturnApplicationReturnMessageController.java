@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -42,7 +43,7 @@ public class ReturnApplicationReturnMessageController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse returnApplicationReturnMessage(
         @RequestHeader("Authorization") String authorisation,
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+        @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
@@ -54,7 +55,7 @@ public class ReturnApplicationReturnMessageController {
             .build();
 
         if (!returnApplicationService.noRejectReasonSelected(caseData)) {
-            caseDataUpdated.put("returnMessage", returnApplicationService.getReturnMessage(caseData,userDetails));
+            caseDataUpdated.put("returnMessage", returnApplicationService.getReturnMessage(caseData, userDetails));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -62,7 +63,7 @@ public class ReturnApplicationReturnMessageController {
     @PostMapping(path = "/return-application-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to send return application email notification")
     public AboutToStartOrSubmitCallbackResponse returnApplicationEmailNotification(
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(callbackRequest.getCaseDetails());
 
