@@ -11,7 +11,7 @@ public class ChildrenLiveAtAddress {
     private final YesOrNo keepChildrenInfoConfidential;
     private final String childFullName;
     private final String childsAge;
-    private final YesOrNo isRespondentResponsisbleForChild;
+    private final YesOrNo isRespondentResponsibleForChild;
 
     @JsonCreator
     public ChildrenLiveAtAddress(YesOrNo keepChildrenInfoConfidential, String childFullName,
@@ -19,6 +19,6 @@ public class ChildrenLiveAtAddress {
         this.keepChildrenInfoConfidential = keepChildrenInfoConfidential;
         this.childFullName = childFullName;
         this.childsAge = childsAge;
-        this.isRespondentResponsisbleForChild = isRespondentResponsisbleYesNo;
+        this.isRespondentResponsibleForChild = isRespondentResponsisbleYesNo;
     }
 }

@@ -159,7 +159,7 @@ public class HomeCheckerTest {
             .keepChildrenInfoConfidential(YesOrNo.Yes)
             .childFullName("child")
             .childsAge("12")
-            .isRespondentResponsisbleForChild(YesOrNo.Yes)
+            .isRespondentResponsibleForChild(YesOrNo.Yes)
             .build();
 
         Home homefull = Home.builder()
