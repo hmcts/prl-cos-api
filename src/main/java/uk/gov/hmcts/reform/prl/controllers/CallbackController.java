@@ -22,7 +22,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
@@ -45,8 +45,7 @@ public class CallbackController {
 
     private final DgsService dgsService;
     private final ObjectMapper objectMapper;
-
-    private final AllTabsService allTabsService;
+    private final AllTabServiceImpl allTabsService;
 
     /**
      * It's just an example - to be removed when there are real tasks sending emails.
