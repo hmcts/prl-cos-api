@@ -64,8 +64,7 @@ public class CaseData implements MappableObject {
 
     private final LocalDateTime createdDate;
 
-    @JsonProperty("lastModifiedDate")
-    private final LocalDateTime modifiedDate;
+    private final LocalDateTime lastModifiedDate;
 
     private final LocalDateTime dateSubmitted;
 
