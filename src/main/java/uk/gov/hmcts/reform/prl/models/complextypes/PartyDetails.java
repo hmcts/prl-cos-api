@@ -53,7 +53,7 @@ public class PartyDetails {
     private final String sendSignUpLink;
     private final String solicitorEmail;
 
-    public boolean hasConfidentialInfo () {
+    public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
             || this.isEmailAddressConfidential.equals(YesOrNo.Yes)
             || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);

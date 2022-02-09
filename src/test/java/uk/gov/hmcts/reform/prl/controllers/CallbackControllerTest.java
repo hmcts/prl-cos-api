@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -32,10 +31,13 @@ import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValida
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -94,7 +96,8 @@ public class CallbackControllerTest {
         CaseDetails caseDetails  = CaseDetailsProvider.full();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
-        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse callbackResponse = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder().build();
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse callbackResponse =
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder().build();
 
         callbackController.sendEmail(callbackRequest);
 
@@ -135,7 +138,6 @@ public class CallbackControllerTest {
         verifyNoMoreInteractions(validateMiamApplicationOrExemptionWorkflow);
 
     }
-
 
     @Test
     public void testGenerateAndStoreDocument() throws Exception {
@@ -182,6 +184,7 @@ public class CallbackControllerTest {
 
     @Test (expected = NullPointerException.class)
     public void testIssueAndSendToLocalCourt() throws Exception {
+
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -234,22 +237,19 @@ public class CallbackControllerTest {
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("c8Document", Document.builder()
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(C8_DOC).build());
+
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        //when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
-           // .thenReturn(generatedDocumentInfo);
-
         when(dgsService.generateDocument(authToken,caseDetails,PRL_C8_TEMPLATE))
             .thenReturn(generatedDocumentInfo);
-
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
@@ -257,11 +257,9 @@ public class CallbackControllerTest {
 
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
 
-
         verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
 
         verify(dgsService).generateDocument(authToken, caseDetails, PRL_C8_TEMPLATE);
-        verifyNoMoreInteractions(dgsService);
-        verifyNoMoreInteractions(caseWorkerEmailService);
+
     }
 }

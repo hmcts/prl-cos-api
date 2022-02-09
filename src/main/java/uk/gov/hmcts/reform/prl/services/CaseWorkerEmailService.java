@@ -40,7 +40,8 @@ public class CaseWorkerEmailService {
     private static final String WITHOUT_NOTICE = "Without notice";
     private static final String REDUCED_NOTICE = "Reduced notice";
     private static final String STANDARAD_HEARING = "Standard hearing";
-    private static final String CONFIDENTIAL_INFO = "The case contains confidential contact details";
+    private static final String YES = "Yes";
+    private static final String NO = "No";
 
     @Autowired
     private EmailService emailService;
@@ -168,7 +169,7 @@ public class CaseWorkerEmailService {
         ));
     }
 
-    private EmailTemplateVars buildCourtAdminEmail(CaseDetails caseDetails) {
+    public EmailTemplateVars buildCourtAdminEmail(CaseDetails caseDetails) {
 
         caseData = emailService.getCaseData(caseDetails);
 
@@ -184,17 +185,18 @@ public class CaseWorkerEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        String isConfidential = "No";
-         if ((applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
-            || (child.stream().anyMatch(Child::hasConfidentialInfo)))
-             isConfidential = "Yes";
+        String isConfidential = NO;
+        if ((applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
+             || (child.stream().anyMatch(Child::hasConfidentialInfo))) {
+            isConfidential = YES;
+        }
 
-        String typeOfHearing = " ";
-        String isCaseUrgent = "No";
+        String typeOfHearing = "";
+        String isCaseUrgent = NO;
 
         if (caseData.getIsCaseUrgent().equals(YesOrNo.Yes)) {
             typeOfHearing = URGENT_CASE;
-            isCaseUrgent = "Yes";
+            isCaseUrgent = YES;
         }
 
         LocalDate issueDate = LocalDate.now();
