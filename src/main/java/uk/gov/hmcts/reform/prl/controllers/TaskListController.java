@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.tab.AllTabsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 
 @Api
 @RestController

@@ -13,12 +13,14 @@ public class CommonUtils {
 
     public static String formatLocalDateTime(LocalDateTime localDateTime) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-            String format = localDateTime.format(formatter);
-            return format;
+            if (localDateTime != null) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                String format = localDateTime.format(formatter);
+                return format;
+            }
         } catch (Exception e) {
             log.error("Error while formatting the date from casedetails to casedata.. " + e.getMessage());
         }
-        return "";
+        return " ";
     }
 }

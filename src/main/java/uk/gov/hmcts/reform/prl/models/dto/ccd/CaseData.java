@@ -67,6 +67,8 @@ public class CaseData implements MappableObject {
     @JsonProperty("lastModifiedDate")
     private final LocalDateTime modifiedDate;
 
+    private final LocalDateTime dateSubmitted;
+
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;
 

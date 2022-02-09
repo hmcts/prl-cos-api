@@ -53,8 +53,8 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
         List<Element<OtherProceedings>> otherProceedingsDetailsList = new ArrayList<>();
 
         for (ProceedingDetails p : proceedings) {
-            String ordersMade = p.getTypeOfOrder().stream().map(TypeOfOrderEnum::getDisplayedValue)
-                .collect(Collectors.joining(", "));
+            String ordersMade = null != p.getTypeOfOrder() ? p.getTypeOfOrder().stream().map(TypeOfOrderEnum::getDisplayedValue)
+                .collect(Collectors.joining(", ")) : null;
 
             OtherProceedings otherProceedingsDetails = OtherProceedings.builder()
                 .caseNumber(p.getCaseNumber())

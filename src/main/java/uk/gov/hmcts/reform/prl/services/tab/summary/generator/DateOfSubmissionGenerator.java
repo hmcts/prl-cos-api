@@ -14,6 +14,6 @@ public class DateOfSubmissionGenerator implements FieldGenerator {
                                                           .dateOfSubmission(
                                                               CommonUtils
                                                                   .formatLocalDateTime(
-                                                                      caseData.getModifiedDate())).build()).build();
+                                                                      caseData.getDateSubmitted())).build()).build();
     }
 }
