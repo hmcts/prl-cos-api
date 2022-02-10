@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
+import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDateTime;
@@ -27,21 +29,20 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.getDynamicListSelectedValue;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendAndReplyService {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    AuthorisationUtil authorisationUtil;
+    private final AuthorisationUtil authorisationUtil;
 
-    @Autowired
-    ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    LocalDateTime dateTime = LocalDateTime.now();
+    private final ElementUtils elementUtils;
+
+    private final Time dateTime;
 
     public String getLoggedInUserEmail(String authorisation) {
         return userService.getUserDetails(authorisation).getEmail();
@@ -103,20 +104,20 @@ public class SendAndReplyService {
 
         return (Message) Message.builder()
             .status(OPEN)
-            .dateSent(dateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
+            .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
             .senderEmail(metaData.getSenderEmail())
             .recipientEmail(metaData.getRecipientEmail())
             .messageSubject(metaData.getMessageSubject())
             .messageHistory(buildMessageHistory(metaData.getSenderEmail(), eventData.getMessageContent()))
             .messageUrgency(ofNullable(metaData.getMessageUrgency()).orElse(""))
             .latestMessage(eventData.getMessageContent())
-            .updatedTime(dateTime)
+            .updatedTime(dateTime.now())
             .build();
     }
 
     public Map<String, Object> populateReplyMessageFields(CaseData caseData) {
         Map<String, Object> data = new HashMap<>();
-        UUID messageId = getDynamicListSelectedValue(
+        UUID messageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendAndReplyEventData().getReplyMessageDynamicList(), objectMapper);
         Optional<Message> previousMessage = caseData.getMessages().stream()
             .filter(element -> element.getId().equals(messageId))
@@ -154,8 +155,8 @@ public class SendAndReplyService {
                     String senderEmail = replyMessage.getReplyFrom();
 
                     Message updatedMessage = message.toBuilder()
-                        .dateSent(dateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
-                        .updatedTime(dateTime)
+                        .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
+                        .updatedTime(dateTime.now())
                         .senderEmail(senderEmail)
                         .recipientEmail(replyMessage.getReplyTo())
                         .messageHistory(buildMessageHistory(replyMessage, message, senderEmail))
@@ -171,7 +172,7 @@ public class SendAndReplyService {
         return Map.of("messages", messages);
     }
 
-    public static boolean hasMessages(CaseData caseData) {
+    public boolean hasMessages(CaseData caseData) {
         return !(caseData.getMessages() == null);
     }
 
@@ -191,7 +192,7 @@ public class SendAndReplyService {
         return String.join("\n \n", history, messageDetails);
     }
 
-    public static void removeTemporaryFields(Map<String, Object> caseData, String... fields) {
+    public void removeTemporaryFields(Map<String, Object> caseData, String... fields) {
         for (String field : fields) {
             caseData.remove(field);
         }

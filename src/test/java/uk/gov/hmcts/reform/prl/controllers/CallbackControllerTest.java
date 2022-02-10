@@ -160,7 +160,7 @@ public class CallbackControllerTest {
         verifyNoMoreInteractions(dgsService);
 
     }
-  
+
     @Test
     public void testGenerateAndStoreC8Document() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -189,9 +189,6 @@ public class CallbackControllerTest {
             .applicantsRelationshipToChild(specialGuardian)
             .respondentsRelationshipToChild(father)
             .childLiveWith(Collections.singletonList(anotherPerson))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("test")
             .build();

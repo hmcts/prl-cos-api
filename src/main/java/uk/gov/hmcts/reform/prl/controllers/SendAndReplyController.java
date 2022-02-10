@@ -30,8 +30,6 @@ import java.util.UUID;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData.temporaryFields;
-import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.hasMessages;
-import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.removeTemporaryFields;
 
 
 @Slf4j
@@ -48,6 +46,9 @@ public class SendAndReplyController extends AbstractCallbackController {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    ElementUtils elementUtils;
 
 
     @PostMapping("/about-to-start")
@@ -73,7 +74,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         List<String> errors = new ArrayList<>();
         if (eventData.getChooseSendOrReply().equals(REPLY)) {
-            if (!hasMessages(caseData)) {
+            if (!sendAndReplyService.hasMessages(caseData)) {
                 errors.add("There are no messages to respond to.");
             }
             caseDataMap.putAll(sendAndReplyService.populateReplyMessageFields(caseData));
@@ -98,7 +99,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             List<Element<Message>> listOfMessages = sendAndReplyService.addNewMessage(caseData, newMessage);
             caseDataMap.putAll(sendAndReplyService.returnMapOfNewMessages(listOfMessages));
         } else {
-            UUID selectedValue = ElementUtils
+            UUID selectedValue = elementUtils
                 .getDynamicListSelectedValue(caseData.getSendAndReplyEventData()
                                                  .getReplyMessageDynamicList(), objectMapper);
             List<Element<Message>> updatedMessageList;
@@ -114,7 +115,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             }
             caseDataMap.put("messages", updatedMessageList);
         }
-        removeTemporaryFields(caseDataMap, temporaryFields());
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
