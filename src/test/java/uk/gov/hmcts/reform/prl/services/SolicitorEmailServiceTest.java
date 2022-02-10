@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
@@ -31,6 +33,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
+@PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorEmailServiceTest {
 
@@ -38,16 +41,9 @@ public class SolicitorEmailServiceTest {
     private static final String manageCaseUrl = null;
     public static final String EMAIL_TEMPLATE_ID_1 = "111";
     public static final String EMAIL_TEMPLATE_ID_2 = "222";
-    public static final SolicitorEmail expectedEmailVars = SolicitorEmail.builder()
-        .caseReference("123")
-        .caseName("Case 123")
-        .applicantName("applicantName")
-        .courtName("court name")
-        .fullName("Full name")
-        .courtEmail("C@justice.gov.uk")
-        .caseLink("http://localhost:3333/")
-        .build();
 
+    @Value("${uk.gov.notify.email.application.email-id}")
+    private String courtEmail;
 
     @Mock
     private EmailService emailService;
@@ -87,7 +83,6 @@ public class SolicitorEmailServiceTest {
             .courts(courtList)
             .build();
 
-        when(courtFinderApi.findClosestChildArrangementsCourtByPostcode("SE1 9BA")).thenReturn(serviceArea);
     }
 
     @Test
@@ -118,7 +113,6 @@ public class SolicitorEmailServiceTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -146,6 +140,9 @@ public class SolicitorEmailServiceTest {
             .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
+
+//        when(courtFinderApi.findClosestChildArrangementsCourtByPostcode("SE1 9BA")).thenReturn(serviceArea);
+//        when(courtFinderApi.getCourtDetails("testcourt")).thenReturn(court);
         when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
 
         assertEquals(solicitorEmailService.buildEmail(caseDetails), email);
@@ -153,10 +150,13 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void sendEmailSuccessfully() {
+    public void sendEmailSuccessfully() throws NotFoundException {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
+            .address(Address.builder()
+                         .postCode("SE1 9BA")
+                         .build())
             .build();
 
         String applicantNames = "TestFirst TestLast";
@@ -164,11 +164,25 @@ public class SolicitorEmailServiceTest {
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
 
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
+            .children(listOfChildren)
+            .courtName("testcourt")
             .build();
 
         Map<String, Object> data = new HashMap<>();
@@ -189,8 +203,11 @@ public class SolicitorEmailServiceTest {
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
             .applicantName(applicantNames)
-            .caseLink(manageCaseUrl + caseDetails.getId())
+            .courtName(court.getCourtName())
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
+
+        when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
 
         solicitorEmailService.sendEmail(caseDetails);
         assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
