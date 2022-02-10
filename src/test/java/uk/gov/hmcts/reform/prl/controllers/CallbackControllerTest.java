@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -286,13 +287,11 @@ public class CallbackControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
+        doNothing().when(allTabsService).updateAllTabs(any(CaseData.class));
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.updateApplication(
-            authToken,
-            callbackRequest
-        );
-        verify(allTabsService, times(1)).getAllTabsFields(any(CaseData.class));
+        callbackController.updateApplication(authToken, callbackRequest);
+
+        verify(allTabsService, times(1)).updateAllTabs(any(CaseData.class));
     }
 }

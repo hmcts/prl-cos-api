@@ -5,32 +5,24 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class CaseUtils {
 
     public static CaseData getCaseData(CaseDetails caseDetails, ObjectMapper objectMapper) {
-        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-            .toBuilder()
-            .id(caseDetails.getId())
-            .state(State.tryFromValue(caseDetails.getState()).orElse(null))
-            .createdDate(caseDetails.getCreatedDate())
-            .lastModifiedDate(caseDetails.getLastModified())
-            .build();
-
-        return caseData;
-    }
-
-    public static CaseData getCaseData(CaseDetails caseDetails, ObjectMapper objectMapper, State state) {
+        State state = State.tryFromValue(caseDetails.getState()).orElse(null);
         CaseData.CaseDataBuilder caseDataBuilder = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
             .id(caseDetails.getId())
-            .state(State.tryFromValue(caseDetails.getState()).orElse(null))
+            .state(state)
             .createdDate(caseDetails.getCreatedDate())
             .lastModifiedDate(caseDetails.getLastModified());
 
-        if (null != state && (State.SUBMITTED_NOT_PAID.equals(state) || State.SUBMITTED_PAID.equals(state))) {
-            caseDataBuilder.dateSubmitted(LocalDateTime.now());
+        if (null != state && (State.SUBMITTED_PAID.equals(state))) {
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+            caseDataBuilder.dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
         }
         return caseDataBuilder.build();
     }

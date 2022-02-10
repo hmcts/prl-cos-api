@@ -19,7 +19,7 @@ public class DateOfSubmissionGeneratorTest {
     public void testGenerate() {
         LocalDateTime now = LocalDateTime.now();
         CaseSummary caseSummary = generator.generate(CaseData.builder()
-                                                         .dateSubmitted(now)
+                                                         .dateSubmitted("2022-02-10")
                                                              .build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()

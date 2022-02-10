@@ -7,5 +7,4 @@ import lombok.Data;
 @Data
 public class AllegationOfHarm {
     private final String typesOfHarm;
-    private final String status;
 }

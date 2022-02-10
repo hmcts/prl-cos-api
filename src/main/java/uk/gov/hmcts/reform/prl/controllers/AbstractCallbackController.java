@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -21,10 +20,6 @@ public abstract class AbstractCallbackController {
 
     protected CaseData getCaseData(CaseDetails caseDetails) {
         return CaseUtils.getCaseData(caseDetails, objectMapper);
-    }
-
-    protected CaseData getCaseData(CaseDetails caseDetails, State state) {
-        return CaseUtils.getCaseData(caseDetails, objectMapper, state);
     }
 
     protected Map<String, Object> toMap(Object object) {

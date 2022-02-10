@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
@@ -70,8 +68,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
         try {
             log.info("**********************");
 
-            final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            final CaseData caseData = getCaseData(caseDetails, State.SUBMITTED_NOT_PAID);
+            final CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
 
             PaymentDto paymentDto = PaymentDto.builder()
                 .paymentAmount("232")
@@ -87,7 +84,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
                 .serviceRequestStatus("Paid")
                 .payment(paymentDto)
                 .build();
-
+            //TODO: Have to set date of submission if payment is successful.
             tabService.updateAllTabs(caseData);
             log.info("After application tab service");
 
