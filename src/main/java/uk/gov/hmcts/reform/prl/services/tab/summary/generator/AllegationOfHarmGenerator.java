@@ -17,7 +17,6 @@ public class AllegationOfHarmGenerator implements FieldGenerator {
         String typeOfHarm = getTypeOfHarm(caseData);
         return CaseSummary.builder().allegationOfHarm(AllegationOfHarm.builder()
                                                           .typesOfHarm(typeOfHarm)
-                                                          .status(typeOfHarm.isEmpty() ? "No Allegations of harm" : "")
                                                           .build()).build();
     }
 

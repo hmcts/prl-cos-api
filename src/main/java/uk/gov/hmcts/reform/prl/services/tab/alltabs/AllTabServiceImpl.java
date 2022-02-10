@@ -37,6 +37,9 @@ public class AllTabServiceImpl implements AllTabsService {
     @Override
     public void updateAllTabs(CaseData caseData) {
         Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
+        if (caseData.getDateSubmitted() != null) {
+            combinedFieldsMap.put("dateSubmitted", caseData.getDateSubmitted());
+        }
 
         // Calling event to refresh the page.
         coreCaseDataService.triggerEvent(

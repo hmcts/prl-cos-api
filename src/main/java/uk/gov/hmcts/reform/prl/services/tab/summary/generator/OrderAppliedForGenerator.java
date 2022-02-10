@@ -39,7 +39,6 @@ public class OrderAppliedForGenerator implements FieldGenerator {
         return OrderAppliedFor.builder()
             .ordersApplyingFor(String.join(", ", ordersApplyingFor))
             .typeOfChildArrangementsOrder(typeOfChildArrangementsOrder)
-            .natureOfOrder(natureOfOrder)
             .build();
     }
 }

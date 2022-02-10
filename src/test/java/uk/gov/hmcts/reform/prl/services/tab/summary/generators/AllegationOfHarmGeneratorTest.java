@@ -29,7 +29,6 @@ public class AllegationOfHarmGeneratorTest {
                                                                                 + "child abuse, drugs,"
                                                                                 + " alcohol or substance abuse, safety "
                                                                                 + "or welfare concerns")
-                                                               .status("")
                                                                .build())
                                          .build());
     }
@@ -42,7 +41,6 @@ public class AllegationOfHarmGeneratorTest {
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()
                                               .allegationOfHarm(AllegationOfHarm.builder()
                                                                     .typesOfHarm("No Allegations of harm")
-                                                                    .status("")
                                                                     .build())
                                               .build());
     }

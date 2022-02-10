@@ -106,7 +106,7 @@ public class ApplicantTabServiceTest {
             .ordersOccupation(YesOrNo.Yes)
             .occupationOrder(order)
             .ordersForcedMarriageProtection(YesOrNo.Yes)
-            .forcedMarriageOrder(order)
+            //.forcedMarriageOrder(order)
             .ordersRestraining(YesOrNo.Yes)
             .restrainingOrder(order)
             .ordersOtherInjunctive(YesOrNo.Yes)

@@ -383,7 +383,7 @@ public class ApplicationsTabService implements TabService {
                 .orderCurrent(caseData.getOrdersForcedMarriageProtectionCurrent())
                 .courtName(caseData.getOrdersForcedMarriageProtectionCourtName())
                 .build();
-            allegationsOfHarmOrders.setForcedMarriageOrder(forOrder);
+            //allegationsOfHarmOrders.setForcedMarriageOrder(forOrder);
         }
 
         Optional<YesOrNo> resYesNo = ofNullable(allegationsOfHarmOrders.getOrdersRestraining());

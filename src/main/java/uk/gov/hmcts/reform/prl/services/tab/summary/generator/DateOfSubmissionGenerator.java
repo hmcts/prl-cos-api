@@ -12,8 +12,9 @@ public class DateOfSubmissionGenerator implements FieldGenerator {
     public CaseSummary generate(CaseData caseData) {
         return CaseSummary.builder().dateOfSubmission(DateOfSubmission.builder()
                                                           .dateOfSubmission(
-                                                              CommonUtils
-                                                                  .formatLocalDateTime(
-                                                                      caseData.getDateSubmitted())).build()).build();
+                                                              CommonUtils.getIsoDateToSpecificFormat(
+                                                                      caseData.getDateSubmitted(),
+                                                                      CommonUtils.DATE_OF_SUBMISSION_FORMAT))
+                                                          .build()).build();
     }
 }

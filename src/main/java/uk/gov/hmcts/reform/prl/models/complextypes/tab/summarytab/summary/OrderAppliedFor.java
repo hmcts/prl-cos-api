@@ -9,6 +9,5 @@ public class OrderAppliedFor {
 
     private final String ordersApplyingFor;
     private final String typeOfChildArrangementsOrder;
-    private final String natureOfOrder;
 
 }
