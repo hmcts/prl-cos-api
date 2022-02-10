@@ -7,9 +7,6 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.time.LocalDate;
@@ -22,7 +19,7 @@ public class Child {
     private final String firstName;
     private final String lastName;
     private final LocalDate dateOfBirth;
-    private final DontKnow isDateOfBirthUnknown;
+    private final DontKnow isDateOfBirthUnknown; //TODO: field not used
     private final Gender gender;
     private final String otherGender;
     private final List<OrderTypeEnum> orderAppliedFor;
@@ -31,16 +28,7 @@ public class Child {
     private final RelationshipsEnum  respondentsRelationshipToChild;
     private final String otherRespondentsRelationshipToChild;
     private final List<LiveWithEnum> childLiveWith;
-    private final YesNoDontKnow childrenKnownToLocalAuthority;
-    private final String childrenKnownToLocalAuthorityTextArea;
-    private final YesNoDontKnow childrenSubjectOfChildProtectionPlan;
     private final List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild;
-    private final Address address;
-    private final YesOrNo isChildAddressConfidential;
-    private final YesOrNo childUnsupervisedTime;
-    private final YesOrNo childContactFromOtherRecipients;
-    private final String relationshipToApplicant;
-    private final String relationshipToRespondent;
     private final String parentalResponsibilityDetails;
 
 

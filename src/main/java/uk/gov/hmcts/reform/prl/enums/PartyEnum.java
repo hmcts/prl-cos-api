@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.enums;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum PartyEnum {
 
@@ -16,15 +16,5 @@ public enum PartyEnum {
     other("Someone else");
 
     private final String displayedValue;
-
-    @JsonValue
-    public String getDisplayedValue() {
-        return displayedValue;
-    }
-
-    @JsonCreator
-    public static PartyEnum getValue(String key) {
-        return PartyEnum.valueOf(key);
-    }
 
 }

@@ -88,7 +88,6 @@ public class ApplicationsTabService {
         applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
 
         log.info("inside the application tab service update");
-        log.info(applicationTab.toString());
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
