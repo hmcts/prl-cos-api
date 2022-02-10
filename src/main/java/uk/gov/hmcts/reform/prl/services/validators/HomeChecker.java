@@ -55,8 +55,6 @@ public class HomeChecker implements EventChecker {
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
 
-        Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
-
         boolean mandatoryCompleted = false;
         mandatoryCompleted = mandatoryHomeCompleted(ofNullable(caseData.getHome()));
 
