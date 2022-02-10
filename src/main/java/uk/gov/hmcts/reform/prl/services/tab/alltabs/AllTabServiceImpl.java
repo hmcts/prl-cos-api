@@ -40,6 +40,9 @@ public class AllTabServiceImpl implements AllTabsService {
         if (caseData.getDateSubmitted() != null) {
             combinedFieldsMap.put("dateSubmitted", caseData.getDateSubmitted());
         }
+        if (caseData.getCourtName() != null) {
+            combinedFieldsMap.put("courtName", caseData.getCourtName());
+        }
 
         // Calling event to refresh the page.
         coreCaseDataService.triggerEvent(

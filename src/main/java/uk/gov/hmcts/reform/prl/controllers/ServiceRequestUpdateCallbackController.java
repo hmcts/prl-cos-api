@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
-
-import java.util.Collections;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -32,6 +32,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
     private final String serviceAuth = "ServiceAuthorization";
     private final RequestUpdateCallbackService requestUpdateCallbackService;
     private final AuthTokenGenerator authTokenGenerator;
+    private final CourtFinderService courtLocatorService;
 
     @Autowired
     @Qualifier("allTabsService")
@@ -69,11 +70,8 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
     ) throws Exception {
         try {
             log.info("**********************");
-            log.info("Printing casedetails === " + Collections.singletonList(callbackRequest.getCaseDetails().getData()));
 
             final CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-
-            log.info("Court Name $$$ " + caseData.getCourtName());
 
             PaymentDto paymentDto = PaymentDto.builder()
                 .paymentAmount("232")
@@ -82,13 +80,22 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
                 .caseReference(String.valueOf(caseData.getId()))
                 .accountNumber("111111")
                 .build();
-            ServiceRequestUpdateDto serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+
+            final ServiceRequestUpdateDto serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
                 .serviceRequestReference(String.valueOf(caseData.getId()))
                 .ccdCaseNumber(String.valueOf(caseData.getId()))
                 .serviceRequestAmount("232")
                 .serviceRequestStatus("Paid")
                 .payment(paymentDto)
                 .build();
+
+            // Getting court name and save it to db.
+            Court closestChildArrangementsCourt = courtLocatorService
+                .getClosestChildArrangementsCourt(caseData);
+            if (closestChildArrangementsCourt != null) {
+                caseData.setCourtName(closestChildArrangementsCourt.getCourtName());
+            }
+            log.info("*** Court Name *** " + caseData.getCourtName());
             //TODO: Have to set date of submission if payment is successful.
             tabService.updateAllTabs(caseData);
             log.info("After application tab service");
