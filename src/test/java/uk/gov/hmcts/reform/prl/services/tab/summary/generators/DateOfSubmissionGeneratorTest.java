@@ -25,7 +25,9 @@ public class DateOfSubmissionGeneratorTest {
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()
                                               .dateOfSubmission(DateOfSubmission.builder()
                                                                     .dateOfSubmission(
-                                                                        CommonUtils.formatLocalDateTime(now)).build())
+                                                                        CommonUtils.formatLocalDateTime(now)
+                                                                            .replaceAll("-", " "))
+                                                                    .build())
                                                                .build());
 
     }
