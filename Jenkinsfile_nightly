@@ -39,9 +39,8 @@ withNightlyPipeline(type, product, component) {
 
   loadVaultSecrets(secrets)
   enableSlackNotifications(channel)
-//  enableFortifyScan()
+  enableFortifyScan()
   enableFullFunctionalTest(200)
-
 
   after('fullFunctionalTest') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
