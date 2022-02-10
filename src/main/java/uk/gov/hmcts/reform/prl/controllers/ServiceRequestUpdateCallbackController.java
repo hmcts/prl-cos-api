@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 
+import java.util.Collections;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
@@ -67,8 +69,11 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
     ) throws Exception {
         try {
             log.info("**********************");
+            log.info("Printing casedetails === " + Collections.singletonList(callbackRequest.getCaseDetails().getData()));
 
             final CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+
+            log.info("Court Name $$$ " + caseData.getCourtName());
 
             PaymentDto paymentDto = PaymentDto.builder()
                 .paymentAmount("232")
