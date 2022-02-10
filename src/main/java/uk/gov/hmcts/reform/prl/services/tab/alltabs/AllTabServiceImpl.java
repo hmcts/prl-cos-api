@@ -36,6 +36,19 @@ public class AllTabServiceImpl implements AllTabsService {
 
     @Override
     public void updateAllTabs(CaseData caseData) {
+        Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
+
+        // Calling event to refresh the page.
+        coreCaseDataService.triggerEvent(
+            JURISDICTION,
+            CASE_TYPE,
+            caseData.getId(),
+            "internal-update-all-tabs",
+            combinedFieldsMap
+        );
+    }
+
+    private Map<String, Object> getCombinedMap(CaseData caseData) {
         Map<String, Object> applicationTabFields = applicationsTabService.updateTab(
             caseData);
 
@@ -46,13 +59,12 @@ public class AllTabServiceImpl implements AllTabsService {
                 summaryTabFields.entrySet().stream()
             ).collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll);
 
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            "internal-update-all-tabs",
-            combinedFieldsMap
-        );
+        return combinedFieldsMap;
+    }
+
+    @Override
+    public Map<String, Object> getAllTabsFields(CaseData caseData) {
+        return getCombinedMap(caseData);
     }
 
 }
