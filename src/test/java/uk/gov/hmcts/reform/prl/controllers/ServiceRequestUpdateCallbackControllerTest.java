@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,7 +22,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @PropertySource(value = "classpath:application.yaml")
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceRequestUpdateCallbackControllerTest {
 
 
@@ -46,9 +47,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
     private ServiceRequestUpdateDto serviceRequestUpdateDto;
 
     public static final String authToken = "Bearer TestAuthToken";
-
     public static final String serviceAuthToken = "Bearer TestServiceAuthToken";
-
 
     @Before
     public void setUp() {

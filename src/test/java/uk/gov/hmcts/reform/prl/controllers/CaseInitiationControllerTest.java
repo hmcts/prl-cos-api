@@ -19,12 +19,12 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.any;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CaseInitiationControllerTest extends AbstractCallbackController {
+@RunWith(MockitoJUnitRunner.Silent.class)
+public class CaseInitiationControllerTest {
 
     private final String auth = "testAuth";
 
@@ -38,38 +38,49 @@ public class CaseInitiationControllerTest extends AbstractCallbackController {
     private ObjectMapper objectMapper;
 
     @Mock
-    private CaseDetails caseDetails;
+    private EventService eventService;
 
     @Mock
     EventService eventPublisher;
 
-    private Map<String, Object> caseDataMap;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        caseDataMap = new HashMap<>();
-        caseDataMap.put("applicantCaseName", "testCaseName");
-
-        caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseDataMap)
-            .build();
     }
 
     @Test
     public void testHandleSubmitted() {
 
-        CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
-        CaseData caseData = getCaseData(caseDetails);
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("applicantCaseName", "testCaseName");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(caseDataMap)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("testCaseName")
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
+
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
-        doNothing().when(applicationsTabService).updateApplicationTabData(Mockito.any(CaseData.class));
+        caseInitiationController.handleSubmitted(callbackRequest);
+        eventService.publishEvent(caseDataChanged);
 
-        publishEvent(new CaseDataChanged(caseData));
-        assertTrue(true);
+        verify(applicationsTabService).updateApplicationTabData(caseData);
+        verify(eventService).publishEvent(caseDataChanged);
+
     }
 }
 
