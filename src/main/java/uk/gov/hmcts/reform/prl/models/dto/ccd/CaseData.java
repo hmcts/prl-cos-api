@@ -331,7 +331,6 @@ public class CaseData implements MappableObject {
     /**
      * This field contains Application Submitter solicitor email address.
      */
-    @JsonProperty("applicantSolicitorEmailAddress")
     private final String applicantSolicitorEmailAddress;
     private final String respondentSolicitorEmailAddress;
     private final String caseworkerEmailAddress;
