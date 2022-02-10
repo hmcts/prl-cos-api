@@ -140,9 +140,6 @@ public class SolicitorEmailServiceTest {
             .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
-
-//        when(courtFinderApi.findClosestChildArrangementsCourtByPostcode("SE1 9BA")).thenReturn(serviceArea);
-//        when(courtFinderApi.getCourtDetails("testcourt")).thenReturn(court);
         when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
 
         assertEquals(solicitorEmailService.buildEmail(caseDetails), email);
@@ -158,8 +155,6 @@ public class SolicitorEmailServiceTest {
                          .postCode("SE1 9BA")
                          .build())
             .build();
-
-        String applicantNames = "TestFirst TestLast";
 
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
@@ -196,6 +191,7 @@ public class SolicitorEmailServiceTest {
             .forename("userFirst")
             .surname("userLast")
             .build();
+        String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
 
