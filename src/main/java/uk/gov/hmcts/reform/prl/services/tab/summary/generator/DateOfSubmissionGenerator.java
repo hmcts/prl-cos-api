@@ -10,11 +10,14 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 public class DateOfSubmissionGenerator implements FieldGenerator {
     @Override
     public CaseSummary generate(CaseData caseData) {
+        String dateString = CommonUtils.getIsoDateToSpecificFormat(
+            caseData.getDateSubmitted(),
+            CommonUtils.DATE_OF_SUBMISSION_FORMAT
+        );
+        dateString = dateString.replaceAll("-", " ");
         return CaseSummary.builder().dateOfSubmission(DateOfSubmission.builder()
-                                                          .dateOfSubmission(
-                                                              CommonUtils.getIsoDateToSpecificFormat(
-                                                                      caseData.getDateSubmitted(),
-                                                                      CommonUtils.DATE_OF_SUBMISSION_FORMAT))
+                                                          .dateOfSubmission(dateString
+                                                              )
                                                           .build()).build();
     }
 }
