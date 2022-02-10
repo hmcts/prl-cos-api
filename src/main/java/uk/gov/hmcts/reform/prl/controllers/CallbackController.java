@@ -147,7 +147,11 @@ public class CallbackController {
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(C8_DOC).build());
 
-        allTabsService.updateAllTabs(caseData);
+        // Refreshing the page in the same event. Hence no external event call needed.
+        // Getting the tab fields and add it to the casedetails..
+        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+
+        caseDataUpdated.putAll(allTabsFields);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -163,10 +167,14 @@ public class CallbackController {
             .toBuilder()
             .id(callbackRequest.getCaseDetails().getId())
             .build();
+        // Refreshing the page in the same event. Hence no external event call needed.
+        // Getting the tab fields and add it to the casedetails..
+        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
 
-        allTabsService.updateAllTabs(caseData);
+        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
+        data.putAll(allTabsFields);
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(data).build();
     }
 
 }
