@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -77,6 +78,11 @@ public class PrePopulateFeeAndSolicitorNameController {
             PRL_DRAFT_TEMPLATE
         );
 
+        Court closestChildArrangementsCourt = courtLocatorService
+            .getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
+            .getCaseData());
+        log.info("**** Court Name *** " + (null != closestChildArrangementsCourt
+            ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched"));
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()
                 .solicitorName(userDetails.getFullName())
@@ -89,12 +95,11 @@ public class PrePopulateFeeAndSolicitorNameController {
                                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                          .documentHash(generatedDocumentInfo.getHashToken())
                                                          .documentFileName(DRAFT_C_100_APPLICATION).build())
-                .courtName(courtLocatorService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
-                                                                                    .getCaseData()).getCourtName())
+                .courtName(closestChildArrangementsCourt.getCourtName())
                 .build(),
             CaseData.class
         );
-
+        log.info("Saving Court name into DB..");
         return CallbackResponse.builder()
             .data(caseData)
             .build();
