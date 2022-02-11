@@ -20,13 +20,16 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -55,6 +58,9 @@ public class ReturnApplicationReturnMessageControllerTest {
 
     @Mock
     private CaseWorkerEmailService caseWorkerEmailService;
+
+    @Mock
+    private AllTabServiceImpl allTabsService;
 
     private CallbackRequest callbackRequest;
 
@@ -118,14 +124,17 @@ public class ReturnApplicationReturnMessageControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = new HashMap<>();
+        doNothing().when(allTabsService).updateAllTabs(any(CaseData.class));
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
 
         doNothing().when(caseWorkerEmailService).sendReturnApplicationEmailToSolicitor(callbackRequest.getCaseDetails());
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = returnApplicationReturnMessageController
-            .returnApplicationEmailNotification(callbackRequest);
 
+        returnApplicationReturnMessageController.returnApplicationEmailNotification(callbackRequest);
+
+        verify(allTabsService, times(1)).updateAllTabs(any(CaseData.class));
     }
 }
