@@ -60,12 +60,11 @@ public class AllTabServiceImpl implements AllTabsService {
 
         Map<String, Object> summaryTabFields = caseSummaryTabService.updateTab(caseData);
 
-        Map<String, Object> combinedFieldsMap = Stream.concat(
+        return Stream.concat(
                 applicationTabFields.entrySet().stream(),
                 summaryTabFields.entrySet().stream()
             ).collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll);
 
-        return combinedFieldsMap;
     }
 
     @Override

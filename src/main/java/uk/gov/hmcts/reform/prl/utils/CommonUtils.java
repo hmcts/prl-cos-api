@@ -10,6 +10,10 @@ import java.time.format.DateTimeFormatter;
 public class CommonUtils {
     public static final String DATE_OF_SUBMISSION_FORMAT = "dd-MM-yyyy";
 
+    private CommonUtils() {
+
+    }
+
     public static String getValue(Object obj) {
         return obj != null ? String.valueOf(obj) : " ";
     }
@@ -17,9 +21,8 @@ public class CommonUtils {
     public static String formatLocalDateTime(LocalDateTime localDateTime) {
         try {
             if (localDateTime != null) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-                String format = localDateTime.format(formatter);
-                return format;
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_OF_SUBMISSION_FORMAT);
+                return localDateTime.format(formatter);
             }
         } catch (Exception e) {
             log.error("Error while formatting the date from casedetails to casedata.. " + e.getMessage());
@@ -32,8 +35,7 @@ public class CommonUtils {
             if (date != null) {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
                 LocalDate parse = LocalDate.parse(date);
-                String formattedDate = parse.format(formatter);
-                return formattedDate;
+                return parse.format(formatter);
             }
         } catch (Exception e) {
             log.error("Error while formatting the date from casedetails to casedata.. " + e.getMessage());

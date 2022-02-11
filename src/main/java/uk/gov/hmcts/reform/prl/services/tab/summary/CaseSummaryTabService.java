@@ -96,4 +96,9 @@ public class CaseSummaryTabService implements TabService {
                        orderAppliedForGenerator,
                        specialArrangementsGenerator, urgencyGenerator, allegationOfHarmGenerator,dateOfSubmissionGenerator);
     }
+
+    @Override
+    public void calEventToRefreshUI() {
+
+    }
 }
