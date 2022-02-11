@@ -181,3 +181,7 @@ prl-dgs-api:
 courtfinder:
   api:
     url: http://fact-api-aat.service.core-compute-aat.internal/
+
+
+launchdarkly:
+  sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
