@@ -265,7 +265,7 @@ public class CallbackControllerTest {
         CaseData caseData = CaseData.builder()
                            .withDrawApplicationData(withdrawApplication)
                            .applicants(applicantList).build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData.toMap(objectMapper);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
