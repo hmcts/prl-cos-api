@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.AuthorisationUtil;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
@@ -97,23 +99,31 @@ public class SendAndReplyController extends AbstractCallbackController {
         if (eventData.getChooseSendOrReply().equals(SEND)) {
             Message newMessage = sendAndReplyService.buildNewSendMessage(caseData);
             List<Element<Message>> listOfMessages = sendAndReplyService.addNewMessage(caseData, newMessage);
-            caseDataMap.putAll(sendAndReplyService.returnMapOfNewMessages(listOfMessages));
+            caseDataMap.putAll(sendAndReplyService.returnMapOfOpenMessages(listOfMessages));
+
         } else {
             UUID selectedValue = elementUtils
                 .getDynamicListSelectedValue(caseData.getSendAndReplyEventData()
                                                  .getReplyMessageDynamicList(), objectMapper);
-            List<Element<Message>> updatedMessageList;
 
+            List<Element<Message>> messages;
             if (eventData.getMessageReply().getIsReplying().equals(YesOrNo.No)) {
-                updatedMessageList = sendAndReplyService.closeMessage(selectedValue, caseData);
+                messages = sendAndReplyService.closeMessage(selectedValue, caseData);
+                List<Element<Message>> closedMessages = messages.stream()
+                    .filter(m -> m.getValue().getStatus().equals(MessageStatus.CLOSED))
+                    .collect(Collectors.toList());
+
+                messages.removeAll(closedMessages);
+                caseDataMap.put("closedMessages", closedMessages);
+
             } else {
-                updatedMessageList = sendAndReplyService.buildNewReplyMessage(
+                messages = sendAndReplyService.buildNewReplyMessage(
                     selectedValue,
                     eventData.getMessageReply(),
-                    caseData.getMessages()
+                    caseData.getOpenMessages()
                 );
             }
-            caseDataMap.put("messages", updatedMessageList);
+            caseDataMap.put("openMessages", messages);
         }
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
         return AboutToStartOrSubmitCallbackResponse.builder()
