@@ -3,6 +3,9 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import org.junit.Test;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class CaseNameCheckerTest {
 
 
@@ -15,8 +18,7 @@ public class CaseNameCheckerTest {
 
         boolean finished = caseNameChecker.isFinished(caseData);
 
-        assert (!finished);
-
+        assertFalse(finished);
     }
 
     @Test
@@ -27,8 +29,7 @@ public class CaseNameCheckerTest {
 
         boolean finished = caseNameChecker.isFinished(caseData);
 
-        assert (finished);
-
+        assertTrue(finished);
     }
 
     @Test
@@ -37,8 +38,7 @@ public class CaseNameCheckerTest {
 
         CaseNameChecker caseNameChecker = new CaseNameChecker();
 
-        assert !caseNameChecker.isStarted(caseData);
-
+        assertFalse(caseNameChecker.isStarted(caseData));
     }
 
     @Test
@@ -47,8 +47,7 @@ public class CaseNameCheckerTest {
 
         CaseNameChecker caseNameChecker = new CaseNameChecker();
 
-        assert !caseNameChecker.isStarted(caseData);
-
+        assertFalse(caseNameChecker.isStarted(caseData));
     }
 
     @Test
@@ -57,8 +56,7 @@ public class CaseNameCheckerTest {
 
         CaseNameChecker caseNameChecker = new CaseNameChecker();
 
-        assert !caseNameChecker.hasMandatoryCompleted(caseData);
-
+        assertFalse(caseNameChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
@@ -67,10 +65,6 @@ public class CaseNameCheckerTest {
 
         CaseNameChecker caseNameChecker = new CaseNameChecker();
 
-        assert !caseNameChecker.hasMandatoryCompleted(caseData);
-
+        assertFalse(caseNameChecker.hasMandatoryCompleted(caseData));
     }
-
-
-
 }
