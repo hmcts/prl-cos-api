@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
@@ -30,6 +31,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendAndReplyService {
@@ -62,10 +64,7 @@ public class SendAndReplyService {
     }
 
     public DynamicList getOpenMessagesDynamicList(CaseData caseData) {
-        List<Element<Message>> openMessages = caseData.getMessages()
-            .stream()
-            .filter(m -> m.getValue().getStatus().equals(OPEN))
-            .collect(Collectors.toList());
+        List<Element<Message>> openMessages = caseData.getOpenMessages();
 
         return ElementUtils.asDynamicList(
             openMessages,
@@ -74,19 +73,18 @@ public class SendAndReplyService {
         );
     }
 
-
     public List<Element<Message>> addNewMessage(CaseData caseData, Message newMessage) {
         List<Element<Message>> messages = new ArrayList<>();
         Element<Message> messageElement = element(newMessage);
         if (hasMessages(caseData)) {
-            messages = caseData.getMessages();
+            messages = caseData.getOpenMessages();
         }
         messages.add(messageElement);
         return messages;
     }
 
     public List<Element<Message>> closeMessage(UUID messageId, CaseData caseData) {
-        List<Element<Message>> messages = caseData.getMessages();
+        List<Element<Message>> messages = caseData.getOpenMessages();
         messages.stream()
             .filter(m -> m.getId().equals(messageId))
             .map(Element::getValue)
@@ -119,13 +117,14 @@ public class SendAndReplyService {
         Map<String, Object> data = new HashMap<>();
         UUID messageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendAndReplyEventData().getReplyMessageDynamicList(), objectMapper);
-        Optional<Message> previousMessage = caseData.getMessages().stream()
+        Optional<Message> previousMessage = caseData.getOpenMessages().stream()
             .filter(element -> element.getId().equals(messageId))
             .map(Element::getValue)
             .findFirst();
 
         if (previousMessage.isEmpty()) {
-            throw new RuntimeException(); //TODO:add correct error handling
+            log.info("No messages exist to respond to.");
+            return  data;
         }
 
         Message m = previousMessage.get();
@@ -168,12 +167,16 @@ public class SendAndReplyService {
             }).collect(Collectors.toList());
     }
 
-    public Map<String, Object> returnMapOfNewMessages(List<Element<Message>> messages) {
-        return Map.of("messages", messages);
+    public Map<String, Object> returnMapOfOpenMessages(List<Element<Message>> messages) {
+        return Map.of("openMessages", messages);
+    }
+
+    public Map<String, Object> returnMapOfClosedMessages(List<Element<Message>> messages) {
+        return Map.of("closedMessages", messages);
     }
 
     public boolean hasMessages(CaseData caseData) {
-        return !(caseData.getMessages() == null);
+        return !(caseData.getOpenMessages() == null);
     }
 
     public String buildMessageHistory(String message, String sender) {
