@@ -101,6 +101,7 @@ public class TaskListService {
             RESPONDENT_BEHAVIOUR,
             FL401_APPLICANT_FAMILY_DETAILS,
             OTHER_PROCEEDINGS,
+            ATTENDING_THE_HEARING,
             INTERNATIONAL_ELEMENT,
             WELSH_LANGUAGE_REQUIREMENTS,
             VIEW_PDF_DOCUMENT));
