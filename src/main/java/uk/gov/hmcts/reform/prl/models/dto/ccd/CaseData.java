@@ -29,6 +29,8 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
@@ -340,4 +342,8 @@ public class CaseData {
      * Respondent Behaviour.
      */
     private final RespondentBehaviour respondentBehaviourData;
+    @JsonProperty("applicantFamilyDetails")
+    private final ApplicantFamilyDetails applicantFamilyDetails;
+    @JsonProperty("applicantChildDetails")
+    private final List<Element<ApplicantChild>> applicantChildDetails;
 }
