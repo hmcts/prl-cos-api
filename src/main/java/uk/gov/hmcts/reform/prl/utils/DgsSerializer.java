@@ -421,6 +421,8 @@ public class DgsSerializer extends JsonSerializer<CaseData> {
         }
 
         //Attending the hearing
+        gen.writeStringField("isWelshNeeded", ofNullable(value.getAgreeChildOtherContact())
+            .map(YesOrNo::getValue).orElse(null));
 
 
 
