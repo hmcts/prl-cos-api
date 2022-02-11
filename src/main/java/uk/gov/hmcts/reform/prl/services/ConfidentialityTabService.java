@@ -104,25 +104,24 @@ public class ConfidentialityTabService {
             boolean addressSet = false;
             boolean emailSet = false;
             boolean phoneSet = false;
-            Applicant a = objectMapper.convertValue(applicant, Applicant.class);
-            if ((YesOrNo.Yes).equals(a.getIsAddressConfidential())) {
+            if ((YesOrNo.Yes).equals(applicant.getIsAddressConfidential())) {
                 addressSet = true;
             }
-            if ((YesOrNo.Yes).equals(a.getIsEmailAddressConfidential())) {
+            if ((YesOrNo.Yes).equals(applicant.getIsEmailAddressConfidential())) {
                 emailSet = true;
             }
-            if ((YesOrNo.Yes).equals(a.getIsPhoneNumberConfidential())) {
+            if ((YesOrNo.Yes).equals(applicant.getIsPhoneNumberConfidential())) {
                 phoneSet = true;
             }
             if (addressSet || emailSet || phoneSet) {
                 Element<ApplicantConfidentialityDetails> appElement = Element
                     .<ApplicantConfidentialityDetails>builder()
                     .value(ApplicantConfidentialityDetails.builder()
-                               .firstName(a.getFirstName())
-                               .lastName(a.getLastName())
-                               .address(addressSet ? a.getAddress() : null)
-                               .phoneNumber(phoneSet ? a.getPhoneNumber() : null)
-                               .email(emailSet ? a.getEmail() : null)
+                               .firstName(applicant.getFirstName())
+                               .lastName(applicant.getLastName())
+                               .address(addressSet ? applicant.getAddress() : null)
+                               .phoneNumber(phoneSet ? applicant.getPhoneNumber() : null)
+                               .email(emailSet ? applicant.getEmail() : null)
                                .build()).build();
                 tempConfidentialApplicants.add(appElement);
             }
