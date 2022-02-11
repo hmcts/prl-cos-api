@@ -11,6 +11,10 @@ import java.time.format.DateTimeFormatter;
 
 public class CaseUtils {
 
+    private CaseUtils() {
+
+    }
+
     public static CaseData getCaseData(CaseDetails caseDetails, ObjectMapper objectMapper) {
         State state = State.tryFromValue(caseDetails.getState()).orElse(null);
         CaseData.CaseDataBuilder caseDataBuilder = objectMapper.convertValue(caseDetails.getData(), CaseData.class)

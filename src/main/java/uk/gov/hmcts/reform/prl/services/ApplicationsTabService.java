@@ -91,14 +91,17 @@ public class ApplicationsTabService implements TabService {
         log.info("inside the application tab service update");
         log.info(applicationTab.toString());
 
-        // applicationTab.values().removeAll(Collections.singleton(null));
-
         return applicationTab;
     }
 
     @Override
     public List<FieldGenerator> getGenerators() {
-        return null;
+        return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public void calEventToRefreshUI() {
+
     }
 
     public Map<String, Object> toMap(Object object) {

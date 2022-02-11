@@ -10,4 +10,6 @@ public interface TabService {
     public Map<String, Object> updateTab(CaseData caseData);
 
     public List<FieldGenerator> getGenerators();
+
+    public void calEventToRefreshUI();
 }

@@ -159,7 +159,7 @@ public class CallbackController {
     @ApiOperation(value = "Callback to refresh the tabs")
     public void updateApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 

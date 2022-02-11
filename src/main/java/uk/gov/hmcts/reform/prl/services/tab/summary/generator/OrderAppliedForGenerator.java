@@ -34,7 +34,6 @@ public class OrderAppliedForGenerator implements FieldGenerator {
         if (childArrangementCheck.isPresent()) {
             typeOfChildArrangementsOrder = caseData.getTypeOfChildArrangementsOrder().getDisplayedValue();
         }
-        String natureOfOrder = caseData.getNatureOfOrder();
 
         return OrderAppliedFor.builder()
             .ordersApplyingFor(String.join(", ", ordersApplyingFor))
