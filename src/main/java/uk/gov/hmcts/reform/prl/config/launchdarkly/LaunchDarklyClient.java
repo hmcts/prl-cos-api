@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.documentgenerator.config.launchdarkly;
+package uk.gov.hmcts.reform.prl.config.launchdarkly;
 
 import com.launchdarkly.sdk.LDUser;
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface;
@@ -10,7 +10,7 @@ import java.io.IOException;
 
 @Service
 public class LaunchDarklyClient {
-    public static final LDUser PRL_DGS_USER = new LDUser.Builder("prl-dgs-api")
+    public static final LDUser PRL_COS_USER = new LDUser.Builder("prl-cos-api")
         .anonymous(true)
         .build();
 
@@ -18,7 +18,7 @@ public class LaunchDarklyClient {
 
     @Autowired
     public LaunchDarklyClient(
-        LDClientFactory ldClientFactory,
+        LaunchDarkClientFactory ldClientFactory,
         @Value("${launchdarkly.sdk-key}") String sdkKey,
         @Value("${launchdarkly.offline-mode:false}") Boolean offlineMode
     ) {
@@ -27,7 +27,7 @@ public class LaunchDarklyClient {
     }
 
     public boolean isFeatureEnabled(String feature) {
-        return internalClient.boolVariation(feature, LaunchDarklyClient.PRL_DGS_USER, false);
+        return internalClient.boolVariation(feature, LaunchDarklyClient.PRL_COS_USER, false);
     }
 
     public boolean isFeatureEnabled(String feature, LDUser user) {
