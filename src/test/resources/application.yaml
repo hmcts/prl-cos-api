@@ -91,6 +91,7 @@ notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
 
+
 payments:
   api:
     url: ${PAY_URL:}
@@ -171,7 +172,7 @@ prl-dgs-api:
 
 courtfinder:
   api:
-    url: http://fact-api-aat.service.core-compute-aat.internal/
+    url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal/}
 
 
 launchdarkly:
