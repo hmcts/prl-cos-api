@@ -331,7 +331,7 @@ public class CaseData implements MappableObject {
      * Return Application.
      */
     private final List<RejectReasonEnum> rejectReason;
-    private String returnMessage;
+    private final String returnMessage;
 
     /**
      * Issue and send to local court'.
