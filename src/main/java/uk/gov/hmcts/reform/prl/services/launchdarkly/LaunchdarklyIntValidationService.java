@@ -1,8 +1,8 @@
-package uk.gov.hmcts.reform.prl.documentgenerator.service.launchdarkly;
+package uk.gov.hmcts.reform.prl.services.launchdarkly;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.documentgenerator.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 
 @Service
 public class LaunchdarklyIntValidationService {

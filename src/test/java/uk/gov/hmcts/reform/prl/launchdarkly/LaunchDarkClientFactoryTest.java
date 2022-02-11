@@ -5,10 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarkClientFactory;
 
-
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class LDClientFactoryTest {
+public class LaunchDarkClientFactoryTest {
     private LaunchDarkClientFactory factory;
 
     @Before
