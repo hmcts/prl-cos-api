@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum.noNotRequired;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -31,8 +33,7 @@ public class ApplicationTypeCheckerTest {
             .applicationDetails("Test details")
             .build();
 
-        assert !applicationTypeChecker.isFinished(caseData);
-
+        assertTrue(!applicationTypeChecker.isFinished(caseData));
     }
 
     @Test
@@ -45,8 +46,7 @@ public class ApplicationTypeCheckerTest {
             .applicationDetails("Test details")
             .build();
 
-        assert applicationTypeChecker.isFinished(caseData);
-
+        assertTrue(applicationTypeChecker.isFinished(caseData));
     }
 
     @Test
@@ -56,8 +56,7 @@ public class ApplicationTypeCheckerTest {
             .natureOfOrder("Test")
             .build();
 
-        assert applicationTypeChecker.isStarted(caseData);
-
+        assertTrue(applicationTypeChecker.isStarted(caseData));
     }
 
     @Test
@@ -65,7 +64,7 @@ public class ApplicationTypeCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        assert !applicationTypeChecker.isStarted(caseData);
+        assertFalse(applicationTypeChecker.isStarted(caseData));
 
     }
 
@@ -74,8 +73,7 @@ public class ApplicationTypeCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        assert !applicationTypeChecker.hasMandatoryCompleted(caseData);
-
+        assertFalse(applicationTypeChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
@@ -89,9 +87,6 @@ public class ApplicationTypeCheckerTest {
             .applicationDetails("Test details")
             .build();
 
-        assert !applicationTypeChecker.hasMandatoryCompleted(caseData);
-
+        assertFalse(applicationTypeChecker.hasMandatoryCompleted(caseData));
     }
-
-
 }

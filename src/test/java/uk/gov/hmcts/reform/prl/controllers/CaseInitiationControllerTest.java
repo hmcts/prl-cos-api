@@ -33,6 +33,5 @@ public class CaseInitiationControllerTest {
         verify(eventPublisher, times(1)).publishEvent(eq(caseDataChanged));
 
     }
-
 }
 
