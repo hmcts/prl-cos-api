@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.prl.enums;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum PermissionRequiredEnum {
 
@@ -13,15 +13,6 @@ public enum PermissionRequiredEnum {
 
     private final String displayedValue;
 
-    @JsonValue
-    public String getDisplayedValue() {
-        return displayedValue;
-    }
-
-    @JsonCreator
-    public static PermissionRequiredEnum getValue(String key) {
-        return PermissionRequiredEnum.valueOf(key);
-    }
 
 }
 

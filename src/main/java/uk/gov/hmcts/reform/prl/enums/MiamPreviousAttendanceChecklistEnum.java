@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.enums;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum MiamPreviousAttendanceChecklistEnum {
 
@@ -35,16 +35,6 @@ public enum MiamPreviousAttendanceChecklistEnum {
             "the application for those proceedings");
 
     private final String displayedValue;
-
-    @JsonValue
-    public String getDisplayedValue() {
-        return displayedValue;
-    }
-
-    @JsonCreator
-    public static MiamPreviousAttendanceChecklistEnum getValue(String key) {
-        return MiamPreviousAttendanceChecklistEnum.valueOf(key);
-    }
 
 
 }
