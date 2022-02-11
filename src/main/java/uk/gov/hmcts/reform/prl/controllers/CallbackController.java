@@ -37,6 +37,8 @@ public class CallbackController {
     private static final String DRAFT_C_100_APPLICATION = "Draft_C100_application.pdf";
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
     private static final String C8_DOC = "C8Document.pdf";
+    private static final String C100_FINAL_DOC = "C100FinalDocument.docx";
+    private static final String C100_FINAL_TEMPLATE = "c100-final-template-1.docx";
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
@@ -138,6 +140,11 @@ public class CallbackController {
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             PRL_C8_TEMPLATE
         );
+        GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+            C100_FINAL_TEMPLATE
+        );
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -147,7 +154,12 @@ public class CallbackController {
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(C8_DOC).build());
 
+        caseDataUpdated.put("finalDocument", Document.builder()
+            .documentUrl(generatedDocumentInfoFinal.getUrl())
+            .documentBinaryUrl(generatedDocumentInfoFinal.getBinaryUrl())
+            .documentHash(generatedDocumentInfoFinal.getHashToken())
+            .documentFileName(C100_FINAL_DOC).build());
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
 }

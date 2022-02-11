@@ -121,21 +121,21 @@ fees-register:
 
 
 idam:
-  s2s-auth:
-    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
-    microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
-    url: https://idam-api.aat.platform.hmcts.net
+    url: http://localhost:5000
+  s2s-auth:
+    url: http://localhost:4502
+    totp_secret: AABBCCDDEEFFGGHH
+    microservice: prl_cos_api
   client:
-    id: prl-cos-api
-    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    id: prl_cos_api
+    redirect_uri: https://localhost:9000/oauth2/callback
+    secret: OOOOOOOOOOOOOOOO
 
 prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:privatelaw-system-update@mailnesia.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:Password12!}
 
 security:
     oauth2:
@@ -173,11 +173,14 @@ send-letter:
 case_document_am:
   url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
 
+
 prl-dgs-api:
-  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
-
-
+  url: http://localhost:4007
 
 courtfinder:
   api:
     url: http://fact-api-aat.service.core-compute-aat.internal/
+
+organization:
+  api:
+    url: http://rd-professional-api-aat.service.core-compute-aat.internal

@@ -327,7 +327,7 @@ public class CaseData implements MappableObject {
      * Issue and send to local court'.
      */
     private final List<Element<LocalCourtAdminEmail>> localCourtAdminEmail;
-  
+
     /**
      * This field contains Application Submitter solicitor email address.
      */
@@ -342,4 +342,11 @@ public class CaseData implements MappableObject {
 
     private String courtName;
     private String courtId;
+
+    /**
+     * Final document.
+     */
+
+    @JsonProperty("finalDocument")
+    private final Document finalDocument;
 }
