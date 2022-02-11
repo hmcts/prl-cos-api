@@ -63,7 +63,7 @@ public class SendAndReplyControllerTest {
 
 
     SendAndReplyEventData replyEventData;
-    String AUTH = "authorisation";
+    String auth = "authorisation";
     UUID selectedValue = UUID.randomUUID();
 
     @Before
@@ -105,7 +105,7 @@ public class SendAndReplyControllerTest {
         aboutToStartMap.put("messageObject", MessageMetaData.builder().build());
 
         when(sendAndReplyService.setSenderAndGenerateMessageList(sendCaseData)).thenReturn(aboutToStartMap);
-        sendAndReplyController.handleAboutToStart(AUTH, sendCallbackRequest);
+        sendAndReplyController.handleAboutToStart(auth, sendCallbackRequest);
         verify(sendAndReplyService).setSenderAndGenerateMessageList(sendCaseData);
         verifyNoMoreInteractions(sendAndReplyService);
 
@@ -121,7 +121,7 @@ public class SendAndReplyControllerTest {
         CaseData caseData = CaseData.builder().id(12345L).sendAndReplyEventData(eventData).build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        sendAndReplyController.handleMidEvent(AUTH, callbackRequest);
+        sendAndReplyController.handleMidEvent(auth, callbackRequest);
         verifyNoInteractions(sendAndReplyService);
     }
 
@@ -136,14 +136,13 @@ public class SendAndReplyControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.populateReplyMessageFields(caseData)).thenReturn(expectedMap);
-        sendAndReplyController.handleMidEvent(AUTH, callbackRequest);
+        sendAndReplyController.handleMidEvent(auth, callbackRequest);
         verify(sendAndReplyService).populateReplyMessageFields(caseData);
     }
 
     @Test
     public void testHandleAboutToSubmitSendPath() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         SendAndReplyEventData eventData = SendAndReplyEventData.builder().chooseSendOrReply(SEND).build();
         CaseData caseData = CaseData.builder().id(12345L).sendAndReplyEventData(eventData).build();
         Message message = Message.builder().build();
@@ -156,7 +155,9 @@ public class SendAndReplyControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.buildNewSendMessage(caseData)).thenReturn(message);
         when(sendAndReplyService.addNewMessage(caseData, message)).thenReturn(Collections.singletonList(element(message)));
-        sendAndReplyController.handleAboutToSubmit(AUTH, callbackRequest);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
         verify(sendAndReplyService).buildNewSendMessage(caseData);
         verify(sendAndReplyService).addNewMessage(caseData, message);
     }
@@ -165,7 +166,6 @@ public class SendAndReplyControllerTest {
     public void testHandleAboutToSubmitReplyPathClose() {
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         Message message = Message.builder().status(MessageStatus.OPEN).isReplying(YesOrNo.No).build();
         SendAndReplyEventData eventData = SendAndReplyEventData.builder()
             .chooseSendOrReply(REPLY)
@@ -184,7 +184,8 @@ public class SendAndReplyControllerTest {
         when(sendAndReplyService.closeMessage(selectedValue, caseDataWithMessage))
             .thenReturn(Collections.singletonList(element(message)));
 
-        sendAndReplyController.handleAboutToSubmit(AUTH, callbackRequest);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
         verify(sendAndReplyService).closeMessage(selectedValue, caseDataWithMessage);
     }
 
@@ -192,7 +193,6 @@ public class SendAndReplyControllerTest {
     public void testHandleAboutToSubmitReplyPathReply() {
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
         SendAndReplyEventData eventData = SendAndReplyEventData.builder()
             .chooseSendOrReply(REPLY)
@@ -200,9 +200,6 @@ public class SendAndReplyControllerTest {
             .replyMessageDynamicList(DynamicList.builder().build())
             .build();
         CaseData caseData = CaseData.builder().id(12345L).sendAndReplyEventData(eventData).build();
-        CaseData caseDataWithMessage = CaseData.builder().id(12345L).sendAndReplyEventData(eventData)
-            .openMessages(Collections.singletonList(element(message)))
-            .build();
         UUID selectedValue = UUID.randomUUID();
 
         when(elementUtils.getDynamicListSelectedValue(eventData.getReplyMessageDynamicList(), objectMapper))
@@ -212,7 +209,8 @@ public class SendAndReplyControllerTest {
         when(sendAndReplyService.buildNewReplyMessage(selectedValue, message, caseData.getOpenMessages()))
             .thenReturn(Collections.singletonList(element(message)));
 
-        sendAndReplyController.handleAboutToSubmit(AUTH, callbackRequest);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
         verify(sendAndReplyService).buildNewReplyMessage(selectedValue, message, caseData.getOpenMessages());
     }
 
