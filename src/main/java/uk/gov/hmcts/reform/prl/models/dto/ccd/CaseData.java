@@ -37,6 +37,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
@@ -327,7 +329,7 @@ public class CaseData implements MappableObject {
      * Issue and send to local court'.
      */
     private final List<Element<LocalCourtAdminEmail>> localCourtAdminEmail;
-  
+
     /**
      * This field contains Application Submitter solicitor email address.
      */
@@ -342,4 +344,11 @@ public class CaseData implements MappableObject {
 
     private String courtName;
     private String courtId;
+
+    /**
+     * Confidentiality details.
+     */
+    private final List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
+    private final List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
+
 }
