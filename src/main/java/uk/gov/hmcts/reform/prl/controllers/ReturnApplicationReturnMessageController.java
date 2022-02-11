@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
 
@@ -35,6 +37,8 @@ public class ReturnApplicationReturnMessageController {
     private ObjectMapper objectMapper;
     @Autowired
     private final CaseWorkerEmailService caseWorkerEmailService;
+    @Autowired
+    private AllTabServiceImpl allTabsService;
 
     @PostMapping(path = "/return-application-return-message", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to get return message of the return application ")
@@ -62,13 +66,13 @@ public class ReturnApplicationReturnMessageController {
 
     @PostMapping(path = "/return-application-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to send return application email notification")
-    public AboutToStartOrSubmitCallbackResponse returnApplicationEmailNotification(
+    public void returnApplicationEmailNotification(
         @RequestBody CallbackRequest callbackRequest) throws Exception {
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(callbackRequest.getCaseDetails());
 
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        allTabsService.updateAllTabs(caseData);
     }
 }
