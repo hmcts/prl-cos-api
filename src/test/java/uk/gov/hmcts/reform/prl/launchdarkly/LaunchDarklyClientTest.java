@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.documentgenerator.config.launchdarkly;
+package uk.gov.hmcts.reform.prl.launchdarkly;
 
 import com.launchdarkly.sdk.LDUser;
 import com.launchdarkly.sdk.server.interfaces.LDClientInterface;
@@ -7,8 +7,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.documentgenerator.config.launchdarkly.LDClientFactory;
-import uk.gov.hmcts.reform.prl.documentgenerator.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarkClientFactory;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,7 +23,7 @@ public class LaunchDarklyClientTest {
     private static final String FAKE_FEATURE = "fake feature";
 
     @Mock
-    private LDClientFactory ldClientFactory;
+    private LaunchDarkClientFactory ldClientFactory;
 
     @Mock
     private LDClientInterface ldClient;

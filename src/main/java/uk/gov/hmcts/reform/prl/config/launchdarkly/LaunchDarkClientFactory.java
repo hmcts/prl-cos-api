@@ -6,7 +6,7 @@ import com.launchdarkly.sdk.server.interfaces.LDClientInterface;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LDClientFactory {
+public class LaunchDarkClientFactory {
     public LDClientInterface create(String sdkKey, boolean offlineMode) {
         LDConfig config = new LDConfig.Builder()
             .offline(offlineMode)
