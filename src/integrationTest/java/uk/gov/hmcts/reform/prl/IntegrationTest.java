@@ -41,22 +41,22 @@ public abstract class IntegrationTest {
     @Value("${idam.user.genericpassword}")
     protected String aatPassword;
 
-    @Value("${auth.idam.client.baseUrl}")
+    @Value("${idam.api.url}")
     private String idamUserBaseUrl;
 
-    @Value("${auth.idam.client.redirectUri}")
+    @Value("${idam.client.redirect_uri}")
     private String idamRedirectUri;
 
-    @Value("${idam.client.aat.authorize.context-path}")
+    @Value("${idam.client.authorize.context-path}")
     private String idamAuthorizeContextPath;
 
-    @Value("${idam.client.aat.token.context-path}")
+    @Value("${idam.client.token.context-path}")
     private String idamTokenContextPath;
 
-    @Value("${auth.idam.client.clientId}")
+    @Value("${idam.client.clientId}")
     private String idamAuthClientID;
 
-    @Value("${auth.idam.client.secret}")
+    @Value("${idam.client.secret}")
     private String idamSecret;
 
     @Value("${idam.s2s-auth.url}")
@@ -104,7 +104,7 @@ public abstract class IntegrationTest {
                 .documentGenerate(
                 requestBody,
                 documentGenerateUri,
-                getUserToken()
+                "Bearer TestAuthToken"
             );
     }
 
@@ -143,7 +143,7 @@ public abstract class IntegrationTest {
             .prePopulateFeeAndSolicitorName(
                 requestBody,
                 prePopulateUri,
-                getUserToken()
+                "Bearer TestAuthToken"
             );
     }
 
