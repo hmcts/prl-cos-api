@@ -66,13 +66,21 @@ public class ReturnApplicationReturnMessageController {
 
     @PostMapping(path = "/return-application-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to send return application email notification")
-    public void returnApplicationEmailNotification(
+    public AboutToStartOrSubmitCallbackResponse returnApplicationEmailNotification(
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        allTabsService.updateAllTabs(caseData);
-
         caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(callbackRequest.getCaseDetails());
+
+        // Refreshing the page in the same event. Hence no external event call needed.
+        // Getting the tab fields and add it to the casedetails..
+        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        caseDataUpdated.putAll(allTabsFields);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }

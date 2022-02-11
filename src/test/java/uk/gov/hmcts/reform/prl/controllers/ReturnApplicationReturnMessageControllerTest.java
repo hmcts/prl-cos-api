@@ -124,7 +124,7 @@ public class ReturnApplicationReturnMessageControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = new HashMap<>();
-        doNothing().when(allTabsService).updateAllTabs(any(CaseData.class));
+        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -133,8 +133,9 @@ public class ReturnApplicationReturnMessageControllerTest {
 
         doNothing().when(caseWorkerEmailService).sendReturnApplicationEmailToSolicitor(callbackRequest.getCaseDetails());
 
-        returnApplicationReturnMessageController.returnApplicationEmailNotification(callbackRequest);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            returnApplicationReturnMessageController.returnApplicationEmailNotification(callbackRequest);
 
-        verify(allTabsService, times(1)).updateAllTabs(any(CaseData.class));
+        verify(allTabsService, times(1)).getAllTabsFields(any(CaseData.class));
     }
 }
