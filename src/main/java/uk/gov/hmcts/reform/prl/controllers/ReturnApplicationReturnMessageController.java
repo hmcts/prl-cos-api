@@ -71,8 +71,8 @@ public class ReturnApplicationReturnMessageController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(callbackRequest.getCaseDetails());
-
         allTabsService.updateAllTabs(caseData);
+
+        caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(callbackRequest.getCaseDetails());
     }
 }
