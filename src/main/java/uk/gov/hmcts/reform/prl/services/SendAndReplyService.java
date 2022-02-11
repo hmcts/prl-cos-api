@@ -100,7 +100,7 @@ public class SendAndReplyService {
         SendAndReplyEventData eventData = objectMapper.convertValue(caseData, SendAndReplyEventData.class);
         MessageMetaData metaData = eventData.getMessageMetaData();
 
-        return (Message) Message.builder()
+        return Message.builder()
             .status(OPEN)
             .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
             .senderEmail(metaData.getSenderEmail())
@@ -176,11 +176,11 @@ public class SendAndReplyService {
     }
 
     public boolean hasMessages(CaseData caseData) {
-        return !(caseData.getOpenMessages() == null);
+        return (caseData.getOpenMessages() != null);
     }
 
-    public String buildMessageHistory(String message, String sender) {
-        return buildMessageHistory(message, "", sender);
+    public String buildMessageHistory(String sender, String message) {
+        return buildMessageHistory(sender, "", message);
     }
 
     private String buildMessageHistory(Message reply, Message previousMessage, String sender) {

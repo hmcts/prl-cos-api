@@ -30,7 +30,7 @@ public class CaseInitiationControllerTest {
         CaseDataChanged caseDataChanged = new CaseDataChanged(CaseData.builder().build());
         caseInitiationController.publishEvent(caseDataChanged);
 
-        verify(eventPublisher, times(1)).publishEvent(eq(caseDataChanged));
+        verify(eventPublisher, times(1)).publishEvent(caseDataChanged);
 
     }
 }
