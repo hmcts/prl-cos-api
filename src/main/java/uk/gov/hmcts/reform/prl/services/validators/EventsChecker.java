@@ -13,6 +13,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
@@ -85,6 +86,9 @@ public class EventsChecker {
     @Autowired
     private FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
 
+    @Autowired
+    private FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
+
     private EnumMap<Event, EventChecker> eventStatus = new EnumMap<Event, EventChecker>(Event.class);
 
     @PostConstruct
@@ -109,6 +113,7 @@ public class EventsChecker {
         eventStatus.put(FL401_CASE_NAME, caseNameChecker);
         eventStatus.put(FL401_TYPE_OF_APPLICATION, fl401ApplicationTypeChecker);
         eventStatus.put(RESPONDENT_BEHAVIOUR, respondentBehaviourChecker);
+        eventStatus.put(FL401_APPLICANT_FAMILY_DETAILS, fl401ApplicantFamilyChecker);
     }
 
     public boolean isFinished(Event event, CaseData caseData) {

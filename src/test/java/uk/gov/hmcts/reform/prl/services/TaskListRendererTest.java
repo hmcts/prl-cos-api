@@ -20,6 +20,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
@@ -67,7 +68,8 @@ public class TaskListRendererTest {
         Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build(),
         Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
         Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
-        Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build());
+        Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build());
 
     private final List<EventValidationErrors> errors = List.of(
         EventValidationErrors.builder().event(ALLEGATIONS_OF_HARM)
@@ -82,6 +84,7 @@ public class TaskListRendererTest {
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
         Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
         Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
         Task.builder().event(INTERNATIONAL_ELEMENT).state(NOT_STARTED).build(),
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),

@@ -20,6 +20,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
@@ -98,6 +99,7 @@ public class TaskListService {
             APPLICANT_DETAILS,
             RESPONDENT_DETAILS,
             RESPONDENT_BEHAVIOUR,
+            FL401_APPLICANT_FAMILY_DETAILS,
             OTHER_PROCEEDINGS,
             INTERNATIONAL_ELEMENT,
             WELSH_LANGUAGE_REQUIREMENTS,
