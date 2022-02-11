@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
@@ -57,6 +58,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicationsTabService {
 
+    public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is confidential";
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
@@ -116,14 +118,28 @@ public class ApplicationsTabService {
         List<PartyDetails> currentApplicants = caseData.getApplicants().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
-
+        currentApplicants = maskConfidentialDetails(currentApplicants);
         for (PartyDetails applicant : currentApplicants) {
             Applicant a = objectMapper.convertValue(applicant, Applicant.class);
             Element<Applicant> app = Element.<Applicant>builder().value(a).build();
             applicants.add(app);
-
         }
         return applicants;
+    }
+
+    private List<PartyDetails> maskConfidentialDetails(List<PartyDetails> currentApplicants) {
+        for(PartyDetails applicantDetails : currentApplicants){
+            if((YesOrNo.Yes).equals(applicantDetails.getIsPhoneNumberConfidential())){
+                applicantDetails.setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
+            }
+            if((YesOrNo.Yes).equals(applicantDetails.getIsEmailAddressConfidential())){
+                applicantDetails.setEmail(THIS_INFORMATION_IS_CONFIDENTIAL);
+            }
+            if((YesOrNo.Yes).equals(applicantDetails.getIsAddressConfidential())){
+                applicantDetails.setAddress(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build());
+            }
+        }
+        return currentApplicants;
     }
 
     public List<Element<Respondent>> getRespondentsTable(CaseData caseData) {
