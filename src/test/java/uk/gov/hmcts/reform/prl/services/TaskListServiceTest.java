@@ -21,6 +21,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
@@ -80,6 +81,7 @@ public class TaskListServiceTest {
 
         List<Task> expectedTasks = List.of(
             Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
+            Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
             Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),

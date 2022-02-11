@@ -36,10 +36,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
@@ -323,7 +325,6 @@ public class CaseData {
     private final String giveDetails;
 
     private final List<Element<Correspondence>> correspondence;
-
     private final List<Element<OtherDocuments>> otherDocuments;
 
 
@@ -332,6 +333,14 @@ public class CaseData {
      */
     private final List<RejectReasonEnum> rejectReason;
     private String returnMessage;
+
+    /**
+     * FL401 Type of Application.
+     */
+    @JsonProperty("typeOfApplicationOrders")
+    private final TypeOfApplicationOrders typeOfApplicationOrders;
+    @JsonProperty("typeOfApplicationLinkToCA")
+    private final LinkToCA typeOfApplicationLinkToCA;
 
     /**
      * Respondent Behaviour.
