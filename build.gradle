@@ -125,7 +125,7 @@ allprojects {
       }
 
       // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
-      dependencySet(group: 'io.netty', version: '4.1.73.Final') {
+      dependencySet(group: 'io.netty', version: '4.1.74.Final') {
         entry 'netty-buffer'
         entry 'netty-codec'
         entry 'netty-codec-http'
@@ -378,7 +378,6 @@ dependencies {
   contractTestCompile sourceSets.test.runtimeClasspath
 
   integrationTestImplementation(sourceSets.test.output)
-
   testCompile 'com.github.hmcts:fortify-client:1.2.2:all'
 }
 
