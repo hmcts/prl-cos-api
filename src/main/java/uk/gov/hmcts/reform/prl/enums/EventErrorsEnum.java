@@ -23,6 +23,7 @@ public enum EventErrorsEnum {
     OTHER_PROCEEDINGS_ERROR("Add details about other proceedings"),
     ALLEGATIONS_OF_HARM_ERROR("Add details about allegations of harm"),
     RELATIONSHIP_TO_RESPONDENT_ERROR("Add details about relationship to respondent");
+    FL401_APPLICANT_FAMILY_ERROR("Add details about applicant's family");
 
     private final String error;
 

@@ -40,7 +40,6 @@ public class CallbackController {
     private final DgsService dgsService;
 
 
-
     /**
      * It's just an example - to be removed when there are real tasks sending emails.
      */
@@ -115,5 +114,4 @@ public class CallbackController {
                                                        .documentFileName(DRAFT_C_100_APPLICATION).build()).build())
             .build();
     }
-
 }
