@@ -131,12 +131,10 @@ public class SolicitorEmailService {
         List<String> applicantSolicitorEmailList = applicants.stream()
             .map(element -> element.getSolicitorEmail())
             .collect(Collectors.toList());
-        int size = applicantSolicitorEmailList.size();
-        if (size > 1) {
-            solicitorEmail = userDetails.getEmail();
-        } else {
-            solicitorEmail = applicantSolicitorEmailList.get(0);;
-        }
+
+        solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
+            && !applicantSolicitorEmailList.get(0).isEmpty()) ? applicantSolicitorEmailList.get(0)
+            : userDetails.getEmail();
 
         emailService.send(
             solicitorEmail,
