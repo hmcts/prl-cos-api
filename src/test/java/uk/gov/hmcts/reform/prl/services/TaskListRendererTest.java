@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import org.junit.Assert;
 import org.junit.Test;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
@@ -21,6 +22,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
@@ -65,6 +67,7 @@ public class TaskListRendererTest {
         Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
         Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build(),
         Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
         Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build());
 
@@ -77,11 +80,13 @@ public class TaskListRendererTest {
 
     private final List<Task> fl401Tasks = List.of(
         Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
         Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
         Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
         Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
+        Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
         Task.builder().event(INTERNATIONAL_ELEMENT).state(NOT_STARTED).build(),
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
         Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build());
@@ -103,6 +108,7 @@ public class TaskListRendererTest {
         String expectedTaskList = String.join("\n", lines);
         String actualTaskList = taskListRenderer.render(fl401Tasks, errors, false);
 
+        Assert.assertNotEquals(expectedTaskList, actualTaskList);
         assertFalse(expectedTaskList.equals(actualTaskList));
 
     }
@@ -145,6 +151,7 @@ public class TaskListRendererTest {
         String expectedTaskList = String.join("\n", lines);
         String actualTaskList = taskListRenderer.render(tasks, emptyErrors, true);
 
+        Assert.assertEquals(expectedTaskList, actualTaskList);
         assertTrue(expectedTaskList.equals(actualTaskList));
 
     }
