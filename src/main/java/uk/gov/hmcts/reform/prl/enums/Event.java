@@ -26,6 +26,8 @@ public enum Event {
     // FL401 Events
     FL401_CASE_NAME("fl401CaseName", "Case name"),
     RELATIONSHIP_TO_RESPONDENT("respondentRelationship","Relationship to respondent"),
+    FL401_TYPE_OF_APPLICATION("fl401TypeOfApplication", "Type of application"),
+    FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's Family"),
     RESPONDENT_BEHAVIOUR("respondentBehaviour", "Respondent's Behaviour");
 
     private final String id;
