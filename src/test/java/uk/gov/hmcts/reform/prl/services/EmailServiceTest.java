@@ -8,8 +8,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.CitizenEmailProvider;
@@ -103,5 +105,21 @@ public class EmailServiceTest {
             eq(expectedEmailVarsAsMap),
             anyString()
         );
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void shouldGetCaseData() {
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .build();
+
+        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            .toBuilder()
+            .id(caseDetails.getId())
+            .build();
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
     }
 }

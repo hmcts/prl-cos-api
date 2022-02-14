@@ -25,14 +25,12 @@ public class RespondentsCheckerTest {
     @InjectMocks
     RespondentsChecker respondentsChecker;
 
-
     @Test
     public void whenNoCaseDataThenIsStartedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
 
         assertFalse(respondentsChecker.isStarted(caseData));
-
     }
 
     @Test
@@ -41,16 +39,14 @@ public class RespondentsCheckerTest {
         CaseData caseData = CaseData.builder().build();
 
         assertFalse(respondentsChecker.isFinished(caseData));
-
     }
 
     @Test
     public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
-
+      
         assertFalse(respondentsChecker.hasMandatoryCompleted(caseData));
-
     }
 
     @Test
@@ -74,7 +70,6 @@ public class RespondentsCheckerTest {
             .build();
 
         assertFalse(respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData.getCaseTypeOfApplication()));
-
     }
 
     @Test
@@ -82,9 +77,5 @@ public class RespondentsCheckerTest {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName").build();
 
         assertTrue(respondentsChecker.respondentDetailsStarted(respondent));
-
     }
-
-
-
 }
