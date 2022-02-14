@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,6 +82,10 @@ public class RequestUpdateCallbackService {
             String organisationID = applicant.getSolicitorOrg().getOrganisationID();
             organisation = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
         }
+
+        String jsonOrganisation = objectMapper.writeValueAsString(caseData);
+
+        log.info("Organisation details refdata: {} ", jsonOrganisation);
 
         if (!Objects.isNull(caseDetails.getId())) {
             log.info(
@@ -167,8 +172,12 @@ public class RequestUpdateCallbackService {
     }
 
     private void createEvent(ServiceRequestUpdateDto serviceRequestUpdateDto, String userToken,
-                             String systemUpdateUserId, Organisation organisation, String eventId) {
+                             String systemUpdateUserId, Organisation organisation, String eventId) throws JsonProcessingException {
         CaseData caseData = setCaseData(serviceRequestUpdateDto, organisation);
+
+        String jsonCaseData = objectMapper.writeValueAsString(caseData);
+
+        log.info("CaseData with Organisation details: {} ", jsonCaseData);
 
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             userToken,
@@ -233,7 +242,7 @@ public class RequestUpdateCallbackService {
 
         return objectMapper.convertValue(
             CaseData.builder()
-                .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
+                .id(Long.parseLong(serviceRequestUpdateDto.getCcdCaseNumber()))
                 .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
                                                          .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
                                                          .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
