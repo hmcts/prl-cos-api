@@ -29,15 +29,23 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
@@ -133,6 +141,8 @@ public class CaseData {
      * Applicant details.
      */
     private final List<Element<PartyDetails>> applicants;
+    @JsonProperty("applicantsFL401")
+    private final PartyDetails applicantsFL401;
 
     /**
      * Child details.
@@ -146,6 +156,9 @@ public class CaseData {
      * Respondent details.
      */
     private final List<Element<PartyDetails>> respondents;
+    @JsonProperty("respondentsFL401")
+    private final PartyDetails respondentsFL401;
+
 
     /**
      * MIAM.
@@ -256,6 +269,7 @@ public class CaseData {
      * Attending the hearing.
      */
     private final YesOrNo isWelshNeeded;
+    @JsonAlias({"welshNeeds", "fl401WelshNeeds"})
     private final List<Element<WelshNeed>> welshNeeds;
     private final YesOrNo isInterpreterNeeded;
     private final List<Element<InterpreterNeed>> interpreterNeeds;
@@ -321,7 +335,6 @@ public class CaseData {
     private final String giveDetails;
 
     private final List<Element<Correspondence>> correspondence;
-
     private final List<Element<OtherDocuments>> otherDocuments;
 
 
@@ -335,4 +348,28 @@ public class CaseData {
      * Home Situation DA.
      */
     private final Home home;
+    
+    /**
+     * FL401 Respondents relationship.
+     */
+    private final RespondentRelationObjectType respondentRelationObject;
+    private final RespondentRelationDateInfo respondentRelationDateInfoObject;
+    private final RespondentRelationOptionsInfo respondentRelationOptions;
+    
+    /**
+     * FL401 Type of Application.
+     */
+    @JsonProperty("typeOfApplicationOrders")
+    private final TypeOfApplicationOrders typeOfApplicationOrders;
+    @JsonProperty("typeOfApplicationLinkToCA")
+    private final LinkToCA typeOfApplicationLinkToCA;
+
+    /**
+     * Respondent Behaviour.
+     */
+    private final RespondentBehaviour respondentBehaviourData;
+    @JsonProperty("applicantFamilyDetails")
+    private final ApplicantFamilyDetails applicantFamilyDetails;
+    @JsonProperty("applicantChildDetails")
+    private final List<Element<ApplicantChild>> applicantChildDetails;
 }
