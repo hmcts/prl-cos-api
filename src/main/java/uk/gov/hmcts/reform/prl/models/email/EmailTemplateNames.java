@@ -4,5 +4,6 @@ public enum EmailTemplateNames {
     EXAMPLE,
     SOLICITOR,
     CASEWORKER,
-    RETURNAPPLICATION
+    RETURNAPPLICATION,
+    WITHDRAW
 }
