@@ -184,3 +184,8 @@ courtfinder:
 organization:
   api:
     url: http://rd-professional-api-aat.service.core-compute-aat.internal
+
+
+rd_professional:
+  api:
+    url: http://rd-professional-api-aat.service.core-compute-aat.internal

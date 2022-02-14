@@ -11,13 +11,24 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
+import uk.gov.hmcts.reform.prl.models.ContactInformation;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.SuperUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
@@ -33,10 +44,12 @@ public class RequestUpdateCallbackService {
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
     private final CoreCaseDataApi coreCaseDataApi;
+    private final OrganisationApi organisationApi;
     private final SystemUserService systemUserService;
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final UserService userService;
+    private Organisation organisation;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
 
@@ -53,12 +66,28 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
 
+        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            .toBuilder()
+            .id(caseDetails.getId())
+            .build();
+
+        List<PartyDetails> applicants = caseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        for (PartyDetails applicant : applicants) {
+            String organisationID = applicant.getSolicitorOrg().getOrganisationID();
+            organisation = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
+        }
+
         if (!Objects.isNull(caseDetails.getId())) {
             log.info(
                 "Updating the Case data with payment information for caseId {}",
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
-            createEvent(serviceRequestUpdateDto, userToken, systemUpdateUserId,
+            createEvent(serviceRequestUpdateDto, userToken, systemUpdateUserId, organisation,
                         serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
                             ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
             );
@@ -138,8 +167,9 @@ public class RequestUpdateCallbackService {
     }
 
     private void createEvent(ServiceRequestUpdateDto serviceRequestUpdateDto, String userToken,
-                             String systemUpdateUserId, String eventId) {
-        CaseData caseData = setCaseData(serviceRequestUpdateDto);
+                             String systemUpdateUserId, Organisation organisation, String eventId) {
+        CaseData caseData = setCaseData(serviceRequestUpdateDto, organisation);
+
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             userToken,
             authTokenGenerator.generate(),
@@ -196,7 +226,11 @@ public class RequestUpdateCallbackService {
 
     }
 
-    private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
+    private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto, Organisation organisation) {
+
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
         return objectMapper.convertValue(
             CaseData.builder()
                 .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
@@ -212,11 +246,24 @@ public class RequestUpdateCallbackService {
                                                                       .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
                                                                       .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
                                                                       .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
-                                                                      .build()).build()).build(),
+                                                                      .build()).build())
+                .organisationDetails(Organisation.builder()
+                                         .name(organisation.getName())
+                                         .organisationName(organisation.getOrganisationID())
+                                         .contactInformation(organisation.getContactInformation())
+                                         .status(organisation.getStatus())
+                                         .sraRegulated(organisation.isSraRegulated())
+                                         .superUser(SuperUser.builder()
+                                                        .firstName(organisation.getSuperUser().getFirstName())
+                                                        .lastName(organisation.getSuperUser().getLastName())
+                                                        .email(organisation.getSuperUser().getEmail())
+                                                        .build())
+                                         .paymentAccount(organisation.getPaymentAccount())
+                                         .build())
+                .issueDate(issueDate.format(dateTimeFormatter))
+                .build(),
             CaseData.class
         );
 
     }
-
-
 }
