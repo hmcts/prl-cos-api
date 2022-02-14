@@ -173,3 +173,6 @@ courtfinder:
 launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
 
+rd_professional:
+  api:
+    url: http://rd-professional-api-aat.service.core-compute-aat.internal
