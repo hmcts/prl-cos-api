@@ -103,40 +103,6 @@ public class RequestUpdateCallbackService {
         }
     }
 
-    // todo this method will be deleted once we wipe out fee and pay bypass
-    private void createEventForFeeAndPayBypass(ServiceRequestUpdateDto serviceRequestUpdateDto, String userToken,
-                                               String systemUpdateUserId, String eventId, String authorisation) {
-        CaseData caseData = setCaseDataFeeAndPayBypass(serviceRequestUpdateDto, authorisation);
-        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
-            userToken,
-            authTokenGenerator.generate(),
-            systemUpdateUserId,
-            JURISDICTION,
-            CASE_TYPE,
-            serviceRequestUpdateDto.getCcdCaseNumber(),
-            eventId
-        );
-
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .eventToken(startEventResponse.getToken())
-            .event(Event.builder()
-                       .id(startEventResponse.getEventId())
-                       .build())
-            .data(caseData)
-            .build();
-
-        coreCaseDataApi.submitEventForCaseWorker(
-            userToken,
-            authTokenGenerator.generate(),
-            systemUpdateUserId,
-            JURISDICTION,
-            CASE_TYPE,
-            serviceRequestUpdateDto.getCcdCaseNumber(),
-            true,
-            caseDataContent
-        );
-    }
-
     private void createEvent(ServiceRequestUpdateDto serviceRequestUpdateDto, String userToken,
                              String systemUpdateUserId, String eventId) {
         CaseData caseData = setCaseData(serviceRequestUpdateDto);
@@ -168,32 +134,6 @@ public class RequestUpdateCallbackService {
             true,
             caseDataContent
         );
-    }
-
-
-    //todo this method will be deleted once we wipe out fee and pay bypass
-    private CaseData setCaseDataFeeAndPayBypass(ServiceRequestUpdateDto serviceRequestUpdateDto, String authorisation) {
-        return objectMapper.convertValue(
-            CaseData.builder()
-                .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
-                .applicantSolicitorEmailAddress(userService.getUserDetails(authorisation).getEmail())
-                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
-                .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
-                                                         .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
-                                                         .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
-                                                         .serviceRequestAmount(serviceRequestUpdateDto.getServiceRequestAmount())
-                                                         .serviceRequestStatus(serviceRequestUpdateDto.getServiceRequestStatus())
-                                                         .callBackUpdateTimestamp(LocalDateTime.now())
-                                                         .payment(CcdPayment.builder().paymentAmount(
-                                                             serviceRequestUpdateDto.getPayment().getPaymentAmount())
-                                                                      .paymentReference(serviceRequestUpdateDto.getPayment().getPaymentReference())
-                                                                      .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
-                                                                      .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
-                                                                      .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
-                                                                      .build()).build()).build(),
-            CaseData.class
-        );
-
     }
 
     private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
