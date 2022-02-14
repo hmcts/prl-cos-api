@@ -137,6 +137,8 @@ public class CaseData {
      * Applicant details.
      */
     private final List<Element<PartyDetails>> applicants;
+    @JsonProperty("applicantsFL401")
+    private final PartyDetails applicantsFL401;
 
     /**
      * Child details.
@@ -150,6 +152,9 @@ public class CaseData {
      * Respondent details.
      */
     private final List<Element<PartyDetails>> respondents;
+    @JsonProperty("respondentsFL401")
+    private final PartyDetails respondentsFL401;
+
 
     /**
      * MIAM.
