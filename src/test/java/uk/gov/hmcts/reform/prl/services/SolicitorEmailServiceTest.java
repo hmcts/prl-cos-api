@@ -39,8 +39,7 @@ public class SolicitorEmailServiceTest {
 
 
     private static final String manageCaseUrl = null;
-    public static final String EMAIL_TEMPLATE_ID_1 = "111";
-    public static final String EMAIL_TEMPLATE_ID_2 = "222";
+    public static final String authToken = "Bearer TestAuthToken";
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -206,6 +205,70 @@ public class SolicitorEmailServiceTest {
         when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
 
         solicitorEmailService.sendEmail(caseDetails);
+        assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
+    }
+
+
+    @Test
+    public void sendByPassEmailSuccessfully() throws NotFoundException {
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .address(Address.builder()
+                         .postCode("SE1 9BA")
+                         .build())
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .children(listOfChildren)
+            .courtName("testcourt")
+            .build();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .build();
+        String applicantNames = "TestFirst TestLast";
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        EmailTemplateVars email = SolicitorEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .applicantName(applicantNames)
+            .courtName(court.getCourtName())
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+        when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
+
+        solicitorEmailService.sendEmailBypss(caseDetails, authToken);
         assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
     }
 

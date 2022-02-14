@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.env.SystemEnvironmentPropertySource;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -260,6 +261,7 @@ public class AllegationsOfHarmCheckerTest {
 
         CaseData caseData = CaseData.builder()
             .allegationsOfHarmDomesticAbuseYesNo(Yes)
+            .allegationsOfHarmChildAbductionYesNo(No)
             .sexualAbuseVictim(Collections.singletonList(children))
             .behaviours(Collections.singletonList(wrappedBehaviour))
             .build();
@@ -272,6 +274,10 @@ public class AllegationsOfHarmCheckerTest {
 
         CaseData caseData = CaseData.builder()
             .allegationsOfHarmDomesticAbuseYesNo(Yes)
+            .allegationsOfHarmChildAbductionYesNo(Yes)
+            .childAbductionReasons("harm")
+            .previousAbductionThreats(Yes)
+            .previousAbductionThreatsDetails("none")
             .build();
 
         assertFalse(allegationsOfHarmChecker.validateDomesticAbuseSection(caseData));
