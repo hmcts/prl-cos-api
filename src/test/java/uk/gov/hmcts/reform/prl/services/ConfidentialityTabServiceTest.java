@@ -14,23 +14,15 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
-import java.time.temporal.JulianFields;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConfidentialityTabServiceTest {
@@ -88,39 +80,11 @@ public class ConfidentialityTabServiceTest {
             .phoneNumber("12345678900")
             .email("abc2@xyz.com")
             .build();
-        Applicant applicant1 = Applicant.builder()
-            .firstName("ABC 1")
-            .lastName("XYZ 1")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
-            .gender("Male")
-            .address(address)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .email("abc1@xyz.com")
-            .phoneNumber("09876543211")
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
-            .build();
-        Applicant applicant2 = Applicant.builder()
-            .firstName("ABC 2")
-            .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
-            .gender("Male")
-            .address(address)
-            .canYouProvideEmailAddress(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .isEmailAddressConfidential(YesOrNo.No)
-            .phoneNumber("12345678900")
-            .email("abc2@xyz.com")
-            .build();
-        when(objectMapper.convertValue(partyDetails1, Applicant.class)).thenReturn(applicant1);
-        when(objectMapper.convertValue(partyDetails2, Applicant.class)).thenReturn(applicant2);
         List<Element<ApplicantConfidentialityDetails>> expectedOutput = List
             .of(Element.<ApplicantConfidentialityDetails>builder()
                     .value(ApplicantConfidentialityDetails.builder()
                                .firstName("ABC 1")
-                               .lastName("XYZ 1")
+                               .lastName("XYZ 2")
                                .email("abc1@xyz.com")
                                .phoneNumber("09876543211")
                                .address(address)
@@ -139,7 +103,8 @@ public class ConfidentialityTabServiceTest {
             .firstName("Confidential First Name").lastName("Confidential Last Name").address(address).build();
         OtherPersonWhoLivesWithChild personWhoLivesWithChild2 = OtherPersonWhoLivesWithChild.builder()
             .isPersonIdentityConfidential(YesOrNo.No).relationshipToChildDetails("test")
-            .firstName("Nonconfidential test First Name").lastName("Nonconfidential test Last Name").address(address).build();
+            .firstName("Nonconfidential test First Name").lastName("Nonconfidential test Last Name")
+            .address(address).build();
 
         Element<OtherPersonWhoLivesWithChild> otherPersonElement1 = Element.<OtherPersonWhoLivesWithChild>builder().value(
             personWhoLivesWithChild1).build();

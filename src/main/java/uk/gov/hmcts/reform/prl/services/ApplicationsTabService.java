@@ -7,23 +7,39 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
-import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
-
-import uk.gov.hmcts.reform.prl.models.complextypes.*;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.*;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChildDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.InternationalElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.LitigationCapacity;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamExemptions;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCase;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherProceedingsDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Respondent;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.TypeOfApplication;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.WelshLanguageRequirements;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOverview;
@@ -40,7 +56,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.*;
+import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 
 @Slf4j
 @Service
@@ -80,8 +98,7 @@ public class ApplicationsTabService {
         applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
 
         log.info("inside the application tab service update");
-        //log.info(applicationTab.toString());
-
+        log.info(applicationTab.toString());
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -118,47 +135,54 @@ public class ApplicationsTabService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        List<Element<OtherPersonLivingWithChild>> otherPersonLiving = new ArrayList<>();
+        List<Element<OtherPersonWhoLivesWithChildDetails>> otherPersonLiving = new ArrayList<>();
         for (OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild : otherPersonList) {
-            otherPersonLiving.add(Element.<OtherPersonLivingWithChild>builder().
-                value(OtherPersonLivingWithChild.builder()
-                          .firstName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild.
-                              getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL
+            otherPersonLiving.add(Element.<OtherPersonWhoLivesWithChildDetails>builder()
+                                      .value(OtherPersonWhoLivesWithChildDetails.builder()
+                          .firstName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                         .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL
                                          : otherPersonWhoLivesWithChild.getFirstName())
-                          .lastName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild.
-                              getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
+                          .lastName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                        .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
                                         otherPersonWhoLivesWithChild.getLastName())
-                          .relationshipToChildDetails((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild.
-                              getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
-                                                          otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
-                          .isPersonIdentityConfidential(otherPersonWhoLivesWithChild.
-                              getIsPersonIdentityConfidential())
-                          .address((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild.
-                              getIsPersonIdentityConfidential()) ?
-                                       Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
+                          .relationshipToChildDetails((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                         .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
+                                         otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
+                          .isPersonIdentityConfidential(otherPersonWhoLivesWithChild.getIsPersonIdentityConfidential())
+                          .address((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                                            .getIsPersonIdentityConfidential())
+                                       ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
                                        : otherPersonWhoLivesWithChild.getAddress()).build()).build());
         }
-        Optional<RelationshipsEnum> applicantsRelationshipToChild = ofNullable(child.getApplicantsRelationshipToChild());
-        Optional<RelationshipsEnum> respondentsRelationshipToChild = ofNullable(child.getRespondentsRelationshipToChild());
+        Optional<RelationshipsEnum> applicantsRelationshipToChild =
+            ofNullable(child.getApplicantsRelationshipToChild());
+        Optional<RelationshipsEnum> respondentsRelationshipToChild =
+            ofNullable(child.getRespondentsRelationshipToChild());
+        Optional<List<LiveWithEnum>> childLivesWith = ofNullable(child.getChildLiveWith());
+        Optional<List<OrderTypeEnum>> orderAppliedFor = ofNullable(child.getOrderAppliedFor());
         return ChildDetails.builder().firstName(child.getFirstName())
             .lastName(child.getLastName())
             .address(child.getAddress())
             .dateOfBirth(child.getDateOfBirth())
             .gender(child.getGender())
             .otherGender(child.getOtherGender())
-            .applicantsRelationshipToChild(applicantsRelationshipToChild.isEmpty() ?
-                                               null : child.getApplicantsRelationshipToChild().getDisplayedValue())
+            .applicantsRelationshipToChild(applicantsRelationshipToChild.isEmpty()
+                                               ? null : child.getApplicantsRelationshipToChild().getDisplayedValue())
             .otherApplicantsRelationshipToChild(child.getOtherApplicantsRelationshipToChild())
-            .respondentsRelationshipToChild(respondentsRelationshipToChild.isEmpty() ?
-                                                null : child.getRespondentsRelationshipToChild().getDisplayedValue())
+            .respondentsRelationshipToChild(respondentsRelationshipToChild.isEmpty()
+                                                ? null : child.getRespondentsRelationshipToChild().getDisplayedValue())
             .otherRespondentsRelationshipToChild(child.getOtherRespondentsRelationshipToChild())
             .childrenKnownToLocalAuthority(child.getChildrenKnownToLocalAuthority())
             .childrenKnownToLocalAuthorityTextArea(child.getChildrenKnownToLocalAuthorityTextArea())
             .childrenSubjectOfChildProtectionPlan(child.getChildrenSubjectOfChildProtectionPlan())
             .personWhoLivesWithChild(otherPersonLiving)
             .parentalResponsibilityDetails(child.getParentalResponsibilityDetails())
-            .childLiveWith(child.getChildLiveWith().isEmpty() ? null : child.getChildLiveWith().stream().map(LiveWithEnum::getDisplayedValue).collect(Collectors.joining(", ")))
-            .orderAppliedFor(child.getOrderAppliedFor().isEmpty() ? null : child.getOrderAppliedFor().stream().map(OrderTypeEnum::getDisplayedValue).collect(Collectors.joining(", ")))
+            .childLiveWith(childLivesWith.isEmpty() ? null : child.getChildLiveWith().stream()
+                .map(LiveWithEnum::getDisplayedValue).collect(
+                Collectors.joining(", ")))
+            .orderAppliedFor(orderAppliedFor.isEmpty() ? null : child.getOrderAppliedFor().stream()
+                .map(OrderTypeEnum::getDisplayedValue).collect(
+                Collectors.joining(", ")))
             .build();
     }
 
@@ -188,7 +212,7 @@ public class ApplicationsTabService {
         return applicants;
     }
 
-    private List<PartyDetails> maskConfidentialDetails(List<PartyDetails> currentApplicants) {
+    public List<PartyDetails> maskConfidentialDetails(List<PartyDetails> currentApplicants) {
         for (PartyDetails applicantDetails : currentApplicants) {
             if ((YesOrNo.Yes).equals(applicantDetails.getIsPhoneNumberConfidential())) {
                 applicantDetails.setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
