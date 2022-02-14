@@ -192,18 +192,16 @@ public class CallbackController {
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             solicitorEmailService.sendEmailToSolicitor(caseDetails, userDetails);
+
+            // Refreshing the page in the same event. Hence no external event call needed.
+            // Getting the tab fields and add it to the casedetails..
+            Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+
+            caseDataUpdated.putAll(allTabsFields);
         }
-
-        // Refreshing the page in the same event. Hence no external event call needed.
-        // Getting the tab fields and add it to the casedetails..
-        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        caseDataUpdated.putAll(allTabsFields);
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
