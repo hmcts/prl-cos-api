@@ -26,10 +26,10 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
@@ -182,26 +182,29 @@ public class CallbackController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public void sendEmailNotificationOnCaseWithdraw(
+    public AboutToStartOrSubmitCallbackResponse sendEmailNotificationOnCaseWithdraw(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) throws Exception {
-        try {
-            CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)
-                .toBuilder()
-                .id(callbackRequest.getCaseDetails().getId())
-                .build();
-            UserDetails userDetails = userService.getUserDetails(authorisation);
-            final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
-            Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
-            boolean applicationWithdrawn = (withdrawApplication.isPresent() && withdrawApplication.get().equals(Yes));
-            if (applicationWithdrawn) {
-                solicitorEmailService.sendEmailToSolicitor(caseDetails, userDetails);
-            }
-        } catch (Exception ex) {
-            throw new Exception(ex.getMessage());
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
+        Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
+        if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
+            solicitorEmailService.sendEmailToSolicitor(caseDetails, userDetails);
         }
+
+        // Refreshing the page in the same event. Hence no external event call needed.
+        // Getting the tab fields and add it to the casedetails..
+        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        caseDataUpdated.putAll(allTabsFields);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
 }
