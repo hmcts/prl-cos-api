@@ -71,6 +71,8 @@ public class CallbackControllerTest {
     public static final String authToken = "Bearer TestAuthToken";
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
+    private static final String C100_FINAL_TEMPLATE = "c100-final-template-1.docx";
+
 
     @Before
     public void setUp() {
@@ -160,7 +162,7 @@ public class CallbackControllerTest {
         verifyNoMoreInteractions(dgsService);
 
     }
-  
+
     @Test
     public void testGenerateAndStoreC8Document() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -229,7 +231,7 @@ public class CallbackControllerTest {
             callbackRequest
         );
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString());
+        verify(dgsService, times(2)).generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString());
 
     }
 }
