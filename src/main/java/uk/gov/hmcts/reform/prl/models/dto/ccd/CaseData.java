@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
@@ -53,6 +55,7 @@ import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
+import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -63,7 +66,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-public class CaseData {
+public class CaseData implements MappableObject {
 
     private final long id;
 
@@ -318,6 +321,9 @@ public class CaseData {
     private final String feeCode;
     @JsonProperty("draftOrderDoc")
     private final Document draftOrderDoc;
+    @JsonProperty("c8Document")
+    private final Document c8Document;
+
     @JsonProperty("submitAndPayDownloadApplicationLink")
     private final Document submitAndPayDownloadApplicationLink;
 
@@ -327,7 +333,7 @@ public class CaseData {
     private final String familymanCaseNumber;
 
     /**
-     *  Manage Documents.
+     * Manage Documents.
      */
     private final DocumentCategoryEnum documentCategory;
     private final List<Element<FurtherEvidence>> furtherEvidences;
@@ -336,6 +342,8 @@ public class CaseData {
 
     private final List<Element<Correspondence>> correspondence;
     private final List<Element<OtherDocuments>> otherDocuments;
+
+    private final List<Element<UserInfo>> userInfo;
 
 
     /**
@@ -355,7 +363,7 @@ public class CaseData {
     private final RespondentRelationObjectType respondentRelationObject;
     private final RespondentRelationDateInfo respondentRelationDateInfoObject;
     private final RespondentRelationOptionsInfo respondentRelationOptions;
-    
+
     /**
      * FL401 Type of Application.
      */
@@ -372,4 +380,24 @@ public class CaseData {
     private final ApplicantFamilyDetails applicantFamilyDetails;
     @JsonProperty("applicantChildDetails")
     private final List<Element<ApplicantChild>> applicantChildDetails;
+
+    /**
+     * Issue and send to local court'.
+     */
+    private final List<Element<LocalCourtAdminEmail>> localCourtAdminEmail;
+
+    /**
+     * This field contains Application Submitter solicitor email address.
+     */
+    private final String applicantSolicitorEmailAddress;
+    private final String respondentSolicitorEmailAddress;
+    private final String caseworkerEmailAddress;
+
+
+    /**
+     * Court details.
+     */
+
+    private String courtName;
+    private String courtId;
 }

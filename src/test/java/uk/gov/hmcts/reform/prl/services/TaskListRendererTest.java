@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
@@ -72,7 +72,8 @@ public class TaskListRendererTest {
         Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
         Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
-        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build());
+        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build()
+    );
 
 
     private final List<EventValidationErrors> errors = List.of(
@@ -133,13 +134,11 @@ public class TaskListRendererTest {
         String expectedTaskList = String.join("\n", lines);
         String actualTaskList = taskListRenderer.render(tasks, errors, true);
 
-        assertEquals(expectedTaskList, actualTaskList);
-
+        assertThat(expectedTaskList).isEqualTo(actualTaskList);
     }
 
     @Test
     public void shouldRenderTaskListWithNoErrors() throws IOException {
-
         List<EventValidationErrors> emptyErrors = Collections.emptyList();
 
         BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/task-list-no-errors.md"));
@@ -159,6 +158,5 @@ public class TaskListRendererTest {
         assertTrue(expectedTaskList.equals(actualTaskList));
 
     }
-
 }
 

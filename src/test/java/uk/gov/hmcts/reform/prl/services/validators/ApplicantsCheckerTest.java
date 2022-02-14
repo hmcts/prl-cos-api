@@ -44,7 +44,7 @@ public class ApplicantsCheckerTest {
         PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-
+      
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(applicantList)
@@ -60,7 +60,7 @@ public class ApplicantsCheckerTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(null)
             .build();
-
+      
         assertFalse(applicantsChecker.isFinished(caseData));
     }
 
@@ -70,7 +70,7 @@ public class ApplicantsCheckerTest {
         PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-
+      
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(applicantList)
@@ -81,7 +81,6 @@ public class ApplicantsCheckerTest {
 
     @Test
     public void whenApplicantIsNotPresentThenIsStartedReturnsFalse() {
-
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(null)
@@ -107,7 +106,6 @@ public class ApplicantsCheckerTest {
 
     @Test
     public void whenApplicantIsNotPresentThenHasMandatoryReturnsFalse() {
-
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicants(null)
@@ -140,7 +138,6 @@ public class ApplicantsCheckerTest {
 
         assertTrue(applicantsChecker.verifyAddressCompleted(address));
     }
-
 
 
 }

@@ -8,6 +8,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
@@ -41,11 +42,13 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
 
     @DisplayName("temporary test to verify gov UK notifications integration")
     @Test
+    @Ignore
     public void sendEmail() {
         cosApiClient.sendEmail(CallbackRequest.builder()
                                    .caseDetails(CaseDetails.builder().build())
                                    .build());
     }
+
 
     @Test
     public void testDocumentGenerate_return200() throws Exception {
