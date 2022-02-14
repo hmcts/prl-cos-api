@@ -12,6 +12,7 @@ public enum EventErrorsEnum {
     APPLICANTS_DETAILS_ERROR("Add applicant details"),
     TYPE_OF_APPLICATION_ERROR("Add details about the type of application"),
     RESPONDENT_DETAILS_ERROR("Add respondent details"),
+    RESPONDENT_BEHAVIOUR_ERROR("Add details about respondent behaviour"),
     LITIGATION_CAPACITY_ERROR("Add the litigation capacity details"),
     INTERNATIONAL_ELEMENT_ERROR("Add the international element details"),
     HEARING_URGENCY_ERROR("Add hearing urgency details"),
@@ -22,6 +23,9 @@ public enum EventErrorsEnum {
     OTHER_PROCEEDINGS_ERROR("Add details about other proceedings"),
     ALLEGATIONS_OF_HARM_ERROR("Add details about allegations of harm"),
     HOME_ERROR("Add details about home situation");
+    RELATIONSHIP_TO_RESPONDENT_ERROR("Add details about relationship to respondent");
+    FL401_APPLICANT_FAMILY_ERROR("Add details about applicant's family");
+
     private final String error;
 
     @JsonValue
