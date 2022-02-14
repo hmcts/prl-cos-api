@@ -81,9 +81,6 @@ public class TaskListServiceTest {
 
         List<Task> expectedTasks = List.of(
             Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
-            Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
             Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
             Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
@@ -98,6 +95,8 @@ public class TaskListServiceTest {
             Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build());
 
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
+
+
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
 
