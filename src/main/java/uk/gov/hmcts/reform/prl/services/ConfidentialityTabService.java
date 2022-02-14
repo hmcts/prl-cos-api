@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
@@ -30,10 +28,9 @@ import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
 public class ConfidentialityTabService {
 
     private final CoreCaseDataService coreCaseDataService;
-    private final ObjectMapper objectMapper;
 
 
-    public void updateConfidentialityDetails(Long id, CaseData caseData) {
+    public boolean updateConfidentialityDetails(Long id, CaseData caseData) {
 
         List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
         List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
@@ -60,6 +57,7 @@ public class ConfidentialityTabService {
             )
         );
 
+        return true;
 
     }
 
