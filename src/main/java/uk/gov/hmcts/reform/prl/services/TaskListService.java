@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
@@ -98,6 +99,7 @@ public class TaskListService {
             FL401_TYPE_OF_APPLICATION,
             APPLICANT_DETAILS,
             RESPONDENT_DETAILS,
+            RELATIONSHIP_TO_RESPONDENT,
             RESPONDENT_BEHAVIOUR,
             FL401_APPLICANT_FAMILY_DETAILS,
             OTHER_PROCEEDINGS,

@@ -22,6 +22,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
@@ -84,6 +85,9 @@ public class EventsChecker {
     SubmitAndPayChecker submitAndPayChecker;
 
     @Autowired
+    RespondentRelationshipChecker respondentRelationshipChecker;
+    
+    @Autowired
     private FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
 
     @Autowired
@@ -111,6 +115,7 @@ public class EventsChecker {
         eventStatus.put(SUBMIT_AND_PAY, submitAndPayChecker);
 
         eventStatus.put(FL401_CASE_NAME, caseNameChecker);
+        eventStatus.put(RELATIONSHIP_TO_RESPONDENT, respondentRelationshipChecker);
         eventStatus.put(FL401_TYPE_OF_APPLICATION, fl401ApplicationTypeChecker);
         eventStatus.put(RESPONDENT_BEHAVIOUR, respondentBehaviourChecker);
         eventStatus.put(FL401_APPLICANT_FAMILY_DETAILS, fl401ApplicantFamilyChecker);

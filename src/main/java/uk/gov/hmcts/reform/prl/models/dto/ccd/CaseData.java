@@ -41,6 +41,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
@@ -340,6 +343,13 @@ public class CaseData {
     private final List<RejectReasonEnum> rejectReason;
     private String returnMessage;
 
+    /**
+     * FL401 Respondents relationship.
+     */
+    private final RespondentRelationObjectType respondentRelationObject;
+    private final RespondentRelationDateInfo respondentRelationDateInfoObject;
+    private final RespondentRelationOptionsInfo respondentRelationOptions;
+    
     /**
      * FL401 Type of Application.
      */
