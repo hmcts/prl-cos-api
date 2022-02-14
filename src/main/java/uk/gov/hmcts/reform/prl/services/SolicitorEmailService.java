@@ -133,7 +133,7 @@ public class SolicitorEmailService {
             .collect(Collectors.toList());
 
         solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
-            && !applicantSolicitorEmailList.get(0).isEmpty()) ? applicantSolicitorEmailList.get(0)
+            && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() === 1) ? applicantSolicitorEmailList.get(0)
             : userDetails.getEmail();
 
         emailService.send(
