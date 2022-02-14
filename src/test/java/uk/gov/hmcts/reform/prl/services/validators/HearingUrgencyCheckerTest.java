@@ -8,6 +8,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -27,7 +29,7 @@ public class HearingUrgencyCheckerTest {
 
         boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
 
-        assert (!isFinished);
+        assertFalse(isFinished);
     }
 
     @Test
@@ -41,7 +43,7 @@ public class HearingUrgencyCheckerTest {
 
         boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
 
-        assert (isFinished);
+        assertTrue(isFinished);
     }
 
     @Test
@@ -60,7 +62,7 @@ public class HearingUrgencyCheckerTest {
 
         boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
 
-        assert (isFinished);
+        assertTrue(isFinished);
     }
 
     @Test
@@ -72,7 +74,7 @@ public class HearingUrgencyCheckerTest {
 
         boolean isStarted = hearingUrgencyChecker.isStarted(casedata);
 
-        assert (isStarted);
+        assertTrue(isStarted);
     }
 
     @Test
@@ -84,7 +86,7 @@ public class HearingUrgencyCheckerTest {
 
         boolean isStarted = hearingUrgencyChecker.isStarted(casedata);
 
-        assert (isStarted);
+        assertTrue(isStarted);
     }
 
     @Test
@@ -94,7 +96,7 @@ public class HearingUrgencyCheckerTest {
 
         boolean isMandatory = hearingUrgencyChecker.hasMandatoryCompleted(casedata);
 
-        assert (!isMandatory);
+        assertFalse(isMandatory);
     }
 
     @Test
@@ -104,7 +106,7 @@ public class HearingUrgencyCheckerTest {
 
         boolean isMandatory = hearingUrgencyChecker.hasMandatoryCompleted(casedata);
 
-        assert (isMandatory);
+        assertTrue(isMandatory);
     }
 
 }

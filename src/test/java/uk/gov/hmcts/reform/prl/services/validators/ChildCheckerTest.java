@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -20,6 +19,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
@@ -40,8 +41,7 @@ public class ChildCheckerTest {
     public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assert !childChecker.isStarted(caseData);
-
+        assertTrue(!childChecker.isStarted(caseData));
     }
 
     @Test
@@ -52,7 +52,7 @@ public class ChildCheckerTest {
 
         CaseData caseData = CaseData.builder().children(listOfChildren).build();
 
-        assert !childChecker.isStarted(caseData);
+        assertTrue(!childChecker.isStarted(caseData));
     }
 
     @Test
@@ -63,16 +63,14 @@ public class ChildCheckerTest {
 
         CaseData caseData = CaseData.builder().children(listOfChildren).build();
 
-        assert childChecker.isStarted(caseData);
-
+        assertTrue(childChecker.isStarted(caseData));
     }
 
     @Test
     public void whenNoCaseDataPresentThenIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assert !childChecker.isFinished(caseData);
-
+        assertTrue(!childChecker.isFinished(caseData));
     }
 
     @Test
@@ -83,9 +81,7 @@ public class ChildCheckerTest {
 
         CaseData caseData = CaseData.builder().children(listOfChildren).build();
 
-        assert !childChecker.isFinished(caseData);
-
-
+        assertTrue(!childChecker.isFinished(caseData));
     }
 
     @Test
@@ -96,8 +92,7 @@ public class ChildCheckerTest {
 
         CaseData caseData = CaseData.builder().children(listOfChildren).build();
 
-        assert !childChecker.isFinished(caseData);
-
+        assertTrue(!childChecker.isFinished(caseData));
     }
 
     @Test
@@ -129,8 +124,7 @@ public class ChildCheckerTest {
             .build();
 
 
-        assert childChecker.isFinished(caseData);
-
+        assertTrue(childChecker.isFinished(caseData));
     }
 
     @Test
@@ -158,7 +152,7 @@ public class ChildCheckerTest {
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
 
-        Assertions.assertFalse(childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
 
     @Test
@@ -173,8 +167,10 @@ public class ChildCheckerTest {
             .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
             .firstName("test First Name").lastName("test Last Name").address(address).build();
 
-        Element<OtherPersonWhoLivesWithChild> wrappedList = Element.<OtherPersonWhoLivesWithChild>builder().value(personWhoLivesWithChild).build();
-        List<Element<OtherPersonWhoLivesWithChild>> listOfOtherPersonsWhoLivedWithChild = Collections.singletonList(wrappedList);
+        Element<OtherPersonWhoLivesWithChild> wrappedList = Element.<OtherPersonWhoLivesWithChild>builder().value(
+            personWhoLivesWithChild).build();
+        List<Element<OtherPersonWhoLivesWithChild>> listOfOtherPersonsWhoLivedWithChild = Collections.singletonList(
+            wrappedList);
 
         Child child = Child.builder()
             .firstName("Test")
@@ -200,7 +196,7 @@ public class ChildCheckerTest {
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
 
-        Assertions.assertTrue(childChecker.isFinished(caseData));
+        assertTrue(childChecker.isFinished(caseData));
     }
 
     @Test
@@ -214,8 +210,10 @@ public class ChildCheckerTest {
             .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
             .firstName("test First Name").lastName("test Last Name").address(address).build();
 
-        Element<OtherPersonWhoLivesWithChild> wrappedList = Element.<OtherPersonWhoLivesWithChild>builder().value(personWhoLivesWithChild).build();
-        List<Element<OtherPersonWhoLivesWithChild>> listOfOtherPersonsWhoLivedWithChild = Collections.singletonList(wrappedList);
+        Element<OtherPersonWhoLivesWithChild> wrappedList = Element.<OtherPersonWhoLivesWithChild>builder().value(
+            personWhoLivesWithChild).build();
+        List<Element<OtherPersonWhoLivesWithChild>> listOfOtherPersonsWhoLivedWithChild = Collections.singletonList(
+            wrappedList);
 
         Child child = Child.builder()
             .firstName("Test")
@@ -241,9 +239,8 @@ public class ChildCheckerTest {
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
 
-        Assertions.assertFalse(childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
-
 
     @Test
     public void whenAllChildDataPresentAndChoosenAnotherPersonNotListedWithPersonDetailsNotAvailableInSecondRow() {
@@ -261,12 +258,13 @@ public class ChildCheckerTest {
             .firstName("").lastName("test Last Name").address(address).build();
 
         Element<OtherPersonWhoLivesWithChild> firstWrappedList = Element.<OtherPersonWhoLivesWithChild>builder()
-                                                                        .value(personWhoLivesWithChildFirstRow).build();
+            .value(personWhoLivesWithChildFirstRow).build();
         Element<OtherPersonWhoLivesWithChild> secondWrappedList = Element.<OtherPersonWhoLivesWithChild>builder()
-                                                                       .value(personWhoLivesWithChildSecondRow).build();
+            .value(personWhoLivesWithChildSecondRow).build();
         List<Element<OtherPersonWhoLivesWithChild>> listOfOtherPersonsWhoLivedWithChild = Arrays.asList(
-                                                                                                  firstWrappedList,
-                                                                                                  secondWrappedList);
+            firstWrappedList,
+            secondWrappedList
+        );
 
         Child child = Child.builder()
             .firstName("Test")
@@ -292,8 +290,6 @@ public class ChildCheckerTest {
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
 
-        Assertions.assertFalse(childChecker.isFinished(caseData));
+        assertFalse(childChecker.isFinished(caseData));
     }
-
-
 }
