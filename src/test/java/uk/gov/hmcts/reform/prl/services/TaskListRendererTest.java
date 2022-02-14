@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
@@ -82,6 +83,7 @@ public class TaskListRendererTest {
         Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
         Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
+        Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
         Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
         Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
@@ -90,7 +92,6 @@ public class TaskListRendererTest {
         Task.builder().event(INTERNATIONAL_ELEMENT).state(NOT_STARTED).build(),
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
         Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build());
-
 
     @Test
     public void shouldRenderFl401TaskList() throws IOException {

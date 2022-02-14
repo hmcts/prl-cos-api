@@ -155,3 +155,4 @@ case_document_am:
 
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
+
