@@ -48,7 +48,7 @@ public class RequestUpdateCallbackService {
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final UserService userService;
-    private List<OrganisationDetails> organisationDetails = new ArrayList<>();
+    private final List<OrganisationDetails> organisationDetails = new ArrayList<>();
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
 
@@ -193,9 +193,7 @@ public class RequestUpdateCallbackService {
                              String systemUpdateUserId, List<OrganisationDetails> organisation, String eventId) throws JsonProcessingException {
         CaseData caseData = setCaseData(serviceRequestUpdateDto, organisation);
 
-        String jsonCaseData = objectMapper.writeValueAsString(caseData);
-
-        log.info("CaseData with Organisation details: {} ", jsonCaseData);
+        log.info("CaseData with Organisation details:  ");
 
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             userToken,
