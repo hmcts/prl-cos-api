@@ -18,7 +18,7 @@ public class ContactInformation {
     private String addressLine3;
     private String country;
     private String county;
-    private List<DxAddress> dxAddress;
+    private List<Element<DxAddress>> dxAddress;
     private String postCode;
     private String townCity;
 

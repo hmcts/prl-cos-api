@@ -15,7 +15,7 @@ import java.util.List;
 @Jacksonized
 public class OrganisationDetails {
 
-    private List<ContactInformation> contactInformation;
+    private List<Element<ContactInformation>> contactInformation;
     private String name;
     private String organisationIdentifier;
 }
