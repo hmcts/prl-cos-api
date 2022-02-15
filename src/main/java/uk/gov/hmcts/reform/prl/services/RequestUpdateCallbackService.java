@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional.*;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
@@ -99,14 +98,8 @@ public class RequestUpdateCallbackService {
                 .name(String.valueOf(organisationDetailsMap.get("name")))
                 .organisationIdentifier(String.valueOf(organisationDetailsMap.get("organisationIdentifier")))
                 .build());
-
              */
-            //String jsonOrganisation = objectMapper.writeValueAsString(orgDetails);
-
-            //log.info("Organisation details refdata: {} ", jsonOrganisation);
         }
-
-        //String jsonOrganisation = objectMapper.writeValueAsString(caseData);
 
         log.info("****** Organisation details refdata: ");
 
