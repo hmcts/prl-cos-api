@@ -76,9 +76,15 @@ public class RequestUpdateCallbackService {
             .collect(Collectors.toList());
 
         //Map<String, Object> organisationDetailsMap = new HashMap<>();
+        OrganisationDetails orgDetails = OrganisationDetails.builder().build();
         for (PartyDetails applicant : applicants) {
             String organisationID = applicant.getSolicitorOrg().getOrganisationID();
-            organisationDetails.add(organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID));
+            log.info("Organisation Id : {}",organisationID);
+            log.info("*** Before api call organisation **** ");
+            orgDetails = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
+            log.info("*** After api call organisation **** ");
+            organisationDetails.add(orgDetails);
+
             /*organisationDetails.add(OrganisationDetails.builder()
                 .contactInformation((List<ContactInformation>) organisationDetailsMap.get("contactInformation"))
                 .name(String.valueOf(organisationDetailsMap.get("name")))
@@ -86,6 +92,9 @@ public class RequestUpdateCallbackService {
                 .build());
 
              */
+            String jsonOrganisation = objectMapper.writeValueAsString(orgDetails);
+
+            log.info("Organisation details refdata: {} ", jsonOrganisation);
         }
 
         String jsonOrganisation = objectMapper.writeValueAsString(caseData);
