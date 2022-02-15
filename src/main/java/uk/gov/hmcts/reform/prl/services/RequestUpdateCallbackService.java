@@ -109,6 +109,7 @@ public class RequestUpdateCallbackService {
                 "Updating the Case data with payment information for caseId {}",
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
+
             log.info("Before entering case event *****");
             createEvent(serviceRequestUpdateDto, userToken, systemUpdateUserId, organisationDetails,
                         serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
@@ -193,8 +194,12 @@ public class RequestUpdateCallbackService {
                              String systemUpdateUserId, List<OrganisationDetails> organisation, String eventId) throws JsonProcessingException {
         CaseData caseData = setCaseData(serviceRequestUpdateDto, organisation);
 
-        log.info("CaseData with Organisation details:  ");
-
+        log.info("CaseData with Organisation details:");
+        log.info("Servicerequest update dto : {} ", serviceRequestUpdateDto);
+        log.info("systemUpdateUserId update dto : {} ", systemUpdateUserId);
+        log.info("organisation update dto : {} ", organisation);
+        log.info("eventId update dto : {} ", eventId);
+        log.info("eventId update dto : {} ", userToken);
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             userToken,
             authTokenGenerator.generate(),
