@@ -82,9 +82,9 @@ public class RequestUpdateCallbackService {
         for (PartyDetails applicant : applicants) {
 
             log.info("*** Count **** ");
-            if(applicant.getSolicitorOrg() != null){
+            if (applicant.getSolicitorOrg() != null) {
                 String organisationID = applicant.getSolicitorOrg().getOrganisationID();
-                if(organisationID!=null){
+                if (organisationID != null) {
                     log.info("Organisation Id : {}",organisationID);
                     log.info("*** Before api call organisation **** ");
                     orgDetails = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
