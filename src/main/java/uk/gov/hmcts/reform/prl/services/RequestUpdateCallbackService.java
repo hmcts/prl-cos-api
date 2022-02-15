@@ -100,6 +100,16 @@ public class RequestUpdateCallbackService {
         );
 
         if (!Objects.isNull(caseDetails.getId())) {
+            if (confidentialityTabService
+                .updateConfidentialityDetails(caseDetails.getId(), objectMapper.convertValue(
+                    caseDetails.getData(),
+                    CaseData.class
+                ))) {
+                log.info(
+                    "Confidentiality details updated for caseId {}",
+                    caseDetails.getId()
+                );
+            }
             log.info(
                 "Updating the Case data with payment information for caseId {}",
                 serviceRequestUpdateDto.getCcdCaseNumber()
