@@ -124,9 +124,10 @@ public class HomeChecker implements EventChecker {
                 }
             }
 
+            boolean addressPresent = ofNullable(home.get().getAddress()).isPresent() && !home.get().getAddress().getAddressLine1().isBlank();
             return fields.stream().noneMatch(Optional::isEmpty)
                 && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""))
-                && !home.get().getAddress().getAddressLine1().isBlank();
+                && addressPresent;
         }
         return false;
     }
