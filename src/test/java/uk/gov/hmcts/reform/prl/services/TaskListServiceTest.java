@@ -83,8 +83,8 @@ public class TaskListServiceTest {
 
         List<Task> expectedTasks = List.of(
             Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
-            Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
             Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
+            Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
             Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
