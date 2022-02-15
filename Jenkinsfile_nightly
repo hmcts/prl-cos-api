@@ -20,7 +20,8 @@ def secrets = [
     secret('prl-cos-idam-client-secret', 'IDAM_CLIENT_SECRET'),
     secret('system-update-user-username', 'SYSTEM_UPDATE_USER_USERNAME'),
     secret('system-update-user-password', 'PRL_SYSTEM_UPDATE_PASSWORD'),
-    secret('microservicekey-prl-cos-api', 'IDAM_S2S_AUTH_TOTP_SECRET')
+    secret('microservicekey-prl-cos-api', 'IDAM_S2S_AUTH_TOTP_SECRET'),
+    secret("launchDarkly-sdk-key", "LAUNCH_DARKLY_SDK_KEY")
   ]
 ]
 
@@ -39,9 +40,8 @@ withNightlyPipeline(type, product, component) {
 
   loadVaultSecrets(secrets)
   enableSlackNotifications(channel)
-//  enableFortifyScan()
+  enableFortifyScan()
   enableFullFunctionalTest(200)
-
 
   after('fullFunctionalTest') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
