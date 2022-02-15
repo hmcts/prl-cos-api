@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional.*;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
@@ -77,14 +78,22 @@ public class RequestUpdateCallbackService {
 
         //Map<String, Object> organisationDetailsMap = new HashMap<>();
         OrganisationDetails orgDetails = OrganisationDetails.builder().build();
-        for (PartyDetails applicant : applicants) {
-            String organisationID = applicant.getSolicitorOrg().getOrganisationID();
-            log.info("Organisation Id : {}",organisationID);
-            log.info("*** Before api call organisation **** ");
-            orgDetails = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
-            log.info("*** After api call organisation **** {}",orgDetails.toString());
-            organisationDetails.add(orgDetails);
+        log.info("applicants length {}",applicants.stream().count());
 
+        for (PartyDetails applicant : applicants) {
+
+            log.info("*** Count **** ");
+            if(applicant.getSolicitorOrg() != null){
+                String organisationID = applicant.getSolicitorOrg().getOrganisationID();
+                if(organisationID!=null){
+                    log.info("Organisation Id : {}",organisationID);
+                    log.info("*** Before api call organisation **** ");
+                    orgDetails = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
+                    log.info("*** After api call organisation **** {}",orgDetails.toString());
+                    organisationDetails.add(orgDetails);
+                }
+            }
+            log.info("*** solicitor org null **** ");
             /*organisationDetails.add(OrganisationDetails.builder()
                 .contactInformation((List<ContactInformation>) organisationDetailsMap.get("contactInformation"))
                 .name(String.valueOf(organisationDetailsMap.get("name")))
@@ -99,7 +108,7 @@ public class RequestUpdateCallbackService {
 
         //String jsonOrganisation = objectMapper.writeValueAsString(caseData);
 
-        log.info("Organisation details refdata: {} ");
+        log.info("****** Organisation details refdata: ");
 
         if (!Objects.isNull(caseDetails.getId())) {
             log.info(
