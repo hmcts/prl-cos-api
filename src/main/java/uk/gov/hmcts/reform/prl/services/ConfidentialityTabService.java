@@ -32,17 +32,15 @@ public class ConfidentialityTabService {
 
     public boolean updateConfidentialityDetails(Long id, CaseData caseData) {
 
-        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
-        List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
-        List<PartyDetails> applicants = caseData.getApplicants().stream()
+       List<PartyDetails> applicants = caseData.getApplicants().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
-        applicantsConfidentialDetails = getConfidentialApplicantDetails(applicants);
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = getConfidentialApplicantDetails(applicants);
         List<Child> children = caseData.getChildren().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        childrenConfidentialDetails = getChildrenConfidentialDetails(children);
+        List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(children);
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
