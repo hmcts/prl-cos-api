@@ -29,7 +29,10 @@ def secrets = [
       secret('prl-cos-idam-client-secret', 'IDAM_CLIENT_SECRET'),
       secret('system-update-user-username', 'SYSTEM_UPDATE_USER_USERNAME'),
       secret('system-update-user-password', 'PRL_SYSTEM_UPDATE_PASSWORD'),
-      secret('microservicekey-prl-cos-api', 'IDAM_S2S_AUTH_TOTP_SECRET')
+      secret('microservicekey-prl-cos-api', 'IDAM_S2S_AUTH_TOTP_SECRET'),
+      secret('notification-client-api-key', 'UK_GOV_NOTIFY_API_KEY'),
+      secret('test-genericpassword', 'PRL_GENERIC_PASSWORD'),
+      secret("launchDarkly-sdk-key", "LAUNCH_DARKLY_SDK_KEY")
    ]
 ]
 
