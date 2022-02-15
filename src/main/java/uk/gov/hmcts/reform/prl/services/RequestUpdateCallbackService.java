@@ -48,7 +48,7 @@ public class RequestUpdateCallbackService {
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final UserService userService;
-    private List<OrganisationDetails> organisationDetails =new ArrayList<OrganisationDetails>();
+    private List<OrganisationDetails> organisationDetails = new ArrayList<>();
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
 
