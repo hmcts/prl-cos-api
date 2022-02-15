@@ -40,6 +40,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskSection.newSection;
 
 @Service
@@ -187,7 +188,8 @@ public class TaskListRenderer {
 
         final TaskSection applicationDetails = newSection("Add application details")
             .withTask(tasks.get(FL401_CASE_NAME))
-            .withTask(tasks.get(FL401_TYPE_OF_APPLICATION));
+            .withTask(tasks.get(FL401_TYPE_OF_APPLICATION))
+            .withTask(tasks.get(WITHOUT_NOTICE_ORDER));
 
         final TaskSection peopleInTheCase = newSection("Add people to the case")
             .withTask(tasks.get(APPLICANT_DETAILS))

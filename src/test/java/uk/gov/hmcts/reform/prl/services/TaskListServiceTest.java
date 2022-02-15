@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -83,6 +84,7 @@ public class TaskListServiceTest {
         List<Task> expectedTasks = List.of(
             Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
             Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
+            Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
             Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
