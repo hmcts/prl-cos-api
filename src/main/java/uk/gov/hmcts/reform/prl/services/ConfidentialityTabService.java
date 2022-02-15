@@ -32,10 +32,11 @@ public class ConfidentialityTabService {
 
     public boolean updateConfidentialityDetails(Long id, CaseData caseData) {
 
-       List<PartyDetails> applicants = caseData.getApplicants().stream()
+        List<PartyDetails> applicants = caseData.getApplicants().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
-        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = getConfidentialApplicantDetails(applicants);
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = getConfidentialApplicantDetails(
+            applicants);
         List<Child> children = caseData.getChildren().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
