@@ -48,7 +48,7 @@ public class RequestUpdateCallbackService {
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final UserService userService;
-    private final List<OrganisationDetails> organisationDetails = new ArrayList<>();
+    private final List<Element<OrganisationDetails>> organisationDetails = new ArrayList<>();
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
 
@@ -69,7 +69,7 @@ public class RequestUpdateCallbackService {
             .toBuilder()
             .id(caseDetails.getId())
             .build();
-
+        log.info("*** Is organisation in Case Data *** {}",caseData);
         List<PartyDetails> applicants = caseData
             .getApplicants()
             .stream()
@@ -90,7 +90,8 @@ public class RequestUpdateCallbackService {
                     log.info("*** Before api call organisation **** ");
                     orgDetails = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
                     log.info("*** After api call organisation **** {}",orgDetails.toString());
-                    organisationDetails.add(orgDetails);
+
+                    organisationDetails.add(Element.<OrganisationDetails>builder().value(orgDetails).build());
                 }
             }
             log.info("*** solicitor org null **** ");
@@ -191,7 +192,7 @@ public class RequestUpdateCallbackService {
     }
 
     private void createEvent(ServiceRequestUpdateDto serviceRequestUpdateDto, String userToken,
-                             String systemUpdateUserId, List<OrganisationDetails> organisation, String eventId) throws JsonProcessingException {
+                             String systemUpdateUserId, List<Element<OrganisationDetails>> organisation, String eventId) throws JsonProcessingException {
         CaseData caseData = setCaseData(serviceRequestUpdateDto, organisation);
 
         log.info("**** CAse DAta {} ", caseData);
@@ -252,7 +253,7 @@ public class RequestUpdateCallbackService {
 
     }
 
-    private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto, List<OrganisationDetails> organisation) {
+    private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto, List<Element<OrganisationDetails>> organisation) {
 
         LocalDate issueDate = LocalDate.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
