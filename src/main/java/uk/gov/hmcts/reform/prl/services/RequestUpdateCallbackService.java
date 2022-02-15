@@ -212,7 +212,7 @@ public class RequestUpdateCallbackService {
     private CaseData setCaseDataFeeAndPayBypass(ServiceRequestUpdateDto serviceRequestUpdateDto, String authorisation) {
         return objectMapper.convertValue(
             CaseData.builder()
-                .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
+                .id(Long.parseLong(serviceRequestUpdateDto.getCcdCaseNumber()))
                 .applicantSolicitorEmailAddress(userService.getUserDetails(authorisation).getEmail())
                 .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
                 .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
