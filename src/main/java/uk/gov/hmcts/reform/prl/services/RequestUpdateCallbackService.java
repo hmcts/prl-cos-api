@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
-import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrganisationDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -25,9 +24,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -78,15 +75,17 @@ public class RequestUpdateCallbackService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        Map<String, Object> organisationDetailsMap = new HashMap<>();
+        //Map<String, Object> organisationDetailsMap = new HashMap<>();
         for (PartyDetails applicant : applicants) {
             String organisationID = applicant.getSolicitorOrg().getOrganisationID();
-            organisationDetailsMap = (Map<String, Object>) organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
-            organisationDetails.add(OrganisationDetails.builder()
+            organisationDetails.add(organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID));
+            /*organisationDetails.add(OrganisationDetails.builder()
                 .contactInformation((List<ContactInformation>) organisationDetailsMap.get("contactInformation"))
                 .name(String.valueOf(organisationDetailsMap.get("name")))
                 .organisationIdentifier(String.valueOf(organisationDetailsMap.get("organisationIdentifier")))
                 .build());
+
+             */
         }
 
         String jsonOrganisation = objectMapper.writeValueAsString(caseData);
