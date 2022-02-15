@@ -36,6 +36,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 
 @Slf4j
 @Service
@@ -97,6 +98,7 @@ public class TaskListService {
         return new ArrayList<>(List.of(
             FL401_CASE_NAME,
             FL401_TYPE_OF_APPLICATION,
+            WITHOUT_NOTICE_ORDER,
             APPLICANT_DETAILS,
             RESPONDENT_DETAILS,
             RELATIONSHIP_TO_RESPONDENT,

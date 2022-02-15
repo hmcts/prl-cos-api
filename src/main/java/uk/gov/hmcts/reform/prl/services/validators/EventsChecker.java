@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 
 @Service
 public class EventsChecker {
@@ -86,12 +87,16 @@ public class EventsChecker {
 
     @Autowired
     RespondentRelationshipChecker respondentRelationshipChecker;
-    
+
     @Autowired
     private FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
 
     @Autowired
     private FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
+
+    @Autowired
+    WithoutNoticeOrderChecker withoutNoticeOrderChecker;
+
 
     private EnumMap<Event, EventChecker> eventStatus = new EnumMap<Event, EventChecker>(Event.class);
 
@@ -118,7 +123,9 @@ public class EventsChecker {
         eventStatus.put(RELATIONSHIP_TO_RESPONDENT, respondentRelationshipChecker);
         eventStatus.put(FL401_TYPE_OF_APPLICATION, fl401ApplicationTypeChecker);
         eventStatus.put(RESPONDENT_BEHAVIOUR, respondentBehaviourChecker);
+        eventStatus.put(WITHOUT_NOTICE_ORDER, withoutNoticeOrderChecker);
         eventStatus.put(FL401_APPLICANT_FAMILY_DETAILS, fl401ApplicantFamilyChecker);
+
     }
 
     public boolean isFinished(Event event, CaseData caseData) {
