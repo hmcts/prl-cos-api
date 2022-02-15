@@ -13,6 +13,9 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(MockitoJUnitRunner.class)
 public class RespondentsCheckerTest {
 
@@ -22,14 +25,12 @@ public class RespondentsCheckerTest {
     @InjectMocks
     RespondentsChecker respondentsChecker;
 
-
     @Test
     public void whenNoCaseDataThenIsStartedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
 
-        assert !respondentsChecker.isStarted(caseData);
-
+        assertFalse(respondentsChecker.isStarted(caseData));
     }
 
     @Test
@@ -37,17 +38,15 @@ public class RespondentsCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        assert !respondentsChecker.isFinished(caseData);
-
+        assertFalse(respondentsChecker.isFinished(caseData));
     }
 
     @Test
     public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
-
-        assert !respondentsChecker.hasMandatoryCompleted(caseData);
-
+      
+        assertFalse(respondentsChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
@@ -60,25 +59,23 @@ public class RespondentsCheckerTest {
             .respondents(applicantList)
             .build();
 
-        assert respondentsChecker.isStarted(caseData);
+        assertTrue(respondentsChecker.isStarted(caseData));
     }
 
     @Test
     public void whenIncompleteCaseDataValidateMandatoryFieldsForRespondentReturnsFalse() {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName").build();
 
-        assert !respondentsChecker.validateMandatoryFieldsForRespondent(respondent);
+        CaseData caseData = CaseData.builder().caseTypeOfApplication("Test")
+            .build();
 
+        assertFalse(respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData.getCaseTypeOfApplication()));
     }
 
     @Test
     public void whenIncompleteCaseDataRespondentsDetailsStartedReturnsTrue() {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName").build();
 
-        assert respondentsChecker.respondentDetailsStarted(respondent);
-
+        assertTrue(respondentsChecker.respondentDetailsStarted(respondent));
     }
-
-
-
 }

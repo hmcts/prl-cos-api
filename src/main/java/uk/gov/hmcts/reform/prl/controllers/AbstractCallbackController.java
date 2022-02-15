@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractCallbackController {
 
@@ -18,12 +19,14 @@ public abstract class AbstractCallbackController {
 
     protected CaseData getCaseData(CaseDetails caseDetails) {
 
-        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
             .id(caseDetails.getId())
             .build();
+    }
 
-        return caseData;
+    protected Map<String, Object> toMap(Object object) {
+        return objectMapper.convertValue(object, Map.class);
     }
 
 
