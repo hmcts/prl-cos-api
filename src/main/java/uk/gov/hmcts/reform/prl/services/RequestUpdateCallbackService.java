@@ -192,7 +192,8 @@ public class RequestUpdateCallbackService {
     }
 
     private void createEvent(ServiceRequestUpdateDto serviceRequestUpdateDto, String userToken,
-                             String systemUpdateUserId, List<Element<OrganisationDetails>> organisation, String eventId) throws JsonProcessingException {
+                             String systemUpdateUserId, List<Element<OrganisationDetails>> organisation,
+                             String eventId) throws JsonProcessingException {
         CaseData caseData = setCaseData(serviceRequestUpdateDto, organisation);
 
         log.info("**** CAse DAta {} ", caseData);
