@@ -17,15 +17,6 @@ public class Organisation {
     private String organisationID;
     @JsonProperty("OrganisationName")
     private String organisationName;
-    private String companyNumber;
-    private String companyUrl;
-    private List<ContactInformation> contactInformation;
-    private String name;
-    private List<String> paymentAccount;
-    private String sraId;
-    private boolean sraRegulated;
-    private String status;
-    private SuperUser superUser;
 
     public static Organisation organisation(String id) {
         return Organisation.builder()
