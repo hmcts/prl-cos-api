@@ -82,7 +82,7 @@ public class RequestUpdateCallbackService {
             log.info("Organisation Id : {}",organisationID);
             log.info("*** Before api call organisation **** ");
             orgDetails = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
-            log.info("*** After api call organisation **** ");
+            log.info("*** After api call organisation **** {}",orgDetails.toString());
             organisationDetails.add(orgDetails);
 
             /*organisationDetails.add(OrganisationDetails.builder()
@@ -92,26 +92,26 @@ public class RequestUpdateCallbackService {
                 .build());
 
              */
-            String jsonOrganisation = objectMapper.writeValueAsString(orgDetails);
+            //String jsonOrganisation = objectMapper.writeValueAsString(orgDetails);
 
-            log.info("Organisation details refdata: {} ", jsonOrganisation);
+            //log.info("Organisation details refdata: {} ", jsonOrganisation);
         }
 
-        String jsonOrganisation = objectMapper.writeValueAsString(caseData);
+        //String jsonOrganisation = objectMapper.writeValueAsString(caseData);
 
-        log.info("Organisation details refdata: {} ", jsonOrganisation);
+        log.info("Organisation details refdata: {} ");
 
         if (!Objects.isNull(caseDetails.getId())) {
             log.info(
                 "Updating the Case data with payment information for caseId {}",
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
-
+            log.info("Before entering case event *****");
             createEvent(serviceRequestUpdateDto, userToken, systemUpdateUserId, organisationDetails,
                         serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
                             ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
             );
-
+            log.info("After entering case event *****");
             solicitorEmailService.sendEmail(caseDetails);
             caseWorkerEmailService.sendEmail(caseDetails);
 
