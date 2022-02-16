@@ -26,11 +26,14 @@ public class OrganisationService {
 
     private Organisations organisations;
     private final AuthTokenGenerator authTokenGenerator;
+    private final SystemUserService systemUserService;
     private List<Element<PartyDetails>> applicantsWithOrganisationDetails;
     @Autowired
     private ObjectMapper objectMapper;
 
-    public List<Element<PartyDetails>> getOrganisationDetails(CaseData caseData, String authToken) throws NotFoundException {
+    public List<Element<PartyDetails>> getOrganisationDetails(CaseData caseData) throws NotFoundException {
+
+        String userToken = systemUserService.getSysUserToken();
 
         List<PartyDetails> applicants = caseData
             .getApplicants()
@@ -48,7 +51,7 @@ public class OrganisationService {
                 if (organisationID != null) {
                     log.info("Organisation Id : {}",organisationID);
                     log.info("*** Before api call organisation **** ");
-                    organisations = organisationApi.findOrganisation(authToken, authTokenGenerator.generate(), organisationID);
+                    organisations = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
                     log.info("*** After api call organisation **** {}",organisations);
                     applicantsWithOrganisationDetails
                         .add(Element
@@ -63,13 +66,10 @@ public class OrganisationService {
                                                               .organisationPostcode(organisations.getContactInformation().get(0).getPostCode())
                                                               .build(), PartyDetails.class)).build());
 
+                    log.info("***** Applicant with Organisation address **** {}", applicantsWithOrganisationDetails);
                 }
             }
-            log.info("*** solicitor org null **** ");
-
         }
-
-        log.info("****** Organisation details refdata: ");
 
         return applicantsWithOrganisationDetails;
 

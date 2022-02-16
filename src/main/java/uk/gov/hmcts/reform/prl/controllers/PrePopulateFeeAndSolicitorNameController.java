@@ -84,7 +84,7 @@ public class PrePopulateFeeAndSolicitorNameController {
         );
 
         List<Element<PartyDetails>> organisationDetails = organisationService
-            .getOrganisationDetails(callbackRequest.getCaseDetails().getCaseData(), authorisation);
+            .getOrganisationDetails(callbackRequest.getCaseDetails().getCaseData());
 
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()
@@ -105,6 +105,8 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .build(),
             CaseData.class
         );
+
+        log.info("=========CaseData with applicant organisation======= {}", caseData);
 
         return CallbackResponse.builder()
             .data(caseData)
