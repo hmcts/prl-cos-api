@@ -22,6 +22,9 @@ public enum EventErrorsEnum {
     WELSH_LANGUAGE_ERROR("Add details about welsh language requirements"),
     OTHER_PROCEEDINGS_ERROR("Add details about other proceedings"),
     ALLEGATIONS_OF_HARM_ERROR("Add details about allegations of harm"),
+
+    //FL401 ERRORS
+    WITHOUT_NOTICE_ORDER_ERROR("Add Without Notice Order details"),
     HOME_ERROR("Add details about home situation"),
     RELATIONSHIP_TO_RESPONDENT_ERROR("Add details about relationship to respondent"),
     FL401_APPLICANT_FAMILY_ERROR("Add details about applicant's family");
