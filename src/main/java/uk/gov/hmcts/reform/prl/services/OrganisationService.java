@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import javax.servlet.http.Part;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
