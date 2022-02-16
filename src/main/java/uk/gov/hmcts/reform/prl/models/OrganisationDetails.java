@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.prl.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
+import uk.gov.hmcts.reform.prl.models.complextypes.Organisations;
 
 import java.util.List;
 
@@ -14,15 +16,6 @@ import java.util.List;
 @AllArgsConstructor
 @Jacksonized
 public class OrganisationDetails {
-
-    private String companyNumber;
-    private String companyUrl;
-    private List<ContactInformation> contactInformation;
-    private String name;
-    private String organisationIdentifier;
-    private List<String> paymentAccount;
-    private String sraId;
-    private boolean sraRegulated;
-    private String status;
-    private SuperUser superUser;
+    @JsonProperty("organisations")
+    private List<Organisations> organisations;
 }
