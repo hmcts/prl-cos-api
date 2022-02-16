@@ -52,5 +52,11 @@ public class PartyDetails {
     private final YesNoDontKnow doTheyHaveLegalRepresentation;
     private final String sendSignUpLink;
     private final String solicitorEmail;
-    private final List<Element<Organisations>> organisations;
+    private final String organisationAddress1;
+    private final String organisationAddress2;
+    private final String organisationAddress3;
+    private final String organisationCountry;
+    private final String organisationCounty;
+    private final String organisationDxAddress;
+    private final String organisationPostcode;
 }
