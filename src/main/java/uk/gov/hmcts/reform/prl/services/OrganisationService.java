@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -89,6 +90,68 @@ public class OrganisationService {
                                  .value(partyDetails).build());
 
                     log.info("***** Applicant with Organisation address **** {}", applicantsWithOrganisationDetails);
+                }
+            }
+        }
+        return applicantsWithOrganisationDetails;
+    }
+    public List<Element<PartyDetails>> getOrganisationDetailsForRespondent(CaseData caseData) throws NotFoundException {
+
+        String userToken = systemUserService.getSysUserToken();
+
+        List<PartyDetails> respondents = caseData
+            .getRespondents()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        log.info("applicants length {}",respondents.stream().count());
+
+        for (PartyDetails respondent : respondents) {
+
+            log.info("*** Count **** ");
+            if(respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)){
+                if (respondent.getSolicitorOrg() != null) {
+                    String organisationID = respondent.getSolicitorOrg().getOrganisationID();
+                    if (organisationID != null) {
+                        log.info("Organisation Id : {}",organisationID);
+                        log.info("*** Before api call organisation **** ");
+                        organisations = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
+                        log.info("*** After api call organisation **** {}",organisations);
+                        String addressLine1 = Optional.ofNullable(organisations.getContactInformation().get(0).getAddressLine1()).isPresent()
+                            ? organisations.getContactInformation().get(0).getAddressLine1()
+                            : "";
+                        String addressLine2 = Optional.ofNullable(organisations.getContactInformation().get(0).getAddressLine2()).isPresent()
+                            ? organisations.getContactInformation().get(0).getAddressLine2()
+                            : "";
+                        String addressLine3 = Optional.ofNullable(organisations.getContactInformation().get(0).getAddressLine3()).isPresent()
+                            ? organisations.getContactInformation().get(0).getAddressLine3()
+                            : "";
+                        String country = Optional.ofNullable(organisations.getContactInformation().get(0).getCountry()).isPresent()
+                            ? organisations.getContactInformation().get(0).getCountry()
+                            : "";
+                        String county = Optional.ofNullable(organisations.getContactInformation().get(0).getCounty()).isPresent()
+                            ? organisations.getContactInformation().get(0).getCounty()
+                            : "";
+                        String postcode = Optional.ofNullable(organisations.getContactInformation().get(0).getPostCode()).isPresent()
+                            ? organisations.getContactInformation().get(0).getPostCode()
+                            : "";
+                        partyDetails = objectMapper
+                            .convertValue(PartyDetails.builder()
+                                              .organisationAddress1(addressLine1)
+                                              .organisationAddress2(addressLine2)
+                                              .organisationAddress3(addressLine3)
+                                              .organisationCountry(country)
+                                              .organisationCounty(county)
+                                              .organisationPostcode(postcode)
+                                              .build(), PartyDetails.class);
+                        applicantsWithOrganisationDetails
+                            .add(Element
+                                     .<PartyDetails>builder()
+                                     .value(partyDetails).build());
+
+                        log.info("***** Applicant with Organisation address **** {}", applicantsWithOrganisationDetails);
+                    }
                 }
             }
         }

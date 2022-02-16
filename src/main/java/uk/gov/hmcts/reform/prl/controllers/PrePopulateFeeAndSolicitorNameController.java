@@ -83,7 +83,10 @@ public class PrePopulateFeeAndSolicitorNameController {
             PRL_DRAFT_TEMPLATE
         );
 
-        List<Element<PartyDetails>> organisationDetails = organisationService
+        List<Element<PartyDetails>> organisationDetailsApplicants = organisationService
+            .getOrganisationDetails(callbackRequest.getCaseDetails().getCaseData());
+
+        List<Element<PartyDetails>> organisationDetailsRespondents = organisationService
             .getOrganisationDetails(callbackRequest.getCaseDetails().getCaseData());
 
         CaseData caseData = objectMapper.convertValue(
@@ -101,7 +104,8 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .courtName(courtLocatorService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
                                                                                     .getCaseData()).getCourtName())
 
-                .applicants(organisationDetails)
+                .applicants(organisationDetailsApplicants)
+                .respondents(organisationDetailsRespondents)
                 .build(),
             CaseData.class
         );
