@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.OrganisationDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -22,10 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
-import uk.gov.hmcts.reform.prl.services.DgsService;
-import uk.gov.hmcts.reform.prl.services.FeeService;
-import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +41,9 @@ public class PrePopulateFeeAndSolicitorNameController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private OrganisationService organisationService;
 
     private final CourtFinderService courtLocatorService;
 
@@ -79,6 +80,9 @@ public class PrePopulateFeeAndSolicitorNameController {
             PRL_DRAFT_TEMPLATE
         );
 
+        List<Element<PartyDetails>> organisationDetails = organisationService
+            .getOrganisationDetails(callbackRequest.getCaseDetails().getCaseData(), authorisation);
+
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()
                 .solicitorName(userDetails.getFullName())
@@ -93,6 +97,8 @@ public class PrePopulateFeeAndSolicitorNameController {
                                                          .documentFileName(DRAFT_C_100_APPLICATION).build())
                 .courtName(courtLocatorService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
                                                                                     .getCaseData()).getCourtName())
+
+                .applicants(organisationDetails)
                 .build(),
             CaseData.class
         );

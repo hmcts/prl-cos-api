@@ -42,7 +42,6 @@ public class RequestUpdateCallbackService {
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
     private final CoreCaseDataApi coreCaseDataApi;
-    private final OrganisationApi organisationApi;
     private final SystemUserService systemUserService;
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
@@ -64,44 +63,6 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
 
-        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-            .toBuilder()
-            .id(caseDetails.getId())
-            .build();
-        log.info("*** Case Data from CCD *** {}",caseData);
-
-        List<PartyDetails> applicants = caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
-        log.info("applicants length {}",applicants.stream().count());
-
-        for (PartyDetails applicant : applicants) {
-
-            log.info("*** Count **** ");
-            if (applicant.getSolicitorOrg() != null) {
-                String organisationID = applicant.getSolicitorOrg().getOrganisationID();
-                if (organisationID != null) {
-                    log.info("Organisation Id : {}",organisationID);
-                    log.info("*** Before api call organisation **** ");
-                    organisationDetails = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
-                    log.info("*** After api call organisation **** {}",organisationDetails);
-
-                    //organisationDetails.add(Element.<OrganisationDetails>builder().value(orgDetails).build());
-                }
-            }
-            log.info("*** solicitor org null **** ");
-            /*organisationDetails.add(OrganisationDetails.builder()
-                .contactInformation((List<ContactInformation>) organisationDetailsMap.get("contactInformation"))
-                .name(String.valueOf(organisationDetailsMap.get("name")))
-                .organisationIdentifier(String.valueOf(organisationDetailsMap.get("organisationIdentifier")))
-                .build());
-             */
-        }
-
-        log.info("****** Organisation details refdata: ");
 
         if (!Objects.isNull(caseDetails.getId())) {
             log.info(
@@ -273,8 +234,6 @@ public class RequestUpdateCallbackService {
                                                                       .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
                                                                       .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
                                                                       .build()).build())
-                .organisationDetails(organisation)
-                .issueDate(issueDate.format(dateTimeFormatter))
                 .build(),
             CaseData.class
         );

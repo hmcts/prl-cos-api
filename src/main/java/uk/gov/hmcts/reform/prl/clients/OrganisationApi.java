@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.hmcts.reform.prl.models.OrganisationDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.Organisations;
 
 @FeignClient(
     name = "rd-professional-api",
@@ -15,7 +16,7 @@ import uk.gov.hmcts.reform.prl.models.OrganisationDetails;
 public interface OrganisationApi {
 
     @GetMapping("/refdata/internal/v1/organisations")
-    OrganisationDetails findOrganisation(
+    Organisations findOrganisation(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestParam(value = "id") String organisationId

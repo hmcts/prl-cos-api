@@ -57,6 +57,5 @@ public class PartyDetails {
     private final String organisationAddress3;
     private final String organisationCountry;
     private final String organisationCounty;
-    private final String organisationDxAddress;
     private final String organisationPostcode;
 }
