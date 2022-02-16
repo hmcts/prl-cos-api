@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -46,6 +47,8 @@ public class CallbackController {
     private static final String C100_FINAL_DOC = "C100FinalDocument.docx";
     private static final String C100_FINAL_TEMPLATE = "c100-final-template-1.docx";
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
+    public static final String PRL_C1A_TEMPLATE = "PRL-C1A.docx";
+    public static final String PRL_C1A_FILENAME = "C1A_Document.pdf";
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final OrganisationService organisationService;
@@ -53,7 +56,6 @@ public class CallbackController {
 
     private final DgsService dgsService;
     private final ObjectMapper objectMapper;
-
 
 
     /**
@@ -131,9 +133,9 @@ public class CallbackController {
             .build();
     }
 
-    @PostMapping(path = "/generate-c8-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/generate-c8-c1a-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to generate and store document")
-    public AboutToStartOrSubmitCallbackResponse generateC8Document(
+    public AboutToStartOrSubmitCallbackResponse generateC8AndOtherDocument(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
@@ -147,14 +149,29 @@ public class CallbackController {
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             PRL_C8_TEMPLATE
         );
-        GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
+
+      GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             C100_FINAL_TEMPLATE
         );
 
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("Generate C1A if allegations of harm is set to Yes and the passed value is {}",
+                 caseData.getAllegationsOfHarmYesNo());
+        if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
+            GeneratedDocumentInfo generatedC1ADocumentInfo = dgsService.generateDocument(
+                authorisation,
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                PRL_C1A_TEMPLATE
+            );
+            caseDataUpdated.put("c1ADocument", Document.builder()
+                .documentUrl(generatedC1ADocumentInfo.getUrl())
+                .documentBinaryUrl(generatedC1ADocumentInfo.getBinaryUrl())
+                .documentHash(generatedC1ADocumentInfo.getHashToken())
+                .documentFileName(PRL_C1A_FILENAME).build());
+        }
         caseDataUpdated.put("c8Document", Document.builder()
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
