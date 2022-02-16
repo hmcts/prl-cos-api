@@ -111,20 +111,26 @@ public class ConfidentialityTabService {
                 phoneSet = true;
             }
             if (addressSet || emailSet || phoneSet) {
-                Element<ApplicantConfidentialityDetails> appElement = Element
-                    .<ApplicantConfidentialityDetails>builder()
-                    .value(ApplicantConfidentialityDetails.builder()
-                               .firstName(applicant.getFirstName())
-                               .lastName(applicant.getLastName())
-                               .address(addressSet ? applicant.getAddress() : null)
-                               .phoneNumber(phoneSet ? applicant.getPhoneNumber() : null)
-                               .email(emailSet ? applicant.getEmail() : null)
-                               .build()).build();
-                tempConfidentialApplicants.add(appElement);
+                tempConfidentialApplicants
+                    .add(getApplicantConfidentialityElement(addressSet, emailSet, phoneSet, applicant));
             }
         }
 
         return tempConfidentialApplicants;
+    }
+
+    private Element<ApplicantConfidentialityDetails> getApplicantConfidentialityElement(boolean addressSet,
+              boolean emailSet, boolean phoneSet, PartyDetails applicant) {
+
+        return Element
+            .<ApplicantConfidentialityDetails>builder()
+            .value(ApplicantConfidentialityDetails.builder()
+                       .firstName(applicant.getFirstName())
+                       .lastName(applicant.getLastName())
+                       .address(addressSet ? applicant.getAddress() : null)
+                       .phoneNumber(phoneSet ? applicant.getPhoneNumber() : null)
+                       .email(emailSet ? applicant.getEmail() : null)
+                       .build()).build();
     }
 
 }
