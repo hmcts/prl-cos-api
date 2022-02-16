@@ -15,7 +15,14 @@ import java.util.List;
 @Jacksonized
 public class OrganisationDetails {
 
-    private List<Element<ContactInformation>> contactInformation;
+    private String companyNumber;
+    private String companyUrl;
+    private List<ContactInformation> contactInformation;
     private String name;
     private String organisationIdentifier;
+    private List<String> paymentAccount;
+    private String sraId;
+    private boolean sraRegulated;
+    private String status;
+    private SuperUser superUser;
 }

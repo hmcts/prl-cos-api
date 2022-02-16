@@ -48,7 +48,7 @@ public class RequestUpdateCallbackService {
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final UserService userService;
-    private final List<Element<OrganisationDetails>> organisationDetails = new ArrayList<>();
+    private OrganisationDetails organisationDetails;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
 
@@ -69,15 +69,14 @@ public class RequestUpdateCallbackService {
             .toBuilder()
             .id(caseDetails.getId())
             .build();
-        log.info("*** Is organisation in Case Data *** {}",caseData);
+        log.info("*** Case Data from CCD *** {}",caseData);
+
         List<PartyDetails> applicants = caseData
             .getApplicants()
             .stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        //Map<String, Object> organisationDetailsMap = new HashMap<>();
-        OrganisationDetails orgDetails = OrganisationDetails.builder().build();
         log.info("applicants length {}",applicants.stream().count());
 
         for (PartyDetails applicant : applicants) {
@@ -88,10 +87,10 @@ public class RequestUpdateCallbackService {
                 if (organisationID != null) {
                     log.info("Organisation Id : {}",organisationID);
                     log.info("*** Before api call organisation **** ");
-                    orgDetails = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
-                    log.info("*** After api call organisation **** {}",orgDetails.toString());
+                    organisationDetails = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
+                    log.info("*** After api call organisation **** {}",organisationDetails);
 
-                    organisationDetails.add(Element.<OrganisationDetails>builder().value(orgDetails).build());
+                    //organisationDetails.add(Element.<OrganisationDetails>builder().value(orgDetails).build());
                 }
             }
             log.info("*** solicitor org null **** ");
@@ -192,7 +191,7 @@ public class RequestUpdateCallbackService {
     }
 
     private void createEvent(ServiceRequestUpdateDto serviceRequestUpdateDto, String userToken,
-                             String systemUpdateUserId, List<Element<OrganisationDetails>> organisation,
+                             String systemUpdateUserId, OrganisationDetails organisation,
                              String eventId) throws JsonProcessingException {
         CaseData caseData = setCaseData(serviceRequestUpdateDto, organisation);
 
@@ -254,7 +253,7 @@ public class RequestUpdateCallbackService {
 
     }
 
-    private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto, List<Element<OrganisationDetails>> organisation) {
+    private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto, OrganisationDetails organisation) {
 
         LocalDate issueDate = LocalDate.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
