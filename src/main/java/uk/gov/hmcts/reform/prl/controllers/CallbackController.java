@@ -147,13 +147,6 @@ public class CallbackController {
             PRL_C8_TEMPLATE
         );
 
-      GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
-            authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-            C100_FINAL_TEMPLATE
-        );
-
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("Generate C1A if allegations of harm is set to Yes and the passed value is {}",
                  caseData.getAllegationsOfHarmYesNo());
@@ -174,6 +167,12 @@ public class CallbackController {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(C8_DOC).build());
+
+        GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+            C100_FINAL_TEMPLATE
+        );
 
         caseDataUpdated.put("finalDocument", Document.builder()
             .documentUrl(generatedDocumentInfoFinal.getUrl())

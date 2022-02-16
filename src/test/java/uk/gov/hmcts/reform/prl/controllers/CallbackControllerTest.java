@@ -260,9 +260,9 @@ public class CallbackControllerTest {
             callbackRequest
         );
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
-        verify(dgsService, times(2)).generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString());
+        verify(dgsService, times(3)).generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString());
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.anyString()

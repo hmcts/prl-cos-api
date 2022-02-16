@@ -352,8 +352,8 @@ public class CaseData implements MappableObject {
 
     @JsonProperty("finalDocument")
     private final Document finalDocument;
-  
-     /**
+
+    /**
      *  Withdraw Application.
      */
     private final WithdrawApplication withDrawApplicationData;
