@@ -77,6 +77,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .errors(errorList)
                 .build();
         }
+        log.info("=====***** Case Data from CCD before callback *****====== {}", callbackRequest.getCaseDetails().getCaseData());
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             callbackRequest.getCaseDetails(),
@@ -84,10 +85,10 @@ public class PrePopulateFeeAndSolicitorNameController {
         );
 
         List<Element<PartyDetails>> organisationDetailsApplicants = organisationService
-            .getOrganisationDetails(callbackRequest.getCaseDetails().getCaseData());
+            .getRespondentOrganisationDetails(callbackRequest.getCaseDetails().getCaseData());
 
         List<Element<PartyDetails>> organisationDetailsRespondents = organisationService
-            .getOrganisationDetails(callbackRequest.getCaseDetails().getCaseData());
+            .getRespondentOrganisationDetails(callbackRequest.getCaseDetails().getCaseData());
 
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()

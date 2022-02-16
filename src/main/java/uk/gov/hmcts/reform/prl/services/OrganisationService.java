@@ -35,7 +35,7 @@ public class OrganisationService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public List<Element<PartyDetails>> getOrganisationDetails(CaseData caseData) throws NotFoundException {
+    public List<Element<PartyDetails>> getApplicantOrganisationDetails(CaseData caseData) throws NotFoundException {
 
         String userToken = systemUserService.getSysUserToken();
 
@@ -96,7 +96,7 @@ public class OrganisationService {
         return applicantsWithOrganisationDetails;
     }
 
-    public List<Element<PartyDetails>> getOrganisationDetailsForRespondent(CaseData caseData) throws NotFoundException {
+    public List<Element<PartyDetails>> getRespondentOrganisationDetails(CaseData caseData) throws NotFoundException {
 
         String userToken = systemUserService.getSysUserToken();
 

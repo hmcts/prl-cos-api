@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,15 +11,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.prl.models.OrganisationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
@@ -41,7 +37,6 @@ public class RequestUpdateCallbackService {
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final UserService userService;
-    private OrganisationDetails organisationDetails;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
 
@@ -58,19 +53,16 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
 
-
         if (!Objects.isNull(caseDetails.getId())) {
             log.info(
                 "Updating the Case data with payment information for caseId {}",
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
-
-            log.info("Before entering case event *****");
-            createEvent(serviceRequestUpdateDto, userToken, systemUpdateUserId, organisationDetails,
+            createEvent(serviceRequestUpdateDto, userToken, systemUpdateUserId,
                         serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
                             ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
             );
-            log.info("After entering case event *****");
+
             solicitorEmailService.sendEmail(caseDetails);
             caseWorkerEmailService.sendEmail(caseDetails);
 
@@ -146,11 +138,8 @@ public class RequestUpdateCallbackService {
     }
 
     private void createEvent(ServiceRequestUpdateDto serviceRequestUpdateDto, String userToken,
-                             String systemUpdateUserId, OrganisationDetails organisation,
-                             String eventId) throws JsonProcessingException {
-        CaseData caseData = setCaseData(serviceRequestUpdateDto, organisation);
-
-        log.info("**** CAse DAta {} ", caseData);
+                             String systemUpdateUserId, String eventId) {
+        CaseData caseData = setCaseData(serviceRequestUpdateDto);
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             userToken,
             authTokenGenerator.generate(),
@@ -160,7 +149,7 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getCcdCaseNumber(),
             eventId
         );
-        log.info("**** after event response ***  ");
+
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
@@ -168,7 +157,7 @@ public class RequestUpdateCallbackService {
                        .build())
             .data(caseData)
             .build();
-        log.info("**** after case data content  *** {} ",caseDataContent);
+
         coreCaseDataApi.submitEventForCaseWorker(
             userToken,
             authTokenGenerator.generate(),
@@ -179,7 +168,6 @@ public class RequestUpdateCallbackService {
             true,
             caseDataContent
         );
-        log.info("**** after submit event  ***  ");
     }
 
 
@@ -187,7 +175,7 @@ public class RequestUpdateCallbackService {
     private CaseData setCaseDataFeeAndPayBypass(ServiceRequestUpdateDto serviceRequestUpdateDto, String authorisation) {
         return objectMapper.convertValue(
             CaseData.builder()
-                .id(Long.parseLong(serviceRequestUpdateDto.getCcdCaseNumber()))
+                .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
                 .applicantSolicitorEmailAddress(userService.getUserDetails(authorisation).getEmail())
                 .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
                 .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
@@ -208,14 +196,10 @@ public class RequestUpdateCallbackService {
 
     }
 
-    private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto, OrganisationDetails organisation) {
-
-        LocalDate issueDate = LocalDate.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
+    private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
         return objectMapper.convertValue(
             CaseData.builder()
-                .id(Long.parseLong(serviceRequestUpdateDto.getCcdCaseNumber()))
+                .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
                 .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
                                                          .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
                                                          .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
@@ -228,10 +212,11 @@ public class RequestUpdateCallbackService {
                                                                       .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
                                                                       .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
                                                                       .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
-                                                                      .build()).build())
-                .build(),
+                                                                      .build()).build()).build(),
             CaseData.class
         );
 
     }
+
+
 }
