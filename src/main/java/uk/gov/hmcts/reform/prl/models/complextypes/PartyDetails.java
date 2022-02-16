@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class PartyDetails {
 
     private final String firstName;

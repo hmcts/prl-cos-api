@@ -12,10 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -25,7 +23,6 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
-import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.ArrayList;
@@ -44,9 +41,6 @@ public class PrePopulateFeeAndSolicitorNameController {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private OrganisationService organisationService;
 
     private final CourtFinderService courtLocatorService;
 
@@ -77,18 +71,11 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .errors(errorList)
                 .build();
         }
-        log.info("=====***** Case Data from CCD before callback *****====== {}", callbackRequest.getCaseDetails().getCaseData());
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             callbackRequest.getCaseDetails(),
             PRL_DRAFT_TEMPLATE
         );
-
-        List<Element<PartyDetails>> organisationDetailsApplicants = organisationService
-            .getRespondentOrganisationDetails(callbackRequest.getCaseDetails().getCaseData());
-
-        List<Element<PartyDetails>> organisationDetailsRespondents = organisationService
-            .getRespondentOrganisationDetails(callbackRequest.getCaseDetails().getCaseData());
 
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()
@@ -104,14 +91,9 @@ public class PrePopulateFeeAndSolicitorNameController {
                                                          .documentFileName(DRAFT_C_100_APPLICATION).build())
                 .courtName(courtLocatorService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
                                                                                     .getCaseData()).getCourtName())
-
-                .applicants(organisationDetailsApplicants)
-                .respondents(organisationDetailsRespondents)
                 .build(),
             CaseData.class
         );
-
-        log.info("=========CaseData with applicant organisation======= {}", caseData);
 
         return CallbackResponse.builder()
             .data(caseData)
