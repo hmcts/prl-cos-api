@@ -95,6 +95,7 @@ public class OrganisationService {
         }
         return applicantsWithOrganisationDetails;
     }
+
     public List<Element<PartyDetails>> getOrganisationDetailsForRespondent(CaseData caseData) throws NotFoundException {
 
         String userToken = systemUserService.getSysUserToken();
@@ -110,7 +111,7 @@ public class OrganisationService {
         for (PartyDetails respondent : respondents) {
 
             log.info("*** Count **** ");
-            if(respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)){
+            if (respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)) {
                 if (respondent.getSolicitorOrg() != null) {
                     String organisationID = respondent.getSolicitorOrg().getOrganisationID();
                     if (organisationID != null) {
