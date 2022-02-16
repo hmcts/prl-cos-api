@@ -143,7 +143,7 @@ public class CallbackController {
             PRL_C8_TEMPLATE
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("Generate C1A if allegations of farm is set to Yes and the passed value is {}",
+        log.info("Generate C1A if allegations of harm is set to Yes and the passed value is {}",
                  caseData.getAllegationsOfHarmYesNo());
         if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
             GeneratedDocumentInfo generatedC1ADocumentInfo = dgsService.generateDocument(
