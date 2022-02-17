@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -47,6 +48,7 @@ import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -58,6 +60,14 @@ import java.util.List;
 public class CaseData implements MappableObject {
 
     private final long id;
+
+    private final State state;
+
+    private final LocalDateTime createdDate;
+
+    private final LocalDateTime lastModifiedDate;
+
+    private final String dateSubmitted;
 
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;
@@ -325,7 +335,7 @@ public class CaseData implements MappableObject {
      * Return Application.
      */
     private final List<RejectReasonEnum> rejectReason;
-    private String returnMessage;
+    private final String returnMessage;
 
     /**
      * Issue and send to local court'.

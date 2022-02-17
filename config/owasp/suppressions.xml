@@ -34,7 +34,6 @@
     <cve>CVE-2021-22060</cve>
     <cve>CVE-2022-23181</cve>
   </suppress>
-
   <suppress>
     <notes><![CDATA[
         new supressions(log4j,springframework,apache tomcat)
@@ -46,5 +45,4 @@
     <cve>CVE-2021-22060</cve>
     <cve>CVE-2022-23181</cve>
   </suppress>
-
 </suppressions>

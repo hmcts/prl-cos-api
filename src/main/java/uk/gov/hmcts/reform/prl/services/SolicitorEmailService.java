@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -81,6 +82,7 @@ public class SolicitorEmailService {
         return null;
     }
 
+
     public void sendEmail(CaseDetails caseDetails) {
         log.info("Sending the email to solicitor for caseId {}", caseDetails.getId()
         );
@@ -103,6 +105,41 @@ public class SolicitorEmailService {
             "yogendra.upasani@hmcts.net",
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
+            LanguagePreference.ENGLISH
+        );
+
+    }
+
+    private EmailTemplateVars buildCaseWithdrawEmail(CaseDetails caseDetails) {
+
+        return SolicitorEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+    }
+
+    public void sendEmailToSolicitor(CaseDetails caseDetails, UserDetails userDetails) {
+        String solicitorEmail = "";
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        List<PartyDetails> applicants = caseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> applicantSolicitorEmailList = applicants.stream()
+            .map(element -> element.getSolicitorEmail())
+            .collect(Collectors.toList());
+
+        solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
+            && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(0)
+            : userDetails.getEmail();
+
+        emailService.send(
+            solicitorEmail,
+            EmailTemplateNames.WITHDRAW,
+            buildCaseWithdrawEmail(caseDetails),
             LanguagePreference.ENGLISH
         );
 
