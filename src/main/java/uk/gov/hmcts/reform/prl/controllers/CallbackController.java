@@ -197,9 +197,9 @@ public class CallbackController {
             .id(callbackRequest.getCaseDetails().getId())
             .build();
 
-        caseData = organisationService.getApplicantOrganisationDetails(caseData);
+      //  caseData = organisationService.getApplicantOrganisationDetails(caseData);
 
-        caseData = organisationService.getRespondentOrganisationDetails(caseData);
+      //  caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
