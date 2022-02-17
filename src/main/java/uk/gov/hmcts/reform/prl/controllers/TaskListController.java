@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
-import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 
 @Api
 @RestController
@@ -20,14 +22,15 @@ import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 public class TaskListController extends AbstractCallbackController {
 
     @Autowired
-    ApplicationsTabService applicationsTabService;
+    @Qualifier("allTabsService")
+    AllTabsService tabService;
 
     @PostMapping("/submitted")
     public void handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                 @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation) {
 
-        applicationsTabService.updateApplicationTabData(getCaseData(callbackRequest.getCaseDetails()));
-
-        publishEvent(new CaseDataChanged(getCaseData(callbackRequest.getCaseDetails())));
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        tabService.updateAllTabs(caseData);
+        publishEvent(new CaseDataChanged(caseData));
     }
 }
