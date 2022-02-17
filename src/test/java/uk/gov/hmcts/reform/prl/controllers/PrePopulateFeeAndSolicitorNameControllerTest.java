@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.verify;
@@ -34,7 +33,7 @@ import static org.mockito.Mockito.when;
 
 
 @PropertySource(value = "classpath:application.yaml")
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     private MockMvc mockMvc;
@@ -110,18 +109,16 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
-        when(dgsService.generateDocument(
-            authToken,
-            callbackRequest.getCaseDetails(),
-            "PRL-DRAFT-C100-20.docx"
-        )).thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(authToken,
+                                          callbackRequest.getCaseDetails(),
+                                          "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
 
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
             .thenReturn(court);
 
-        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenThrow(new RuntimeException("Cannot process"));
 
         prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
 
@@ -137,78 +134,90 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
-        when(dgsService.generateDocument(
-            authToken,
-            callbackRequest.getCaseDetails(),
-            "PRL-DRAFT-C100-20.docx"
-        )).thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(authToken,
+                                          callbackRequest.getCaseDetails(),
+                                          "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
 
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
-            .thenReturn(court);
+            .thenThrow(new RuntimeException("Cannot process"));
 
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
 
-        verify(dgsService).generateDocument(
-            authToken,
-            callbackRequest.getCaseDetails(),
-            "PRL-DRAFT-C100-20.docx"
-        );
+        verify(dgsService).generateDocument(authToken,
+                                            callbackRequest.getCaseDetails(),
+                                            "PRL-DRAFT-C100-20.docx");
 
     }
 
     @Test
-    public void testFeeDetailsForFeeAmount() {
+    public void testFeeDetailsForFeeAmount()  throws Exception {
 
-        List<String> errorList = new ArrayList<>();
-        CallbackResponse callbackResponse;
-        try {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
-            CallbackRequest callbackRequest = CallbackRequest.builder()
-                .caseDetails(caseDetails)
-                .build();
-            GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
+        when(dgsService.generateDocument(authToken,
+                                          callbackRequest.getCaseDetails(),
+                                          "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
-            try {
-                when(dgsService.generateDocument(
-                    authToken,
-                    callbackRequest.getCaseDetails(),
-                    "PRL-DRAFT-C100-20.docx"
-                )).thenReturn(generatedDocumentInfo);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
+            .thenThrow(new RuntimeException("Cannot process"));
 
-            when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
-                .thenReturn(court);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-            try {
-                feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
-                when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
-                verify(feesService).fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
 
-            } catch (Exception e) {
-                errorList.add(e.getMessage());
-                e.printStackTrace();
-            }
+        verify(feesService).fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
 
-            try {
-                prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
-            } catch (Exception e) {
-                errorList.add(e.getMessage());
-                e.printStackTrace();
-            }
-
-        } catch (NullPointerException | NotFoundException ne) {
-            errorList.add(ne.getMessage());
-            CallbackResponse.builder()
-                .data(caseData)
-                .build();
-
-        }
     }
+
+    @Test (expected = NullPointerException.class)
+    public void testCourtDetailsWithCourtName() throws Exception {
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
+
+        when(dgsService.generateDocument(authToken,
+                                         callbackRequest.getCaseDetails(),
+                                         "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
+
+        Court court1 = courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData());
+        when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
+            .thenReturn(court1);
+        CaseData caseData1 = objectMapper.convertValue(
+            CaseData.builder()
+                .solicitorName("example")
+                .applicantSolicitorEmailAddress("test@gmail.com")
+                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
+                .feeAmount(feeResponse.getAmount().toString())
+                .submitAndPayDownloadApplicationLink(Document.builder()
+                                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                                         .documentFileName("Draft_c100_application.pdf").build())
+                .courtName(court1.getCourtName())
+                .build(),
+            CaseData.class
+        );
+
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
+            .thenReturn(caseData1);
+
+        CallbackResponse callbackResponse = CallbackResponse.builder().data(caseData1).build();
+
+        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
+        when(prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest))
+            .thenReturn(callbackResponse);
+        verify(feesService).fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+
+    }
+
 }

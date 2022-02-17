@@ -47,6 +47,7 @@ public class PrePopulateFeeAndSolicitorNameController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
     @Autowired
     private DgsService dgsService;
 
@@ -78,41 +79,44 @@ public class PrePopulateFeeAndSolicitorNameController {
             PRL_DRAFT_TEMPLATE
         );
 
+        Court closestChildArrangementsCourt = null;
         try {
-            Court closestChildArrangementsCourt = courtLocatorService
+            closestChildArrangementsCourt = courtLocatorService
                 .getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
                                                       .getCaseData());
-            log.info("**** Court Name *** " + (closestChildArrangementsCourt != null
-                ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched"));
-            CaseData caseData = null;
-            if (closestChildArrangementsCourt != null) {
-                caseData = objectMapper.convertValue(
-                    CaseData.builder()
-                        .solicitorName(userDetails.getFullName())
-                        .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
-                        .applicantSolicitorEmailAddress(userDetails.getEmail())
-                        .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
-                        .feeAmount(feeResponse.getAmount().toString())
-                        .submitAndPayDownloadApplicationLink(Document.builder()
-                                                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                                                 .documentFileName(DRAFT_C_100_APPLICATION).build())
-                        .courtName(closestChildArrangementsCourt.getCourtName())
-                        .build(),
-                    CaseData.class
-                );
-            }
-
-            log.info("Saving Court name into DB..");
-            return CallbackResponse.builder()
-                .data(caseData)
-                .build();
-        } catch (NullPointerException ne) {
-            errorList.add(ne.getMessage());
+        } catch (Exception e) {
+            errorList.add(e.getMessage());
             return CallbackResponse.builder()
                 .errors(errorList)
                 .build();
         }
+
+        log.info("**** Court Name *** " + (closestChildArrangementsCourt != null
+            ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched"));
+
+        CaseData caseData = null;
+        if (closestChildArrangementsCourt != null) {
+            caseData = objectMapper.convertValue(
+                CaseData.builder()
+                    .solicitorName(userDetails.getFullName())
+                    .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
+                    .applicantSolicitorEmailAddress(userDetails.getEmail())
+                    .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
+                    .feeAmount(feeResponse.getAmount().toString())
+                    .submitAndPayDownloadApplicationLink(Document.builder()
+                                                             .documentUrl(generatedDocumentInfo.getUrl())
+                                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                             .documentHash(generatedDocumentInfo.getHashToken())
+                                                             .documentFileName(DRAFT_C_100_APPLICATION).build())
+                    .courtName(closestChildArrangementsCourt.getCourtName())
+                    .build(),
+                CaseData.class
+            );
+        }
+        log.info("Saving Court name into DB..");
+        return CallbackResponse.builder()
+            .data(caseData)
+            .build();
+
     }
 }
