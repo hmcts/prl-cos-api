@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -34,7 +35,6 @@ import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValida
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -261,7 +261,7 @@ public class CallbackControllerTest {
             .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
             .build();
 
-   
+
         CallbackResponse callbackResponse = CallbackResponse.builder()
             .data(CaseData.builder()
                       .c8Document(Document.builder()
@@ -280,7 +280,7 @@ public class CallbackControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-  
+
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
@@ -288,8 +288,6 @@ public class CallbackControllerTest {
             .thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.issueAndSendToLocalCourt(
-
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.generateC8AndOtherDocument(
             authToken,
             callbackRequest
         );
@@ -300,11 +298,11 @@ public class CallbackControllerTest {
 
         verify(dgsService).generateDocument(authToken, caseDetails, PRL_C8_TEMPLATE);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService.generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.anyString()
-        );
+        ));
 
 
     }
