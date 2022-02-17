@@ -291,7 +291,7 @@ public class SolicitorEmailServiceTest {
         when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
 
         solicitorEmailService.sendEmailBypss(caseDetails, authToken);
-        assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
+        assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
 }
