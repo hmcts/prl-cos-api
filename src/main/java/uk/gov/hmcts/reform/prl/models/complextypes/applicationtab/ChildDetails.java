@@ -32,7 +32,6 @@ public class ChildDetails {
     private final YesNoDontKnow childrenKnownToLocalAuthority;
     private final String childrenKnownToLocalAuthorityTextArea;
     private final YesNoDontKnow childrenSubjectOfChildProtectionPlan;
-    //@Getter(AccessLevel.NONE)
     private List<Element<OtherPersonWhoLivesWithChildDetails>> personWhoLivesWithChild;
     private final Address address;
     private final YesOrNo isChildAddressConfidential;
@@ -42,21 +41,4 @@ public class ChildDetails {
     private final String relationshipToRespondent;
     private final String parentalResponsibilityDetails;
 
-    /*public List<Element<OtherPersonLivingWithChild>> getPersonWhoLivesWithChild() {
-
-        if(null != this.personWhoLivesWithChild){
-            List<OtherPersonLivingWithChild> otherPersonList = this.personWhoLivesWithChild.stream().map(Element::getValue)
-                .collect(Collectors.toList());
-            for(OtherPersonLivingWithChild otherPersonLivingWithChild : otherPersonList ){
-                if(YesOrNo.Yes.equals(otherPersonLivingWithChild.getIsPersonIdentityConfidential())){
-                    otherPersonLivingWithChild.setFirstName(THIS_INFORMATION_IS_CONFIDENTIAL);
-                    otherPersonLivingWithChild.setLastName(THIS_INFORMATION_IS_CONFIDENTIAL);
-                    otherPersonLivingWithChild.setRelationshipToChildDetails(THIS_INFORMATION_IS_CONFIDENTIAL);
-                    otherPersonLivingWithChild.setAddress(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build());
-                }
-            }
-            return this.personWhoLivesWithChild;
-        }
-        return null;
-    }*/
 }
