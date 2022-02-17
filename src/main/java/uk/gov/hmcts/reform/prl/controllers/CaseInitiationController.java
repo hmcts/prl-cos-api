@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 
 @Api
 @RestController
@@ -19,17 +18,13 @@ import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseInitiationController extends AbstractCallbackController {
 
-    @Autowired
-    ApplicationsTabService applicationsTabService;
-
     @PostMapping("/submitted")
     public void handleSubmitted(@RequestBody CallbackRequest callbackRequest) {
 
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         final CaseData caseData = getCaseData(caseDetails);
 
-        applicationsTabService.updateApplicationTabData(getCaseData(callbackRequest.getCaseDetails()));
-
         publishEvent(new CaseDataChanged(caseData));
+
     }
 }
