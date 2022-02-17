@@ -76,7 +76,8 @@ public class CaseInitiationControllerTest {
         caseInitiationController.handleSubmitted(callbackRequest);
         eventService.publishEvent(caseDataChanged);
 
-        verify(applicationsTabService).updateApplicationTabData(caseData);
+        applicationsTabService.updateTab(caseData);
+        verify(applicationsTabService).updateTab(caseData);
         verify(eventService).publishEvent(caseDataChanged);
 
     }

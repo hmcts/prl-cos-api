@@ -99,6 +99,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .build(),
             CaseData.class
         );
+
         log.info("Saving Court name into DB..");
         return CallbackResponse.builder()
             .data(caseData)
