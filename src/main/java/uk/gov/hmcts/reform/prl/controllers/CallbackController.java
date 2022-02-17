@@ -244,33 +244,34 @@ public class CallbackController {
     @ApiOperation(value = "Callback to retrieve and store organisation details")
     public AboutToStartOrSubmitCallbackResponse saveOrganisationDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody @ApiParam("CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+        @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest
     ) throws Exception {
 
-        log.info("=====***** Case Data from CCD before callback *****====== {}", callbackRequest.getCaseDetails().getData());
+        //log.info("=====***** Case Data from CCD before callback *****====== {}", callbackRequest.getCaseDetails().getData());
 
-        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)
-            .toBuilder()
-            .id(callbackRequest.getCaseDetails().getId())
-            .build();
+//        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)
+//            .toBuilder()
+//            .id(callbackRequest.getCaseDetails().getId())
+//            .build();
+        CaseData caseData = callbackRequest.getCaseDetails().getCaseData();
+//        caseData = organisationService.getApplicantOrganisationDetails(caseData);
+//
+//        caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
-        caseData = organisationService.getApplicantOrganisationDetails(caseData);
+        //Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        caseData = organisationService.getRespondentOrganisationDetails(caseData);
+//        caseDataUpdated.put("case_data", caseData);
+//
+//        log.info("=================CaseData Updated Map {}",toMap(caseData));
+//
+//        log.info("======== CaseData with applicant Organisation ~Details==== {}",caseData);
 
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        Map<String, Object> caseDataUpdated1 =
-            objectMapper.convertValue(caseData, new TypeReference<Map<String, Object>>() {});
-
-        caseDataUpdated.put("case_data", caseData);
-
-        log.info("=================CaseData Updated Map {}", caseDataUpdated1);
-
-        log.info("======== CaseData with applicant Organisation ~Details==== {}",caseData);
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(caseDataUpdated1)
-            .build();
+            .data(toMap(caseData)).build();
+    }
+
+    public Map<String, Object> toMap(Object object) {
+        return objectMapper.convertValue(object, Map.class);
     }
 }
