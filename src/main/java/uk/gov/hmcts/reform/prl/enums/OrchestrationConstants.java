@@ -25,7 +25,7 @@ public class OrchestrationConstants {
     public static final String PAYMENT_ACTION = "payment";
     public static final String FEE_VERSION = "1";
     public static final Integer FEE_VOLUME = 1;
-    public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is confidential";
+    public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
 
 
 }
