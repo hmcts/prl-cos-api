@@ -54,9 +54,11 @@ public class OrganisationService {
                     String organisationID = applicant.getSolicitorOrg().getOrganisationID();
                     if (organisationID != null) {
                         log.info("Organisation Id : {}",organisationID);
-                        log.info("*** Before api call organisation **** ");
+                        log.info("*** Before api call organisation **** \n");
                         organisations = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
-                        log.info("*** After api call organisation **** {}",organisations);
+                        log.info("*** After api call organisation **** {} ============ \n",organisations);
+                        log.info("Before mapping, Applicant with to builder address line1: {} \n", applicant.getOrganisationAddress1());
+
                         applicant.toBuilder()
                             .organisationAddress1(Optional.ofNullable(organisations.getContactInformation().get(0).getAddressLine1()).isPresent()
                                                       ? organisations.getContactInformation().get(0).getAddressLine1()
@@ -77,8 +79,10 @@ public class OrganisationService {
                                                       ? organisations.getContactInformation().get(0).getPostCode()
                                                       : "")
                             .build();
+                        log.info("After mapping, Applicant with to builder address line1: {} \n", applicant.getOrganisationAddress1());
+
                         applicantsWithOrganisationDetails.add(Element.<PartyDetails>builder().value(applicant).build());
-                        log.info("***** Applicant with Organisation address **** {}", applicantsWithOrganisationDetails);
+                        log.info("***** Applicant with Organisation address **** {} \n", applicantsWithOrganisationDetails);
                     }
                 }
             }
