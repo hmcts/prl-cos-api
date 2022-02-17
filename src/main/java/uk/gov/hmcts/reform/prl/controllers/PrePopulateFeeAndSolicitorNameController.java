@@ -108,14 +108,11 @@ public class PrePopulateFeeAndSolicitorNameController {
             return CallbackResponse.builder()
                 .data(caseData)
                 .build();
-        }
-        catch (NullPointerException ne) {
+        } catch (NullPointerException ne) {
             errorList.add(ne.getMessage());
             return CallbackResponse.builder()
                 .errors(errorList)
                 .build();
-
         }
-
     }
 }
