@@ -199,13 +199,13 @@ public class CallbackController {
 
         caseData = organisationService.getApplicantOrganisationDetails(caseData);
 
-        caseData = organisationService.getRespondentOrganisationDetails(caseData);
+        //caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         caseDataUpdated.put("data", caseData);
 
-        log.info("======== CAseData with applicant Organisation ~Details==== {}",caseData);
+        log.info("======== CaseData with applicant Organisation ~Details==== {}",caseData);
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(caseDataUpdated)
