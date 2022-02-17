@@ -52,6 +52,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
@@ -326,6 +327,10 @@ public class CaseData implements MappableObject {
     private final Document draftOrderDoc;
     @JsonProperty("c8Document")
     private final Document c8Document;
+    @JsonProperty("c1ADocument")
+    private final Document c1ADocument;
+
+
 
     @JsonProperty("submitAndPayDownloadApplicationLink")
     private final Document submitAndPayDownloadApplicationLink;
@@ -410,4 +415,10 @@ public class CaseData implements MappableObject {
 
     private String courtName;
     private String courtId;
+
+    /**
+     *  Withdraw Application.
+     */
+    private final WithdrawApplication withDrawApplicationData;
+
 }
