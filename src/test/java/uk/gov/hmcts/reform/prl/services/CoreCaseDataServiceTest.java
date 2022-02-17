@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 public class CoreCaseDataServiceTest {
 
     private final String jurisdiction = "PRIVATELAW";
-    private final String caseType = "C100";
+    private final String caseType = "PRLAPPS";
     private final Long caseId = 1234567887654321L;
     private final String eventName = "system-update";
     private final String userToken = "Bearer testToken";
