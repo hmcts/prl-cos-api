@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import javax.servlet.http.Part;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,12 +31,13 @@ public class OrganisationService {
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
     private List<Element<PartyDetails>> applicantsWithOrganisationDetails = new ArrayList<>();
+
     @Autowired
     private ObjectMapper objectMapper;
 
     public CaseData getApplicantOrganisationDetails(CaseData caseData) throws NotFoundException {
 
-        if(Optional.ofNullable(caseData.getApplicants()).isPresent()){
+        if (Optional.ofNullable(caseData.getApplicants()).isPresent()) {
             String userToken = systemUserService.getSysUserToken();
 
             List<PartyDetails> applicants = caseData
@@ -46,11 +46,10 @@ public class OrganisationService {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
 
-            log.info("applicants length {}",applicants.stream().count());
+            log.info("applicants length {}",  applicants.size());
 
             for (PartyDetails applicant : applicants) {
 
-                log.info("*** Count **** ");
                 if (applicant.getSolicitorOrg() != null) {
                     String organisationID = applicant.getSolicitorOrg().getOrganisationID();
                     if (organisationID != null) {
@@ -100,13 +99,13 @@ public class OrganisationService {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
 
-            log.info("applicants length {}",respondents.stream().count());
+            log.info("Respondents length {}", respondents.size());
 
             for (PartyDetails respondent : respondents) {
 
                 log.info("*** Count **** ");
-                if (respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)) {
-                    if (respondent.getSolicitorOrg() != null) {
+                if (respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)
+                    && respondent.getSolicitorOrg() != null) {
                         String organisationID = respondent.getSolicitorOrg().getOrganisationID();
                         if (organisationID != null) {
                             log.info("Organisation Id : {}",organisationID);
@@ -134,8 +133,7 @@ public class OrganisationService {
                                                           ? organisations.getContactInformation().get(0).getPostCode()
                                                           : "");
                             applicantsWithOrganisationDetails.add(Element.<PartyDetails>builder().value(respondent).build());
-                            log.info("***** Respondent with Organisation address **** ");
-                        }
+                            log.info("***** Respondent with Organisation address **** {} ", applicantsWithOrganisationDetails);
                     }
                 }
             }
