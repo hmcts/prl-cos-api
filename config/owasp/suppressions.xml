@@ -23,7 +23,7 @@
     <cve>CVE-2021-22118</cve>
     <cve>CVE-2021-22096</cve>
   </suppress>
-  <suppress>
+   <suppress>
     <notes><![CDATA[
         new supressions(log4j,springframework,apache tomcat)
          ]]></notes>
