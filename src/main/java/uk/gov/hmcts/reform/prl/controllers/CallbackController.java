@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -199,18 +200,21 @@ public class CallbackController {
 
         caseData = organisationService.getApplicantOrganisationDetails(caseData);
 
-        //caseData = organisationService.getRespondentOrganisationDetails(caseData);
+        caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
+        Map<String, Object> caseDataUpdated1 =
+            objectMapper.convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+
         caseDataUpdated.put("case_data", caseData);
 
-        log.info("=================CaseData Updated Map {}", caseDataUpdated);
+        log.info("=================CaseData Updated Map {}", caseDataUpdated1);
 
         log.info("======== CaseData with applicant Organisation ~Details==== {}",caseData);
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(caseDataUpdated)
+            .data(caseDataUpdated1)
             .build();
     }
 }

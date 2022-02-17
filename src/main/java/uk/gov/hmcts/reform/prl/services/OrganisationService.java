@@ -76,7 +76,7 @@ public class OrganisationService {
                     }
                 }
             }
-            caseData.toBuilder().applicants(applicantsWithOrganisationDetails).build();
+            caseData = caseData.toBuilder().applicants(applicantsWithOrganisationDetails).build();
         }
 
         return caseData;
@@ -106,7 +106,7 @@ public class OrganisationService {
                         organisations = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
                         log.info("*** After api call organisation **** {}",organisations);
 
-                        respondent.toBuilder()
+                        respondent = respondent.toBuilder()
                             .organisationAddress1(Optional.ofNullable(organisations.getContactInformation().get(0).getAddressLine1()).isPresent()
                                                           ? organisations.getContactInformation().get(0).getAddressLine1()
                                                           : "")
@@ -124,13 +124,14 @@ public class OrganisationService {
                                                         : "")
                             .organisationPostcode(Optional.ofNullable(organisations.getContactInformation().get(0).getPostCode()).isPresent()
                                                           ? organisations.getContactInformation().get(0).getPostCode()
-                                                          : "");
+                                                          : "")
+                            .build();
                         applicantsWithOrganisationDetails.add(Element.<PartyDetails>builder().value(respondent).build());
                         log.info("***** Respondent with Organisation address **** {} ", applicantsWithOrganisationDetails);
                     }
                 }
             }
-            caseData.toBuilder().respondents(applicantsWithOrganisationDetails).build();
+            caseData = caseData.toBuilder().respondents(applicantsWithOrganisationDetails).build();
         }
         return caseData;
     }
