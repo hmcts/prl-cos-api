@@ -9,13 +9,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -79,6 +82,7 @@ public class CallbackControllerTest {
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
     private static final String C8_DOC = "C8Document.pdf";
+    public static final String PRL_C1A_TEMPLATE = "PRL-C1A.docx";
 
 
     @Before
@@ -108,7 +112,7 @@ public class CallbackControllerTest {
 
     @Test
     public void testConfirmMiamApplicationOrExemption() throws WorkflowException {
-        CaseDetails caseDetails  = CaseDetailsProvider.full();
+        CaseDetails caseDetails = CaseDetailsProvider.full();
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.builder().build();
 
@@ -124,7 +128,7 @@ public class CallbackControllerTest {
 
     @Test
     public void testvalidateApplicationConsiderationTimetable() throws WorkflowException {
-        CaseDetails caseDetails  = CaseDetailsProvider.full();
+        CaseDetails caseDetails = CaseDetailsProvider.full();
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.builder().build();
 
@@ -150,13 +154,13 @@ public class CallbackControllerTest {
 
         CaseDetails caseDetails = CaseDetails.builder()
             .caseData(CaseData.builder()
-            .draftOrderDoc(Document.builder()
-                               .documentUrl(generatedDocumentInfo.getUrl())
-                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                               .documentHash(generatedDocumentInfo.getHashToken())
-                               .documentFileName("PRL-DRAFT-C100-20.docx")
-                               .build())
-            .build())
+                          .draftOrderDoc(Document.builder()
+                                             .documentUrl(generatedDocumentInfo.getUrl())
+                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                             .documentHash(generatedDocumentInfo.getHashToken())
+                                             .documentFileName("PRL-DRAFT-C100-20.docx")
+                                             .build())
+                          .build())
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -172,12 +176,12 @@ public class CallbackControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
-        when(dgsService.generateDocument(authToken,null,PRL_DRAFT_TEMPLATE))
+        when(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE))
             .thenReturn(generatedDocumentInfo);
 
         callbackController.generateAndStoreDocument(authToken, callbackRequest);
 
-        verify(dgsService).generateDocument(authToken,null,PRL_DRAFT_TEMPLATE);
+        verify(dgsService).generateDocument(authToken, null, PRL_DRAFT_TEMPLATE);
         verifyNoMoreInteractions(dgsService);
 
     }
@@ -207,12 +211,27 @@ public class CallbackControllerTest {
             .postTown("London")
             .build();
 
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
         OtherPersonWhoLivesWithChild personWhoLivesWithChild = OtherPersonWhoLivesWithChild.builder()
             .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
             .firstName("test First Name").lastName("test Last Name").address(address).build();
 
-        Element<OtherPersonWhoLivesWithChild> wrappedList = Element.<OtherPersonWhoLivesWithChild>builder().value(personWhoLivesWithChild).build();
-        List<Element<OtherPersonWhoLivesWithChild>> listOfOtherPersonsWhoLivedWithChild = Collections.singletonList(wrappedList);
+        Element<OtherPersonWhoLivesWithChild> wrappedList = Element.<OtherPersonWhoLivesWithChild>builder().value(
+            personWhoLivesWithChild).build();
+        List<Element<OtherPersonWhoLivesWithChild>> listOfOtherPersonsWhoLivedWithChild = Collections.singletonList(
+            wrappedList);
 
         Child child = Child.builder()
             .firstName("Test")
@@ -235,15 +254,33 @@ public class CallbackControllerTest {
         CaseData caseData = CaseData.builder().children(listOfChildren).childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
+            .applicants(applicantList)
+            .allegationsOfHarmYesNo(YesOrNo.Yes)
+            .allegationsOfHarmChildAbductionYesNo(YesOrNo.Yes)
+            .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
+            .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
             .build();
 
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap.put("c8Document", Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(C8_DOC).build());
+   
+        CallbackResponse callbackResponse = CallbackResponse.builder()
+            .data(CaseData.builder()
+                      .c8Document(Document.builder()
+                                      .documentUrl(generatedDocumentInfo.getUrl())
+                                      .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                      .documentHash(generatedDocumentInfo.getHashToken())
+                                      .documentFileName(PRL_C8_TEMPLATE)
+                                      .build())
+                      .c1ADocument(Document.builder()
+                                             .documentUrl(generatedDocumentInfo.getUrl())
+                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                             .documentHash(generatedDocumentInfo.getHashToken())
+                                             .documentFileName(PRL_C8_TEMPLATE)
+                                             .build())
+                      .build())
+            .build();
 
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+  
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
@@ -251,6 +288,8 @@ public class CallbackControllerTest {
             .thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.issueAndSendToLocalCourt(
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.generateC8AndOtherDocument(
             authToken,
             callbackRequest
         );
@@ -260,6 +299,13 @@ public class CallbackControllerTest {
         verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
 
         verify(dgsService).generateDocument(authToken, caseDetails, PRL_C8_TEMPLATE);
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
+        verify(dgsService, times(2)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.anyString()
+        );
+
 
     }
 }
