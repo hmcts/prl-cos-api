@@ -20,7 +20,7 @@ public class OrchestrationConstants {
 
     //Fee and Pay integration related constants
     public static final String JURISDICTION = "PRIVATELAW";
-    public static final String CASE_TYPE = "C100";
+    public static final String CASE_TYPE = "PRLAPPS";
 
     public static final String PAYMENT_ACTION = "payment";
     public static final String FEE_VERSION = "1";

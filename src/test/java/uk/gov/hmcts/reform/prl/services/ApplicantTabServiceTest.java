@@ -70,10 +70,6 @@ public class ApplicantTabServiceTest {
     @Mock
     ObjectMapper objectMapper;
 
-    @Mock
-    CoreCaseDataService coreCaseDataService;
-
-
     CaseData caseDataWithParties;
     CaseData emptyCaseData;
     Address address;
@@ -117,7 +113,7 @@ public class ApplicantTabServiceTest {
             .ordersOccupation(YesOrNo.Yes)
             .occupationOrder(order)
             .ordersForcedMarriageProtection(YesOrNo.Yes)
-            .forcedMarriageOrder(order)
+            //.forcedMarriageOrder(order)
             .ordersRestraining(YesOrNo.Yes)
             .restrainingOrder(order)
             .ordersOtherInjunctive(YesOrNo.Yes)
