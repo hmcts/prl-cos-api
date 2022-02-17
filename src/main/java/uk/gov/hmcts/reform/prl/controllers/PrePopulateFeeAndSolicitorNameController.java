@@ -84,13 +84,13 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .applicantSolicitorEmailAddress(userDetails.getEmail())
                 .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
                 .feeAmount(feeResponse.getAmount().toString())
-                .submitAndPayDownloadApplicationLink(Document.builder()
+                /*.submitAndPayDownloadApplicationLink(Document.builder()
                                                          .documentUrl(generatedDocumentInfo.getUrl())
                                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                          .documentHash(generatedDocumentInfo.getHashToken())
                                                          .documentFileName(DRAFT_C_100_APPLICATION).build())
                 .courtName(courtLocatorService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
-                                                                                    .getCaseData()).getCourtName())
+                                                                                    .getCaseData()).getCourtName())*/
                 .build(),
             CaseData.class
         );
