@@ -15,10 +15,8 @@ public enum YesNoDontKnow {
     @JsonProperty("dontKnow")
     dontKnow("dontKnow", "Don't know");
 
-
     private final String id;
     private final String displayedValue;
-
 
     @JsonValue
     public String getDisplayedValue() {
@@ -29,6 +27,4 @@ public enum YesNoDontKnow {
     public static YesNoDontKnow getValue(String key) {
         return YesNoDontKnow.valueOf(key);
     }
-
-
 }

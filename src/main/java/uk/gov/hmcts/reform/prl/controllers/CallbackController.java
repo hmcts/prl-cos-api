@@ -244,27 +244,13 @@ public class CallbackController {
     @ApiOperation(value = "Callback to retrieve and store organisation details")
     public AboutToStartOrSubmitCallbackResponse saveOrganisationDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest
+        @RequestBody @ApiParam("CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) throws Exception {
 
-        //log.info("=====***** Case Data from CCD before callback *****====== {}", callbackRequest.getCaseDetails().getData());
 
-//        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)
-//            .toBuilder()
-//            .id(callbackRequest.getCaseDetails().getId())
-//            .build();
-        CaseData caseData = callbackRequest.getCaseDetails().getCaseData();
-//        caseData = organisationService.getApplicantOrganisationDetails(caseData);
-//
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        caseData = organisationService.getApplicantOrganisationDetails(caseData);
 //        caseData = organisationService.getRespondentOrganisationDetails(caseData);
-
-        //Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-//        caseDataUpdated.put("case_data", caseData);
-//
-//        log.info("=================CaseData Updated Map {}",toMap(caseData));
-//
-//        log.info("======== CaseData with applicant Organisation ~Details==== {}",caseData);
 
         return AboutToStartOrSubmitCallbackResponse
             .builder()

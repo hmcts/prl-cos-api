@@ -25,5 +25,4 @@ public enum YesOrNo {
     public String getDisplayedValue() {
         return value;
     }
-
 }

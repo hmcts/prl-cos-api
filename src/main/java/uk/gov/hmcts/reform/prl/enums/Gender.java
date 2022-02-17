@@ -17,15 +17,4 @@ public enum Gender {
 
     private final String id;
     private final String displayedValue;
-
-    @JsonValue
-    public String getDisplayedValue() {
-        return displayedValue;
-    }
-
-    @JsonCreator
-    public static Gender getValue(String key) {
-        return Gender.valueOf(key);
-    }
-
 }
