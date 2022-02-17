@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,8 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @PropertySource(value = "classpath:application.yaml")
@@ -295,21 +292,6 @@ public class SolicitorEmailServiceTest {
 
         solicitorEmailService.sendEmailBypss(caseDetails, authToken);
         assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
-    }
-
-    @Test
-    public void sendEmailToSolicitorSuccessfully() {
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("applicantSolicitorEmailAddress", "test@test.com");
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(caseData.getId())
-            .data(data)
-            .build();
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        verify(solicitorEmailService, times(1)).sendEmailToSolicitor(caseDetails, userDetails);
     }
 
 }
