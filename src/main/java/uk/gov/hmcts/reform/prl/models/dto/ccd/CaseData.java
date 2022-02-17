@@ -304,6 +304,10 @@ public class CaseData implements MappableObject {
     private final Document draftOrderDoc;
     @JsonProperty("c8Document")
     private final Document c8Document;
+    @JsonProperty("c1ADocument")
+    private final Document c1ADocument;
+
+
 
     @JsonProperty("submitAndPayDownloadApplicationLink")
     private final Document submitAndPayDownloadApplicationLink;
@@ -357,7 +361,6 @@ public class CaseData implements MappableObject {
     /**
      *  Withdraw Application.
      */
-
     private final WithdrawApplication withDrawApplicationData;
 
 }
