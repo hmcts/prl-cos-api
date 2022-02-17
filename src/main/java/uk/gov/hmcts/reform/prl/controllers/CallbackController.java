@@ -199,7 +199,7 @@ public class CallbackController {
 
         caseData = organisationService.getApplicantOrganisationDetails(caseData);
 
-        //caseData = organisationService.getRespondentOrganisationDetails(caseData);
+        caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
