@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @PropertySource(value = "classpath:application.yaml")
@@ -67,9 +70,27 @@ public class SolicitorEmailServiceTest {
     @Mock
     private ServiceArea serviceArea;
 
+    CaseData caseData;
+
+    UserDetails userDetails;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .solicitorEmail("test@test.com")
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicants(listOfApplicants)
+            .build();
 
         court = Court.builder()
             .courtName("testcourt")
@@ -82,6 +103,10 @@ public class SolicitorEmailServiceTest {
             .courts(courtList)
             .build();
 
+        userDetails = UserDetails.builder()
+            .email("solicitor@example.com")
+            .surname("userLast")
+            .build();
     }
 
     @Test
@@ -270,6 +295,21 @@ public class SolicitorEmailServiceTest {
 
         solicitorEmailService.sendEmailBypss(caseDetails, authToken);
         assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
+    }
+
+    @Test
+    public void sendEmailToSolicitorSuccessfully() {
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        verify(solicitorEmailService, times(1)).sendEmailToSolicitor(caseDetails, userDetails);
     }
 
 }
