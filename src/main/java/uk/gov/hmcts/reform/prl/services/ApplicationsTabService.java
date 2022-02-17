@@ -39,6 +39,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.ChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.DomesticAbuseVictim;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.tab.TabService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.FieldGenerator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,13 +51,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class ApplicationsTabService {
+public class ApplicationsTabService implements TabService {
 
     @Autowired
     CoreCaseDataService coreCaseDataService;
@@ -63,7 +63,8 @@ public class ApplicationsTabService {
     @Autowired
     ObjectMapper objectMapper;
 
-    public void updateApplicationTabData(CaseData caseData) {
+    @Override
+    public Map<String, Object> updateTab(CaseData caseData) {
 
         Map<String, Object> applicationTab = new HashMap<>();
         applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
@@ -89,13 +90,17 @@ public class ApplicationsTabService {
 
         log.info("inside the application tab service update");
 
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            "internal-update-application-tab",
-            applicationTab
-        );
+        return applicationTab;
+    }
+
+    @Override
+    public List<FieldGenerator> getGenerators() {
+        return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public void calEventToRefreshUI() {
+
     }
 
     public Map<String, Object> toMap(Object object) {
@@ -380,7 +385,7 @@ public class ApplicationsTabService {
                 .orderCurrent(caseData.getOrdersForcedMarriageProtectionCurrent())
                 .courtName(caseData.getOrdersForcedMarriageProtectionCourtName())
                 .build();
-            allegationsOfHarmOrders.setForcedMarriageOrder(forOrder);
+            //allegationsOfHarmOrders.setForcedMarriageOrder(forOrder);
         }
 
         Optional<YesOrNo> resYesNo = ofNullable(allegationsOfHarmOrders.getOrdersRestraining());

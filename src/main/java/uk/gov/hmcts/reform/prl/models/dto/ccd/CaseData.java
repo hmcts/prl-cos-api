@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
@@ -49,6 +51,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -60,6 +63,14 @@ import java.util.List;
 public class CaseData implements MappableObject {
 
     private final long id;
+
+    private final State state;
+
+    private final LocalDateTime createdDate;
+
+    private final LocalDateTime lastModifiedDate;
+
+    private final String dateSubmitted;
 
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;
@@ -296,6 +307,10 @@ public class CaseData implements MappableObject {
     private final Document draftOrderDoc;
     @JsonProperty("c8Document")
     private final Document c8Document;
+    @JsonProperty("c1ADocument")
+    private final Document c1ADocument;
+
+
 
     @JsonProperty("submitAndPayDownloadApplicationLink")
     private final Document submitAndPayDownloadApplicationLink;
@@ -324,7 +339,7 @@ public class CaseData implements MappableObject {
      * Return Application.
      */
     private final List<RejectReasonEnum> rejectReason;
-    private String returnMessage;
+    private final String returnMessage;
 
     /**
      * Issue and send to local court'.
@@ -349,7 +364,6 @@ public class CaseData implements MappableObject {
     /**
      * Send and reply to messages.
      */
-
     @JsonUnwrapped
     private final SendAndReplyEventData sendAndReplyEventData;
     @JsonProperty("openMessages")
@@ -357,5 +371,11 @@ public class CaseData implements MappableObject {
 
     @JsonProperty("closedMessages")
     private final List<Element<Message>> closedMessages;
+
+
+    /**
+     *  Withdraw Application.
+     */
+    private final WithdrawApplication withDrawApplicationData;
 
 }
