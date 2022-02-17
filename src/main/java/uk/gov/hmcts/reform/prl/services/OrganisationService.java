@@ -61,7 +61,7 @@ public class OrganisationService {
                             organisations.getContactInformation().get(0));
                         log.info("Before mapping, Applicant with to builder address line1: {} \n", applicant.getOrganisationAddress1());
 
-                        applicant.toBuilder()
+                        applicant = applicant.toBuilder()
                             .organisationAddress1(organisations.getContactInformation().get(0).getAddressLine1())
                             .organisationAddress2(organisations.getContactInformation().get(0).getAddressLine2())
                             .organisationAddress3(organisations.getContactInformation().get(0).getAddressLine3())

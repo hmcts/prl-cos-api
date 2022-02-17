@@ -203,7 +203,7 @@ public class CallbackController {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        caseDataUpdated.put("data", caseData);
+        caseDataUpdated.put("case_data", caseData);
 
         log.info("=================CaseData Updated Map {}", caseDataUpdated);
 
