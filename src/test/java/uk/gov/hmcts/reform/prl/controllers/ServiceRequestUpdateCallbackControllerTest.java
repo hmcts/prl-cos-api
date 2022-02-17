@@ -52,7 +52,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
     public void setUp() {
 
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .serviceRequestStatus(" ").ccdCaseNumber("").build();
+            .serviceRequestStatus("paid").ccdCaseNumber("123456").build();
 
         feeResponse = FeeResponse.builder()
             .code("FEE0325")
@@ -84,6 +84,20 @@ public class ServiceRequestUpdateCallbackControllerTest {
         serviceRequestUpdateCallbackController.serviceRequestUpdate(authToken, serviceAuthToken,serviceRequestUpdateDto);
 
         verifyNoMoreInteractions(feesService);
+
+    }
+
+    @Test
+    public void testServiceRequestCallBackForByPassDetails() throws Exception {
+
+        FeeType feeType = null;
+
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(authToken,serviceAuthToken,serviceRequestUpdateDto);
+
+        requestUpdateCallbackService.processCallbackForBypass(serviceRequestUpdateDto, authToken);
+        verify(requestUpdateCallbackService).processCallbackForBypass(serviceRequestUpdateDto, authToken);
 
     }
 }
