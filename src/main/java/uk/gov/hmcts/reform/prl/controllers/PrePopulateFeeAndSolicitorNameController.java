@@ -26,6 +26,9 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -44,6 +47,7 @@ public class PrePopulateFeeAndSolicitorNameController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
     @Autowired
     private DgsService dgsService;
 
@@ -58,12 +62,16 @@ public class PrePopulateFeeAndSolicitorNameController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public CallbackResponse prePoppulateSolicitorAndFees(@RequestHeader("Authorization") String authorisation,
                                                          @RequestBody CallbackRequest callbackRequest) throws Exception {
+        List<String> errorList = new ArrayList<>();
         UserDetails userDetails = userService.getUserDetails(authorisation);
         FeeResponse feeResponse = null;
         try {
             feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
         } catch (Exception e) {
-            log.info("Unable to fetch feedetails from API:{}",e.getMessage());
+            errorList.add(e.getMessage());
+            return CallbackResponse.builder()
+                .errors(errorList)
+                .build();
         }
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
