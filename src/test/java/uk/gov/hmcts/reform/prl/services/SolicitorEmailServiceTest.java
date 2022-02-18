@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import javassist.NotFoundException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -163,7 +164,7 @@ public class SolicitorEmailServiceTest {
 
         when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
 
-        assertEquals(solicitorEmailService.buildEmail(caseDetails), email);
+        Assert.assertEquals(solicitorEmailService.buildEmail(caseDetails), email);
 
     }
 
@@ -296,16 +297,18 @@ public class SolicitorEmailServiceTest {
 
     @Test
     public void testSendEmailForWithdraw() throws NotFoundException {
+
+        List<PartyDetails> applicantList = new ArrayList<>();
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
             .solicitorEmail("test@demo.com")
             .build();
 
+        applicantList.add(applicant);
+
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        String email = applicant.getSolicitorEmail();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -315,19 +318,21 @@ public class SolicitorEmailServiceTest {
             .courtName("testcourt")
             .build();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("applicantSolicitorEmailAddress", "test@demo.com");
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(caseData.getId())
-            .data(data)
-            .build();
         UserDetails userDetails = UserDetails.builder()
             .forename("userFirst")
             .surname("userLast")
             .email("test@demo.com")
             .build();
-        String applicantNames = "TestFirst TestLast";
+
+       String email = applicantList.get(0).getEmail() != null ? String.valueOf(applicantList.get(0).getEmail())
+           : userDetails.getEmail();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", email);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
 
