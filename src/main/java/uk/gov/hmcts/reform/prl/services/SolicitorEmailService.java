@@ -76,7 +76,7 @@ public class SolicitorEmailService {
                 .caseLink(manageCaseUrl + "/" + caseDetails.getId())
                 .build();
         } catch (NotFoundException e) {
-            e.printStackTrace();
+           log.info("Cannot send email {}", e.getMessage());
         }
         return null;
     }
