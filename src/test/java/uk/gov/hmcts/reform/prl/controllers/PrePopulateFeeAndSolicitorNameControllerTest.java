@@ -11,8 +11,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -26,6 +31,9 @@ import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,11 +83,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     public void setUp() {
 
         MockitoAnnotations.initMocks(this);
-
-        userDetails = UserDetails.builder()
-            .forename("solicitor@example.com")
-            .surname("Solicitor")
-            .build();
 
         feeResponse = FeeResponse.builder()
             .amount(BigDecimal.valueOf(232.00))
@@ -176,20 +179,70 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     }
 
-    @Test (expected = NullPointerException.class)
+    @Test
     public void testCourtDetailsWithCourtName() throws Exception {
 
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .address(Address.builder()
+                         .postCode("SE1 9BA")
+                         .build())
             .build();
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService
-            .generateDocument(authToken,
-                              callbackRequest.getCaseDetails(),
-                              "PRL-DRAFT-C100-20.docx");
 
-        Court court1 = courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData());
-        when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseDataForCourt = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .children(listOfChildren)
+            .courtName("testcourt")
+            .build();
+
+        CaseDetails caseDetails1 = CaseDetails.builder()
+            .caseData(caseDataForCourt)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .build();
+
+        Court court1 = Court.builder()
+            .courtName("testcourt")
+            .build();
+
+        when(courtFinderService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails().getCaseData()))
             .thenReturn(court1);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .build();
+
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();;
+
         CaseData caseData1 = objectMapper.convertValue(
             CaseData.builder()
                 .solicitorName(userDetails.getFullName())
@@ -206,9 +259,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             CaseData.class
         );
 
-        when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
-            .thenThrow(new RuntimeException("Cannot process"));
-
         when(dgsService.generateDocument(authToken,
                                          callbackRequest.getCaseDetails(),
                                          "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
@@ -218,7 +268,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         CallbackResponse callbackResponse = CallbackResponse.builder().data(caseData1).build();
 
-        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
         when(prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest))
             .thenReturn(callbackResponse);
         verify(feesService).fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
