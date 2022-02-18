@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
@@ -430,5 +431,10 @@ public class CaseData implements MappableObject {
      *  Withdraw Application.
      */
     private final WithdrawApplication withDrawApplicationData;
+
+    /**
+     * FL401 Other Proceedings.
+     */
+    private final FL401OtherProceedingDetails fl401OtherProceedingDetails;
 
 }
