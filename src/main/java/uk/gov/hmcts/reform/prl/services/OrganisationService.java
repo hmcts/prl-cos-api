@@ -53,6 +53,7 @@ public class OrganisationService {
                                                                                            (String) solicitorOrg.get(
                                                                                                "organisationID")
                             );
+                            log.info("**********Organisation details from API {}*************", organisations);
                             if (Optional.ofNullable(organisations.getContactInformation()).isPresent()) {
                                 ContactInformation contactInformation = organisations.getContactInformation().get(0);
                                 applicantDetails.put("organisationAddress1",
@@ -73,13 +74,13 @@ public class OrganisationService {
                                 applicantDetails.put("postCode",
                                     Optional.ofNullable(contactInformation.getPostCode()).isPresent()
                                         ? contactInformation.getPostCode() : null);
-
+                                log.info("********* Applicant Details before map: {}**********\n",applicantDetails);
                                 applicant.put("value", applicantDetails);
+                                log.info("********* Applicant Details after map: {}**********\n",applicant);
+
                             }
                         }
-                        ;
                     }
-                    ;
                     return applicant;
                 })
                 .collect(Collectors.toList());
