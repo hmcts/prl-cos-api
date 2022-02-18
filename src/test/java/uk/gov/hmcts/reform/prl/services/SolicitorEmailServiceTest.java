@@ -294,5 +294,45 @@ public class SolicitorEmailServiceTest {
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
+    @Test
+    public void testSendEmailForWithdraw() throws NotFoundException {
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .solicitorEmail("test@demo.com")
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        String email = applicant.getSolicitorEmail();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@demo.com")
+            .applicants(listOfApplicants)
+            .courtName("testcourt")
+            .build();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", "test@demo.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .email("test@demo.com")
+            .build();
+        String applicantNames = "TestFirst TestLast";
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        solicitorEmailService.sendEmailToSolicitor(caseDetails, userDetails);
+        assertEquals("test@demo.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+    }
 }
 
