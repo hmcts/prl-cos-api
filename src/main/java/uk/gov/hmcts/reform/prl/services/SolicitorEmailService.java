@@ -45,7 +45,8 @@ public class SolicitorEmailService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
-    private final CourtFinderService courtLocatorService;
+    @Autowired
+    private CourtFinderService courtLocatorService;
 
     public EmailTemplateVars buildEmail(CaseDetails caseDetails) {
         try {
@@ -63,21 +64,18 @@ public class SolicitorEmailService {
             String applicantNames = String.join(", ", applicantNamesList);
 
             Court court = null;
-
             court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
 
-
-            return SolicitorEmail.builder()
+            return   SolicitorEmail.builder()
                 .caseReference(String.valueOf(caseDetails.getId()))
                 .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
                 .applicantName(applicantNames)
                 .courtName(court.getCourtName())
-                //.fullName(userDetails.getFullName())
                 .courtEmail(courtEmail)
-                .caseLink(manageCaseUrl + caseDetails.getId())
+                .caseLink(manageCaseUrl + "/" + caseDetails.getId())
                 .build();
         } catch (NotFoundException e) {
-            e.printStackTrace();
+            log.info("Cannot send email {}", e.getMessage());
         }
         return null;
     }
@@ -129,7 +127,7 @@ public class SolicitorEmailService {
             .collect(Collectors.toList());
 
         List<String> applicantSolicitorEmailList = applicants.stream()
-            .map(element -> element.getSolicitorEmail())
+            .map(PartyDetails::getSolicitorEmail)
             .collect(Collectors.toList());
 
         solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
