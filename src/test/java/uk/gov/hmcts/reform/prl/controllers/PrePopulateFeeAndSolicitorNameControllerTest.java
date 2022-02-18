@@ -153,22 +153,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     }
 
-    @Test (expected = NullPointerException.class)
-    public void testFeeServiceIsThrowingErrorWhenApiIsNotWorking() throws Exception {
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-
-        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE))
-            .thenThrow(new RuntimeException("Unable to fetch feedetails from API"));
-
-        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
-        verify(prePopulateFeeAndSolicitorNameController).prePoppulateSolicitorAndFees(authToken, callbackRequest);
-    }
-
     @Test
     public void testFeeDetailsForFeeAmount()  throws Exception {
 
