@@ -176,7 +176,6 @@ public class ApplicationsTabService implements TabService {
         Optional<List<OrderTypeEnum>> orderAppliedFor = ofNullable(child.getOrderAppliedFor());
         return ChildDetails.builder().firstName(child.getFirstName())
             .lastName(child.getLastName())
-            .address(child.getAddress())
             .dateOfBirth(child.getDateOfBirth())
             .gender(child.getGender())
             .otherGender(child.getOtherGender())
@@ -186,11 +185,7 @@ public class ApplicationsTabService implements TabService {
             .respondentsRelationshipToChild(respondentsRelationshipToChild.isEmpty()
                                                 ? null : child.getRespondentsRelationshipToChild().getDisplayedValue())
             .otherRespondentsRelationshipToChild(child.getOtherRespondentsRelationshipToChild())
-            .childrenKnownToLocalAuthority(child.getChildrenKnownToLocalAuthority())
-            .childrenKnownToLocalAuthorityTextArea(child.getChildrenKnownToLocalAuthorityTextArea())
-            .childrenSubjectOfChildProtectionPlan(child.getChildrenSubjectOfChildProtectionPlan())
             .personWhoLivesWithChild(otherPersonLiving)
-            .parentalResponsibilityDetails(child.getParentalResponsibilityDetails())
             .childLiveWith(childLivesWith.isEmpty() ? null : child.getChildLiveWith().stream()
                 .map(LiveWithEnum::getDisplayedValue).collect(
                 Collectors.joining(", ")))
