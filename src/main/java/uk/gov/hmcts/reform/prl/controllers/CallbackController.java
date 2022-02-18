@@ -246,10 +246,11 @@ public class CallbackController {
         @RequestBody @ApiParam("CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) throws Exception {
 
+        Map<String,Object>  caseData = callbackRequest.getCaseDetails().getData();
 
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        //CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = organisationService.getApplicantOrganisationDetails(caseData);
-        //caseData = organisationService.getRespondentOrganisationDetails(caseData);
+        caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
         return AboutToStartOrSubmitCallbackResponse
             .builder()
