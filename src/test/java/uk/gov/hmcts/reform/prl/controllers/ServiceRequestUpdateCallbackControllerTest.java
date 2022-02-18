@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceRequestUpdateCallbackControllerTest {
 
-
     private MockMvc mockMvc;
 
     @InjectMocks

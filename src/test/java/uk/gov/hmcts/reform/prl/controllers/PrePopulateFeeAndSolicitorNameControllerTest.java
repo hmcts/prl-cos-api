@@ -182,18 +182,17 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
-
-        when(dgsService.generateDocument(authToken,
-                                         callbackRequest.getCaseDetails(),
-                                         "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService
+            .generateDocument(authToken,
+                              callbackRequest.getCaseDetails(),
+                              "PRL-DRAFT-C100-20.docx");
 
         Court court1 = courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData());
         when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
             .thenReturn(court1);
         CaseData caseData1 = objectMapper.convertValue(
             CaseData.builder()
-                .solicitorName("example")
+                .solicitorName(userDetails.getFullName())
                 .applicantSolicitorEmailAddress("test@gmail.com")
                 .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
                 .feeAmount(feeResponse.getAmount().toString())
@@ -206,6 +205,13 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
                 .build(),
             CaseData.class
         );
+
+        when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
+            .thenThrow(new RuntimeException("Cannot process"));
+
+        when(dgsService.generateDocument(authToken,
+                                         callbackRequest.getCaseDetails(),
+                                         "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
 
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
