@@ -192,6 +192,7 @@ public class ApplicationsTabService implements TabService {
             .orderAppliedFor(orderAppliedFor.isEmpty() ? null : child.getOrderAppliedFor().stream()
                 .map(OrderTypeEnum::getDisplayedValue).collect(
                 Collectors.joining(", ")))
+            .parentalResponsibilityDetails(child.getParentalResponsibilityDetails())
             .build();
     }
 

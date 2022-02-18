@@ -25,5 +25,6 @@ public class ChildDetails {
     private final String otherRespondentsRelationshipToChild;
     private final String childLiveWith;
     private List<Element<OtherPersonWhoLivesWithChildDetails>> personWhoLivesWithChild;
+    private final String parentalResponsibilityDetails;
 
 }
