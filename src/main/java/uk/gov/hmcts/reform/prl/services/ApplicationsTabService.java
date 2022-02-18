@@ -102,13 +102,7 @@ public class ApplicationsTabService implements TabService {
 
         log.info("inside the application tab service update");
         log.info(applicationTab.toString());
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            "internal-update-application-tab",
-            applicationTab
-        );
+
         return applicationTab;
     }
 
