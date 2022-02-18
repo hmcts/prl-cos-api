@@ -324,7 +324,7 @@ public class SolicitorEmailServiceTest {
             .email("test@demo.com")
             .build();
 
-        String email = applicantList.get(0).getEmail() != null ? String.valueOf(applicantList.get(0).getEmail())
+        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(applicantList.get(0).getEmail())
             : userDetails.getEmail();
 
         Map<String, Object> data = new HashMap<>();
