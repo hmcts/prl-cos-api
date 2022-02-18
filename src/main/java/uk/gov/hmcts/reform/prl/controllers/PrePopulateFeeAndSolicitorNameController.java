@@ -47,7 +47,6 @@ public class PrePopulateFeeAndSolicitorNameController {
 
     @Autowired
     private ObjectMapper objectMapper;
-
     @Autowired
     private DgsService dgsService;
 
@@ -62,16 +61,12 @@ public class PrePopulateFeeAndSolicitorNameController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public CallbackResponse prePoppulateSolicitorAndFees(@RequestHeader("Authorization") String authorisation,
                                                          @RequestBody CallbackRequest callbackRequest) throws Exception {
-        List<String> errorList = new ArrayList<>();
         UserDetails userDetails = userService.getUserDetails(authorisation);
         FeeResponse feeResponse = null;
         try {
             feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
         } catch (Exception e) {
-            errorList.add(e.getMessage());
-            return CallbackResponse.builder()
-                .errors(errorList)
-                .build();
+           log.info("Unable to fetch feedetails from API:{}",e.getMessage() );
         }
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
@@ -79,41 +74,27 @@ public class PrePopulateFeeAndSolicitorNameController {
             PRL_DRAFT_TEMPLATE
         );
 
-        Court closestChildArrangementsCourt = null;
-        try {
-            closestChildArrangementsCourt = courtLocatorService
-                .getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
-                                                      .getCaseData());
-        } catch (Exception e) {
-            errorList.add(e.getMessage());
-            return CallbackResponse.builder()
-                .errors(errorList)
-                .build();
-        }
+        Court closestChildArrangementsCourt = courtLocatorService
+            .getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
+                                                  .getCaseData());
 
-        log.info("**** Court Name *** " + (closestChildArrangementsCourt != null
-            ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched"));
+        CaseData caseData = objectMapper.convertValue(
+            CaseData.builder()
+                .solicitorName(userDetails.getFullName())
+                .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
+                .applicantSolicitorEmailAddress(userDetails.getEmail())
+                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
+                .feeAmount(feeResponse.getAmount().toString())
+                .submitAndPayDownloadApplicationLink(Document.builder()
+                                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                                         .documentFileName(DRAFT_C_100_APPLICATION).build())
+                .courtName((closestChildArrangementsCourt != null)  ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
+                .build(),
+            CaseData.class
+        );
 
-        CaseData caseData = null;
-        if (closestChildArrangementsCourt != null) {
-            caseData = objectMapper.convertValue(
-                CaseData.builder()
-                    .solicitorName(userDetails.getFullName())
-                    .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
-                    .applicantSolicitorEmailAddress(userDetails.getEmail())
-                    .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
-                    .feeAmount(feeResponse.getAmount().toString())
-                    .submitAndPayDownloadApplicationLink(Document.builder()
-                                                             .documentUrl(generatedDocumentInfo.getUrl())
-                                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                             .documentHash(generatedDocumentInfo.getHashToken())
-                                                             .documentFileName(DRAFT_C_100_APPLICATION).build())
-                    .courtName(closestChildArrangementsCourt.getCourtName())
-                    .build(),
-                CaseData.class
-            );
-        }
-        log.info("Saving Court name into DB..");
         return CallbackResponse.builder()
             .data(caseData)
             .build();
