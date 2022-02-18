@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 import uk.gov.hmcts.reform.prl.utils.CitizenEmailProvider;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
@@ -21,6 +22,7 @@ import uk.gov.service.notify.SendEmailResponse;
 
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -107,19 +109,17 @@ public class EmailServiceTest {
         );
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void shouldGetCaseData() {
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
             .build();
-
-        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+        CaseData caseData = CaseDetailsProvider.full().getCaseData();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CaseData caseData1 = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
             .id(caseDetails.getId())
             .build();
-
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
+        assertEquals(emailService.getCaseData(caseDetails),caseData1);
     }
 }
