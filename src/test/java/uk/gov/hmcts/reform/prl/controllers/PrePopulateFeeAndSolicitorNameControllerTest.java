@@ -154,7 +154,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     }
 
     @Test (expected = NullPointerException.class)
-    public void testFeeServiceIsThrowingErrorWhenAPIIsNotWorking() throws Exception {
+    public void testFeeServiceIsThrowingErrorWhenApiIsNotWorking() throws Exception {
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
