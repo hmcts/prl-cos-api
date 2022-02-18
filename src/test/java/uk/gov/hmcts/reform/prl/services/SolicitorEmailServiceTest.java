@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 @PropertySource(value = "classpath:application.yaml")
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class SolicitorEmailServiceTest {
 
 
@@ -338,6 +338,109 @@ public class SolicitorEmailServiceTest {
 
         solicitorEmailService.sendEmailToSolicitor(caseDetails, userDetails);
         assertEquals("test@demo.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+    }
+
+    @Test
+    public void testSendEmailForWithdrawWhenApplicantSolicitorEmailNotPresent() throws NotFoundException {
+
+        List<PartyDetails> applicantList = new ArrayList<>();
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .build();
+
+        applicantList.add(applicant);
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@demo.com")
+            .applicants(listOfApplicants)
+            .courtName("testcourt")
+            .build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .email("test@demo.com")
+            .build();
+
+        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(applicantList.get(0).getEmail())
+            : userDetails.getEmail();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", email);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        solicitorEmailService.sendEmailToSolicitor(caseDetails, userDetails);
+        assertEquals("test@demo.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+    }
+
+    @Test
+    public void whenBuildEmailIsNotSuccessThrowError() throws NotFoundException {
+
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .address(Address.builder()
+                         .postCode("SE1 9BA")
+                         .build())
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicants(listOfApplicants)
+            .children(listOfChildren)
+            .courtName("testcourt")
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .build();
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        EmailTemplateVars email = SolicitorEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .applicantName(applicantNames)
+            .courtName(court.getCourtName())
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+        when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
+        when(solicitorEmailService.buildEmail(caseDetails)).thenThrow(new RuntimeException("Cannot send email"));
     }
 }
 

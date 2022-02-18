@@ -26,9 +26,6 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -66,7 +63,7 @@ public class PrePopulateFeeAndSolicitorNameController {
         try {
             feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
         } catch (Exception e) {
-           log.info("Unable to fetch feedetails from API:{}",e.getMessage() );
+            log.info("Unable to fetch feedetails from API:{}",e.getMessage());
         }
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
