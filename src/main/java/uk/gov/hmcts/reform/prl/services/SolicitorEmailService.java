@@ -128,7 +128,7 @@ public class SolicitorEmailService {
             .collect(Collectors.toList());
 
         List<String> applicantSolicitorEmailList = applicants.stream()
-            .map(element -> element.getSolicitorEmail())
+            .map(PartyDetails::getSolicitorEmail)
             .collect(Collectors.toList());
 
         solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
