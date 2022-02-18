@@ -58,8 +58,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 
 @Slf4j
