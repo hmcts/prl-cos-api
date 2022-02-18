@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserService {
@@ -20,10 +22,11 @@ public class UserService {
     public UserInfo getUserInfo(String authorisation, UserRoles roleName) {
         UserDetails idamClientUserDetails = idamClient.getUserDetails(authorisation);
 
+        Optional<String> surname = idamClientUserDetails.getSurname();
         return UserInfo.builder()
             .idamId(idamClientUserDetails.getId())
             .firstName(idamClientUserDetails.getFullName())
-            .lastName(idamClientUserDetails.getSurname().get())
+            .lastName(surname.orElse("Surname not present"))
             .emailAddress(idamClientUserDetails.getEmail())
             .role(roleName.name())
             .build();
