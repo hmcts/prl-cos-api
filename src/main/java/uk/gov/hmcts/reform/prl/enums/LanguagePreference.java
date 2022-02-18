@@ -14,7 +14,6 @@ public enum LanguagePreference {
     @JsonProperty("welsh")
     WELSH("welsh");
 
-
     private final String code;
 
     public static LanguagePreference getLanguagePreference(CaseData caseData) {

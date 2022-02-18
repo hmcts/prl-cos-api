@@ -17,5 +17,4 @@ public enum FurtherEvidenceDocumentType {
 
     private final String id;
     private final String displayedValue;
-
 }

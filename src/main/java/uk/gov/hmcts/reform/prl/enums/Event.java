@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.prl.enums;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum Event {
 
@@ -26,19 +26,4 @@ public enum Event {
 
     private final String id;
     private final String name;
-
-    @JsonValue
-    public String getName() {
-        return name;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    @JsonCreator
-    public static Event getValue(String key) {
-        return Event.valueOf(key);
-    }
-
 }
