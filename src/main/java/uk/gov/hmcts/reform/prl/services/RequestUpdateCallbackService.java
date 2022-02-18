@@ -15,7 +15,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
+import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 
+import javax.json.JsonObject;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -38,6 +40,7 @@ public class RequestUpdateCallbackService {
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final UserService userService;
     private final ConfidentialityTabService confidentialityTabService;
+    private final C100JsonMapper c100JsonMapper;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
 
@@ -53,6 +56,9 @@ public class RequestUpdateCallbackService {
             authTokenGenerator.generate(),
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
+
+        JsonObject map = c100JsonMapper.map(objectMapper.convertValue(caseDetails.getData(), CaseData.class));
+        System.out.println("******Map*****" + map);
 
         if (!Objects.isNull(caseDetails.getId())) {
             if (confidentialityTabService
