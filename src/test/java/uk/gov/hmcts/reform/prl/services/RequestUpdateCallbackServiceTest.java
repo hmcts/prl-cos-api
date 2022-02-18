@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -23,14 +23,14 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class RequestUpdateCallbackServiceTest {
 
     private final String jurisdiction = "PRIVATELAW";
     private final String caseType = "PRLAPPS";
     private final Long caseId = 1234567887654321L;
     private final String eventName = "paymentSuccessCallback";
-    private final String userToken = "Bearer testToken";
+    public static final String authToken = "Bearer TestAuthToken";
     private final String serviceAuthToken = "Bearer testServiceAuth";
     private final String systemUserId = "systemUserID";
     private final String eventToken = "eventToken";
@@ -62,15 +62,15 @@ public class RequestUpdateCallbackServiceTest {
     @Before
     public void setUp() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        when(systemUserService.getUserId(userToken)).thenReturn(systemUserId);
-        when(systemUserService.getSysUserToken()).thenReturn(userToken);
+        when(systemUserService.getUserId(authToken)).thenReturn(systemUserId);
+        when(systemUserService.getSysUserToken()).thenReturn(authToken);
     }
 
     @Test(expected = NullPointerException.class)
     public void shouldStartAndSubmitEventWithCaseDetails() throws Exception {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).build();
-        when(coreCaseDataApi.getCase(userToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
-        when(coreCaseDataApi.startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
+        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, Long.toString(caseId), eventName
         ))
             .thenReturn(buildStartEventResponse(eventName, eventToken));
@@ -89,10 +89,10 @@ public class RequestUpdateCallbackServiceTest {
 
         requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
 
-        verify(coreCaseDataApi).startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
+        verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, Long.toString(caseId), eventName
         );
-        verify(coreCaseDataApi).submitEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
+        verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                          caseType, Long.toString(caseId), true,
                                                          buildCaseDataContent(eventName, eventToken, null)
         );
@@ -103,10 +103,12 @@ public class RequestUpdateCallbackServiceTest {
 
         CaseDetails caseDetails = CaseDetails.builder()
             .build();
-        when(coreCaseDataApi.getCase(userToken, serviceAuthToken, "123")).thenReturn(caseDetails);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, "123")).thenReturn(caseDetails);
 
         assertThrows(Exception.class, () -> {
-            serviceRequestUpdateDto = ServiceRequestUpdateDto.builder().ccdCaseNumber("123").serviceRequestStatus(
+            serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+                .ccdCaseNumber("123")
+                .serviceRequestStatus(
                 "Paid").build();
 
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
@@ -119,8 +121,8 @@ public class RequestUpdateCallbackServiceTest {
     public void shouldProcessCallback() throws Exception {
 
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).build();
-        when(coreCaseDataApi.getCase(userToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
-        when(coreCaseDataApi.startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
+        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, Long.toString(caseId), eventName
         ))
             .thenReturn(buildStartEventResponse(eventName, eventToken));
@@ -145,7 +147,7 @@ public class RequestUpdateCallbackServiceTest {
                           .build());
 
         requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-        assertEquals(coreCaseDataApi.getCase(userToken, serviceAuthToken, caseId.toString()), caseDetails);
+        assertEquals(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString()), caseDetails);
 
     }
 
@@ -161,5 +163,31 @@ public class RequestUpdateCallbackServiceTest {
 
     private StartEventResponse buildStartEventResponse(String eventId, String eventToken) {
         return StartEventResponse.builder().eventId(eventId).token(eventToken).build();
+    }
+
+    @Test
+    public void shouldProcessCallbackForByPass() throws Exception {
+
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).build();
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
+        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                     caseType, Long.toString(caseId), eventName
+        ))
+            .thenReturn(buildStartEventResponse(eventName, eventToken));
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentMethod("cash")
+                         .paymentReference("reference")
+                         .caseReference("reference")
+                         .accountNumber("123445555")
+                         .build())
+            .serviceRequestStatus("Paid")
+            .build();
+
+        requestUpdateCallbackService.processCallbackForBypass(serviceRequestUpdateDto, authToken);
+        assertEquals(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString()), caseDetails);
+
     }
 }

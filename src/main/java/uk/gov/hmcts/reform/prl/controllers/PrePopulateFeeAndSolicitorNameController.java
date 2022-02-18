@@ -43,10 +43,11 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Autowired
     private UserService userService;
 
-    private final CourtFinderService courtLocatorService;
+    private CourtFinderService courtLocatorService;
 
     @Autowired
     private ObjectMapper objectMapper;
+
     @Autowired
     private DgsService dgsService;
 
@@ -80,9 +81,8 @@ public class PrePopulateFeeAndSolicitorNameController {
 
         Court closestChildArrangementsCourt = courtLocatorService
             .getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
-            .getCaseData());
-        log.info("**** Court Name *** " + (null != closestChildArrangementsCourt
-            ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched"));
+                                                  .getCaseData());
+
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()
                 .solicitorName(userDetails.getFullName())
@@ -95,11 +95,11 @@ public class PrePopulateFeeAndSolicitorNameController {
                                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                          .documentHash(generatedDocumentInfo.getHashToken())
                                                          .documentFileName(DRAFT_C_100_APPLICATION).build())
-                .courtName(closestChildArrangementsCourt.getCourtName())
+                .courtName((closestChildArrangementsCourt != null)  ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                 .build(),
             CaseData.class
         );
-        log.info("Saving Court name into DB..");
+
         return CallbackResponse.builder()
             .data(caseData)
             .build();
