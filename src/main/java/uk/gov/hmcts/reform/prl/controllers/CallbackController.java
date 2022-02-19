@@ -132,9 +132,11 @@ public class CallbackController {
             request.getCaseDetails(),
             PRL_DRAFT_TEMPLATE
         );
+        CaseData caseData = request.getCaseDetails().getCaseData();
+        caseData = organisationService.getApplicantOrganisationDetailsOld(caseData);
         return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse
             .builder()
-            .data(CaseData.builder().draftOrderDoc(Document.builder()
+            .data(caseData.toBuilder().draftOrderDoc(Document.builder()
                                                        .documentUrl(generatedDocumentInfo.getUrl())
                                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                        .documentHash(generatedDocumentInfo.getHashToken())
