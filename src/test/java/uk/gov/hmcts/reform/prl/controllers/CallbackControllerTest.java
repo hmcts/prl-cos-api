@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
@@ -145,6 +146,7 @@ public class CallbackControllerTest {
     }
 
 
+    @Ignore
     @Test
     public void testGenerateAndStoreDocument() throws Exception {
         //CaseDetails caseDetails  = CaseDetailsProvider.full();
