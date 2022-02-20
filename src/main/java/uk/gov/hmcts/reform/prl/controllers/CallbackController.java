@@ -134,13 +134,17 @@ public class CallbackController {
         );
         CaseData caseData = request.getCaseDetails().getCaseData();
         caseData = organisationService.getApplicantOrganisationDetailsOld(caseData);
+
+        CaseData caseData1 = caseData.toBuilder().draftOrderDoc(Document.builder()
+                                                                    .documentUrl(generatedDocumentInfo.getUrl())
+                                                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                                    .documentHash(generatedDocumentInfo.getHashToken())
+                                                                    .documentFileName(DRAFT_C_100_APPLICATION).build()).build();
+
+        log.info("=============Casedata with updated ones... {}===========", caseData1);
         return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse
             .builder()
-            .data(caseData.toBuilder().draftOrderDoc(Document.builder()
-                                                       .documentUrl(generatedDocumentInfo.getUrl())
-                                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                       .documentHash(generatedDocumentInfo.getHashToken())
-                                                       .documentFileName(DRAFT_C_100_APPLICATION).build()).build())
+            .data(caseData1)
             .build();
     }
 
