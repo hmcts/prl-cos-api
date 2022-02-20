@@ -148,7 +148,7 @@ public class OrganisationService {
         return caseData;
     }
 
-    public CaseData getApplicantOrganisationDetailsOld(CaseData caseData) throws NotFoundException {
+    public CaseData getApplicantOrganisationDetailsOld(CaseData caseData) {
         if (Optional.ofNullable(caseData.getApplicants()).isPresent()) {
             String userToken = systemUserService.getSysUserToken();
             List<PartyDetails> applicants = caseData
@@ -184,6 +184,7 @@ public class OrganisationService {
             }
             caseData.toBuilder().applicants(applicantsWithOrganisationDetails).build();
             caseData = caseData.toBuilder().applicants(applicantsWithOrganisationDetails).build();
+            log.info("*********Casedata after organisation details {}********",caseData);
         }
 
         return caseData;
