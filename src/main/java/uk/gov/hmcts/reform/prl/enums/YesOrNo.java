@@ -17,4 +17,8 @@ public enum YesOrNo {
     private final String value;
 
 
+    public String getDisplayedValue() {
+        return value;
+    }
+
 }

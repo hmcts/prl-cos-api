@@ -24,6 +24,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -65,6 +66,7 @@ public class SendAndReplyServiceTest {
                                               LocalTime.of(10, 22));
 
     String dateSent = dateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK));
+
     Message message1;
     Message message2;
     Message message3;
@@ -334,5 +336,7 @@ public class SendAndReplyServiceTest {
         assertEquals(expectedMap, map);
 
     }
+
+
 
 }
