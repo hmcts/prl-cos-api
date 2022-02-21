@@ -485,5 +485,173 @@ public class CaseWorkerEmailServiceTest {
         assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
 
     }
+
+    @Test
+    public void testCourtAdminEmailWithNoUrgency() {
+
+        PartyDetails applicant1 = PartyDetails.builder()
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant1).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Child child = Child.builder()
+            .isChildAddressConfidential(YesOrNo.No)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        String isConfidential = "No";
+        if (applicant1.hasConfidentialInfo() || child.hasConfidentialInfo()) {
+            isConfidential = "Yes";
+        }
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicants(listOfApplicants)
+            .children(listOfChildren)
+            .isCaseUrgent(YesOrNo.No)
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .build();
+
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        EmailTemplateVars email = CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseUrgency("")
+            .isCaseUrgent("No")
+            .issueDate(issueDate.format(dateTimeFormatter))
+            .isConfidential(isConfidential)
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        assertEquals(email, caseWorkerEmailService.buildCourtAdminEmail(caseDetails));
+
+    }
+
+    @Test
+    public void testCourtAdminEmailWithUrgencyAndConfidentialInfo() {
+
+        PartyDetails applicant1 = PartyDetails.builder()
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant1).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Child child = Child.builder()
+            .isChildAddressConfidential(YesOrNo.Yes)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        String isConfidential = "No";
+        if (applicant1.hasConfidentialInfo() || child.hasConfidentialInfo()) {
+            isConfidential = "Yes";
+        }
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicants(listOfApplicants)
+            .children(listOfChildren)
+            .isCaseUrgent(YesOrNo.Yes)
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .build();
+
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        EmailTemplateVars email = CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseUrgency("Urgent ")
+            .isCaseUrgent("Yes")
+            .issueDate(issueDate.format(dateTimeFormatter))
+            .isConfidential(isConfidential)
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        assertEquals(email, caseWorkerEmailService.buildCourtAdminEmail(caseDetails));
+
+    }
+
+    @Test
+    public void testSendEmailToCourtAdmin() {
+
+        LocalCourtAdminEmail localCourtAdminEmail = LocalCourtAdminEmail.builder()
+            .email("test@demo.com")
+            .build();
+
+        Element<LocalCourtAdminEmail> wrappedEmail = Element.<LocalCourtAdminEmail>builder().value(localCourtAdminEmail).build();
+        List<Element<LocalCourtAdminEmail>> emailList = Collections.singletonList(wrappedEmail);
+        PartyDetails applicant1 = PartyDetails.builder()
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant1).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Child child = Child.builder()
+            .isChildAddressConfidential(YesOrNo.Yes)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        String isConfidential = "No";
+        if (applicant1.hasConfidentialInfo() || child.hasConfidentialInfo()) {
+            isConfidential = "Yes";
+        }
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicants(listOfApplicants)
+            .children(listOfChildren)
+            .localCourtAdmin(emailList)
+            .isCaseUrgent(YesOrNo.Yes)
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .build();
+
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        caseWorkerEmailService.sendEmailToCourtAdmin(caseDetails);
+
+        assertEquals(emailList, caseData.getLocalCourtAdmin());
+    }
 }
 
