@@ -155,7 +155,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
             Optional<List<Element<Behaviours>>> behavioursWrapped = ofNullable(caseData.getBehaviours());
 
             behaviourRequired = behavioursWrapped.isPresent()
-                && behavioursWrapped.get().size() > 0;
+                && (behavioursWrapped.get().size() > 0);
 
         }
         return abuseVictimCompleted & behaviourRequired;
