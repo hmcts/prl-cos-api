@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -81,8 +82,10 @@ public class CaseData implements MappableObject {
 
     private final State state;
 
+    @JsonIgnore
     private final LocalDateTime createdDate;
 
+    @JsonIgnore
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
