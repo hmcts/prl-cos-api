@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -20,8 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -39,7 +36,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -134,15 +130,15 @@ public class CallbackController {
         @RequestBody @ApiParam("CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest request
     ) throws Exception {
 
-//        Map<String, Object> caseDataUpdated =request.getCaseDetails().getData();
-//
-//        caseDataUpdated = organisationService.getApplicantOrganisationDetails(caseDataUpdated);
-//
-//        caseDataUpdated = organisationService.getRespondentOrganisationDetails(caseDataUpdated);
+        //        Map<String, Object> caseDataUpdated =request.getCaseDetails().getData();
+        //
+        //        caseDataUpdated = organisationService.getApplicantOrganisationDetails(caseDataUpdated);
+        //
+        //        caseDataUpdated = organisationService.getRespondentOrganisationDetails(caseDataUpdated);
 
         CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
-        caseData = organisationService1.getApplicantOrganisationDetails(caseData);
-        caseData = organisationService1.getRespondentOrganisationDetails(caseData);
+        caseData = organisationService.getApplicantOrganisationDetails(caseData);
+        caseData = organisationService.getRespondentOrganisationDetails(caseData);
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
@@ -200,9 +196,9 @@ public class CallbackController {
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             C100_FINAL_TEMPLATE
         );
-        caseDataUpdated = organisationService.getApplicantOrganisationDetails(caseDataUpdated);
+        caseDataUpdated = organisationService1.getApplicantOrganisationDetails(caseDataUpdated);
 
-        caseDataUpdated = organisationService.getRespondentOrganisationDetails(caseDataUpdated);
+        caseDataUpdated = organisationService1.getRespondentOrganisationDetails(caseDataUpdated);
 
         caseDataUpdated.put("finalDocument", Document.builder()
             .documentUrl(generatedDocumentInfoFinal.getUrl())
@@ -269,8 +265,8 @@ public class CallbackController {
 
         Map<String,Object>  caseData = callbackRequest.getCaseDetails().getData();
 
-        caseData = organisationService.getApplicantOrganisationDetails(caseData);
-        caseData = organisationService.getRespondentOrganisationDetails(caseData);
+        caseData = organisationService1.getApplicantOrganisationDetails(caseData);
+        caseData = organisationService1.getRespondentOrganisationDetails(caseData);
 
         return AboutToStartOrSubmitCallbackResponse
             .builder()

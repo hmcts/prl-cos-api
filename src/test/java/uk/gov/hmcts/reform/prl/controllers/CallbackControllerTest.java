@@ -184,7 +184,10 @@ public class CallbackControllerTest {
         when(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE))
             .thenReturn(generatedDocumentInfo);
 
-        callbackController.generateAndStoreDocument(authToken, callbackRequest);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest1 = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
+            .builder().build();
+
+        callbackController.generateAndStoreDocument(authToken, callbackRequest1);
 
         verify(dgsService).generateDocument(authToken, null, PRL_DRAFT_TEMPLATE);
         verifyNoMoreInteractions(dgsService);
