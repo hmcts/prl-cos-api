@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -93,8 +94,11 @@ public class CallbackControllerTest {
     @Mock
     AllTabServiceImpl allTabsService;
 
+    @Mock
+    OrganisationService organisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
-    public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
+    public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
     private static final String C100_FINAL_TEMPLATE = "c100-final-template-1.docx";
     public static final String PRL_C1A_TEMPLATE = "PRL-C1A.docx";
@@ -146,7 +150,6 @@ public class CallbackControllerTest {
 
     }
 
-
     @Ignore
     @Test
     public void testGenerateAndStoreDocument() throws Exception {
@@ -164,10 +167,17 @@ public class CallbackControllerTest {
                                              .documentUrl(generatedDocumentInfo.getUrl())
                                              .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                              .documentHash(generatedDocumentInfo.getHashToken())
-                                             .documentFileName("PRL-DRAFT-C100-20.docx")
+                                             .documentFileName("PRL-C100-Draft-Final.docx")
                                              .build())
                           .build())
             .build();
+        CaseData.builder()
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("PRL-C100-Draft-Final.docx")
+                               .build()).build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
             .data(CaseData.builder()
@@ -175,7 +185,7 @@ public class CallbackControllerTest {
                                          .documentUrl(generatedDocumentInfo.getUrl())
                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                          .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("PRL-DRAFT-C100-20.docx")
+                                         .documentFileName("PRL-C100-Draft-Final.docx")
                                          .build())
                       .build())
             .build();
@@ -186,7 +196,8 @@ public class CallbackControllerTest {
             .thenReturn(generatedDocumentInfo);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest1 = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
-            .builder().build();
+            .builder()
+            .build();
 
         callbackController.generateAndStoreDocument(authToken, callbackRequest1);
 
@@ -195,7 +206,6 @@ public class CallbackControllerTest {
 
     }
 
-    @Ignore
     @Test
     public void testGenerateAndStoreC8Document() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
