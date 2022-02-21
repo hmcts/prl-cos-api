@@ -24,6 +24,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -183,8 +185,22 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
-    public void testThatNewMessageIsAddedToList() {
+    public void testThatNewMessageIsAddedToListWhenOpenMessagesPresent() {
         assertEquals(sendAndReplyService.addNewMessage(caseData, message3).size(), messagesWithOneAdded.size());
+    }
+
+    @Test
+    public void testThatNewMessageIsAddedToListWhenNoOpenMessagesPresent() {
+        CaseData caseDataNoMessages = CaseData.builder().build();
+        CaseData caseDataWithMessageAdded = CaseData.builder()
+            .openMessages(Collections.singletonList(element(message3)))
+            .build();
+
+        sendAndReplyService.addNewMessage(caseDataNoMessages, message3);
+        assertThat(caseDataWithMessageAdded.getOpenMessages())
+            .hasSize(1)
+                .extracting(m -> m.getValue().getMessageContent())
+                    .containsExactly("This is message 3 body");
     }
 
     @Test
