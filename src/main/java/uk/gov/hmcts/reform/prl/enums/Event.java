@@ -22,7 +22,15 @@ public enum Event {
     LITIGATION_CAPACITY("litigationCapacity", "Litigation capacity"),
     WELSH_LANGUAGE_REQUIREMENTS("welshLanguageRequirements", "Welsh language requirements"),
     VIEW_PDF_DOCUMENT("viewPdfDocument", "View PDF application"),
-    SUBMIT_AND_PAY("submitAndPay", "Submit and pay");
+    SUBMIT_AND_PAY("submitAndPay", "Submit and pay"),
+    // FL401 Events
+    FL401_CASE_NAME("fl401CaseName", "Case name"),
+    RESPONDENT_BEHAVIOUR("respondentBehaviour", "Respondent's Behaviour"),
+    WITHOUT_NOTICE_ORDER("withoutNoticeOrderDetails", "Without notice order"),
+    RELATIONSHIP_TO_RESPONDENT("respondentRelationship","Relationship to respondent"),
+    FL401_TYPE_OF_APPLICATION("fl401TypeOfApplication", "Type of application"),
+    FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's Family");
+
 
     private final String id;
     private final String name;
