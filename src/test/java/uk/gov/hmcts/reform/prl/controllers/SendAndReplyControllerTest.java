@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.AuthorisationUtil;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -32,7 +34,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-
 
 @RunWith(MockitoJUnitRunner.class)
 public class SendAndReplyControllerTest {
@@ -52,19 +53,14 @@ public class SendAndReplyControllerTest {
     @Mock
     ElementUtils elementUtils;
 
-
     CaseData replyCaseData;
     Map<String, Object> caseDataMap;
-
     SendAndReplyEventData sendEventData;
     CaseDetails sendCaseDetails;
     CaseData sendCaseData;
     CallbackRequest sendCallbackRequest;
-
-
     SendAndReplyEventData replyEventData;
     String auth = "authorisation";
-    UUID selectedValue = UUID.randomUUID();
 
     @Before
     public void setup() {
@@ -95,7 +91,6 @@ public class SendAndReplyControllerTest {
             .caseDetails(sendCaseDetails)
             .build();
 
-
         when(objectMapper.convertValue(sendCaseDetails.getData(), CaseData.class)).thenReturn(sendCaseData);
     }
 
@@ -108,7 +103,6 @@ public class SendAndReplyControllerTest {
         sendAndReplyController.handleAboutToStart(auth, sendCallbackRequest);
         verify(sendAndReplyService).setSenderAndGenerateMessageList(sendCaseData);
         verifyNoMoreInteractions(sendAndReplyService);
-
     }
 
     @Test
@@ -132,12 +126,33 @@ public class SendAndReplyControllerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         SendAndReplyEventData eventData = SendAndReplyEventData.builder().chooseSendOrReply(REPLY).build();
-        CaseData caseData = CaseData.builder().id(12345L).sendAndReplyEventData(eventData).build();
+        List<Element<Message>> messages = Collections.singletonList(element(Message.builder().build()));
+        CaseData caseData = CaseData.builder().id(12345L)
+            .sendAndReplyEventData(eventData)
+            .openMessages(messages)
+            .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.hasMessages(caseData)).thenReturn(true);
         when(sendAndReplyService.populateReplyMessageFields(caseData)).thenReturn(expectedMap);
         sendAndReplyController.handleMidEvent(auth, callbackRequest);
         verify(sendAndReplyService).populateReplyMessageFields(caseData);
+    }
+
+    @Test
+    public void testHandleMidEventReplyPathNoMessages() {
+        Map<String, Object> expectedMap = new HashMap<>();
+        expectedMap.put("messageReply", Message.builder().build());
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        SendAndReplyEventData eventData = SendAndReplyEventData.builder().chooseSendOrReply(REPLY).build();
+        CaseData caseData = CaseData.builder().id(12345L).sendAndReplyEventData(eventData).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.hasMessages(caseData)).thenReturn(false);
+        sendAndReplyController.handleMidEvent(auth, callbackRequest);
+        verify(sendAndReplyService).hasMessages(caseData);
+        verifyNoMoreInteractions(sendAndReplyService);
     }
 
     @Test
