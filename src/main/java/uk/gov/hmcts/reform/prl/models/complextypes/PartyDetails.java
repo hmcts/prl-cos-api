@@ -58,4 +58,10 @@ public class PartyDetails {
     private final String caseTypeOfApplication;
     private final YesOrNo respondentLivedWithApplicant;
 
+    public boolean hasConfidentialInfo() {
+        return this.isAddressConfidential.equals(YesOrNo.Yes)
+            || this.isEmailAddressConfidential.equals(YesOrNo.Yes)
+            || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
+    }
+
 }
