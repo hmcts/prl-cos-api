@@ -5,6 +5,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +44,7 @@ public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    @Ignore
     public void whenValidRequestFormat_Return200() throws Exception {
 
         HttpPost httpPost = new HttpPost(serviceUrl + caseInitiationControllerEndpoint);
