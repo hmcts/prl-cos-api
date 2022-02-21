@@ -133,6 +133,7 @@ public class CallbackController {
             request.getCaseDetails(),
             PRL_DRAFT_TEMPLATE
         );
+
         Map<String, Object> caseDataUpdated =
             objectMapper.convertValue(request.getCaseDetails().getCaseData(), new TypeReference<Map<String, Object>>() {});
 

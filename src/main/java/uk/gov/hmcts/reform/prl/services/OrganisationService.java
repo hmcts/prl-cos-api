@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,23 +44,6 @@ public class OrganisationService {
 
             List<Map<String, Object>> applicants = (List<Map<String, Object>>) caseData.get("applicants");
 
-//            applicants = applicants.stream()
-//                .map(applicant -> {
-//                    Map<String, Object> applicantDetails = (Map<String, Object>) applicant.get("value");
-//                    if (applicantDetails.get("solicitorOrg") != null) {
-//                        Map<String, Object> solicitorOrg = (Map<String, Object>) applicantDetails.get("solicitorOrg");
-//                        String organizationId = (String) solicitorOrg.get("organisationID");
-//                        if (organizationId != null) {
-//                            applicantDetails = addOrganizationDetails(userToken,organizationId,applicantDetails);
-//                            applicant.put("value", applicantDetails);
-//                            log.info("********* Applicant Details after map: {}**********\n",applicant);
-//                            log.info("**********Organisation details from API {}*************", organisations);
-//                        }
-//                    }
-//                    return applicant;
-//                })
-//                .collect(Collectors.toList());
-
             applicants.forEach((applicant) -> {
                     Map<String, Object> applicantDetails = (Map<String, Object>) applicant.get("value");
                     if (applicantDetails.get("solicitorOrg") != null) {
@@ -74,12 +58,12 @@ public class OrganisationService {
                     }
                 });
 
-
             caseData.put("applicants", applicants);
             log.info("Case Data after unwrapping : {}", caseData);
         }
         return caseData;
     }
+
     public Map<String,Object> addOrganizationDetails(String userToken, String organisationId, Map<String, Object> applicantDetails) {
 
 //        Organisations organisations = Organisations.builder()
@@ -137,6 +121,48 @@ public class OrganisationService {
 
             caseData.put("respondents", respondents);
         }
+        return caseData;
+    }
+
+    public CaseData getApplicantOrganisationDetailsOld(CaseData caseData) {
+        if (Optional.ofNullable(caseData.getApplicants()).isPresent()) {
+            String userToken = systemUserService.getSysUserToken();
+            List<PartyDetails> applicants = caseData
+                .getApplicants()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            log.info("applicants length {}",  applicants.size());
+            for (PartyDetails applicant : applicants) {
+                if (applicant.getSolicitorOrg() != null) {
+                    String organisationID = applicant.getSolicitorOrg().getOrganisationID();
+                    if (organisationID != null) {
+                        log.info("Organisation Id : {}",organisationID);
+                        log.info("*** Before api call organisation **** \n");
+                        organisations = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
+                        log.info("*** After api call organisation **** {} ============ \n",organisations);
+                        log.info("*** After api call organisation contact information address line 1 {} ============ \n",
+                                 organisations.getContactInformation().get(0));
+                        log.info("Before mapping, Applicant with to builder address line1: {} \n", applicant.getOrganisationAddress1());
+                        applicant = applicant.toBuilder()
+                            .organisationAddress1(organisations.getContactInformation().get(0).getAddressLine1())
+                            .organisationAddress2(organisations.getContactInformation().get(0).getAddressLine2())
+                            .organisationAddress3(organisations.getContactInformation().get(0).getAddressLine3())
+                            .organisationCountry(organisations.getContactInformation().get(0).getCountry())
+                            .organisationCounty(organisations.getContactInformation().get(0).getCounty())
+                            .organisationPostcode(organisations.getContactInformation().get(0).getPostCode())
+                            .build();
+                        log.info("After mapping, Applicant with to builder address line1: {} \n", applicant.getOrganisationAddress1());
+                        applicantsWithOrganisationDetails.add(Element.<PartyDetails>builder().value(applicant).build());
+                        log.info("***** Applicant with Organisation address **** {} \n", applicantsWithOrganisationDetails);
+                    }
+                }
+            }
+            caseData.toBuilder().applicants(applicantsWithOrganisationDetails).build();
+            caseData = caseData.toBuilder().applicants(applicantsWithOrganisationDetails).build();
+            log.info("*********Casedata after organisation details {}********",caseData);
+        }
+
         return caseData;
     }
 }
