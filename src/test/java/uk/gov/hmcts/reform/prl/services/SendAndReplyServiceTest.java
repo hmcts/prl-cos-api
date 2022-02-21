@@ -60,12 +60,9 @@ public class SendAndReplyServiceTest {
 
     String auth = "auth-token";
     UserDetails userDetails;
-
     LocalDateTime dateTime = LocalDateTime.of(LocalDate.of(2000, 1, 10),
                                               LocalTime.of(10, 22));
-
     String dateSent = dateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK));
-
     Message message1;
     Message message2;
     Message message3;
@@ -98,18 +95,6 @@ public class SendAndReplyServiceTest {
             .status(OPEN)
             .latestMessage("Message 1 latest message")
             .messageHistory("")
-            .build();
-        Message message1closed = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .status(CLOSED)
-            .latestMessage("Message 1 latest message")
-            .messageHistory("Message 1 message history")
             .build();
         message2 = Message.builder()
             .senderEmail("sender@email.com")
@@ -302,7 +287,6 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> testMessages = List.of(message1Element);
         Message replyMessage = Message.builder()
             .build();
-
         assertEquals(testMessages, sendAndReplyService.buildNewReplyMessage(selectedMessage,
                                                                                   replyMessage,
                                                                                   testMessages));
@@ -345,7 +329,6 @@ public class SendAndReplyServiceTest {
         Map<String, Object> expectedMap = Map.of("three", "this is the third field");
         sendAndReplyService.removeTemporaryFields(map, tempFields);
         assertEquals(expectedMap, map);
-
     }
 
 
