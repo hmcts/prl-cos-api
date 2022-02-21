@@ -32,7 +32,7 @@ public class FL401ApplicationTypeCheckerTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
 
         caseData = CaseData.builder().build();
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
