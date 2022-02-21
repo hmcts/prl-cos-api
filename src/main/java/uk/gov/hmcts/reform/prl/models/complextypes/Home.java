@@ -25,9 +25,9 @@ public class Home {
     private final YesOrNo isPropertyAdapted;
     private final String howIsThePropertyAdapted;
     private final YesOrNo isThereMortgageOnProperty;
-    private final List<Element<Mortgage>> mortgages;
+    private final Mortgage mortgages;
     private final YesOrNo isPropertyRented;
-    private final List<Element<Landlord>> landlords;
+    private final Landlord landlords;
     private final YesOrNo doesApplicantHaveHomeRights;
     private final List<LivingSituationEnum> livingSituation;
     private final List<FamilyHomeEnum> familyHome;
