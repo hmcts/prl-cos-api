@@ -1,189 +1,141 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.context.annotation.PropertySource;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.RejectReasonEnum.consentOrderNotProvided;
 
 
-@PropertySource(value = "classpath:application.yaml")
 @RunWith(SpringRunner.class)
 public class ReturnApplicationReturnMessageControllerTest {
 
-    public static final String authToken = "Bearer TestAuthToken";
-
-    public static final String caseName = "123";
-
-    public static final String ccdId = "1234567890123456";
-
-    public static final String legalName = "John Smith";
+    private MockMvc mockMvc;
 
     @InjectMocks
     private ReturnApplicationReturnMessageController returnApplicationReturnMessageController;
 
-    CaseData casedata;
+    @Mock
+    private UserService userService;
 
-    private CallbackRequest callbackRequest;
+    @Mock
+    private ReturnApplicationService returnApplicationService;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @Mock
     private UserDetails userDetails;
 
     @Mock
-    private UserService userService;
+    private CaseWorkerEmailService caseWorkerEmailService;
+
+    @Mock
+    private AllTabServiceImpl allTabsService;
+
+    private CallbackRequest callbackRequest;
+
+    CaseData casedata;
+
+    public static final String authToken = "Bearer TestAuthToken";
 
     @Before
     public void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
             .surname("Solicitor")
             .build();
-    }
-
-
-    @Test
-    public void whenNoOptionSelectedThenNoRejectReasonSelectedReturnTrue() {
-        casedata = CaseData.builder().build();
-
-        Assertions.assertTrue(returnApplicationReturnMessageController.noRejectReasonSelected(casedata));
-    }
-
-    @Test
-    public void whenHasOptionSelectedThenNoRejectReasonSelectedReturnFalse() {
 
         casedata = CaseData.builder()
+            .applicantCaseName("TestCase")
+            .id(123L)
+            .applicants(applicantList)
             .rejectReason(Collections.singletonList(consentOrderNotProvided))
             .build();
-
-        Assertions.assertFalse(returnApplicationReturnMessageController.noRejectReasonSelected(casedata));
-    }
-
-    @Test
-    public void whenHasApplicantWithNullRepresentativeNameGetLegalFullNameReturnsFalse() {
-        casedata = CaseData.builder().applicants(null).build();
-
-        Assertions.assertEquals("[Legal representative name]",returnApplicationReturnMessageController.getLegalFullName(casedata));
-    }
-
-    @Test
-    public void whenNoApplicantGetLegalFullNameReturnConstantString() {
-        casedata = CaseData.builder().build();
-
-        Assertions.assertEquals("[Legal representative name]",returnApplicationReturnMessageController.getLegalFullName(casedata));
-    }
-
-
-    @Test
-    public void whenHasApplicantRepresentativeNameGetLegalFullNameReturnLegalRepresentativeFullName() {
-        PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-
-        casedata = CaseData.builder().applicants(applicantList).build();
-
-        Assertions.assertEquals("John Smith",returnApplicationReturnMessageController.getLegalFullName(casedata));
     }
 
     @Test
     public void shouldStartReturnApplicationReturnMessageWithCaseDetails() throws Exception {
-        PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("returnMessage", "Test");
 
-        StringBuilder returnMsgStr = new StringBuilder();
-
-        returnMsgStr.append("Subject line: Application returned: " + caseName + "\n")
-            .append("Case name: " + caseName + "\n")
-            .append("Reference code: " + ccdId + "\n\n")
-            .append("Dear " + legalName + ",\n\n")
-            .append("Thank you for your application."
-                        + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n")
-            .append(consentOrderNotProvided.getReturnMsgText());
-
-        returnMsgStr.append("Please resolve these issues and resubmit your application.\n\n")
-            .append("Kind regards,\n")
-            .append("solicitor@example.com Solicitor");
-
-        callbackRequest = CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
-                             .caseId(ccdId)
-                             .caseData(CaseData.builder()
-                                           .applicantCaseName(caseName)
-                                           .applicants(applicantList)
-                                           .rejectReason(Collections.singletonList(consentOrderNotProvided))
-                                           .returnMessage(returnMsgStr.toString())
-                                           .build())
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
                              .build())
             .build();
 
-
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-
-        returnApplicationReturnMessageController.returnApplicationReturnMessage(authToken, callbackRequest);
-
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)).thenReturn(casedata);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = returnApplicationReturnMessageController
+            .returnApplicationReturnMessage(
+            authToken,
+            callbackRequest);
         verify(userService).getUserDetails(authToken);
         verifyNoMoreInteractions(userService);
-
-
     }
 
     @Test
-    public void shouldDoNothingReturnApplicationReturnMessageWithoutRejectReason() throws Exception {
+    public void testReturnApplicationEmailNotification() throws Exception {
+
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
-        StringBuilder returnMsgStr = new StringBuilder();
-
-        returnMsgStr.append("Subject line: Application returned: " + caseName + "\n")
-            .append("Case name: " + caseName + "\n")
-            .append("Reference code: " + ccdId + "\n\n")
-            .append("Dear " + legalName + ",\n\n")
-            .append("Thank you for your application."
-                        + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n")
-            .append(consentOrderNotProvided.getReturnMsgText());
-
-        returnMsgStr.append("Please resolve these issues and resubmit your application.\n\n")
-            .append("Kind regards,\n")
-            .append("solicitor@example.com Solicitor");
-
-        callbackRequest = CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
-                             .caseId(ccdId)
-                             .caseData(CaseData.builder()
-                                           .applicantCaseName(caseName)
-                                           .applicants(applicantList)
-                                           .returnMessage(returnMsgStr.toString())
-                                           .build())
-                             .build())
+        CaseData caseData = CaseData.builder()
+            .applicants(applicantList)
+            .applicantSolicitorEmailAddress("testing@test.com")
             .build();
 
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .data(stringObjectMap).build()).build();
 
-        returnApplicationReturnMessageController.returnApplicationReturnMessage(authToken, callbackRequest);
+        doNothing().when(caseWorkerEmailService).sendReturnApplicationEmailToSolicitor(callbackRequest.getCaseDetails());
 
-        verify(userService).getUserDetails(authToken);
-        verifyNoMoreInteractions(userService);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            returnApplicationReturnMessageController.returnApplicationEmailNotification(callbackRequest);
 
-
+        verify(allTabsService, times(1)).getAllTabsFields(any(CaseData.class));
     }
 }

@@ -36,7 +36,7 @@ public class ApplicationConsiderationTimetableValidationWorkflowTest {
 
     @BeforeEach
     void init_mocks() throws IllegalAccessException {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
 
         FieldUtils.writeField(applicationConsiderationTimetableValidationWorkflow, "objectMapper", objectMapper, true);
     }
