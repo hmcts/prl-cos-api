@@ -155,8 +155,6 @@ public class CallbackController {
             PRL_C8_TEMPLATE
         );
 
-        caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("Generate C1A if allegations of harm is set to Yes and the passed value is {}",
                  caseData.getAllegationsOfHarmYesNo());
@@ -189,7 +187,11 @@ public class CallbackController {
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
 
         caseDataUpdated.putAll(allTabsFields);
-        caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
+        try {
+            caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
+        } catch (Exception ex) {
+            log.info("notification has not been sent due to following {}", ex.getMessage());
+        }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -232,6 +234,12 @@ public class CallbackController {
 
             caseDataUpdated.putAll(allTabsFields);
         }
+        try {
+            caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
+        } catch (Exception ex) {
+            log.info("notification has not been sent due to following {}", ex.getMessage());
+        }
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
