@@ -297,6 +297,18 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void whenNewReplyTestNoMatchingMessageElement() {
+        UUID selectedMessage = UUID.randomUUID();
+        List<Element<Message>> testMessages = List.of(message1Element);
+        Message replyMessage = Message.builder()
+            .build();
+
+        assertEquals(testMessages, sendAndReplyService.buildNewReplyMessage(selectedMessage,
+                                                                                  replyMessage,
+                                                                                  testMessages));
+    }
+
+    @Test
     public void returnsMapWithCorrectOpenField() {
         Map<String, Object> expectedMap = Map.of("openMessages", messages);
         assertEquals(expectedMap, sendAndReplyService.returnMapOfOpenMessages(messages));

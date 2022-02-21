@@ -78,8 +78,9 @@ public class SendAndReplyController extends AbstractCallbackController {
         if (eventData.getChooseSendOrReply().equals(REPLY)) {
             if (!sendAndReplyService.hasMessages(caseData)) {
                 errors.add("There are no messages to respond to.");
+            } else {
+                caseDataMap.putAll(sendAndReplyService.populateReplyMessageFields(caseData));
             }
-            caseDataMap.putAll(sendAndReplyService.populateReplyMessageFields(caseData));
         }
         return AboutToStartOrSubmitCallbackResponse.builder()
             .errors(errors)
