@@ -54,10 +54,10 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 public class CallbackController {
 
     private static final String DRAFT_C_100_APPLICATION = "Draft_C100_application.pdf";
-    public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
+    public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
     private static final String C8_DOC = "C8Document.pdf";
-    private static final String C100_FINAL_DOC = "C100FinalDocument.docx";
-    private static final String C100_FINAL_TEMPLATE = "c100-final-template-1.docx";
+    private static final String C100_FINAL_DOC = "C100FinalDocument.pdf";
+    private static final String C100_FINAL_TEMPLATE = "C100-Final-Document.docx";
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
     public static final String PRL_C1A_TEMPLATE = "PRL-C1A.docx";
     public static final String PRL_C1A_FILENAME = "C1A_Document.pdf";
@@ -131,20 +131,23 @@ public class CallbackController {
     @ApiOperation(value = "Callback to generate and store document")
     public uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse generateAndStoreDocument(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody @ApiParam("CaseData") CallbackRequest request
+        @RequestBody @ApiParam("CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest request
     ) throws Exception {
+
+//        Map<String, Object> caseDataUpdated =request.getCaseDetails().getData();
+//
+//        caseDataUpdated = organisationService.getApplicantOrganisationDetails(caseDataUpdated);
+//
+//        caseDataUpdated = organisationService.getRespondentOrganisationDetails(caseDataUpdated);
+
+        CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
+        caseData = organisationService1.getApplicantOrganisationDetails(caseData);
+        caseData = organisationService1.getRespondentOrganisationDetails(caseData);
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
-            request.getCaseDetails(),
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             PRL_DRAFT_TEMPLATE
         );
-
-        Map<String, Object> caseDataUpdated =
-            objectMapper.convertValue(request.getCaseDetails().getCaseData(), new TypeReference<Map<String, Object>>() {});
-
-        caseDataUpdated = organisationService.getApplicantOrganisationDetails(caseDataUpdated);
-
-        caseDataUpdated = organisationService.getRespondentOrganisationDetails(caseDataUpdated);
 
         return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse
             .builder()
@@ -153,8 +156,6 @@ public class CallbackController {
                                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                        .documentHash(generatedDocumentInfo.getHashToken())
                                                        .documentFileName(DRAFT_C_100_APPLICATION).build())
-                      .applicants((List<Element<PartyDetails>>) caseDataUpdated.get("applicants"))
-                      .respondents((List<Element<PartyDetails>>) caseDataUpdated.get("respondents"))
                       .build())
             .build();
     }
