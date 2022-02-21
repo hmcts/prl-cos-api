@@ -42,103 +42,97 @@ public class OrganisationService {
             String userToken = systemUserService.getSysUserToken();
 
             List<Map<String, Object>> applicants = (List<Map<String, Object>>) caseData.get("applicants");
-            applicants.stream()
-                .map(applicant -> {
+
+//            applicants = applicants.stream()
+//                .map(applicant -> {
+//                    Map<String, Object> applicantDetails = (Map<String, Object>) applicant.get("value");
+//                    if (applicantDetails.get("solicitorOrg") != null) {
+//                        Map<String, Object> solicitorOrg = (Map<String, Object>) applicantDetails.get("solicitorOrg");
+//                        String organizationId = (String) solicitorOrg.get("organisationID");
+//                        if (organizationId != null) {
+//                            applicantDetails = addOrganizationDetails(userToken,organizationId,applicantDetails);
+//                            applicant.put("value", applicantDetails);
+//                            log.info("********* Applicant Details after map: {}**********\n",applicant);
+//                            log.info("**********Organisation details from API {}*************", organisations);
+//                        }
+//                    }
+//                    return applicant;
+//                })
+//                .collect(Collectors.toList());
+
+            applicants.forEach((applicant) -> {
                     Map<String, Object> applicantDetails = (Map<String, Object>) applicant.get("value");
                     if (applicantDetails.get("solicitorOrg") != null) {
                         Map<String, Object> solicitorOrg = (Map<String, Object>) applicantDetails.get("solicitorOrg");
-                        if (solicitorOrg.get("organisationID") != null) {
-                            Organisations organisations = organisationApi.findOrganisation(userToken,
-                                                                                           authTokenGenerator.generate(),
-                                                                                           (String) solicitorOrg.get(
-                                                                                               "organisationID")
-                            );
+                        String organizationId = (String) solicitorOrg.get("OrganisationID");
+                        if (organizationId != null) {
+                            applicantDetails = addOrganizationDetails(userToken,organizationId,applicantDetails);
+                            applicant.put("value", applicantDetails);
+                            log.info("********* Applicant Details after map: {}**********\n",applicant);
                             log.info("**********Organisation details from API {}*************", organisations);
-                            if (Optional.ofNullable(organisations.getContactInformation()).isPresent()) {
-                                ContactInformation contactInformation = organisations.getContactInformation().get(0);
-                                applicantDetails.put("organisationAddress1",
-                                    Optional.ofNullable(contactInformation.getAddressLine1()).isPresent()
-                                        ? contactInformation.getAddressLine1() : null);
-                                applicantDetails.put("organisationAddress2",
-                                    Optional.ofNullable(contactInformation.getAddressLine2()).isPresent()
-                                        ? contactInformation.getAddressLine2() : null);
-                                applicantDetails.put("organisationAddress3",
-                                    Optional.ofNullable(contactInformation.getAddressLine3()).isPresent()
-                                        ? contactInformation.getAddressLine3() : null);
-                                applicantDetails.put("country",
-                                    Optional.ofNullable(contactInformation.getCountry()).isPresent()
-                                        ? contactInformation.getCountry() : null);
-                                applicantDetails.put("county",
-                                    Optional.ofNullable(contactInformation.getCounty()).isPresent()
-                                        ? contactInformation.getCounty() : null);
-                                applicantDetails.put("postCode",
-                                    Optional.ofNullable(contactInformation.getPostCode()).isPresent()
-                                        ? contactInformation.getPostCode() : null);
-                                log.info("********* Applicant Details before map: {}**********\n",applicantDetails);
-                                applicant.put("value", applicantDetails);
-                                log.info("********* Applicant Details after map: {}**********\n",applicant);
-
-                            }
                         }
                     }
-                    return applicant;
-                })
-                .collect(Collectors.toList());
+                });
+
 
             caseData.put("applicants", applicants);
             log.info("Case Data after unwrapping : {}", caseData);
         }
         return caseData;
     }
+    public Map<String,Object> addOrganizationDetails(String userToken, String organisationId, Map<String, Object> applicantDetails) {
 
+//        Organisations organisations = Organisations.builder()
+//                                .contactInformation(List.of(ContactInformation.builder()
+//                                                                .addressLine1("hello")
+//                                                                .addressLine3("hello").build()))
+//                                .build();
+        Organisations organisations = organisationApi.findOrganisation(userToken,
+                                                                       authTokenGenerator.generate(),
+                                                                       organisationId);
+        if (Optional.ofNullable(organisations.getContactInformation()).isPresent()) {
+            ContactInformation contactInformation = organisations.getContactInformation().get(0);
+            applicantDetails.put("organisationAddress1",
+                                 Optional.ofNullable(contactInformation.getAddressLine1()).isPresent()
+                                     ? contactInformation.getAddressLine1() : null);
+            applicantDetails.put("organisationAddress2",
+                                 Optional.ofNullable(contactInformation.getAddressLine2()).isPresent()
+                                     ? contactInformation.getAddressLine2() : null);
+            applicantDetails.put("organisationAddress3",
+                                 Optional.ofNullable(contactInformation.getAddressLine3()).isPresent()
+                                     ? contactInformation.getAddressLine3() : null);
+            applicantDetails.put("country",
+                                 Optional.ofNullable(contactInformation.getCountry()).isPresent()
+                                     ? contactInformation.getCountry() : null);
+            applicantDetails.put("county",
+                                 Optional.ofNullable(contactInformation.getCounty()).isPresent()
+                                     ? contactInformation.getCounty() : null);
+            applicantDetails.put("postCode",
+                                 Optional.ofNullable(contactInformation.getPostCode()).isPresent()
+                                     ? contactInformation.getPostCode() : null);
+            log.info("********* Applicant Details before map: {}**********\n",applicantDetails);
+
+        }
+        return applicantDetails;
+    }
     public Map<String, Object> getRespondentOrganisationDetails(Map<String, Object> caseData) throws NotFoundException {
 
         if (Optional.ofNullable(caseData.get("respondents")).isPresent()) {
             String userToken = systemUserService.getSysUserToken();
             List<Map<String, Object>> respondents = (List<Map<String, Object>>) caseData.get("respondents");
-            respondents
-                .stream()
-                .map(respondent -> {
+            respondents.forEach(respondent -> {
                     Map<String, Object> respondentDetails = (Map<String, Object>) respondent.get("value");
                     if (respondentDetails.get("solicitorOrg") != null
                         && respondentDetails.get("doTheyHaveLegalRepresentation").equals("yes")) {
                         Map<String, Object> solicitorOrg = (Map<String, Object>) respondentDetails.get("solicitorOrg");
-                        if (solicitorOrg.get("organisationID") != null) {
-                            Organisations organisations = organisationApi.findOrganisation(userToken,
-                                                                                           authTokenGenerator.generate(),
-                                                                                           (String) solicitorOrg.get(
-                                                                                               "organisationID")
-                            );
-                            if (Optional.ofNullable(organisations.getContactInformation()).isPresent()) {
-                                ContactInformation contactInformation = organisations.getContactInformation().get(0);
-                                respondentDetails.put("organisationAddress1",
-                                                      Optional.ofNullable(contactInformation.getAddressLine1()).isPresent()
-                                                          ? contactInformation.getAddressLine1() : null);
-                                respondentDetails.put("organisationAddress2",
-                                                      Optional.ofNullable(contactInformation.getAddressLine2()).isPresent()
-                                                          ? contactInformation.getAddressLine2() : null);
-                                respondentDetails.put("organisationAddress3",
-                                                      Optional.ofNullable(contactInformation.getAddressLine3()).isPresent()
-                                                          ? contactInformation.getAddressLine3() : null);
-                                respondentDetails.put("country",
-                                                      Optional.ofNullable(contactInformation.getCountry()).isPresent()
-                                                          ? contactInformation.getCountry() : null);
-                                respondentDetails.put("county",
-                                                      Optional.ofNullable(contactInformation.getCounty()).isPresent()
-                                                          ? contactInformation.getCounty() : null);
-                                respondentDetails.put("postCode",
-                                                      Optional.ofNullable(contactInformation.getPostCode()).isPresent()
-                                                          ? contactInformation.getPostCode() : null);
-
-                                respondent.put("value", respondentDetails);
-                            }
-                            respondent.put("value", respondentDetails);
+                        String organisationID = (String) solicitorOrg.get("OrganisationID");
+                        if (organisationID != null) {
+                            respondentDetails = addOrganizationDetails(userToken,organisationID,respondentDetails);
                         }
+                        respondent.put("value", respondentDetails);
                     }
-                    return respondent;
-                })
-                .collect(Collectors.toList());
 
+                });
             log.info("Respondents length {}", respondents);
 
             caseData.put("respondents", respondents);

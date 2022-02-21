@@ -11,4 +11,5 @@ public enum RestrictToCafcassHmcts {
     RESTRICTTOGROUP("Yes - restrict to this group");
 
     private final String displayedValue;
+
 }

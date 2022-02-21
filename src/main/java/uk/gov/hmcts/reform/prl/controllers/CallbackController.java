@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -19,22 +20,21 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
-import uk.gov.hmcts.reform.prl.services.DgsService;
-import uk.gov.hmcts.reform.prl.services.ExampleService;
-import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
-import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.*;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -66,6 +66,7 @@ public class CallbackController {
     private final ObjectMapper objectMapper;
     private final AllTabServiceImpl allTabsService;
     private final UserService userService;
+    private final OrganisationService1 organisationService1;
 
     /**
      * It's just an example - to be removed when there are real tasks sending emails.
@@ -132,13 +133,23 @@ public class CallbackController {
             request.getCaseDetails(),
             PRL_DRAFT_TEMPLATE
         );
+        Map<String, Object> caseDataUpdated =
+            objectMapper.convertValue(request.getCaseDetails().getCaseData(), new TypeReference<Map<String, Object>>() {});
+
+        caseDataUpdated = organisationService.getApplicantOrganisationDetails(caseDataUpdated);
+
+        caseDataUpdated = organisationService.getRespondentOrganisationDetails(caseDataUpdated);
+
         return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse
             .builder()
             .data(CaseData.builder().draftOrderDoc(Document.builder()
                                                        .documentUrl(generatedDocumentInfo.getUrl())
                                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                        .documentHash(generatedDocumentInfo.getHashToken())
-                                                       .documentFileName(DRAFT_C_100_APPLICATION).build()).build())
+                                                       .documentFileName(DRAFT_C_100_APPLICATION).build())
+                      .applicants((List<Element<PartyDetails>>) caseDataUpdated.get("applicants"))
+                      .respondents((List<Element<PartyDetails>>) caseDataUpdated.get("respondents"))
+                      .build())
             .build();
     }
 
@@ -182,6 +193,9 @@ public class CallbackController {
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             C100_FINAL_TEMPLATE
         );
+        caseDataUpdated = organisationService.getApplicantOrganisationDetails(caseDataUpdated);
+
+        caseDataUpdated = organisationService.getRespondentOrganisationDetails(caseDataUpdated);
 
         caseDataUpdated.put("finalDocument", Document.builder()
             .documentUrl(generatedDocumentInfoFinal.getUrl())
@@ -248,7 +262,6 @@ public class CallbackController {
 
         Map<String,Object>  caseData = callbackRequest.getCaseDetails().getData();
 
-        //CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = organisationService.getApplicantOrganisationDetails(caseData);
         caseData = organisationService.getRespondentOrganisationDetails(caseData);
 

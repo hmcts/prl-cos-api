@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @RequiredArgsConstructor
 public enum YesNoDontKnow {
 
@@ -15,6 +15,20 @@ public enum YesNoDontKnow {
     @JsonProperty("dontKnow")
     dontKnow("dontKnow", "Don't know");
 
+
     private final String id;
     private final String displayedValue;
+
+
+    @JsonValue
+    public String getDisplayedValue() {
+        return displayedValue;
+    }
+
+    @JsonCreator
+    public static YesNoDontKnow getValue(String key) {
+        return YesNoDontKnow.valueOf(key);
+    }
+
+
 }

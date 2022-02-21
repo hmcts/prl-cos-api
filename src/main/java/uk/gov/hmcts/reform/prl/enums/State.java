@@ -1,46 +1,26 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
-
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public enum State {
 
-    AWAITING_SUBMISSION_TO_HMCTS("AWAITING_SUBMISSION_TO_HMCTS", "Draft"),
-    SUBMITTED_NOT_PAID("SUBMITTED_NOT_PAID", "Pending"),
-    SUBMITTED_PAID("SUBMITTED_PAID", "Submitted"),
-    AWAITING_RESUBMISSION_TO_HMCTS("AWAITING_RESUBMISSION_TO_HMCTS", "Returned"),
-    CASE_ISSUE("CASE_ISSUE", "Case Issued"),
-    CASE_WITHDRAWN("CASE_WITHDRAWN", "Withdrawn"),
-    GATEKEEPING("GATEKEEPING", "Gatekeeping"),
-    PREPARE_FOR_HEARING_CONDUCT_HEARING("PREPARE_FOR_HEARING_CONDUCT_HEARING", "Hearing"),
-    DECISION_OUTCOME("DECISION_OUTCOME"),
-    ALL_FINAL_ORDERS_ISSUED("ALL_FINAL_ORDERS_ISSUED");
+    @JsonProperty("AWAITING_SUBMISSION_TO_HMCTS")
+    AWAITING_SUBMISSION_TO_HMCTS("AWAITING_SUBMISSION_TO_HMCTS");
 
-    private final String value;
-    private final String label;
+    private final String displayedValue;
 
-    State(String value) {
-        this.value = value;
-        this.label = value;
+    @JsonValue
+    public String getDisplayedValue() {
+        return displayedValue;
     }
 
-    public static State fromValue(final String value) {
-        return tryFromValue(value)
-            .orElseThrow(() -> new NoSuchElementException("Unable to map " + value + " to a case state"));
-    }
-
-    public static Optional<State> tryFromValue(final String value) {
-        return Stream.of(values())
-            .filter(state -> state.value.equalsIgnoreCase(value))
-            .findFirst();
-    }
-
-    public String getLabel() {
-        return label;
+    @JsonCreator
+    public static State getValue(String key) {
+        return State.valueOf(key);
     }
 
 }
