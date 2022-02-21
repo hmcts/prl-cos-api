@@ -82,7 +82,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     @Before
     public void setUp() {
 
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
 
         feeResponse = FeeResponse.builder()
             .amount(BigDecimal.valueOf(232.00))
