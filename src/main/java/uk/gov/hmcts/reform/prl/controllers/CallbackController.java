@@ -154,7 +154,6 @@ public class CallbackController {
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             PRL_C8_TEMPLATE
         );
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("Generate C1A if allegations of harm is set to Yes and the passed value is {}",
                  caseData.getAllegationsOfHarmYesNo());
@@ -170,12 +169,6 @@ public class CallbackController {
                 .documentHash(generatedC1ADocumentInfo.getHashToken())
                 .documentFileName(PRL_C1A_FILENAME).build());
         }
-
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-            PRL_C8_TEMPLATE
-        );
         caseDataUpdated.put("c8Document", Document.builder()
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -205,7 +198,6 @@ public class CallbackController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-
         allTabsService.updateAllTabs(caseData);
     }
 
@@ -234,12 +226,6 @@ public class CallbackController {
 
             caseDataUpdated.putAll(allTabsFields);
         }
-        try {
-            caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            log.info("notification has not been sent due to following {}", ex.getMessage());
-        }
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

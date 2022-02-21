@@ -36,7 +36,7 @@ public class CaseWorkerEmail extends EmailTemplateVars {
 
 
     @JsonProperty("issueDate")
-    private final LocalDate issueDate;
+    private final String issueDate;
 
     @JsonProperty("isCaseUrgent")
     private final String isCaseUrgent;
@@ -56,8 +56,9 @@ public class CaseWorkerEmail extends EmailTemplateVars {
                            String ordersApplyingFor, String hearingDateRequested,
                            String typeOfHearing, String respondentLastName,
                            String courtEmail,
-                           String contentFromDev, String caseLink) {
-                           String courtEmail, LocalDate issueDate, String isCaseUrgent, String isConfidential, String caseUrgency, String caseLink) {
+                           String contentFromDev,
+                           String issueDate, String isCaseUrgent,
+                           String isConfidential, String caseUrgency, String caseLink) {
         super(caseReference);
         this.caseName = caseName;
         this.applicantName = applicantName;
