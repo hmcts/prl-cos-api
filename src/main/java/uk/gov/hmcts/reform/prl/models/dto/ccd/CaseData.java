@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
@@ -382,6 +383,11 @@ public class CaseData implements MappableObject {
     private final RespondentBailConditionDetails bailDetails;
     @JsonProperty("anyOtherDtailsForWithoutNoticeOrder")
     private final OtherDetailsOfWithoutNoticeOrder anyOtherDtailsForWithoutNoticeOrder;
+
+    /**
+     * Home Situation DA.
+     */
+    private final Home home;
 
     /**
      * FL401 Respondents relationship.
