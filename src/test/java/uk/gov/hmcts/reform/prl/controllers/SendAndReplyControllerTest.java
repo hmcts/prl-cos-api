@@ -73,7 +73,6 @@ public class SendAndReplyControllerTest {
             .id(12345678L)
             .sendAndReplyEventData(sendEventData)
             .build();
-
         replyEventData = SendAndReplyEventData.builder()
             .chooseSendOrReply(REPLY)
             .build();
@@ -81,12 +80,10 @@ public class SendAndReplyControllerTest {
             .id(12345678L)
             .sendAndReplyEventData(replyEventData)
             .build();
-
         sendCaseDetails = CaseDetails.builder()
             .id(12345678L)
             .data(caseDataMap)
             .build();
-
         sendCallbackRequest = CallbackRequest.builder()
             .caseDetails(sendCaseDetails)
             .build();
@@ -124,7 +121,6 @@ public class SendAndReplyControllerTest {
         Map<String, Object> expectedMap = new HashMap<>();
         expectedMap.put("messageReply", Message.builder().build());
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         SendAndReplyEventData eventData = SendAndReplyEventData.builder().chooseSendOrReply(REPLY).build();
         List<Element<Message>> messages = Collections.singletonList(element(Message.builder().build()));
         CaseData caseData = CaseData.builder().id(12345L)
@@ -135,7 +131,10 @@ public class SendAndReplyControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.hasMessages(caseData)).thenReturn(true);
         when(sendAndReplyService.populateReplyMessageFields(caseData)).thenReturn(expectedMap);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleMidEvent(auth, callbackRequest);
+
         verify(sendAndReplyService).populateReplyMessageFields(caseData);
     }
 
