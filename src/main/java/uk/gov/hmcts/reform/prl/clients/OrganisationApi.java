@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
-import uk.gov.hmcts.reform.prl.models.complextypes.Organisations;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 
 @FeignClient(
     name = "rd-professional-api",

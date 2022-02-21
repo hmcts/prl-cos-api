@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.Organisations;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -91,24 +91,7 @@ public class OrganisationService {
                 log.info("*** After api call organisation **** {}",organisations);
 
                 respondent = respondent.toBuilder()
-                    .organisationAddress1(Optional.ofNullable(organisations.getContactInformation().get(0).getAddressLine1()).isPresent()
-                                              ? organisations.getContactInformation().get(0).getAddressLine1()
-                                              : "")
-                    .organisationAddress2(Optional.ofNullable(organisations.getContactInformation().get(0).getAddressLine2()).isPresent()
-                                              ? organisations.getContactInformation().get(0).getAddressLine2()
-                                              : "")
-                    .organisationAddress3(Optional.ofNullable(organisations.getContactInformation().get(0).getAddressLine3()).isPresent()
-                                              ? organisations.getContactInformation().get(0).getAddressLine3()
-                                              : "")
-                    .organisationCountry(Optional.ofNullable(organisations.getContactInformation().get(0).getCountry()).isPresent()
-                                             ? organisations.getContactInformation().get(0).getCountry()
-                                             : "")
-                    .organisationCounty(Optional.ofNullable(organisations.getContactInformation().get(0).getCounty()).isPresent()
-                                            ? organisations.getContactInformation().get(0).getCounty()
-                                            : "")
-                    .organisationPostcode(Optional.ofNullable(organisations.getContactInformation().get(0).getPostCode()).isPresent()
-                                              ? organisations.getContactInformation().get(0).getPostCode()
-                                              : "")
+                    .organisations(organisations)
                     .build();
 
                 log.info("***** Respondent with Organisation address **** {} ", respondent);
@@ -137,17 +120,11 @@ public class OrganisationService {
                 log.info("*** After api call organisation **** {} ============ \n",organisations);
                 log.info("*** After api call organisation contact information address line 1 {} ============ \n",
                          organisations.getContactInformation().get(0));
-                log.info("Before mapping, Applicant with to builder address line1: {} \n", applicant.getOrganisationAddress1());
 
                 applicant = applicant.toBuilder()
-                    .organisationAddress1(organisations.getContactInformation().get(0).getAddressLine1())
-                    .organisationAddress2(organisations.getContactInformation().get(0).getAddressLine2())
-                    .organisationAddress3(organisations.getContactInformation().get(0).getAddressLine3())
-                    .organisationCountry(organisations.getContactInformation().get(0).getCountry())
-                    .organisationCounty(organisations.getContactInformation().get(0).getCounty())
-                    .organisationPostcode(organisations.getContactInformation().get(0).getPostCode())
+                    .organisations(organisations)
                     .build();
-                log.info("After mapping, Applicant with to builder address line1: {} \n", applicant.getOrganisationAddress1());
+                log.info("After mapping, Applicant with to builder address line1: {} \n", applicant.getOrganisations());
             }
         }
         return applicant;

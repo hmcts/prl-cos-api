@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.complextypes;
+package uk.gov.hmcts.reform.prl.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

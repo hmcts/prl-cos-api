@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -52,10 +53,6 @@ public class PartyDetails {
     private final YesNoDontKnow doTheyHaveLegalRepresentation;
     private final String sendSignUpLink;
     private final String solicitorEmail;
-    private final String organisationAddress1;
-    private final String organisationAddress2;
-    private final String organisationAddress3;
-    private final String organisationCountry;
-    private final String organisationCounty;
-    private final String organisationPostcode;
+    private final Organisations organisations;
+
 }
