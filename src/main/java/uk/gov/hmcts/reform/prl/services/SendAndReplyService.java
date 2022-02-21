@@ -117,17 +117,13 @@ public class SendAndReplyService {
         Map<String, Object> data = new HashMap<>();
         UUID messageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendAndReplyEventData().getReplyMessageDynamicList(), objectMapper);
-        Optional<Message> previousMessage = caseData.getOpenMessages().stream()
+
+        Optional<Message> previousMessageOptional = caseData.getOpenMessages().stream()
             .filter(element -> element.getId().equals(messageId))
             .map(Element::getValue)
             .findFirst();
 
-        if (previousMessage.isEmpty()) {
-            log.info("No messages exist to respond to.");
-            return  data;
-        }
-
-        Message m = previousMessage.get();
+        Message m = previousMessageOptional.orElse(Message.builder().build());
         Message populatedReply = Message.builder()
             .senderEmail(m.getSenderEmail())
             .messageSubject(m.getMessageSubject())
