@@ -39,7 +39,7 @@ Run the distributions (created in `build/install/prl-cos-api` directory)
 by executing the following command:
 
 ```bash
-  docker-compose up
+  docker-compose up 
 ```
 
 This will start the API container exposing the application's port
