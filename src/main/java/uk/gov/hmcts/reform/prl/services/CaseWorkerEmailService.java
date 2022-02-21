@@ -136,4 +136,42 @@ public class CaseWorkerEmailService {
         );
 
     }
+
+    private EmailTemplateVars buildReturnApplicationEmail(CaseDetails caseDetails) {
+
+        String returnMessage = emailService.getCaseData(caseDetails).getReturnMessage();
+
+        return CaseWorkerEmail.builder()
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .contentFromDev(returnMessage)
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+    }
+
+    public void sendReturnApplicationEmailToSolicitor(CaseDetails caseDetails) {
+
+        List<PartyDetails> applicants = emailService.getCaseData(caseDetails)
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> applicantEmailList = applicants.stream()
+            .map(element -> element.getSolicitorEmail())
+            .collect(Collectors.toList());
+
+        String email = applicantEmailList.get(0);
+
+        if (applicants.size() > 1) {
+            email = emailService.getCaseData(caseDetails).getApplicantSolicitorEmailAddress();
+        }
+        emailService.send(
+            email,
+            EmailTemplateNames.RETURNAPPLICATION,
+            buildReturnApplicationEmail(caseDetails),
+            LanguagePreference.ENGLISH
+        );
+
+    }
 }

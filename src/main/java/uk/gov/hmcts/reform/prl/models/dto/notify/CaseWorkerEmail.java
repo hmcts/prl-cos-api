@@ -31,6 +31,9 @@ public class CaseWorkerEmail extends EmailTemplateVars {
     @JsonProperty("courtEmail")
     private final String courtEmail;
 
+    @JsonProperty("contentFromDev")
+    private final String contentFromDev;
+
 
     private final String caseLink;
 
@@ -40,7 +43,8 @@ public class CaseWorkerEmail extends EmailTemplateVars {
                            String caseName, String applicantName,
                            String ordersApplyingFor, String hearingDateRequested,
                            String typeOfHearing, String respondentLastName,
-                           String courtEmail, String caseLink) {
+                           String courtEmail,
+                           String contentFromDev, String caseLink) {
         super(caseReference);
         this.caseName = caseName;
         this.applicantName = applicantName;
@@ -49,6 +53,7 @@ public class CaseWorkerEmail extends EmailTemplateVars {
         this.typeOfHearing = typeOfHearing;
         this.respondentLastName = respondentLastName;
         this.courtEmail = courtEmail;
+        this.contentFromDev = contentFromDev;
         this.caseLink = caseLink;
     }
 }
