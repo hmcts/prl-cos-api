@@ -65,33 +65,41 @@ public class CaseWorkerEmailServiceTest {
     @InjectMocks
     private CaseWorkerEmailService caseWorkerEmailService;
 
+    private PartyDetails applicant;
+    private PartyDetails respondent;
+    private String applicantNames;
+    private Element<PartyDetails> wrappedApplicants;
+    private List<Element<PartyDetails>> listOfApplicants;
+
+    private Element<PartyDetails> wrappedRespondents;
+    private List<Element<PartyDetails>> listOfRespondents;
+
+
     @Before
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
+        MockitoAnnotations.initMocks(this);
 
-    @Test
-    public void whenApplicantPresentThenApplicantStringCreated() {
-
-        PartyDetails applicant = PartyDetails.builder()
+        applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
             .build();
 
-        String applicantNames = "TestFirst TestLast";
+        applicantNames = "TestFirst TestLast";
 
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+        wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        listOfApplicants = Collections.singletonList(wrappedApplicants);
 
-        PartyDetails respondent = PartyDetails.builder()
+        respondent = PartyDetails.builder()
             .lastName("TestLast")
             .build();
 
-        String respondentNames = "TestLast";
+        wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        listOfRespondents = Collections.singletonList(wrappedRespondents);
 
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+    }
 
+    @Test
+    public void whenApplicantPresentThenApplicantStringCreated() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -112,7 +120,7 @@ public class CaseWorkerEmailServiceTest {
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
-            .respondentLastName("TestLast")
+            .respondentLastName(respondent.getLastName())
             .typeOfHearing("Urgent ")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Child Arrangements Order")
@@ -128,26 +136,6 @@ public class CaseWorkerEmailServiceTest {
 
     @Test
     public void whenRespondentPresentThenRespondentStringCreated() {
-
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .build();
-
-        String applicantNames = "TestFirst TestLast";
-
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        PartyDetails respondent = PartyDetails.builder()
-            .lastName("respondentLast")
-            .build();
-
-        String respondentNames = "TestLast";
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
-
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -168,7 +156,7 @@ public class CaseWorkerEmailServiceTest {
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
-            .respondentLastName("respondentLast")
+            .respondentLastName(respondent.getLastName())
             .typeOfHearing("Standard hearing")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Prohibited Steps Order")
@@ -184,25 +172,6 @@ public class CaseWorkerEmailServiceTest {
 
     @Test
     public void whenTypeOfApplicationPresentThenOrdersApplyForWillBeDispalyed() {
-
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .build();
-
-        String applicantNames = "TestFirst TestLast";
-
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        PartyDetails respondent = PartyDetails.builder()
-            .lastName("respondentLast")
-            .build();
-
-        String respondentNames = "TestLast";
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -223,7 +192,7 @@ public class CaseWorkerEmailServiceTest {
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
-            .respondentLastName("respondentLast")
+            .respondentLastName(respondent.getLastName())
             .typeOfHearing("Without notice")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Specific Issue Order")
@@ -238,25 +207,6 @@ public class CaseWorkerEmailServiceTest {
 
     @Test
     public void whenTypeOfApplicationIsReducedNoticeThenOrdersApplyForWillBeDispalyed() {
-
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .build();
-
-        String applicantNames = "TestFirst TestLast";
-
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        PartyDetails respondent = PartyDetails.builder()
-            .lastName("respondentLast")
-            .build();
-
-        String respondentNames = "TestLast";
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -277,7 +227,7 @@ public class CaseWorkerEmailServiceTest {
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
-            .respondentLastName("respondentLast")
+            .respondentLastName(respondent.getLastName())
             .typeOfHearing("Reduced notice")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Specific Issue Order")
@@ -292,24 +242,6 @@ public class CaseWorkerEmailServiceTest {
 
     @Test
     public void sendEmailSuccessfully() {
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .build();
-
-        String applicantNames = "TestFirst TestLast";
-
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        PartyDetails respondent = PartyDetails.builder()
-            .lastName("respondentLast")
-            .build();
-
-        String respondentNames = "TestLast";
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -336,7 +268,7 @@ public class CaseWorkerEmailServiceTest {
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
-            .respondentLastName("respondentLast")
+            .respondentLastName(respondent.getLastName())
             .typeOfHearing("Reduced notice")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Specific Issue Order")
@@ -345,45 +277,6 @@ public class CaseWorkerEmailServiceTest {
 
         caseWorkerEmailService.sendEmail(caseDetails);
         assertEquals(caseDetails.getData().get("caseworkerEmailAddress").toString(), "test@test.com");
-    }
-
-    @Test
-    public void sendReturnApplicationEmailSuccessfully() {
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .build();
-
-        String applicantNames = "TestFirst TestLast";
-
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .applicants(listOfApplicants)
-            .build();
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("applicantSolicitorEmailAddress", "test@test.com");
-
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(caseData.getId())
-            .data(data)
-            .build();
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = CaseWorkerEmail.builder()
-            .caseName(caseData.getApplicantCaseName())
-            .contentFromDev(caseData.getReturnMessage())
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
-            .build();
-
-        caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(caseDetails);
-        assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
-
     }
 
     @Test
@@ -552,6 +445,45 @@ public class CaseWorkerEmailServiceTest {
         caseWorkerEmailService.sendEmailToCourtAdmin(caseDetails);
 
         assertEquals(emailList, caseData.getLocalCourtAdmin());
+    }
+
+    @Test
+    public void sendReturnApplicationEmailSuccessfully() {
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicants(listOfApplicants)
+            .build();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", "test@test.com");
+
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        EmailTemplateVars email = CaseWorkerEmail.builder()
+            .caseName(caseData.getApplicantCaseName())
+            .contentFromDev(caseData.getReturnMessage())
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+        caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(caseDetails);
+        assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
+
     }
 }
 
