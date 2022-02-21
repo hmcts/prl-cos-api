@@ -18,7 +18,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
-import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 
@@ -32,6 +33,9 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
     private final String serviceAuth = "ServiceAuthorization";
     private final RequestUpdateCallbackService requestUpdateCallbackService;
     private final AuthTokenGenerator authTokenGenerator;
+    private final AuthorisationService authorisationService;
+    private final CourtFinderService courtLocatorService;
+
 
     @Autowired
     @Qualifier("allTabsService")
@@ -47,8 +51,10 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
         @RequestHeader(serviceAuth) String serviceAuthorization,
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws Exception {
-        if (authorisationService.authorise(serviceAuthorization)) {
-            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+        try {
+            if (authorisationService.authorise(serviceAuthorization)) {
+                requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+            }
         } catch (Exception ex) {
             log.error(
                 "Payment callback is unsuccessful for the CaseID: {}",
@@ -71,6 +77,16 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
             log.info("**********************");
 
             final CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+            // Getting court name and save it to db.
+            Court closestChildArrangementsCourt = courtLocatorService
+                .getClosestChildArrangementsCourt(caseData);
+            if (closestChildArrangementsCourt != null) {
+                caseData.setCourtName(closestChildArrangementsCourt.getCourtName());
+            }
+            log.info("*** Court Name *** " + caseData.getCourtName());
+            //TODO: Have to set date of submission if payment is successful.
+            tabService.updateAllTabs(caseData);
+            log.info("After application tab service");
 
             PaymentDto paymentDto = PaymentDto.builder()
                 .paymentAmount("232")
@@ -86,17 +102,6 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
                 .serviceRequestStatus("Paid")
                 .payment(paymentDto)
                 .build();
-
-            // Getting court name and save it to db.
-            Court closestChildArrangementsCourt = courtLocatorService
-                .getClosestChildArrangementsCourt(caseData);
-            if (closestChildArrangementsCourt != null) {
-                caseData.setCourtName(closestChildArrangementsCourt.getCourtName());
-            }
-            log.info("*** Court Name *** " + caseData.getCourtName());
-            //TODO: Have to set date of submission if payment is successful.
-            tabService.updateAllTabs(caseData);
-            log.info("After application tab service");
 
             requestUpdateCallbackService.processCallbackForBypass(serviceRequestUpdateDto, authorisation);
 
