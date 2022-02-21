@@ -59,7 +59,7 @@ public class CaseWorkerEmailService {
 
     public EmailTemplateVars buildEmail(CaseDetails caseDetails) {
 
-        caseData = caseData;
+        caseData = emailService.getCaseData(caseDetails);
 
         List<PartyDetails> applicants = caseData
             .getApplicants()
@@ -161,6 +161,8 @@ public class CaseWorkerEmailService {
 
     public void sendReturnApplicationEmailToSolicitor(CaseDetails caseDetails) {
 
+        caseData = emailService.getCaseData(caseDetails);
+
         List<PartyDetails> applicants = caseData
             .getApplicants()
             .stream()
@@ -168,7 +170,7 @@ public class CaseWorkerEmailService {
             .collect(Collectors.toList());
 
         List<String> applicantEmailList = applicants.stream()
-            .map(element -> element.getSolicitorEmail())
+            .map(PartyDetails::getSolicitorEmail)
             .collect(Collectors.toList());
 
         String email = applicantEmailList.get(0);
