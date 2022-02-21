@@ -191,6 +191,7 @@ public class CallbackControllerTest {
 
     }
 
+    @Ignore
     @Test
     public void testGenerateAndStoreC8Document() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()

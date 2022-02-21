@@ -8,13 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,10 +39,11 @@ public class OrganisationService1 {
     public Map<String, Object> getApplicantOrganisationDetails(Map<String, Object> caseData) throws NotFoundException {
         log.info("Case Data before unwrapping : {}",caseData);
         if (Optional.ofNullable(caseData.get("applicants")).isPresent()) {
+
             String userToken = systemUserService.getSysUserToken();
 
             List<Map<String,Object>> applicants = (List<Map<String, Object>>) caseData.get("applicants");
-             applicants.stream()
+            applicants.stream()
                 .map(applicant ->  {
                     Map<String,Object> applicantDetails = (Map<String, Object>) applicant.get("value");
                     if (applicantDetails.get("solicitorOrg") != null) {
@@ -47,14 +51,14 @@ public class OrganisationService1 {
                         applicantDetails.put("organisationAddress2","hello");
                         applicantDetails.put("organisationAddress3","hello");
                         applicant.put("value",applicantDetails);
-                    };
+                    }
 
                     return applicant;
                 })
                 .collect(Collectors.toList());
 
-             caseData.put("applicants", applicants);
-             log.info("Case Data after unwrapping : {}",caseData);
+            caseData.put("applicants", applicants);
+            log.info("Case Data after unwrapping : {}",caseData);
         }
         return caseData;
     }
@@ -77,18 +81,24 @@ public class OrganisationService1 {
                             );
                             if (Optional.ofNullable(organisations.getContactInformation()).isPresent()) {
                                 ContactInformation contactInformation = organisations.getContactInformation().get(0);
-                                respondentDetails.put("organisationAddress1"
-                                    ,Optional.ofNullable(contactInformation.getAddressLine1()).isPresent() ? contactInformation.getAddressLine1() : null);
-                                respondentDetails.put("organisationAddress2"
-                                    ,Optional.ofNullable(contactInformation.getAddressLine2()).isPresent() ? contactInformation.getAddressLine2() : null);
-                                respondentDetails.put("organisationAddress3"
-                                    ,Optional.ofNullable(contactInformation.getAddressLine3()).isPresent() ? contactInformation.getAddressLine3() : null);
-                                respondentDetails.put("country"
-                                    ,Optional.ofNullable(contactInformation.getCountry()).isPresent() ? contactInformation.getCountry() : null);
-                                respondentDetails.put("county"
-                                    ,Optional.ofNullable(contactInformation.getCounty()).isPresent() ? contactInformation.getCounty() : null);
-                                respondentDetails.put("postCode"
-                                    ,Optional.ofNullable(contactInformation.getPostCode()).isPresent() ? contactInformation.getPostCode() : null);
+                                respondentDetails.put("organisationAddress1",
+                                                      Optional.ofNullable(contactInformation.getAddressLine1()).isPresent()
+                                                          ? contactInformation.getAddressLine1() : null);
+                                respondentDetails.put("organisationAddress2",
+                                                      Optional.ofNullable(contactInformation.getAddressLine2()).isPresent()
+                                                          ? contactInformation.getAddressLine2() : null);
+                                respondentDetails.put("organisationAddress3",
+                                                      Optional.ofNullable(contactInformation.getAddressLine3()).isPresent()
+                                                          ? contactInformation.getAddressLine3() : null);
+                                respondentDetails.put("country",
+                                                      Optional.ofNullable(contactInformation.getCountry()).isPresent()
+                                                          ? contactInformation.getCountry() : null);
+                                respondentDetails.put("county",
+                                                      Optional.ofNullable(contactInformation.getCounty()).isPresent()
+                                                          ? contactInformation.getCounty() : null);
+                                respondentDetails.put("postCode",
+                                                      Optional.ofNullable(contactInformation.getPostCode()).isPresent()
+                                                          ? contactInformation.getPostCode() : null);
 
                                 respondent.put("value",respondentDetails);
                             }
