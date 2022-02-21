@@ -255,25 +255,4 @@ public class CallbackController {
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
-    @PostMapping(path = "/save-organisation-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to retrieve and store organisation details")
-    public AboutToStartOrSubmitCallbackResponse saveOrganisationDetails(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody @ApiParam("CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws Exception {
-
-        Map<String,Object>  caseData = callbackRequest.getCaseDetails().getData();
-
-        caseData = organisationService1.getApplicantOrganisationDetails(caseData);
-        caseData = organisationService1.getRespondentOrganisationDetails(caseData);
-
-        return AboutToStartOrSubmitCallbackResponse
-            .builder()
-            .data(toMap(caseData)).build();
-    }
-
-    public Map<String, Object> toMap(Object object) {
-        return objectMapper.convertValue(object, Map.class);
-    }
 }
