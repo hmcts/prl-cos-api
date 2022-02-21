@@ -42,6 +42,7 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -179,28 +180,28 @@ public class CallbackController {
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
                 PRL_C1A_TEMPLATE
             );
-            caseDataUpdated.put("c1ADocument", Document.builder()
+            caseDataUpdated.put(DOCUMENT_FIELD_C1A, Document.builder()
                 .documentUrl(generatedC1ADocumentInfo.getUrl())
                 .documentBinaryUrl(generatedC1ADocumentInfo.getBinaryUrl())
                 .documentHash(generatedC1ADocumentInfo.getHashToken())
                 .documentFileName(PRL_C1A_FILENAME).build());
         }
-        caseDataUpdated.put("c8Document", Document.builder()
+        caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(C8_DOC).build());
+        caseData = organisationService.getApplicantOrganisationDetails(caseData);
+
+        caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
         GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             C100_FINAL_TEMPLATE
         );
-        caseDataUpdated = organisationService1.getApplicantOrganisationDetails(caseDataUpdated);
 
-        caseDataUpdated = organisationService1.getRespondentOrganisationDetails(caseDataUpdated);
-
-        caseDataUpdated.put("finalDocument", Document.builder()
+        caseDataUpdated.put(DOCUMENT_FIELD_FINAL, Document.builder()
             .documentUrl(generatedDocumentInfoFinal.getUrl())
             .documentBinaryUrl(generatedDocumentInfoFinal.getBinaryUrl())
             .documentHash(generatedDocumentInfoFinal.getHashToken())
