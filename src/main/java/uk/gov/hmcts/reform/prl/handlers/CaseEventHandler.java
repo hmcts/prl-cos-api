@@ -16,8 +16,10 @@ import uk.gov.hmcts.reform.prl.services.TaskListService;
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -36,7 +38,8 @@ public class CaseEventHandler {
 
         List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors();
 
-        final String taskList = taskListRenderer.render(tasks, eventErrors);
+        final String taskList = taskListRenderer
+            .render(tasks, eventErrors, caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE));
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,

@@ -178,4 +178,5 @@ rd_professional:
     url: http://rd-professional-api-aat.service.core-compute-aat.internal
     
 launchdarkly:
-  sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
+  sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
+  

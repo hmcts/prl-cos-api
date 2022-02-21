@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -29,7 +30,7 @@ public class RespondentsCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        assertTrue(!respondentsChecker.isStarted(caseData));
+        assertFalse(respondentsChecker.isStarted(caseData));
     }
 
     @Test
@@ -37,15 +38,15 @@ public class RespondentsCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        assertTrue(!respondentsChecker.isFinished(caseData));
+        assertFalse(respondentsChecker.isFinished(caseData));
     }
 
     @Test
     public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
-
-        assertTrue(!respondentsChecker.hasMandatoryCompleted(caseData));
+      
+        assertFalse(respondentsChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
@@ -65,7 +66,10 @@ public class RespondentsCheckerTest {
     public void whenIncompleteCaseDataValidateMandatoryFieldsForRespondentReturnsFalse() {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName").build();
 
-        assertTrue(!respondentsChecker.validateMandatoryFieldsForRespondent(respondent));
+        CaseData caseData = CaseData.builder().caseTypeOfApplication("Test")
+            .build();
+
+        assertFalse(respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData.getCaseTypeOfApplication()));
     }
 
     @Test
