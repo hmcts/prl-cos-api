@@ -140,8 +140,6 @@ public class CallbackController {
             .id(callbackRequest.getCaseDetails().getId())
             .build();
 
-        caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("Generate C1A if allegations of harm is set to Yes and the passed value is {}",
                  caseData.getAllegationsOfHarmYesNo());
@@ -168,6 +166,12 @@ public class CallbackController {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(C8_DOC).build());
+
+        try {
+            caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
+        } catch (Exception ex) {
+            log.info("notification has not been sent due to following {}", ex.getMessage());
+        }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
