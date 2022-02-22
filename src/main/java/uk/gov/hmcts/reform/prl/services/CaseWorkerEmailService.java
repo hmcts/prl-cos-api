@@ -35,6 +35,7 @@ public class CaseWorkerEmailService {
     private final EmailTemplatesConfig emailTemplatesConfig;
     private final ObjectMapper objectMapper;
 
+    private static final String URL_STRING = "/";
     private static final String URGENT_CASE = "Urgent ";
     private static final String WITHOUT_NOTICE = "Without notice";
     private static final String REDUCED_NOTICE = "Reduced notice";
@@ -130,7 +131,7 @@ public class CaseWorkerEmailService {
             .ordersApplyingFor(typeOfOrders)
             .typeOfHearing(typeOfHearings)
             .courtEmail(courtEmail)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .build();
 
     }
@@ -155,7 +156,7 @@ public class CaseWorkerEmailService {
         return CaseWorkerEmail.builder()
             .caseName(caseData.getApplicantCaseName())
             .contentFromDev(returnMessage)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .build();
 
     }
@@ -171,7 +172,7 @@ public class CaseWorkerEmailService {
             .collect(Collectors.toList());
 
         List<String> applicantEmailList = applicants.stream()
-            .map(element -> element.getSolicitorEmail())
+            .map(PartyDetails::getSolicitorEmail)
             .collect(Collectors.toList());
 
         String email = applicantEmailList.get(0);
@@ -231,7 +232,7 @@ public class CaseWorkerEmailService {
             .caseUrgency(typeOfHearing)
             .isCaseUrgent(isCaseUrgent)
             .issueDate(issueDate.format(dateTimeFormatter))
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .build();
     }
 }

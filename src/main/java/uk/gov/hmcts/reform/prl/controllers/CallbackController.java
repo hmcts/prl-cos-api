@@ -232,13 +232,14 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseWorkerEmailService.sendEmailToGateKeeper(caseDetails);
-        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
 
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
+
+        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
