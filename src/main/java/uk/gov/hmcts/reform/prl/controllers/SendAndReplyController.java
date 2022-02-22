@@ -113,6 +113,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                     .filter(m -> m.getValue().getStatus().equals(MessageStatus.CLOSED))
                     .collect(Collectors.toList());
 
+                closedMessages.addAll(caseData.getClosedMessages());
+
                 messages.removeAll(closedMessages);
                 caseDataMap.put("closedMessages", closedMessages);
 
