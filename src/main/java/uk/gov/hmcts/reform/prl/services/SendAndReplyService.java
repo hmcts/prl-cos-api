@@ -77,7 +77,6 @@ public class SendAndReplyService {
                 EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION,
                 buildNotificationEmail(caseData, message),
                 LanguagePreference.ENGLISH);
-        log.info(String.format("Send and reply notification sent to %s", message.getRecipientEmail()));
     }
 
 
