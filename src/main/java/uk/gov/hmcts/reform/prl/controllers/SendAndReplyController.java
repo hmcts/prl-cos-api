@@ -144,17 +144,16 @@ public class SendAndReplyController extends AbstractCallbackController {
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestHeader("Authorization") String authorisation,
                                                                 @RequestBody CallbackRequest callbackRequest) {
-        log.info(callbackRequest.getCaseDetails().toString());
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
 
+        //get the most recent message
+        Message message = caseData.getOpenMessages().get(0).getValue();
 
         if (caseData.getSendAndReplyEventData().getChooseSendOrReply().equals(SEND)
             || (caseData.getSendAndReplyEventData().getChooseSendOrReply().equals(REPLY)
-            && caseData.getSendAndReplyEventData().getMessageReply().getIsReplying().equals(YesOrNo.Yes))) {
+            && message.getIsReplying().equals(YesOrNo.Yes))) {
 
-
-            Message message = caseData.getOpenMessages().get(0).getValue();
             sendAndReplyService.sendNotificationEmail(caseData, message);
         }
         //if a message is being closed then no notification email is sent
