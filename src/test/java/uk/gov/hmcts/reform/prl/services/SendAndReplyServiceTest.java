@@ -7,10 +7,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
+import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
@@ -34,6 +38,8 @@ import static java.util.Optional.ofNullable;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
@@ -55,6 +61,12 @@ public class SendAndReplyServiceTest {
 
     @Mock
     ElementUtils elementUtils;
+
+    @Mock
+    EmailService emailService;
+
+    @Value("${xui.url}")
+    private String manageCaseUrl;
 
     String auth = "auth-token";
     UserDetails userDetails;
@@ -139,6 +151,7 @@ public class SendAndReplyServiceTest {
         messages.add(message1Element);
         messages.add(message2Element);
         caseData = CaseData.builder()
+            .applicantCaseName("Test name")
             .openMessages(messages)
             .closedMessages(messages)
             .sendAndReplyEventData(eventData)
@@ -352,6 +365,38 @@ public class SendAndReplyServiceTest {
         assertEquals(expectedMap, map);
     }
 
+    @Test
+    public void testThatEmailNotificationIsBuilt() {
+        SendAndReplyNotificationEmail email =
+            SendAndReplyNotificationEmail.builder()
+                .caseName(caseData.getApplicantCaseName())
+                .messageSubject(message1.getMessageSubject())
+                .senderEmail(message1.getSenderEmail())
+                .messageUrgency(message1.getMessageUrgency())
+                .messageContent(message1.getLatestMessage())
+                .caseLink(manageCaseUrl + "/" + caseData.getId())
+                .build();
+        assertEquals(email, sendAndReplyService.buildNotificationEmail(caseData, message1));
+    }
 
+    @Test
+    public void testThatEmailServiceIsCalledWithEmailTemplate() {
+        SendAndReplyNotificationEmail email =
+            SendAndReplyNotificationEmail.builder()
+                .caseName(caseData.getApplicantCaseName())
+                .messageSubject(message1.getMessageSubject())
+                .senderEmail(message1.getSenderEmail())
+                .messageUrgency(message1.getMessageUrgency())
+                .messageContent(message1.getLatestMessage())
+                .caseLink(manageCaseUrl + "/" + caseData.getId())
+                .build();
 
+        sendAndReplyService.sendNotificationEmail(caseData, message1);
+        verify(emailService, times(1)).send(
+            message1.getRecipientEmail(),
+            EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION,
+            email,
+            LanguagePreference.ENGLISH
+        );
+    }
 }

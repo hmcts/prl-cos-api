@@ -4,11 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
+import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
+import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
@@ -34,6 +39,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendAndReplyService {
 
+    private final EmailService emailService;
+
     private final UserService userService;
 
     private final ObjectMapper objectMapper;
@@ -41,6 +48,38 @@ public class SendAndReplyService {
     private final ElementUtils elementUtils;
 
     private final Time dateTime;
+
+    @Value("${xui.url}")
+    private String manageCaseUrl;
+
+
+    public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
+        String caseName = caseData.getApplicantCaseName();
+        String subject = message.getMessageSubject();
+        String senderEmail = message.getSenderEmail();
+        String urgency = message.getMessageUrgency();
+        String content = message.getLatestMessage();
+        String caseLink = manageCaseUrl + "/" + caseData.getId();
+
+        return  SendAndReplyNotificationEmail.builder()
+                    .caseName(caseName)
+                    .messageSubject(subject)
+                    .senderEmail(senderEmail)
+                    .messageUrgency(urgency)
+                    .messageContent(content)
+                    .caseLink(caseLink)
+                    .build();
+    }
+
+    public void sendNotificationEmail(CaseData caseData, Message message) {
+        emailService.send(
+                message.getRecipientEmail(),
+                EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION,
+                buildNotificationEmail(caseData, message),
+                LanguagePreference.ENGLISH);
+        log.info(String.format("Send and reply notification sent to %s", message.getRecipientEmail()));
+    }
+
 
     public String getLoggedInUserEmail(String authorisation) {
         return userService.getUserDetails(authorisation).getEmail();
@@ -198,5 +237,7 @@ public class SendAndReplyService {
             caseData.remove(field);
         }
     }
+
+
 
 }
