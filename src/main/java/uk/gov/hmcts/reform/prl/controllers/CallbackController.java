@@ -66,7 +66,7 @@ public class CallbackController {
     private final SolicitorEmailService solicitorEmailService;
 
     private final DgsService dgsService;
-    private final ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     private final AllTabServiceImpl allTabsService;
     private final UserService userService;
 

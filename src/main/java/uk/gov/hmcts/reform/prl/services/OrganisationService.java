@@ -34,11 +34,8 @@ public class OrganisationService {
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
     private List<Element<PartyDetails>> applicantsWithOrganisationDetails = new ArrayList<>();
-    private UUID id;
-    @Autowired
-    private ObjectMapper objectMapper;
 
-    public CaseData getApplicantOrganisationDetails(CaseData caseData) throws NotFoundException {
+    public CaseData getApplicantOrganisationDetails(CaseData caseData)  {
         log.info("Case Data before unwrapping : {}",caseData);
         if (Optional.ofNullable(caseData.getApplicants()).isPresent()) {
             String userToken = systemUserService.getSysUserToken();
