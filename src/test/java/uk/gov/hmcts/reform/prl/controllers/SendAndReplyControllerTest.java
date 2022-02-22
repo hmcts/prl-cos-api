@@ -289,33 +289,4 @@ public class SendAndReplyControllerTest {
         verifyNoMoreInteractions(sendAndReplyService);
     }
 
-//    @Test
-//    public void testHandleSubmittedReplyMessage() {
-//        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-//        Message newMessage = Message.builder()
-//            .updatedTime(ZonedDateTime.of(2022, 01, 01, 10, 30, 30, 0,
-//                                          ZoneId.of("Europe/London")).toLocalDateTime())
-//            .isReplying(YesOrNo.Yes).build();
-//        Message oldMessage = Message.builder()
-//            .updatedTime(ZonedDateTime.of(2022, 01, 01, 9, 30, 30, 0,
-//                                          ZoneId.of("Europe/London")).toLocalDateTime())
-//            .isReplying(YesOrNo.Yes).build();
-//
-//        SendAndReplyEventData eventData = SendAndReplyEventData.builder()
-//            .chooseSendOrReply(REPLY)
-//            .messageReply(newMessage)
-//            .replyMessageDynamicList(DynamicList.builder().build())
-//            .build();
-//
-//        CaseData caseData = CaseData.builder().id(12345L)
-//            .sendAndReplyEventData(eventData)
-//            .openMessages((Arrays.asList(element(newMessage), element(oldMessage))))
-//            .build();
-//
-//        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-//        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-//        sendAndReplyController.handleSubmitted(auth, callbackRequest);
-//        verify(sendAndReplyService).sendNotificationEmail(caseData, newMessage);
-//        verifyNoMoreInteractions(sendAndReplyService);
-//    }
 }
