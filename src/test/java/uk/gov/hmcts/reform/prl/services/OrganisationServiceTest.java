@@ -59,9 +59,6 @@ public class OrganisationServiceTest {
 
         String applicantNames = "TestFirst TestLast";
 
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
                                                                                         .addressLine1("29, SEATON DRIVE")
                                                                                         .addressLine2("test line")
@@ -102,6 +99,8 @@ public class OrganisationServiceTest {
             .applicants(elementList)
             .build();
         assertEquals(organisations.getOrganisationIdentifier(), organisationId);
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -125,9 +124,6 @@ public class OrganisationServiceTest {
             .build();
 
         String applicantNames = "TestFirst TestLast";
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
 
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
                                                                                         .addressLine1("29, SEATON DRIVE")
@@ -169,6 +165,8 @@ public class OrganisationServiceTest {
         organisationService.getOrganisationDetaiils(authToken, organisationId);
 
         assertEquals(organisations.getOrganisationIdentifier(), organisationId);
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
