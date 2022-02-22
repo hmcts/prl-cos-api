@@ -28,4 +28,7 @@ public class OrchestrationConstants {
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
 
 
+    public static final String CHILD_ARRANGEMENT_CASE = "CHILD ARRANGEMENT CASE";
+
+
 }
