@@ -147,12 +147,17 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
 
-        if (caseData.getSendAndReplyEventData().getChooseSendOrReply().equals(SEND)
-            || (caseData.getSendAndReplyEventData().getChooseSendOrReply().equals(REPLY)
-            && caseData.getOpenMessages().get(0).getValue().getIsReplying().equals(YesOrNo.Yes))) {
-
-            sendAndReplyService.sendNotificationEmail(caseData, caseData.getOpenMessages().get(0).getValue());
+        List<Element<Message>> messages = caseData.getOpenMessages();
+        if (ofNullable(caseData.getClosedMessages()).isPresent()) {
+            messages.addAll(caseData.getClosedMessages());
         }
+        messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+
+        Message mostRecentMessage = messages.get(0).getValue();
+        if (mostRecentMessage.getStatus().equals(MessageStatus.OPEN)) {
+            sendAndReplyService.sendNotificationEmail(caseData, mostRecentMessage);
+        }
+
         //if a message is being closed then no notification email is sent
         return AboutToStartOrSubmitCallbackResponse.builder()
             .build();
