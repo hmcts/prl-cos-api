@@ -70,7 +70,7 @@ public class ReturnApplicationReturnMessageControllerTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
 
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();

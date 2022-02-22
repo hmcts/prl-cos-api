@@ -65,21 +65,16 @@ public class EmailService {
         );
     }
 
-    private String generateReference() {
-        return UUID.randomUUID().toString();
-    }
-
     private String getTemplateId(EmailTemplateNames templateName, LanguagePreference languagePreference) {
         return emailTemplatesConfig.getTemplates().get(languagePreference).get(templateName);
     }
 
     protected CaseData getCaseData(CaseDetails caseDetails) {
 
-        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
             .id(caseDetails.getId())
             .build();
 
-        return caseData;
     }
 }
