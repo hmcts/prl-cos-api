@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.models.AuthorisationUtil;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -49,9 +48,6 @@ public class SendAndReplyServiceTest {
     UserService userService;
 
     @Mock
-    AuthorisationUtil authorisationUtil;
-
-    @Mock
     ObjectMapper objectMapper;
 
     @Mock
@@ -81,7 +77,6 @@ public class SendAndReplyServiceTest {
     @Before
     public void init() {
         when(time.now()).thenReturn(LocalDateTime.now());
-        when(authorisationUtil.getToken()).thenReturn(auth);
         userDetails = UserDetails.builder()
             .email("sender@email.com")
             .build();
@@ -180,8 +175,8 @@ public class SendAndReplyServiceTest {
         CaseData caseDataWithPreFill = CaseData.builder()
             .sendAndReplyEventData(preFillEventData)
             .build();
-        assertTrue(sendAndReplyService.setSenderAndGenerateMessageList(caseData).containsKey("messageObject"));
-        assertEquals(sendAndReplyService.setSenderAndGenerateMessageList(caseDataWithPreFill).get("messageObject"), preFillMetaData);
+        assertTrue(sendAndReplyService.setSenderAndGenerateMessageList(caseData, auth).containsKey("messageObject"));
+        assertEquals(sendAndReplyService.setSenderAndGenerateMessageList(caseDataWithPreFill, auth).get("messageObject"), preFillMetaData);
     }
 
     @Test
@@ -251,7 +246,17 @@ public class SendAndReplyServiceTest {
             .build();
 
         Map<String, Object> expectedMap = Map.of("messageReply", populatedReply);
-        assertEquals(expectedMap, sendAndReplyService.populateReplyMessageFields(caseData));
+        assertEquals(expectedMap, sendAndReplyService.populateReplyMessageFields(caseData, auth));
+
+    }
+
+    @Test
+    public void testPopulateReplyMessageFieldsWhenIdNotPresent() {
+        when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(UUID.randomUUID());
+        Message populatedReply = Message.builder().build();
+
+        Map<String, Object> expectedMap = Collections.emptyMap();
+        assertEquals(expectedMap, sendAndReplyService.populateReplyMessageFields(caseData, auth));
 
     }
 
