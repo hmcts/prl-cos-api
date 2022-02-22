@@ -144,11 +144,10 @@ public class SendAndReplyController extends AbstractCallbackController {
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestHeader("Authorization") String authorisation,
                                                                 @RequestBody CallbackRequest callbackRequest) {
-
+        log.info(callbackRequest.getCaseDetails().toString());
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
 
-        log.info(caseData.getSendAndReplyEventData().getMessageReply().toString());
 
         if (caseData.getSendAndReplyEventData().getChooseSendOrReply().equals(SEND)
             || (caseData.getSendAndReplyEventData().getChooseSendOrReply().equals(REPLY)
