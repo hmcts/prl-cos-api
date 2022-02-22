@@ -96,7 +96,7 @@ public class ApplicationsTabService implements TabService {
 
     @Override
     public List<FieldGenerator> getGenerators() {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @Override
@@ -379,15 +379,6 @@ public class ApplicationsTabService implements TabService {
         }
 
         Optional<YesOrNo> forcedYesNo = ofNullable(allegationsOfHarmOrders.getOrdersForcedMarriageProtection());
-        if (forcedYesNo.isPresent() && forcedYesNo.get().equals(YesOrNo.Yes)) {
-            Order forOrder = Order.builder()
-                .dateIssued(caseData.getOrdersForcedMarriageProtectionDateIssued())
-                .endDate(caseData.getOrdersForcedMarriageProtectionEndDate())
-                .orderCurrent(caseData.getOrdersForcedMarriageProtectionCurrent())
-                .courtName(caseData.getOrdersForcedMarriageProtectionCourtName())
-                .build();
-            //allegationsOfHarmOrders.setForcedMarriageOrder(forOrder);
-        }
 
         Optional<YesOrNo> resYesNo = ofNullable(allegationsOfHarmOrders.getOrdersRestraining());
         if (resYesNo.isPresent() && resYesNo.get().equals(YesOrNo.Yes)) {

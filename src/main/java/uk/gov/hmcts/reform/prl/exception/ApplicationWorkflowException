@@ -1,0 +1,15 @@
+package uk.gov.hmcts.reform.prl.exception;
+
+import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+
+public class ApplicationReturnMessageException extends WorkflowExtension {
+    private static final long serialVersionUID = 744292109317411077L;
+
+    public ApplicationReturnMessageException(String message) {
+        super(message);
+    }
+
+    public ApplicationReturnMessageException(String message, WorkflowException cause) {
+        super(message, cause);
+    }
+}

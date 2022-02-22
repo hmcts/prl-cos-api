@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.ApplicationWorkflowException
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -73,7 +74,7 @@ public class CallbackController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public ResponseEntity<uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse> sendEmail(
         @RequestBody @ApiParam("CaseData") CallbackRequest request
-    ) throws WorkflowException {
+    ) throws ApplicationWorkflowException {
         return ok(
             uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
                 .data(exampleService.executeExampleWorkflow(request.getCaseDetails()))
@@ -88,7 +89,7 @@ public class CallbackController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public ResponseEntity<uk.gov.hmcts.reform.ccd.client.model.CallbackResponse> validateApplicationConsiderationTimetable(
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws WorkflowException {
+    ) throws ApplicationWorkflowException {
         WorkflowResult workflowResult = applicationConsiderationTimetableValidationWorkflow.run(callbackRequest);
 
         return ok(
@@ -105,7 +106,7 @@ public class CallbackController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public ResponseEntity<uk.gov.hmcts.reform.ccd.client.model.CallbackResponse> validateMiamApplicationOrExemption(
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws WorkflowException {
+    ) throws ApplicationWorkflowException {
         WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
         return ok(
@@ -201,7 +202,7 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse sendEmailNotificationOnCaseWithdraw(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws Exception {
+    ) throws SendEmailNotificationException {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         UserDetails userDetails = userService.getUserDetails(authorisation);

@@ -1,0 +1,13 @@
+package uk.gov.hmcts.reform.prl.exception;
+
+public class GenerateDocumentException extends Exception {
+    private static final long serialVersionUID = 744324169317411077L;
+
+    public GenerateDocumentException(String message) {
+        super(message);
+    }
+
+    public GenerateDocumentException(String message, Exception cause) {
+        super(message, cause);
+    }
+}

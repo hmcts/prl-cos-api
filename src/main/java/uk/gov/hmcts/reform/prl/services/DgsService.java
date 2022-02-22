@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
+import uk.gov.hmcts.reform.prl.framework.exceptions.GenerateDocumentException;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -21,9 +22,9 @@ public class DgsService {
 
     private final DgsApiClient dgsApiClient;
 
-    public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
+    public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws GenerateDocumentException {
 
-        Map<String, Object> tempCaseDetails = new HashMap<String, Object>();
+        Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put("caseDetails", caseDetails);
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
@@ -32,9 +33,9 @@ public class DgsService {
                     .builder().template(templateName).values(tempCaseDetails).build()
                 );
 
-        } catch (Exception ex) {
+        } catch (GenerateDocumentException ex) {
             log.error("Error generating and storing document for case {}", caseDetails.getCaseId());
-            throw new Exception(ex.getMessage());
+            throw new GenerateDocumentException(ex.getMessage());
         }
         return generatedDocumentInfo;
     }

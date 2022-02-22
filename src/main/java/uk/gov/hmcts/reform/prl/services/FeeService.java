@@ -18,7 +18,7 @@ public class FeeService {
     private final FeesConfig feesConfig;
     private final FeesRegisterApi feesRegisterApi;
 
-    public FeeResponse fetchFeeDetails(FeeType feeType) throws Exception {
+    public FeeResponse fetchFeeDetails(FeeType feeType) throws FeignException {
         FeesConfig.FeeParameters parameters = feesConfig.getFeeParametersByFeeType(feeType);
         try {
             log.debug("Making request to Fee Register with parameters : {} ", parameters);
@@ -40,7 +40,7 @@ public class FeeService {
                       parameters, ex.status(), ex.contentUTF8(), ex
             );
 
-            throw new Exception(ex);
+            throw new FeignException(ex);
         }
     }
 }

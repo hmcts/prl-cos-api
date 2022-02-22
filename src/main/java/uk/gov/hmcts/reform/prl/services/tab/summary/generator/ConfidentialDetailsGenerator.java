@@ -31,7 +31,7 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
         // Checking the Child details..
         Optional<List<Element<Child>>> childrenWrapped = ofNullable(caseData.getChildren());
 
-        if (childrenWrapped.isPresent() && childrenWrapped.get().size() != 0) {
+        if (childrenWrapped.isPresent() && !childrenWrapped.get().isEmpty()) {
             List<Child> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)

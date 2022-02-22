@@ -18,7 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TaskErrorService {
 
-    Map<EventErrorsEnum, EventValidationErrors> eventErrors = new HashMap<>();
+    Map<EventErrorsEnum, EventValidationErrors> eventErrors = new EnumMap<>();
 
     public List<EventValidationErrors> getEventErrors() {
 

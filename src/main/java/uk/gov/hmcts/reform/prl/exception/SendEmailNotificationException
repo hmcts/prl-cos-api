@@ -1,0 +1,14 @@
+package uk.gov.hmcts.reform.prl.exception;
+
+public class SendEmailNotificationException extends Exception {
+
+    private static final long serialVersionUID = 744299440367411077L;
+
+    public SendEmailNotificationException(String message) {
+        super(message);
+    }
+
+    public SendEmailNotificationException(String message, Exception cause) {
+        super(message, cause);
+    }
+}

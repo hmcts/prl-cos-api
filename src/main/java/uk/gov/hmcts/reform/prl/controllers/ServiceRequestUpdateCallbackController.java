@@ -29,7 +29,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequiredArgsConstructor
 public class ServiceRequestUpdateCallbackController extends AbstractCallbackController {
 
-    private final String serviceAuth = "ServiceAuthorization";
+    private static final String serviceAuth = "ServiceAuthorization";
     private final RequestUpdateCallbackService requestUpdateCallbackService;
     private final AuthTokenGenerator authTokenGenerator;
     private final CourtFinderService courtLocatorService;
