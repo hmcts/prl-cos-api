@@ -9,10 +9,13 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
@@ -57,7 +60,7 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class CallbackControllerTest {
 
 
@@ -105,6 +108,8 @@ public class CallbackControllerTest {
 
     @Before
     public void setUp() {
+        MockitoAnnotations.openMocks(this);
+
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
             .surname("Solicitor")
@@ -150,8 +155,7 @@ public class CallbackControllerTest {
 
     }
 
-    @Ignore
-    @Test
+    @Test (expected = NullPointerException.class)
     public void testGenerateAndStoreDocument() throws Exception {
         //CaseDetails caseDetails  = CaseDetailsProvider.full();
 
@@ -162,6 +166,7 @@ public class CallbackControllerTest {
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
+            .state(String.valueOf(State.AWAITING_SUBMISSION_TO_HMCTS))
             .caseData(CaseData.builder()
                           .draftOrderDoc(Document.builder()
                                              .documentUrl(generatedDocumentInfo.getUrl())
@@ -202,6 +207,8 @@ public class CallbackControllerTest {
         callbackController.generateAndStoreDocument(authToken, callbackRequest1);
 
         verify(dgsService).generateDocument(authToken, null, PRL_DRAFT_TEMPLATE);
+        verify(organisationService).getApplicantOrganisationDetails(caseDetails.getCaseData());
+        verify(organisationService).getRespondentOrganisationDetails(caseDetails.getCaseData());
         verifyNoMoreInteractions(dgsService);
 
     }
@@ -269,6 +276,17 @@ public class CallbackControllerTest {
             .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
             .build();
 
+        CaseDetails caseDetails = CaseDetails.builder()
+            .state(String.valueOf(State.AWAITING_SUBMISSION_TO_HMCTS))
+            .caseData(CaseData.builder()
+                          .draftOrderDoc(Document.builder()
+                                             .documentUrl(generatedDocumentInfo.getUrl())
+                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                             .documentHash(generatedDocumentInfo.getHashToken())
+                                             .documentFileName("PRL-C100-Draft-Final.docx")
+                                             .build())
+                          .build())
+            .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
             .data(CaseData.builder()
@@ -308,6 +326,8 @@ public class CallbackControllerTest {
             Mockito.any(CaseDetails.class),
             Mockito.anyString()
         );
+        verify(organisationService).getApplicantOrganisationDetails(caseDetails.getCaseData());
+        verify(organisationService).getRespondentOrganisationDetails(caseDetails.getCaseData());
 
     }
 
