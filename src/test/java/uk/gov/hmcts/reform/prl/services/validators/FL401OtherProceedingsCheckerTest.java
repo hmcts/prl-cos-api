@@ -67,7 +67,7 @@ public class FL401OtherProceedingsCheckerTest {
     public void notFinishedWithWithoutProceedings() {
         CaseData caseData = CaseData.builder().build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
-        assertTrue(isFinished);
+        assertFalse(isFinished);
     }
 
     @Test
