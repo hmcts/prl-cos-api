@@ -328,7 +328,7 @@ public class CaseData implements MappableObject {
     @JsonProperty("paymentServiceRequestReferenceNumber")
     private final String paymentServiceRequestReferenceNumber;
 
-    private final String issueDate;
+    private final LocalDate issueDate;
 
     @JsonProperty("solicitorName")
     private final String solicitorName;

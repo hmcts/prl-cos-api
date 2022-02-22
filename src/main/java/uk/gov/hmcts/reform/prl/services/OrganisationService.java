@@ -9,11 +9,13 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +48,10 @@ public class OrganisationService {
                     .value(getApplicantWithOrg(eachItem.getValue(),userToken))
                     .id(eachItem.getId()).build())
                 .collect(Collectors.toList());
-            caseData = caseData.toBuilder().applicants(applicants).build();
+            caseData = caseData.toBuilder()
+                .applicants(applicants)
+                .issueDate(LocalDate.now())
+                .build();
             log.info("Case Data after unwrapping : {}",caseData);
         }
         return caseData;
@@ -81,13 +86,13 @@ public class OrganisationService {
             if (organisationID != null) {
                 log.info("Organisation Id : {}",organisationID);
                 log.info("*** Before api call organisation **** ");
-                organisations = getOrganisationDetaiils(userToken, organisationID);
-                //organisations = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
-                //                organisations = Organisations.builder()
-                //                    .contactInformation(List.of(ContactInformation.builder()
-                //                                                    .addressLine1("hello")
-                //                                                    .build()))
-                //                    .build();
+                //organisations = getOrganisationDetaiils(userToken, organisationID);
+                organisations = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
+                                organisations = Organisations.builder()
+                                    .contactInformation(List.of(ContactInformation.builder()
+                                                                    .addressLine1("hello")
+                                                                    .build()))
+                                    .build();
                 log.info("*** After api call organisation **** {}",organisations);
 
                 respondent = respondent.toBuilder()
@@ -111,12 +116,12 @@ public class OrganisationService {
             if (organisationID != null) {
                 log.info("Organisation Id : {}",organisationID);
                 log.info("*** Before api call organisation **** \n");
-                organisations = getOrganisationDetaiils(userToken, organisationID);
-                //                organisations = Organisations.builder()
-                //                    .contactInformation(List.of(ContactInformation.builder()
-                //                                                    .addressLine1("hello")
-                //                                                    .build()))
-                //                    .build();
+                //organisations = getOrganisationDetaiils(userToken, organisationID);
+                                organisations = Organisations.builder()
+                                    .contactInformation(List.of(ContactInformation.builder()
+                                                                    .addressLine1("hello")
+                                                                    .build()))
+                                    .build();
                 log.info("*** After api call organisation **** {} ============ \n",organisations);
                 log.info("*** After api call organisation contact information address line 1 {} ============ \n",
                          organisations.getContactInformation().get(0));
