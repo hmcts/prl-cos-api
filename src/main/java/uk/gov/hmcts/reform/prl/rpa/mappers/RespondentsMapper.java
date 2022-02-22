@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.rpa.mappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
@@ -12,6 +13,7 @@ import javax.json.JsonArray;
 import javax.json.stream.JsonCollectors;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -22,7 +24,7 @@ public class RespondentsMapper {
 
     private final AddressMapper addressMapper;
 
-    public JsonArray map(List<Element<PartyDetails>> respondents) {
+    public JsonArray map(List<Element<PartyDetails>> respondents, int size) {
         Optional<List<Element<PartyDetails>>> respondentElementsCheck = ofNullable(respondents);
         if(respondentElementsCheck.isEmpty()){
             return null;
@@ -30,6 +32,7 @@ public class RespondentsMapper {
         List<PartyDetails> respondentList = respondents.stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
+        AtomicInteger counter = new AtomicInteger(size+1);
         return respondentList.stream().map(respondent -> new NullAwareJsonObjectBuilder()
             .add("firstName", respondent.getFirstName())
             .add("lastName", respondent.getLastName())
@@ -51,7 +54,7 @@ public class RespondentsMapper {
             .add("isAtAddressLessThan5YearsWithDontKnow",
                  CommonUtils.getYesOrNoDontKnowValue(respondent.getIsAtAddressLessThan5YearsWithDontKnow()))
             .add("addressLivedLessThan5YearsDetails", respondent.getAddressLivedLessThan5YearsDetails())
-            .add("solicitorID",CommonUtils.getSolicitorId(respondent))
+            .add("solicitorID", respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes) ? "SOL_"+counter.getAndIncrement() : null)
             .add("dxNumber", respondent.getDxNumber())
             .build()).collect(JsonCollectors.toJsonArray());
     }

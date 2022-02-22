@@ -10,7 +10,9 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import javax.json.JsonArray;
 import javax.json.stream.JsonCollectors;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -31,7 +33,7 @@ public class ApplicantsMapper {
         List<PartyDetails> applicantList = applicants.stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
-        AtomicInteger counter = new AtomicInteger(0);
+        AtomicInteger counter = new AtomicInteger(1);
         return applicantList.stream().map(applicant -> new NullAwareJsonObjectBuilder()
             .add("firstName", applicant.getFirstName())
             .add("lastName", applicant.getLastName())
@@ -49,7 +51,7 @@ public class ApplicantsMapper {
             .add("isPhoneNumberConfidential", CommonUtils.getYesOrNoValue(applicant.getIsPhoneNumberConfidential()))
             .add("isEmailAddressConfidential", CommonUtils.getYesOrNoValue(applicant.getIsEmailAddressConfidential()))
             .add("solicitorOrganisationID", applicant.getSolicitorOrg().getOrganisationID())
-            .add("solicitorID", "APP_SOL_"+counter.incrementAndGet())
+            .add("solicitorID", "SOL_"+counter.getAndIncrement())
             .add("dxNumber", applicant.getDxNumber())
             .build()).collect(JsonCollectors.toJsonArray());
     }
