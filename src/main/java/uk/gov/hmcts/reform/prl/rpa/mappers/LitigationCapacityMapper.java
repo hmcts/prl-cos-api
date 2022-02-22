@@ -15,7 +15,10 @@ public class LitigationCapacityMapper {
         return new NullAwareJsonObjectBuilder()
             .add("litigationCapacityFactors", caseData.getLitigationCapacityFactors())
             .add("litigationCapacityReferrals", caseData.getLitigationCapacityReferrals())
-            .add("litigationCapacityOtherFactors", CommonUtils.getYesOrNoValue(caseData.getLitigationCapacityOtherFactors()))
+            .add(
+                "litigationCapacityOtherFactors",
+                CommonUtils.getYesOrNoValue(caseData.getLitigationCapacityOtherFactors())
+            )
             .add("litigationCapacityOtherFactorsDetails", caseData.getLitigationCapacityOtherFactorsDetails())
             .build();
     }

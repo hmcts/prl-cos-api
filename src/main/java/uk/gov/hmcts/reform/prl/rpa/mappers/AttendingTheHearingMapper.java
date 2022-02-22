@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
@@ -8,13 +10,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.stream.JsonCollectors;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.stream.JsonCollectors;
 
 @Component
 public class AttendingTheHearingMapper {
@@ -28,7 +29,10 @@ public class AttendingTheHearingMapper {
             .add("interpreterNeeds", mapInterpreterNeeds(caseData.getInterpreterNeeds()))
             .add("isDisabilityPresent", CommonUtils.getYesOrNoValue(caseData.getIsDisabilityPresent()))
             .add("adjustmentsRequired", caseData.getAdjustmentsRequired())
-            .add("isSpecialArrangementsRequired", CommonUtils.getYesOrNoValue(caseData.getIsSpecialArrangementsRequired()))
+            .add(
+                "isSpecialArrangementsRequired",
+                CommonUtils.getYesOrNoValue(caseData.getIsSpecialArrangementsRequired())
+            )
             .add("specialArrangementsRequired", caseData.getSpecialArrangementsRequired())
             .add("isIntermediaryNeeded", CommonUtils.getYesOrNoValue(caseData.getIsIntermediaryNeeded()))
             .build();
@@ -37,7 +41,7 @@ public class AttendingTheHearingMapper {
     private JsonArray mapInterpreterNeeds(List<Element<InterpreterNeed>> interpreterNeeds) {
 
         Optional<List<Element<InterpreterNeed>>> interpreterNeedsElementCheck = Optional.ofNullable(interpreterNeeds);
-        if(interpreterNeedsElementCheck.isEmpty()){
+        if (interpreterNeedsElementCheck.isEmpty()) {
             return null;
         }
         List<InterpreterNeed> interpreterNeedsList = interpreterNeeds.stream()
@@ -45,7 +49,8 @@ public class AttendingTheHearingMapper {
             .collect(Collectors.toList());
         return interpreterNeedsList.stream().map(interpreterNeed -> new NullAwareJsonObjectBuilder()
             .add("name", interpreterNeed.getName())
-            .add("party", String.valueOf(interpreterNeed.getParty()))
+            .add("party", interpreterNeed.getParty().isEmpty() ? null : interpreterNeed.getParty().stream()
+                .map(PartyEnum::getDisplayedValue).collect(Collectors.joining(", ")))
             .add("language", interpreterNeed.getLanguage())
             .build()).collect(JsonCollectors.toJsonArray());
 
@@ -53,7 +58,7 @@ public class AttendingTheHearingMapper {
 
     private JsonArray mapWelshNeeds(List<Element<WelshNeed>> welshNeeds) {
         Optional<List<Element<WelshNeed>>> welshNeedsElementCheck = Optional.ofNullable(welshNeeds);
-        if(welshNeedsElementCheck.isEmpty()){
+        if (welshNeedsElementCheck.isEmpty()) {
             return null;
         }
         List<WelshNeed> welshNeedsList = welshNeeds.stream()
@@ -61,7 +66,11 @@ public class AttendingTheHearingMapper {
             .collect(Collectors.toList());
         return welshNeedsList.stream().map(welshNeed -> new NullAwareJsonObjectBuilder()
             .add("whoNeedsWelsh", welshNeed.getWhoNeedsWelsh())
-            .add("spokenOrWritten", String.valueOf(welshNeed.getSpokenOrWritten()))
+            .add(
+                "spokenOrWritten",
+                welshNeed.getSpokenOrWritten().isEmpty() ? null : welshNeed.getSpokenOrWritten().stream()
+                    .map(SpokenOrWrittenWelshEnum::getDisplayedValue).collect(Collectors.joining(", "))
+            )
             .build()).collect(JsonCollectors.toJsonArray());
     }
 }

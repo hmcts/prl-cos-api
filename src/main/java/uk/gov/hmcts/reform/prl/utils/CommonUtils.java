@@ -54,8 +54,8 @@ public class CommonUtils {
         return value != null ? value.getDisplayedValue() : null;
     }
 
-    public static String getSolicitorId(PartyDetails party){
-        if(party.getSolicitorOrg() != null && party.getSolicitorOrg().getOrganisationID() != null){
+    public static String getSolicitorId(PartyDetails party) {
+        if (party.getSolicitorOrg() != null && party.getSolicitorOrg().getOrganisationID() != null) {
             return "SOL_" + party.getSolicitorOrg().getOrganisationID();
         }
         return null;

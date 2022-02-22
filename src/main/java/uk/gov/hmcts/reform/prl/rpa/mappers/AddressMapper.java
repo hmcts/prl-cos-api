@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
@@ -11,9 +10,6 @@ import javax.json.JsonObject;
 public class AddressMapper {
 
     public JsonObject mapAddress(Address address) {
-        if(ObjectUtils.isEmpty(address)){
-            return null;
-        }
         return new NullAwareJsonObjectBuilder()
             .add("AddressLine1", address.getAddressLine1())
             .add("AddressLine2", address.getAddressLine2())

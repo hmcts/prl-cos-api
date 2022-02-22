@@ -3,20 +3,19 @@ package uk.gov.hmcts.reform.prl.rpa.mappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.stream.JsonCollectors;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.json.JsonArray;
+import javax.json.stream.JsonCollectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -28,8 +27,8 @@ public class ChildrenMapper {
 
     public JsonArray map(List<Element<Child>> children) {
         Optional<List<Element<Child>>> childElementsCheck = ofNullable(children);
-        if(childElementsCheck.isEmpty()){
-           return null;
+        if (childElementsCheck.isEmpty()) {
+            return null;
         }
         List<Child> childList = children.stream()
             .map(Element::getValue)
@@ -40,11 +39,22 @@ public class ChildrenMapper {
             .add("dateOfBirth", String.valueOf(child.getDateOfBirth()))
             .add("gender", child.getGender().getDisplayedValue())
             .add("otherGender", child.getOtherGender())
-            .add("childLiveWith", String.valueOf(child.getChildLiveWith()))
-            .add("orderAppliedFor", String.valueOf(child.getOrderAppliedFor()))
-            .add("applicantsRelationshipToChild", child.getApplicantsRelationshipToChild() != null ? child.getApplicantsRelationshipToChild().getDisplayedValue() : null)
+            .add("childLiveWith", child.getChildLiveWith().isEmpty() ? null : child.getChildLiveWith().stream()
+                .map(LiveWithEnum::getDisplayedValue).collect(Collectors.joining(", ")))
+            .add("orderAppliedFor", child.getOrderAppliedFor().isEmpty()
+                ? null : child.getOrderAppliedFor().stream()
+                .map(OrderTypeEnum::getDisplayedValue).collect(Collectors.joining(", ")))
+            .add(
+                "applicantsRelationshipToChild",
+                child.getApplicantsRelationshipToChild() != null
+                    ? child.getApplicantsRelationshipToChild().getDisplayedValue() : null
+            )
             .add("parentalResponsibilityDetails", child.getParentalResponsibilityDetails())
-            .add("respondentsRelationshipToChild", child.getRespondentsRelationshipToChild() != null ? child.getRespondentsRelationshipToChild().getDisplayedValue() : null)
+            .add(
+                "respondentsRelationshipToChild",
+                child.getRespondentsRelationshipToChild() != null
+                    ? child.getRespondentsRelationshipToChild().getDisplayedValue() : null
+            )
             .add("otherApplicantsRelationshipToChild", child.getOtherApplicantsRelationshipToChild())
             .add("otherRespondentsRelationshipToChild", child.getOtherRespondentsRelationshipToChild())
             .add("personWhoLivesWithChild", mapOtherPerson(child.getPersonWhoLivesWithChild()))
@@ -53,7 +63,7 @@ public class ChildrenMapper {
 
     private JsonArray mapOtherPerson(List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild) {
         Optional<List<Element<OtherPersonWhoLivesWithChild>>> childElementsCheck = ofNullable(personWhoLivesWithChild);
-        if(childElementsCheck.isEmpty()){
+        if (childElementsCheck.isEmpty()) {
             return null;
         }
         List<OtherPersonWhoLivesWithChild> otherPersonList = personWhoLivesWithChild.stream()
@@ -63,8 +73,14 @@ public class ChildrenMapper {
             .add("firstName", otherPerson.getFirstName())
             .add("lastName", otherPerson.getLastName())
             .add("relationshipToChildDetails", otherPerson.getRelationshipToChildDetails())
-            .add("isPersonIdentityConfidential", CommonUtils.getYesOrNoValue(otherPerson.getIsPersonIdentityConfidential()))
-            .add("address", addressMapper.mapAddress(otherPerson.getAddress())).build()).collect(JsonCollectors.toJsonArray());
+            .add(
+                "isPersonIdentityConfidential",
+                CommonUtils.getYesOrNoValue(otherPerson.getIsPersonIdentityConfidential())
+            )
+            .add(
+                "address",
+                addressMapper.mapAddress(otherPerson.getAddress())
+            ).build()).collect(JsonCollectors.toJsonArray());
     }
 
 }
