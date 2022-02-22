@@ -302,8 +302,4 @@ public class SendAndReplyControllerTest {
         verify(sendAndReplyService).sendNotificationEmail(caseData, newMessage);
         verifyNoMoreInteractions(sendAndReplyService);
     }
-
-
-
-
 }
