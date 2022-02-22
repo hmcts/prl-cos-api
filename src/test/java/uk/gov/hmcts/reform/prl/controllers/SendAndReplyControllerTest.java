@@ -236,7 +236,10 @@ public class SendAndReplyControllerTest {
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
             .build();
-        CaseData caseData = CaseData.builder().id(12345L).sendAndReplyEventData(eventData).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .sendAndReplyEventData(eventData)
+            .openMessages(Collections.singletonList(element(message)))
+            .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleSubmitted(auth, callbackRequest);
