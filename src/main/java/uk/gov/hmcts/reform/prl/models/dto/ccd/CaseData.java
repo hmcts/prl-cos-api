@@ -52,6 +52,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -365,6 +366,8 @@ public class CaseData implements MappableObject {
      */
     private final List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
     private final List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
+
+    private final Map<String, Object> typeOfApplicationTable;
 
     /**
      *  Withdraw Application.
