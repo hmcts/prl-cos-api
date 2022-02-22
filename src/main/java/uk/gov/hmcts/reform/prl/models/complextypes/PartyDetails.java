@@ -28,16 +28,13 @@ public class PartyDetails {
     private final Gender gender;
     private final String otherGender;
     private final String placeOfBirth;
-    private final Address address;
     private final DontKnow isAddressUnknown;
     private final YesOrNo isAddressConfidential;
     private final YesOrNo isAtAddressLessThan5Years;
     private final String addressLivedLessThan5YearsDetails;
     private final YesOrNo canYouProvideEmailAddress;
-    private final String email;
     private final YesOrNo isEmailAddressConfidential;
     private final String landline;
-    private final String phoneNumber;
     private final YesOrNo isPhoneNumberConfidential;
     private final String relationshipToChildren;
     private final YesOrNo isDateOfBirthKnown;
