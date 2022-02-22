@@ -126,6 +126,11 @@ public class SendAndReplyController extends AbstractCallbackController {
             caseDataMap.put("openMessages", messages);
         }
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
+
+        // sort lists of messages with most recent first
+        caseData.getOpenMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        caseData.getClosedMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
@@ -142,15 +147,10 @@ public class SendAndReplyController extends AbstractCallbackController {
             || (caseData.getSendAndReplyEventData().getChooseSendOrReply().equals(REPLY)
             && caseData.getSendAndReplyEventData().getMessageReply().getIsReplying().equals(YesOrNo.Yes))) {
 
-            Message message = caseData.getOpenMessages().stream()
-                .sorted(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()))
-                .collect(Collectors.toList())
-                .get(0)
-                .getValue();
+            Message message = caseData.getOpenMessages().get(0).getValue();
             sendAndReplyService.sendNotificationEmail(caseData, message);
         }
         //if a message is being closed then no notification email is sent
-
         return AboutToStartOrSubmitCallbackResponse.builder()
             .build();
     }
