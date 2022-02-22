@@ -4,9 +4,11 @@ import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
@@ -16,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,18 +29,22 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class OrganisationServiceTest {
 
-    @Mock
+    @InjectMocks
     private OrganisationService organisationService;
-
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
     @Mock
     private OrganisationApi organisationApi;
+    @Mock
+    private SystemUserService systemUserService;
 
     private final String authToken = "Bearer testAuthtoken";
     private final String serviceAuthToken = "serviceTestAuthtoken";
 
     @Before
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(systemUserService.getSysUserToken()).thenReturn(authToken);
     }
 
     @Test
@@ -92,21 +99,22 @@ public class OrganisationServiceTest {
         CaseData caseData1 = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
+            .issueDate(LocalDate.now())
             .applicants(elementList)
             .build();
-
         when(organisationApi.findOrganisation(authToken,
                                               serviceAuthToken,
                                               applicant.getSolicitorOrg().getOrganisationID()))
             .thenReturn(organisations);
         String organisationId = applicant.getSolicitorOrg().getOrganisationID();
-        organisationService.getOrganisationDetaiils(authToken, organisationId);
+
+        when(organisationService.getOrganisationDetaiils(authToken, organisationId)).thenReturn(organisations);
 
         System.out.println("casedata=======: "+caseData);
         assertEquals(organisations.getOrganisationIdentifier(), organisationId);
 
-        organisationService.getApplicantOrganisationDetails(caseData);
-
+        CaseData caseData2 = organisationService.getApplicantOrganisationDetails(caseData);
+        assertEquals(caseData2,caseData1);
     }
 
     @Test

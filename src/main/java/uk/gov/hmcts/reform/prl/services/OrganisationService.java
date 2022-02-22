@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class OrganisationService {
 
     @Autowired
-    private OrganisationApi organisationApi;
+    private final OrganisationApi organisationApi;
 
     private Organisations organisations;
     private final AuthTokenGenerator authTokenGenerator;
@@ -83,13 +83,13 @@ public class OrganisationService {
             if (organisationID != null) {
                 log.info("Organisation Id : {}",organisationID);
                 log.info("*** Before api call organisation **** ");
-                //organisations = getOrganisationDetaiils(userToken, organisationID);
-                organisations = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
-                                organisations = Organisations.builder()
-                                    .contactInformation(List.of(ContactInformation.builder()
-                                                                    .addressLine1("hello")
-                                                                    .build()))
-                                    .build();
+                organisations = getOrganisationDetaiils(userToken, organisationID);
+//                organisations = organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
+//                                organisations = Organisations.builder()
+//                                    .contactInformation(List.of(ContactInformation.builder()
+//                                                                    .addressLine1("hello")
+//                                                                    .build()))
+//                                    .build();
                 log.info("*** After api call organisation **** {}",organisations);
 
                 respondent = respondent.toBuilder()
@@ -113,12 +113,12 @@ public class OrganisationService {
             if (organisationID != null) {
                 log.info("Organisation Id : {}",organisationID);
                 log.info("*** Before api call organisation **** \n");
-                //organisations = getOrganisationDetaiils(userToken, organisationID);
-                                organisations = Organisations.builder()
-                                    .contactInformation(List.of(ContactInformation.builder()
-                                                                    .addressLine1("hello")
-                                                                    .build()))
-                                    .build();
+                organisations = getOrganisationDetaiils(userToken, organisationID);
+//                organisations = Organisations.builder()
+//                                    .contactInformation(List.of(ContactInformation.builder()
+//                                                                    .addressLine1("hello")
+//                                                                    .build()))
+//                                    .build();
                 log.info("*** After api call organisation **** {} ============ \n",organisations);
                 log.info("*** After api call organisation contact information address line 1 {} ============ \n",
                          organisations.getContactInformation().get(0));
