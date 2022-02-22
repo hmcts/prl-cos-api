@@ -61,8 +61,8 @@ public class PartyDetails {
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
             || this.isPhoneNumberConfidential.equals(YesOrNo.Yes)
-            || (isCanYouProvideEmailAddress() == YesOrNo.No) ? this.isEmailAddressConfidential.equals(YesOrNo.No) : this.isEmailAddressConfidential.equals(YesOrNo.Yes);
-
+            || (isCanYouProvideEmailAddress() == YesOrNo.No) ? this.isEmailAddressConfidential.equals(YesOrNo.No)
+            : this.isEmailAddressConfidential.equals(YesOrNo.Yes);
     }
 
     public YesOrNo isCanYouProvideEmailAddress() {
