@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
-import uk.gov.hmcts.reform.prl.models.AuthorisationUtil;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -16,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,8 +36,6 @@ public class SendAndReplyService {
 
     private final UserService userService;
 
-    private final AuthorisationUtil authorisationUtil;
-
     private final ObjectMapper objectMapper;
 
     private final ElementUtils elementUtils;
@@ -50,10 +46,10 @@ public class SendAndReplyService {
         return userService.getUserDetails(authorisation).getEmail();
     }
 
-    public Map<String, Object> setSenderAndGenerateMessageList(CaseData caseData) {
+    public Map<String, Object> setSenderAndGenerateMessageList(CaseData caseData, String auth) {
         Map<String, Object> data = new HashMap<>();
         MessageMetaData messageMetaData = MessageMetaData.builder()
-            .senderEmail(getLoggedInUserEmail(authorisationUtil.getToken()))
+            .senderEmail(getLoggedInUserEmail(auth))
             .build();
         data.put("messageObject", messageMetaData);
 
@@ -90,7 +86,7 @@ public class SendAndReplyService {
             .map(Element::getValue)
             .forEach(message -> {
                 message.setStatus(MessageStatus.CLOSED);
-                message.setUpdatedTime(LocalDateTime.now());
+                message.setUpdatedTime(dateTime.now());
             });
         return messages;
     }
@@ -113,7 +109,7 @@ public class SendAndReplyService {
             .build();
     }
 
-    public Map<String, Object> populateReplyMessageFields(CaseData caseData) {
+    public Map<String, Object> populateReplyMessageFields(CaseData caseData, String auth) {
         Map<String, Object> data = new HashMap<>();
         UUID messageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendAndReplyEventData().getReplyMessageDynamicList(), objectMapper);
@@ -123,7 +119,13 @@ public class SendAndReplyService {
             .map(Element::getValue)
             .findFirst();
 
-        Message m = previousMessageOptional.orElse(Message.builder().build());
+        if (previousMessageOptional.isEmpty()) {
+            log.info("No message found with that ID");
+            return data;
+        }
+
+        Message m = previousMessageOptional.get();
+
         Message populatedReply = Message.builder()
             .senderEmail(m.getSenderEmail())
             .messageSubject(m.getMessageSubject())
@@ -131,7 +133,7 @@ public class SendAndReplyService {
             .messageUrgency(m.getMessageUrgency())
             .messageHistory(m.getMessageHistory())
             .latestMessage(m.getLatestMessage())
-            .replyFrom(getLoggedInUserEmail(authorisationUtil.getToken()))
+            .replyFrom(getLoggedInUserEmail(auth))
             .replyTo(m.getSenderEmail())
             .build();
 

@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
-import uk.gov.hmcts.reform.prl.models.AuthorisationUtil;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -44,9 +43,6 @@ public class SendAndReplyController extends AbstractCallbackController {
     SendAndReplyService sendAndReplyService;
 
     @Autowired
-    AuthorisationUtil authorisationUtil;
-
-    @Autowired
     ObjectMapper objectMapper;
 
     @Autowired
@@ -56,10 +52,9 @@ public class SendAndReplyController extends AbstractCallbackController {
     @PostMapping("/about-to-start")
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization") String authorisation,
                                                                    @RequestBody CallbackRequest callbackRequest) {
-        authorisationUtil.setTokenAndId(authorisation, callbackRequest.getCaseDetails().getId());
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
-        Map<String, Object> caseDataMap = new HashMap<>(sendAndReplyService.setSenderAndGenerateMessageList(caseData));
+        Map<String, Object> caseDataMap = new HashMap<>(sendAndReplyService.setSenderAndGenerateMessageList(caseData, authorisation));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
@@ -79,7 +74,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             if (!sendAndReplyService.hasMessages(caseData)) {
                 errors.add("There are no messages to respond to.");
             } else {
-                caseDataMap.putAll(sendAndReplyService.populateReplyMessageFields(caseData));
+                caseDataMap.putAll(sendAndReplyService.populateReplyMessageFields(caseData, authorisation));
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -99,6 +94,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         if (eventData.getChooseSendOrReply().equals(SEND)) {
             Message newMessage = sendAndReplyService.buildNewSendMessage(caseData);
+            log.info(String.format("New message sent to %s", newMessage.getRecipientEmail()));
             List<Element<Message>> listOfMessages = sendAndReplyService.addNewMessage(caseData, newMessage);
             caseDataMap.putAll(sendAndReplyService.returnMapOfOpenMessages(listOfMessages));
 
@@ -110,6 +106,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             List<Element<Message>> messages;
             if (eventData.getMessageReply().getIsReplying().equals(YesOrNo.No)) {
                 messages = sendAndReplyService.closeMessage(selectedValue, caseData);
+                log.info(String.format("Closing message with id: %s", selectedValue));
                 List<Element<Message>> closedMessages = messages.stream()
                     .filter(m -> m.getValue().getStatus().equals(MessageStatus.CLOSED))
                     .collect(Collectors.toList());
@@ -123,6 +120,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                     eventData.getMessageReply(),
                     caseData.getOpenMessages()
                 );
+                log.info(String.format("Sending reply message to %s", eventData.getMessageReply().getReplyTo()));
             }
             caseDataMap.put("openMessages", messages);
         }

@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
-import uk.gov.hmcts.reform.prl.models.AuthorisationUtil;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -43,9 +42,6 @@ public class SendAndReplyControllerTest {
 
     @Mock
     SendAndReplyService sendAndReplyService;
-
-    @Mock
-    AuthorisationUtil authorisationUtil;
 
     @Mock
     ObjectMapper objectMapper;
@@ -96,9 +92,9 @@ public class SendAndReplyControllerTest {
         Map<String, Object> aboutToStartMap = new HashMap<>();
         aboutToStartMap.put("messageObject", MessageMetaData.builder().build());
 
-        when(sendAndReplyService.setSenderAndGenerateMessageList(sendCaseData)).thenReturn(aboutToStartMap);
+        when(sendAndReplyService.setSenderAndGenerateMessageList(sendCaseData, auth)).thenReturn(aboutToStartMap);
         sendAndReplyController.handleAboutToStart(auth, sendCallbackRequest);
-        verify(sendAndReplyService).setSenderAndGenerateMessageList(sendCaseData);
+        verify(sendAndReplyService).setSenderAndGenerateMessageList(sendCaseData, auth);
         verifyNoMoreInteractions(sendAndReplyService);
     }
 
@@ -130,12 +126,12 @@ public class SendAndReplyControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.hasMessages(caseData)).thenReturn(true);
-        when(sendAndReplyService.populateReplyMessageFields(caseData)).thenReturn(expectedMap);
+        when(sendAndReplyService.populateReplyMessageFields(caseData, auth)).thenReturn(expectedMap);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleMidEvent(auth, callbackRequest);
 
-        verify(sendAndReplyService).populateReplyMessageFields(caseData);
+        verify(sendAndReplyService).populateReplyMessageFields(caseData, auth);
     }
 
     @Test
