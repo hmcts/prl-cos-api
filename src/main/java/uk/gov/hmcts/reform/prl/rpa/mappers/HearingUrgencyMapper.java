@@ -17,10 +17,19 @@ public class HearingUrgencyMapper {
             .add("setOutReasonsBelow", caseData.getSetOutReasonsBelow())
             .add("caseUrgencyTimeAndReason", caseData.getCaseUrgencyTimeAndReason())
             .add("effortsMadeWithRespondents", caseData.getEffortsMadeWithRespondents())
-            .add("doYouNeedAWithoutNoticeHearing", CommonUtils.getYesOrNoValue(caseData.getDoYouNeedAWithoutNoticeHearing()))
-            .add("areRespondentsAwareOfProceedings", CommonUtils.getYesOrNoValue(caseData.getAreRespondentsAwareOfProceedings()))
+            .add(
+                "doYouNeedAWithoutNoticeHearing",
+                CommonUtils.getYesOrNoValue(caseData.getDoYouNeedAWithoutNoticeHearing())
+            )
+            .add(
+                "areRespondentsAwareOfProceedings",
+                CommonUtils.getYesOrNoValue(caseData.getAreRespondentsAwareOfProceedings())
+            )
             .add("reasonsForApplicationWithoutNotice", caseData.getReasonsForApplicationWithoutNotice())
-            .add("doYouRequireAHearingWithReducedNotice", CommonUtils.getYesOrNoValue(caseData.getDoYouRequireAHearingWithReducedNotice()))
+            .add(
+                "doYouRequireAHearingWithReducedNotice",
+                CommonUtils.getYesOrNoValue(caseData.getDoYouRequireAHearingWithReducedNotice())
+            )
             .build();
     }
 }

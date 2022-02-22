@@ -17,9 +17,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 
-import javax.json.JsonObject;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import javax.json.JsonObject;
 
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
@@ -90,7 +90,8 @@ public class RequestUpdateCallbackService {
     }
 
     //todo This method will be deleted once we wipe out Fee and Pay Bypass
-    public void processCallbackForBypass(ServiceRequestUpdateDto serviceRequestUpdateDto, String authorisation) throws Exception {
+    public void processCallbackForBypass(ServiceRequestUpdateDto serviceRequestUpdateDto,
+                                         String authorisation) throws Exception {
 
         log.info("Processing the callback for the caseId {} with status {}", serviceRequestUpdateDto.getCcdCaseNumber(),
                  serviceRequestUpdateDto.getServiceRequestStatus()

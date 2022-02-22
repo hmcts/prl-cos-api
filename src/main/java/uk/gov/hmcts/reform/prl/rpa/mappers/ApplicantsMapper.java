@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -8,24 +9,25 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
-import javax.json.JsonArray;
-import javax.json.stream.JsonCollectors;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.stream.JsonCollectors;
 
 import static java.util.Optional.ofNullable;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicantsMapper {
 
     private final AddressMapper addressMapper;
 
-    public JsonArray map(List<Element<PartyDetails>> applicants) {
+    public JsonArray map(List<Element<PartyDetails>> applicants, Map<String, PartyDetails> applicantSolicitorMap) {
         Optional<List<Element<PartyDetails>>> applicantElementsCheck = ofNullable(applicants);
         if (applicantElementsCheck.isEmpty()) {
             return null;
@@ -33,8 +35,15 @@ public class ApplicantsMapper {
         List<PartyDetails> applicantList = applicants.stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
+        log.info("Applicant list size  {}", applicantList.size());
         AtomicInteger counter = new AtomicInteger(1);
-        return applicantList.stream().map(applicant -> new NullAwareJsonObjectBuilder()
+        return applicantList.stream().map(applicant -> getApplicant(counter, applicant, applicantSolicitorMap)).collect(
+            JsonCollectors.toJsonArray());
+    }
+
+    private JsonObject getApplicant(AtomicInteger counter, PartyDetails applicant, Map<String, PartyDetails> applicantSolicitorMap) {
+        applicantSolicitorMap.put("APP_SOL_" + counter, applicant);
+        return new NullAwareJsonObjectBuilder()
             .add("firstName", applicant.getFirstName())
             .add("lastName", applicant.getLastName())
             .add("previousName", applicant.getPreviousName())
@@ -51,11 +60,10 @@ public class ApplicantsMapper {
             .add("isPhoneNumberConfidential", CommonUtils.getYesOrNoValue(applicant.getIsPhoneNumberConfidential()))
             .add("isEmailAddressConfidential", CommonUtils.getYesOrNoValue(applicant.getIsEmailAddressConfidential()))
             .add("solicitorOrganisationID", applicant.getSolicitorOrg().getOrganisationID())
-            .add("solicitorID", "SOL_"+counter.getAndIncrement())
+            .add("solicitorID", "APP_SOL_" + counter.getAndIncrement())
             .add("dxNumber", applicant.getDxNumber())
-            .build()).collect(JsonCollectors.toJsonArray());
+            .build();
     }
-
 
 
 }
