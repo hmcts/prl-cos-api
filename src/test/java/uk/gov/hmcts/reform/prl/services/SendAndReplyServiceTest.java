@@ -301,7 +301,7 @@ public class SendAndReplyServiceTest {
             .messageContent("This is message 1 body")
             .updatedTime(dateTime)
             .status(OPEN)
-            .latestMessage("Message 2 latest message")
+            .latestMessage("This is message 2 body")
             .messageHistory("testReply@email.com - This is message 2 body")
             .build();
 

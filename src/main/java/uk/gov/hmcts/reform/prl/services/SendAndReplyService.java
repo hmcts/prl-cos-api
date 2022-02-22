@@ -195,7 +195,7 @@ public class SendAndReplyService {
                         .senderEmail(senderEmail)
                         .recipientEmail(replyMessage.getReplyTo())
                         .messageHistory(buildMessageHistory(replyMessage, message, senderEmail))
-                        .latestMessage(replyMessage.getLatestMessage())
+                        .latestMessage(replyMessage.getMessageContent())
                         .build();
                     return element(messageElement.getId(), updatedMessage);
                 }
