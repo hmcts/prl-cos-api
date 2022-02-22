@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
@@ -23,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -77,12 +75,6 @@ public class OrganisationServiceTest {
             .contactInformation(contactInformationList)
             .build();
 
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .applicants(listOfApplicants)
-            .build();
-
         PartyDetails partyDetailsWithOrganisations = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -96,12 +88,6 @@ public class OrganisationServiceTest {
         Element<PartyDetails> applicants = Element.<PartyDetails>builder().value(partyDetailsWithOrganisations).build();
         List<Element<PartyDetails>> elementList = Collections.singletonList(applicants);
 
-        CaseData caseData1 = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .issueDate(LocalDate.now())
-            .applicants(elementList)
-            .build();
         when(organisationApi.findOrganisation(authToken,
                                               serviceAuthToken,
                                               applicant.getSolicitorOrg().getOrganisationID()))
@@ -109,10 +95,18 @@ public class OrganisationServiceTest {
         String organisationId = applicant.getSolicitorOrg().getOrganisationID();
 
         when(organisationService.getOrganisationDetaiils(authToken, organisationId)).thenReturn(organisations);
-
-        System.out.println("casedata=======: "+caseData);
+        CaseData caseData1 = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .issueDate(LocalDate.now())
+            .applicants(elementList)
+            .build();
         assertEquals(organisations.getOrganisationIdentifier(), organisationId);
-
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicants(listOfApplicants)
+            .build();
         CaseData caseData2 = organisationService.getApplicantOrganisationDetails(caseData);
         assertEquals(caseData2,caseData1);
     }
@@ -148,12 +142,6 @@ public class OrganisationServiceTest {
             .contactInformation(contactInformationList)
             .build();
 
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .respondents(listOfRespondents)
-            .build();
-
         PartyDetails partyDetailsWithOrganisations = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -180,9 +168,12 @@ public class OrganisationServiceTest {
         String organisationId = respondent.getSolicitorOrg().getOrganisationID();
         organisationService.getOrganisationDetaiils(authToken, organisationId);
 
-        System.out.println("casedata=======: "+caseData);
         assertEquals(organisations.getOrganisationIdentifier(), organisationId);
-
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .respondents(listOfRespondents)
+            .build();
         organisationService.getRespondentOrganisationDetails(caseData);
 
     }

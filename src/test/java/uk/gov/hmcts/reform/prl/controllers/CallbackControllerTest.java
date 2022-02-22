@@ -165,17 +165,6 @@ public class CallbackControllerTest {
             .hashToken("testHashToken")
             .build();
 
-        CaseDetails caseDetails = CaseDetails.builder()
-            .state(String.valueOf(State.AWAITING_SUBMISSION_TO_HMCTS))
-            .caseData(CaseData.builder()
-                          .draftOrderDoc(Document.builder()
-                                             .documentUrl(generatedDocumentInfo.getUrl())
-                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                             .documentHash(generatedDocumentInfo.getHashToken())
-                                             .documentFileName("PRL-C100-Draft-Final.docx")
-                                             .build())
-                          .build())
-            .build();
         CaseData.builder()
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
@@ -203,7 +192,17 @@ public class CallbackControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest1 = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest
             .builder()
             .build();
-
+        CaseDetails caseDetails = CaseDetails.builder()
+            .state(String.valueOf(State.AWAITING_SUBMISSION_TO_HMCTS))
+            .caseData(CaseData.builder()
+                          .draftOrderDoc(Document.builder()
+                                             .documentUrl(generatedDocumentInfo.getUrl())
+                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                             .documentHash(generatedDocumentInfo.getHashToken())
+                                             .documentFileName("PRL-C100-Draft-Final.docx")
+                                             .build())
+                          .build())
+            .build();
         callbackController.generateAndStoreDocument(authToken, callbackRequest1);
 
         verify(dgsService).generateDocument(authToken, null, PRL_DRAFT_TEMPLATE);
