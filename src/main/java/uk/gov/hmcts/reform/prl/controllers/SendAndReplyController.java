@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +128,30 @@ public class SendAndReplyController extends AbstractCallbackController {
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
+            .build();
+    }
+
+    @PostMapping("/submitted")
+    public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestHeader("Authorization") String authorisation,
+                                                                @RequestBody CallbackRequest callbackRequest) {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = getCaseData(caseDetails);
+
+        if (caseData.getSendAndReplyEventData().getChooseSendOrReply().equals(SEND)
+            || (caseData.getSendAndReplyEventData().getChooseSendOrReply().equals(REPLY)
+            && caseData.getSendAndReplyEventData().getMessageReply().getIsReplying().equals(YesOrNo.Yes))) {
+
+            Message message = caseData.getOpenMessages().stream()
+                .sorted(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()))
+                .collect(Collectors.toList())
+                .get(0)
+                .getValue();
+            sendAndReplyService.sendNotificationEmail(caseData, message);
+        }
+        //if a message is being closed then no notification email is sent
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
             .build();
     }
 }

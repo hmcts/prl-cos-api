@@ -20,6 +20,9 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -222,6 +225,52 @@ public class SendAndReplyControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
         verify(sendAndReplyService).buildNewReplyMessage(selectedValue, message, caseData.getOpenMessages());
+    }
+
+    @Test
+    public void testHandleSubmittedClosedMessage() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.No).build();
+        SendAndReplyEventData eventData = SendAndReplyEventData.builder()
+            .chooseSendOrReply(REPLY)
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+        CaseData caseData = CaseData.builder().id(12345L).sendAndReplyEventData(eventData).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        sendAndReplyController.handleSubmitted(auth, callbackRequest);
+        verifyNoInteractions(sendAndReplyService);
+    }
+
+    @Test
+    public void testHandleSubmittedNewMessage() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message newMessage = Message.builder()
+            .updatedTime(ZonedDateTime.of(2022, 01, 01, 10, 30, 30, 0,
+                                          ZoneId.of("Europe/London")).toLocalDateTime())
+            .isReplying(YesOrNo.Yes).build();
+        Message oldMessage = Message.builder()
+            .updatedTime(ZonedDateTime.of(2022, 01, 01, 9, 30, 30, 0,
+                                          ZoneId.of("Europe/London")).toLocalDateTime())
+            .isReplying(YesOrNo.Yes).build();
+
+        SendAndReplyEventData eventData = SendAndReplyEventData.builder()
+            .chooseSendOrReply(REPLY)
+            .messageReply(newMessage)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .sendAndReplyEventData(eventData)
+            .openMessages((Arrays.asList(element(newMessage), element(oldMessage))))
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        sendAndReplyController.handleSubmitted(auth, callbackRequest);
+        verify(sendAndReplyService).sendNotificationEmail(caseData, newMessage);
+        verifyNoMoreInteractions(sendAndReplyService);
     }
 
 
