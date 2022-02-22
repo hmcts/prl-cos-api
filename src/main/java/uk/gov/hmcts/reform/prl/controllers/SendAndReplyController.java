@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData.temporaryFields;
@@ -128,8 +129,12 @@ public class SendAndReplyController extends AbstractCallbackController {
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
 
         // sort lists of messages with most recent first
-        caseData.getOpenMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
-        caseData.getClosedMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        if (ofNullable(caseData.getOpenMessages()).isPresent()) {
+            caseData.getOpenMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        }
+        if (ofNullable(caseData.getClosedMessages()).isPresent()) {
+            caseData.getClosedMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
