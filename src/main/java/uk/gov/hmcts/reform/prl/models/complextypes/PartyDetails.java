@@ -55,6 +55,7 @@ public class PartyDetails {
     private final YesNoDontKnow doTheyHaveLegalRepresentation;
     private final String sendSignUpLink;
     private final String solicitorEmail;
+    private final String solicitorTelephone;
     private final String caseTypeOfApplication;
     private final YesOrNo respondentLivedWithApplicant;
 
