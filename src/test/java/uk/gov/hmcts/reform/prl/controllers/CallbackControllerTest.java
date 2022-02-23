@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -53,7 +55,6 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
-
 
 @RunWith(SpringRunner.class)
 public class CallbackControllerTest {
@@ -92,9 +93,13 @@ public class CallbackControllerTest {
     @Mock
     AllTabServiceImpl allTabsService;
 
+    @Mock
+    private OrganisationService organisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
-    public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
+    public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
+    private static final String C100_FINAL_TEMPLATE = "C100-Final-Document.docx";
     public static final String PRL_C1A_TEMPLATE = "PRL-C1A.docx";
 
     @Before
@@ -144,7 +149,6 @@ public class CallbackControllerTest {
 
     }
 
-
     @Test
     public void testGenerateAndStoreDocument() throws Exception {
         //CaseDetails caseDetails  = CaseDetailsProvider.full();
@@ -155,15 +159,29 @@ public class CallbackControllerTest {
             .hashToken("testHashToken")
             .build();
 
-        CaseDetails caseDetails = CaseDetails.builder()
-            .caseData(CaseData.builder()
-                          .draftOrderDoc(Document.builder()
-                                             .documentUrl(generatedDocumentInfo.getUrl())
-                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                             .documentHash(generatedDocumentInfo.getHashToken())
-                                             .documentFileName("PRL-DRAFT-C100-20.docx")
-                                             .build())
-                          .build())
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        CaseData caseData = CaseData.builder()
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("PRL-DRAFT-C100-20.docx")
+                               .build())
+            .applicants(applicantList)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -174,19 +192,34 @@ public class CallbackControllerTest {
                                          .documentHash(generatedDocumentInfo.getHashToken())
                                          .documentFileName("PRL-DRAFT-C100-20.docx")
                                          .build())
+                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                       .build())
             .build();
 
-        CallbackRequest callbackRequest = CallbackRequest.builder().build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE))
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model.
+            CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         callbackController.generateAndStoreDocument(authToken, callbackRequest);
 
-        verify(dgsService).generateDocument(authToken, null, PRL_DRAFT_TEMPLATE);
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.anyString()
+        );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
@@ -211,6 +244,7 @@ public class CallbackControllerTest {
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
@@ -262,11 +296,17 @@ public class CallbackControllerTest {
                                       .documentFileName(PRL_C8_TEMPLATE)
                                       .build())
                       .c1ADocument(Document.builder()
-                                      .documentUrl(generatedDocumentInfo.getUrl())
-                                      .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                      .documentHash(generatedDocumentInfo.getHashToken())
-                                      .documentFileName(PRL_C8_TEMPLATE)
-                                      .build())
+                                       .documentUrl(generatedDocumentInfo.getUrl())
+                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                       .documentHash(generatedDocumentInfo.getHashToken())
+                                       .documentFileName(PRL_C8_TEMPLATE)
+                                       .build())
+                      .finalDocument(Document.builder()
+                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                         .documentFileName(C100_FINAL_TEMPLATE)
+                                         .build())
                       .build())
             .build();
 
@@ -285,7 +325,7 @@ public class CallbackControllerTest {
         );
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.anyString()

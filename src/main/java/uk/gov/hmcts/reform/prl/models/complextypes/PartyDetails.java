@@ -10,13 +10,14 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 
 import java.time.LocalDate;
 import java.util.List;
 
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class PartyDetails {
 
@@ -57,5 +58,5 @@ public class PartyDetails {
     private final String solicitorEmail;
     private final String caseTypeOfApplication;
     private final YesOrNo respondentLivedWithApplicant;
-
+    private final Organisations organisations;
 }
