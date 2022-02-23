@@ -211,6 +211,7 @@ public class CallbackControllerTest {
             .gender(Gender.male)
             .email("abc@xyz.com")
             .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
