@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -54,6 +55,7 @@ public class CallbackController {
 
     private static final String DRAFT_C_100_APPLICATION = "Draft_C100_application.pdf";
     public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
+    private static final String DRAFT_FL401_APPLICATION = "Draft_FL401_application.pdf";
     private static final String C8_DOC = "C8Document.pdf";
     private static final String C100_FINAL_DOC = "C100FinalDocument.pdf";
     private static final String C100_FINAL_TEMPLATE = "C100-Final-Document.docx";
@@ -66,6 +68,8 @@ public class CallbackController {
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
+
+    public static final String PRL_FL401_DRAFT_TEMPLATE = "FL401-draft.docx";
 
     private final DgsService dgsService;
     private final ObjectMapper objectMapper;
@@ -125,31 +129,24 @@ public class CallbackController {
         );
     }
 
-
     @PostMapping(path = "/generate-save-draft-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to generate and store document")
     public uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse generateAndStoreDocument(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody @ApiParam("CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest request
     ) throws Exception {
-
         CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
-        caseData = organisationService.getApplicantOrganisationDetails(caseData);
-        caseData = organisationService.getRespondentOrganisationDetails(caseData);
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-            PRL_DRAFT_TEMPLATE
-        );
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = organisationService.getApplicantOrganisationDetails(caseData);
+            caseData = organisationService.getRespondentOrganisationDetails(caseData);
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = organisationService.getApplicantOrganisationDetailsForFL401(caseData);
+        }
         return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse
             .builder()
-            .data(CaseData.builder().draftOrderDoc(Document.builder()
-                                                       .documentUrl(generatedDocumentInfo.getUrl())
-                                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                       .documentHash(generatedDocumentInfo.getHashToken())
-                                                       .documentFileName(DRAFT_C_100_APPLICATION).build())
-                      .build())
+            .data(getUpdatedCaseDataWithDoc(authorisation, caseData))
             .build();
+
     }
 
     @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -278,4 +275,19 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+    private CaseData getUpdatedCaseDataWithDoc(String authorisation, CaseData caseData) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+            PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? PRL_DRAFT_TEMPLATE
+                : PRL_FL401_DRAFT_TEMPLATE
+        );
+        CaseData updatedCaseData = CaseData.builder().draftOrderDoc(Document.builder().documentUrl(
+            generatedDocumentInfo.getUrl()).documentBinaryUrl(
+            generatedDocumentInfo.getBinaryUrl()).documentHash(generatedDocumentInfo.getHashToken()).documentFileName(
+            PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                ? DRAFT_C_100_APPLICATION : DRAFT_FL401_APPLICATION).build()).build();
+
+        return updatedCaseData;
+    }
 }
