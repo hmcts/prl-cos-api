@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Event {
 
+
     CASE_NAME("caseName", "Case name"),
     TYPE_OF_APPLICATION("selectApplicationType", "Type of application"),
     HEARING_URGENCY("hearingUrgency",  "Hearing urgency"),
