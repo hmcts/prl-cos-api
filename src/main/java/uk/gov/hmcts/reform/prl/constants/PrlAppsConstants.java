@@ -35,4 +35,8 @@ public class PrlAppsConstants {
 
     public static final String YES_SMALL = "yes";
     public static final String NO_SMALL = "no";
+
+    public static final String DOCUMENT_FIELD_C1A = "c1ADocument";
+    public static final String DOCUMENT_FIELD_C8 = "c8Document";
+    public static final String DOCUMENT_FIELD_FINAL = "finalDocument";
 }

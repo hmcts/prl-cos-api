@@ -43,7 +43,7 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Autowired
     private UserService userService;
 
-    private CourtFinderService courtLocatorService;
+    private final CourtFinderService courtLocatorService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -52,7 +52,7 @@ public class PrePopulateFeeAndSolicitorNameController {
     private DgsService dgsService;
 
 
-    public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
+    public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
     private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
 
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
