@@ -33,9 +33,9 @@ public class DgsService {
                     .builder().template(templateName).values(tempCaseDetails).build()
                 );
 
-        } catch (GenerateDocumentException ex) {
+        } catch (uk.gov.hmcts.reform.prl.exception.GenerateDocumentException ex) {
             log.error("Error generating and storing document for case {}", caseDetails.getCaseId());
-            throw new GenerateDocumentException(ex.getMessage());
+            throw new uk.gov.hmcts.reform.prl.exception.GenerateDocumentException(ex.getMessage());
         }
         return generatedDocumentInfo;
     }

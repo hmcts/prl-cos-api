@@ -19,8 +19,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.ApplicationWorkflowException;
-import uk.gov.hmcts.reform.prl.exception.ApplicationWorkflowException;
 import uk.gov.hmcts.reform.prl.exception.SendEmailNotificationException;
+import uk.gov.hmcts.reform.prl.exception.GenerateDocumentException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -76,7 +76,7 @@ public class CallbackController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public ResponseEntity<uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse> sendEmail(
         @RequestBody @ApiParam("CaseData") CallbackRequest request
-    ) throws ApplicationWorkflowException {
+    ) throws uk.gov.hmcts.reform.prl.exception.ApplicationWorkflowException {
         return ok(
             uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
                 .data(exampleService.executeExampleWorkflow(request.getCaseDetails()))
@@ -91,7 +91,7 @@ public class CallbackController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public ResponseEntity<uk.gov.hmcts.reform.ccd.client.model.CallbackResponse> validateApplicationConsiderationTimetable(
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws ApplicationWorkflowException {
+    ) throws uk.gov.hmcts.reform.prl.exception.ApplicationWorkflowException {
         WorkflowResult workflowResult = applicationConsiderationTimetableValidationWorkflow.run(callbackRequest);
 
         return ok(
@@ -108,7 +108,7 @@ public class CallbackController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public ResponseEntity<uk.gov.hmcts.reform.ccd.client.model.CallbackResponse> validateMiamApplicationOrExemption(
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws ApplicationWorkflowException {
+    ) throws uk.gov.hmcts.reform.prl.exception.ApplicationWorkflowException {
         WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
         return ok(
@@ -125,7 +125,7 @@ public class CallbackController {
     public uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse generateAndStoreDocument(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody @ApiParam("CaseData") CallbackRequest request
-    ) throws Exception {
+    ) throws uk.gov.hmcts.reform.prl.exception.GenerateDocumentException {
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             request.getCaseDetails(),
@@ -145,7 +145,7 @@ public class CallbackController {
     @ApiOperation(value = "Callback to generate and store document")
     public AboutToStartOrSubmitCallbackResponse generateC8AndOtherDocument(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws uk.gov.hmcts.reform.prl.exception.GenerateDocumentException {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -155,8 +155,10 @@ public class CallbackController {
             PRL_C8_TEMPLATE
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("Generate C1A if allegations of harm is set to Yes and the passed value is {}",
-                 caseData.getAllegationsOfHarmYesNo());
+        log.info(
+            "Generate C1A if allegations of harm is set to Yes and the passed value is {}",
+            caseData.getAllegationsOfHarmYesNo()
+        );
         if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
             GeneratedDocumentInfo generatedC1ADocumentInfo = dgsService.generateDocument(
                 authorisation,
@@ -204,7 +206,7 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse sendEmailNotificationOnCaseWithdraw(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws SendEmailNotificationException {
+    ) throws uk.gov.hmcts.reform.prl.exception.SendEmailNotificationException {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
