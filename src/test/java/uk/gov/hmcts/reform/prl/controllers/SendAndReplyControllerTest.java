@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -203,7 +204,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleAboutToSubmitReplyPathReply() {
+    public void testHandleAboutToSubmitReplyPathReplyWithClosedMessages() {
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
@@ -231,7 +232,34 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testHandleSubmittedClosedMessage() {
+    public void testHandleAboutToSubmitReplyPathReplyWithoutClosedMessages() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
+        SendAndReplyEventData eventData = SendAndReplyEventData.builder()
+            .chooseSendOrReply(REPLY)
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .sendAndReplyEventData(eventData)
+            .build();
+        UUID selectedValue = UUID.randomUUID();
+
+        when(elementUtils.getDynamicListSelectedValue(eventData.getReplyMessageDynamicList(), objectMapper))
+            .thenReturn(selectedValue);
+        when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.buildNewReplyMessage(selectedValue, message, caseData.getOpenMessages()))
+            .thenReturn(Collections.singletonList(element(message)));
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
+        verify(sendAndReplyService).buildNewReplyMessage(selectedValue, message, caseData.getOpenMessages());
+    }
+
+    @Test
+    public void testHandleSubmittedClosedMessageNoClosedMessages() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.No)
             .status(MessageStatus.CLOSED)
@@ -245,6 +273,29 @@ public class SendAndReplyControllerTest {
             .sendAndReplyEventData(eventData)
             .openMessages(Collections.singletonList(element(message)))
             .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        sendAndReplyController.handleSubmitted(auth, callbackRequest);
+        verifyNoInteractions(sendAndReplyService);
+    }
+
+    @Test
+    public void testHandleSubmittedClosedMessageWithClosedMessages() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.No)
+            .status(MessageStatus.CLOSED)
+            .build();
+        SendAndReplyEventData eventData = SendAndReplyEventData.builder()
+            .chooseSendOrReply(REPLY)
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .sendAndReplyEventData(eventData)
+            .closedMessages(Collections.emptyList())
+            .openMessages(Collections.singletonList(element(message)))
+            .build();
+
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleSubmitted(auth, callbackRequest);
