@@ -80,9 +80,8 @@ public class PrePopulateFeeAndSolicitorNameController {
 
         Court closestChildArrangementsCourt = courtLocatorService
             .getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
-            .getCaseData());
-        log.info("**** Court Name *** " + (null != closestChildArrangementsCourt
-            ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched"));
+                                                  .getCaseData());
+
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()
                 .solicitorName(userDetails.getFullName())
