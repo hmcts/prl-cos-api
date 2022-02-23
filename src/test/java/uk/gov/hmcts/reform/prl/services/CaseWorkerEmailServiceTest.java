@@ -283,7 +283,7 @@ public class CaseWorkerEmailServiceTest {
     public void testCourtAdminEmailWithNoUrgency() {
 
         PartyDetails applicant1 = PartyDetails.builder()
-            .isEmailAddressConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.No)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
@@ -342,6 +342,7 @@ public class CaseWorkerEmailServiceTest {
     public void testCourtAdminEmailWithUrgencyAndConfidentialInfo() {
 
         PartyDetails applicant1 = PartyDetails.builder()
+            .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
@@ -405,6 +406,7 @@ public class CaseWorkerEmailServiceTest {
         Element<LocalCourtAdminEmail> wrappedEmail = Element.<LocalCourtAdminEmail>builder().value(localCourtAdminEmail).build();
         List<Element<LocalCourtAdminEmail>> emailList = Collections.singletonList(wrappedEmail);
         PartyDetails applicant1 = PartyDetails.builder()
+            .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
