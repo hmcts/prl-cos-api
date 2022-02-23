@@ -1,0 +1,104 @@
+package uk.gov.hmcts.reform.prl.services;
+
+import javassist.NotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class OrganisationService {
+
+    @Autowired
+    private final OrganisationApi organisationApi;
+
+    private Organisations organisations;
+    private final AuthTokenGenerator authTokenGenerator;
+    private final SystemUserService systemUserService;
+    private List<Element<PartyDetails>> applicantsWithOrganisationDetails = new ArrayList<>();
+
+    public CaseData getApplicantOrganisationDetails(CaseData caseData)  {
+        if (Optional.ofNullable(caseData.getApplicants()).isPresent()) {
+            String userToken = systemUserService.getSysUserToken();
+            List<Element<PartyDetails>> applicants = caseData.getApplicants()
+                .stream()
+                .map(eachItem ->  Element.<PartyDetails>builder()
+                    .value(getApplicantWithOrg(eachItem.getValue(),userToken))
+                    .id(eachItem.getId()).build())
+                .collect(Collectors.toList());
+            caseData = caseData.toBuilder()
+                .applicants(applicants)
+                .issueDate(LocalDate.now())
+                .build();
+        }
+        return caseData;
+    }
+
+    public CaseData getRespondentOrganisationDetails(CaseData caseData) throws NotFoundException {
+
+        if (Optional.ofNullable(caseData.getRespondents()).isPresent()) {
+            String userToken = systemUserService.getSysUserToken();
+            applicantsWithOrganisationDetails.clear();
+
+            List<Element<PartyDetails>> respondents = caseData.getRespondents()
+                .stream()
+                .map(eachItem ->  Element.<PartyDetails>builder()
+                    .value(getRespondentWithOrg(eachItem.getValue(),userToken))
+                    .id(eachItem.getId()).build())
+                .collect(Collectors.toList());
+
+            caseData = caseData.toBuilder().respondents(respondents).build();
+        }
+        return caseData;
+    }
+
+    private PartyDetails getRespondentWithOrg(PartyDetails respondent, String userToken) {
+
+        if (respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)
+            && respondent.getSolicitorOrg() != null) {
+
+            String organisationID = respondent.getSolicitorOrg().getOrganisationID();
+            if (organisationID != null) {
+                organisations = getOrganisationDetaiils(userToken, organisationID);
+                respondent = respondent.toBuilder()
+                    .organisations(organisations)
+                    .build();
+            }
+        }
+        return respondent;
+    }
+
+    public Organisations getOrganisationDetaiils(String userToken, String organisationID) {
+        return organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
+    }
+
+    private PartyDetails getApplicantWithOrg(PartyDetails applicant, String userToken) {
+
+        if (applicant.getSolicitorOrg() != null) {
+            String organisationID = applicant.getSolicitorOrg().getOrganisationID();
+            if (organisationID != null) {
+                organisations = getOrganisationDetaiils(userToken, organisationID);
+
+                applicant = applicant.toBuilder()
+                    .organisations(organisations)
+                    .build();
+            }
+        }
+        return applicant;
+    }
+}
