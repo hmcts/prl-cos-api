@@ -20,16 +20,16 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
-import uk.gov.hmcts.reform.prl.services.DgsService;
-import uk.gov.hmcts.reform.prl.services.FeeService;
-import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
@@ -49,10 +49,15 @@ public class PrePopulateFeeAndSolicitorNameController {
     private ObjectMapper objectMapper;
     @Autowired
     private DgsService dgsService;
+    @Autowired
+    private DocumentLanguageService documentLanguageService;
 
 
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
     private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
+    public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
+    public static final String PRL_C100_DRAFT_WELSH_TEMPLATE = "PRL-Draft-C100-Welsh.docx";
+    public static final String PRL_C100_DRAFT_WELSH_FILENAME = "Draft_c100_application_welsh.pdf";
 
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to get Solicitor name and fee amount. ")
@@ -72,11 +77,6 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .errors(errorList)
                 .build();
         }
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-            callbackRequest.getCaseDetails(),
-            PRL_DRAFT_TEMPLATE
-        );
 
         Court closestChildArrangementsCourt = courtLocatorService
             .getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
@@ -90,15 +90,44 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .applicantSolicitorEmailAddress(userDetails.getEmail())
                 .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
                 .feeAmount(feeResponse.getAmount().toString())
-                .submitAndPayDownloadApplicationLink(Document.builder()
-                                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                                         .documentFileName(DRAFT_C_100_APPLICATION).build())
                 .courtName(closestChildArrangementsCourt.getCourtName())
                 .build(),
             CaseData.class
         );
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
+        log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}", documentLanguage.isGenEng() ,documentLanguage.isGenWelsh());
+
+        if (documentLanguage.isGenEng()) {
+            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+                authorisation,
+                callbackRequest.getCaseDetails(),
+                PRL_DRAFT_TEMPLATE
+            );
+
+            caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
+                .submitAndPayDownloadApplicationLink(Document.builder()
+                                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                                         .documentFileName(DRAFT_C_100_APPLICATION).build()).build();
+        }
+
+        if (documentLanguage.isGenWelsh()) {
+            GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateDocument(
+                authorisation,
+                callbackRequest.getCaseDetails(),
+                PRL_C100_DRAFT_WELSH_TEMPLATE
+            );
+
+            caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())
+                .submitAndPayDownloadApplicationWelshLink(Document.builder()
+                                                              .documentUrl(generatedWelshDocumentInfo.getUrl())
+                                                              .documentBinaryUrl(generatedWelshDocumentInfo.getBinaryUrl())
+                                                              .documentHash(generatedWelshDocumentInfo.getHashToken())
+                                                              .documentFileName(PRL_C100_DRAFT_WELSH_FILENAME).build()).build();
+        }
+
         log.info("Saving Court name into DB..");
         return CallbackResponse.builder()
             .data(caseData)
