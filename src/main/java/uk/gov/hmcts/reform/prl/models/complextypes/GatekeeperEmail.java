@@ -10,6 +10,7 @@ import lombok.Data;
 public class GatekeeperEmail {
     @JsonProperty("email")
     private final String email;
+
     @JsonCreator
     public GatekeeperEmail(String email) {
         this.email  = email;
