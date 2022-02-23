@@ -41,7 +41,7 @@ public enum ApplicantRelationshipEnum {
     }
 
     @JsonCreator
-    public static ApplicantRelationshipOptionsEnum getValue(String key) {
-        return ApplicantRelationshipOptionsEnum.valueOf(key);
+    public static ApplicantRelationshipEnum getValue(String key) {
+        return ApplicantRelationshipEnum.valueOf(key);
     }
 }

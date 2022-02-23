@@ -31,7 +31,7 @@ public class FL401OtherProceedingsChecker implements EventChecker {
     public boolean isFinished(CaseData caseData) {
 
         if (null == caseData.getFl401OtherProceedingDetails()) {
-            return true;
+            return false;
         }
 
         Optional<YesNoDontKnow> otherProceedings = ofNullable(
@@ -77,13 +77,15 @@ public class FL401OtherProceedingsChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        Optional<YesNoDontKnow> otherProceedings = ofNullable(
-            caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding());
+        if (null != caseData.getFl401OtherProceedingDetails()) {
+            Optional<YesNoDontKnow> otherProceedings = ofNullable(
+                caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding());
 
-        if (otherProceedings.isPresent() && otherProceedings.get().equals(yes)) {
-            taskErrorService.addEventError(OTHER_PROCEEDINGS, OTHER_PROCEEDINGS_ERROR,
-                                           OTHER_PROCEEDINGS_ERROR.getError());
-            return true;
+            if (otherProceedings.isPresent() && otherProceedings.get().equals(yes)) {
+                taskErrorService.addEventError(OTHER_PROCEEDINGS, OTHER_PROCEEDINGS_ERROR,
+                                               OTHER_PROCEEDINGS_ERROR.getError());
+                return true;
+            }
         }
         return false;
     }

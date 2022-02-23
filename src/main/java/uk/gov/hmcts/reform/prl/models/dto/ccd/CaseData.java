@@ -345,8 +345,6 @@ public class CaseData implements MappableObject {
     @JsonProperty("c1ADocument")
     private final Document c1ADocument;
 
-
-
     @JsonProperty("submitAndPayDownloadApplicationLink")
     private final Document submitAndPayDownloadApplicationLink;
 

@@ -173,6 +173,66 @@ public class OrganisationServiceTest {
             .respondents(listOfRespondents)
             .build();
         organisationService.getRespondentOrganisationDetails(caseData);
+    }
 
+    @Test
+    public void testApplicantOrganisationDetailsForFl401() throws NotFoundException {
+
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("79ZRSOU")
+                              .organisationName("Civil - Organisation 2")
+                              .build())
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
+                                                                                        .addressLine1("29, SEATON DRIVE")
+                                                                                        .addressLine2("test line")
+                                                                                        .townCity("NORTHAMPTON")
+                                                                                        .postCode("NN3 9SS")
+                                                                                        .build());
+
+        Organisations organisations = Organisations.builder()
+            .organisationIdentifier("79ZRSOU")
+            .name("Civil - Organisation 2")
+            .contactInformation(contactInformationList)
+            .build();
+
+        PartyDetails partyDetailsWithOrganisations = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("79ZRSOU")
+                              .organisationName("Civil - Organisation 2")
+                              .build())
+            .organisations(organisations)
+            .build();
+
+        when(organisationApi.findOrganisation(authToken,
+                                              serviceAuthToken,
+                                              applicant.getSolicitorOrg().getOrganisationID()))
+            .thenReturn(organisations);
+        String organisationId = applicant.getSolicitorOrg().getOrganisationID();
+
+        when(organisationService.getOrganisationDetaiils(authToken, organisationId)).thenReturn(organisations);
+        CaseData expectedCaseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .issueDate(LocalDate.now())
+            .applicantsFL401(partyDetailsWithOrganisations)
+            .build();
+        assertEquals(organisations.getOrganisationIdentifier(), organisationId);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(applicant)
+            .build();
+        CaseData actualCaseData = organisationService.getApplicantOrganisationDetailsForFL401(caseData);
+        assertEquals(actualCaseData,expectedCaseData);
     }
 }
