@@ -296,5 +296,4 @@ public class CallbackController {
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
 }

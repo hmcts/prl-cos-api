@@ -55,7 +55,7 @@ def versions = [
   springSecurityRsa            : '1.0.9.RELEASE',
   springBoot                   : '2.5.4',
   springCloud                  : '3.0.3',
-  tomcat                       : '9.0.54',
+  tomcat                       : '9.0.58',
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.7.3'
 ]
@@ -125,7 +125,7 @@ allprojects {
       }
 
       // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
-      dependencySet(group: 'io.netty', version: '4.1.73.Final') {
+      dependencySet(group: 'io.netty', version: '4.1.74.Final') {
         entry 'netty-buffer'
         entry 'netty-codec'
         entry 'netty-codec-http'
@@ -244,7 +244,7 @@ dependencies {
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.0.1'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
   implementation group: 'org.apache.commons', name: 'commons-math3', version: versions.commonsMath3
-  implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.14'
+  implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.15'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
@@ -256,7 +256,7 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-httpcomponents', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-spring', version: versions.reformsJavaLogging
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.15.0'
+  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.1'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.17.1'
   implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version: versions.reformPropertiesVolume
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
@@ -267,7 +267,7 @@ dependencies {
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
   implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
-  implementation group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '2.2.0'
+  implementation group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '3.0.3'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
 
   compile group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '2.2.0'
@@ -280,7 +280,7 @@ dependencies {
   implementation group: 'org.springframework.security', name: 'spring-security-web'
 //  implementation group: 'org.springframework.security', name: 'spring-security-config'
 //  // CVE-2021-22112 - Privilege Escalation
-  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.5.2'
+  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.6.1'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
 
@@ -380,7 +380,6 @@ dependencies {
   contractTestCompile sourceSets.test.runtimeClasspath
 
   integrationTestImplementation(sourceSets.test.output)
-
   testCompile 'com.github.hmcts:fortify-client:1.2.2:all'
 }
 
@@ -458,19 +457,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/utils/SslVerificationDisabler.*',
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/services/validators/*.*',
-  '**uk/gov/hmcts/reform/prl/services/DgsService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/ServiceRequestUpdateCallbackController.java',
-  '**uk/gov/hmcts/reform/prl/services/UserService.java',
   '**uk/gov/hmcts/reform/prl/utils/ElementUtils.java',
-  '**uk/gov/hmcts/reform/prl/services/EmailService.java',
-  '**uk/gov/hmcts/reform/prl/services/DgsService.java',
-  '**uk/gov/hmcts/reform/prl/services/DgsService.java',
-  '**uk/gov/hmcts/reform/prl/services/CaseWorkerEmailService.java',
-  '**uk/gov/hmcts/reform/prl/services/SolicitorEmailService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/CaseInitiationController.java',
   '**uk/gov/hmcts/reform/prl/services/RequestUpdateCallbackService.java',
-  '**uk/gov/hmcts/reform/prl/services/SolicitorEmailService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/PrePopulateFeeAndSolicitorNameController.java'
 ]
 
 sonarqube {
