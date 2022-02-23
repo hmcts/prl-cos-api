@@ -41,6 +41,11 @@ public class CourtFinderService {
             .get(0)
             .getCourtId();
 
+        if (ofNullable(courtSlug).isEmpty()) {
+            // return null to ensure current usage is not impacted
+            return null;
+
+        }
         return getCourtDetails(courtSlug);
     }
 
@@ -72,8 +77,14 @@ public class CourtFinderService {
         if (child.getChildLiveWith().contains(applicant)) {
             return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
         } else if (child.getChildLiveWith().contains(respondent)) {
+            if (ofNullable(getPostcodeFromWrappedParty(caseData.getRespondents().get(0))).isEmpty()) {
+                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+            }
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
         } else if (child.getChildLiveWith().contains(anotherPerson) && ofNullable(getFirstOtherPerson(child)).isPresent()) {
+            if (ofNullable(getFirstOtherPerson(child).getAddress().getPostCode()).isEmpty()) {
+                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+            }
             return getFirstOtherPerson(child).getAddress().getPostCode();
         }
         //default to the applicant postcode
