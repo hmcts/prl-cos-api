@@ -206,7 +206,7 @@ public class SendAndReplyControllerTest {
     public void testHandleAboutToSubmitReplyPathReplyWithClosedMessages() {
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
+        Message message = Message.builder().isReplying(YesOrNo.No).build();
         SendAndReplyEventData eventData = SendAndReplyEventData.builder()
             .chooseSendOrReply(REPLY)
             .messageReply(message)
@@ -222,12 +222,10 @@ public class SendAndReplyControllerTest {
             .thenReturn(selectedValue);
         when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.buildNewReplyMessage(selectedValue, message, caseData.getOpenMessages()))
-            .thenReturn(Collections.singletonList(element(message)));
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).buildNewReplyMessage(selectedValue, message, caseData.getOpenMessages());
+        verify(sendAndReplyService).closeMessage(selectedValue, caseData);
     }
 
     @Test
