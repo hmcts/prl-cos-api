@@ -8,8 +8,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
-import java.util.stream.Collectors;
 import javax.json.JsonObject;
+import java.util.stream.Collectors;
 
 @Component
 public class MiamMapper {
@@ -22,21 +22,23 @@ public class MiamMapper {
             .add("familyMediatorMiam", CommonUtils.getYesOrNoValue(caseData.getFamilyMediatorMiam()))
             .add(
                 "miamExemptionsChecklist",
-                caseData.getMiamExemptionsChecklist().isEmpty() ? null : caseData.getMiamExemptionsChecklist().stream()
+                caseData.getMiamExemptionsChecklist() != null ? caseData.getMiamExemptionsChecklist().stream()
                     .map(MiamExemptionsChecklistEnum::getDisplayedValue).collect(Collectors.joining(", "))
+                    : null
             )
             .add(
                 "miamDomesticViolenceChecklist",
-                caseData.getMiamDomesticViolenceChecklist().isEmpty() ? null :
+                caseData.getMiamDomesticViolenceChecklist() != null ?
                     caseData.getMiamDomesticViolenceChecklist().stream()
-                    .map(MiamDomesticViolenceChecklistEnum::getDisplayedValue)
-                        .collect(Collectors.joining(", "))
+                        .map(MiamDomesticViolenceChecklistEnum::getDisplayedValue)
+                        .collect(Collectors.joining(", ")) : null
             )
             .add(
                 "miamUrgencyReasonChecklist",
-                caseData.getMiamUrgencyReasonChecklist().isEmpty() ? null :
+                caseData.getMiamUrgencyReasonChecklist() != null ?
                     caseData.getMiamUrgencyReasonChecklist().stream()
-                    .map(MiamUrgencyReasonChecklistEnum::getDisplayedValue).collect(Collectors.joining(", "))
+                        .map(MiamUrgencyReasonChecklistEnum::getDisplayedValue)
+                        .collect(Collectors.joining(", ")) : null
             )
             .add(
                 "miamPreviousAttendanceChecklist",
