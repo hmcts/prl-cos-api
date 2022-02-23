@@ -133,6 +133,11 @@ courtfinder:
   api:
     url: http://fact-api-aat.service.core-compute-aat.internal/
 
+rd_professional:
+  api:
+    url: http://rd-professional-api-aat.service.core-compute-aat.internal
+
+
 launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
 
