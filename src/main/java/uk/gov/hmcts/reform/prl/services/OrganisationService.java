@@ -101,4 +101,16 @@ public class OrganisationService {
         }
         return applicant;
     }
+
+    public CaseData getApplicantOrganisationDetailsForFL401(CaseData caseData)  {
+        if (Optional.ofNullable(caseData.getApplicantsFL401()).isPresent()) {
+            String userToken = systemUserService.getSysUserToken();
+            PartyDetails applicantWithOrg = getApplicantWithOrg(caseData.getApplicantsFL401(), userToken);
+            caseData = caseData.toBuilder()
+                .applicantsFL401(applicantWithOrg)
+                .issueDate(LocalDate.now())
+                .build();
+        }
+        return caseData;
+    }
 }
