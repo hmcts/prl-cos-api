@@ -42,12 +42,12 @@ public class CaseEventHandler {
 
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
             List<Event> events = taskListService.getC100Events();
-            eventErrors.removeIf(e -> events.contains(e.getEvent()));
+            eventErrors.removeIf(e -> !events.contains(e.getEvent()));
         }
 
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)) {
             List<Event> events = taskListService.getFL401Events();
-            eventErrors.removeIf(e -> events.contains(e.getEvent()));
+            eventErrors.removeIf(e -> !events.contains(e.getEvent()));
         }
 
 
