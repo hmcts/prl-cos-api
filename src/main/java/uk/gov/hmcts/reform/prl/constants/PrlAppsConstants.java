@@ -36,6 +36,7 @@ public class PrlAppsConstants {
     public static final String YES_SMALL = "yes";
     public static final String NO_SMALL = "no";
 
+
     public static final String DOCUMENT_FIELD_C1A = "c1ADocument";
     public static final String DOCUMENT_FIELD_C8 = "c8Document";
     public static final String DOCUMENT_FIELD_FINAL = "finalDocument";
@@ -43,4 +44,7 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_FIELD_C1A_WELSH = "c1AWelshDocument";
     public static final String DOCUMENT_FIELD_C8_WELSH = "c8WelshDocument";
     public static final String DOCUMENT_FIELD_FINAL_WELSH = "finalWelshDocument";
+
+    public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
+
 }
