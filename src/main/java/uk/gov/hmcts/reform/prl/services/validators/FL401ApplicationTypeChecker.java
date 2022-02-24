@@ -11,13 +11,15 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_CHILD_ARRANGEMENTS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_TYPE_OF_ORDER_ERROR;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Slf4j
@@ -62,6 +64,7 @@ public class FL401ApplicationTypeChecker implements EventChecker {
                 taskErrorService.removeError(FL401_TYPE_OF_APPLICATION_ERROR);
                 return true;
             }
+
             taskErrorService.addEventError(
                 FL401_TYPE_OF_APPLICATION,
                 FL401_TYPE_OF_APPLICATION_ERROR,
@@ -72,13 +75,26 @@ public class FL401ApplicationTypeChecker implements EventChecker {
             FL401_TYPE_OF_APPLICATION,
             FL401_TYPE_OF_APPLICATION_ERROR,
             FL401_TYPE_OF_APPLICATION_ERROR.getError());
+        taskErrorService.addNestedEventErrors(
+            FL401_TYPE_OF_APPLICATION,
+            FL401_TYPE_OF_APPLICATION_ERROR,
+            getFieldSpecificErrors(caseData)
+        );
         return false;
     }
 
 
-
     public List<EventErrorsEnum> getFieldSpecificErrors(CaseData caseData) {
-        return Collections.emptyList();
+        Optional<List<FL401OrderTypeEnum>> orderType = ofNullable(caseData.getTypeOfApplicationOrders().getOrderType());
+        Optional<YesOrNo> linkToCaApplication = ofNullable(caseData.getTypeOfApplicationLinkToCA().getLinkToCaApplication());
+        List<EventErrorsEnum> errors = new ArrayList<>();
+        if (orderType.isEmpty()) {
+            errors.add(FL401_TYPE_OF_APPLICATION_TYPE_OF_ORDER_ERROR);
+        }
+        if (linkToCaApplication.isEmpty()) {
+            errors.add(FL401_TYPE_OF_APPLICATION_CHILD_ARRANGEMENTS_ERROR);
+        }
+        return errors;
     }
 
 }

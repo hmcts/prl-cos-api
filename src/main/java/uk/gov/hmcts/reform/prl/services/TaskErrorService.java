@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -40,10 +41,12 @@ public class TaskErrorService {
                                     .build());
     }
 
-    public void addNestedEventError(Event event, EventErrorsEnum parentError, EventErrorsEnum errorType) {
+
+    public void addNestedEventErrors(Event event, EventErrorsEnum parentError, List<EventErrorsEnum> errors) {
         if (eventErrors.containsKey(parentError)) {
 
-            List<String> updatedNestedErrors = new ArrayList<>(Collections.singleton(errorType.getError()));
+            List<String> updatedNestedErrors = errors.stream().map(EventErrorsEnum::getError)
+                .collect(Collectors.toList());
 
             EventValidationErrors eventValidationErrors = eventErrors.get(parentError);
             if (ofNullable(eventValidationErrors.getNestedErrors()).isPresent()) {
@@ -59,7 +62,8 @@ public class TaskErrorService {
         } else {
             EventValidationErrors updatedErrors = EventValidationErrors.builder()
                 .event(event)
-                .nestedErrors(Collections.singletonList(errorType.getError()))
+                .nestedErrors(errors.stream().map(EventErrorsEnum::getError)
+                                  .collect(Collectors.toList()))
                 .build();
 
             eventErrors.put(parentError, updatedErrors);
