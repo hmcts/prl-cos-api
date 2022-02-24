@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -78,8 +79,10 @@ public class CaseData implements MappableObject {
 
     private final State state;
 
+    @JsonIgnore
     private final LocalDateTime createdDate;
 
+    @JsonIgnore
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
@@ -268,7 +271,6 @@ public class CaseData implements MappableObject {
     private final YesOrNo agreeChildSupervisedTime;
     private final YesOrNo agreeChildOtherContact;
 
-
     /**
      * Other people in the case.
      */
@@ -280,7 +282,6 @@ public class CaseData implements MappableObject {
 
     private final YesNoDontKnow previousOrOngoingProceedingsForChildren;
     private final List<Element<ProceedingDetails>> existingProceedings;
-
 
     /**
      * Attending the hearing.
@@ -326,6 +327,8 @@ public class CaseData implements MappableObject {
     private final CcdPaymentServiceRequestUpdate paymentCallbackServiceRequestUpdate;
     @JsonProperty("paymentServiceRequestReferenceNumber")
     private final String paymentServiceRequestReferenceNumber;
+
+    private final LocalDate issueDate;
 
     @JsonProperty("solicitorName")
     private final String solicitorName;
@@ -373,7 +376,6 @@ public class CaseData implements MappableObject {
     private final List<Element<OtherDocuments>> otherDocuments;
 
     private final List<Element<UserInfo>> userInfo;
-
 
     /**
      * Return Application.
@@ -429,13 +431,21 @@ public class CaseData implements MappableObject {
     private final String respondentSolicitorEmailAddress;
     private final String caseworkerEmailAddress;
 
-
     /**
      * Court details.
      */
 
     private String courtName;
     private String courtId;
+
+    /**
+     * Final document.
+     */
+
+    @JsonProperty("finalDocument")
+    private final Document finalDocument;
+    @JsonProperty("finalWelshDocument")
+    private final Document finalWelshDocument;
 
     /**
      *  Withdraw Application.

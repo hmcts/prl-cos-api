@@ -43,10 +43,7 @@ public class DocumentLanguageService {
                 }
             }
         }
-
-
         return docLanguage;
-
     }
 
 
