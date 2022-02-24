@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -18,4 +20,14 @@ public enum MiamChildProtectionConcernChecklistEnum {
                                                " put in place by a local authority");
 
     private final String displayedValue;
+
+    @JsonValue
+    public String getDisplayedValue() {
+        return displayedValue;
+    }
+
+    @JsonCreator
+    public static MiamChildProtectionConcernChecklistEnum getValue(String key) {
+        return MiamChildProtectionConcernChecklistEnum.valueOf(key);
+    }
 }

@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 
@@ -197,6 +198,7 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        caseData.toBuilder().issueDate(LocalDate.now());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -295,6 +297,7 @@ public class CallbackController {
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
 
         caseDataUpdated.putAll(allTabsFields);
+        caseDataUpdated.put("issueDate",caseData.getIssueDate());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
