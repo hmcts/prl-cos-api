@@ -40,14 +40,13 @@ public class DgsService {
         module.addSerializer(CaseData.class, new DgsSerializer());
         objectMapper.registerModule(module);
 
-        Map<String, Object> tempCaseDetails = new HashMap<String, Object>();
-
         Map<String, Object> caseDataMap = objectMapper.convertValue(caseDetails.getCaseData(), Map.class);
 
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("caseData", caseDataMap);
         caseDataMap.put("caseId", caseDetails.getCaseId());
         caseDataMap.put("state", caseDetails.getState());
+        Map<String, Object> tempCaseDetails = new HashMap<String, Object>();
         tempCaseDetails.put("caseDetails", caseDetailsMap);
 
         JSONObject json1 = new JSONObject(tempCaseDetails);
