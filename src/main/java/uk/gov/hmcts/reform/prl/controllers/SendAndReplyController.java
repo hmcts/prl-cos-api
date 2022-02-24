@@ -134,10 +134,10 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         // sort lists of messages with most recent first
         if (ofNullable(caseData.getOpenMessages()).isPresent()) {
-            caseData.getOpenMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+            caseData.getOpenMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime()));
         }
         if (ofNullable(caseData.getClosedMessages()).isPresent()) {
-            caseData.getClosedMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+            caseData.getClosedMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime()));
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -155,7 +155,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         if (ofNullable(caseData.getClosedMessages()).isPresent()) {
             messages.addAll(caseData.getClosedMessages());
         }
-        messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime()));
 
         Message mostRecentMessage = messages.get(0).getValue();
         if (mostRecentMessage.getStatus().equals(MessageStatus.OPEN)) {
