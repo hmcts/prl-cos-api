@@ -56,7 +56,7 @@ public class CallbackController {
 
     private static final String DRAFT_C_100_APPLICATION = "Draft_C100_application.pdf";
     public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
-    private static final String DRAFT_FL401_APPLICATION = "Draft_DA_application"+ CommonUtils.formatCurrentDate("ddMMM").toLowerCase() + ".pdf";
+    private static final String DRAFT_FL401_APPLICATION = "Draft_DA_application";
     private static final String C8_DOC = "C8Document.pdf";
     private static final String C100_FINAL_DOC = "C100FinalDocument.pdf";
     private static final String C100_FINAL_TEMPLATE = "C100-Final-Document.docx";
@@ -287,7 +287,7 @@ public class CallbackController {
             generatedDocumentInfo.getUrl()).documentBinaryUrl(
             generatedDocumentInfo.getBinaryUrl()).documentHash(generatedDocumentInfo.getHashToken()).documentFileName(
             PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                ? DRAFT_C_100_APPLICATION : DRAFT_FL401_APPLICATION).build()).build();
+                ? DRAFT_C_100_APPLICATION : DRAFT_FL401_APPLICATION + CommonUtils.formatCurrentDate("ddMMM").toLowerCase() + ".pdf").build()).build();
 
         return updatedCaseData;
     }
