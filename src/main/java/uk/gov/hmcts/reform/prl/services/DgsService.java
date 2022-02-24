@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.prl.utils.DgsSerializer;
 
 import java.util.Map;
 
+import static java.util.Optional.ofNullable;
+
 @Slf4j
 @Service
 @ConditionalOnProperty(prefix = "prl-dgs-api", name = "url")
@@ -28,7 +30,12 @@ public class DgsService {
     private final DgsApiClient dgsApiClient;
 
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
-        CaseData caseData = caseDetails.getCaseData();
+        CaseData caseData;
+        if (ofNullable(caseDetails).isPresent()) {
+            caseData = caseDetails.getCaseData();
+        } else {
+            caseData = null;
+        }
 
         ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new ParameterNamesModule())

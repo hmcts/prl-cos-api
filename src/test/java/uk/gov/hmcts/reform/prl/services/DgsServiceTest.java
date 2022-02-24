@@ -70,6 +70,7 @@ public class DgsServiceTest {
     public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
 
         CaseDetails caseDetails = CaseDetailsProvider.full();
+        caseDetails.setCaseData(CaseData.builder().build());
 
         when(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE)).thenReturn(generatedDocumentInfo);
 
