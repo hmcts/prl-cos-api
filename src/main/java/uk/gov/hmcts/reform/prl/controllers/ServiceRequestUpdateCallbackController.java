@@ -48,7 +48,6 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
         @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
     public void serviceRequestUpdate(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(serviceAuth) String serviceAuthorization,
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws Exception {
