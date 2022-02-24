@@ -41,16 +41,17 @@ public class DgsService {
         objectMapper.registerModule(module);
 
         Map<String, Object> tempCaseDetails = new HashMap<String, Object>();
-        tempCaseDetails.put("caseDetails", caseDetails);
-        JSONObject json1 = new JSONObject(tempCaseDetails);
-        log.info("tempCaseDetails------------------------");
-        log.info(json1.toString(4));
-
 
         Map<String, Object> caseDataMap = objectMapper.convertValue(caseDetails.getCaseData(), Map.class);
-        JSONObject json = new JSONObject(caseDataMap);
-        log.info("caseDataMap------------------------");
-        log.info(json.toString(4));
+
+        Map<String, Object> caseDetailsMap = new HashMap<>();
+        caseDetailsMap.put("caseData", caseDataMap);
+        caseDataMap.put("caseId", caseDetails.getCaseId());
+        caseDataMap.put("state", caseDetails.getState());
+        tempCaseDetails.put("caseDetails", caseDetailsMap);
+
+        JSONObject json1 = new JSONObject(tempCaseDetails);
+        log.info(json1.toString(4));
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
