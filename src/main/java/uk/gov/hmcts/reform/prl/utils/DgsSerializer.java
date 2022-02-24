@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
@@ -16,14 +15,11 @@ import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.PassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
@@ -34,7 +30,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +38,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -134,23 +128,24 @@ public class DgsSerializer extends JsonSerializer<CaseData> {
         } else {
             gen.writeObjectField("miamExemptionsChecklist", null);
         }
-        if (ofNullable(value.getMiamExemptionsChecklist()).isPresent()) {
-            gen.writeObjectField("miamDomesticViolenceChecklist", value.getMiamExemptionsChecklist().stream()
-                .map(MiamExemptionsChecklistEnum::getDisplayedValue)
+        if (ofNullable(value.getMiamDomesticViolenceChecklist()).isPresent()) {
+            gen.writeObjectField("miamDomesticViolenceChecklist", value.getMiamDomesticViolenceChecklist().stream()
+                .map(MiamDomesticViolenceChecklistEnum::getDisplayedValue)
                 .collect(Collectors.toList()));
         } else {
             gen.writeObjectField("miamDomesticViolenceChecklist", null);
         }
-        if (ofNullable(value.getMiamExemptionsChecklist()).isPresent()) {
-            gen.writeObjectField("miamUrgencyReasonChecklist", value.getMiamExemptionsChecklist().stream()
-                .map(MiamExemptionsChecklistEnum::getDisplayedValue)
+        if (ofNullable(value.getMiamUrgencyReasonChecklist()).isPresent()) {
+            gen.writeObjectField("miamUrgencyReasonChecklist", value.getMiamUrgencyReasonChecklist().stream()
+                .map(MiamUrgencyReasonChecklistEnum::getDisplayedValue)
                 .collect(Collectors.toList()));
         } else {
             gen.writeObjectField("miamUrgencyReasonChecklist", null);
         }
-        if (ofNullable(value.getMiamExemptionsChecklist()).isPresent()) {
-            gen.writeObjectField("miamChildProtectionConcernList", value.getMiamExemptionsChecklist().stream()
-                .map(MiamExemptionsChecklistEnum::getDisplayedValue)
+        if (ofNullable(value.getMiamChildProtectionConcernList()).isPresent()) {
+            gen.writeObjectField("miamChildProtectionConcernList", value.getMiamChildProtectionConcernList()
+                .stream()
+                .map(MiamChildProtectionConcernChecklistEnum::getDisplayedValue)
                 .collect(Collectors.toList()));
         } else {
             gen.writeObjectField("miamChildProtectionConcernList", null);

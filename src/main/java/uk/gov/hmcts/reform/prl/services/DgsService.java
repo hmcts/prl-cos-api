@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.utils.DgsSerializer;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -43,14 +42,11 @@ public class DgsService {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> caseDataMap = mapper.readValue(objectMapper.writeValueAsString(caseData), Map.class);
 
-
-        Map<String, Object> tempCaseDetails = new HashMap<String, Object>();
-        tempCaseDetails.put("caseDetails", caseDetails);
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
-                    .builder().template(templateName).values(tempCaseDetails).build()
+                    .builder().template(templateName).values(caseDataMap).build()
                 );
 
         } catch (Exception ex) {
