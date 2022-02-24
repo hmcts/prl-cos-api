@@ -13,11 +13,13 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -179,19 +181,26 @@ public class TaskListRenderer {
 
         List<EventValidationErrors> updatedErrors = new ArrayList<>();
         for (EventValidationErrors error : taskErrors) {
+
+            boolean nestedPresent = ofNullable(error.getNestedErrors()).isPresent();
+            List<String> nestedErrors = new ArrayList<>();
+            if (nestedPresent) {
+                nestedErrors = error.getNestedErrors()
+                    .stream()
+                    .map(e -> format(
+                        "%s to %s",
+                        e,
+                        taskListRenderElements.renderLink(error.getEvent())
+                    ))
+                    .collect(Collectors.toList());
+            }
+
             EventValidationErrors updated = EventValidationErrors.builder()
                 .errors(error.getErrors()
                             .stream()
                             .map(e -> format("%s to %s", e, taskListRenderElements.renderLink(error.getEvent())))
                             .collect(Collectors.toList()))
-                .nestedErrors(error.getNestedErrors()
-                                  .stream()
-                                  .map(e -> format(
-                                      "%s to %s",
-                                      e,
-                                      taskListRenderElements.renderLink(error.getEvent())
-                                  ))
-                                  .collect(Collectors.toList()))
+                .nestedErrors(nestedErrors)
                 .build();
             updatedErrors.add(updated);
         }
