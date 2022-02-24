@@ -43,8 +43,12 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -149,7 +153,8 @@ public class CallbackController {
         Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}", documentLanguage.isGenEng() ,documentLanguage.isGenWelsh());
+        log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}",
+                 documentLanguage.isGenEng(),documentLanguage.isGenWelsh());
 
 
         if (documentLanguage.isGenEng()) {
@@ -167,7 +172,7 @@ public class CallbackController {
                 .documentFileName(DRAFT_C_100_APPLICATION).build());
         }
 
-        if(documentLanguage.isGenWelsh()){
+        if (documentLanguage.isGenWelsh()) {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
@@ -195,7 +200,8 @@ public class CallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}", documentLanguage.isGenEng() ,documentLanguage.isGenWelsh());
+        log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}",
+                 documentLanguage.isGenEng(),documentLanguage.isGenWelsh());
 
         if (documentLanguage.isGenEng()) {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
