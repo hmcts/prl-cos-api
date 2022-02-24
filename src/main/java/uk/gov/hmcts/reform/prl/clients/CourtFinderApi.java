@@ -12,6 +12,7 @@ public interface CourtFinderApi {
 
     final String CHILD_ARRANGEMENTS_POSTCODE_URL = "search/results?postcode={postcode}&serviceArea=childcare-arrangements";
     final String COURT_DETAILS_URL = "courts/{court-slug}";
+    final String DOMESTIC_ABUSE_POSTCODE_URL = "search/results?postcode={postcode}&serviceArea=domestic-abuse";
 
     @GetMapping(value = CHILD_ARRANGEMENTS_POSTCODE_URL)
     ServiceArea findClosestChildArrangementsCourtByPostcode(@PathVariable("postcode") String postcode);
@@ -19,4 +20,6 @@ public interface CourtFinderApi {
     @GetMapping(value = COURT_DETAILS_URL)
     Court getCourtDetails(@PathVariable("court-slug") String courtSlug);
 
+    @GetMapping(value = DOMESTIC_ABUSE_POSTCODE_URL)
+    ServiceArea findClosestDomesticAbuseCourtByPostCode(@PathVariable("postcode") String postcode);
 }
