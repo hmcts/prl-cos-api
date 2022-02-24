@@ -17,13 +17,16 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -44,6 +47,9 @@ public class DaApplicationSubmitController {
     private SolicitorEmailService solicitorEmailService;
 
     @Autowired
+    private CaseWorkerEmailService caseWorkerEmailService;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @PostMapping(path = "/da-application-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -60,11 +66,7 @@ public class DaApplicationSubmitController {
             .getClosestDomesticAbuseCourt(callbackRequest.getCaseDetails()
                                               .getCaseData());
 
-        Optional<CourtEmailAddress> matchingEmailAddress = closestDomesticAbuseCourt.getCourtEmailAddresses()
-            .stream().filter(p -> "Family".equalsIgnoreCase(p.getExplanation())).findFirst();
-
-        //todo document generation to be implemented
-
+        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
 
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()
@@ -74,10 +76,15 @@ public class DaApplicationSubmitController {
                 .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
                 .courtName((closestDomesticAbuseCourt != null)  ? closestDomesticAbuseCourt.getCourtName() : "No Court Fetched")
                 .courtEmailAddress((closestDomesticAbuseCourt != null && matchingEmailAddress.isPresent())
-                                       ? matchingEmailAddress.get().getAddress() : "No Email Id Fetched")
+                                       ? matchingEmailAddress.get().getAddress() :
+                                       Objects.requireNonNull(closestDomesticAbuseCourt).getCourtEmailAddresses().get(0).getAddress())
                 .build(),
             CaseData.class
         );
+
+        solicitorEmailService.sendEmailToDaSolicitor(caseData, userDetails);
+        caseWorkerEmailService.sendEmailToLocalCourt(caseData);
+
         return CallbackResponse.builder()
             .data(caseData)
             .build();
