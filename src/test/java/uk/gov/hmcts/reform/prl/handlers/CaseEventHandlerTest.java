@@ -64,12 +64,12 @@ public class CaseEventHandlerTest {
         final List<EventValidationErrors> eventsErrors = Collections.emptyList();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(tasks);
-        when(taskListRenderer.render(tasks, eventsErrors, true)).thenReturn(renderedTaskLists);
+        when(taskListRenderer.render(tasks, eventsErrors, true, caseData)).thenReturn(renderedTaskLists);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         verify(taskListService).getTasksForOpenCase(caseData);
-        verify(taskListRenderer).render(tasks, eventsErrors, true);
+        verify(taskListRenderer).render(tasks, eventsErrors, true, caseData);
 
         verify(coreCaseDataService).triggerEvent(
             JURISDICTION,
@@ -79,4 +79,5 @@ public class CaseEventHandlerTest {
             Map.of("taskList", renderedTaskLists,"id",String.valueOf(caseData.getId()))
         );
     }
+
 }
