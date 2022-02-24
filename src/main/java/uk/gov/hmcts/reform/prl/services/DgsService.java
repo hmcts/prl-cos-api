@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.prl.utils.DgsSerializer;
 
 import java.util.Map;
 
+import static java.util.Optional.ofNullable;
+
 @Slf4j
 @Service
 @ConditionalOnProperty(prefix = "prl-dgs-api", name = "url")
@@ -41,7 +43,7 @@ public class DgsService {
         ObjectMapper mapper = new ObjectMapper();
 
         Map<String, Object> caseDetailsMap = mapper.convertValue(caseDetails, Map.class);
-        log.info(caseDetailsMap.toString());
+        log.info(ofNullable(caseDetailsMap).isPresent() ? caseDetailsMap.toString() : "No case details map");
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
