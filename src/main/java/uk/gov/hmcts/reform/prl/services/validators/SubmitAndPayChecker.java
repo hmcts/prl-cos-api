@@ -22,6 +22,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
+import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
 public class SubmitAndPayChecker implements EventChecker {
@@ -36,7 +37,9 @@ public class SubmitAndPayChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        return false;
+        return anyNonEmpty(
+            caseData.getFl401StmtOfTruth()
+        );
     }
 
     @Override
