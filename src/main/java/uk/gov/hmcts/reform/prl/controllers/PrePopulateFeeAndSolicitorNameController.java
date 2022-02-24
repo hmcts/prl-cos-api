@@ -43,7 +43,8 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Autowired
     private UserService userService;
 
-    private final CourtFinderService courtLocatorService;
+    @Autowired
+    private CourtFinderService courtLocatorService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -53,7 +54,7 @@ public class PrePopulateFeeAndSolicitorNameController {
     private DocumentLanguageService documentLanguageService;
 
 
-    public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
+    public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
     private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
     public static final String PRL_C100_DRAFT_WELSH_TEMPLATE = "PRL-Draft-C100-Welsh.docx";
@@ -82,17 +83,14 @@ public class PrePopulateFeeAndSolicitorNameController {
             .getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
                                                   .getCaseData());
 
-        CaseData caseData = objectMapper.convertValue(
-            CaseData.builder()
-                .solicitorName(userDetails.getFullName())
-                .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
-                .applicantSolicitorEmailAddress(userDetails.getEmail())
-                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
-                .feeAmount(feeResponse.getAmount().toString())
-                .courtName(closestChildArrangementsCourt.getCourtName())
-                .build(),
-            CaseData.class
-        );
+        CaseData caseData = CaseData.builder()
+            .solicitorName(userDetails.getFullName())
+            .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
+            .applicantSolicitorEmailAddress(userDetails.getEmail())
+            .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
+            .feeAmount(feeResponse.getAmount().toString())
+            .courtName(closestChildArrangementsCourt.getCourtName())
+            .build();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
         log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}", documentLanguage.isGenEng() ,documentLanguage.isGenWelsh());
@@ -128,6 +126,7 @@ public class PrePopulateFeeAndSolicitorNameController {
         }
 
         log.info("Saving Court name into DB..");
+
         return CallbackResponse.builder()
             .data(caseData)
             .build();
