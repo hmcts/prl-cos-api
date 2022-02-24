@@ -11,7 +11,11 @@ import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.enums.*;
+import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -48,7 +52,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.controllers.CallbackController.*;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -106,6 +109,7 @@ public class CallbackControllerTest {
     public static final String PRL_C1A_WELSH_TEMPLATE = "PRL-C1A-Welsh.docx";
     public static final String PRL_C8_WELSH_TEMPLATE = "PRL-C8-Welsh.docx";
     public static final String PRL_C100_DRAFT_WELSH_TEMPLATE = "PRL-Draft-C100-Welsh.docx";
+    public static final String PRL_C100_DRAFT_WELSH_FILENAME = "Draft_c100_application_welsh.pdf";
     private static final String C100_FINAL_WELSH_FILENAME = "C100FinalDocumentWelsh.pdf";
 
     @Before
@@ -210,7 +214,7 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
                     .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
