@@ -142,4 +142,57 @@ public class SolicitorEmailService {
         );
 
     }
+
+    public void sendEmailToDaSolicitor(CaseData dACaseData, UserDetails userDetails) {
+
+        String solicitorEmail = "";
+
+        List<PartyDetails> applicants = dACaseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> applicantSolicitorEmailList = applicants.stream()
+            .map(PartyDetails::getSolicitorEmail)
+            .collect(Collectors.toList());
+
+        solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
+            && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(0)
+            : userDetails.getEmail();
+
+        emailService.send(
+            solicitorEmail,
+            EmailTemplateNames.DA_SOLICITOR,
+            buildDaSolicitorEmail(dACaseData),
+            LanguagePreference.ENGLISH
+        );
+
+    }
+
+    private EmailTemplateVars buildDaSolicitorEmail(CaseData dACaseData) {
+
+        List<PartyDetails> applicants = dACaseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> applicantNamesList = applicants.stream()
+            .map(element -> element.getFirstName() + " " + element.getLastName())
+            .collect(Collectors.toList());
+
+        String applicantNames = String.join(", ", applicantNamesList);
+
+        Court court = null;
+
+        return  SolicitorEmail.builder()
+            .caseReference(String.valueOf(dACaseData.getId()))
+            .caseName(dACaseData.getApplicantCaseName())
+            .applicantName(applicantNames)
+            .courtName(court.getCourtName())
+            .courtEmail(courtEmail)
+            .caseLink(manageCaseUrl + "/" + dACaseData.getId())
+            .build();
+    }
 }
