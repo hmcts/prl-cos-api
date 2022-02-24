@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -95,7 +94,6 @@ public class OrganisationServiceTest {
         CaseData caseData1 = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
-            .issueDate(LocalDate.now())
             .applicants(elementList)
             .build();
         assertEquals(organisations.getOrganisationIdentifier(), organisationId);
