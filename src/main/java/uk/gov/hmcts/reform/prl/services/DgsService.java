@@ -44,22 +44,16 @@ public class DgsService {
 
         Map<String, Object> tempCaseDetails = new HashMap<String, Object>();
         tempCaseDetails.put("caseDetails", caseDetails);
-        JSONObject json1 = new JSONObject(caseDetails);
+        JSONObject json1 = new JSONObject(tempCaseDetails);
         log.info(json1.toString(4));
+
 
         Map<String, Object> caseDataMap = mapper.convertValue(caseDetails.getCaseData(), Map.class);
         JSONObject json = new JSONObject(caseDataMap);
         log.info(json.toString(4));
 
-        
+
         Map<String, Object> caseData = mapper.convertValue(caseDetails.getCaseData(), Map.class);
-
-        Map<String, Object> caseDetailsMap = new HashMap<>();
-        caseDetailsMap.put("caseId", caseDetails.getCaseId());
-        caseDetailsMap.put("state", caseDetails.getState());
-        caseDetailsMap.put("caseData",caseData);
-
-        log.info(caseDetailsMap.toString());
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
