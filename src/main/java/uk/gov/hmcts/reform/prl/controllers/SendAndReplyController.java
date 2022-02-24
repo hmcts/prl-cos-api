@@ -128,6 +128,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                 );
                 log.info(String.format("Sending reply message to %s", eventData.getMessageReply().getReplyTo()));
             }
+
+            messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
             caseDataMap.put("openMessages", messages);
         }
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
