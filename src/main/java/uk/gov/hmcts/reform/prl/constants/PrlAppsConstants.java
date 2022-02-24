@@ -39,4 +39,7 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_FIELD_C1A = "c1ADocument";
     public static final String DOCUMENT_FIELD_C8 = "c8Document";
     public static final String DOCUMENT_FIELD_FINAL = "finalDocument";
+
+    public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
+
 }
