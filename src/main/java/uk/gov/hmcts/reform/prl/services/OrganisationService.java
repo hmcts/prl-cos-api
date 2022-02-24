@@ -43,7 +43,6 @@ public class OrganisationService {
                 .collect(Collectors.toList());
             caseData = caseData.toBuilder()
                 .applicants(applicants)
-                .issueDate(LocalDate.now())
                 .build();
         }
         return caseData;
