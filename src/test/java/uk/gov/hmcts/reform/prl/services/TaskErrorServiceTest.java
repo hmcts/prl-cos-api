@@ -76,7 +76,7 @@ public class TaskErrorServiceTest {
     @Test
     public void whenNestedErrorAddedPresentInList() {
         taskErrorService.addEventError(fl401Event, fl401Error, fl401Error.getError());
-        taskErrorService.addNestedEventError(fl401Event, fl401Error, fl401NestedError);
+        taskErrorService.addNestedEventErrors(fl401Event, fl401Error, Collections.singletonList(fl401NestedError));
         List<String> actual = taskErrorService.eventErrors.get(fl401Error).getNestedErrors();
 
         assertTrue(actual.contains(fl401NestedError.getError()));
