@@ -159,47 +159,9 @@ public class TaskListRendererTest {
     }
 
     @Test
-    public void shouldRenderFl401TaskListNonMolestationOrderType() throws IOException {
-
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-markdown.md"));
-
-        List<String> lines = new ArrayList<>();
-
-        String line = taskListMarkDown.readLine();
-        while (line != null) {
-            lines.add(line);
-            line = taskListMarkDown.readLine();
-        }
-
-        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
-
-        orders = TypeOfApplicationOrders.builder()
-            .orderType(orderList)
-            .build();
-
-        linkToCA = LinkToCA.builder()
-            .linkToCaApplication(YesOrNo.Yes)
-            .caApplicationNumber("123")
-            .build();
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .typeOfApplicationOrders(orders)
-            .typeOfApplicationLinkToCA(linkToCA)
-            .build();
-
-        String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(fl401Tasks, fl401Errors, false, caseData);
-
-        assertNotEquals(expectedTaskList, actualTaskList);
-    }
-
-    @Test
     public void shouldRenderTaskList() throws IOException {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .typeOfApplicationOrders(orders)
-            .typeOfApplicationLinkToCA(linkToCA)
             .build();
         List<String> lines = new ArrayList<>();
 
@@ -241,5 +203,40 @@ public class TaskListRendererTest {
         assertEquals(expectedTaskList, actualTaskList);
 
     }
-}
 
+    @Test
+    public void shouldRenderFl401TaskListNonMolestationOrderType() throws IOException {
+
+        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-markdown.md"));
+
+        List<String> lines = new ArrayList<>();
+
+        String line = taskListMarkDown.readLine();
+        while (line != null) {
+            lines.add(line);
+            line = taskListMarkDown.readLine();
+        }
+
+        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+
+        orders = TypeOfApplicationOrders.builder()
+            .orderType(orderList)
+            .build();
+
+        linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.Yes)
+            .caApplicationNumber("123")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .build();
+
+        String expectedTaskList = String.join("\n", lines);
+        String actualTaskList = taskListRenderer.render(fl401Tasks, fl401Errors, false, caseData);
+
+        assertNotEquals(expectedTaskList, actualTaskList);
+    }
+}
