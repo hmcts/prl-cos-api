@@ -109,9 +109,9 @@ public class TaskListService {
             FL401_HOME,
             FL401_OTHER_PROCEEDINGS,
             ATTENDING_THE_HEARING,
-            INTERNATIONAL_ELEMENT,
             WELSH_LANGUAGE_REQUIREMENTS,
-            VIEW_PDF_DOCUMENT));
+            VIEW_PDF_DOCUMENT,
+            FL401_STATEMENT_OF_TRUTH));
     }
 
 }

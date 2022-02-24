@@ -297,6 +297,7 @@ public class CaseData implements MappableObject {
     private final YesNoDontKnow previousOrOngoingProceedingsForChildren;
     private final List<Element<ProceedingDetails>> existingProceedings;
 
+
     /**
      * Attending the hearing.
      */
@@ -437,6 +438,7 @@ public class CaseData implements MappableObject {
     private final String respondentSolicitorEmailAddress;
     private final String caseworkerEmailAddress;
 
+
     /**
      * Court details.
      */
@@ -471,5 +473,13 @@ public class CaseData implements MappableObject {
      * FL401 Other Proceedings.
      */
     private final FL401OtherProceedingDetails fl401OtherProceedingDetails;
+
+    /**
+     *  FL401 Statement Of Truth and Submit.
+     */
+    @JsonProperty("fl401StmtOfTruth")
+    private final StatementOfTruth fl401StmtOfTruth;
+    @JsonProperty("fl401ConfidentialityCheck")
+    private final ConfidentialityCheck fl401ConfidentialityCheck;
 
 }
