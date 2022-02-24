@@ -56,6 +56,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
@@ -442,6 +444,13 @@ public class CaseData implements MappableObject {
 
     @JsonProperty("closedMessages")
     private final List<Element<Message>> closedMessages;
+
+
+    /**
+     * Confidentiality details.
+     */
+    private final List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
+    private final List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
 
 
     /**
