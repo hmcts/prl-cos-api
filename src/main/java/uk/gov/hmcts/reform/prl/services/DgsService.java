@@ -47,8 +47,8 @@ public class DgsService {
         JSONObject json1 = new JSONObject(caseDetails);
         log.info(json1.toString(4));
 
-        String jsonValue = mapper.writeValueAsString(caseDetails.getCaseData());
-        JSONObject json = new JSONObject(jsonValue);
+        Map<String, Object> caseDataMap = mapper.convertValue(caseDetails.getCaseData(), Map.class);
+        JSONObject json = new JSONObject(caseDataMap);
         log.info(json.toString(4));
 
 
