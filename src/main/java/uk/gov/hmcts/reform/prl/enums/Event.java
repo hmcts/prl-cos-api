@@ -30,7 +30,10 @@ public enum Event {
     WITHOUT_NOTICE_ORDER("withoutNoticeOrderDetails", "Without notice order"),
     RELATIONSHIP_TO_RESPONDENT("respondentRelationship","Relationship to respondent"),
     FL401_TYPE_OF_APPLICATION("fl401TypeOfApplication", "Type of application"),
-    FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's Family");
+    FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's Family"),
+    FL401_HOME("fl401Home", "The Home"),
+    STATEMENT_OF_TRUTH_AND_SUBMIT("statementOfTruthAndSubmit", "Statement of Truth and Submit"),
+    UPLOAD_DOCUMENTS("uploadDocuments", "Upload Documents");
 
 
     private final String id;
