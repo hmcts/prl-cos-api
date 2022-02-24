@@ -148,8 +148,8 @@ public class CallbackController {
     ) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
-        caseData = organisationService.getApplicantOrganisationDetails(caseData);
-        caseData = organisationService.getRespondentOrganisationDetails(caseData);
+        //caseData = organisationService.getApplicantOrganisationDetails(caseData);
+        //caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
         Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
 
@@ -233,9 +233,9 @@ public class CallbackController {
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentFileName(C8_DOC).build());
-            caseData = organisationService.getApplicantOrganisationDetails(caseData);
+            //caseData = organisationService.getApplicantOrganisationDetails(caseData);
 
-            caseData = organisationService.getRespondentOrganisationDetails(caseData);
+            //caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
             GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
                 authorisation,
