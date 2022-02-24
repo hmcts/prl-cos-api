@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.GatekeeperEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -304,6 +305,61 @@ public class CaseWorkerEmailService {
             .issueDate(issueDate.format(dateTimeFormatter))
             .isConfidential(isConfidential)
             .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+    }
+
+    public void sendEmailToLocalCourt(CaseData daCaseData) {
+
+        emailService.send(
+            daCaseData.getCourtEmailAddress(),
+            EmailTemplateNames.DA_LOCALCOURT,
+            buildCourtAdminEmail(daCaseData),
+            LanguagePreference.ENGLISH
+        );
+    }
+
+    public EmailTemplateVars buildCourtAdminEmail(CaseData daCaseData) {
+
+
+        List<PartyDetails> applicants = daCaseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<Child> child = daCaseData
+            .getChildren()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        String isConfidential = NO;
+        if ((applicants.stream().noneMatch(PartyDetails::isCanYouProvideEmailAddress)
+            && applicants.stream().anyMatch(PartyDetails::isEmailAddressNull))
+            || (applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
+            || (child.stream().anyMatch(Child::hasConfidentialInfo))) {
+            isConfidential = YES;
+        }
+
+        String typeOfHearing = "";
+        String isCaseUrgent = NO;
+
+        if (caseData.getIsCaseUrgent().equals(YesOrNo.Yes)) {
+            typeOfHearing = URGENT_CASE;
+            isCaseUrgent = YES;
+        }
+
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        return CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(daCaseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseUrgency(typeOfHearing)
+            .isCaseUrgent(isCaseUrgent)
+            .issueDate(issueDate.format(dateTimeFormatter))
+            .isConfidential(isConfidential)
+            .caseLink(manageCaseUrl + "/" + daCaseData.getId())
             .build();
     }
 

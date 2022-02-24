@@ -7,5 +7,7 @@ public enum EmailTemplateNames {
     RETURNAPPLICATION,
     WITHDRAW,
     COURTADMIN,
-    GATEKEEPER
+    GATEKEEPER,
+    DA_SOLICITOR,
+    DA_LOCALCOURT
 }
