@@ -10,10 +10,8 @@ import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
-import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -66,20 +64,6 @@ public class DgsServiceTest {
 
     }
 
-    @Test
-    public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
-
-        CaseDetails caseDetails = CaseDetailsProvider.full();
-        caseDetails.setCaseData(CaseData.builder().build());
-
-        when(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE)).thenReturn(generatedDocumentInfo);
-
-        Throwable exception = assertThrows(Exception.class, () -> {
-            throw new Exception("Error generating and storing document for case");
-        });
-
-        assertEquals("Error generating and storing document for case", exception.getMessage());
-
-    }
+    //TODO: add in test that was removed
 
 }

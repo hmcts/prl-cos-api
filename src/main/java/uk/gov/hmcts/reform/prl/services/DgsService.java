@@ -17,9 +17,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.utils.DgsSerializer;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
@@ -42,14 +41,24 @@ public class DgsService {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        Map<String, Object> caseDetailsMap = mapper.convertValue(caseDetails, Map.class);
-        log.info(ofNullable(caseDetailsMap).isPresent() ? caseDetailsMap.toString() : "No case details map");
+        Map<String, Object> tempCaseDetails = new HashMap<String, Object>();
+        tempCaseDetails.put("caseDetails", caseDetails);
+        log.info(caseDetails.toString());
+
+        Map<String, Object> caseData = mapper.convertValue(caseDetails.getCaseData(), Map.class);
+
+        Map<String, Object> caseDetailsMap = new HashMap<>();
+        caseDetailsMap.put("caseId", caseDetails.getCaseId());
+        caseDetailsMap.put("state", caseDetails.getState());
+        caseDetailsMap.put("caseData",caseData);
+
+        log.info(caseDetailsMap.toString());
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
-                    .builder().template(templateName).values(caseDetailsMap).build()
+                    .builder().template(templateName).values(tempCaseDetails).build()
                 );
 
         } catch (Exception ex) {
