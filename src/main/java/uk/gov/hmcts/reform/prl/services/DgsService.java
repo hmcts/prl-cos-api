@@ -30,12 +30,6 @@ public class DgsService {
     private final DgsApiClient dgsApiClient;
 
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
-        CaseData caseData;
-        if (ofNullable(caseDetails).isPresent()) {
-            caseData = caseDetails.getCaseData();
-        } else {
-            caseData = null;
-        }
 
         ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new ParameterNamesModule())
@@ -47,13 +41,15 @@ public class DgsService {
         objectMapper.registerModule(module);
 
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> caseDataMap = mapper.readValue(objectMapper.writeValueAsString(caseData), Map.class);
+
+        Map<String, Object> caseDetailsMap = mapper.convertValue(caseDetails, Map.class);
+        log.info(caseDetailsMap.toString());
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
-                    .builder().template(templateName).values(caseDataMap).build()
+                    .builder().template(templateName).values(caseDetailsMap).build()
                 );
 
         } catch (Exception ex) {
