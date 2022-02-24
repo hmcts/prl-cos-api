@@ -8,14 +8,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
-import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
@@ -26,20 +23,23 @@ import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.services.*;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.FeeService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-import static org.mockito.Mockito.*;
-import static uk.gov.hmcts.reform.prl.controllers.CallbackController.PRL_C100_DRAFT_WELSH_FILENAME;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @PropertySource(value = "classpath:application.yaml")
@@ -83,6 +83,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     CaseData caseData;
 
+    CallbackRequest callbackRequest;
+
     DocumentLanguage documentLanguage;
 
     @Mock
@@ -113,6 +115,10 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .courtName("testcourt")
             .build();
 
+        callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
         generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
         documentLanguage = DocumentLanguage.builder()
@@ -124,10 +130,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     //TODO Update this testcase once we have integration with Fee and Pay
     @Test
     public void testUserDetailsForSolicitorName() throws Exception {
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
@@ -149,10 +151,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     @Test
     public void testWhenControllerCalledOneInvokeToDgsService() throws Exception {
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
@@ -178,10 +176,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     @Test
     public void testFeeDetailsForFeeAmount()  throws Exception {
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
