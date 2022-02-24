@@ -36,8 +36,9 @@ import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ATTENDING_THE_HEARING_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_TYPE_OF_ORDER_ERROR;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.FINISHED;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.IN_PROGRESS;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
@@ -76,10 +77,15 @@ public class TaskListRendererTest {
 
 
     private final List<EventValidationErrors> errors = List.of(
-        EventValidationErrors.builder().event(ALLEGATIONS_OF_HARM)
-            .errors(Collections.singletonList(ALLEGATIONS_OF_HARM_ERROR.toString())).build(),
+        EventValidationErrors.builder().event(FL401_TYPE_OF_APPLICATION)
+            .errors(Collections.singletonList(FL401_TYPE_OF_APPLICATION_ERROR.getError()))
+            .nestedErrors(Collections.singletonList(FL401_TYPE_OF_APPLICATION_TYPE_OF_ORDER_ERROR.getError()))
+            .build(),
+
         EventValidationErrors.builder().event(ATTENDING_THE_HEARING)
-            .errors(Collections.singletonList(ATTENDING_THE_HEARING_ERROR.toString())).build()
+            .errors(Collections.singletonList(ATTENDING_THE_HEARING_ERROR.getError()))
+            .nestedErrors(Collections.emptyList())
+            .build()
     );
 
     private final List<Task> fl401Tasks = List.of(

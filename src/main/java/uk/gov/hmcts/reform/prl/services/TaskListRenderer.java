@@ -8,9 +8,12 @@ import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskSection;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -173,14 +176,37 @@ public class TaskListRenderer {
         if (isEmpty(taskErrors)) {
             return emptyList();
         }
-        final List<String> errors = taskErrors.stream()
-            .flatMap(task -> task.getErrors()
-                .stream()
-                .map(error -> format("%s in %s", error, taskListRenderElements.renderLink(task.getEvent()))))
-            .collect(toList());
 
-        return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
+        List<EventValidationErrors> updatedErrors = new ArrayList<>();
+        for (EventValidationErrors error : taskErrors) {
+            EventValidationErrors updated = EventValidationErrors.builder()
+                .errors(error.getErrors()
+                            .stream()
+                            .map(e -> format("%s in %s", e, taskListRenderElements.renderLink(error.getEvent())))
+                            .collect(Collectors.toList()))
+                .nestedErrors(error.getNestedErrors()
+                                  .stream()
+                                  .map(e -> format(
+                                      "%s in %s",
+                                      e,
+                                      taskListRenderElements.renderLink(error.getEvent())
+                                  ))
+                                  .collect(Collectors.toList()))
+                .build();
+            updatedErrors.add(updated);
+        }
+
+        List<List<String>> renderedErrors = new ArrayList<>();
+        for (EventValidationErrors errors : updatedErrors) {
+            renderedErrors.add(taskListRenderElements.renderCollapsible(errors.getErrors().get(0), errors.getNestedErrors()));
+        }
+
+        return taskListRenderElements.renderCollapsible("Why can't I submit my application?", renderedErrors
+            .stream()
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList()));
     }
+
 
 
     private List<TaskSection> groupInSectionsForFL401(List<Task> allTasks) {

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
@@ -10,6 +11,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -70,6 +73,12 @@ public class FL401ApplicationTypeChecker implements EventChecker {
             FL401_TYPE_OF_APPLICATION_ERROR,
             FL401_TYPE_OF_APPLICATION_ERROR.getError());
         return false;
+    }
+
+
+
+    public List<EventErrorsEnum> getFieldSpecificErrors(CaseData caseData) {
+        return Collections.emptyList();
     }
 
 }

@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Optional.ofNullable;
+
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TaskErrorService {
@@ -36,6 +38,32 @@ public class TaskErrorService {
                                     .event(event)
                                     .errors(Collections.singletonList(error))
                                     .build());
+    }
+
+    public void addNestedEventError(Event event, EventErrorsEnum parentError, EventErrorsEnum errorType) {
+        if (eventErrors.containsKey(errorType)) {
+
+            List<String> updatedNestedErrors = new ArrayList<>(Collections.singleton(errorType.getError()));
+
+            EventValidationErrors eventValidationErrors = eventErrors.get(errorType);
+            if (ofNullable(eventValidationErrors.getNestedErrors()).isPresent()) {
+                updatedNestedErrors.addAll(eventValidationErrors.getNestedErrors());
+            }
+            EventValidationErrors updatedErrors = EventValidationErrors.builder()
+                .event(event)
+                .errors(eventValidationErrors.getErrors())
+                .nestedErrors(updatedNestedErrors)
+                .build();
+
+            eventErrors.put(errorType, updatedErrors);
+        } else {
+            EventValidationErrors updatedErrors = EventValidationErrors.builder()
+                .event(event)
+                .nestedErrors(Collections.singletonList(errorType.getError()))
+                .build();
+
+            eventErrors.put(parentError, updatedErrors);
+        }
     }
 
 
