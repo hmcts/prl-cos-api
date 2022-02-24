@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,15 @@ public class DgsService {
 
         Map<String, Object> tempCaseDetails = new HashMap<String, Object>();
         tempCaseDetails.put("caseDetails", caseDetails);
-        log.info(caseDetails.toString());
+        JSONObject json1 = new JSONObject(caseDetails);
+        log.info(json1.toString(4));
+
+        String jsonValue = mapper.writeValueAsString(caseDetails.getCaseData());
+        JSONObject json = new JSONObject(jsonValue);
+        log.info(json.toString(4));
+
+
+
 
         Map<String, Object> caseData = mapper.convertValue(caseDetails.getCaseData(), Map.class);
 
