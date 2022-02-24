@@ -15,28 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
-import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
-import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
-import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
-import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
-import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
-import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
-import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
-import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
-import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
-import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
-import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
+import static uk.gov.hmcts.reform.prl.enums.Event.*;
 
 @Slf4j
 @Service
@@ -102,13 +81,13 @@ public class TaskListService {
             APPLICANT_DETAILS,
             RESPONDENT_DETAILS,
             RELATIONSHIP_TO_RESPONDENT,
-            RESPONDENT_BEHAVIOUR,
             FL401_APPLICANT_FAMILY_DETAILS,
+            RESPONDENT_BEHAVIOUR,
             OTHER_PROCEEDINGS,
             ATTENDING_THE_HEARING,
-            INTERNATIONAL_ELEMENT,
             WELSH_LANGUAGE_REQUIREMENTS,
-            VIEW_PDF_DOCUMENT));
+            VIEW_PDF_DOCUMENT,
+            FL401_STATEMENT_OF_TRUTH));
     }
 
 }
