@@ -40,8 +40,6 @@ public class DgsService {
         module.addSerializer(CaseData.class, new DgsSerializer());
         objectMapper.registerModule(module);
 
-        ObjectMapper mapper = new ObjectMapper();
-
         Map<String, Object> tempCaseDetails = new HashMap<String, Object>();
         tempCaseDetails.put("caseDetails", caseDetails);
         JSONObject json1 = new JSONObject(tempCaseDetails);
@@ -49,13 +47,10 @@ public class DgsService {
         log.info(json1.toString(4));
 
 
-        Map<String, Object> caseDataMap = mapper.convertValue(caseDetails.getCaseData(), Map.class);
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseDetails.getCaseData(), Map.class);
         JSONObject json = new JSONObject(caseDataMap);
         log.info("caseDataMap------------------------");
         log.info(json.toString(4));
-
-
-        Map<String, Object> caseData = mapper.convertValue(caseDetails.getCaseData(), Map.class);
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
