@@ -124,7 +124,7 @@ Why can't I submit my application?
 
 <span class='govuk-details__summary-text'>
 
-Ensure you have added all relevant information in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401TypeOfApplication/fl401TypeOfApplication1'>Type of application</a>
+Ensure you have added all relevant information to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401TypeOfApplication/fl401TypeOfApplication1'>Type of application</a>
 
 </span>
 
@@ -132,7 +132,7 @@ Ensure you have added all relevant information in <a href='/cases/case-details/$
 
 <div class='govuk-details__text'>
 
-Add type of order in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401TypeOfApplication/fl401TypeOfApplication1'>Type of application</a>
+Add type of order to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401TypeOfApplication/fl401TypeOfApplication1'>Type of application</a>
 
 </div>
 
@@ -144,7 +144,7 @@ Add type of order in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl
 
 <span class='govuk-details__summary-text'>
 
-Add details about attending the hearing in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing</a>
+Add details about attending the hearing to <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing</a>
 
 </span>
 
