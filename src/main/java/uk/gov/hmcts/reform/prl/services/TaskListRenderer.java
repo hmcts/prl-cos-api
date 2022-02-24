@@ -182,12 +182,12 @@ public class TaskListRenderer {
             EventValidationErrors updated = EventValidationErrors.builder()
                 .errors(error.getErrors()
                             .stream()
-                            .map(e -> format("%s in %s", e, taskListRenderElements.renderLink(error.getEvent())))
+                            .map(e -> format("%s to %s", e, taskListRenderElements.renderLink(error.getEvent())))
                             .collect(Collectors.toList()))
                 .nestedErrors(error.getNestedErrors()
                                   .stream()
                                   .map(e -> format(
-                                      "%s in %s",
+                                      "%s to %s",
                                       e,
                                       taskListRenderElements.renderLink(error.getEvent())
                                   ))
