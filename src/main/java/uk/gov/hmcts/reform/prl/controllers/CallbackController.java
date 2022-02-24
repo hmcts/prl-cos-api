@@ -69,7 +69,7 @@ public class CallbackController {
     public static final String PRL_C1A_WELSH_TEMPLATE = "PRL-C1A-Welsh.docx";
     public static final String PRL_C1A_WELSH_FILENAME = "C1A_Document_Welsh.pdf";
     public static final String PRL_C100_DRAFT_WELSH_TEMPLATE = "PRL-Draft-C100-Welsh.docx";
-    public static final String PRL_C100_DRAFT_WELSH_FILENAME = "Draft_c100_application_welsh.pdf";
+    public static final String PRL_C100_DRAFT_WELSH_FILENAME = "Draft_C100_application_welsh.pdf";
     private static final String C100_FINAL_WELSH_FILENAME = "C100FinalDocumentWelsh.pdf";
     private static final String C100_FINAL_WELSH_TEMPLATE = "C100-Final-Document-Welsh.docx";
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;

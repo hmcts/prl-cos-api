@@ -109,7 +109,7 @@ public class CallbackControllerTest {
     public static final String PRL_C1A_WELSH_TEMPLATE = "PRL-C1A-Welsh.docx";
     public static final String PRL_C8_WELSH_TEMPLATE = "PRL-C8-Welsh.docx";
     public static final String PRL_C100_DRAFT_WELSH_TEMPLATE = "PRL-Draft-C100-Welsh.docx";
-    public static final String PRL_C100_DRAFT_WELSH_FILENAME = "Draft_c100_application_welsh.pdf";
+    public static final String PRL_C100_DRAFT_WELSH_FILENAME = "Draft_C100_application_welsh.pdf";
     private static final String C100_FINAL_WELSH_FILENAME = "C100FinalDocumentWelsh.pdf";
 
     @Before

@@ -62,7 +62,7 @@ public class PrePopulateFeeAndSolicitorNameController {
     private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
     public static final String PRL_C100_DRAFT_WELSH_TEMPLATE = "PRL-Draft-C100-Welsh.docx";
-    public static final String PRL_C100_DRAFT_WELSH_FILENAME = "Draft_c100_application_welsh.pdf";
+    public static final String PRL_C100_DRAFT_WELSH_FILENAME = "Draft_C100_application_welsh.pdf";
 
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to get Solicitor name and fee amount. ")
