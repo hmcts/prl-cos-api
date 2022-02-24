@@ -1,14 +1,9 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,10 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
-import uk.gov.hmcts.reform.prl.utils.DgsSerializer;
-
-import java.util.Map;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 
 @Api
 @RestController
@@ -30,15 +22,17 @@ import java.util.Map;
 public class TaskListController extends AbstractCallbackController {
 
     @Autowired
-    ApplicationsTabService applicationsTabService;
+    @Qualifier("allTabsService")
+    AllTabsService tabService;
 
     @PostMapping("/submitted")
     public void handleSubmitted(@RequestBody CallbackRequest callbackRequest,
-                                @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation) throws JsonProcessingException {
+                                @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation) {
 
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
 
-        applicationsTabService.updateApplicationTabData(getCaseData(callbackRequest.getCaseDetails()));
+        tabService.updateAllTabs(caseData);
 
-        publishEvent(new CaseDataChanged(getCaseData(callbackRequest.getCaseDetails())));
+        publishEvent(new CaseDataChanged(caseData));
     }
 }
