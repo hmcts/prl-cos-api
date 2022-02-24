@@ -67,7 +67,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
         when(authorisationService.authorise(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(authToken,serviceAuthToken,serviceRequestUpdateDto);
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken, serviceRequestUpdateDto);
 
         verify(requestUpdateCallbackService).processCallback(serviceRequestUpdateDto);
         verifyNoMoreInteractions(requestUpdateCallbackService);
@@ -83,7 +83,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
         when(authorisationService.authorise(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(authToken, serviceAuthToken,serviceRequestUpdateDto);
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken, serviceRequestUpdateDto);
 
         verifyNoMoreInteractions(feesService);
 
@@ -96,7 +96,10 @@ public class ServiceRequestUpdateCallbackControllerTest {
 
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(authToken,serviceAuthToken,serviceRequestUpdateDto);
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(
+            serviceAuthToken,
+            serviceRequestUpdateDto
+        );
 
         requestUpdateCallbackService.processCallbackForBypass(serviceRequestUpdateDto, authToken);
         verify(requestUpdateCallbackService).processCallbackForBypass(serviceRequestUpdateDto, authToken);
