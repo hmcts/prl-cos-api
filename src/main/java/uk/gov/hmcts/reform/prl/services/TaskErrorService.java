@@ -41,11 +41,11 @@ public class TaskErrorService {
     }
 
     public void addNestedEventError(Event event, EventErrorsEnum parentError, EventErrorsEnum errorType) {
-        if (eventErrors.containsKey(errorType)) {
+        if (eventErrors.containsKey(parentError)) {
 
             List<String> updatedNestedErrors = new ArrayList<>(Collections.singleton(errorType.getError()));
 
-            EventValidationErrors eventValidationErrors = eventErrors.get(errorType);
+            EventValidationErrors eventValidationErrors = eventErrors.get(parentError);
             if (ofNullable(eventValidationErrors.getNestedErrors()).isPresent()) {
                 updatedNestedErrors.addAll(eventValidationErrors.getNestedErrors());
             }
@@ -55,7 +55,7 @@ public class TaskErrorService {
                 .nestedErrors(updatedNestedErrors)
                 .build();
 
-            eventErrors.put(errorType, updatedErrors);
+            eventErrors.put(parentError, updatedErrors);
         } else {
             EventValidationErrors updatedErrors = EventValidationErrors.builder()
                 .event(event)
