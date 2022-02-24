@@ -27,7 +27,12 @@ public enum EventErrorsEnum {
     WITHOUT_NOTICE_ORDER_ERROR("Add Without Notice Order details"),
     RELATIONSHIP_TO_RESPONDENT_ERROR("Add details about relationship to respondent"),
     FL401_APPLICANT_FAMILY_ERROR("Add details about applicant's family"),
-    FL401_TYPE_OF_APPLICATION_ERROR("Ensure you have added all relevant information to Type of application.");
+    FL401_TYPE_OF_APPLICATION_ERROR("Ensure you have added all relevant information"),
+
+    //FL401_TYPE_OF_APPLICATION_ERRORS
+    FL401_TYPE_OF_APPLICATION_TYPE_OF_ORDER_ERROR("Add type of order");
+
+
 
     private final String error;
 

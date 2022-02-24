@@ -36,6 +36,7 @@ public enum Event {
     private final String id;
     private final String name;
 
+
     @JsonValue
     public String getName() {
         return name;

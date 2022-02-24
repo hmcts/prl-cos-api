@@ -118,9 +118,43 @@ Why can't I submit my application?
 
 <div class='govuk-details__text'>
 
-ALLEGATIONS_OF_HARM_ERROR in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm</a>
+<details class='govuk-details'>
 
-ATTENDING_THE_HEARING_ERROR in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing</a>
+<summary class='govuk-details__summary'>
+
+<span class='govuk-details__summary-text'>
+
+Ensure you have added all relevant information in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401TypeOfApplication/fl401TypeOfApplication1'>Type of application</a>
+
+</span>
+
+</summary>
+
+<div class='govuk-details__text'>
+
+Add type of order in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401TypeOfApplication/fl401TypeOfApplication1'>Type of application</a>
+
+</div>
+
+</details>
+
+<details class='govuk-details'>
+
+<summary class='govuk-details__summary'>
+
+<span class='govuk-details__summary-text'>
+
+Add details about attending the hearing in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing</a>
+
+</span>
+
+</summary>
+
+<div class='govuk-details__text'>
+
+</div>
+
+</details>
 
 </div>
 

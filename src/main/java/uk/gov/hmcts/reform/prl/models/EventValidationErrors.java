@@ -12,5 +12,6 @@ public class EventValidationErrors {
 
     private final Event event;
     private final List<String> errors;
+    private final List<String> nestedErrors;
 
 }
