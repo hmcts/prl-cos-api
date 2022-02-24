@@ -36,27 +36,6 @@ public class TaskListController extends AbstractCallbackController {
     public void handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                 @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation) throws JsonProcessingException {
 
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-
-        String m = callbackRequest.getCaseDetails().getData().toString();
-
-        ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new ParameterNamesModule())
-            .registerModule(new Jdk8Module())
-            .registerModule(new JavaTimeModule());
-
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(CaseData.class, new DgsSerializer());
-        objectMapper.registerModule(module);
-
-
-        String serliazed = objectMapper.writeValueAsString(caseData);
-
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> map = mapper.readValue(serliazed, Map.class);
-        String new1 = map.toString();
-
-
 
         applicationsTabService.updateApplicationTabData(getCaseData(callbackRequest.getCaseDetails()));
 
