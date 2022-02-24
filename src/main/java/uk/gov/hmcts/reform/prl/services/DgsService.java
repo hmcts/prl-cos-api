@@ -51,7 +51,16 @@ public class DgsService {
 
 
         JSONObject json1 = new JSONObject(tempCaseDetails);
+        log.info("----------" + "new version" + "----------");
         log.info(json1.toString(4));
+
+
+        Map<String, Object> old = new HashMap<>();
+        old.put("caseDetails", caseDetails);
+        JSONObject json2 = new JSONObject(old);
+        log.info("----------" + "old version" + "----------");
+        log.info(json2.toString(4));
+
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
