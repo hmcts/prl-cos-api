@@ -55,7 +55,7 @@ public class CallbackController {
 
     private static final String DRAFT_C_100_APPLICATION = "Draft_C100_application.pdf";
     public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
-    private static final String DRAFT_FL401_APPLICATION = "Draft_FL401_application.pdf";
+    private static final String DRAFT_FL401_APPLICATION = "Draft_DA_application.pdf";
     private static final String C8_DOC = "C8Document.pdf";
     private static final String C100_FINAL_DOC = "C100FinalDocument.pdf";
     private static final String C100_FINAL_TEMPLATE = "C100-Final-Document.docx";
