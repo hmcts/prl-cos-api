@@ -46,14 +46,13 @@ public class FL401ApplicationTypeChecker implements EventChecker {
         if (ordersOptional.isPresent() && (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)
             || ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder))) {
 
-            if (applicationTypeLinkToCA.isPresent() && applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
-                YesOrNo.Yes)) {
+            if (applicationTypeLinkToCA.isPresent()
+                && applicationTypeLinkToCA.get().getLinkToCaApplication().equals(YesOrNo.Yes)) {
                 finished = applicationTypeLinkToCA.get().getCaApplicationNumber() != null;
-            } else if (applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
-                YesOrNo.No)) {
-                return true;
+            } else if (applicationTypeLinkToCA.get().getLinkToCaApplication().equals(YesOrNo.No)) {
+                finished = true;
             } else {
-                return false;
+                finished = false;
             }
 
             if (finished) {
@@ -66,7 +65,6 @@ public class FL401ApplicationTypeChecker implements EventChecker {
                 FL401_TYPE_OF_APPLICATION_ERROR.getError()
             );
         }
-
         return false;
     }
 
