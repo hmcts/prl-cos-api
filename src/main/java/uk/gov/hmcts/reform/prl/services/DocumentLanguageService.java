@@ -20,7 +20,7 @@ import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.WELSH;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DocumentLanguageService {
 
-    public DocumentLanguage docGenerateLang (CaseData caseData) {
+    public DocumentLanguage docGenerateLang(CaseData caseData) {
 
         DocumentLanguage docLanguage = DocumentLanguage.builder().build();
 
@@ -32,7 +32,7 @@ public class DocumentLanguageService {
         if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(YesOrNo.Yes)) {
             if (applicationLanguage.isPresent() && applicationLanguage.get().equals(ENGLISH)) {
                 docLanguage = docLanguage.toBuilder().isGenEng(true).build();
-                if(welshRequirements.isPresent() && welshRequirements.get().equals(YesOrNo.Yes)) {
+                if (welshRequirements.isPresent() && welshRequirements.get().equals(YesOrNo.Yes)) {
                     docLanguage = docLanguage.toBuilder().isGenWelsh(true).build();
                 }
             } else if (applicationLanguage.isPresent() && applicationLanguage.get().equals(WELSH)) {
