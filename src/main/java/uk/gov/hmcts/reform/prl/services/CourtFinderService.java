@@ -44,8 +44,7 @@ public class CourtFinderService {
             serviceArea = courtFinderApi
                 .findClosestDomesticAbuseCourtByPostCode(
                     getPostcodeFromWrappedParty(caseData.getApplicants().get(0)));
-        }
-        else {
+        } else {
             serviceArea = courtFinderApi
                 .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
         }
@@ -151,7 +150,7 @@ public class CourtFinderService {
 
     private Optional<CourtEmailAddress> findEmailWithChildOnlyKey(Court closestDomesticAbuseCourt) {
         return closestDomesticAbuseCourt.getCourtEmailAddresses().stream()
-            .filter(p -> (p.getDescription() !=null && p.getDescription().contains(CHILD)
+            .filter(p -> (p.getDescription() != null && p.getDescription().contains(CHILD)
                 || (p.getExplanation() != null && p.getExplanation().contains(CHILD))))
             .findFirst();
     }
