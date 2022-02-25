@@ -25,18 +25,15 @@ import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class DaApplicationSubmitController {
+public class FL401SubmitApplicationController {
 
     @Autowired
     private CourtFinderService courtFinderService;
@@ -53,15 +50,13 @@ public class DaApplicationSubmitController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @PostMapping(path = "/da-application-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to Submit DA application and notification sent. ")
+    @PostMapping(path = "/fl401-generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to generate FL401 final document and submit application. ")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Application Submitted."),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public CallbackResponse daApplicationSubmit(@RequestHeader("Authorization") String authorisation,
+    public CallbackResponse fl401GenerateDocumentSubmitApplication(@RequestHeader("Authorization") String authorisation,
                                         @RequestBody CallbackRequest callbackRequest) throws Exception {
-
-        UserDetails userDetails = userService.getUserDetails(authorisation);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
@@ -72,10 +67,6 @@ public class DaApplicationSubmitController {
 
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()
-                .solicitorName(userDetails.getFullName())
-                .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
-                .applicantSolicitorEmailAddress(userDetails.getEmail())
-                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
                 .courtName((closestDomesticAbuseCourt != null)  ? closestDomesticAbuseCourt.getCourtName() : "No Court Fetched")
                 .courtEmailAddress((closestDomesticAbuseCourt != null && matchingEmailAddress.isPresent())
                                        ? matchingEmailAddress.get().getAddress() :
@@ -84,8 +75,9 @@ public class DaApplicationSubmitController {
             CaseData.class
         );
 
+        //todo document generation
         solicitorEmailService.sendEmail(caseDetails);
-        caseWorkerEmailService.sendEmailToLocalCourt(caseData);
+        caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, matchingEmailAddress);
 
         return CallbackResponse.builder()
             .data(caseData)
