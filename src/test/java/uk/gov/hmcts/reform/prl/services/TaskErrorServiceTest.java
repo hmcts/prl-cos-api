@@ -5,6 +5,7 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
@@ -67,8 +69,12 @@ public class TaskErrorServiceTest {
             .build();
         expectedList.add(errors);
 
-        boolean listSizeEqual = expectedList.size() == taskErrorService.getEventErrors().size();
-        boolean listContentsEqual = expectedList.containsAll(taskErrorService.getEventErrors());
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+
+        boolean listSizeEqual = expectedList.size() == taskErrorService.getEventErrors(caseData).size();
+        boolean listContentsEqual = expectedList.containsAll(taskErrorService.getEventErrors(caseData));
 
         assertTrue(listSizeEqual && listContentsEqual);
     }
