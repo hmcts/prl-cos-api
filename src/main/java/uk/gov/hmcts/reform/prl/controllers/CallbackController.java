@@ -198,7 +198,7 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseData.toBuilder().issueDate(LocalDate.now());
+        caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
         log.info("Added issueDate to caseData: " + caseData.getIssueDate());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
