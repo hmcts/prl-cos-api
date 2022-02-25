@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Optional;
@@ -27,22 +28,31 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
 @RequiredArgsConstructor
 public class CourtFinderService {
 
+    public static final String FAMILY_COURT = "Family Courts";
+    public static final String FAMILY_PUBLIC_LAW_CHILDREN_IN_CARE = "Family public law (children in care)";
+    public static final String PAPER_PROCESS_INCLUDING_C_100_APPLICATIONS = "Paper process including C100 applications";
+    public static final String FAMILY = "Family";
+    public static final String CHILD = "child";
+    public static final String CASE_TYPE = "FL401";
     @Autowired
     private CourtFinderApi courtFinderApi;
 
-
     public Court getClosestChildArrangementsCourt(CaseData caseData) throws NotFoundException {
+        ServiceArea serviceArea;
 
-        String postcode = getCorrectPartyPostcode(caseData);
+        if (CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            serviceArea = courtFinderApi
+                .findClosestDomesticAbuseCourtByPostCode(
+                    getPostcodeFromWrappedParty(caseData.getApplicants().get(0)));
+        }
+        else {
+            serviceArea = courtFinderApi
+                .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
+        }
 
-        log.info("Getting closest court for postcode: {}", postcode);
-
-        String courtSlug = courtFinderApi.findClosestChildArrangementsCourtByPostcode(postcode)
-            .getCourts()
-            .get(0)
-            .getCourtId();
-
-        return getCourtDetails(courtSlug);
+        return getCourtDetails(serviceArea.getCourts()
+                                   .get(0)
+                                   .getCourtId());
     }
 
     public Court getClosestDomesticAbuseCourt(CaseData caseData) throws NotFoundException {
@@ -122,44 +132,53 @@ public class CourtFinderService {
 
     public Optional<CourtEmailAddress> getEmailAddress(Court closestDomesticAbuseCourt) {
         Optional<CourtEmailAddress> emailAddress;
-        emailAddress = findCourtWithFamilyC100Application(closestDomesticAbuseCourt);
-        if (!emailAddress.isPresent()) {
-            emailAddress = findCourtWithFamilyLaw(closestDomesticAbuseCourt);
+        emailAddress = findEmailWithFamilyC100ApplicationKey(closestDomesticAbuseCourt);
+        if (emailAddress.isEmpty()) {
+            emailAddress = findEmailWithFamilyCourtKey(closestDomesticAbuseCourt);
         }
-        if (!emailAddress.isPresent()) {
-            emailAddress = findCourtWithFamilyOnly(closestDomesticAbuseCourt);
+        if (emailAddress.isEmpty()) {
+            emailAddress = findEmailWithFamilyLawKey(closestDomesticAbuseCourt);
         }
-        if (!emailAddress.isPresent()) {
-            emailAddress  = findFamilyCourtWithChildOnly(closestDomesticAbuseCourt);
+        if (emailAddress.isEmpty()) {
+            emailAddress = findEmailWithFamilyOnlyKey(closestDomesticAbuseCourt);
+        }
+        if (emailAddress.isEmpty()) {
+            emailAddress  = findEmailWithChildOnlyKey(closestDomesticAbuseCourt);
         }
 
         return emailAddress;
     }
 
-    private Optional<CourtEmailAddress> findFamilyCourtWithChildOnly(Court closestDomesticAbuseCourt) {
+    private Optional<CourtEmailAddress> findEmailWithChildOnlyKey(Court closestDomesticAbuseCourt) {
         return closestDomesticAbuseCourt.getCourtEmailAddresses().stream()
-                .filter(p -> (p.getDescription().contains("child")
-                || (p.getExplanation() != null && p.getExplanation().contains("child"))))
+            .filter(p -> (p.getDescription() !=null && p.getDescription().contains(CHILD)
+                || (p.getExplanation() != null && p.getExplanation().contains(CHILD))))
             .findFirst();
     }
 
-    private Optional<CourtEmailAddress> findCourtWithFamilyOnly(Court closestDomesticAbuseCourt) {
+    private Optional<CourtEmailAddress> findEmailWithFamilyOnlyKey(Court closestDomesticAbuseCourt) {
         return closestDomesticAbuseCourt.getCourtEmailAddresses().stream()
-                .filter(p -> (p.getDescription().contains("Family")
-                || (p.getExplanation() != null && p.getExplanation().contains("Family"))))
+            .filter(p -> (p.getDescription() != null && p.getDescription().contains(FAMILY)
+                || (p.getExplanation() != null && p.getExplanation().contains(FAMILY))))
             .findFirst();
     }
 
-    private Optional<CourtEmailAddress> findCourtWithFamilyLaw(Court closestDomesticAbuseCourt) {
+    private Optional<CourtEmailAddress> findEmailWithFamilyLawKey(Court closestDomesticAbuseCourt) {
         return closestDomesticAbuseCourt.getCourtEmailAddresses().stream()
-                .filter(p -> ("Family public law (children in care)".equalsIgnoreCase(p.getDescription())))
+            .filter(p -> (FAMILY_PUBLIC_LAW_CHILDREN_IN_CARE.equalsIgnoreCase(p.getDescription())))
             .findFirst();
     }
 
-    private Optional<CourtEmailAddress> findCourtWithFamilyC100Application(Court closestDomesticAbuseCourt) {
+    private Optional<CourtEmailAddress> findEmailWithFamilyC100ApplicationKey(Court closestDomesticAbuseCourt) {
         return closestDomesticAbuseCourt.getCourtEmailAddresses().stream()
-                .filter(p -> ("Family public law (children in care)".equalsIgnoreCase(p.getDescription())
-                && ("Paper process including C100 applications".equalsIgnoreCase(p.getExplanation()))))
+            .filter(p -> (FAMILY_PUBLIC_LAW_CHILDREN_IN_CARE.equalsIgnoreCase(p.getDescription())
+                && (PAPER_PROCESS_INCLUDING_C_100_APPLICATIONS.equalsIgnoreCase(p.getExplanation()))))
+            .findFirst();
+    }
+
+    private Optional<CourtEmailAddress> findEmailWithFamilyCourtKey(Court closestDomesticAbuseCourt) {
+        return closestDomesticAbuseCourt.getCourtEmailAddresses().stream()
+            .filter(p -> (FAMILY_COURT.equalsIgnoreCase(p.getDescription())))
             .findFirst();
     }
 

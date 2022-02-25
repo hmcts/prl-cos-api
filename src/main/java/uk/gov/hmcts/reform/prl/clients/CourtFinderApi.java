@@ -10,9 +10,10 @@ import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 @FeignClient(name = "court-finder-api", primary = false, url = "${courtfinder.api.url}")
 public interface CourtFinderApi {
 
-    final String CHILD_ARRANGEMENTS_POSTCODE_URL = "search/results?postcode={postcode}&serviceArea=childcare-arrangements";
+    final String SEARCH_RESULTS_POSTCODE_POSTCODE_SERVICE_AREA = "search/results?postcode={postcode}&serviceArea=";
+    final String CHILD_ARRANGEMENTS_POSTCODE_URL = SEARCH_RESULTS_POSTCODE_POSTCODE_SERVICE_AREA + "childcare-arrangements";
     final String COURT_DETAILS_URL = "courts/{court-slug}";
-    final String DOMESTIC_ABUSE_POSTCODE_URL = "search/results?postcode={postcode}&serviceArea=domestic-abuse";
+    final String DOMESTIC_ABUSE_POSTCODE_URL = SEARCH_RESULTS_POSTCODE_POSTCODE_SERVICE_AREA + "domestic-abuse";
 
     @GetMapping(value = CHILD_ARRANGEMENTS_POSTCODE_URL)
     ServiceArea findClosestChildArrangementsCourtByPostcode(@PathVariable("postcode") String postcode);
@@ -22,4 +23,5 @@ public interface CourtFinderApi {
 
     @GetMapping(value = DOMESTIC_ABUSE_POSTCODE_URL)
     ServiceArea findClosestDomesticAbuseCourtByPostCode(@PathVariable("postcode") String postcode);
+
 }
