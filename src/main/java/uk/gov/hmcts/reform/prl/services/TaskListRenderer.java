@@ -27,6 +27,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
@@ -134,7 +135,7 @@ public class TaskListRenderer {
         switch (task.getState()) {
 
             case NOT_STARTED:
-                if (task.getEvent().equals(VIEW_PDF_DOCUMENT)) {
+                if (task.getEvent().equals(VIEW_PDF_DOCUMENT) || task.getEvent().equals(FL401_UPLOAD_DOCUMENTS)) {
                     lines.add(taskListRenderElements.renderLink(task));
                 } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
@@ -205,12 +206,16 @@ public class TaskListRenderer {
             .withTask(tasks.get(INTERNATIONAL_ELEMENT))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
+        final TaskSection uploadDocuments = newSection("Upload documents")
+            .withTask(tasks.get(FL401_UPLOAD_DOCUMENTS));
+
         final TaskSection pdfApplication = newSection("View PDF application")
             .withTask(tasks.get(VIEW_PDF_DOCUMENT));
 
         return Stream.of(applicationDetails,
                          peopleInTheCase,
                          additionalInformation,
+                         uploadDocuments,
                          pdfApplication)
             .filter(TaskSection::hasAnyTask)
             .collect(toList());

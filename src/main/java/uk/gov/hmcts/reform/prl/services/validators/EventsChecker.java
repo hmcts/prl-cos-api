@@ -16,6 +16,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
@@ -97,7 +98,6 @@ public class EventsChecker {
     @Autowired
     WithoutNoticeOrderChecker withoutNoticeOrderChecker;
 
-
     private EnumMap<Event, EventChecker> eventStatus = new EnumMap<Event, EventChecker>(Event.class);
 
     @PostConstruct
@@ -125,6 +125,7 @@ public class EventsChecker {
         eventStatus.put(RESPONDENT_BEHAVIOUR, respondentBehaviourChecker);
         eventStatus.put(WITHOUT_NOTICE_ORDER, withoutNoticeOrderChecker);
         eventStatus.put(FL401_APPLICANT_FAMILY_DETAILS, fl401ApplicantFamilyChecker);
+        eventStatus.put(FL401_UPLOAD_DOCUMENTS, pdfChecker);
 
     }
 
