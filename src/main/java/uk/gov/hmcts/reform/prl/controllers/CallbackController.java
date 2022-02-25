@@ -157,7 +157,9 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("Before adding issue date {} " + caseData);
         caseData.toBuilder().issueDate(LocalDate.now());
+        log.info("After adding issue date {} " + caseData.getIssueDate());
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
@@ -183,10 +185,11 @@ public class CallbackController {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(C8_DOC).build());
+        log.info("before calling organisation service date {} " + caseData.getIssueDate());
         caseData = organisationService.getApplicantOrganisationDetails(caseData);
 
         caseData = organisationService.getRespondentOrganisationDetails(caseData);
-
+        log.info("before calling final document date {} " + caseData.getIssueDate());
         GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
@@ -205,6 +208,7 @@ public class CallbackController {
 
         caseDataUpdated.putAll(allTabsFields);
         caseDataUpdated.put("issueDate",caseData.getIssueDate());
+        log.info("final casedata updated {} " + caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
