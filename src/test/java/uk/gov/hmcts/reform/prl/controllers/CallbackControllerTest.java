@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
@@ -190,6 +189,7 @@ public class CallbackControllerTest {
                                .documentHash(generatedDocumentInfo.getHashToken())
                                .documentFileName("PRL-DRAFT-C100-20.docx")
                                .build())
+            .id(123L)
             .draftOrderDocWelsh(Document.builder()
                                     .documentUrl(generatedDocumentInfo.getUrl())
                                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -197,7 +197,6 @@ public class CallbackControllerTest {
                                     .documentFileName(PRL_C100_DRAFT_WELSH_FILENAME)
                                     .build())
             .applicants(applicantList)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -208,18 +207,22 @@ public class CallbackControllerTest {
                                          .documentHash(generatedDocumentInfo.getHashToken())
                                          .documentFileName("PRL-DRAFT-C100-20.docx")
                                          .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                       .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
 
         final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
-                    .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                         .id(123L)
+                         .data(stringObjectMap)
+                         .build())
                 .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
@@ -238,7 +241,12 @@ public class CallbackControllerTest {
             Mockito.any(CaseDetails.class),
             Mockito.anyString()
         );
+        verify(organisationService,times(1))
+            .getApplicantOrganisationDetails(caseData);
+        verify(organisationService,times(1))
+            .getRespondentOrganisationDetails(caseData);
         verifyNoMoreInteractions(dgsService);
+        verifyNoMoreInteractions(organisationService);
     }
 
     @Test
@@ -306,11 +314,16 @@ public class CallbackControllerTest {
             .welshLanguageRequirement(YesOrNo.Yes)
             .welshLanguageRequirementApplication(LanguagePreference.ENGLISH)
             .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)
+            .id(123L)
             .build();
-
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
             .data(CaseData.builder()
+                      .id(123L)
                       .c8Document(Document.builder()
                                       .documentUrl(generatedDocumentInfo.getUrl())
                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -354,7 +367,7 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -377,7 +390,12 @@ public class CallbackControllerTest {
             Mockito.any(CaseDetails.class),
             Mockito.anyString()
         );
-
+        verify(organisationService,times(2))
+            .getApplicantOrganisationDetails(caseData);
+        verify(organisationService,times(2))
+            .getRespondentOrganisationDetails(caseData);
+        verifyNoMoreInteractions(dgsService);
+        verifyNoMoreInteractions(organisationService);
     }
 
     @Test
