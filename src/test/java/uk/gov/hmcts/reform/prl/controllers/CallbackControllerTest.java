@@ -12,7 +12,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Gender;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
@@ -194,14 +193,6 @@ public class CallbackControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-                .CallbackRequest.builder()
-                    .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-                .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -209,7 +200,13 @@ public class CallbackControllerTest {
             .thenReturn(caseData);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
-
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
         callbackController.generateAndStoreDocument(authToken, callbackRequest);
 
         verify(dgsService, times(1)).generateDocument(
