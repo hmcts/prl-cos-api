@@ -27,22 +27,7 @@ public enum EventErrorsEnum {
     RELATIONSHIP_TO_RESPONDENT_ERROR("Add details about relationship to respondent"),
     FL401_APPLICANT_FAMILY_ERROR("Add details about applicant's family"),
     FL401_TYPE_OF_APPLICATION_ERROR("Ensure you have added all relevant information"),
-    RESPONDENT_BEHAVIOUR_ERROR("Add details about respondent behaviour"),
-
-    //FL401_TYPE_OF_APPLICATION_ERRORS
-    FL401_TYPE_OF_APPLICATION_TYPE_OF_ORDER_ERROR("Add type of order"),
-    FL401_TYPE_OF_APPLICATION_CHILD_ARRANGEMENTS_ERROR("Add child arrangement case number"),
-
-    //WITHOUT_NOTICE_ORDER_ERRORS
-    WITHOUT_NOTICE_ORDER_STATUS_ERROR("Add information on 'without notice' order status"),
-    WITHOUT_NOTICE_ORDER_DETAILS_ERROR("Add information on 'without notice' order details"),
-    WITHOUT_NOTICE_ORDER_BAIL_ERROR("Add information on bail conditions"),
-
-    //RELATIONSHIP_TO_RESPONDENT_ERRORS
-    RELATIONSHIP_TO_RESPONDENT_DETAILS_ERROR("Add relationship details"),
-
-    //RESPONDENT_BEHAVIOUR_ERRORS
-    RESPONDENT_BEHAVIOUR_DETAILS_ERROR("Add what the applicant wants the respond to stop doing");
+    RESPONDENT_BEHAVIOUR_ERROR("Add details about respondent behaviour");
 
     private final String error;
 

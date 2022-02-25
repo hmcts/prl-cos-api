@@ -15,11 +15,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
-import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_TYPE_OF_ORDER_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.MIAM_ERROR;
 
 public class TaskErrorServiceTest {
@@ -30,9 +27,6 @@ public class TaskErrorServiceTest {
     Event event = ALLEGATIONS_OF_HARM;
     EventErrorsEnum error = ALLEGATIONS_OF_HARM_ERROR;
     String errorString = ALLEGATIONS_OF_HARM_ERROR.toString();
-    Event fl401Event = FL401_TYPE_OF_APPLICATION;
-    EventErrorsEnum fl401Error = FL401_TYPE_OF_APPLICATION_ERROR;
-    EventErrorsEnum fl401NestedError = FL401_TYPE_OF_APPLICATION_TYPE_OF_ORDER_ERROR;
 
     @Before
     public void setUp() {
@@ -77,14 +71,5 @@ public class TaskErrorServiceTest {
         boolean listContentsEqual = expectedList.containsAll(taskErrorService.getEventErrors(caseData));
 
         assertTrue(listSizeEqual && listContentsEqual);
-    }
-
-    @Test
-    public void whenNestedErrorAddedPresentInList() {
-        taskErrorService.addEventError(fl401Event, fl401Error, fl401Error.getError());
-        taskErrorService.addNestedEventErrors(fl401Event, fl401Error, Collections.singletonList(fl401NestedError));
-        List<String> actual = taskErrorService.eventErrors.get(fl401Error).getNestedErrors();
-
-        assertTrue(actual.contains(fl401NestedError.getError()));
     }
 }

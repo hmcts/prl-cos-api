@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.EventErrorsEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
@@ -11,15 +10,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_CHILD_ARRANGEMENTS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_TYPE_OF_ORDER_ERROR;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Slf4j
@@ -51,20 +46,20 @@ public class FL401ApplicationTypeChecker implements EventChecker {
         if (ordersOptional.isPresent() && (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)
             || ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder))) {
 
-            if (applicationTypeLinkToCA.isPresent()
-                && applicationTypeLinkToCA.get().getLinkToCaApplication().equals(YesOrNo.Yes)) {
+            if (applicationTypeLinkToCA.isPresent() && applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
+                YesOrNo.Yes)) {
                 finished = applicationTypeLinkToCA.get().getCaApplicationNumber() != null;
-            } else if (applicationTypeLinkToCA.get().getLinkToCaApplication().equals(YesOrNo.No)) {
-                finished = true;
+            } else if (applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
+                YesOrNo.No)) {
+                return true;
             } else {
-                finished = false;
+                return false;
             }
 
             if (finished) {
                 taskErrorService.removeError(FL401_TYPE_OF_APPLICATION_ERROR);
                 return true;
             }
-
             taskErrorService.addEventError(
                 FL401_TYPE_OF_APPLICATION,
                 FL401_TYPE_OF_APPLICATION_ERROR,
@@ -74,27 +69,9 @@ public class FL401ApplicationTypeChecker implements EventChecker {
         taskErrorService.addEventError(
             FL401_TYPE_OF_APPLICATION,
             FL401_TYPE_OF_APPLICATION_ERROR,
-            FL401_TYPE_OF_APPLICATION_ERROR.getError());
-        taskErrorService.addNestedEventErrors(
-            FL401_TYPE_OF_APPLICATION,
-            FL401_TYPE_OF_APPLICATION_ERROR,
-            getFieldSpecificErrors(caseData)
+            FL401_TYPE_OF_APPLICATION_ERROR.getError()
         );
         return false;
-    }
-
-
-    public List<EventErrorsEnum> getFieldSpecificErrors(CaseData caseData) {
-        Optional<List<FL401OrderTypeEnum>> orderType = ofNullable(caseData.getTypeOfApplicationOrders().getOrderType());
-        Optional<YesOrNo> linkToCaApplication = ofNullable(caseData.getTypeOfApplicationLinkToCA().getLinkToCaApplication());
-        List<EventErrorsEnum> errors = new ArrayList<>();
-        if (orderType.isEmpty()) {
-            errors.add(FL401_TYPE_OF_APPLICATION_TYPE_OF_ORDER_ERROR);
-        }
-        if (linkToCaApplication.isEmpty()) {
-            errors.add(FL401_TYPE_OF_APPLICATION_CHILD_ARRANGEMENTS_ERROR);
-        }
-        return errors;
     }
 
 }
