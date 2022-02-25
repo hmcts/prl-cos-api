@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.ArrayList;
@@ -51,6 +52,9 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Autowired
     private DgsService dgsService;
 
+    @Autowired
+    private OrganisationService organisationService;
+
 
     public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
     private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
@@ -63,7 +67,6 @@ public class PrePopulateFeeAndSolicitorNameController {
     public CallbackResponse prePoppulateSolicitorAndFees(@RequestHeader("Authorization") String authorisation,
                                                          @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<String> errorList = new ArrayList<>();
-        UserDetails userDetails = userService.getUserDetails(authorisation);
         FeeResponse feeResponse = null;
         try {
             feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
@@ -73,16 +76,19 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .errors(errorList)
                 .build();
         }
+        CaseData caseDataForOrgDetails = callbackRequest.getCaseDetails().getCaseData();
+        caseDataForOrgDetails = organisationService.getApplicantOrganisationDetails(caseDataForOrgDetails);
+        caseDataForOrgDetails = organisationService.getRespondentOrganisationDetails(caseDataForOrgDetails);
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
-            callbackRequest.getCaseDetails(),
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
             PRL_DRAFT_TEMPLATE
         );
 
         Court closestChildArrangementsCourt = courtLocatorService
             .getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
                                                   .getCaseData());
-
+        UserDetails userDetails = userService.getUserDetails(authorisation);
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()
                 .solicitorName(userDetails.getFullName())

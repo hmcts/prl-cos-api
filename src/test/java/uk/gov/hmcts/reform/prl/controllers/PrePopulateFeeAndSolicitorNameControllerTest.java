@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.math.BigDecimal;
@@ -77,6 +79,9 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     @Mock
     private CaseData caseData;
 
+    @Mock
+    private OrganisationService organisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     @Before
@@ -100,26 +105,28 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         court = Court.builder()
             .courtName("testcourt")
             .build();
+
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
     }
 
     //TODO Update this testcase once we have integration with Fee and Pay
     @Test
     public void testUserDetailsForSolicitorName() throws Exception {
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
+        when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
+            .thenReturn(court);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
-        when(dgsService.generateDocument(authToken,
-                                          callbackRequest.getCaseDetails(),
-                                          "PRL-C100-Draft-Final.docx")).thenReturn(generatedDocumentInfo);
-
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-
-        when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
-            .thenReturn(court);
-
+        when(dgsService.generateDocument(Mockito.anyString(),
+                                          Mockito.any(CaseDetails.class),
+                                          Mockito.anyString())).thenReturn(generatedDocumentInfo);
 
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
@@ -131,52 +138,51 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     @Test
     public void testWhenControllerCalledOneInvokeToDgsService() throws Exception {
-
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        CaseDetails caseDetails1 = CaseDetails.builder()
+            .caseData(caseData)
+            .build();
         CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
+            .caseDetails(caseDetails1)
             .build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
-        when(dgsService.generateDocument(authToken,
-                                          callbackRequest.getCaseDetails(),
-                                          "PRL-C100-Draft-Final.docx")).thenReturn(generatedDocumentInfo);
-
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-
-        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
-
+        when(dgsService.generateDocument(Mockito.anyString(),
+                                         Mockito.any(CaseDetails.class),
+                                         Mockito.anyString())).thenReturn(generatedDocumentInfo);
         prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
 
         verify(dgsService).generateDocument(authToken,
                                             callbackRequest.getCaseDetails(),
                                             "PRL-C100-Draft-Final.docx");
-
     }
 
     @Test
     public void testFeeDetailsForFeeAmount()  throws Exception {
-
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
-        when(dgsService.generateDocument(authToken,
-                                          callbackRequest.getCaseDetails(),
-                                          "PRL-C100-Draft-Final.docx")).thenReturn(generatedDocumentInfo);
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-
-        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
-
+        when(dgsService.generateDocument(Mockito.anyString(),
+                                         Mockito.any(CaseDetails.class),
+                                         Mockito.anyString())).thenReturn(generatedDocumentInfo);
         prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
 
         verify(feesService).fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
-
     }
 
     @Test
     public void testCourtDetailsWithCourtName() throws Exception {
-
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -254,10 +260,9 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             CaseData.class
         );
 
-        when(dgsService.generateDocument(authToken,
-                                         callbackRequest.getCaseDetails(),
-                                         "PRL-C100-Draft-Final.docx")).thenReturn(generatedDocumentInfo);
-
+        when(dgsService.generateDocument(Mockito.anyString(),
+                                         Mockito.any(CaseDetails.class),
+                                         Mockito.anyString())).thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
 
