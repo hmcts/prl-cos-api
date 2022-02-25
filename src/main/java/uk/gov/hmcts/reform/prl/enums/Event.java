@@ -29,7 +29,8 @@ public enum Event {
     WITHOUT_NOTICE_ORDER("withoutNoticeOrderDetails", "Without notice order"),
     RELATIONSHIP_TO_RESPONDENT("respondentRelationship","Relationship to respondent"),
     FL401_TYPE_OF_APPLICATION("fl401TypeOfApplication", "Type of application"),
-    FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's Family");
+    FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's Family"),
+    FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents");
 
 
     private final String id;
