@@ -88,7 +88,7 @@ public class OrganisationService {
 
     private PartyDetails getApplicantWithOrg(PartyDetails applicant, String userToken) {
 
-        if (applicant.getSolicitorOrg() != null) {
+        if (null != applicant && applicant.getSolicitorOrg() != null) {
             String organisationID = applicant.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
                 organisations = getOrganisationDetaiils(userToken, organisationID);
