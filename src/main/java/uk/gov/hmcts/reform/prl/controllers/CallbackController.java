@@ -199,7 +199,6 @@ public class CallbackController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
-        log.info("Added issueDate to caseData: " + caseData.getIssueDate());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -299,7 +298,6 @@ public class CallbackController {
 
         caseDataUpdated.putAll(allTabsFields);
         caseDataUpdated.put("issueDate",caseData.getIssueDate());
-        log.info("get IssueDate after caseDataUpdate: ", caseDataUpdated.get("issueDate") + "caseData: " + caseData.getIssueDate());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
