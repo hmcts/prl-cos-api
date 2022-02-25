@@ -148,8 +148,8 @@ public class CallbackController {
     ) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
-        //caseData = organisationService.getApplicantOrganisationDetails(caseData);
-        //caseData = organisationService.getRespondentOrganisationDetails(caseData);
+        caseData = organisationService.getApplicantOrganisationDetails(caseData);
+        caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
         Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
 
@@ -233,9 +233,9 @@ public class CallbackController {
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentFileName(C8_DOC).build());
-            //caseData = organisationService.getApplicantOrganisationDetails(caseData);
+            caseData = organisationService.getApplicantOrganisationDetails(caseData);
 
-            //caseData = organisationService.getRespondentOrganisationDetails(caseData);
+            caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
             GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
                 authorisation,
@@ -276,9 +276,9 @@ public class CallbackController {
                     .documentHash(generatedC1AWelshDocumentInfo.getHashToken())
                     .documentFileName(PRL_C1A_WELSH_FILENAME).build());
             }
-            //caseData = organisationService.getApplicantOrganisationDetails(caseData);
+            caseData = organisationService.getApplicantOrganisationDetails(caseData);
 
-            //caseData = organisationService.getRespondentOrganisationDetails(caseData);
+            caseData = organisationService.getRespondentOrganisationDetails(caseData);
             GeneratedDocumentInfo generatedFinalWelshDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
