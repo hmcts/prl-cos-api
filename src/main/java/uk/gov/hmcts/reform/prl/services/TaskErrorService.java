@@ -14,9 +14,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import static java.util.Optional.ofNullable;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -42,35 +39,6 @@ public class TaskErrorService {
                                     .event(event)
                                     .errors(Collections.singletonList(error))
                                     .build());
-    }
-
-
-    public void addNestedEventErrors(Event event, EventErrorsEnum parentError, List<EventErrorsEnum> errors) {
-        if (eventErrors.containsKey(parentError)) {
-
-            List<String> updatedNestedErrors = errors.stream().map(EventErrorsEnum::getError)
-                .collect(Collectors.toList());
-
-            EventValidationErrors eventValidationErrors = eventErrors.get(parentError);
-            if (ofNullable(eventValidationErrors.getNestedErrors()).isPresent()) {
-                updatedNestedErrors.addAll(eventValidationErrors.getNestedErrors());
-            }
-            EventValidationErrors updatedErrors = EventValidationErrors.builder()
-                .event(event)
-                .errors(eventValidationErrors.getErrors())
-                .nestedErrors(updatedNestedErrors)
-                .build();
-
-            eventErrors.put(parentError, updatedErrors);
-        } else {
-            EventValidationErrors updatedErrors = EventValidationErrors.builder()
-                .event(event)
-                .nestedErrors(errors.stream().map(EventErrorsEnum::getError)
-                                  .collect(Collectors.toList()))
-                .build();
-
-            eventErrors.put(parentError, updatedErrors);
-        }
     }
 
 
