@@ -16,15 +16,15 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
-import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
-import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
-import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.*;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -34,6 +34,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FL401SubmitApplicationController {
+
+    private static final String FL401_FINAL_TEMPLATE = "FL401-Final.docx";
+    private static final String FL401_FINAL_DOC = "FL401FinalDocument.pdf";
 
     @Autowired
     private CourtFinderService courtFinderService;
@@ -50,6 +53,9 @@ public class FL401SubmitApplicationController {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private DgsService dgsService;
+
     @PostMapping(path = "/fl401-generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to generate FL401 final document and submit application. ")
     @ApiResponses(value = {
@@ -63,24 +69,43 @@ public class FL401SubmitApplicationController {
         Court closestDomesticAbuseCourt = courtFinderService
             .getClosestDomesticAbuseCourt(CaseUtils.getCaseData(caseDetails, objectMapper));
 
+        log.info("Generating the Final document of FL401 ");
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        final LocalDate localDate = LocalDate.now();
+        caseData.toBuilder().issueDate(localDate).courtName((closestDomesticAbuseCourt != null)
+                                                                ? closestDomesticAbuseCourt
+            .getCourtName() : "");
+
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+            FL401_FINAL_TEMPLATE
+        );
+        log.info("Generated FL401 Document");
+
         Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
 
-        CaseData caseData = objectMapper.convertValue(
+        CaseData caseDataUpdated = objectMapper.convertValue(
             CaseData.builder()
                 .courtName((closestDomesticAbuseCourt != null)  ? closestDomesticAbuseCourt.getCourtName() : "No Court Fetched")
                 .courtEmailAddress((closestDomesticAbuseCourt != null && matchingEmailAddress.isPresent())
                                        ? matchingEmailAddress.get().getAddress() :
                                        Objects.requireNonNull(closestDomesticAbuseCourt).getCourtEmailAddresses().get(0).getAddress())
+                .issueDate(localDate)
+                .finalDocument(Document.builder()
+                                   .documentUrl(generatedDocumentInfo.getUrl())
+                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                   .documentHash(generatedDocumentInfo.getHashToken())
+                                   .documentFileName(FL401_FINAL_DOC).build())
                 .build(),
             CaseData.class
         );
 
-        //todo document generation
         solicitorEmailService.sendEmail(caseDetails);
-        caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, matchingEmailAddress);
+       // caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, matchingEmailAddress);
 
         return CallbackResponse.builder()
-            .data(caseData)
+            .data(caseDataUpdated)
             .build();
     }
 }
