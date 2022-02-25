@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.ArrayList;
@@ -47,13 +48,17 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private CourtFinderService courtLocatorService;
+    private final CourtFinderService courtLocatorService;
 
     @Autowired
     private ObjectMapper objectMapper;
+
     @Autowired
     private DgsService dgsService;
+
+    @Autowired
+    private OrganisationService organisationService;
+
     @Autowired
     private DocumentLanguageService documentLanguageService;
 
@@ -72,7 +77,6 @@ public class PrePopulateFeeAndSolicitorNameController {
     public CallbackResponse prePoppulateSolicitorAndFees(@RequestHeader("Authorization") String authorisation,
                                                          @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<String> errorList = new ArrayList<>();
-        UserDetails userDetails = userService.getUserDetails(authorisation);
         FeeResponse feeResponse = null;
         try {
             feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
@@ -82,6 +86,11 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .errors(errorList)
                 .build();
         }
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        CaseData caseDataForOrgDetails = callbackRequest.getCaseDetails().getCaseData();
+        caseDataForOrgDetails = organisationService.getApplicantOrganisationDetails(caseDataForOrgDetails);
+        caseDataForOrgDetails = organisationService.getRespondentOrganisationDetails(caseDataForOrgDetails);
+
 
         Court closestChildArrangementsCourt = courtLocatorService
             .getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
@@ -93,7 +102,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             .applicantSolicitorEmailAddress(userDetails.getEmail())
             .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
             .feeAmount(feeResponse.getAmount().toString())
-            .courtName(closestChildArrangementsCourt.getCourtName())
+            .courtName((closestChildArrangementsCourt != null)  ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
             .build();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
@@ -103,7 +112,7 @@ public class PrePopulateFeeAndSolicitorNameController {
         if (documentLanguage.isGenEng()) {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
-                callbackRequest.getCaseDetails(),
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
                 PRL_DRAFT_TEMPLATE
             );
 

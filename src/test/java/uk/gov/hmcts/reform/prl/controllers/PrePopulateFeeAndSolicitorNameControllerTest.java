@@ -8,8 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.math.BigDecimal;
@@ -43,7 +44,7 @@ import static org.mockito.Mockito.when;
 
 
 @PropertySource(value = "classpath:application.yaml")
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     private MockMvc mockMvc;
@@ -81,11 +82,17 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     @Mock
     private CaseDetails caseDetails;
 
-    CaseData caseData;
+    @Mock
+    private CaseData caseData;
 
-    CallbackRequest callbackRequest;
+    @Mock
+    private OrganisationService organisationService;
 
-    DocumentLanguage documentLanguage;
+    @Mock
+    private CallbackRequest callbackRequest;
+
+    @Mock
+    private DocumentLanguage documentLanguage;
 
     @Mock
     private DocumentLanguageService documentLanguageService;
@@ -115,6 +122,9 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .courtName("testcourt")
             .build();
 
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
@@ -130,6 +140,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     //TODO Update this testcase once we have integration with Fee and Pay
     @Test
     public void testUserDetailsForSolicitorName() throws Exception {
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
@@ -151,7 +163,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     @Test
     public void testWhenControllerCalledOneInvokeToDgsService() throws Exception {
-
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
 
@@ -176,7 +189,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     @Test
     public void testFeeDetailsForFeeAmount()  throws Exception {
-
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
 
@@ -197,7 +211,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     @Test
     public void testCourtDetailsWithCourtName() throws Exception {
-
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
