@@ -82,6 +82,7 @@ public class OrganisationService {
     }
 
     public Organisations getOrganisationDetaiils(String userToken, String organisationID) {
+        log.info("Fetching organisation details for organisation id: {}",organisationID);
         return organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
     }
 
