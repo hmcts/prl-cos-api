@@ -45,6 +45,7 @@ public class CommonUtils {
         }
         return " ";
     }
+
     public static String formatCurrentDate(String pattern) {
         try {
             DateFormat dateFormat = new SimpleDateFormat(pattern);
