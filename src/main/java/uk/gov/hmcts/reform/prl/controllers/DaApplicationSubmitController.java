@@ -11,18 +11,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,12 +60,13 @@ public class DaApplicationSubmitController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public CallbackResponse daApplicationSubmit(@RequestHeader("Authorization") String authorisation,
                                         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        List<String> errorList = new ArrayList<>();
+
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
         Court closestDomesticAbuseCourt = courtFinderService
-            .getClosestDomesticAbuseCourt(callbackRequest.getCaseDetails()
-                                              .getCaseData());
+            .getClosestDomesticAbuseCourt(CaseUtils.getCaseData(caseDetails, objectMapper));
 
         Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
 
@@ -82,7 +84,7 @@ public class DaApplicationSubmitController {
             CaseData.class
         );
 
-        solicitorEmailService.sendEmailToDaSolicitor(caseData, userDetails);
+        solicitorEmailService.sendEmail(caseDetails);
         caseWorkerEmailService.sendEmailToLocalCourt(caseData);
 
         return CallbackResponse.builder()
