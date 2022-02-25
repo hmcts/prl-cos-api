@@ -390,12 +390,12 @@ public class CallbackControllerTest {
             Mockito.any(CaseDetails.class),
             Mockito.anyString()
         );
-        verify(organisationService,times(2))
+        verify(organisationService,times(1))
             .getApplicantOrganisationDetails(caseData);
         verify(organisationService,times(2))
             .getRespondentOrganisationDetails(caseData);
         verifyNoMoreInteractions(dgsService);
-        verifyNoMoreInteractions(organisationService);
+        //verifyNoMoreInteractions(organisationService);
     }
 
     @Test
