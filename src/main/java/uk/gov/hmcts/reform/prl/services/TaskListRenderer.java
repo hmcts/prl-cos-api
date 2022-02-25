@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_STATEMENT_OF_TRUTH;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
@@ -207,17 +208,17 @@ public class TaskListRenderer {
             .withInfo("Only complete if relevant")
             .withTask(tasks.get(FL401_OTHER_PROCEEDINGS))
             .withTask(tasks.get(ATTENDING_THE_HEARING))
-            .withTask(tasks.get(INTERNATIONAL_ELEMENT))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
-        final TaskSection pdfApplication = newSection("View PDF application")
-            .withTask(tasks.get(VIEW_PDF_DOCUMENT));
+        final TaskSection checkAndSignApplication = newSection("Check and sign application")
+            .withTask(tasks.get(VIEW_PDF_DOCUMENT))
+            .withTask(tasks.get(FL401_STATEMENT_OF_TRUTH));
 
         return Stream.of(applicationDetails,
                          peopleInTheCase,
                          addCaseDetails,
                          additionalInformation,
-                         pdfApplication)
+                         checkAndSignApplication)
             .filter(TaskSection::hasAnyTask)
             .collect(toList());
     }

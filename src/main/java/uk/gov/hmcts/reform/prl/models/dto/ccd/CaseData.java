@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityCheck;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
@@ -53,6 +54,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -433,6 +435,7 @@ public class CaseData implements MappableObject {
 
     private String courtName;
     private String courtId;
+    private String courtEmailAddress;
 
     /**
      * Final document.
@@ -457,4 +460,11 @@ public class CaseData implements MappableObject {
      */
     private final FL401OtherProceedingDetails fl401OtherProceedingDetails;
 
+    /**
+     *  FL401 Statement Of Truth and Submit.
+     */
+    @JsonProperty("fl401StmtOfTruth")
+    private final StatementOfTruth fl401StmtOfTruth;
+    @JsonProperty("fl401ConfidentialityCheck")
+    private final ConfidentialityCheck fl401ConfidentialityCheck;
 }
