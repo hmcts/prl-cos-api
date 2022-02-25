@@ -150,7 +150,6 @@ public class CallbackControllerTest {
 
     @Test
     public void testGenerateAndStoreDocument() throws Exception {
-        //CaseDetails caseDetails  = CaseDetailsProvider.full();
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -179,8 +178,8 @@ public class CallbackControllerTest {
                                .documentHash(generatedDocumentInfo.getHashToken())
                                .documentFileName("PRL-DRAFT-C100-20.docx")
                                .build())
+            .id(123L)
             .applicants(applicantList)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -191,12 +190,10 @@ public class CallbackControllerTest {
                                          .documentHash(generatedDocumentInfo.getHashToken())
                                          .documentFileName("PRL-DRAFT-C100-20.docx")
                                          .build())
-                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                       .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
@@ -205,11 +202,13 @@ public class CallbackControllerTest {
                              .data(stringObjectMap)
                              .build())
                 .build();
-
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         callbackController.generateAndStoreDocument(authToken, callbackRequest);
 
@@ -218,7 +217,12 @@ public class CallbackControllerTest {
             Mockito.any(CaseDetails.class),
             Mockito.anyString()
         );
+        verify(organisationService,times(1))
+            .getApplicantOrganisationDetails(caseData);
+        verify(organisationService,times(1))
+            .getRespondentOrganisationDetails(caseData);
         verifyNoMoreInteractions(dgsService);
+        verifyNoMoreInteractions(organisationService);
     }
 
     @Test
@@ -283,11 +287,16 @@ public class CallbackControllerTest {
             .allegationsOfHarmChildAbductionYesNo(YesOrNo.Yes)
             .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
             .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
+            .id(123L)
             .build();
-
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
             .data(CaseData.builder()
+                      .id(123L)
                       .c8Document(Document.builder()
                                       .documentUrl(generatedDocumentInfo.getUrl())
                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -311,7 +320,7 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -322,6 +331,7 @@ public class CallbackControllerTest {
             authToken,
             callbackRequest
         );
+
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
         verify(dgsService, times(3)).generateDocument(
@@ -329,7 +339,12 @@ public class CallbackControllerTest {
             Mockito.any(CaseDetails.class),
             Mockito.anyString()
         );
-
+        verify(organisationService,times(1))
+            .getApplicantOrganisationDetails(caseData);
+        verify(organisationService,times(1))
+            .getRespondentOrganisationDetails(caseData);
+        verifyNoMoreInteractions(dgsService);
+        verifyNoMoreInteractions(organisationService);
     }
 
     @Test
