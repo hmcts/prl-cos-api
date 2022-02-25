@@ -143,7 +143,7 @@ public class SolicitorEmailService {
 
     }
 
-    public void sendEmailToDaSolicitor(CaseData dACaseData, UserDetails userDetails) {
+    public void sendEmailToDaSolicitor(CaseData dACaseData, UserDetails userDetails) throws NotFoundException {
 
         String solicitorEmail = "";
 
@@ -170,7 +170,7 @@ public class SolicitorEmailService {
 
     }
 
-    private EmailTemplateVars buildDaSolicitorEmail(CaseData dACaseData) {
+    private EmailTemplateVars buildDaSolicitorEmail(CaseData dACaseData) throws NotFoundException {
 
         List<PartyDetails> applicants = dACaseData
             .getApplicants()
@@ -185,6 +185,7 @@ public class SolicitorEmailService {
         String applicantNames = String.join(", ", applicantNamesList);
 
         Court court = null;
+        court = courtLocatorService.getClosestChildArrangementsCourt(dACaseData);
 
         return  SolicitorEmail.builder()
             .caseReference(String.valueOf(dACaseData.getId()))
