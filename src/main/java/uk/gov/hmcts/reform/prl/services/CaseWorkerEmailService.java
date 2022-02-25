@@ -184,26 +184,26 @@ public class CaseWorkerEmailService {
 
     }
 
-    public void sendEmailToLocalCourt(CaseData daCaseData) {
+    public void sendEmailToLocalCourt(CaseDetails caseDetails, String courtEmail) {
 
         emailService.send(
-            daCaseData.getCourtEmailAddress(),
+            courtEmail,
             EmailTemplateNames.DA_LOCALCOURT,
-            buildCourtAdminEmail(daCaseData),
+            buildCourtAdminEmail(caseDetails),
             LanguagePreference.ENGLISH
         );
     }
 
-    public EmailTemplateVars buildCourtAdminEmail(CaseData daCaseData) {
+    public EmailTemplateVars buildCourtAdminEmail(CaseDetails caseDetails) {
 
-
-        List<PartyDetails> applicants = daCaseData
+        caseData = emailService.getCaseData(caseDetails);
+        List<PartyDetails> applicants = caseData
             .getApplicants()
             .stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        List<Child> child = daCaseData
+        List<Child> child = caseData
             .getChildren()
             .stream()
             .map(Element::getValue)
@@ -229,13 +229,13 @@ public class CaseWorkerEmailService {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
         return CaseWorkerEmail.builder()
-            .caseReference(String.valueOf(daCaseData.getId()))
+            .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .caseUrgency(typeOfHearing)
             .isCaseUrgent(isCaseUrgent)
             .issueDate(issueDate.format(dateTimeFormatter))
             .isConfidential(isConfidential)
-            .caseLink(manageCaseUrl + "/" + daCaseData.getId())
+            .caseLink(manageCaseUrl + "/" + caseData.getId())
             .build();
     }
 }

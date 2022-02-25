@@ -102,7 +102,7 @@ public class FL401SubmitApplicationController {
         );
 
         solicitorEmailService.sendEmail(caseDetails);
-       // caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, matchingEmailAddress);
+        caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
 
         return CallbackResponse.builder()
             .data(caseDataUpdated)
