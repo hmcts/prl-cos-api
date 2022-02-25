@@ -398,6 +398,10 @@ public class CallbackControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))

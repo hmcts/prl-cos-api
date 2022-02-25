@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -107,7 +106,6 @@ public class OrganisationService {
             PartyDetails applicantWithOrg = getApplicantWithOrg(caseData.getApplicantsFL401(), userToken);
             caseData = caseData.toBuilder()
                 .applicantsFL401(applicantWithOrg)
-                .issueDate(LocalDate.now())
                 .build();
         }
         return caseData;
