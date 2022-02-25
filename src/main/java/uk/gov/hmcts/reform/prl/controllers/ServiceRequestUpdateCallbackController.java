@@ -13,13 +13,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
-import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
@@ -31,12 +29,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequiredArgsConstructor
 public class ServiceRequestUpdateCallbackController extends AbstractCallbackController {
 
-    private final String serviceAuth = "ServiceAuthorization";
     private final RequestUpdateCallbackService requestUpdateCallbackService;
-    private final AuthTokenGenerator authTokenGenerator;
-    private final AuthorisationService authorisationService;
     private final CourtFinderService courtLocatorService;
-
 
     @Autowired
     @Qualifier("allTabsService")
@@ -48,13 +42,10 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
         @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
     public void serviceRequestUpdate(
-        @RequestHeader(serviceAuth) String serviceAuthorization,
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws Exception {
         try {
-            if (authorisationService.authorise(serviceAuthorization)) {
-                requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-            }
+            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         } catch (Exception ex) {
             log.error(
                 "Payment callback is unsuccessful for the CaseID: {}",
