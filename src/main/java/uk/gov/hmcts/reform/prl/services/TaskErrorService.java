@@ -22,14 +22,15 @@ public class TaskErrorService {
 
     Map<EventErrorsEnum, EventValidationErrors> eventErrors = new HashMap<>();
 
-    public List<EventValidationErrors> getEventErrors() {
+    public List<EventValidationErrors> getEventErrors(CaseData caseData) {
 
         List<EventValidationErrors> eventErrorList = new ArrayList<>();
 
         for (Map.Entry<EventErrorsEnum, EventValidationErrors> entry : eventErrors.entrySet()) {
             eventErrorList.add(entry.getValue());
         }
-
+        eventErrorList.sort(Comparator.comparingInt(x -> Event.getEventOrder(caseData.getCaseTypeOfApplication())
+            .indexOf(x.getEvent())));
         return eventErrorList;
     }
 
