@@ -77,7 +77,7 @@ public class FL401SubmitApplicationController {
 
         //todo document generation
         solicitorEmailService.sendEmail(caseDetails);
-        caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, matchingEmailAddress);
+        caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
 
         return CallbackResponse.builder()
             .data(caseData)
