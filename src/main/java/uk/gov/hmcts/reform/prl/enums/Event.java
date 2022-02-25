@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+
 @RequiredArgsConstructor
 public enum Event {
 
@@ -35,8 +39,8 @@ public enum Event {
 
     private final String id;
     private final String name;
-    
-    
+
+
     public static List<Event> getEventOrder(String caseType) {
     List<Event> c100 = List.of(
         TYPE_OF_APPLICATION,
@@ -83,6 +87,6 @@ public enum Event {
     public static Event getValue(String key) {
         return Event.valueOf(key);
     }
-    
+
 
 }
