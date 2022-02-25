@@ -220,7 +220,6 @@ public class OrganisationServiceTest {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
-            .issueDate(LocalDate.now())
             .applicantsFL401(partyDetailsWithOrganisations)
             .build();
         assertEquals(organisations.getOrganisationIdentifier(), organisationId);
