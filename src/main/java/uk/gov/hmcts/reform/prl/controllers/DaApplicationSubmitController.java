@@ -53,12 +53,12 @@ public class DaApplicationSubmitController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @PostMapping(path = "/da-application-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/fl401-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to Submit DA application and notification sent. ")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Application Submitted."),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public CallbackResponse daApplicationSubmit(@RequestHeader("Authorization") String authorisation,
+    public CallbackResponse fl401SubmitApplication(@RequestHeader("Authorization") String authorisation,
                                         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
@@ -72,10 +72,6 @@ public class DaApplicationSubmitController {
 
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()
-                .solicitorName(userDetails.getFullName())
-                .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
-                .applicantSolicitorEmailAddress(userDetails.getEmail())
-                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
                 .courtName((closestDomesticAbuseCourt != null)  ? closestDomesticAbuseCourt.getCourtName() : "No Court Fetched")
                 .courtEmailAddress((closestDomesticAbuseCourt != null && matchingEmailAddress.isPresent())
                                        ? matchingEmailAddress.get().getAddress() :
