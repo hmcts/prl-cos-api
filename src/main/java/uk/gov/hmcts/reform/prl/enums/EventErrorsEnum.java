@@ -11,7 +11,6 @@ public enum EventErrorsEnum {
     APPLICANTS_DETAILS_ERROR("Add applicant details"),
     TYPE_OF_APPLICATION_ERROR("Add details about the type of application"),
     RESPONDENT_DETAILS_ERROR("Add respondent details"),
-    RESPONDENT_BEHAVIOUR_ERROR("Add details about respondent behaviour"),
     LITIGATION_CAPACITY_ERROR("Add the litigation capacity details"),
     INTERNATIONAL_ELEMENT_ERROR("Add the international element details"),
     HEARING_URGENCY_ERROR("Add hearing urgency details"),
@@ -25,7 +24,9 @@ public enum EventErrorsEnum {
     //FL401 ERRORS
     WITHOUT_NOTICE_ORDER_ERROR("Add Without Notice Order details"),
     RELATIONSHIP_TO_RESPONDENT_ERROR("Add details about relationship to respondent"),
-    FL401_APPLICANT_FAMILY_ERROR("Add details about applicant's family");
+    FL401_APPLICANT_FAMILY_ERROR("Add details about applicant's family"),
+    FL401_TYPE_OF_APPLICATION_ERROR("Ensure you have added all relevant information"),
+    RESPONDENT_BEHAVIOUR_ERROR("Add details about respondent behaviour");
 
     private final String error;
 
