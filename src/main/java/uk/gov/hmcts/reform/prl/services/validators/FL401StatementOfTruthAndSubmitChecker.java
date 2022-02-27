@@ -8,7 +8,17 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.EnumMap;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.enums.Event.*;
+import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 
 @Service
 public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {

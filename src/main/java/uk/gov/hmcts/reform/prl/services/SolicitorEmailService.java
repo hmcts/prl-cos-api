@@ -86,7 +86,7 @@ public class SolicitorEmailService {
         );
 
         emailService.send(
-            "yogendra.upasani@hmcts.net",
+            "fprl_caseworker_solicitor@mailinator.com",
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
             LanguagePreference.ENGLISH
@@ -105,7 +105,6 @@ public class SolicitorEmailService {
             buildEmail(caseDetails),
             LanguagePreference.ENGLISH
         );
-
     }
 
     private EmailTemplateVars buildCaseWithdrawEmail(CaseDetails caseDetails) {
@@ -143,11 +142,11 @@ public class SolicitorEmailService {
 
     }
 
-    public void sendEmailToDaSolicitor(CaseData dACaseData, UserDetails userDetails) throws NotFoundException {
+    public void sendEmailToDaSolicitor(CaseData daCaseData, UserDetails userDetails) throws NotFoundException {
 
         String solicitorEmail = "";
 
-        List<PartyDetails> applicants = dACaseData
+        List<PartyDetails> applicants = daCaseData
             .getApplicants()
             .stream()
             .map(Element::getValue)
@@ -164,15 +163,15 @@ public class SolicitorEmailService {
         emailService.send(
             solicitorEmail,
             EmailTemplateNames.DA_SOLICITOR,
-            buildDaSolicitorEmail(dACaseData),
+            buildDaSolicitorEmail(daCaseData),
             LanguagePreference.ENGLISH
         );
 
     }
 
-    private EmailTemplateVars buildDaSolicitorEmail(CaseData dACaseData) throws NotFoundException {
+    private EmailTemplateVars buildDaSolicitorEmail(CaseData daCaseData) throws NotFoundException {
 
-        List<PartyDetails> applicants = dACaseData
+        List<PartyDetails> applicants = daCaseData
             .getApplicants()
             .stream()
             .map(Element::getValue)
@@ -185,15 +184,15 @@ public class SolicitorEmailService {
         String applicantNames = String.join(", ", applicantNamesList);
 
         Court court = null;
-        court = courtLocatorService.getClosestChildArrangementsCourt(dACaseData);
+        court = courtLocatorService.getClosestChildArrangementsCourt(daCaseData);
 
         return  SolicitorEmail.builder()
-            .caseReference(String.valueOf(dACaseData.getId()))
-            .caseName(dACaseData.getApplicantCaseName())
+            .caseReference(String.valueOf(daCaseData.getId()))
+            .caseName(daCaseData.getApplicantCaseName())
             .applicantName(applicantNames)
             .courtName(court.getCourtName())
             .courtEmail(courtEmail)
-            .caseLink(manageCaseUrl + "/" + dACaseData.getId())
+            .caseLink(manageCaseUrl + "/" + daCaseData.getId())
             .build();
     }
 }

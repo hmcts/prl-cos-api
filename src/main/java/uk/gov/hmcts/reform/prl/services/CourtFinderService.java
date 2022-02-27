@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
@@ -33,19 +34,18 @@ public class CourtFinderService {
     public static final String PAPER_PROCESS_INCLUDING_C_100_APPLICATIONS = "Paper process including C100 applications";
     public static final String FAMILY = "Family";
     public static final String CHILD = "child";
-    public static final String CASE_TYPE = "FL401";
+
     @Autowired
     private CourtFinderApi courtFinderApi;
 
     public Court getClosestChildArrangementsCourt(CaseData caseData) throws NotFoundException {
         ServiceArea serviceArea;
 
-        if (CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             serviceArea = courtFinderApi
                 .findClosestDomesticAbuseCourtByPostCode(
-                    getPostcodeFromWrappedParty(caseData.getApplicants().get(0)));
-        }
-        else {
+                    getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));
+        } else {
             serviceArea = courtFinderApi
                 .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
         }
@@ -114,6 +114,10 @@ public class CourtFinderService {
         return party.getValue().getAddress().getPostCode();
     }
 
+    private String getPostcodeFromWrappedParty(PartyDetails partyDetails) {
+        return partyDetails.getAddress().getPostCode();
+    }
+
     public boolean courtNameAndIdAreBlank(Optional<String> courtName, Optional<String> courtId) {
         return courtName.isPresent()
             && courtId.isPresent()
@@ -151,7 +155,7 @@ public class CourtFinderService {
 
     private Optional<CourtEmailAddress> findEmailWithChildOnlyKey(Court closestDomesticAbuseCourt) {
         return closestDomesticAbuseCourt.getCourtEmailAddresses().stream()
-            .filter(p -> (p.getDescription() !=null && p.getDescription().contains(CHILD)
+            .filter(p -> (p.getDescription() != null && p.getDescription().contains(CHILD)
                 || (p.getExplanation() != null && p.getExplanation().contains(CHILD))))
             .findFirst();
     }

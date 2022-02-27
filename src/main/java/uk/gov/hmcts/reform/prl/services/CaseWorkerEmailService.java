@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
@@ -137,7 +136,7 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-        String caseworkerEmailId = "yogendra.upasani@hmcts.net";
+        String caseworkerEmailId = "fprl_caseworker_solicitor@mailinator.com";
         emailService.send(
             caseworkerEmailId,
             EmailTemplateNames.CASEWORKER,
