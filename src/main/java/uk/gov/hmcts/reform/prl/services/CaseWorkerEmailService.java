@@ -351,5 +351,4 @@ public class CaseWorkerEmailService {
             .caseLink(manageCaseUrl + "/" + caseData.getId())
             .build();
     }
-
 }
