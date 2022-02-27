@@ -86,7 +86,6 @@ uk:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
           email-id: C100applications@justice.gov.uk
-          fl401-email-id: FL401applications@justice.gov.uk
           court-name: Court Name
 
 
