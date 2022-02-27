@@ -109,6 +109,8 @@ public class FL401SubmitApplicationController {
         );
 
         //todo document generation
+        solicitorEmailService.sendEmail(caseDetails);
+        caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
 
         return CallbackResponse.builder()
             .data(caseData)
@@ -128,6 +130,9 @@ public class FL401SubmitApplicationController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         //todo document generation
+        solicitorEmailService.sendEmail(caseDetails);
+        caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
+
 
         return CallbackResponse.builder()
             .data(caseDataUpdated)
