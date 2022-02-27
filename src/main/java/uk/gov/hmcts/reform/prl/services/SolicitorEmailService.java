@@ -66,7 +66,9 @@ public class SolicitorEmailService {
             Court court = null;
             court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
 
-            return   SolicitorEmail.builder()
+            log.info("retrive court information: {} ======",court);
+
+            return  SolicitorEmail.builder()
                 .caseReference(String.valueOf(caseDetails.getId()))
                 .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
                 .applicantName(applicantNames)
@@ -142,57 +144,55 @@ public class SolicitorEmailService {
 
     }
 
-    public void sendEmailToDaSolicitor(CaseData daCaseData, UserDetails userDetails) throws NotFoundException {
+    public void sendEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails) throws NotFoundException {
+
+        log.info("trying to send email for Solicitor FL401 {} ====:", caseDetails.getId());
 
         String solicitorEmail = "";
 
-        List<PartyDetails> applicants = daCaseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
+        PartyDetails fl401Applicant = emailService.getCaseData(caseDetails)
+            .getApplicantsFL401();
 
-        List<String> applicantSolicitorEmailList = applicants.stream()
-            .map(PartyDetails::getSolicitorEmail)
-            .collect(Collectors.toList());
+        log.info("collect applicants: {} ======",fl401Applicant);
 
-        solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
-            && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(0)
-            : userDetails.getEmail();
+        String applicantSolicitorEmail = fl401Applicant.getSolicitorEmail();
+
+        log.info("collect applicant solicitoremail {} ======",applicantSolicitorEmail);
+        solicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
 
         emailService.send(
             solicitorEmail,
             EmailTemplateNames.DA_SOLICITOR,
-            buildDaSolicitorEmail(daCaseData),
+            buildFl401SolicitorEmail(caseDetails),
             LanguagePreference.ENGLISH
         );
 
     }
 
-    private EmailTemplateVars buildDaSolicitorEmail(CaseData daCaseData) throws NotFoundException {
+    private EmailTemplateVars buildFl401SolicitorEmail(CaseDetails caseDetails) throws NotFoundException {
 
-        List<PartyDetails> applicants = daCaseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
+        log.info("trying to build email for Solicitor FL401 {} ------:", caseDetails.getId());
 
-        List<String> applicantNamesList = applicants.stream()
-            .map(element -> element.getFirstName() + " " + element.getLastName())
-            .collect(Collectors.toList());
+        CaseData caseData = emailService.getCaseData(caseDetails);
 
-        String applicantNames = String.join(", ", applicantNamesList);
+        PartyDetails fl401Applicant = caseData
+            .getApplicantsFL401();
+
+        log.info("Applicant details FL401 {} ====:", fl401Applicant);
+        String applicantFullName = fl401Applicant.getFirstName() + " "  + fl401Applicant.getLastName();
+        log.info("Applicant details FL401 fullname{} ===:", applicantFullName);
 
         Court court = null;
-        court = courtLocatorService.getClosestChildArrangementsCourt(daCaseData);
+        court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
+        log.info("Retrieving the court details{} ===:", court);
 
         return  SolicitorEmail.builder()
-            .caseReference(String.valueOf(daCaseData.getId()))
-            .caseName(daCaseData.getApplicantCaseName())
-            .applicantName(applicantNames)
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .applicantName(applicantFullName)
             .courtName(court.getCourtName())
             .courtEmail(courtEmail)
-            .caseLink(manageCaseUrl + "/" + daCaseData.getId())
+            .caseLink(manageCaseUrl + "/" + caseData.getId())
             .build();
     }
 }
