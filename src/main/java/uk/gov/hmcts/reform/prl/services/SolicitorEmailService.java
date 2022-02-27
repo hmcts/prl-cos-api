@@ -39,6 +39,9 @@ public class SolicitorEmailService {
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
 
+    @Value("${uk.gov.notify.email.application.fl401-email-id}")
+    private String fl401CourtEmail;
+
     @Value("${uk.gov.notify.email.application.court-name}")
     private String courtName;
 
@@ -191,7 +194,7 @@ public class SolicitorEmailService {
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantFullName)
             .courtName(court.getCourtName())
-            .courtEmail(courtEmail)
+            .courtEmail(fl401CourtEmail)
             .caseLink(manageCaseUrl + "/" + caseData.getId())
             .build();
     }
