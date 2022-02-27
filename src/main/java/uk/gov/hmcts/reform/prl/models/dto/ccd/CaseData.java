@@ -478,6 +478,5 @@ public class CaseData implements MappableObject {
      */
     @JsonProperty("fl401StmtOfTruth")
     private final StatementOfTruth fl401StmtOfTruth;
-   // @JsonProperty("fl401ConfidentialityCheck")
-   // private final ConfidentialityCheck fl401ConfidentialityCheck;
+
 }

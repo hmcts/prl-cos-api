@@ -20,8 +20,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
-import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -111,8 +109,25 @@ public class FL401SubmitApplicationController {
         );
 
         //todo document generation
-        solicitorEmailService.sendEmail(caseDetails);
-        caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
+
+        return CallbackResponse.builder()
+            .data(caseData)
+            .build();
+    }
+
+    @PostMapping(path = "/fl401-submit-application-send-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to send FL401 application notification. ")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Application Submitted."),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public CallbackResponse fl401SendApplicationNotification(@RequestHeader("Authorization") String authorisation,
+                                                                   @RequestBody CallbackRequest callbackRequest) throws Exception {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        //todo document generation
 
         return CallbackResponse.builder()
             .data(caseDataUpdated)

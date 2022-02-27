@@ -140,7 +140,7 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-        String caseworkerEmailId = "yogendra.upasani@hmcts.net";
+        String caseworkerEmailId = "fprl_caseworker_solicitor@mailinator.com";
         emailService.send(
             caseworkerEmailId,
             EmailTemplateNames.CASEWORKER,
