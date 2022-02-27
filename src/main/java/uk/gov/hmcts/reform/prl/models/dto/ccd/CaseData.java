@@ -31,29 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
-import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
-import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
-import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
-import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
-import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
-import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
-import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
-import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
-import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.*;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
@@ -105,6 +83,13 @@ public class CaseData implements MappableObject {
      */
     private final List<ConfidentialityStatementDisclaimerEnum> confidentialityStatementDisclaimer;
     private final List<ConfidentialityChecksDisclaimerEnum> confidentialityChecksDisclaimer;
+
+    /**
+     * C100 Confidential Disclaimer.
+     */
+    private final List<ConfidentialityStatementDisclaimerEnum> c100ConfidentialityStatementDisclaimer;
+    private final ConfidentialityDisclaimer confidentialityDisclaimer;
+
 
     /**
      * Upload documents.
