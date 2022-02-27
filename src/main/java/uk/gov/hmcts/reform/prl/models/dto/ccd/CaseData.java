@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.UploadDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
@@ -420,7 +421,6 @@ public class CaseData implements MappableObject {
     private final String respondentSolicitorEmailAddress;
     private final String caseworkerEmailAddress;
 
-
     /**
      * Court details.
      */
@@ -438,5 +438,10 @@ public class CaseData implements MappableObject {
      *  Withdraw Application.
      */
     private final WithdrawApplication withDrawApplicationData;
+
+    /**
+     * FL401 Upload Documents
+     */
+    private final List<Element<UploadDocuments>> fl401UploadedDocuments;
 
 }
