@@ -1,5 +1,5 @@
 server:
-  port: 4044
+    port: 4044
 
 runs-locally: ${RUNS_LOCALLY:true}
 
