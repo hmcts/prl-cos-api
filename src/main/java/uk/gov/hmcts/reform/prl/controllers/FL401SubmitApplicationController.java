@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -74,7 +75,9 @@ public class FL401SubmitApplicationController {
         );
 
         //todo document generation
-        solicitorEmailService.sendEmail(caseDetails);
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+
+        solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
         caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
 
         return CallbackResponse.builder()
