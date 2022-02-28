@@ -9,8 +9,8 @@ import lombok.RequiredArgsConstructor;
 public enum Fl401ConfidentialConsentEnum {
 
     @JsonProperty("fl401ConfidentialConsent")
-    fl401ConfidentialConsent("I have checked the application to " +
-        "ensure confidential information has not been disclosed.");
+    fl401ConfidentialConsent("I have checked the application to "
+                                 + "ensure confidential information has not been disclosed.");
 
     private final String displayedValue;
 

@@ -117,7 +117,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
-        when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
+        when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
             .thenReturn(court);
 
 
@@ -221,7 +221,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .courtName("testcourt")
             .build();
 
-        when(courtFinderService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails().getCaseData()))
+        when(courtFinderService.getNearestFamilyCourt(callbackRequest.getCaseDetails().getCaseData()))
             .thenReturn(court1);
 
         UserDetails userDetails = UserDetails.builder()
