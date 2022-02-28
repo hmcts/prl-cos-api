@@ -80,12 +80,14 @@ public class TaskListRendererTest {
         Task.builder().event(LITIGATION_CAPACITY).state(FINISHED).build(),
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
         Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_HOME).state(NOT_STARTED).build(),
         Task.builder().event(SUBMIT_AND_PAY).state(NOT_STARTED).build(),
         Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
         Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
         Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
         Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build());
+
 
 
 
@@ -103,9 +105,9 @@ public class TaskListRendererTest {
         Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
         Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
         Task.builder().event(FL401_HOME).state(NOT_STARTED).build(),
-        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
         Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
         Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),

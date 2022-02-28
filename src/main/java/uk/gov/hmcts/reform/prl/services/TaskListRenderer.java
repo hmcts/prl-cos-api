@@ -212,9 +212,9 @@ public class TaskListRenderer {
             && ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
             addCaseDetails.withTask(tasks.get(RESPONDENT_BEHAVIOUR));
             addCaseDetails.withTask(tasks.get(FL401_HOME));
-        } else  if (ordersOptional.isPresent() && (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder))) {
+        } else  if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
             addCaseDetails.withTask(tasks.get(FL401_HOME));
-        } else if (ordersOptional.isPresent() && (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
+        } else if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
             addCaseDetails.withTask(tasks.get(RESPONDENT_BEHAVIOUR));
         }
 
