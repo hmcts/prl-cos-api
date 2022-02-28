@@ -120,54 +120,55 @@ public class CourtFinderService {
 
     }
 
-    public Optional<CourtEmailAddress> getEmailAddress(Court closestDomesticAbuseCourt) {
-        Optional<CourtEmailAddress> emailAddress;
-        emailAddress = findEmailWithFamilyC100ApplicationKey(closestDomesticAbuseCourt);
-        if (emailAddress.isEmpty()) {
-            emailAddress = findEmailWithFamilyCourtKey(closestDomesticAbuseCourt);
+    public Optional<CourtEmailAddress> getEmailAddress(Court nearestDomesticAbuseCourt) {
+        Optional<CourtEmailAddress> emailAddress = Optional.empty();
+        if (null != nearestDomesticAbuseCourt) {
+            emailAddress = findEmailWithFamilyC100ApplicationKey(nearestDomesticAbuseCourt);
+            if (emailAddress.isEmpty()) {
+                emailAddress = findEmailWithFamilyCourtKey(nearestDomesticAbuseCourt);
+            }
+            if (emailAddress.isEmpty()) {
+                emailAddress = findEmailWithFamilyLawKey(nearestDomesticAbuseCourt);
+            }
+            if (emailAddress.isEmpty()) {
+                emailAddress = findEmailWithFamilyOnlyKey(nearestDomesticAbuseCourt);
+            }
+            if (emailAddress.isEmpty()) {
+                emailAddress  = findEmailWithChildOnlyKey(nearestDomesticAbuseCourt);
+            }
         }
-        if (emailAddress.isEmpty()) {
-            emailAddress = findEmailWithFamilyLawKey(closestDomesticAbuseCourt);
-        }
-        if (emailAddress.isEmpty()) {
-            emailAddress = findEmailWithFamilyOnlyKey(closestDomesticAbuseCourt);
-        }
-        if (emailAddress.isEmpty()) {
-            emailAddress  = findEmailWithChildOnlyKey(closestDomesticAbuseCourt);
-        }
-
         return emailAddress;
     }
 
-    private Optional<CourtEmailAddress> findEmailWithChildOnlyKey(Court closestDomesticAbuseCourt) {
-        return closestDomesticAbuseCourt.getCourtEmailAddresses().stream()
+    private Optional<CourtEmailAddress> findEmailWithChildOnlyKey(Court nearestDomesticAbuseCourt) {
+        return nearestDomesticAbuseCourt.getCourtEmailAddresses().stream()
             .filter(p -> (p.getDescription() != null && p.getDescription().contains(CHILD)
                 || (p.getExplanation() != null && p.getExplanation().contains(CHILD))))
             .findFirst();
     }
 
-    private Optional<CourtEmailAddress> findEmailWithFamilyOnlyKey(Court closestDomesticAbuseCourt) {
-        return closestDomesticAbuseCourt.getCourtEmailAddresses().stream()
+    private Optional<CourtEmailAddress> findEmailWithFamilyOnlyKey(Court nearestDomesticAbuseCourt) {
+        return nearestDomesticAbuseCourt.getCourtEmailAddresses().stream()
             .filter(p -> (p.getDescription() != null && p.getDescription().contains(FAMILY)
                 || (p.getExplanation() != null && p.getExplanation().contains(FAMILY))))
             .findFirst();
     }
 
-    private Optional<CourtEmailAddress> findEmailWithFamilyLawKey(Court closestDomesticAbuseCourt) {
-        return closestDomesticAbuseCourt.getCourtEmailAddresses().stream()
+    private Optional<CourtEmailAddress> findEmailWithFamilyLawKey(Court nearestDomesticAbuseCourt) {
+        return nearestDomesticAbuseCourt.getCourtEmailAddresses().stream()
             .filter(p -> (FAMILY_PUBLIC_LAW_CHILDREN_IN_CARE.equalsIgnoreCase(p.getDescription())))
             .findFirst();
     }
 
-    private Optional<CourtEmailAddress> findEmailWithFamilyC100ApplicationKey(Court closestDomesticAbuseCourt) {
-        return closestDomesticAbuseCourt.getCourtEmailAddresses().stream()
+    private Optional<CourtEmailAddress> findEmailWithFamilyC100ApplicationKey(Court nearestDomesticAbuseCourt) {
+        return nearestDomesticAbuseCourt.getCourtEmailAddresses().stream()
             .filter(p -> (FAMILY_PUBLIC_LAW_CHILDREN_IN_CARE.equalsIgnoreCase(p.getDescription())
                 && (PAPER_PROCESS_INCLUDING_C_100_APPLICATIONS.equalsIgnoreCase(p.getExplanation()))))
             .findFirst();
     }
 
-    private Optional<CourtEmailAddress> findEmailWithFamilyCourtKey(Court closestDomesticAbuseCourt) {
-        return closestDomesticAbuseCourt.getCourtEmailAddresses().stream()
+    private Optional<CourtEmailAddress> findEmailWithFamilyCourtKey(Court nearestDomesticAbuseCourt) {
+        return nearestDomesticAbuseCourt.getCourtEmailAddresses().stream()
             .filter(p -> (FAMILY_COURT.equalsIgnoreCase(p.getDescription())))
             .findFirst();
     }
