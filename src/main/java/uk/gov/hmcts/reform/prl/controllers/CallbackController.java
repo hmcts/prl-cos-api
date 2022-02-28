@@ -157,14 +157,26 @@ public class CallbackController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData.toBuilder().issueDate(LocalDate.now());
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             PRL_C8_TEMPLATE
         );
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(C8_DOC).build());
+
         log.info("Generate C1A if allegations of harm is set to Yes and the passed value is {}",
                  caseData.getAllegationsOfHarmYesNo());
+
+        caseData = organisationService.getApplicantOrganisationDetails(caseData);
+        caseData = organisationService.getRespondentOrganisationDetails(caseData);
+
         if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
             GeneratedDocumentInfo generatedC1ADocumentInfo = dgsService.generateDocument(
                 authorisation,
@@ -177,14 +189,6 @@ public class CallbackController {
                 .documentHash(generatedC1ADocumentInfo.getHashToken())
                 .documentFileName(PRL_C1A_FILENAME).build());
         }
-        caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(C8_DOC).build());
-        caseData = organisationService.getApplicantOrganisationDetails(caseData);
-
-        caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
         GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
             authorisation,
