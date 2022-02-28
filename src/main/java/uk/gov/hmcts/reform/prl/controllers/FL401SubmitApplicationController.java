@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -71,22 +72,35 @@ public class FL401SubmitApplicationController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Application Submitted."),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse fl401GenerateDocumentSubmitApplication
-        (@RequestHeader("Authorization") String authorisation,
-         @RequestBody CallbackRequest callbackRequest) throws Exception {
+    public AboutToStartOrSubmitCallbackResponse fl401GenerateDocumentSubmitApplication(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         Court nearestDomesticAbuseCourt = courtFinderService
             .getNearestFamilyCourt(CaseUtils.getCaseData(caseDetails, objectMapper));
+        log.info("Retrieved court Name ==> {}", (null != nearestDomesticAbuseCourt ? nearestDomesticAbuseCourt.getCourtName()
+            : "No Court Name Fetched"));
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("Generating the Final document of FL401 for case id " + caseData.getId());
+
         final LocalDate localDate = LocalDate.now();
         caseData = caseData.toBuilder().issueDate(localDate).courtName((nearestDomesticAbuseCourt != null)
                                                                 ? nearestDomesticAbuseCourt
             .getCourtName() : "").build();
 
+        Optional<CourtEmailAddress> courtEmailAddress = courtFinderService
+            .getEmailAddress(nearestDomesticAbuseCourt);
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(COURT_NAME_FIELD, nearestDomesticAbuseCourt != null
+            ? nearestDomesticAbuseCourt.getCourtName() : "");
+        caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, (nearestDomesticAbuseCourt != null
+            && courtEmailAddress.isPresent()) ? courtEmailAddress.get().getAddress() :
+            Objects.requireNonNull(nearestDomesticAbuseCourt).getCourtEmailAddresses().get(0).getAddress());
+
+        log.info("Generating the Final document of FL401 for case id " + caseData.getId());
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
@@ -94,15 +108,6 @@ public class FL401SubmitApplicationController {
         );
         log.info("Generated FL401 Document");
 
-        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService
-            .getEmailAddress(nearestDomesticAbuseCourt);
-
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(COURT_NAME_FIELD, nearestDomesticAbuseCourt != null
-            ? nearestDomesticAbuseCourt.getCourtName() : "");
-        caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, (nearestDomesticAbuseCourt != null
-            && matchingEmailAddress.isPresent()) ? matchingEmailAddress.get().getAddress() :
-            Objects.requireNonNull(nearestDomesticAbuseCourt).getCourtEmailAddresses().get(0).getAddress());
         caseDataUpdated.put(FINAL_DOCUMENT_FIELD, Document.builder()
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
