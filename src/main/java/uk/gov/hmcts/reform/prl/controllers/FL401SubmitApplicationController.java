@@ -104,10 +104,8 @@ public class FL401SubmitApplicationController {
             CaseData.class
         );
 
-
-
         return CallbackResponse.builder()
-            .data(caseData)
+            .data(caseDataUpdated)
             .build();
     }
 
@@ -126,7 +124,7 @@ public class FL401SubmitApplicationController {
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
         solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
-        caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
+        caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
 
         return CallbackResponse.builder()
             .data(caseData)
