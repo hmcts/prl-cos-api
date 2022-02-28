@@ -91,7 +91,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
 
             // Getting court name and save it to db.
             Court closestChildArrangementsCourt = courtLocatorService
-                .getClosestChildArrangementsCourt(caseData);
+                .getNearestFamilyCourt(caseData);
             if (closestChildArrangementsCourt != null) {
                 caseData.setCourtName(closestChildArrangementsCourt.getCourtName());
             }

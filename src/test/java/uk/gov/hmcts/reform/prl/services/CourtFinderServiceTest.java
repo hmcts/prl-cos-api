@@ -176,7 +176,7 @@ public class CourtFinderServiceTest {
             .applicants(Collections.singletonList(wrappedApplicant))
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
-        assertThat(courtFinderService.getClosestChildArrangementsCourt(caseData), is(westLondonCourt));
+        assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(westLondonCourt));
     }
 
     @Test
@@ -202,7 +202,7 @@ public class CourtFinderServiceTest {
             .applicants(Collections.singletonList(wrappedApplicant))
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
-        assertThat(courtFinderService.getClosestChildArrangementsCourt(caseData), is(londonCourt));
+        assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(londonCourt));
     }
 
     @Test
@@ -220,7 +220,7 @@ public class CourtFinderServiceTest {
             .applicants(Collections.singletonList(wrappedApplicant))
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
-        assertThat(courtFinderService.getClosestChildArrangementsCourt(caseData), is(newcastleCourt));
+        assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(newcastleCourt));
     }
 
     @Test
@@ -242,7 +242,7 @@ public class CourtFinderServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
 
-        assertThat(courtFinderService.getClosestChildArrangementsCourt(caseData), is(newcastleCourt));
+        assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(newcastleCourt));
     }
 
     @Test
@@ -324,7 +324,7 @@ public class CourtFinderServiceTest {
 
             .build();
 
-        assertThat(courtFinderService.getClosestChildArrangementsCourt(caseData), is(horshamCourt));
+        assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(horshamCourt));
     }
 
     @Test

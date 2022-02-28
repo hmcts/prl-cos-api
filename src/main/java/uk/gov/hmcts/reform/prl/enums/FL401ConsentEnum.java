@@ -9,8 +9,9 @@ import lombok.RequiredArgsConstructor;
 public enum FL401ConsentEnum {
 
     @JsonProperty("fl401Consent")
-    fl401Consent("The applicant believes that the facts stated in this " +
-        "form and any continuation sheets are true. I am authorised by the applicant to sign this statement.");
+    fl401Consent("The applicant believes that the facts stated in this "
+                     + "form and any continuation sheets are true. I am authorised by the "
+                     + "applicant to sign this statement.");
 
     private final String displayedValue;
 

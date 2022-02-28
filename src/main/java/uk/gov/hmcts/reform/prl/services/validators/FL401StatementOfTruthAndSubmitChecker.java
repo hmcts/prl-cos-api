@@ -19,10 +19,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
-<<<<<<< HEAD
-
-=======
->>>>>>> PRL-812-834-887-DA-Submit-Combined
 
 @Service
 public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {

@@ -38,7 +38,7 @@ public class CourtFinderService {
     @Autowired
     private CourtFinderApi courtFinderApi;
 
-    public Court getClosestChildArrangementsCourt(CaseData caseData) throws NotFoundException {
+    public Court getNearestFamilyCourt(CaseData caseData) throws NotFoundException {
         ServiceArea serviceArea;
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
