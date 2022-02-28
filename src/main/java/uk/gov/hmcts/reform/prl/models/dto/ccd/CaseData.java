@@ -55,6 +55,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -284,7 +285,6 @@ public class CaseData implements MappableObject {
     private final YesOrNo agreeChildSupervisedTime;
     private final YesOrNo agreeChildOtherContact;
 
-
     /**
      * Other people in the case.
      */
@@ -296,7 +296,6 @@ public class CaseData implements MappableObject {
 
     private final YesNoDontKnow previousOrOngoingProceedingsForChildren;
     private final List<Element<ProceedingDetails>> existingProceedings;
-
 
     /**
      * Attending the hearing.
@@ -438,7 +437,6 @@ public class CaseData implements MappableObject {
     private final String respondentSolicitorEmailAddress;
     private final String caseworkerEmailAddress;
 
-
     /**
      * Court details.
      */
@@ -480,7 +478,6 @@ public class CaseData implements MappableObject {
      */
     @JsonProperty("fl401StmtOfTruth")
     private final StatementOfTruth fl401StmtOfTruth;
-    @JsonProperty("fl401ConfidentialityCheck")
-    private final ConfidentialityCheck fl401ConfidentialityCheck;
-
+   // @JsonProperty("fl401ConfidentialityCheck")
+   // private final ConfidentialityCheck fl401ConfidentialityCheck;
 }
