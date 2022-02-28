@@ -66,7 +66,9 @@ public class SolicitorEmailService {
             Court court = null;
             court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
 
-            return   SolicitorEmail.builder()
+            log.info("retrive court information: {} ======",court);
+
+            return  SolicitorEmail.builder()
                 .caseReference(String.valueOf(caseDetails.getId()))
                 .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
                 .applicantName(applicantNames)
@@ -86,7 +88,7 @@ public class SolicitorEmailService {
         );
 
         emailService.send(
-            "yogendra.upasani@hmcts.net",
+            "fprl_caseworker_solicitor@mailinator.com",
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
             LanguagePreference.ENGLISH
@@ -105,7 +107,6 @@ public class SolicitorEmailService {
             buildEmail(caseDetails),
             LanguagePreference.ENGLISH
         );
-
     }
 
     private EmailTemplateVars buildCaseWithdrawEmail(CaseDetails caseDetails) {
@@ -143,57 +144,55 @@ public class SolicitorEmailService {
 
     }
 
-    public void sendEmailToDaSolicitor(CaseData dACaseData, UserDetails userDetails) throws NotFoundException {
+    public void sendEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails) throws NotFoundException {
+
+        log.info("trying to send email for Solicitor FL401 {} ====:", caseDetails.getId());
 
         String solicitorEmail = "";
 
-        List<PartyDetails> applicants = dACaseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
+        PartyDetails fl401Applicant = emailService.getCaseData(caseDetails)
+            .getApplicantsFL401();
 
-        List<String> applicantSolicitorEmailList = applicants.stream()
-            .map(PartyDetails::getSolicitorEmail)
-            .collect(Collectors.toList());
+        log.info("collect applicants: {} ======",fl401Applicant);
 
-        solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
-            && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(0)
-            : userDetails.getEmail();
+        String applicantSolicitorEmail = fl401Applicant.getSolicitorEmail();
+
+        log.info("collect applicant solicitoremail {} ======",applicantSolicitorEmail);
+        solicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
 
         emailService.send(
             solicitorEmail,
             EmailTemplateNames.DA_SOLICITOR,
-            buildDaSolicitorEmail(dACaseData),
+            buildFl401SolicitorEmail(caseDetails),
             LanguagePreference.ENGLISH
         );
 
     }
 
-    private EmailTemplateVars buildDaSolicitorEmail(CaseData dACaseData) throws NotFoundException {
+    private EmailTemplateVars buildFl401SolicitorEmail(CaseDetails caseDetails) throws NotFoundException {
 
-        List<PartyDetails> applicants = dACaseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
+        log.info("trying to build email for Solicitor FL401 {} ------:", caseDetails.getId());
 
-        List<String> applicantNamesList = applicants.stream()
-            .map(element -> element.getFirstName() + " " + element.getLastName())
-            .collect(Collectors.toList());
+        CaseData caseData = emailService.getCaseData(caseDetails);
 
-        String applicantNames = String.join(", ", applicantNamesList);
+        PartyDetails fl401Applicant = caseData
+            .getApplicantsFL401();
+
+        log.info("Applicant details FL401 {} ====:", fl401Applicant);
+        String applicantFullName = fl401Applicant.getFirstName() + " "  + fl401Applicant.getLastName();
+        log.info("Applicant details FL401 fullname{} ===:", applicantFullName);
 
         Court court = null;
-        court = courtLocatorService.getClosestChildArrangementsCourt(dACaseData);
+        court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
+        log.info("Retrieving the court details{} ===:", court);
 
         return  SolicitorEmail.builder()
-            .caseReference(String.valueOf(dACaseData.getId()))
-            .caseName(dACaseData.getApplicantCaseName())
-            .applicantName(applicantNames)
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .applicantName(applicantFullName)
             .courtName(court.getCourtName())
-            .courtEmail(courtEmail)
-            .caseLink(manageCaseUrl + "/" + dACaseData.getId())
+            .courtEmail("FL401applications@justice.gov.uk")
+            .caseLink(manageCaseUrl + "/" + caseData.getId())
             .build();
     }
 }

@@ -15,10 +15,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
-import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -61,7 +60,7 @@ public class FL401SubmitApplicationController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         Court closestDomesticAbuseCourt = courtFinderService
-            .getClosestDomesticAbuseCourt(CaseUtils.getCaseData(caseDetails, objectMapper));
+            .getClosestChildArrangementsCourt(CaseUtils.getCaseData(caseDetails, objectMapper));
 
         Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
 
@@ -76,8 +75,32 @@ public class FL401SubmitApplicationController {
         );
 
         //todo document generation
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+
+        solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
+        caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
+
+        return CallbackResponse.builder()
+            .data(caseData)
+            .build();
+    }
+
+    @PostMapping(path = "/fl401-submit-application-send-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to send FL401 application notification. ")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Application Submitted."),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public CallbackResponse fl401SendApplicationNotification(@RequestHeader("Authorization") String authorisation,
+                                                                   @RequestBody CallbackRequest callbackRequest) throws Exception {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        //todo document generation
         solicitorEmailService.sendEmail(caseDetails);
         caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
+
 
         return CallbackResponse.builder()
             .data(caseData)

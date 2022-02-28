@@ -12,9 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
@@ -137,7 +135,7 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-        String caseworkerEmailId = "yogendra.upasani@hmcts.net";
+        String caseworkerEmailId = "fprl_caseworker_solicitor@mailinator.com";
         emailService.send(
             caseworkerEmailId,
             EmailTemplateNames.CASEWORKER,
@@ -187,6 +185,9 @@ public class CaseWorkerEmailService {
 
     public void sendEmailToLocalCourt(CaseDetails caseDetails, String courtEmail) {
 
+        log.info("Sending FL401 email to localcourt for :{} =====", caseDetails.getId());
+        log.info("Sending FL401 email to localcourt for :{} with this email is=====", courtEmail);
+
         emailService.send(
             courtEmail,
             EmailTemplateNames.DA_LOCALCOURT,
@@ -197,43 +198,29 @@ public class CaseWorkerEmailService {
 
     public EmailTemplateVars buildCourtAdminEmail(CaseDetails caseDetails) {
 
+        log.info("building FL401 email to localcourt for :{} =====", caseDetails.getId());
         caseData = emailService.getCaseData(caseDetails);
-        List<PartyDetails> applicants = caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
+        PartyDetails fl401Applicant = caseData
+            .getApplicantsFL401();
 
-        List<Child> child = caseData
-            .getChildren()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
+        log.info("FL401 email to localcourt for applicant:{} =====", fl401Applicant);
         String isConfidential = NO;
-        if ((applicants.stream().noneMatch(PartyDetails::isCanYouProvideEmailAddress)
-            && applicants.stream().anyMatch(PartyDetails::isEmailAddressNull))
-            || (applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
-            || (child.stream().anyMatch(Child::hasConfidentialInfo))) {
+        if ((fl401Applicant.isCanYouProvideEmailAddress() && fl401Applicant.isEmailAddressNull())
+            || (fl401Applicant.hasConfidentialInfo())) {
             isConfidential = YES;
         }
 
         String typeOfHearing = "";
-        String isCaseUrgent = NO;
-
-        if (caseData.getIsCaseUrgent().equals(YesOrNo.Yes)) {
-            typeOfHearing = URGENT_CASE;
-            isCaseUrgent = YES;
-        }
-
         LocalDate issueDate = LocalDate.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        log.info("FL401 email to localcourt for applicant about to send =====");
 
         return CaseWorkerEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .caseUrgency(typeOfHearing)
-            .isCaseUrgent(isCaseUrgent)
+            .isCaseUrgent(NO)
             .issueDate(issueDate.format(dateTimeFormatter))
             .isConfidential(isConfidential)
             .caseLink(manageCaseUrl + "/" + caseData.getId())
