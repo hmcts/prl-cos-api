@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -40,6 +41,8 @@ public class FL401SubmitApplicationController {
 
     private static final String FL401_FINAL_TEMPLATE = "FL401-Final.docx";
     private static final String FL401_FINAL_DOC = "FL401FinalDocument.pdf";
+    private static final String DA_C8_TEMPLATE = "PRL-DA-C8.docx";
+    private static final String DA_C8_DOC = "C8_Document.pdf";
 
     @Autowired
     private CourtFinderService courtFinderService;
@@ -58,6 +61,9 @@ public class FL401SubmitApplicationController {
 
     @Autowired
     private DgsService dgsService;
+
+    @Autowired
+    private OrganisationService organisationService;
 
     @PostMapping(path = "/fl401-generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to generate FL401 final document and submit application. ")
@@ -79,12 +85,21 @@ public class FL401SubmitApplicationController {
                                                                 ? closestDomesticAbuseCourt
             .getCourtName() : "").build();
 
+        caseData = organisationService.getApplicantOrganisationDetailsForFL401(caseData);
+
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             FL401_FINAL_TEMPLATE
         );
         log.info("Generated FL401 Document");
+
+        GeneratedDocumentInfo generatedDocumentC8Info = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+            DA_C8_TEMPLATE
+        );
+        log.info("Generated DA C8");
 
         Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
 
@@ -100,11 +115,14 @@ public class FL401SubmitApplicationController {
                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                    .documentHash(generatedDocumentInfo.getHashToken())
                                    .documentFileName(FL401_FINAL_DOC).build())
+                .c8Document(Document.builder()
+                                .documentUrl(generatedDocumentC8Info.getUrl())
+                                .documentBinaryUrl(generatedDocumentC8Info.getBinaryUrl())
+                                .documentHash(generatedDocumentC8Info.getHashToken())
+                                .documentFileName(DA_C8_DOC).build())
                 .build(),
             CaseData.class
         );
-
-
 
         return CallbackResponse.builder()
             .data(caseData)
