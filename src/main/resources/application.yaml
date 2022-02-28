@@ -80,6 +80,7 @@ uk:
             RETURNAPPLICATION: 41a7ffcd-a5ec-4377-ba50-59619ad0ac8c
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
             COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
+            GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
