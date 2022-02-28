@@ -212,6 +212,12 @@ public class CallbackController {
                 PRL_C8_TEMPLATE
             );
 
+            caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName(C8_DOC).build());
+
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
@@ -231,11 +237,6 @@ public class CallbackController {
                     .documentHash(generatedC1ADocumentInfo.getHashToken())
                     .documentFileName(PRL_C1A_FILENAME).build());
             }
-            caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(C8_DOC).build());
 
             GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
                 authorisation,
