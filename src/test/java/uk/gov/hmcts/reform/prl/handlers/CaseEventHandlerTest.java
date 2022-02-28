@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
@@ -64,35 +67,35 @@ public class CaseEventHandlerTest {
             MIAM
         );
 
-        final List<Event> fl410Events = List.of(
-            CASE_NAME,
-            FL401_TYPE_OF_APPLICATION
-        );
+        List<EventValidationErrors> errors = new ArrayList<>();
+
+        EventValidationErrors error1 = EventValidationErrors.builder()
+                .event(FL401_TYPE_OF_APPLICATION)
+                .build();
+
+        EventValidationErrors error2 = EventValidationErrors.builder()
+                .event(ALLEGATIONS_OF_HARM)
+                .build();
+
+        errors.add(error1);
+        errors.add(error2);
 
         when(taskListService.getC100Events()).thenReturn(c100Events);
+        when(taskErrorService.getEventErrors(caseData)).thenReturn(errors);
 
         final List<Task> c100Tasks = List.of(
             Task.builder().event(CASE_NAME).state(FINISHED).build(),
             Task.builder().event(MIAM).state(NOT_STARTED).build());
 
-        final List<Task> fl401Tasks = List.of(
-            Task.builder().event(CASE_NAME).state(FINISHED).build(),
-            Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build());
-
         final String c100renderedTaskList = "<h1>Case Name</h1><h2>Miam</h2>";
-        final String fl410renderedTaskList = "<h1>Case Name</h1><h2>Miam</h2>";
-
-        final List<EventValidationErrors> eventsErrors = Collections.emptyList();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
-
-        when(taskListRenderer.render(c100Tasks, eventsErrors, true)).thenReturn(c100renderedTaskList);
+        when(taskListRenderer.render(c100Tasks, errors, true)).thenReturn(c100renderedTaskList);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         verify(taskListService).getTasksForOpenCase(caseData);
-        verify(taskListRenderer).render(c100Tasks, eventsErrors, true);
-
+        verify(taskListRenderer).render(c100Tasks, errors, true);
         verify(coreCaseDataService).triggerEvent(
             JURISDICTION,
             CASE_TYPE,
