@@ -89,6 +89,9 @@ public class EventsChecker {
     SubmitAndPayChecker submitAndPayChecker;
 
     @Autowired
+    HomeChecker homeChecker;
+
+    @Autowired
     RespondentRelationshipChecker respondentRelationshipChecker;
 
     @Autowired
@@ -99,9 +102,6 @@ public class EventsChecker {
 
     @Autowired
     WithoutNoticeOrderChecker withoutNoticeOrderChecker;
-
-    @Autowired
-    HomeChecker homeChecker;
 
     @Autowired
     UploadDocumentChecker uploadDocumentChecker;
@@ -135,6 +135,7 @@ public class EventsChecker {
         eventStatus.put(SUBMIT_AND_PAY, submitAndPayChecker);
 
         eventStatus.put(FL401_CASE_NAME, caseNameChecker);
+        eventStatus.put(FL401_HOME, homeChecker);
         eventStatus.put(RELATIONSHIP_TO_RESPONDENT, respondentRelationshipChecker);
         eventStatus.put(FL401_TYPE_OF_APPLICATION, fl401ApplicationTypeChecker);
         eventStatus.put(RESPONDENT_BEHAVIOUR, respondentBehaviourChecker);

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -84,7 +83,6 @@ public class TaskListServiceTest {
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
-
     }
 
     @Test
@@ -214,9 +212,10 @@ public class TaskListServiceTest {
 
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
+
+
         assertThat(expectedTasks).isEqualTo(actualTasks);
 
     }
-
 }
 
