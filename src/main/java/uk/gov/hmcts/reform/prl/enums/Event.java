@@ -1,11 +1,16 @@
 package uk.gov.hmcts.reform.prl.enums;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+
+@Getter
 @RequiredArgsConstructor
 public enum Event {
+
 
     CASE_NAME("caseName", "Case name"),
     TYPE_OF_APPLICATION("selectApplicationType", "Type of application"),
@@ -36,18 +41,36 @@ public enum Event {
     private final String id;
     private final String name;
 
-    @JsonValue
-    public String getName() {
-        return name;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    @JsonCreator
-    public static Event getValue(String key) {
-        return Event.valueOf(key);
+    public static List<Event> getEventOrder(String caseType) {
+        List<Event> c100 = List.of(
+            TYPE_OF_APPLICATION,
+            HEARING_URGENCY,
+            APPLICANT_DETAILS,
+            CHILD_DETAILS,
+            RESPONDENT_DETAILS,
+            MIAM,
+            ALLEGATIONS_OF_HARM,
+            OTHER_PEOPLE_IN_THE_CASE,
+            OTHER_PROCEEDINGS,
+            ATTENDING_THE_HEARING,
+            INTERNATIONAL_ELEMENT,
+            LITIGATION_CAPACITY,
+            WELSH_LANGUAGE_REQUIREMENTS
+        );
+        List<Event> fl401 = List.of(
+            FL401_TYPE_OF_APPLICATION,
+            WITHOUT_NOTICE_ORDER,
+            APPLICANT_DETAILS,
+            RESPONDENT_DETAILS,
+            RELATIONSHIP_TO_RESPONDENT,
+            FL401_APPLICANT_FAMILY_DETAILS,
+            RESPONDENT_BEHAVIOUR,
+            OTHER_PROCEEDINGS,
+            ATTENDING_THE_HEARING,
+            INTERNATIONAL_ELEMENT,
+            WELSH_LANGUAGE_REQUIREMENTS
+        );
+        return caseType.equalsIgnoreCase(C100_CASE_TYPE) ? c100 : fl401;
     }
 
 }

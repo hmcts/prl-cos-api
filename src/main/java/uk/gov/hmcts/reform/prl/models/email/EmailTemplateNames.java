@@ -7,5 +7,6 @@ public enum EmailTemplateNames {
     RETURNAPPLICATION,
     WITHDRAW,
     COURTADMIN,
-    GATEKEEPER
+    GATEKEEPER,
+    SEND_AND_REPLY_NOTIFICATION
 }

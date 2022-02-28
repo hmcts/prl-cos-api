@@ -73,7 +73,7 @@ public class TaskListService {
             ? getFL401Events() : getC100Events();
     }
 
-    private List<Event> getC100Events() {
+    public List<Event> getC100Events() {
         return new ArrayList<>(List.of(
             CASE_NAME,
             TYPE_OF_APPLICATION,
@@ -95,7 +95,7 @@ public class TaskListService {
 
     }
 
-    private List<Event> getFL401Events() {
+    public List<Event> getFL401Events() {
         return new ArrayList<>(List.of(
             FL401_CASE_NAME,
             FL401_TYPE_OF_APPLICATION,
