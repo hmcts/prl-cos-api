@@ -16,7 +16,7 @@ import java.util.List;
 
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class PartyDetails {
 
@@ -58,4 +58,18 @@ public class PartyDetails {
     private final String caseTypeOfApplication;
     private final YesOrNo respondentLivedWithApplicant;
 
+    public boolean hasConfidentialInfo() {
+        return this.isAddressConfidential.equals(YesOrNo.Yes) || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
+    }
+
+    public boolean isCanYouProvideEmailAddress() {
+        return this.canYouProvideEmailAddress.equals(YesOrNo.No);
+    }
+
+    public boolean isEmailAddressNull() {
+        if (isCanYouProvideEmailAddress()) {
+            return this.isEmailAddressConfidential == YesOrNo.No;
+        }
+        return this.isEmailAddressConfidential == YesOrNo.Yes;
+    }
 }
