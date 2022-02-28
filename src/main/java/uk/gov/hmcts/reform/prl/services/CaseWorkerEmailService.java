@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
+import uk.gov.hmcts.reform.prl.models.complextypes.GatekeeperEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
@@ -36,6 +37,7 @@ public class CaseWorkerEmailService {
     private final EmailTemplatesConfig emailTemplatesConfig;
     private final ObjectMapper objectMapper;
 
+    private static final String URL_STRING = "/";
     private static final String URGENT_CASE = "Urgent ";
     private static final String WITHOUT_NOTICE = "Without notice";
     private static final String REDUCED_NOTICE = "Reduced notice";
@@ -131,7 +133,7 @@ public class CaseWorkerEmailService {
             .ordersApplyingFor(typeOfOrders)
             .typeOfHearing(typeOfHearings)
             .courtEmail(courtEmail)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .build();
 
     }
@@ -149,12 +151,14 @@ public class CaseWorkerEmailService {
 
     private EmailTemplateVars buildReturnApplicationEmail(CaseDetails caseDetails) {
 
+        caseData = emailService.getCaseData(caseDetails);
+
         String returnMessage = caseData.getReturnMessage();
 
         return CaseWorkerEmail.builder()
             .caseName(caseData.getApplicantCaseName())
             .contentFromDev(returnMessage)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .build();
 
     }
@@ -185,6 +189,53 @@ public class CaseWorkerEmailService {
             LanguagePreference.ENGLISH
         );
 
+    }
+
+    public void sendEmailToGateKeeper(CaseDetails caseDetails) {
+
+        caseData = emailService.getCaseData(caseDetails);
+
+        List<GatekeeperEmail> gatekeeperEmails = caseData
+            .getGatekeeper()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> emailList = gatekeeperEmails.stream()
+            .map(GatekeeperEmail::getEmail)
+            .collect(Collectors.toList());
+
+        emailList.forEach(email ->   emailService.send(
+            email,
+            EmailTemplateNames.GATEKEEPER,
+            buildGatekeeperEmail(caseDetails),
+            LanguagePreference.ENGLISH
+        ));
+    }
+
+    public EmailTemplateVars buildGatekeeperEmail(CaseDetails caseDetails) {
+
+        caseData = emailService.getCaseData(caseDetails);
+
+        String typeOfHearing = "";
+        String isCaseUrgent = NO;
+
+        if (caseData.getIsCaseUrgent().equals(YesOrNo.Yes)) {
+            typeOfHearing = URGENT_CASE;
+            isCaseUrgent = YES;
+        }
+
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        return CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseUrgency(typeOfHearing)
+            .isCaseUrgent(isCaseUrgent)
+            .issueDate(issueDate.format(dateTimeFormatter))
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
+            .build();
     }
 
 

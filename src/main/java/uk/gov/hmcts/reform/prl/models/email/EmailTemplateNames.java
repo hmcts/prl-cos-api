@@ -6,5 +6,6 @@ public enum EmailTemplateNames {
     CASEWORKER,
     RETURNAPPLICATION,
     WITHDRAW,
-    COURTADMIN
+    COURTADMIN,
+    GATEKEEPER
 }
