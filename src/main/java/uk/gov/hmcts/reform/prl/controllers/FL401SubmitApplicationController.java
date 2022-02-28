@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -32,10 +33,15 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_DOCUMENT_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 
 @Slf4j
 @RestController
@@ -68,19 +74,20 @@ public class FL401SubmitApplicationController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Application Submitted."),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public CallbackResponse fl401GenerateDocumentSubmitApplication(@RequestHeader("Authorization") String authorisation,
-                                        @RequestBody CallbackRequest callbackRequest) throws Exception {
+    public AboutToStartOrSubmitCallbackResponse fl401GenerateDocumentSubmitApplication
+        (@RequestHeader("Authorization") String authorisation,
+         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        Court closestDomesticAbuseCourt = courtFinderService
+        Court nearestDomesticAbuseCourt = courtFinderService
             .getNearestFamilyCourt(CaseUtils.getCaseData(caseDetails, objectMapper));
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("Generating the Final document of FL401 for case id " + caseData.getId());
         final LocalDate localDate = LocalDate.now();
-        caseData = caseData.toBuilder().issueDate(localDate).courtName((closestDomesticAbuseCourt != null)
-                                                                ? closestDomesticAbuseCourt
+        caseData = caseData.toBuilder().issueDate(localDate).courtName((nearestDomesticAbuseCourt != null)
+                                                                ? nearestDomesticAbuseCourt
             .getCourtName() : "").build();
 
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
@@ -90,32 +97,24 @@ public class FL401SubmitApplicationController {
         );
         log.info("Generated FL401 Document");
 
-        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
+        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService
+            .getEmailAddress(nearestDomesticAbuseCourt);
 
-        CaseData caseDataUpdated = objectMapper.convertValue(
-            CaseData.builder()
-                .courtName((closestDomesticAbuseCourt != null)  ? closestDomesticAbuseCourt.getCourtName() : "No Court Fetched")
-                .courtEmailAddress((closestDomesticAbuseCourt != null && matchingEmailAddress.isPresent())
-                                       ? matchingEmailAddress.get().getAddress() :
-                                       Objects.requireNonNull(closestDomesticAbuseCourt).getCourtEmailAddresses().get(0).getAddress())
-                .issueDate(localDate)
-                .finalDocument(Document.builder()
-                                   .documentUrl(generatedDocumentInfo.getUrl())
-                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                   .documentHash(generatedDocumentInfo.getHashToken())
-                                   .documentFileName(FL401_FINAL_DOC).build())
-                .build(),
-            CaseData.class
-        );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(COURT_NAME_FIELD, nearestDomesticAbuseCourt != null
+            ? nearestDomesticAbuseCourt.getCourtName() : "");
+        caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, (nearestDomesticAbuseCourt != null
+            && matchingEmailAddress.isPresent()) ? matchingEmailAddress.get().getAddress() :
+            Objects.requireNonNull(nearestDomesticAbuseCourt).getCourtEmailAddresses().get(0).getAddress());
+        caseDataUpdated.put(FINAL_DOCUMENT_FIELD, Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(FL401_FINAL_DOC).build());
+        caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
-        //todo document generation
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-
-        solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
-        caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
-
-        return CallbackResponse.builder()
-            .data(caseData)
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
             .build();
     }
 
@@ -124,8 +123,10 @@ public class FL401SubmitApplicationController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Application Submitted."),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public CallbackResponse fl401SendApplicationNotification(@RequestHeader("Authorization") String authorisation,
-                                                                   @RequestBody CallbackRequest callbackRequest) throws Exception {
+    public CallbackResponse fl401SendApplicationNotification(@RequestHeader("Authorization")
+                                                                     String authorisation,
+                                                                   @RequestBody CallbackRequest callbackRequest)
+        throws Exception {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
