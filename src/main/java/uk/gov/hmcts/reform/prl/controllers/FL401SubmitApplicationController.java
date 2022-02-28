@@ -69,14 +69,14 @@ public class FL401SubmitApplicationController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         Court closestDomesticAbuseCourt = courtFinderService
-            .getClosestDomesticAbuseCourt(CaseUtils.getCaseData(caseDetails, objectMapper));
+            .getClosestChildArrangementsCourt(CaseUtils.getCaseData(caseDetails, objectMapper));
 
         log.info("Generating the Final document of FL401 ");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         final LocalDate localDate = LocalDate.now();
-        caseData.toBuilder().issueDate(localDate).courtName((closestDomesticAbuseCourt != null)
+        caseData = caseData.toBuilder().issueDate(localDate).courtName((closestDomesticAbuseCourt != null)
                                                                 ? closestDomesticAbuseCourt
-            .getCourtName() : "");
+            .getCourtName() : "").build();
 
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
