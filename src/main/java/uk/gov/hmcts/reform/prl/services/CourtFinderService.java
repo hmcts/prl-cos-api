@@ -54,19 +54,6 @@ public class CourtFinderService {
                                    .getCourtId());
     }
 
-    public Court getClosestDomesticAbuseCourt(CaseData caseData) throws NotFoundException {
-        String postcode = getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
-
-        log.info("Getting Closest court for postcode: {}",postcode);
-
-        String courtSlug = courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode)
-            .getCourts()
-            .get(0)
-            .getCourtId();
-
-        return getCourtDetails(courtSlug);
-    }
-
     public boolean courtsAreTheSame(Court c1, Court c2) {
         if (c1 == null || c2 == null) {
             return false;
