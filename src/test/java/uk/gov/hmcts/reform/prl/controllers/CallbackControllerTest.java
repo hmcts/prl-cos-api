@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -91,6 +92,9 @@ public class CallbackControllerTest {
 
     @Mock
     AllTabServiceImpl allTabsService;
+
+    @Mock
+    private CaseWorkerEmailService caseWorkerEmailService;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
@@ -190,7 +194,7 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testGenerateAndStoreC8Document() throws Exception {
+    public void testIssueAndSendLocalCourt() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -207,6 +211,7 @@ public class CallbackControllerTest {
             .gender(Gender.male)
             .email("abc@xyz.com")
             .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
@@ -279,7 +284,7 @@ public class CallbackControllerTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.generateC8AndOtherDocument(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
         );
@@ -290,6 +295,8 @@ public class CallbackControllerTest {
             Mockito.any(CaseDetails.class),
             Mockito.anyString()
         );
+
+        verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
 
     }
 
