@@ -34,6 +34,7 @@ public class CourtFinderService {
     public static final String PAPER_PROCESS_INCLUDING_C_100_APPLICATIONS = "Paper process including C100 applications";
     public static final String FAMILY = "Family";
     public static final String CHILD = "child";
+
     @Autowired
     private CourtFinderApi courtFinderApi;
 
@@ -113,8 +114,9 @@ public class CourtFinderService {
         return party.getValue().getAddress().getPostCode();
     }
 
-    private String getPostcodeFromWrappedParty(PartyDetails party) {
-        return party.getAddress().getPostCode();
+
+    private String getPostcodeFromWrappedParty(PartyDetails partyDetails) {
+        return partyDetails.getAddress().getPostCode();
     }
 
     public boolean courtNameAndIdAreBlank(Optional<String> courtName, Optional<String> courtId) {
