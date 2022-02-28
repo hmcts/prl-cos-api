@@ -329,8 +329,7 @@ public class CaseData implements MappableObject {
     private final CcdPaymentServiceRequestUpdate paymentCallbackServiceRequestUpdate;
     @JsonProperty("paymentServiceRequestReferenceNumber")
     private final String paymentServiceRequestReferenceNumber;
-    
-    @JsonProperty("issueDate")
+
     private final LocalDate issueDate;
 
     @JsonProperty("solicitorName")
@@ -449,7 +448,7 @@ public class CaseData implements MappableObject {
     private final Document finalDocument;
     @JsonProperty("finalWelshDocument")
     private final Document finalWelshDocument;
-    
+
     /**
      * Confidentiality details.
      */
