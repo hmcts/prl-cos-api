@@ -76,8 +76,8 @@ public class FL401SubmitApplicationController {
         Court closestDomesticAbuseCourt = courtFinderService
             .getNearestFamilyCourt(CaseUtils.getCaseData(caseDetails, objectMapper));
 
-        log.info("Generating the Final document of FL401 ");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("Generating the Final document of FL401 for case id " + caseData.getId());
         final LocalDate localDate = LocalDate.now();
         caseData = caseData.toBuilder().issueDate(localDate).courtName((closestDomesticAbuseCourt != null)
                                                                 ? closestDomesticAbuseCourt
