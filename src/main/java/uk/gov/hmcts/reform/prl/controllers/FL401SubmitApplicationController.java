@@ -74,7 +74,7 @@ public class FL401SubmitApplicationController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         Court closestDomesticAbuseCourt = courtFinderService
-            .getClosestChildArrangementsCourt(CaseUtils.getCaseData(caseDetails, objectMapper));
+            .getNearestFamilyCourt(CaseUtils.getCaseData(caseDetails, objectMapper));
 
         log.info("Generating the Final document of FL401 ");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);

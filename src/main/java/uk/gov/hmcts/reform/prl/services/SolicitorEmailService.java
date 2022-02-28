@@ -64,7 +64,7 @@ public class SolicitorEmailService {
             String applicantNames = String.join(", ", applicantNamesList);
 
             Court court = null;
-            court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
+            court = courtLocatorService.getNearestFamilyCourt(caseData);
 
             log.info("retrive court information: {} ======",court);
 
