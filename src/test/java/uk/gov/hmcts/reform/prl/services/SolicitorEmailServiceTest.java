@@ -162,7 +162,7 @@ public class SolicitorEmailServiceTest {
             .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
-        when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
         Assert.assertEquals(solicitorEmailService.buildEmail(caseDetails), email);
 
@@ -225,7 +225,7 @@ public class SolicitorEmailServiceTest {
             .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
-        when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
         solicitorEmailService.sendEmail(caseDetails);
         assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
@@ -289,7 +289,7 @@ public class SolicitorEmailServiceTest {
             .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
-        when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
         solicitorEmailService.sendEmailBypss(caseDetails, authToken);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());

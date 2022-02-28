@@ -64,7 +64,7 @@ public class SolicitorEmailService {
             String applicantNames = String.join(", ", applicantNamesList);
 
             Court court = null;
-            court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
+            court = courtLocatorService.getNearestFamilyCourt(caseData);
 
             return  SolicitorEmail.builder()
                 .caseReference(String.valueOf(caseDetails.getId()))
