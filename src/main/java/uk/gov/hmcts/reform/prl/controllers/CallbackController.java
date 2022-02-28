@@ -212,6 +212,9 @@ public class CallbackController {
                 PRL_C8_TEMPLATE
             );
 
+            caseData = organisationService.getApplicantOrganisationDetails(caseData);
+            caseData = organisationService.getRespondentOrganisationDetails(caseData);
+
             log.info(
                 "Generate C1A if allegations of harm is set to Yes and the passed value is {}",
                 caseData.getAllegationsOfHarmYesNo()
@@ -233,9 +236,6 @@ public class CallbackController {
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentFileName(C8_DOC).build());
-            caseData = organisationService.getApplicantOrganisationDetails(caseData);
-
-            caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
             GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
                 authorisation,
@@ -262,6 +262,9 @@ public class CallbackController {
                 .documentHash(generatedC8WelshDocumentInfo.getHashToken())
                 .documentFileName(C8_WELSH_FILENAME).build());
 
+            caseData = organisationService.getApplicantOrganisationDetails(caseData);
+            caseData = organisationService.getRespondentOrganisationDetails(caseData);
+
             log.info("Generate C1A if allegations of harm is set to Yes and the passed value is {}",
                      caseData.getAllegationsOfHarmYesNo());
             if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
@@ -276,9 +279,7 @@ public class CallbackController {
                     .documentHash(generatedC1AWelshDocumentInfo.getHashToken())
                     .documentFileName(PRL_C1A_WELSH_FILENAME).build());
             }
-            caseData = organisationService.getApplicantOrganisationDetails(caseData);
 
-            caseData = organisationService.getRespondentOrganisationDetails(caseData);
             GeneratedDocumentInfo generatedFinalWelshDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
