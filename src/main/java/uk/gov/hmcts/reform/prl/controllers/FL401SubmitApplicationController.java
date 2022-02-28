@@ -131,13 +131,13 @@ public class FL401SubmitApplicationController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        //todo document generation
-        solicitorEmailService.sendEmail(caseDetails);
-        caseWorkerEmailService.sendEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
+        UserDetails userDetails = userService.getUserDetails(authorisation);
 
+        solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
+        caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
 
         return CallbackResponse.builder()
-            .data(caseDataUpdated)
+            .data(caseData)
             .build();
     }
 }

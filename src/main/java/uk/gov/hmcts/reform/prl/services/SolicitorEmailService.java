@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -131,6 +132,11 @@ public class SolicitorEmailService {
             .map(PartyDetails::getSolicitorEmail)
             .collect(Collectors.toList());
 
+        List<YesOrNo> abc = applicants.stream()
+            .filter(eachParty -> null != eachParty.getIsEmailAddressConfidential() && YesOrNo.Yes.equals(eachParty.getIsEmailAddressConfidential()))
+            .map(PartyDetails::getIsEmailAddressConfidential)
+            .collect(Collectors.toList());
+
         solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
             && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(0)
             : userDetails.getEmail();
@@ -144,7 +150,7 @@ public class SolicitorEmailService {
 
     }
 
-    public void sendEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails) throws NotFoundException {
+    public void sendEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails)  {
 
         log.info("trying to send email for Solicitor FL401 {} ====:", caseDetails.getId());
 
@@ -169,7 +175,7 @@ public class SolicitorEmailService {
 
     }
 
-    private EmailTemplateVars buildFl401SolicitorEmail(CaseDetails caseDetails) throws NotFoundException {
+    public EmailTemplateVars buildFl401SolicitorEmail(CaseDetails caseDetails)  {
 
         log.info("trying to build email for Solicitor FL401 {} ------:", caseDetails.getId());
 

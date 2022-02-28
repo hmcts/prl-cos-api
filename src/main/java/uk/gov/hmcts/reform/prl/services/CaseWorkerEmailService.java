@@ -308,44 +308,39 @@ public class CaseWorkerEmailService {
             .build();
     }
 
-    public void sendEmailToLocalCourt(CaseDetails caseDetails, String courtEmail) {
+    public void sendEmailToFl401LocalCourt(CaseDetails caseDetails, String courtEmail) {
 
         log.info("Sending FL401 email to localcourt for :{} =====", caseDetails.getId());
-        log.info("Sending FL401 email to localcourt for :{} with this email is=====", courtEmail);
 
         emailService.send(
             courtEmail,
             EmailTemplateNames.DA_LOCALCOURT,
-            buildCourtAdminEmail(caseDetails),
+            buildFl401LocalCourtAdminEmail(caseDetails),
             LanguagePreference.ENGLISH
         );
     }
 
-    public EmailTemplateVars buildCourtAdminEmail(CaseDetails caseDetails) {
+    public EmailTemplateVars buildFl401LocalCourtAdminEmail(CaseDetails caseDetails) {
 
         log.info("building FL401 email to localcourt for :{} =====", caseDetails.getId());
         caseData = emailService.getCaseData(caseDetails);
         PartyDetails fl401Applicant = caseData
             .getApplicantsFL401();
 
-        log.info("FL401 email to localcourt for applicant:{} =====", fl401Applicant);
         String isConfidential = NO;
-        if ((fl401Applicant.isCanYouProvideEmailAddress() && fl401Applicant.isEmailAddressNull())
+        if (fl401Applicant.getCanYouProvideEmailAddress().equals(YesOrNo.Yes)
+            || (null != fl401Applicant.getIsEmailAddressConfidential()
+            && YesOrNo.Yes.equals(fl401Applicant.getIsEmailAddressConfidential()))
             || (fl401Applicant.hasConfidentialInfo())) {
             isConfidential = YES;
         }
 
-        String typeOfHearing = "";
         LocalDate issueDate = LocalDate.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
-        log.info("FL401 email to localcourt for applicant about to send =====");
 
         return CaseWorkerEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
-            .caseUrgency(typeOfHearing)
-            .isCaseUrgent(NO)
             .issueDate(issueDate.format(dateTimeFormatter))
             .isConfidential(isConfidential)
             .caseLink(manageCaseUrl + "/" + caseData.getId())
