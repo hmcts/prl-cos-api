@@ -20,7 +20,7 @@ public enum FL401Consent {
     }
 
     @JsonCreator
-    public static Fl401ConfidentialConsent getValue(String key) {
-        return Fl401ConfidentialConsent.valueOf(key);
+    public static FL401Consent getValue(String key) {
+        return FL401Consent.valueOf(key);
     }
 }
