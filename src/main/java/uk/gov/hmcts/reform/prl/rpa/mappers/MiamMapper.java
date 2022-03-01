@@ -8,8 +8,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
-import javax.json.JsonObject;
 import java.util.stream.Collectors;
+import javax.json.JsonObject;
 
 @Component
 public class MiamMapper {
@@ -28,15 +28,15 @@ public class MiamMapper {
             )
             .add(
                 "miamDomesticViolenceChecklist",
-                caseData.getMiamDomesticViolenceChecklist() != null ?
-                    caseData.getMiamDomesticViolenceChecklist().stream()
+                caseData.getMiamDomesticViolenceChecklist() != null
+                    ? caseData.getMiamDomesticViolenceChecklist().stream()
                         .map(MiamDomesticViolenceChecklistEnum::getDisplayedValue)
                         .collect(Collectors.joining(", ")) : null
             )
             .add(
                 "miamUrgencyReasonChecklist",
-                caseData.getMiamUrgencyReasonChecklist() != null ?
-                    caseData.getMiamUrgencyReasonChecklist().stream()
+                caseData.getMiamUrgencyReasonChecklist() != null
+                    ? caseData.getMiamUrgencyReasonChecklist().stream()
                         .map(MiamUrgencyReasonChecklistEnum::getDisplayedValue)
                         .collect(Collectors.joining(", ")) : null
             )

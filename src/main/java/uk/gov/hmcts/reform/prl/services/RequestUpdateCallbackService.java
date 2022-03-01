@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import javax.json.JsonObject;
 
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
@@ -57,8 +56,7 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
 
-        JsonObject map = c100JsonMapper.map(objectMapper.convertValue(caseDetails.getData(), CaseData.class));
-        System.out.println("******Map*****" + map);
+        //JsonObject map = c100JsonMapper.map(objectMapper.convertValue(caseDetails.getData(), CaseData.class));
 
         if (!Objects.isNull(caseDetails.getId())) {
             if (confidentialityTabService
