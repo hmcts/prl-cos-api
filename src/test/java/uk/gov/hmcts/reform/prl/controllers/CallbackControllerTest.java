@@ -390,7 +390,7 @@ public class CallbackControllerTest {
     public void testCopyFL401CasenameToC100CaseName() throws Exception {
 
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("applicantCaseName","test");
+        caseData.put("applicantOrRespondentCaseName","test");
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -398,6 +398,6 @@ public class CallbackControllerTest {
                              .data(caseData).build()).build();
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .copyFL401CasenameToC100CaseName(authToken, callbackRequest);
-        assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantOrRespondentCaseName"));
+        assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
     }
 }

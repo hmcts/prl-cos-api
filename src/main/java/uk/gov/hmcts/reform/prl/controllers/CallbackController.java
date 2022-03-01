@@ -262,7 +262,9 @@ public class CallbackController {
     ) throws Exception {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        caseDataUpdated.put("applicantOrRespondentCaseName",caseDataUpdated.get("applicantCaseName"));
+        if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
+            caseDataUpdated.put("applicantCaseName",caseDataUpdated.get("applicantOrRespondentCaseName"));
+        }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
