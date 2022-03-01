@@ -259,7 +259,7 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse copyFL401CasenameToC100CaseName(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws Exception {
+    ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
