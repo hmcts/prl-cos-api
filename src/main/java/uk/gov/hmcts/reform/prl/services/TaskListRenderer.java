@@ -26,6 +26,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
@@ -195,13 +197,16 @@ public class TaskListRenderer {
         final TaskSection peopleInTheCase = newSection("Add people to the case")
             .withTask(tasks.get(APPLICANT_DETAILS))
             .withTask(tasks.get(RESPONDENT_DETAILS))
+            .withTask(tasks.get(FL401_APPLICANT_FAMILY_DETAILS));
+
+        final TaskSection addCaseDetails = newSection("Add case details")
             .withTask(tasks.get(RELATIONSHIP_TO_RESPONDENT))
-            .withTask(tasks.get(FL401_APPLICANT_FAMILY_DETAILS))
-            .withTask(tasks.get(RESPONDENT_BEHAVIOUR));
+            .withTask(tasks.get(RESPONDENT_BEHAVIOUR))
+            .withTask(tasks.get(FL401_HOME));
 
         final TaskSection additionalInformation = newSection("Add additional information")
             .withInfo("Only complete if relevant")
-            .withTask(tasks.get(OTHER_PROCEEDINGS))
+            .withTask(tasks.get(FL401_OTHER_PROCEEDINGS))
             .withTask(tasks.get(ATTENDING_THE_HEARING))
             .withTask(tasks.get(INTERNATIONAL_ELEMENT))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
@@ -214,6 +219,7 @@ public class TaskListRenderer {
 
         return Stream.of(applicationDetails,
                          peopleInTheCase,
+                         addCaseDetails,
                          additionalInformation,
                          uploadDocuments,
                          pdfApplication)
