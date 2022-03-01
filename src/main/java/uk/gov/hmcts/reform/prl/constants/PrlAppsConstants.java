@@ -1,10 +1,15 @@
-package uk.gov.hmcts.reform.prl.enums;
+package uk.gov.hmcts.reform.prl.constants;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class OrchestrationConstants {
+public class PrlAppsConstants {
+    public static final String JURISDICTION = "PRIVATELAW";
+    public static final String CASE_TYPE = "PRLAPPS";
+
+    public static final String C100_CASE_TYPE = "C100";
+    public static final String FL401_CASE_TYPE = "FL401";
 
     public static final String YES = "Yes";
     public static final String NO = "No";
@@ -18,17 +23,25 @@ public class OrchestrationConstants {
     public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMiam";
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMiam";
 
-    //Fee and Pay integration related constants
-    public static final String JURISDICTION = "PRIVATELAW";
-    public static final String CASE_TYPE = "PRLAPPS";
-
-    public static final String PAYMENT_ACTION = "payment";
+    // Fee and Pay related constants
     public static final String FEE_VERSION = "1";
     public static final Integer FEE_VOLUME = 1;
+    public static final String PAYMENT_ACTION = "payment";
+
+    public static final String BAIL_DETAILS = "bailDetails";
+    public static final String APPLICANT_HAS_BAIL_END_DATE = "isRespondentAlreadyInBailCondition";
+    public static final String APPLICANT_BAIL_END_DATE = "bailConditionEndDate";
+    public static final String NOT_KNOWN_BAIL_END_DATE = "dontKnowBailEndDate";
+
+    public static final String YES_SMALL = "yes";
+    public static final String NO_SMALL = "no";
+
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
 
 
     public static final String CHILD_ARRANGEMENT_CASE = "CHILD ARRANGEMENT CASE";
+    public static final String ISSUE_EVENT_CODE = "001";
+    public static final String ISSUE_EVENT_SEQUENCE = "1";
 
 
 }

@@ -260,6 +260,7 @@ public class AllegationsOfHarmCheckerTest {
 
         CaseData caseData = CaseData.builder()
             .allegationsOfHarmDomesticAbuseYesNo(Yes)
+            .allegationsOfHarmChildAbductionYesNo(No)
             .sexualAbuseVictim(Collections.singletonList(children))
             .behaviours(Collections.singletonList(wrappedBehaviour))
             .build();
@@ -272,6 +273,10 @@ public class AllegationsOfHarmCheckerTest {
 
         CaseData caseData = CaseData.builder()
             .allegationsOfHarmDomesticAbuseYesNo(Yes)
+            .allegationsOfHarmChildAbductionYesNo(Yes)
+            .childAbductionReasons("harm")
+            .previousAbductionThreats(Yes)
+            .previousAbductionThreatsDetails("none")
             .build();
 
         assertFalse(allegationsOfHarmChecker.validateDomesticAbuseSection(caseData));

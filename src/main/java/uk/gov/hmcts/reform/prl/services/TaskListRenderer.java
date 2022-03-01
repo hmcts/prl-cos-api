@@ -24,17 +24,25 @@ import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskSection.newSection;
 
 @Service
@@ -47,12 +55,13 @@ public class TaskListRenderer {
     private final TaskListRenderElements taskListRenderElements;
 
 
-    public String render(List<Task> allTasks, List<EventValidationErrors> tasksErrors) {
+    public String render(List<Task> allTasks, List<EventValidationErrors> tasksErrors, boolean isC100CaseType) {
         final List<String> lines = new LinkedList<>();
 
         lines.add("<div class='width-50'>");
 
-        groupInSections(allTasks).forEach(section -> lines.addAll(renderSection(section)));
+        (isC100CaseType ? groupInSections(allTasks) : groupInSectionsForFL401(allTasks))
+            .forEach(section -> lines.addAll(renderSection(section)));
 
         lines.add("</div>");
 
@@ -176,5 +185,41 @@ public class TaskListRenderer {
     }
 
 
+    private List<TaskSection> groupInSectionsForFL401(List<Task> allTasks) {
+        final Map<Event, Task> tasks = allTasks.stream().collect(toMap(Task::getEvent, identity()));
+
+        final TaskSection applicationDetails = newSection("Add application details")
+            .withTask(tasks.get(FL401_CASE_NAME))
+            .withTask(tasks.get(FL401_TYPE_OF_APPLICATION))
+            .withTask(tasks.get(WITHOUT_NOTICE_ORDER));
+
+        final TaskSection peopleInTheCase = newSection("Add people to the case")
+            .withTask(tasks.get(APPLICANT_DETAILS))
+            .withTask(tasks.get(RESPONDENT_DETAILS))
+            .withTask(tasks.get(FL401_APPLICANT_FAMILY_DETAILS));
+
+        final TaskSection addCaseDetails = newSection("Add case details")
+            .withTask(tasks.get(RELATIONSHIP_TO_RESPONDENT))
+            .withTask(tasks.get(RESPONDENT_BEHAVIOUR))
+            .withTask(tasks.get(FL401_HOME));
+
+        final TaskSection additionalInformation = newSection("Add additional information")
+            .withInfo("Only complete if relevant")
+            .withTask(tasks.get(FL401_OTHER_PROCEEDINGS))
+            .withTask(tasks.get(ATTENDING_THE_HEARING))
+            .withTask(tasks.get(INTERNATIONAL_ELEMENT))
+            .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
+
+        final TaskSection pdfApplication = newSection("View PDF application")
+            .withTask(tasks.get(VIEW_PDF_DOCUMENT));
+
+        return Stream.of(applicationDetails,
+                         peopleInTheCase,
+                         addCaseDetails,
+                         additionalInformation,
+                         pdfApplication)
+            .filter(TaskSection::hasAnyTask)
+            .collect(toList());
+    }
 
 }
