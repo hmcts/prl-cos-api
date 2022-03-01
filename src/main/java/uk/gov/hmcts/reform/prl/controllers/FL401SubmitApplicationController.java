@@ -36,9 +36,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 
@@ -130,7 +130,7 @@ public class FL401SubmitApplicationController {
         );
         log.info("Generated DA C8 Document");
 
-        caseDataUpdated.put(C8_DOCUMENT_FIELD, Document.builder()
+        caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
             .documentUrl(generatedDocumentC8Info.getUrl())
             .documentBinaryUrl(generatedDocumentC8Info.getBinaryUrl())
             .documentHash(generatedDocumentC8Info.getHashToken())

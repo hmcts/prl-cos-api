@@ -43,7 +43,7 @@ public class PrlAppsConstants {
     public static final String COURT_EMAIL_ADDRESS_FIELD = "courtEmailAddress";
     public static final String FINAL_DOCUMENT_FIELD = "finalDocument";
     public static final String ISSUE_DATE_FIELD = "issueDate";
-    public static final String C8_DOCUMENT_FIELD = "c8Document";
+
 
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
     public static final String SEARCH_RESULTS_POSTCODE_POSTCODE_SERVICE_AREA = "search/results?postcode={postcode}&serviceArea=";
