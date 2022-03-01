@@ -102,6 +102,7 @@ public class CallbackControllerTest {
     @Mock
     private DocumentLanguageService documentLanguageService;
 
+    @Mock
     private CaseWorkerEmailService caseWorkerEmailService;
 
 
@@ -119,6 +120,7 @@ public class CallbackControllerTest {
 
     @Before
     public void setUp() {
+
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
             .surname("Solicitor")
@@ -166,19 +168,13 @@ public class CallbackControllerTest {
 
     @Test
     public void testGenerateAndStoreDocument() throws Exception {
-        //CaseDetails caseDetails  = CaseDetailsProvider.full();
-
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
 
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .gender(Gender.male)
             .email("abc@xyz.com")
             .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
@@ -225,12 +221,12 @@ public class CallbackControllerTest {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -239,6 +235,7 @@ public class CallbackControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+
         callbackController.generateAndStoreDocument(authToken, callbackRequest);
 
         verify(dgsService, times(2)).generateDocument(
@@ -256,12 +253,6 @@ public class CallbackControllerTest {
 
     @Test
     public void testIssueAndSendLocalCourt() throws Exception {
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
         Address address = Address.builder()
             .addressLine1("address")
             .postTown("London")
@@ -375,14 +366,14 @@ public class CallbackControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
-        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.issueAndSendToLocalCourt(
-
             authToken,
             callbackRequest
         );
@@ -401,10 +392,8 @@ public class CallbackControllerTest {
         verify(organisationService,times(2))
             .getRespondentOrganisationDetails(caseData);
         verifyNoMoreInteractions(dgsService);
-        //verifyNoMoreInteractions(organisationService);
-
         verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
-
+        //verifyNoMoreInteractions(organisationService);
     }
 
     @Test
