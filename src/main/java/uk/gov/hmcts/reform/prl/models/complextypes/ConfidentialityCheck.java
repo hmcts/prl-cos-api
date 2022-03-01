@@ -7,5 +7,5 @@ import uk.gov.hmcts.reform.prl.enums.Fl401ConfidentialConsentEnum;
 @Data
 @Builder
 public class ConfidentialityCheck {
-    private final Fl401ConfidentialConsent confidentialityConsent;
+    private final Fl401ConfidentialConsentEnum fl401ConfidentialConsentEnum;
 }

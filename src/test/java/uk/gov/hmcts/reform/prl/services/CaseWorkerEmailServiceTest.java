@@ -79,7 +79,6 @@ public class CaseWorkerEmailServiceTest {
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-    }
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
