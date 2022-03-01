@@ -57,7 +57,7 @@ public class ApplicantsChecker implements EventChecker {
 
         for (PartyDetails applicant : applicants) {
             Optional<String> dxNumber = ofNullable(applicant.getDxNumber());
-
+            log.info(applicant.toString());
             boolean mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant, caseData.getCaseTypeOfApplication());
             boolean dxCompleted = (dxNumber.isPresent() && !(dxNumber.get().isBlank()));
 
@@ -86,6 +86,8 @@ public class ApplicantsChecker implements EventChecker {
 
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
+
+        log.info(caseData.getApplicants().toString());
 
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
@@ -129,10 +131,7 @@ public class ApplicantsChecker implements EventChecker {
         }
         Optional<Address> address = ofNullable(applicant.getAddress());
         fields.add(address);
-        log.info("----------------------");
-        log.info(address.toString());
         if (address.isPresent() && !verifyAddressCompleted(address.get())) {
-            log.info("WE ARE HERE");
             return false;
         }
         fields.add(ofNullable(applicant.getIsAddressConfidential()));
