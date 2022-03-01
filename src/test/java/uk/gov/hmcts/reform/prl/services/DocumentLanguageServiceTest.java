@@ -38,6 +38,13 @@ public class DocumentLanguageServiceTest {
     }
 
     @Test
+    public void whenWelshLanguageRequirementIsPresentAndEqualsToNoIsGenEngReturnTrueIsGenWelshReturnFalse() {
+        caseData = CaseData.builder().welshLanguageRequirement(No).build();
+        assertTrue(documentLanguageService.docGenerateLang(caseData).isGenEng());
+        assertFalse(documentLanguageService.docGenerateLang(caseData).isGenWelsh());
+    }
+
+    @Test
     public void whenApplicationLanguageIsEngReturnTrueAndIsGenWelshReturnFalse() {
         caseData = caseData.toBuilder()
             .welshLanguageRequirementApplication(ENGLISH)
