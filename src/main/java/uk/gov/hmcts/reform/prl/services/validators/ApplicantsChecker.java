@@ -170,9 +170,8 @@ public class ApplicantsChecker implements EventChecker {
     }
 
     public boolean verifyAddressCompleted(Address address) {
-        return allNonEmpty(
-            address.getAddressLine1()
-        );
+        return ofNullable(address.getAddressLine1()).isPresent()
+            && ofNullable(address.getPostCode()).isPresent();
     }
 
 }
