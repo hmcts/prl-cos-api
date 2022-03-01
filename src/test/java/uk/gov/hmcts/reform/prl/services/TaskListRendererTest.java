@@ -97,6 +97,7 @@ public class TaskListRendererTest {
         Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
         Task.builder().event(FL401_HOME).state(NOT_STARTED).build(),
+        Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
         Task.builder().event(FL401_OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
         Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),

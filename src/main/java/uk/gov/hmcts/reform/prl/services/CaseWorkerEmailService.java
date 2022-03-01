@@ -12,6 +12,9 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.GatekeeperEmail;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
@@ -34,6 +37,7 @@ public class CaseWorkerEmailService {
     private final EmailTemplatesConfig emailTemplatesConfig;
     private final ObjectMapper objectMapper;
 
+    private static final String URL_STRING = "/";
     private static final String URGENT_CASE = "Urgent ";
     private static final String WITHOUT_NOTICE = "Without notice";
     private static final String REDUCED_NOTICE = "Reduced notice";
@@ -129,13 +133,13 @@ public class CaseWorkerEmailService {
             .ordersApplyingFor(typeOfOrders)
             .typeOfHearing(typeOfHearings)
             .courtEmail(courtEmail)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .build();
 
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-        String caseworkerEmailId = "fprl_caseworker_solicitor@mailinator.com";
+        String caseworkerEmailId = "yogendra.upasani@hmcts.net";
         emailService.send(
             caseworkerEmailId,
             EmailTemplateNames.CASEWORKER,
@@ -147,19 +151,23 @@ public class CaseWorkerEmailService {
 
     private EmailTemplateVars buildReturnApplicationEmail(CaseDetails caseDetails) {
 
-        String returnMessage = emailService.getCaseData(caseDetails).getReturnMessage();
+        caseData = emailService.getCaseData(caseDetails);
+
+        String returnMessage = caseData.getReturnMessage();
 
         return CaseWorkerEmail.builder()
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .caseName(caseData.getApplicantCaseName())
             .contentFromDev(returnMessage)
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .build();
 
     }
 
     public void sendReturnApplicationEmailToSolicitor(CaseDetails caseDetails) {
 
-        List<PartyDetails> applicants = emailService.getCaseData(caseDetails)
+        caseData = emailService.getCaseData(caseDetails);
+
+        List<PartyDetails> applicants = caseData
             .getApplicants()
             .stream()
             .map(Element::getValue)
@@ -172,7 +180,7 @@ public class CaseWorkerEmailService {
         String email = applicantEmailList.get(0);
 
         if (applicants.size() > 1) {
-            email = emailService.getCaseData(caseDetails).getApplicantSolicitorEmailAddress();
+            email = caseData.getApplicantSolicitorEmailAddress();
         }
         emailService.send(
             email,
@@ -181,6 +189,122 @@ public class CaseWorkerEmailService {
             LanguagePreference.ENGLISH
         );
 
+    }
+
+    public void sendEmailToGateKeeper(CaseDetails caseDetails) {
+
+        caseData = emailService.getCaseData(caseDetails);
+
+        List<GatekeeperEmail> gatekeeperEmails = caseData
+            .getGatekeeper()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> emailList = gatekeeperEmails.stream()
+            .map(GatekeeperEmail::getEmail)
+            .collect(Collectors.toList());
+
+        emailList.forEach(email ->   emailService.send(
+            email,
+            EmailTemplateNames.GATEKEEPER,
+            buildGatekeeperEmail(caseDetails),
+            LanguagePreference.ENGLISH
+        ));
+    }
+
+    public EmailTemplateVars buildGatekeeperEmail(CaseDetails caseDetails) {
+
+        caseData = emailService.getCaseData(caseDetails);
+
+        String typeOfHearing = "";
+        String isCaseUrgent = NO;
+
+        if (caseData.getIsCaseUrgent().equals(YesOrNo.Yes)) {
+            typeOfHearing = URGENT_CASE;
+            isCaseUrgent = YES;
+        }
+
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        return CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseUrgency(typeOfHearing)
+            .isCaseUrgent(isCaseUrgent)
+            .issueDate(issueDate.format(dateTimeFormatter))
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
+            .build();
+    }
+
+
+    public void sendEmailToCourtAdmin(CaseDetails caseDetails) {
+
+        caseData = emailService.getCaseData(caseDetails);
+
+        List<LocalCourtAdminEmail> localCourtAdminEmails = caseData
+            .getLocalCourtAdmin()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> emailList = localCourtAdminEmails.stream()
+            .map(LocalCourtAdminEmail::getEmail)
+            .collect(Collectors.toList());
+
+        emailList.forEach(email ->   emailService.send(
+            email,
+            EmailTemplateNames.COURTADMIN,
+            buildCourtAdminEmail(caseDetails),
+            LanguagePreference.ENGLISH
+        ));
+    }
+
+    public EmailTemplateVars buildCourtAdminEmail(CaseDetails caseDetails) {
+
+        caseData = emailService.getCaseData(caseDetails);
+
+        List<PartyDetails> applicants = caseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<Child> child = caseData
+            .getChildren()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        String isConfidential = NO;
+        if ((applicants.stream().noneMatch(PartyDetails::isCanYouProvideEmailAddress)
+            && applicants.stream().anyMatch(PartyDetails::isEmailAddressNull))
+            || (applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
+            || (child.stream().anyMatch(Child::hasConfidentialInfo))) {
+            isConfidential = YES;
+        }
+
+        String typeOfHearing = "";
+        String isCaseUrgent = NO;
+
+        if (caseData.getIsCaseUrgent().equals(YesOrNo.Yes)) {
+            typeOfHearing = URGENT_CASE;
+            isCaseUrgent = YES;
+        }
+
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        return CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseUrgency(typeOfHearing)
+            .isCaseUrgent(isCaseUrgent)
+            .issueDate(issueDate.format(dateTimeFormatter))
+            .isConfidential(isConfidential)
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
     }
 
     public void sendEmailToFl401LocalCourt(CaseDetails caseDetails, String courtEmail) {
@@ -221,4 +345,5 @@ public class CaseWorkerEmailService {
             .caseLink(manageCaseUrl + "/" + caseData.getId())
             .build();
     }
+
 }
