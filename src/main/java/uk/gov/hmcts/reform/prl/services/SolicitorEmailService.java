@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -105,6 +106,7 @@ public class SolicitorEmailService {
             buildEmail(caseDetails),
             LanguagePreference.ENGLISH
         );
+
     }
 
     private EmailTemplateVars buildCaseWithdrawEmail(CaseDetails caseDetails) {
@@ -147,10 +149,15 @@ public class SolicitorEmailService {
         log.info("trying to send email for Solicitor FL401 {} ====:", caseDetails.getId());
 
         String solicitorEmail = "";
+
         PartyDetails fl401Applicant = emailService.getCaseData(caseDetails)
             .getApplicantsFL401();
 
+        log.info("collect applicants: {} ======",fl401Applicant);
+
         String applicantSolicitorEmail = fl401Applicant.getSolicitorEmail();
+
+        log.info("collect applicant solicitoremail {} ======",applicantSolicitorEmail);
         solicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
 
         emailService.send(
@@ -167,6 +174,7 @@ public class SolicitorEmailService {
         log.info("trying to build email for Solicitor FL401 {} ------:", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
+
         PartyDetails fl401Applicant = caseData
             .getApplicantsFL401();
 

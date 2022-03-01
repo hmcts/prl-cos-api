@@ -103,7 +103,7 @@ public class CallbackControllerTest {
     private CaseWorkerEmailService caseWorkerEmailService;
 
     public static final String authToken = "Bearer TestAuthToken";
-    public static final String PRL_DRAFT_TEMPLATE = "PRL-DRAFT-C100-20.docx";
+    public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
     private static final String C100_FINAL_TEMPLATE = "C100-Final-Document.docx";
     public static final String PRL_C1A_TEMPLATE = "PRL-C1A.docx";
@@ -244,6 +244,7 @@ public class CallbackControllerTest {
             .representativeLastName("Xyz")
             .gender(Gender.male)
             .email("abc@xyz.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
             .phoneNumber("1234567890")
             .isEmailAddressConfidential(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.Yes)
@@ -303,6 +304,7 @@ public class CallbackControllerTest {
             Mockito.anyString()
         );
         verifyNoMoreInteractions(dgsService);
+
     }
 
     @Test
