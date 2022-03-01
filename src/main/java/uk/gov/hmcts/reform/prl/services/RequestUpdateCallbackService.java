@@ -56,8 +56,6 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
 
-        //JsonObject map = c100JsonMapper.map(objectMapper.convertValue(caseDetails.getData(), CaseData.class));
-
         if (!Objects.isNull(caseDetails.getId())) {
             if (confidentialityTabService
                 .updateConfidentialityDetails(caseDetails.getId(), objectMapper.convertValue(
