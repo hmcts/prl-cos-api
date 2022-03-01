@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.services.OrganisationService1;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.time.LocalDate;
@@ -49,7 +49,7 @@ public class SolicitorsMapperTest {
     @Mock
     Organisations organisations;
     @Mock
-    OrganisationService1 organisationService1;
+    OrganisationService organisationService1;
     @Mock
     Organisation organisation;
     @Mock
