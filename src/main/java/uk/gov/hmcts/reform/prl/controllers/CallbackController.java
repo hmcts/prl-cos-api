@@ -131,6 +131,7 @@ public class CallbackController {
         );
     }
 
+
     @PostMapping(path = "/generate-save-draft-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to generate and store document")
     public uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse generateAndStoreDocument(
@@ -148,7 +149,6 @@ public class CallbackController {
             .builder()
             .data(getUpdatedCaseDataWithDoc(authorisation, caseData))
             .build();
-
     }
 
     @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

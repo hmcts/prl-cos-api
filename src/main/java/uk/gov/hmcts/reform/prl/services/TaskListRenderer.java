@@ -142,6 +142,9 @@ public class TaskListRenderer {
                 } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
                                   + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
+                } else if (task.getEvent().equals(FL401_STATEMENT_OF_TRUTH)) {
+                    lines.add(taskListRenderElements.renderDisabledLink(task)
+                                  + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("not-started.png", "Not started"));
@@ -157,6 +160,9 @@ public class TaskListRenderer {
                 break;
             case FINISHED:
                 if (task.getEvent().equals(SUBMIT_AND_PAY)) {
+                    lines.add(taskListRenderElements.renderLink(task)
+                                  + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
+                } else if (task.getEvent().equals(FL401_STATEMENT_OF_TRUTH)) {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
                 } else {
