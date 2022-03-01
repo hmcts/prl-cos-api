@@ -5,13 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
-import uk.gov.hmcts.reform.prl.services.OrganisationService1;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.util.Map;
@@ -29,8 +28,7 @@ public class SolicitorsMapper {
 
     private final AddressMapper addressMapper;
 
-    private final OrganisationService1 organisationService1;
-    private final AuthTokenGenerator authTokenGenerator;
+    private final OrganisationService organisationService;
     private final SystemUserService systemUserService;
 
     public JsonObject mapSolicitorAddress(ContactInformation contactInformation) {
@@ -57,9 +55,8 @@ public class SolicitorsMapper {
     public JsonObject callOrgSearchFormSolicitorMap(String id, PartyDetails party) {
         log.info("Fetching the organisation details for org {}", party.getSolicitorOrg());
         if (party.getSolicitorOrg() != null && party.getSolicitorOrg().getOrganisationID() != null) {
-            Organisations org = organisationService1.fetchOrgs(
+            Organisations org = organisationService.getOrganisationDetaiils(
                 systemUserService.getSysUserToken(),
-                authTokenGenerator.generate(),
                 party.getSolicitorOrg().getOrganisationID()
             );
 
