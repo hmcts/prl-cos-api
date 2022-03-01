@@ -456,7 +456,7 @@ public class CaseData implements MappableObject {
     private final WithdrawApplication withDrawApplicationData;
 
     /**
-     * FL401 Upload Documents
+     * FL401 Upload Documents.
      */
     private final List<Element<UploadDocuments>> fl401UploadedDocuments;
     
