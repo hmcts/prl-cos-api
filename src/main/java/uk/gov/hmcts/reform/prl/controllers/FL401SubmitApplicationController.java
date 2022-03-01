@@ -91,6 +91,7 @@ public class FL401SubmitApplicationController {
             : "No Court Name Fetched"));
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         final LocalDate localDate = LocalDate.now();
         caseData = caseData.toBuilder().issueDate(localDate).courtName((nearestDomesticAbuseCourt != null)
@@ -100,7 +101,6 @@ public class FL401SubmitApplicationController {
         Optional<CourtEmailAddress> courtEmailAddress = courtFinderService
             .getEmailAddress(nearestDomesticAbuseCourt);
 
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(COURT_NAME_FIELD, nearestDomesticAbuseCourt != null
             ? nearestDomesticAbuseCourt.getCourtName() : "");
         caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, (nearestDomesticAbuseCourt != null
@@ -117,11 +117,11 @@ public class FL401SubmitApplicationController {
         );
         log.info("Generated FL401 Document");
 
-      caseDataUpdated.put(FINAL_DOCUMENT_FIELD, Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(FL401_FINAL_DOC).build());
+        caseDataUpdated.put(FINAL_DOCUMENT_FIELD, Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName(FL401_FINAL_DOC).build());
 
         GeneratedDocumentInfo generatedDocumentC8Info = dgsService.generateDocument(
             authorisation,
