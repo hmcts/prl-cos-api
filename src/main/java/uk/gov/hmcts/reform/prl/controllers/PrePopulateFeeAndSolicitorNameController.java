@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,7 @@ public class PrePopulateFeeAndSolicitorNameController {
     private UserService userService;
 
     private final CourtFinderService courtLocatorService;
+    private final SubmitAndPayChecker submitAndPayChecker;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -63,6 +65,12 @@ public class PrePopulateFeeAndSolicitorNameController {
     public CallbackResponse prePoppulateSolicitorAndFees(@RequestHeader("Authorization") String authorisation,
                                                          @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<String> errorList = new ArrayList<>();
+        boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
+                                                                                     .getCaseDetails().getCaseData());
+
+        if(!mandatoryEventStatus)
+            errorList.add("Submit and pay is not allowed for this application unless you are finished with mandatory events");
+
         UserDetails userDetails = userService.getUserDetails(authorisation);
         FeeResponse feeResponse = null;
         try {
@@ -102,6 +110,7 @@ public class PrePopulateFeeAndSolicitorNameController {
 
         return CallbackResponse.builder()
             .data(caseData)
+            .errors(errorList)
             .build();
 
     }
