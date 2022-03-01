@@ -177,10 +177,12 @@ public class FL401SubmitApplicationControllerTest {
                              .build())
             .build();
 
-        Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
+        Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
+            CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
         Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
 
-        when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)))
+        when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(callbackRequest.getCaseDetails(),
+                                                                            objectMapper)))
             .thenReturn(court);
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 

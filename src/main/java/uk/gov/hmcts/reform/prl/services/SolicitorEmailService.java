@@ -130,11 +130,6 @@ public class SolicitorEmailService {
             .map(PartyDetails::getSolicitorEmail)
             .collect(Collectors.toList());
 
-        List<YesOrNo> abc = applicants.stream()
-            .filter(eachParty -> null != eachParty.getIsEmailAddressConfidential() && YesOrNo.Yes.equals(eachParty.getIsEmailAddressConfidential()))
-            .map(PartyDetails::getIsEmailAddressConfidential)
-            .collect(Collectors.toList());
-
         solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
             && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(0)
             : userDetails.getEmail();
