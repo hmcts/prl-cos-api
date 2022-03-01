@@ -56,7 +56,23 @@ public class PartyDetails {
     private String phoneNumber;
     private String email;
     private Address address;
+    private final Organisations organisations;
+    private final String solicitorTelephone;
     private final String caseTypeOfApplication;
     private final YesOrNo respondentLivedWithApplicant;
-    private final Organisations organisations;
+
+    public boolean hasConfidentialInfo() {
+        return this.isAddressConfidential.equals(YesOrNo.Yes) || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
+    }
+
+    public boolean isCanYouProvideEmailAddress() {
+        return this.canYouProvideEmailAddress.equals(YesOrNo.No);
+    }
+
+    public boolean isEmailAddressNull() {
+        if (isCanYouProvideEmailAddress()) {
+            return this.isEmailAddressConfidential == YesOrNo.No;
+        }
+        return this.isEmailAddressConfidential == YesOrNo.Yes;
+    }
 }

@@ -7,12 +7,12 @@ import lombok.Data;
 
 @Data
 @Builder
-public class LocalCourtAdminEmail {
+public class GatekeeperEmail {
     @JsonProperty("email")
     private final String email;
 
     @JsonCreator
-    public LocalCourtAdminEmail(String email) {
+    public GatekeeperEmail(String email) {
         this.email  = email;
     }
 }
