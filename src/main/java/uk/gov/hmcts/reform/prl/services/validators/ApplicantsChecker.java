@@ -87,8 +87,6 @@ public class ApplicantsChecker implements EventChecker {
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
 
-        log.info(caseData.getApplicants().toString());
-
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
         boolean mandatoryCompleted = false;
@@ -98,6 +96,8 @@ public class ApplicantsChecker implements EventChecker {
                 .stream()
                 .map(Element::getValue)
                 .collect(Collectors.toList());
+
+            log.info(applicants.toString());
 
             for (PartyDetails applicant : applicants) {
                 mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant, caseData.getCaseTypeOfApplication());
