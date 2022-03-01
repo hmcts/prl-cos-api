@@ -36,8 +36,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
+import uk.gov.hmcts.reform.prl.models.complextypes.GatekeeperEmail;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
@@ -55,6 +59,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.C8Document;
 import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
@@ -106,6 +112,13 @@ public class CaseData implements MappableObject {
      */
     private final List<ConfidentialityStatementDisclaimerEnum> confidentialityStatementDisclaimer;
     private final List<ConfidentialityChecksDisclaimerEnum> confidentialityChecksDisclaimer;
+
+    /**
+     * C100 Confidential Disclaimer.
+     */
+    private final List<ConfidentialityStatementDisclaimerEnum> c100ConfidentialityStatementDisclaimer;
+    private final ConfidentialityDisclaimer confidentialityDisclaimer;
+
 
     /**
      * Upload documents.
@@ -385,6 +398,11 @@ public class CaseData implements MappableObject {
     private final OtherDetailsOfWithoutNoticeOrder anyOtherDtailsForWithoutNoticeOrder;
 
     /**
+     * Home Situation DA.
+     */
+    private final Home home;
+
+    /**
      * FL401 Respondents relationship.
      */
     private final RespondentRelationObjectType respondentRelationObject;
@@ -411,7 +429,7 @@ public class CaseData implements MappableObject {
     /**
      * Issue and send to local court'.
      */
-    private final List<Element<LocalCourtAdminEmail>> localCourtAdminEmail;
+    private final List<Element<LocalCourtAdminEmail>> localCourtAdmin;
 
     /**
      * This field contains Application Submitter solicitor email address.
@@ -433,10 +451,26 @@ public class CaseData implements MappableObject {
 
     @JsonProperty("finalDocument")
     private final Document finalDocument;
+  
+    /**
+     * Confidentiality details.
+     */
+    private final List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
+    private final List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
 
     /**
      *  Withdraw Application.
      */
     private final WithdrawApplication withDrawApplicationData;
+
+    /**
+     * Send to Gatekeeper.
+     */
+    private final List<Element<GatekeeperEmail>> gatekeeper;
+
+    /**
+     * FL401 Other Proceedings.
+     */
+    private final FL401OtherProceedingDetails fl401OtherProceedingDetails;
 
 }

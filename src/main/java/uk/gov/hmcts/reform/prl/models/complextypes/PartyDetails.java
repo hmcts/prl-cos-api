@@ -29,16 +29,13 @@ public class PartyDetails {
     private final Gender gender;
     private final String otherGender;
     private final String placeOfBirth;
-    private final Address address;
     private final DontKnow isAddressUnknown;
     private final YesOrNo isAddressConfidential;
     private final YesOrNo isAtAddressLessThan5Years;
     private final String addressLivedLessThan5YearsDetails;
     private final YesOrNo canYouProvideEmailAddress;
-    private final String email;
     private final YesOrNo isEmailAddressConfidential;
     private final String landline;
-    private final String phoneNumber;
     private final YesOrNo isPhoneNumberConfidential;
     private final String relationshipToChildren;
     private final YesOrNo isDateOfBirthKnown;
@@ -56,7 +53,26 @@ public class PartyDetails {
     private final YesNoDontKnow doTheyHaveLegalRepresentation;
     private final String sendSignUpLink;
     private final String solicitorEmail;
+    private String phoneNumber;
+    private String email;
+    private Address address;
+    private final String solicitorTelephone;
     private final String caseTypeOfApplication;
     private final YesOrNo respondentLivedWithApplicant;
     private final Organisations organisations;
+
+    public boolean hasConfidentialInfo() {
+        return this.isAddressConfidential.equals(YesOrNo.Yes) || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
+    }
+
+    public boolean isCanYouProvideEmailAddress() {
+        return this.canYouProvideEmailAddress.equals(YesOrNo.No);
+    }
+
+    public boolean isEmailAddressNull() {
+        if (isCanYouProvideEmailAddress()) {
+            return this.isEmailAddressConfidential == YesOrNo.No;
+        }
+        return this.isEmailAddressConfidential == YesOrNo.Yes;
+    }
 }
