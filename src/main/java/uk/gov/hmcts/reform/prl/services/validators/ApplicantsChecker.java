@@ -144,6 +144,7 @@ public class ApplicantsChecker implements EventChecker {
         fields.add(canYouProvideEmailAddress);
         if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(Yes)) {
             fields.add(ofNullable(applicant.getEmail()));
+            fields.add(ofNullable(applicant.getIsEmailAddressConfidential()));
         }
         fields.add(ofNullable(applicant.getPhoneNumber()));
         fields.add(ofNullable(applicant.getIsPhoneNumberConfidential()));
