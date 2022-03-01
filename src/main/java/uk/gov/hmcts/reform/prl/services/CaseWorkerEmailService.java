@@ -284,7 +284,7 @@ public class CaseWorkerEmailService {
             .collect(Collectors.toList());
 
         String isConfidential = NO;
-        if (emailAddressInfo.stream().equals(YesOrNo.Yes)
+        if (emailAddressInfo.contains(YesOrNo.Yes)
             || (applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
             || (child.stream().anyMatch(Child::hasConfidentialInfo))) {
             isConfidential = YES;
