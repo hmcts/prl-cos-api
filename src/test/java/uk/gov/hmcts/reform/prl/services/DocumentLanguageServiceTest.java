@@ -30,7 +30,15 @@ public class DocumentLanguageServiceTest {
     DocumentLanguageService documentLanguageService;
 
     @Test
-    public void whenApplicationLanguageIsEngReturnTrueAndisGenWelshReturnFalse() {
+    public void whenWelshLanguageRequirementIsNotPresentIsGenEngReturnTrueAndIsGenWelshReturnFalse() {
+        caseData = CaseData.builder().build();
+
+        assertTrue(documentLanguageService.docGenerateLang(caseData).isGenEng());
+        assertFalse(documentLanguageService.docGenerateLang(caseData).isGenWelsh());
+    }
+
+    @Test
+    public void whenApplicationLanguageIsEngReturnTrueAndIsGenWelshReturnFalse() {
         caseData = caseData.toBuilder()
             .welshLanguageRequirementApplication(ENGLISH)
             .build();
