@@ -35,5 +35,8 @@ public class Child {
     private final List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild;
     private final String parentalResponsibilityDetails;
 
+    public boolean hasConfidentialInfo() {
+        return this.isChildAddressConfidential.equals(YesOrNo.Yes);
+    }
 
 }
