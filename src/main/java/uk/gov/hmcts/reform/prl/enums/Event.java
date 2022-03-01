@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Event {
 
-
     CASE_NAME("caseName", "Case name"),
     TYPE_OF_APPLICATION("selectApplicationType", "Type of application"),
     HEARING_URGENCY("hearingUrgency",  "Hearing urgency"),
@@ -33,7 +32,8 @@ public enum Event {
     FL401_TYPE_OF_APPLICATION("fl401TypeOfApplication", "Type of application"),
     FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's Family"),
     STATEMENT_OF_TRUTH_AND_SUBMIT("statementOfTruthAndSubmit", "Statement of Truth and Submit"),
-    UPLOAD_DOCUMENTS("uploadDocuments", "Upload Documents");
+    UPLOAD_DOCUMENTS("uploadDocuments", "Upload Documents"),
+    FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings");
 
 
     private final String id;
@@ -52,7 +52,5 @@ public enum Event {
     public static Event getValue(String key) {
         return Event.valueOf(key);
     }
-
-
 
 }

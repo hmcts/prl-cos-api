@@ -37,7 +37,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
+import uk.gov.hmcts.reform.prl.models.complextypes.GatekeeperEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
@@ -425,7 +427,7 @@ public class CaseData implements MappableObject {
     /**
      * Issue and send to local court'.
      */
-    private final List<Element<LocalCourtAdminEmail>> localCourtAdminEmail;
+    private final List<Element<LocalCourtAdminEmail>> localCourtAdmin;
 
     /**
      * This field contains Application Submitter solicitor email address.
@@ -452,5 +454,15 @@ public class CaseData implements MappableObject {
      *  Withdraw Application.
      */
     private final WithdrawApplication withDrawApplicationData;
+
+    /**
+     * Send to Gatekeeper.
+     */
+    private final List<Element<GatekeeperEmail>> gatekeeper;
+
+    /**
+     * FL401 Other Proceedings.
+     */
+    private final FL401OtherProceedingDetails fl401OtherProceedingDetails;
 
 }
