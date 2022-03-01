@@ -68,8 +68,10 @@ public class PrePopulateFeeAndSolicitorNameController {
         boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
                                                                                      .getCaseDetails().getCaseData());
 
-        if(!mandatoryEventStatus)
-            errorList.add("Submit and pay is not allowed for this application unless you are finished with mandatory events");
+        if (!mandatoryEventStatus) {
+            errorList.add(
+                "Submit and pay is not allowed for this application unless you are finished with mandatory events");
+        }
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
         FeeResponse feeResponse = null;

@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -77,6 +78,9 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     @Mock
     private CaseData caseData;
 
+    @Mock
+    SubmitAndPayChecker submitAndPayChecker;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     @Before
@@ -111,6 +115,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
+        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+
         when(dgsService.generateDocument(authToken,
                                           callbackRequest.getCaseDetails(),
                                           "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
@@ -137,6 +143,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
+        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+
         when(dgsService.generateDocument(authToken,
                                           callbackRequest.getCaseDetails(),
                                           "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
@@ -160,6 +168,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .caseDetails(caseDetails)
             .build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
+        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
 
         when(dgsService.generateDocument(authToken,
                                           callbackRequest.getCaseDetails(),
@@ -220,6 +229,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         Court court1 = Court.builder()
             .courtName("testcourt")
             .build();
+        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
 
         when(courtFinderService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails().getCaseData()))
             .thenReturn(court1);
