@@ -55,10 +55,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.ENGLISH;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(SpringRunner.class)
 public class CallbackControllerTest {
@@ -185,6 +187,9 @@ public class CallbackControllerTest {
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
         CaseData caseData = CaseData.builder()
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(ENGLISH)
+            .languageRequirementApplicationNeedWelsh(Yes)
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
