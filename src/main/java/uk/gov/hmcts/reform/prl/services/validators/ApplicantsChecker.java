@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -25,6 +26,7 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.APPLICANTS_DETAILS_E
 import static uk.gov.hmcts.reform.prl.enums.Gender.other;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@Slf4j
 @Service
 public class ApplicantsChecker implements EventChecker {
 
@@ -127,7 +129,10 @@ public class ApplicantsChecker implements EventChecker {
         }
         Optional<Address> address = ofNullable(applicant.getAddress());
         fields.add(address);
+        log.info("----------------------");
+        log.info(address.toString());
         if (address.isPresent() && !verifyAddressCompleted(address.get())) {
+            log.info("WE ARE HERE");
             return false;
         }
         fields.add(ofNullable(applicant.getIsAddressConfidential()));
