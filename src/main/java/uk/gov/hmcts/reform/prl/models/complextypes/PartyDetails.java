@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
@@ -14,8 +15,10 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 import java.time.LocalDate;
 import java.util.List;
 
+
 @Data
 @Builder(toBuilder = true)
+@AllArgsConstructor
 public class PartyDetails {
 
     private final String firstName;
@@ -54,10 +57,22 @@ public class PartyDetails {
     private String email;
     private Address address;
     private final Organisations organisations;
+    private final String solicitorTelephone;
+    private final String caseTypeOfApplication;
+    private final YesOrNo respondentLivedWithApplicant;
 
     public boolean hasConfidentialInfo() {
-        return this.isAddressConfidential.equals(YesOrNo.Yes)
-            || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
+        return this.isAddressConfidential.equals(YesOrNo.Yes) || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
     }
 
+    public boolean isCanYouProvideEmailAddress() {
+        return this.canYouProvideEmailAddress.equals(YesOrNo.No);
+    }
+
+    public boolean isEmailAddressNull() {
+        if (isCanYouProvideEmailAddress()) {
+            return this.isEmailAddressConfidential == YesOrNo.No;
+        }
+        return this.isEmailAddressConfidential == YesOrNo.Yes;
+    }
 }

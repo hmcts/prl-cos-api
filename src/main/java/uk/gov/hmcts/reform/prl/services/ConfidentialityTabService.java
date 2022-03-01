@@ -19,8 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+
 
 @Slf4j
 @Service

@@ -14,7 +14,9 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.stream.JsonCollectors;
 
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CHILD_ARRANGEMENT_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_ARRANGEMENT_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_EVENT_CODE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_EVENT_SEQUENCE;
 
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -59,8 +61,8 @@ public class C100JsonMapper {
     private JsonArray getEvents(CaseData caseData) {
 
         List<EventsData> listEvents = new ArrayList<EventsData>();
-        listEvents.add(EventsData.builder().dateReceived(String.valueOf(LocalDateTime.now())).eventCode("001").eventDetails(
-            "caseIssued").eventSequence("1").build());
+        listEvents.add(EventsData.builder().dateReceived(String.valueOf(LocalDateTime.now())).eventCode(ISSUE_EVENT_CODE).eventDetails(
+            "caseIssued").eventSequence(ISSUE_EVENT_SEQUENCE).build());
         return listEvents.stream().map(eventsData -> new NullAwareJsonObjectBuilder()
             .add("eventSequence", eventsData.getEventSequence())
             .add("eventCode", eventsData.getEventCode())
