@@ -31,6 +31,7 @@ public class TaskListController extends AbstractCallbackController {
 
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         tabService.updateAllTabs(caseData);
-        publishEvent(new CaseDataChanged(caseData));
+        CaseData taskListCaseData = getCaseData(callbackRequest.getCaseDetails());
+        publishEvent(new CaseDataChanged(taskListCaseData));
     }
 }

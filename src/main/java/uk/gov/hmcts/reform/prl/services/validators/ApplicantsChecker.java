@@ -97,8 +97,6 @@ public class ApplicantsChecker implements EventChecker {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
 
-            log.info(applicants.toString());
-
             for (PartyDetails applicant : applicants) {
                 mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant, caseData.getCaseTypeOfApplication());
                 if (!mandatoryCompleted) {
