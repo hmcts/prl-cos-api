@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -66,8 +65,6 @@ public class SolicitorEmailService {
 
             Court court = null;
             court = courtLocatorService.getNearestFamilyCourt(caseData);
-
-            log.info("retrive court information: {} ======",court);
 
             return  SolicitorEmail.builder()
                 .caseReference(String.valueOf(caseDetails.getId()))
@@ -150,15 +147,10 @@ public class SolicitorEmailService {
         log.info("trying to send email for Solicitor FL401 {} ====:", caseDetails.getId());
 
         String solicitorEmail = "";
-
         PartyDetails fl401Applicant = emailService.getCaseData(caseDetails)
             .getApplicantsFL401();
 
-        log.info("collect applicants: {} ======",fl401Applicant);
-
         String applicantSolicitorEmail = fl401Applicant.getSolicitorEmail();
-
-        log.info("collect applicant solicitoremail {} ======",applicantSolicitorEmail);
         solicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
 
         emailService.send(
@@ -175,24 +167,17 @@ public class SolicitorEmailService {
         log.info("trying to build email for Solicitor FL401 {} ------:", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
-
         PartyDetails fl401Applicant = caseData
             .getApplicantsFL401();
 
-        log.info("Applicant details FL401 {} ====:", fl401Applicant);
         String applicantFullName = fl401Applicant.getFirstName() + " "  + fl401Applicant.getLastName();
-        log.info("Applicant details FL401 fullname{} ===:", applicantFullName);
-
-        Court court = null;
-        court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
-        log.info("Retrieving the court details{} ===:", court);
 
         return  SolicitorEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantFullName)
-            .courtName(court.getCourtName())
-            .courtEmail("FL401applications@justice.gov.uk")
+            .courtName(caseData.getCourtName())
+            .courtEmail(caseData.getCourtEmailAddress())
             .caseLink(manageCaseUrl + "/" + caseData.getId())
             .build();
     }

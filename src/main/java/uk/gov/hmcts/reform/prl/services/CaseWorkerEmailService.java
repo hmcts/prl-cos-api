@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.GatekeeperEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -278,9 +277,14 @@ public class CaseWorkerEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
+        List<YesOrNo> emailAddressInfo = applicants.stream()
+            .filter(eachParty -> null != eachParty.getIsEmailAddressConfidential()
+                && YesOrNo.Yes.equals(eachParty.getIsEmailAddressConfidential()))
+            .map(PartyDetails::getIsEmailAddressConfidential)
+            .collect(Collectors.toList());
+
         String isConfidential = NO;
-        if ((applicants.stream().noneMatch(PartyDetails::isCanYouProvideEmailAddress)
-            && applicants.stream().anyMatch(PartyDetails::isEmailAddressNull))
+        if (emailAddressInfo.stream().equals(YesOrNo.Yes)
             || (applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
             || (child.stream().anyMatch(Child::hasConfidentialInfo))) {
             isConfidential = YES;
