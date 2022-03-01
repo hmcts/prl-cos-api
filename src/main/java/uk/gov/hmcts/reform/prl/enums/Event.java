@@ -27,9 +27,11 @@ public enum Event {
     FL401_CASE_NAME("fl401CaseName", "Case name"),
     RESPONDENT_BEHAVIOUR("respondentBehaviour", "Respondent's Behaviour"),
     WITHOUT_NOTICE_ORDER("withoutNoticeOrderDetails", "Without notice order"),
+    FL401_HOME("fl401Home", "The Home"),
     RELATIONSHIP_TO_RESPONDENT("respondentRelationship","Relationship to respondent"),
     FL401_TYPE_OF_APPLICATION("fl401TypeOfApplication", "Type of application"),
     FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's Family"),
+    FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings"),
     FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents");
 
 
