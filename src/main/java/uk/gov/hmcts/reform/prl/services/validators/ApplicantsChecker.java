@@ -49,8 +49,6 @@ public class ApplicantsChecker implements EventChecker {
             return false;
         }
 
-        boolean allFinished = true;
-
         List<PartyDetails> applicants = applicantsWrapped.get()
             .stream()
             .map(Element::getValue)
@@ -116,8 +114,6 @@ public class ApplicantsChecker implements EventChecker {
     }
 
     private boolean mandatoryApplicantFieldsAreCompleted(PartyDetails applicant, String caseTypeOfApplication) {
-
-
         List<Optional> fields = new ArrayList<>();
         fields.add(ofNullable(applicant.getFirstName()));
         fields.add(ofNullable(applicant.getLastName()));
@@ -148,7 +144,6 @@ public class ApplicantsChecker implements EventChecker {
         fields.add(canYouProvideEmailAddress);
         if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(Yes)) {
             fields.add(ofNullable(applicant.getEmail()));
-            fields.add(ofNullable(applicant.getIsAddressConfidential()));
         }
         fields.add(ofNullable(applicant.getPhoneNumber()));
         fields.add(ofNullable(applicant.getIsPhoneNumberConfidential()));
@@ -160,7 +155,9 @@ public class ApplicantsChecker implements EventChecker {
             fields.add(solicitorOrg);
         } else {
             Optional<Address> solicitorAddress = ofNullable(applicant.getSolicitorAddress());
-            if (solicitorAddress.isPresent() && ofNullable(solicitorAddress.get().getAddressLine1()).isEmpty()) {
+            if (solicitorAddress.isPresent()
+                && (ofNullable(solicitorAddress.get().getAddressLine1()).isEmpty()
+                && ofNullable(solicitorAddress.get().getPostCode()).isEmpty())) {
                 return false;
             }
             fields.add(solicitorAddress);
