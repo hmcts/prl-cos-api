@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
@@ -78,6 +79,7 @@ public class CallbackController {
     private final OrganisationService organisationService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
     private final SolicitorEmailService solicitorEmailService;
+    private final CaseWorkerEmailService caseWorkerEmailService;
 
     private final DgsService dgsService;
     private final ObjectMapper objectMapper;
@@ -191,9 +193,9 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/generate-c8-c1a-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to generate and store document")
-    public AboutToStartOrSubmitCallbackResponse generateC8AndOtherDocument(
+    @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to Issue and send to local court")
+    public AboutToStartOrSubmitCallbackResponse issueAndSendToLocalCourt(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
@@ -300,6 +302,13 @@ public class CallbackController {
 
         caseDataUpdated.putAll(allTabsFields);
         caseDataUpdated.put("issueDate",caseData.getIssueDate());
+
+        try {
+            caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
+        } catch (Exception ex) {
+            log.info("Email notification could not be sent due to following {}", ex.getMessage());
+        }
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -342,4 +351,27 @@ public class CallbackController {
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+    @PostMapping(path = "/send-to-gatekeeper", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Send Email Notification on Send to gatekeeper ")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse sendEmailForSendToGatekeeper(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) throws Exception {
+
+        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseWorkerEmailService.sendEmailToGateKeeper(caseDetails);
+
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
+
+        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+        caseDataUpdated.putAll(allTabsFields);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
 }

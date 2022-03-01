@@ -24,7 +24,7 @@ public class CaseUtils {
             .createdDate(caseDetails.getCreatedDate())
             .lastModifiedDate(caseDetails.getLastModified());
 
-        if (null != state && (State.SUBMITTED_PAID.equals(state))) {
+        if ((State.SUBMITTED_PAID.equals(state))) {
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
             caseDataBuilder.dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
         }

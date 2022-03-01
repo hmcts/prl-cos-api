@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -40,6 +41,8 @@ import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -98,6 +101,9 @@ public class CallbackControllerTest {
 
     @Mock
     private DocumentLanguageService documentLanguageService;
+
+    private CaseWorkerEmailService caseWorkerEmailService;
+
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
@@ -247,7 +253,7 @@ public class CallbackControllerTest {
         verifyNoMoreInteractions(dgsService);
         verifyNoMoreInteractions(organisationService);
     }
-
+  
     @Test
     public void testGenerateAndStoreC8Document() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -266,6 +272,129 @@ public class CallbackControllerTest {
             .gender(Gender.male)
             .email("abc@xyz.com")
             .phoneNumber("1234567890")
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        OtherPersonWhoLivesWithChild personWhoLivesWithChild = OtherPersonWhoLivesWithChild.builder()
+            .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
+            .firstName("test First Name").lastName("test Last Name").address(address).build();
+
+        Element<OtherPersonWhoLivesWithChild> wrappedList = Element.<OtherPersonWhoLivesWithChild>builder().value(
+            personWhoLivesWithChild).build();
+        List<Element<OtherPersonWhoLivesWithChild>> listOfOtherPersonsWhoLivedWithChild = Collections.singletonList(
+            wrappedList);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .childrenKnownToLocalAuthorityTextArea("Test")
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
+            .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder().children(listOfChildren).childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .childrenKnownToLocalAuthorityTextArea("Test")
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
+            .applicants(applicantList)
+            .allegationsOfHarmYesNo(YesOrNo.Yes)
+            .allegationsOfHarmChildAbductionYesNo(YesOrNo.Yes)
+            .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
+            .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
+            .id(123L)
+            .build();
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+
+        CallbackResponse callbackResponse = CallbackResponse.builder()
+            .data(CaseData.builder()
+                      .id(123L)
+                      .c8Document(Document.builder()
+                                      .documentUrl(generatedDocumentInfo.getUrl())
+                                      .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                      .documentHash(generatedDocumentInfo.getHashToken())
+                                      .documentFileName(PRL_C8_TEMPLATE)
+                                      .build())
+                      .c1ADocument(Document.builder()
+                                       .documentUrl(generatedDocumentInfo.getUrl())
+                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                       .documentHash(generatedDocumentInfo.getHashToken())
+                                       .documentFileName(PRL_C8_TEMPLATE)
+                                       .build())
+                      .finalDocument(Document.builder()
+                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                         .documentFileName(C100_FINAL_TEMPLATE)
+                                         .build())
+                      .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+            .thenReturn(generatedDocumentInfo);
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.generateC8AndOtherDocument(
+            authToken,
+            callbackRequest
+        );
+
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
+        verify(dgsService, times(3)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.anyString()
+        );
+        verify(organisationService,times(1))
+            .getApplicantOrganisationDetails(caseData);
+        verify(organisationService,times(1))
+            .getRespondentOrganisationDetails(caseData);
+        verifyNoMoreInteractions(dgsService);
+        verifyNoMoreInteractions(organisationService);
+    }
+
+    @Test
+    public void testIssueAndSendLocalCourt() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Address address = Address.builder()
+            .addressLine1("address")
+            .postTown("London")
+            .build();
+
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
@@ -373,9 +502,9 @@ public class CallbackControllerTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
 
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.generateC8AndOtherDocument(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.issueAndSendToLocalCourt(
+
             authToken,
             callbackRequest
         );
@@ -395,6 +524,9 @@ public class CallbackControllerTest {
             .getRespondentOrganisationDetails(caseData);
         verifyNoMoreInteractions(dgsService);
         //verifyNoMoreInteractions(organisationService);
+
+        verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
+
     }
 
     @Test
@@ -480,5 +612,58 @@ public class CallbackControllerTest {
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
         verify(solicitorEmailService, times(1))
             .sendEmailToSolicitor(callbackRequest.getCaseDetails(), userDetails);
+    }
+
+    @Test
+    public void testSendToGateKeeperNotification() throws Exception {
+
+        PartyDetails applicant1 = PartyDetails.builder()
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant1).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Child child = Child.builder()
+            .isChildAddressConfidential(YesOrNo.No)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        String isConfidential = "No";
+        if (applicant1.hasConfidentialInfo() || child.hasConfidentialInfo()) {
+            isConfidential = "Yes";
+        }
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicants(listOfApplicants)
+            .children(listOfChildren)
+            .isCaseUrgent(YesOrNo.No)
+            .build();
+
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .data(stringObjectMap).build()).build();
+
+        callbackController.sendEmailForSendToGatekeeper(authToken, callbackRequest);
+        verify(caseWorkerEmailService, times(1))
+            .sendEmailToGateKeeper(callbackRequest.getCaseDetails());
     }
 }
