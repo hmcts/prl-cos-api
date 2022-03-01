@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -388,55 +389,17 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testSendToGateKeeperNotification() throws Exception {
+    public void testCopyFL401CasenameToC100CaseName() throws Exception {
 
-        PartyDetails applicant1 = PartyDetails.builder()
-            .canYouProvideEmailAddress(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .build();
-
-        String applicantNames = "TestFirst TestLast";
-
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant1).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        Child child = Child.builder()
-            .isChildAddressConfidential(YesOrNo.No)
-            .build();
-
-        String childNames = "child1 child2";
-
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        String isConfidential = "No";
-        if (applicant1.hasConfidentialInfo() || child.hasConfidentialInfo()) {
-            isConfidential = "Yes";
-        }
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .applicants(listOfApplicants)
-            .children(listOfChildren)
-            .isCaseUrgent(YesOrNo.No)
-            .build();
-
-        LocalDate issueDate = LocalDate.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        Map<String, Object> stringObjectMap = new HashMap<>();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
-
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("applicantCaseName","test");
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .data(stringObjectMap).build()).build();
-
-        callbackController.sendEmailForSendToGatekeeper(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(1))
-            .sendEmailToGateKeeper(callbackRequest.getCaseDetails());
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .copyFL401CasenameToC100CaseName(authToken, callbackRequest);
+        assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantOrRespondentCaseName"));
     }
 }
