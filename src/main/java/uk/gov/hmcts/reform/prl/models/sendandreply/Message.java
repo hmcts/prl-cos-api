@@ -23,7 +23,7 @@ public class Message extends MessageMetaData {
 
     private String dateSent;
     private String messageContent;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS")
     private LocalDateTime updatedTime;
     private MessageStatus status;
     private String latestMessage;
