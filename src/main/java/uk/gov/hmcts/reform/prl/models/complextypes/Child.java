@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
@@ -20,6 +22,7 @@ public class Child {
 
     private final String firstName;
     private final String lastName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOfBirth;
     private final DontKnow isDateOfBirthUnknown; //TODO: field not used
     private final Gender gender;
@@ -29,7 +32,9 @@ public class Child {
     private final String otherApplicantsRelationshipToChild;
     private final RelationshipsEnum  respondentsRelationshipToChild;
     private final String otherRespondentsRelationshipToChild;
+    @JsonIgnore
     private final Address address;
+    @JsonIgnore
     private final YesOrNo isChildAddressConfidential;
     private final List<LiveWithEnum> childLiveWith;
     private final List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild;

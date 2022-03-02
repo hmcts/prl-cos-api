@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -250,32 +251,44 @@ public class CaseData implements MappableObject {
     private final YesOrNo ordersRestraining;
     private final YesOrNo ordersOtherInjunctive;
     private final YesOrNo ordersUndertakingInPlace;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersNonMolestationDateIssued;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersNonMolestationEndDate;
     private final YesOrNo ordersNonMolestationCurrent;
     private final String ordersNonMolestationCourtName;
     private final OtherDocument ordersNonMolestationDocument;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOccupationDateIssued;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOccupationEndDate;
     private final YesOrNo ordersOccupationCurrent;
     private final String ordersOccupationCourtName;
     private final OtherDocument ordersOccupationDocument;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersForcedMarriageProtectionDateIssued;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersForcedMarriageProtectionEndDate;
     private final YesOrNo ordersForcedMarriageProtectionCurrent;
     private final String ordersForcedMarriageProtectionCourtName;
     private final OtherDocument ordersForcedMarriageProtectionDocument;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersRestrainingDateIssued;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersRestrainingEndDate;
     private final YesOrNo ordersRestrainingCurrent;
     private final String ordersRestrainingCourtName;
     private final OtherDocument ordersRestrainingDocument;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOtherInjunctiveDateIssued;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOtherInjunctiveEndDate;
     private final YesOrNo ordersOtherInjunctiveCurrent;
     private final String ordersOtherInjunctiveCourtName;
     private final OtherDocument ordersOtherInjunctiveDocument;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersUndertakingInPlaceDateIssued;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersUndertakingInPlaceEndDate;
     private final YesOrNo ordersUndertakingInPlaceCurrent;
     private final String ordersUndertakingInPlaceCourtName;

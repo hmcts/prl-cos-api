@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.documents;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Builder;
 import lombok.Value;
 
@@ -9,9 +10,13 @@ import lombok.Value;
 @Builder(toBuilder = true)
 public class Document {
 
+    @JsonProperty("document_url")
     String documentUrl;
+    @JsonProperty("document_binary_url")
     String documentBinaryUrl;
+    @JsonProperty("document_filename")
     String documentFileName;
+    @JsonProperty("document_hash")
     String documentHash;
 
     @JsonCreator
