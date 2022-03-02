@@ -66,6 +66,7 @@ public enum Event {
             RELATIONSHIP_TO_RESPONDENT,
             FL401_APPLICANT_FAMILY_DETAILS,
             RESPONDENT_BEHAVIOUR,
+            FL401_HOME,
             OTHER_PROCEEDINGS,
             ATTENDING_THE_HEARING,
             INTERNATIONAL_ELEMENT,
