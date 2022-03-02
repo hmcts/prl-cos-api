@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @RequiredArgsConstructor
+@JsonSerialize(using = CustomEnumSerializer.class)
 public enum SpokenOrWrittenWelshEnum {
 
     @JsonProperty("spoken")
@@ -16,5 +18,15 @@ public enum SpokenOrWrittenWelshEnum {
     both("Both");
 
     private final String displayedValue;
+
+    @JsonValue
+    public String getDisplayedValue() {
+        return displayedValue;
+    }
+
+    @JsonCreator
+    public static SpokenOrWrittenWelshEnum getValue(String key) {
+        return SpokenOrWrittenWelshEnum.valueOf(key);
+    }
 
 }

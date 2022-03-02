@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @RequiredArgsConstructor
+@JsonSerialize(using = CustomEnumSerializer.class)
 public enum MiamPreviousAttendanceChecklistEnum {
 
     @JsonProperty("miamPreviousAttendanceChecklistEnum_Value_1")
@@ -35,5 +37,16 @@ public enum MiamPreviousAttendanceChecklistEnum {
             "the application for those proceedings");
 
     private final String displayedValue;
+
+    @JsonValue
+    public String getDisplayedValue() {
+        return displayedValue;
+    }
+
+    @JsonCreator
+    public static MiamPreviousAttendanceChecklistEnum getValue(String key) {
+        return MiamPreviousAttendanceChecklistEnum.valueOf(key);
+    }
+
 
 }

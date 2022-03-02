@@ -79,7 +79,6 @@ public class CaseEventHandlerTest {
         errors.add(error1);
         errors.add(error2);
 
-        when(taskListService.getC100Events()).thenReturn(c100Events);
         when(taskErrorService.getEventErrors(caseData)).thenReturn(errors);
 
         final List<Task> c100Tasks = List.of(
@@ -117,7 +116,6 @@ public class CaseEventHandlerTest {
             FL401_TYPE_OF_APPLICATION
         );
 
-        when(taskListService.getFL401Events()).thenReturn(fl410Events);
 
         final List<Task> fl401Tasks = List.of(
             Task.builder().event(CASE_NAME).state(FINISHED).build(),

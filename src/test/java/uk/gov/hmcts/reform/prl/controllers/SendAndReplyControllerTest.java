@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
+
 @RunWith(MockitoJUnitRunner.class)
 public class SendAndReplyControllerTest {
 
@@ -159,12 +160,7 @@ public class SendAndReplyControllerTest {
         SendAndReplyEventData eventData = SendAndReplyEventData.builder().chooseSendOrReply(SEND).build();
         CaseData caseData = CaseData.builder().id(12345L).sendAndReplyEventData(eventData).build();
         Message message = Message.builder().build();
-        CaseData caseDataWithMessage = CaseData.builder().id(12345L).sendAndReplyEventData(eventData)
-            .openMessages(Collections.singletonList(element(message)))
-            .build();
-        Map<String, Object> caseDataMap = new HashMap<>();
 
-        when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.buildNewSendMessage(caseData)).thenReturn(message);
         when(sendAndReplyService.addNewMessage(caseData, message)).thenReturn(Collections.singletonList(element(message)));
@@ -192,7 +188,6 @@ public class SendAndReplyControllerTest {
 
         when(elementUtils.getDynamicListSelectedValue(eventData.getReplyMessageDynamicList(), objectMapper))
             .thenReturn(selectedValue);
-        when(objectMapper.convertValue(caseDataWithMessage, Map.class)).thenReturn(caseDataMap);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataWithMessage);
         when(sendAndReplyService.closeMessage(selectedValue, caseDataWithMessage))
             .thenReturn(Collections.singletonList(element(message)));
@@ -218,10 +213,9 @@ public class SendAndReplyControllerTest {
             .build();
         UUID selectedValue = UUID.randomUUID();
 
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(elementUtils.getDynamicListSelectedValue(eventData.getReplyMessageDynamicList(), objectMapper))
             .thenReturn(selectedValue);
-        when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
@@ -245,7 +239,6 @@ public class SendAndReplyControllerTest {
 
         when(elementUtils.getDynamicListSelectedValue(eventData.getReplyMessageDynamicList(), objectMapper))
             .thenReturn(selectedValue);
-        when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.buildNewReplyMessage(selectedValue, message, caseData.getOpenMessages()))
             .thenReturn(Collections.singletonList(element(message)));
