@@ -23,11 +23,12 @@ public enum EventErrorsEnum {
     ALLEGATIONS_OF_HARM_ERROR("Add details about allegations of harm"),
 
     //FL401 ERRORS
-    WITHOUT_NOTICE_ORDER_ERROR("Add Without Notice Order details"),
-    RELATIONSHIP_TO_RESPONDENT_ERROR("Add details about relationship to respondent"),
-    FL401_APPLICANT_FAMILY_ERROR("Add details about applicant's family"),
+    WITHOUT_NOTICE_ORDER_ERROR("Ensure all relevant information has been added"),
+    RELATIONSHIP_TO_RESPONDENT_ERROR("Ensure you have added all relevant information"),
+    FL401_APPLICANT_FAMILY_ERROR("Ensure you have completed all relevant information"),
     FL401_TYPE_OF_APPLICATION_ERROR("Ensure you have added all relevant information"),
-    RESPONDENT_BEHAVIOUR_ERROR("Add details about respondent behaviour");
+    RESPONDENT_BEHAVIOUR_ERROR("Ensure you have added relevant information"),
+    HOME_ERROR("Ensure you have added all relevant details");
 
     private final String error;
 
