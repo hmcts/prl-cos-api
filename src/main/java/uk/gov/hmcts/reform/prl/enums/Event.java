@@ -11,7 +11,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @RequiredArgsConstructor
 public enum Event {
 
-
     CASE_NAME("caseName", "Case name"),
     TYPE_OF_APPLICATION("selectApplicationType", "Type of application"),
     HEARING_URGENCY("hearingUrgency",  "Hearing urgency"),
