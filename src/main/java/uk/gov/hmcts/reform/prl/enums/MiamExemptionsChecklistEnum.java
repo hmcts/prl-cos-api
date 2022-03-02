@@ -1,11 +1,14 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
-@Getter
+
 @RequiredArgsConstructor
+@JsonSerialize(using = CustomEnumSerializer.class)
 public enum MiamExemptionsChecklistEnum {
 
     @JsonProperty("domesticViolence")
@@ -20,5 +23,15 @@ public enum MiamExemptionsChecklistEnum {
     childProtectionConcern("Child Protection Concern");
 
     private final String displayedValue;
+
+    @JsonValue
+    public String getDisplayedValue() {
+        return displayedValue;
+    }
+
+    @JsonCreator
+    public static MiamExemptionsChecklistEnum getValue(String key) {
+        return MiamExemptionsChecklistEnum.valueOf(key);
+    }
 
 }

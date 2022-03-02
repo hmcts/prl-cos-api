@@ -1,13 +1,13 @@
 package uk.gov.hmcts.reform.prl.enums;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JacksonStdImpl;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
+import java.io.IOException;
+import java.lang.reflect.Method;
 
 @JacksonStdImpl
 public class CustomEnumSerializer extends StdSerializer<Enum<?>> {
@@ -28,9 +28,9 @@ public class CustomEnumSerializer extends StdSerializer<Enum<?>> {
             Class<?> declaringClass = en.getDeclaringClass();
             Method method = declaringClass.getDeclaredMethod("getDisplayedValue");
             String displayedValue = (String) method.invoke(en);
-            if(serializers.isEnabled(SerializationFeature.WRITE_ENUM_KEYS_USING_INDEX)) {
+            if (serializers.isEnabled(SerializationFeature.WRITE_ENUM_KEYS_USING_INDEX)) {
                 gen.writeString(id);
-            } else if(serializers.isEnabled(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)) {
+            } else if (serializers.isEnabled(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)) {
                 gen.writeString(displayedValue);
             } else {
                 gen.writeString(en.toString());
