@@ -29,7 +29,6 @@ public enum EventErrorsEnum {
     RESPONDENT_BEHAVIOUR_ERROR("Ensure you have added relevant information"),
     HOME_ERROR("Ensure you have added all relevant details");
 
-
     private final String error;
 
 }

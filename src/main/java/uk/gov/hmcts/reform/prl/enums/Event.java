@@ -44,6 +44,7 @@ public enum Event {
 
     public static List<Event> getEventOrder(String caseType) {
         List<Event> c100 = List.of(
+            CASE_NAME,
             TYPE_OF_APPLICATION,
             HEARING_URGENCY,
             APPLICANT_DETAILS,
@@ -59,12 +60,13 @@ public enum Event {
             WELSH_LANGUAGE_REQUIREMENTS
         );
         List<Event> fl401 = List.of(
+            FL401_CASE_NAME,
             FL401_TYPE_OF_APPLICATION,
             WITHOUT_NOTICE_ORDER,
             APPLICANT_DETAILS,
             RESPONDENT_DETAILS,
-            RELATIONSHIP_TO_RESPONDENT,
             FL401_APPLICANT_FAMILY_DETAILS,
+            RELATIONSHIP_TO_RESPONDENT,
             RESPONDENT_BEHAVIOUR,
             FL401_HOME,
             OTHER_PROCEEDINGS,

@@ -40,16 +40,6 @@ public class CaseEventHandler {
 
         List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
 
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
-            List<Event> events = taskListService.getC100Events();
-            eventErrors.removeIf(e -> !events.contains(e.getEvent()));
-        }
-
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)) {
-            List<Event> events = taskListService.getFL401Events();
-            eventErrors.removeIf(e -> !events.contains(e.getEvent()));
-        }
-
         final String taskList = taskListRenderer
             .render(tasks, eventErrors, caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE));
 
