@@ -71,10 +71,14 @@ public class OrganisationService {
 
             String organisationID = respondent.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
-                organisations = getOrganisationDetaiils(userToken, organisationID);
-                respondent = respondent.toBuilder()
-                    .organisations(organisations)
-                    .build();
+                try {
+                    organisations = getOrganisationDetaiils(userToken, organisationID);
+                    respondent = respondent.toBuilder()
+                        .organisations(organisations)
+                        .build();
+                } catch (Exception e) {
+                    log.info("OrganisationsAPi return 404, organisation not present for {} {} ", organisationID, e.getMessage());
+                }
             }
         }
         return respondent;
@@ -89,11 +93,15 @@ public class OrganisationService {
         if (applicant.getSolicitorOrg() != null) {
             String organisationID = applicant.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
-                organisations = getOrganisationDetaiils(userToken, organisationID);
+                try {
+                    organisations = getOrganisationDetaiils(userToken, organisationID);
 
-                applicant = applicant.toBuilder()
-                    .organisations(organisations)
-                    .build();
+                    applicant = applicant.toBuilder()
+                        .organisations(organisations)
+                        .build();
+                } catch (Exception e) {
+                    log.info("OrganisationsAPi return 404, organisation not present for {} {} ", organisationID, e.getMessage());
+                }
             }
         }
         return applicant;
