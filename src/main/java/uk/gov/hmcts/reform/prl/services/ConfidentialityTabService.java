@@ -32,7 +32,6 @@ public class ConfidentialityTabService {
 
 
     public boolean updateConfidentialityDetails(Long id, CaseData caseData) {
-        log.info("Updating ConfidentialityDetails");
 
         List<PartyDetails> applicants = caseData.getApplicants().stream()
             .map(Element::getValue)
