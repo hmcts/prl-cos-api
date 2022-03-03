@@ -13,10 +13,10 @@ import java.util.Optional;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum LanguagePreference {
 
-    @JsonProperty("ENGLISH")
-    ENGLISH("English"),
-    @JsonProperty("WELSH")
-    WELSH("Welsh");
+    @JsonProperty("english")
+    english("English"),
+    @JsonProperty("welsh")
+    welsh("Welsh");
 
 
     private final String displayedValue;
@@ -26,6 +26,6 @@ public enum LanguagePreference {
             .map(YesOrNo.Yes::equals)
             .orElse(false);
 
-        return preferredLanguageIsWelsh ? LanguagePreference.WELSH : LanguagePreference.ENGLISH;
+        return preferredLanguageIsWelsh ? LanguagePreference.welsh : LanguagePreference.english;
     }
 }
