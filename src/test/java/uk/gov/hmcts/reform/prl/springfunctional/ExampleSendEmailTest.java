@@ -51,7 +51,7 @@ public class ExampleSendEmailTest {
             TestConstants.TEST_SOLICITOR_EMAIL,
             EmailTemplateNames.EXAMPLE,
             expectedPersonalisation(),
-            LanguagePreference.english
+            LanguagePreference.ENGLISH
         );
     }
 

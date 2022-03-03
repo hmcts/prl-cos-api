@@ -396,7 +396,7 @@ public class SendAndReplyServiceTest {
             message1.getRecipientEmail(),
             EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION,
             email,
-            LanguagePreference.english
+            LanguagePreference.ENGLISH
         );
     }
 }

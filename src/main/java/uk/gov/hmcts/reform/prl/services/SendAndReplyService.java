@@ -76,7 +76,7 @@ public class SendAndReplyService {
                 message.getRecipientEmail(),
                 EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION,
                 buildNotificationEmail(caseData, message),
-                LanguagePreference.english);
+                LanguagePreference.ENGLISH);
     }
 
 
