@@ -37,4 +37,6 @@ public class PrlAppsConstants {
     public static final String NO_SMALL = "no";
 
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
+
+    public static final String TESTING_PR = "Testing";
 }
