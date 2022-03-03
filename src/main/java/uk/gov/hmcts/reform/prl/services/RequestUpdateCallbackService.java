@@ -48,11 +48,14 @@ public class RequestUpdateCallbackService {
         String systemUpdateUserId = systemUserService.getUserId(userToken);
         log.info("Fetching the Case details based on caseId {}", serviceRequestUpdateDto.getCcdCaseNumber()
         );
+
         CaseDetails caseDetails = coreCaseDataApi.getCase(
             userToken,
             authTokenGenerator.generate(),
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
+
+        log.info("caseDetails: " + caseDetails);
 
         if (!Objects.isNull(caseDetails.getId())) {
             if (confidentialityTabService
