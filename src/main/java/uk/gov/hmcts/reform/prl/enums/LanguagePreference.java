@@ -14,9 +14,9 @@ import java.util.Optional;
 public enum LanguagePreference {
 
     @JsonProperty("english")
-    ENGLISH("english"),
+    english("english"),
     @JsonProperty("welsh")
-    WELSH("welsh");
+    welsh("welsh");
 
 
     private final String displayedValue;
@@ -26,6 +26,6 @@ public enum LanguagePreference {
             .map(YesOrNo.Yes::equals)
             .orElse(false);
 
-        return preferredLanguageIsWelsh ? LanguagePreference.WELSH : LanguagePreference.ENGLISH;
+        return preferredLanguageIsWelsh ? LanguagePreference.welsh : LanguagePreference.english;
     }
 }
