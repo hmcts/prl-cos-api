@@ -54,10 +54,8 @@ public class RequestUpdateCallbackService {
             authTokenGenerator.generate(),
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
-        log.info("Getting caseDetails...");
 
         if (!Objects.isNull(caseDetails.getId())) {
-            log.info("caseDetails.getId() is not null");
             if (confidentialityTabService
                 .updateConfidentialityDetails(caseDetails.getId(), objectMapper.convertValue(
                     caseDetails.getData(),
