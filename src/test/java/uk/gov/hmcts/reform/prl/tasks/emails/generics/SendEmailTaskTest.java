@@ -61,7 +61,7 @@ public class SendEmailTaskTest {
 
     @Test
     public void getLanguageShouldReturnEnglishWhenNotSpecified() {
-        assertThat(task.getLanguage(CaseDetailsProvider.empty()), is(LanguagePreference.english));
+        assertThat(task.getLanguage(CaseDetailsProvider.empty()), is(LanguagePreference.ENGLISH));
     }
 
     @Test
@@ -69,7 +69,7 @@ public class SendEmailTaskTest {
         asList(CaseDataProvider.english(), CaseDataProvider.empty()).forEach(caseData -> {
             assertThat(
                 task.getLanguage(CaseDetailsProvider.of(caseData)),
-                is(LanguagePreference.english)
+                is(LanguagePreference.ENGLISH)
             );
         });
     }
@@ -80,7 +80,7 @@ public class SendEmailTaskTest {
 
         assertThat(
             task.getLanguage(CaseDetailsProvider.of(caseData)),
-            is(LanguagePreference.welsh)
+            is(LanguagePreference.WELSH)
         );
     }
 
@@ -121,7 +121,7 @@ public class SendEmailTaskTest {
             TEST_EMAIL,
             EMAIL_TEMPLATE_ID,
             EmailTemplateVarsProvider.empty(),
-            LanguagePreference.english
+            LanguagePreference.ENGLISH
         );
     }
 
