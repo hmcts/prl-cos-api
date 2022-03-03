@@ -17,7 +17,7 @@ public enum LanguagePreference {
     WELSH("welsh");
 
 
-    private final String code;
+    private final String displayedValue;
 
     public static LanguagePreference getLanguagePreference(CaseData caseData) {
         boolean preferredLanguageIsWelsh = Optional.ofNullable(caseData.getLanguagePreferenceWelsh())
