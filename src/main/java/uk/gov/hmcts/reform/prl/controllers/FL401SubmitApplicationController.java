@@ -27,9 +27,15 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -61,10 +67,36 @@ public class FL401SubmitApplicationController {
     private CaseWorkerEmailService caseWorkerEmailService;
 
     @Autowired
+    private FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
     private DgsService dgsService;
+
+    @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to send FL401 application notification. ")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Application Submitted."),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public CallbackResponse fl401SubmitApplicationValidation(@RequestHeader("Authorization")
+                                                                 String authorisation,
+                                                             @RequestBody CallbackRequest callbackRequest)
+        throws Exception {
+
+        List<String> errorList = new ArrayList<>();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        boolean mandatoryEventStatus = fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData);
+
+        if (!mandatoryEventStatus) {
+            errorList.add(
+                "Statement of Truth and submit is not allowed for this case unless you finish all the mandatory events");
+        }
+        return CallbackResponse.builder()
+            .errors(errorList)
+            .build();
+    }
 
     @PostMapping(path = "/fl401-generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to generate FL401 final document and submit application. ")
@@ -137,6 +169,11 @@ public class FL401SubmitApplicationController {
 
         solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
         caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        caseData = caseData.toBuilder()
+            .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
+            .build();
 
         return CallbackResponse.builder()
             .data(caseData)
