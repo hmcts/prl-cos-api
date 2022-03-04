@@ -54,6 +54,11 @@ public class FL401ApplicationTypeChecker implements EventChecker {
                 taskErrorService.removeError(FL401_TYPE_OF_APPLICATION_ERROR);
                 return true;
             } else {
+                taskErrorService.addEventError(
+                    FL401_TYPE_OF_APPLICATION,
+                    FL401_TYPE_OF_APPLICATION_ERROR,
+                    FL401_TYPE_OF_APPLICATION_ERROR.getError()
+                );
                 return false;
             }
 
