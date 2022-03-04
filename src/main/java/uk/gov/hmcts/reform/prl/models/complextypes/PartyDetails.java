@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -58,6 +59,7 @@ public class PartyDetails {
     private String phoneNumber;
     private String email;
     private Address address;
+    private final Organisations organisations;
     private final String solicitorTelephone;
     @JsonIgnore
     private final String caseTypeOfApplication;

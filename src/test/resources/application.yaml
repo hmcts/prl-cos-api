@@ -175,4 +175,3 @@ courtfinder:
 
 launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
-  
