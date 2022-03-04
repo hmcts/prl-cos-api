@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><testsuite errors="1" failures="0" name="uk.gov.hmcts.reform.prl.config.SwaggerPublisherTest" skipped="0" tests="1" time="6.54" timestamp="2022-03-04 03:56:29"><testcase classname="uk.gov.hmcts.reform.prl.config.SwaggerPublisherTest" name="Generate docs"><error message="Failed to load ApplicationContext" type="java.lang.IllegalStateException">Failed to load ApplicationContext</error><system-err>Failed to load ApplicationContext
-org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:132)
-org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:124)
-org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:190)
-org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:132)
-org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:244)
-</system-err></testcase></testsuite>
