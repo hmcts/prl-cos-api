@@ -22,25 +22,25 @@ public class NullAwareJsonObjectBuilder implements JsonObjectBuilder {
 
     @Override
     public JsonObjectBuilder add(String name, JsonValue value) {
-        delegate.add(name, value != null ? value : JsonObject.NULL);
+        delegate.add(name, value != null ? value : JsonValue.NULL);
         return this;
     }
 
     @Override
     public JsonObjectBuilder add(String name, String value) {
-        delegate.add(name, value != null ? Json.createValue(value) : JsonObject.NULL);
+        delegate.add(name, value != null ? Json.createValue(value) : JsonValue.NULL);
         return this;
     }
 
     @Override
     public JsonObjectBuilder add(String name, BigInteger value) {
-        delegate.add(name, value != null ? Json.createValue(value) : JsonObject.NULL);
+        delegate.add(name, value != null ? Json.createValue(value) : JsonValue.NULL);
         return this;
     }
 
     @Override
     public JsonObjectBuilder add(String name, BigDecimal value) {
-        delegate.add(name, value != null ? Json.createValue(value) : JsonObject.NULL);
+        delegate.add(name, value != null ? Json.createValue(value) : JsonValue.NULL);
         return this;
     }
 
