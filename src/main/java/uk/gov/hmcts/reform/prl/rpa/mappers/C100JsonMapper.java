@@ -54,13 +54,12 @@ public class C100JsonMapper {
             .add("feeAmount", caseData.getFeeAmount())
             .add("familyManNumber", caseData.getFamilymanCaseNumber())
             .add("others", getOthers(caseData.getDateSubmitted()))
-            .add("events", getEvents(caseData))
+            .add("events", getEvents())
             .build();
     }
 
-    private JsonArray getEvents(CaseData caseData) {
-
-        List<EventsData> listEvents = new ArrayList<EventsData>();
+    private JsonArray getEvents() {
+        List<EventsData> listEvents = new ArrayList<>();
         listEvents.add(EventsData.builder().dateReceived(String.valueOf(LocalDateTime.now())).eventCode(ISSUE_EVENT_CODE).eventDetails(
             "caseIssued").eventSequence(ISSUE_EVENT_SEQUENCE).build());
         return listEvents.stream().map(eventsData -> new NullAwareJsonObjectBuilder()
