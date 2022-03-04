@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -24,8 +25,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.APPLICANTS_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.Gender.other;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
+@Slf4j
 @Service
 public class ApplicantsChecker implements EventChecker {
 
@@ -49,8 +50,6 @@ public class ApplicantsChecker implements EventChecker {
             return false;
         }
 
-        boolean allFinished = true;
-
         List<PartyDetails> applicants = applicantsWrapped.get()
             .stream()
             .map(Element::getValue)
@@ -58,7 +57,7 @@ public class ApplicantsChecker implements EventChecker {
 
         for (PartyDetails applicant : applicants) {
             Optional<String> dxNumber = ofNullable(applicant.getDxNumber());
-
+            log.info(applicant.toString());
             boolean mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant, caseData.getCaseTypeOfApplication());
             boolean dxCompleted = (dxNumber.isPresent() && !(dxNumber.get().isBlank()));
 
@@ -116,8 +115,6 @@ public class ApplicantsChecker implements EventChecker {
     }
 
     private boolean mandatoryApplicantFieldsAreCompleted(PartyDetails applicant, String caseTypeOfApplication) {
-
-
         List<Optional> fields = new ArrayList<>();
         fields.add(ofNullable(applicant.getFirstName()));
         fields.add(ofNullable(applicant.getLastName()));
@@ -148,7 +145,7 @@ public class ApplicantsChecker implements EventChecker {
         fields.add(canYouProvideEmailAddress);
         if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(Yes)) {
             fields.add(ofNullable(applicant.getEmail()));
-            fields.add(ofNullable(applicant.getIsAddressConfidential()));
+            fields.add(ofNullable(applicant.getIsEmailAddressConfidential()));
         }
         fields.add(ofNullable(applicant.getPhoneNumber()));
         fields.add(ofNullable(applicant.getIsPhoneNumberConfidential()));
@@ -160,7 +157,9 @@ public class ApplicantsChecker implements EventChecker {
             fields.add(solicitorOrg);
         } else {
             Optional<Address> solicitorAddress = ofNullable(applicant.getSolicitorAddress());
-            if (solicitorAddress.isPresent() && ofNullable(solicitorAddress.get().getAddressLine1()).isEmpty()) {
+            if (solicitorAddress.isPresent()
+                && (ofNullable(solicitorAddress.get().getAddressLine1()).isEmpty()
+                && ofNullable(solicitorAddress.get().getPostCode()).isEmpty())) {
                 return false;
             }
             fields.add(solicitorAddress);
@@ -172,9 +171,8 @@ public class ApplicantsChecker implements EventChecker {
     }
 
     public boolean verifyAddressCompleted(Address address) {
-        return allNonEmpty(
-            address.getAddressLine1()
-        );
+        return ofNullable(address.getAddressLine1()).isPresent()
+            && ofNullable(address.getPostCode()).isPresent();
     }
 
 }

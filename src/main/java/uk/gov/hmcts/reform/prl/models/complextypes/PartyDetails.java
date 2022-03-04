@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +25,7 @@ public class PartyDetails {
     private final String firstName;
     private final String lastName;
     private final String previousName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOfBirth;
     private final DontKnow isDateOfBirthUnknown;
     private final Gender gender;
@@ -56,6 +59,7 @@ public class PartyDetails {
     private String email;
     private Address address;
     private final String solicitorTelephone;
+    @JsonIgnore
     private final String caseTypeOfApplication;
     private final YesOrNo respondentLivedWithApplicant;
 
@@ -67,6 +71,7 @@ public class PartyDetails {
         return this.canYouProvideEmailAddress.equals(YesOrNo.No);
     }
 
+    @JsonIgnore
     public boolean isEmailAddressNull() {
         if (isCanYouProvideEmailAddress()) {
             return this.isEmailAddressConfidential == YesOrNo.No;

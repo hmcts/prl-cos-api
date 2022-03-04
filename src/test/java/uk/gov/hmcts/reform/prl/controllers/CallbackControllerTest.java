@@ -241,9 +241,6 @@ public class CallbackControllerTest {
             .applicantsRelationshipToChild(specialGuardian)
             .respondentsRelationshipToChild(father)
             .childLiveWith(Collections.singletonList(anotherPerson))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("test")
             .build();
@@ -334,9 +331,9 @@ public class CallbackControllerTest {
             .applicantsRelationshipToChild(specialGuardian)
             .respondentsRelationshipToChild(father)
             .childLiveWith(Collections.singletonList(anotherPerson))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
+            //.childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            // .childrenKnownToLocalAuthorityTextArea("Test")
+            //.childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("test")
             .build();
