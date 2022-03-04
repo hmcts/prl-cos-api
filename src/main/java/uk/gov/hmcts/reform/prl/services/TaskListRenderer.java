@@ -225,7 +225,7 @@ public class TaskListRenderer {
             .withTask(tasks.get(ATTENDING_THE_HEARING))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
-        final TaskSection uploadDocuments = newSection("Upload Documents")
+        final TaskSection uploadDocuments = newSection("Upload documents")
             .withTask(tasks.get(UPLOAD_DOCUMENTS));
 
         final TaskSection pdfApplication = newSection("View PDF application")
