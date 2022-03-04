@@ -51,6 +51,7 @@ public class FL401ApplicationTypeChecker implements EventChecker {
                 finished = applicationTypeLinkToCA.get().getCaApplicationNumber() != null;
             } else if (applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
                 YesOrNo.No)) {
+                taskErrorService.removeError(FL401_TYPE_OF_APPLICATION_ERROR);
                 return true;
             } else {
                 return false;
