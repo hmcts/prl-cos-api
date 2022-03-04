@@ -134,7 +134,5 @@ public class TaskListService {
         }
 
         return eventsList;
-
     }
-
 }
