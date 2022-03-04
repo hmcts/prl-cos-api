@@ -13,8 +13,8 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.TYPE_OF_APPLICATION_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_ERROR;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Slf4j
@@ -57,16 +57,20 @@ public class FL401ApplicationTypeChecker implements EventChecker {
             }
 
             if (finished) {
-                taskErrorService.removeError(TYPE_OF_APPLICATION_ERROR);
+                taskErrorService.removeError(FL401_TYPE_OF_APPLICATION_ERROR);
                 return true;
             }
             taskErrorService.addEventError(
-                TYPE_OF_APPLICATION,
-                TYPE_OF_APPLICATION_ERROR,
-                TYPE_OF_APPLICATION_ERROR.getError()
+                FL401_TYPE_OF_APPLICATION,
+                FL401_TYPE_OF_APPLICATION_ERROR,
+                FL401_TYPE_OF_APPLICATION_ERROR.getError()
             );
         }
-
+        taskErrorService.addEventError(
+            FL401_TYPE_OF_APPLICATION,
+            FL401_TYPE_OF_APPLICATION_ERROR,
+            FL401_TYPE_OF_APPLICATION_ERROR.getError()
+        );
         return false;
     }
 
