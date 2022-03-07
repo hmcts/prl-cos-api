@@ -12,8 +12,9 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.ENGLISH;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.WELSH;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.welsh;
+
 
 @Service
 @Slf4j
@@ -30,12 +31,12 @@ public class DocumentLanguageService {
         Optional<YesOrNo> welshRequirements = ofNullable(caseData.getLanguageRequirementApplicationNeedWelsh());
 
         if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(YesOrNo.Yes)) {
-            if (applicationLanguage.isPresent() && applicationLanguage.get().equals(ENGLISH)) {
+            if (applicationLanguage.isPresent() && applicationLanguage.get().equals(english)) {
                 docLanguage = docLanguage.toBuilder().isGenEng(true).build();
                 if (welshRequirements.isPresent() && welshRequirements.get().equals(YesOrNo.Yes)) {
                     docLanguage = docLanguage.toBuilder().isGenWelsh(true).build();
                 }
-            } else if (applicationLanguage.isPresent() && applicationLanguage.get().equals(WELSH)) {
+            } else if (applicationLanguage.isPresent() && applicationLanguage.get().equals(welsh)) {
                 docLanguage = docLanguage.toBuilder().isGenWelsh(true).build();
                 docLanguage = docLanguage.toBuilder().isGenEng(false).build();
                 if (englishRequirements.isPresent() && englishRequirements.get().equals(YesOrNo.Yes)) {
