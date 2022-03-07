@@ -60,13 +60,36 @@ public class WelshLangMapper {
     // Getting conditional fields from document...
     public static List<String> getCaConditionalFieldWelshLangMap() {
         return Arrays.asList("isAtAddressLessThan5Years",
-                             "");
+                             "applicationPermissionRequired",
+                             "canYouProvideEmailAddress",
+                             "childrenKnownToLocalAuthority",
+                             "isDateOfBirthKnown",
+                             "isPlaceOfBirthKnown",
+                             "isCurrentAddressKnown",
+                             "isAtAddressLessThan5YearsWithDontKnow",
+                             "canYouProvideEmailAddress",
+                             "canYouProvidePhoneNumber",
+                             "doTheyHaveLegalRepresentation",
+                             "ordersNonMolestation",
+                             "ordersOccupation",
+                             "ordersForcedMarriageProtection",
+                             "ordersRestraining",
+                             "ordersOtherInjunctive",
+                             "ordersUndertakingInPlace");
     }
 
     // Getting conditional fields and Rendering from document...
     public static List<String> getCaConditionalAndRenderingFieldWelshLangMap() {
         return Arrays.asList("isAddressConfidential",
-                             "");
+                             "typeOfChildArrangementsOrder",
+                             "isCaseUrgent",
+                             "doYouNeedAWithoutNoticeHearing",
+                             "doYouRequireAHearingWithReducedNotice",
+                             "gender",
+                             "isEmailAddressConfidential",
+                             "isPhoneNumberConfidential",
+                             "isPersonIdentityConfidential",
+                             "familyMediatorMiam");
     }
 
     // Getting CA realted values map..
@@ -101,17 +124,17 @@ public class WelshLangMapper {
                      "Gorchymyn Byw Gyda a Threulio Amser Gyda");
 
         /**
+         * Type of Application - Have you applied to the court for permission to make this application?.
+         */
+        welshMap.put("applicationPermissionRequired_Yes","Do");
+        welshMap.put("applicationPermissionRequired_No","Naddo, nid oes rhaid cael caniatâd");
+
+        /**
          * Hearing urgency - Do you need a without notice hearing?.
          */
-        //will need as a condition
         welshMap.put("doYouNeedAWithoutNoticeHearing_Yes","Ydw");
         welshMap.put("doYouNeedAWithoutNoticeHearing_No","Nac ydw");
 
-        /**
-         * Hearing urgency - Do you require a hearing with reduced notice?.
-         */
-        // YesNo for doYouRequireAHearingWithReducedNotice is using the common utils
-        // also as a condition
 
         /**
          * Hearing urgency - Are respondents aware of proceedings?.
@@ -119,35 +142,25 @@ public class WelshLangMapper {
         welshMap.put("awareOfProceeding_Yes", "Ydyn");
         welshMap.put("awareOfProceeding_No", "Nac ydyn");
 
-        /**
-         * Applicant Details - gender.
-         */
-        //from common utils also as condition
 
         /**
          * Applicant -Details - Do you need to keep the address confidential?.
          */
-        //need as condition
-        //need a confidential_mask
         welshMap.put("isAddressConfidential_Yes","Ydw");
         welshMap.put("isAddressConfidential_No","Nac ydw");
 
         /**
-         * Applicant -Details - Has applicant lived at this address for less than 5 years?.
+         * Applicant -Details - Can you provide email address?.
          */
-        //isAtAddressLessThan5Years  is using common utils but if option is no it will be "Don't know"
-        welshMap.put("canYouProvideEmailAddress_Yes","Gallaf"); // will need as condition
-        welshMap.put("canYouProvideEmailAddress_No","Na allaf"); // if no need to be don't know
-        //if yes will need confidentially mask
-        welshMap.put("isPhoneNumberConfidential_Yes","Ydw"); //need as a condition
-        welshMap.put("isPhoneNumberConfidential_No","Nac ydw");
-        //if yes will need confidentially mask
+        welshMap.put("canYouProvideEmailAddress_Yes","Gallaf");
+        welshMap.put("canYouProvideEmailAddress_No","Na allaf");
 
         /**
-         * Child Details.
+         * Applicant -Details - Do you need to keep the contact number confidential?.
          */
-        //Gender is reused
-        //Order applied for is used from type of application
+        welshMap.put("isPhoneNumberConfidential_Yes","Ydw");
+        welshMap.put("isPhoneNumberConfidential_No","Nac ydw");
+
         /**
          * Child Details - What is the applicant's relationship to child? (applicantsRelationshipToChild) & What is the respondent’s relationship to Child 1? (respondentsRelationshipToChild).
          */
@@ -170,58 +183,30 @@ public class WelshLangMapper {
         /**
          * Child Details - Do you need to keep the identity of the person that the child lives with confidential? (isPersonIdentityConfidential).
          */
-        welshMap.put("isPersonIdentityConfidential_Yes","Ydw"); //need to be as condition
+        welshMap.put("isPersonIdentityConfidential_Yes","Ydw");
         welshMap.put("isPersonIdentityConfidential_No","Nac ydw");
-        //If yes needed a confidential mask
-
-        /**
-         * Respondent - Gender.
-         */
-        //reuse common utils for gender
-        //with condition
-
-        /**
-         * Respondent - Is date of birth known?.
-         */
-        // reuse common utils Yes No
-        // need as condition
-
-        /**
-         * Respondent - Is place of birth known?.
-         */
-        // reuse common utils Yes No
-        // need as condition
-
-        /**
-         * Respondent - Is current address known?.
-         */
-        // reuse common utils Yes No
-        // need as condition
-
-        /**
-         * Respondent - Has respondent lived at this address for less than 5 years?.
-         */
-        // reuse common utils Yes No and don't know
-        // need as condition
 
         /**
          * Respondent - Can you provide email address?.
          */
-        welshMap.put("canYouProvideEmailAddress_Yes","Gallaf"); // as conditon
+        welshMap.put("canYouProvideEmailAddress_Yes","Gallaf");
         welshMap.put("canYouProvideEmailAddress_No","Na allaf");
 
         /**
          * Respondent - Can you provide a contact number?.
          */
-        welshMap.put("canYouProvidePhoneNumber_Yes","Gallaf"); //as condition
-        welshMap.put("canYouProvidePhoneNumber_No","Na allaf"); //as condition and will be dont know in doc
+        welshMap.put("canYouProvidePhoneNumber_Yes","Gallaf");
+        welshMap.put("canYouProvidePhoneNumber_No","Na allaf");
 
         /**
          * Respondent - Do they have legal representation?.
          */
-        welshMap.put("doTheyHaveLegalRepresentation_Yes","Nac oes"); //as condition
+        welshMap.put("doTheyHaveLegalRepresentation_Yes","Nac oes");
         welshMap.put("doTheyHaveLegalRepresentation_No","Oes");
 
+        /**
+         * MIAM.
+         */
         welshMap.put(MiamExemptionsChecklistEnum.domesticViolence.getDisplayedValue(), "Trais domestig");
         welshMap.put(MiamExemptionsChecklistEnum.childProtectionConcern.getDisplayedValue(), "Pryderon amddiffyn plant");
         welshMap.put(MiamExemptionsChecklistEnum.urgency.getDisplayedValue(), "Cais brys");
@@ -374,11 +359,47 @@ public class WelshLangMapper {
                      "Mae’r ceisydd yn fethdalwr ac mae ganddo/i ddeiseb gan gredydwr y darpar geisydd am orchymyn methdalu");
         welshMap.put(MiamOtherGroundsChecklistEnum.miamOtherGroundsChecklistEnum_Value_1.getDisplayedValue(),
                      "Mae’r ceisydd yn fethdalwr ac mae ganddo/i gais gan y darpar geisydd am orchymyn methdalu;");
+
+        /**
+         * Allegations of harm.
+         */
+        welshMap.put("allegationsOfHarmYesNo_Yes","Oes");
+        welshMap.put("allegationsOfHarmYesNo_No","Nac oes");
+        welshMap.put("allegationsOfHarmDomesticAbuseYesNo_Yes","Oes");
+        welshMap.put("allegationsOfHarmDomesticAbuseYesNo_No","Nac oes");
         welshMap.put(ApplicantOrChildren.applicants.getDisplayedValue(), "Ceisydd/Ceiswyr");
         welshMap.put(ApplicantOrChildren.children.getDisplayedValue(), "Plentyn/Plant");
         welshMap.put(AbductionChildPassportPossessionEnum.MOTHER.getDisplayedValue(), "Mam");
         welshMap.put(AbductionChildPassportPossessionEnum.FATHER.getDisplayedValue(), "Tad");
         welshMap.put(AbductionChildPassportPossessionEnum.OTHER.getDisplayedValue(), "Arall");
+        welshMap.put("allegationsOfHarmChildAbductionYesNo_Yes","Oes");
+        welshMap.put("allegationsOfHarmChildAbductionYesNo_No","Nac oes");
+        welshMap.put("allegationsOfHarmChildAbuseYesNo_Yes","Oes");
+        welshMap.put("allegationsOfHarmChildAbuseYesNo_No","Nac oes");
+        welshMap.put("allegationsOfHarmSubstanceAbuseYesNo_Yes","Oes");
+        welshMap.put("allegationsOfHarmSubstanceAbuseYesNo_No","Nac oes");
+        welshMap.put("allegationsOfHarmOtherConcernsYesNo_Yes","Oes");
+        welshMap.put("allegationsOfHarmOtherConcernsYesNo_No","Nac oes");
+        welshMap.put("ordersNonMolestation_Yes","Oes");
+        welshMap.put("ordersNonMolestation_No","Nac oes");
+        welshMap.put("ordersOccupation_Yes","Oes");
+        welshMap.put("ordersOccupation_No","Nac oes");
+        welshMap.put("ordersForcedMarriageProtection_Yes","Oes");
+        welshMap.put("ordersForcedMarriageProtection_No","Nac oes");
+        welshMap.put("ordersRestraining_Yes","Oes");
+        welshMap.put("ordersRestraining_No","Nac oes");
+        welshMap.put("ordersOtherInjunctive_Yes","Oes");
+        welshMap.put("ordersOtherInjunctive_No","Nac oes");
+        welshMap.put("ordersUndertakingInPlace_Yes","Oes");
+        welshMap.put("ordersUndertakingInPlace_No","Nac oes");
+        welshMap.put("abductionChildHasPassport_Yes","Oes");
+        welshMap.put("abductionChildHasPassport_No","Nac oes");
+        welshMap.put("abductionPreviousPoliceInvolvement_Yes"," "); //missing from excel
+        welshMap.put("abductionPreviousPoliceInvolvement_No"," ");
+
+        /**
+         * Other Proceedings.
+         */
         welshMap.put(ProceedingsEnum.ongoing.getDisplayedValue(), "achosion sy’n mynd ymlaen ar hyn o bryd");
         welshMap.put(ProceedingsEnum.previous.getDisplayedValue(), "achosion blaenorol");
         welshMap.put(TypeOfOrderEnum.emergencyProtectionOrder.getDisplayedValue(), "Gorchymyn Diogelu Brys");
@@ -393,12 +414,43 @@ public class WelshLangMapper {
         welshMap.put(TypeOfOrderEnum.orderRelatingToChildMaintainance.getDisplayedValue(), "Gorchymyn yn ymwneud â chynhaliaeth plant");
         welshMap.put(TypeOfOrderEnum.childArrangementsOrder.getDisplayedValue(), "Gorchymyn trefniadau plant");
         welshMap.put(TypeOfOrderEnum.otherOrder.getDisplayedValue(), "Gorchmynion eraill");
+
+        /**
+         * Attending the hearing.*/
+        welshMap.put("isWelshNeeded_yes","Bydd");
+        welshMap.put("isWelshNeeded_no","Na fydd");
         welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Byddant eisiau siarad Cymraeg");
         welshMap.put(SpokenOrWrittenWelshEnum.written.getDisplayedValue(), "Byddant eisiau darllen ac ysgrifennu yn Gymraeg");
         welshMap.put(SpokenOrWrittenWelshEnum.both.getDisplayedValue(), "Y ddau");
+        welshMap.put("isInterpreterNeeded_yes","Bydd");
+        welshMap.put("isInterpreterNeeded_no","Na fydd");
         welshMap.put(PartyEnum.applicant.getDisplayedValue(), "Ceisydd");
         welshMap.put(PartyEnum.respondent.getDisplayedValue(), "Atebydd");
         welshMap.put(PartyEnum.other.getDisplayedValue(), "Pobl eraill yn yr achos");
+        welshMap.put("isDisabilityPresent_Yes","Oes");
+        welshMap.put("isDisabilityPresent_No","Nac oes");
+        welshMap.put("isSpecialArrangementsRequired_Yes","Bydd");
+        welshMap.put("isSpecialArrangementsRequired_No","Na fydd");
+
+        /**
+         * International Element.
+         */
+        welshMap.put("habitualResidentInOtherState_Yes","Oes");
+        welshMap.put("habitualResidentInOtherState_No","Nac oes");
+        welshMap.put("jurisdictionIssue_Yes","Oes");
+        welshMap.put("jurisdictionIssue_No","Nac oes");
+        welshMap.put("requestToForeignAuthority_Yes","Oes");
+        welshMap.put("requestToForeignAuthority_No","Nac oes");
+
+        /**
+         * Litigation capacity.
+         */
+        welshMap.put("litigationCapacityOtherFactors_Yes","Ydw");
+        welshMap.put("litigationCapacityOtherFactors_No","Nac ydw");
+
+        /**
+         * Welsh language requirement.
+         */
         welshMap.put(LanguagePreference.english.getDisplayedValue(), "Saesneg");
         welshMap.put(LanguagePreference.welsh.getDisplayedValue(), "Cymraeg");
 
