@@ -83,21 +83,24 @@ public class OrganisationService {
 
     public Organisations getOrganisationDetaiils(String userToken, String organisationID) {
         log.info("Fetching organisation details for organisation id: {}",organisationID);
+
         return organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
     }
 
     private PartyDetails getApplicantWithOrg(PartyDetails applicant, String userToken) {
 
         if (applicant.getSolicitorOrg() != null) {
-            String organisationID = applicant.getSolicitorOrg().getOrganisationID();
-            if (organisationID != null) {
-                organisations = getOrganisationDetaiils(userToken, organisationID);
+          if (null != applicant && applicant.getSolicitorOrg() != null) {
 
-                applicant = applicant.toBuilder()
-                    .organisations(organisations)
-                    .build();
-            }
-        }
-        return applicant;
-    }
+              String organisationID = applicant.getSolicitorOrg().getOrganisationID();
+              if (organisationID != null) {
+                  organisations = getOrganisationDetaiils(userToken, organisationID);
+  
+                  applicant = applicant.toBuilder()
+                      .organisations(organisations)
+                      .build();
+              }
+          }
+          return applicant;
+     }
 }

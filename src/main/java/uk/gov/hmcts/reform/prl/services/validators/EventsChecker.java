@@ -15,6 +15,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
@@ -86,6 +88,9 @@ public class EventsChecker {
     SubmitAndPayChecker submitAndPayChecker;
 
     @Autowired
+    HomeChecker homeChecker;
+
+    @Autowired
     RespondentRelationshipChecker respondentRelationshipChecker;
 
     @Autowired
@@ -96,6 +101,9 @@ public class EventsChecker {
 
     @Autowired
     WithoutNoticeOrderChecker withoutNoticeOrderChecker;
+
+    @Autowired
+    FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
 
 
     private EnumMap<Event, EventChecker> eventStatus = new EnumMap<Event, EventChecker>(Event.class);
@@ -120,11 +128,13 @@ public class EventsChecker {
         eventStatus.put(SUBMIT_AND_PAY, submitAndPayChecker);
 
         eventStatus.put(FL401_CASE_NAME, caseNameChecker);
+        eventStatus.put(FL401_HOME, homeChecker);
         eventStatus.put(RELATIONSHIP_TO_RESPONDENT, respondentRelationshipChecker);
         eventStatus.put(FL401_TYPE_OF_APPLICATION, fl401ApplicationTypeChecker);
         eventStatus.put(RESPONDENT_BEHAVIOUR, respondentBehaviourChecker);
         eventStatus.put(WITHOUT_NOTICE_ORDER, withoutNoticeOrderChecker);
         eventStatus.put(FL401_APPLICANT_FAMILY_DETAILS, fl401ApplicantFamilyChecker);
+        eventStatus.put(FL401_OTHER_PROCEEDINGS, fl401OtherProceedingsChecker);
 
     }
 

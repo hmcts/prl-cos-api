@@ -41,4 +41,11 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_FIELD_FINAL = "finalDocument";
   
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
+
+
+    public static final String CHILD_ARRANGEMENT_CASE = "CHILD ARRANGEMENT CASE";
+    public static final String ISSUE_EVENT_CODE = "001";
+    public static final String ISSUE_EVENT_SEQUENCE = "1";
+
+
 }

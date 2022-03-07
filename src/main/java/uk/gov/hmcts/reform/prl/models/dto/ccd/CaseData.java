@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,8 +38,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
+import uk.gov.hmcts.reform.prl.models.complextypes.GatekeeperEmail;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
@@ -63,11 +69,14 @@ import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
+import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -108,6 +117,13 @@ public class CaseData implements MappableObject {
      */
     private final List<ConfidentialityStatementDisclaimerEnum> confidentialityStatementDisclaimer;
     private final List<ConfidentialityChecksDisclaimerEnum> confidentialityChecksDisclaimer;
+
+    /**
+     * C100 Confidential Disclaimer.
+     */
+    private final List<ConfidentialityStatementDisclaimerEnum> c100ConfidentialityStatementDisclaimer;
+    private final ConfidentialityDisclaimer confidentialityDisclaimer;
+
 
     /**
      * Upload documents.
@@ -236,32 +252,44 @@ public class CaseData implements MappableObject {
     private final YesOrNo ordersRestraining;
     private final YesOrNo ordersOtherInjunctive;
     private final YesOrNo ordersUndertakingInPlace;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersNonMolestationDateIssued;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersNonMolestationEndDate;
     private final YesOrNo ordersNonMolestationCurrent;
     private final String ordersNonMolestationCourtName;
     private final OtherDocument ordersNonMolestationDocument;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOccupationDateIssued;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOccupationEndDate;
     private final YesOrNo ordersOccupationCurrent;
     private final String ordersOccupationCourtName;
     private final OtherDocument ordersOccupationDocument;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersForcedMarriageProtectionDateIssued;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersForcedMarriageProtectionEndDate;
     private final YesOrNo ordersForcedMarriageProtectionCurrent;
     private final String ordersForcedMarriageProtectionCourtName;
     private final OtherDocument ordersForcedMarriageProtectionDocument;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersRestrainingDateIssued;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersRestrainingEndDate;
     private final YesOrNo ordersRestrainingCurrent;
     private final String ordersRestrainingCourtName;
     private final OtherDocument ordersRestrainingDocument;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOtherInjunctiveDateIssued;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOtherInjunctiveEndDate;
     private final YesOrNo ordersOtherInjunctiveCurrent;
     private final String ordersOtherInjunctiveCourtName;
     private final OtherDocument ordersOtherInjunctiveDocument;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersUndertakingInPlaceDateIssued;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersUndertakingInPlaceEndDate;
     private final YesOrNo ordersUndertakingInPlaceCurrent;
     private final String ordersUndertakingInPlaceCourtName;
@@ -387,6 +415,11 @@ public class CaseData implements MappableObject {
     private final OtherDetailsOfWithoutNoticeOrder anyOtherDtailsForWithoutNoticeOrder;
 
     /**
+     * Home Situation DA.
+     */
+    private final Home home;
+
+    /**
      * FL401 Respondents relationship.
      */
     private final RespondentRelationObjectType respondentRelationObject;
@@ -413,7 +446,7 @@ public class CaseData implements MappableObject {
     /**
      * Issue and send to local court'.
      */
-    private final List<Element<LocalCourtAdminEmail>> localCourtAdminEmail;
+    private final List<Element<LocalCourtAdminEmail>> localCourtAdmin;
 
     /**
      * This field contains Application Submitter solicitor email address.
@@ -437,14 +470,39 @@ public class CaseData implements MappableObject {
     private final Document finalDocument;
   
     /**
+     * Send and reply to messages.
+     */
+  
+    @JsonUnwrapped
+    private final SendAndReplyEventData sendAndReplyEventData;
+    @JsonProperty("openMessages")
+    private final List<Element<Message>> openMessages;
+
+    @JsonProperty("closedMessages")
+    private final List<Element<Message>> closedMessages;
+
+    /**
      * Confidentiality details.
      */
     private final List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
     private final List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
 
+
+    private final Map<String, Object> typeOfApplicationTable;
+
     /**
      *  Withdraw Application.
      */
     private final WithdrawApplication withDrawApplicationData;
+
+    /**
+     * Send to Gatekeeper.
+     */
+    private final List<Element<GatekeeperEmail>> gatekeeper;
+
+    /**
+     * FL401 Other Proceedings.
+     */
+    private final FL401OtherProceedingDetails fl401OtherProceedingDetails;
 
 }

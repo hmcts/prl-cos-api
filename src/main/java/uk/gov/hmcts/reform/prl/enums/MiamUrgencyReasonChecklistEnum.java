@@ -3,9 +3,11 @@ package uk.gov.hmcts.reform.prl.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+@JsonSerialize(using = CustomEnumSerializer.class)
 public enum MiamUrgencyReasonChecklistEnum {
 
     @JsonProperty("miamUrgencyReasonChecklistEnum_Value_1")
@@ -29,9 +31,9 @@ public enum MiamUrgencyReasonChecklistEnum {
                                                +
                                                "dispute before a court in England and Wales."),
     @JsonProperty("miamUrgencyReasonChecklistEnum_Value_6")
-    miamUrgencyReasonChecklistEnum_Value_6("There is a risk of unlawful removal of a child from the United Kingdom,"
-                                                +
-                                                "or a risk of unlawful retention of a child who is currently outside England and Wales"),
+    MIAMUrgencyReasonChecklistEnum_Value_6("There is a risk of unlawful removal of a child from the United Kingdom,"
+                                               +
+                                               "or a risk of unlawful retention of a child who is currently outside England and Wales"),
     @JsonProperty("miamUrgencyReasonChecklistEnum_Value_7")
     miamUrgencyReasonChecklistEnum_Value_7("There is a risk of harm to a child");
 
