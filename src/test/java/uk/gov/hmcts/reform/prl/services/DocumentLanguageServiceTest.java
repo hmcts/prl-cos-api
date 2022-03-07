@@ -9,8 +9,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.ENGLISH;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.WELSH;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.welsh;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -55,7 +55,7 @@ public class DocumentLanguageServiceTest {
     @Test
     public void whenApplicationLanguageIsEngReturnTrueAndIsGenWelshReturnFalse() {
         caseData = caseData.toBuilder()
-            .welshLanguageRequirementApplication(ENGLISH)
+            .welshLanguageRequirementApplication(english)
             .build();
 
         assertTrue(documentLanguageService.docGenerateLang(caseData).isGenEng());
@@ -65,7 +65,7 @@ public class DocumentLanguageServiceTest {
     @Test
     public void whenApplicationLanguageIsWelshReturnTrueAndIsGenEngReturnFalse() {
         caseData = caseData.toBuilder()
-            .welshLanguageRequirementApplication(WELSH)
+            .welshLanguageRequirementApplication(welsh)
             .build();
 
         assertFalse(documentLanguageService.docGenerateLang(caseData).isGenEng());
@@ -75,7 +75,7 @@ public class DocumentLanguageServiceTest {
     @Test
     public void whenApplicationLanguageIsEngAndNeedWelshIsYesReturnTrue() {
         caseData = caseData.toBuilder()
-            .welshLanguageRequirementApplication(ENGLISH)
+            .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .build();
 
@@ -86,7 +86,7 @@ public class DocumentLanguageServiceTest {
     @Test
     public void whenApplicationLanguageIsEngAndNeedWelshIsNoReturnTrueFalse() {
         caseData = caseData.toBuilder()
-            .welshLanguageRequirementApplication(ENGLISH)
+            .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(No)
             .build();
 
@@ -97,7 +97,7 @@ public class DocumentLanguageServiceTest {
     @Test
     public void whenApplicationLanguageIsWelshAndNeedEngIsNoReturnTrueFalse() {
         caseData = caseData.toBuilder()
-            .welshLanguageRequirementApplication(WELSH)
+            .welshLanguageRequirementApplication(welsh)
             .welshLanguageRequirementApplicationNeedEnglish(No)
             .build();
 
@@ -108,7 +108,7 @@ public class DocumentLanguageServiceTest {
     @Test
     public void whenApplicationLanguageIsWelshAndNeedEngIsTesReturnTrueTrue() {
         caseData = caseData.toBuilder()
-            .welshLanguageRequirementApplication(WELSH)
+            .welshLanguageRequirementApplication(welsh)
             .welshLanguageRequirementApplicationNeedEnglish(Yes)
             .build();
 

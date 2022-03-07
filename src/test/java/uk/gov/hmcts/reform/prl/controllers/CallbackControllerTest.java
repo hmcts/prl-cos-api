@@ -57,7 +57,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.ENGLISH;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
@@ -190,7 +190,7 @@ public class CallbackControllerTest {
 
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(ENGLISH)
+            .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
@@ -313,7 +313,7 @@ public class CallbackControllerTest {
             .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
             .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
             .welshLanguageRequirement(YesOrNo.Yes)
-            .welshLanguageRequirementApplication(LanguagePreference.ENGLISH)
+            .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)
             .id(123L)
             .build();

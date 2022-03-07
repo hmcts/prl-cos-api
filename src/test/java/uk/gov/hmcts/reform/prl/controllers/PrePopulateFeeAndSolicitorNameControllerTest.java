@@ -41,7 +41,7 @@ import java.util.List;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.ENGLISH;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 
@@ -114,7 +114,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         caseData = CaseData.builder()
             .courtName("testcourt")
             .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(ENGLISH)
+            .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .build();
 
