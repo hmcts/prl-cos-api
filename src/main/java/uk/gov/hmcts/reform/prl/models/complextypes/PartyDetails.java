@@ -64,7 +64,6 @@ public class PartyDetails {
     @JsonIgnore
     private final String caseTypeOfApplication;
     private final YesOrNo respondentLivedWithApplicant;
-    private final Organisations organisations;
 
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)

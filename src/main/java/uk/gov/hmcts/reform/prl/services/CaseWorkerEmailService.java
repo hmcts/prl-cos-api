@@ -320,7 +320,7 @@ public class CaseWorkerEmailService {
             courtEmail,
             EmailTemplateNames.DA_LOCALCOURT,
             buildFl401LocalCourtAdminEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         );
     }
 

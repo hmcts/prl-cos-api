@@ -163,7 +163,7 @@ public class SolicitorEmailService {
             solicitorEmail,
             EmailTemplateNames.DA_SOLICITOR,
             buildFl401SolicitorEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         );
 
     }
