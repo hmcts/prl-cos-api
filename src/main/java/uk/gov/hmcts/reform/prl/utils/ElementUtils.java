@@ -1,20 +1,27 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
+@Component
 public class ElementUtils {
 
     private ElementUtils() {
@@ -85,5 +92,46 @@ public class ElementUtils {
 
     public static <T> List<T> nullSafeList(List<T> collection) {
         return defaultIfNull(collection, emptyList());
+    }
+
+    public static <T> DynamicList asDynamicList(List<Element<T>> elements,
+                                                UUID selectedId,
+                                                Function<T, String> labelProducer) {
+        return asDynamicList(emptyList(), elements, selectedId, labelProducer);
+    }
+
+    public static <T> DynamicList asDynamicList(List<DynamicListElement> additionalItems, List<Element<T>> elements,
+                                                UUID selectedId,
+                                                Function<T, String> labelProducer) {
+        Objects.requireNonNull(labelProducer, "Label producer is required to convert elements to dynamic lists");
+
+        List<DynamicListElement> items = nullSafeCollection(elements).stream()
+            .filter(Objects::nonNull)
+            .filter(element -> Objects.nonNull(element.getId()))
+            .map(element -> DynamicListElement.builder()
+                .code(element.getId())
+                .label(labelProducer.apply(element.getValue()))
+                .build())
+            .collect(toList());
+
+        items.addAll(0, additionalItems);
+
+        DynamicListElement selectedItem = items.stream()
+            .filter(element -> element.hasCode(selectedId))
+            .findFirst()
+            .orElse(DynamicListElement.EMPTY);
+
+        return DynamicList.builder().listItems(items).value(selectedItem).build();
+    }
+
+
+    public UUID getDynamicListSelectedValue(Object dynamicList, ObjectMapper mapper) {
+        if (dynamicList instanceof String) {
+            return UUID.fromString((String) dynamicList);
+        }
+
+        return ofNullable(mapper.convertValue(dynamicList, DynamicList.class))
+            .map(DynamicList::getValueCodeAsUuid)
+            .orElse(null);
     }
 }

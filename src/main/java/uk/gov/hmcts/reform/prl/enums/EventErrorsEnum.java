@@ -1,10 +1,9 @@
 package uk.gov.hmcts.reform.prl.enums;
 
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum EventErrorsEnum {
 
@@ -31,15 +30,5 @@ public enum EventErrorsEnum {
     HOME_ERROR("Ensure you have added all relevant details");
 
     private final String error;
-
-    @JsonValue
-    public String getError() {
-        return error;
-    }
-
-    @JsonCreator
-    public static EventErrorsEnum getValue(String key) {
-        return EventErrorsEnum.valueOf(key);
-    }
 
 }
