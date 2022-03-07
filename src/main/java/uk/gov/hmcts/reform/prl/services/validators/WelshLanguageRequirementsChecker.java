@@ -12,8 +12,8 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.WELSH_LANGUAGE_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.ENGLISH;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.WELSH;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.welsh;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -35,13 +35,13 @@ public class WelshLanguageRequirementsChecker implements EventChecker {
             taskErrorService.removeError(WELSH_LANGUAGE_ERROR);
             return true;
         }
-        if (applicationLanguage.isPresent() && applicationLanguage.get().equals(ENGLISH)) {
+        if (applicationLanguage.isPresent() && applicationLanguage.get().equals(english)) {
             if (welshRequirements.isPresent()) {
                 taskErrorService.removeError(WELSH_LANGUAGE_ERROR);
                 return  true;
             }
         }
-        if (applicationLanguage.isPresent() && applicationLanguage.get().equals(WELSH)) {
+        if (applicationLanguage.isPresent() && applicationLanguage.get().equals(welsh)) {
             if (englishRequirements.isPresent()) {
                 taskErrorService.removeError(WELSH_LANGUAGE_ERROR);
                 return  true;
