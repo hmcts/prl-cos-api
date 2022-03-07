@@ -463,6 +463,8 @@ public class CaseData implements MappableObject {
 
     private String courtName;
     private String courtId;
+    private String courtEmailAddress;
+    private String reasonForAmendCourtDetails;
 
     /**
      * Send and reply to messages.
