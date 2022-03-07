@@ -144,7 +144,7 @@ public class CaseWorkerEmailService {
             caseworkerEmailId,
             EmailTemplateNames.CASEWORKER,
             buildEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         );
 
     }
@@ -186,7 +186,7 @@ public class CaseWorkerEmailService {
             email,
             EmailTemplateNames.RETURNAPPLICATION,
             buildReturnApplicationEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         );
 
     }
@@ -209,7 +209,7 @@ public class CaseWorkerEmailService {
             email,
             EmailTemplateNames.GATEKEEPER,
             buildGatekeeperEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         ));
     }
 
@@ -257,7 +257,7 @@ public class CaseWorkerEmailService {
             email,
             EmailTemplateNames.COURTADMIN,
             buildCourtAdminEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         ));
     }
 

@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -55,5 +58,20 @@ public class CommonUtils {
             log.error("Error while formatting the date from casedetails to casedata.. " + e.getMessage());
         }
         return "";
+    }
+  
+    public static String getYesOrNoValue(YesOrNo value) {
+        return value != null ? value.getDisplayedValue() : null;
+    }
+
+    public static String getYesOrNoDontKnowValue(YesNoDontKnow value) {
+        return value != null ? value.getDisplayedValue() : null;
+    }
+
+    public static String getSolicitorId(PartyDetails party) {
+        if (party.getSolicitorOrg() != null && party.getSolicitorOrg().getOrganisationID() != null) {
+            return "SOL_" + party.getSolicitorOrg().getOrganisationID();
+        }
+        return null;
     }
 }

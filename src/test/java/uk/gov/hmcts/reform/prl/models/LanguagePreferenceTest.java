@@ -14,7 +14,7 @@ public class LanguagePreferenceTest {
     public void getLanguagePreferenceShouldReturnDefaultValueWhenEmptyCaseData() {
         assertThat(
             LanguagePreference.getLanguagePreference(CaseData.builder().build()),
-            is(LanguagePreference.ENGLISH)
+            is(LanguagePreference.english)
         );
     }
 
@@ -23,7 +23,7 @@ public class LanguagePreferenceTest {
         assertThat(
             LanguagePreference.getLanguagePreference(
                 CaseData.builder().languagePreferenceWelsh(YesOrNo.Yes).build()),
-            is(LanguagePreference.WELSH)
+            is(LanguagePreference.welsh)
         );
     }
 
@@ -32,7 +32,7 @@ public class LanguagePreferenceTest {
         assertThat(
             LanguagePreference.getLanguagePreference(
                 CaseData.builder().languagePreferenceWelsh(YesOrNo.No).build()),
-            is(LanguagePreference.ENGLISH)
+            is(LanguagePreference.english)
         );
     }
 
