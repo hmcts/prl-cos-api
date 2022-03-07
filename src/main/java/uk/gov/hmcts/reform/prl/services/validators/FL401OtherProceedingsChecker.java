@@ -84,6 +84,7 @@ public class FL401OtherProceedingsChecker implements EventChecker {
             if (otherProceedings.isPresent() && otherProceedings.get().equals(yes)) {
                 taskErrorService.addEventError(FL401_OTHER_PROCEEDINGS, FL401_OTHER_PROCEEDINGS_ERROR,
                                                FL401_OTHER_PROCEEDINGS_ERROR.getError());
+
                 return true;
             }
         }
