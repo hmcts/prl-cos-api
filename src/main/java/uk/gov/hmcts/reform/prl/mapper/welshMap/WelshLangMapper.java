@@ -321,10 +321,10 @@ public class WelshLangMapper {
                      "Byddai unrhyw oedi a achosir drwy fynychu MIAM yn peri risg sylweddol o gamwedd cyfiawnder");
         welshMap.put(MiamUrgencyReasonChecklistEnum.miamUrgencyReasonChecklistEnum_Value_1.getDisplayedValue(),
                      "Mae yna risg i fywyd, rhyddid neu ddiogelwch corfforol y ceisydd arfaethedig neu ei deulu/theulu neu ei gartref/chartref; neu");
-        welshMap.put(MiamUrgencyReasonChecklistEnum.MIAMUrgencyReasonChecklistEnum_Value_6.getDisplayedValue(),
+        welshMap.put(MiamUrgencyReasonChecklistEnum.miamUrgencyReasonChecklistEnum_Value_6.getDisplayedValue(),
                      "Mae yna risg y byddai plentyn yn cael ei gludo o’r Deyrnas Unedig yn anghyfreithlon, "
                          + "neu risg y byddai plentyn sydd y tu allan i Gymru a Lloegr ar hyn o bryd yn cael ei gadw’n anghyfreithlon");
-        welshMap.put(MiamUrgencyReasonChecklistEnum.MIAMUrgencyReasonChecklistEnum_Value_7.getDisplayedValue(), "Mae yna risg o niwed i blentyn");
+        welshMap.put(MiamUrgencyReasonChecklistEnum.miamUrgencyReasonChecklistEnum_Value_7.getDisplayedValue(), "Mae yna risg o niwed i blentyn");
         welshMap.put(MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_5.getDisplayedValue(),
                      "Byddai’r cais yn cael ei wneud ynghylch achos presennol sy’n parhau ac roedd esemptiad MIAM yn berthnasol pan wnaed y cais ynghylch yr achos hwnnw");
         welshMap.put(MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_4.getDisplayedValue(),
