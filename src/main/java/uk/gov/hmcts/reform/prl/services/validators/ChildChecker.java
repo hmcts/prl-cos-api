@@ -151,8 +151,7 @@ public class ChildChecker implements EventChecker {
         fields.add(ofNullable(c.getApplicantsRelationshipToChild()));
         fields.add(ofNullable(c.getRespondentsRelationshipToChild()));
         fields.add(ofNullable(c.getChildLiveWith()));
-        fields.add(ofNullable(c.getChildrenKnownToLocalAuthority()));
-        fields.add(ofNullable(c.getChildrenSubjectOfChildProtectionPlan()));
+
         fields.add(ofNullable(c.getParentalResponsibilityDetails()));
 
         return  fields.stream().anyMatch(Optional::isPresent);
