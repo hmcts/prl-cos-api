@@ -68,6 +68,7 @@ public class PrePopulateFeeAndSolicitorNameController {
     public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
     public static final String PRL_C100_DRAFT_WELSH_TEMPLATE = "PRL-Draft-C100-Welsh.docx";
     public static final String PRL_C100_DRAFT_WELSH_FILENAME = "Draft_C100_application_welsh.pdf";
+    public static final String CURRENCY_SIGN_POUND = "£";
 
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to get Solicitor name and fee amount. ")
@@ -101,7 +102,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
             .applicantSolicitorEmailAddress(userDetails.getEmail())
             .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
-            .feeAmount(feeResponse.getAmount().toString())
+            .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
             .courtName((closestChildArrangementsCourt != null)  ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
             .build();
 

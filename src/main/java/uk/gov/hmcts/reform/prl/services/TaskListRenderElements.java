@@ -52,7 +52,6 @@ public class TaskListRenderElements {
 
     public List<String> renderCollapsible(String header, List<String> lines) {
         final List<String> collapsible = new ArrayList<>();
-
         collapsible.add("<details class='govuk-details'>");
         collapsible.add("<summary class='govuk-details__summary'>");
         collapsible.add("<span class='govuk-details__summary-text'>");
@@ -65,6 +64,22 @@ public class TaskListRenderElements {
         collapsible.add("</details>");
 
         return collapsible;
+    }
+
+    public List<String> renderNestedCollapsible(String header, List<String> lines) {
+        final List<String> nestedCollapsible = new ArrayList<>();
+        nestedCollapsible.add("<details class='govuk-details'>");
+        nestedCollapsible.add("<summary class='govuk-details__summary'>");
+        nestedCollapsible.add("<span class='govuk-details__summary-text'>");
+        nestedCollapsible.add(header);
+        nestedCollapsible.add("</span>");
+        nestedCollapsible.add("</summary>");
+        nestedCollapsible.add("<div class='govuk-details__text'>");
+        nestedCollapsible.addAll(lines);
+        nestedCollapsible.add("</div>");
+        nestedCollapsible.add("</details>");
+
+        return nestedCollapsible;
     }
 
 }
