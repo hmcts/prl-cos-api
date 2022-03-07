@@ -30,7 +30,7 @@ public class OrganisationService {
     private final SystemUserService systemUserService;
     private List<Element<PartyDetails>> applicantsWithOrganisationDetails = new ArrayList<>();
 
-    public CaseData getApplicantOrganisationDetails(CaseData caseData)  {
+    public CaseData getApplicantOrganisationDetails(CaseData caseData) {
         if (Optional.ofNullable(caseData.getApplicants()).isPresent()) {
             String userToken = systemUserService.getSysUserToken();
             List<Element<PartyDetails>> applicants = caseData.getApplicants()
@@ -85,22 +85,31 @@ public class OrganisationService {
     }
 
     public Organisations getOrganisationDetaiils(String userToken, String organisationID) {
+        log.info("Fetching organisation details for organisation id: {}", organisationID);
+
         return organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
     }
 
     private PartyDetails getApplicantWithOrg(PartyDetails applicant, String userToken) {
 
         if (applicant.getSolicitorOrg() != null) {
-            String organisationID = applicant.getSolicitorOrg().getOrganisationID();
-            if (organisationID != null) {
-                try {
-                    organisations = getOrganisationDetaiils(userToken, organisationID);
+            if (null != applicant && applicant.getSolicitorOrg() != null) {
 
-                    applicant = applicant.toBuilder()
-                        .organisations(organisations)
-                        .build();
-                } catch (Exception e) {
-                    log.info("OrganisationsAPi return 404, organisation not present for {} {} ", organisationID, e.getMessage());
+                String organisationID = applicant.getSolicitorOrg().getOrganisationID();
+                if (organisationID != null) {
+                    try {
+                        organisations = getOrganisationDetaiils(userToken, organisationID);
+
+                        applicant = applicant.toBuilder()
+                            .organisations(organisations)
+                            .build();
+                    } catch (Exception e) {
+                        log.info(
+                            "OrganisationsAPi return 404, organisation not present for {} {} ",
+                            organisationID,
+                            e.getMessage()
+                        );
+                    }
                 }
             }
         }
