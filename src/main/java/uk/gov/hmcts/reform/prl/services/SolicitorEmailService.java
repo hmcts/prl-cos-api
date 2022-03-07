@@ -89,7 +89,7 @@ public class SolicitorEmailService {
             "fprl_caseworker_solicitor@mailinator.com",
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         );
 
     }
@@ -103,7 +103,7 @@ public class SolicitorEmailService {
             "yogendra.upasani@hmcts.net",
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         );
 
     }
@@ -138,7 +138,7 @@ public class SolicitorEmailService {
             solicitorEmail,
             EmailTemplateNames.WITHDRAW,
             buildCaseWithdrawEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         );
 
     }

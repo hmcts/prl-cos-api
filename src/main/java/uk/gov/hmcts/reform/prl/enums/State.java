@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.NoSuchElementException;
@@ -7,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
+@Getter
 public enum State {
 
     AWAITING_SUBMISSION_TO_HMCTS("AWAITING_SUBMISSION_TO_HMCTS", "Draft"),
@@ -43,5 +45,6 @@ public enum State {
     public String getLabel() {
         return label;
     }
+
 
 }
