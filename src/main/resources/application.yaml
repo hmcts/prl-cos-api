@@ -43,7 +43,7 @@ spring:
 
 azure:
   application-insights:
-    instrumentation-key: ${rpe.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+    instrumentation-key: ${APP_INSIGHTS_INSTRUMENTATION_KEY:00000000-0000-0000-0000-000000000000}
 
 logging:
   level:
@@ -179,3 +179,7 @@ courtfinder:
 
 launchdarkly:
   sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
+
+rd_professional:
+  api:
+    url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}
