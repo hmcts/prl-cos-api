@@ -81,6 +81,8 @@ uk:
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
             COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
             GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
+            DA_SOLICITOR: d65830b7-eb13-46c3-b772-03976a67210d
+            DA_LOCALCOURT: 9d6b311a-a764-45a7-9dd9-cd1d06408214
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
           welsh:
@@ -170,21 +172,13 @@ case_document_am:
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
 
-
-
 courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
-
 
 rd_professional:
   api:
     url: http://rd-professional-api-aat.service.core-compute-aat.internal
 
-
 launchdarkly:
   sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
-
-rd_professional:
-  api:
-    url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}
