@@ -172,8 +172,6 @@ case_document_am:
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
 
-
-
 courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
@@ -184,7 +182,3 @@ rd_professional:
 
 launchdarkly:
   sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
-
-rd_professional:
-  api:
-    url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}
