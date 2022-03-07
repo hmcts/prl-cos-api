@@ -59,7 +59,6 @@ public class PartyDetails {
     private String phoneNumber;
     private String email;
     private Address address;
-    private final Organisations organisations;
     private final String solicitorTelephone;
     @JsonIgnore
     private final String caseTypeOfApplication;

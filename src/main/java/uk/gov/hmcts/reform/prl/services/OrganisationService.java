@@ -31,13 +31,13 @@ public class OrganisationService {
     private final SystemUserService systemUserService;
     private List<Element<PartyDetails>> applicantsWithOrganisationDetails = new ArrayList<>();
 
-    public CaseData getApplicantOrganisationDetails(CaseData caseData)  {
+    public CaseData getApplicantOrganisationDetails(CaseData caseData) {
         if (Optional.ofNullable(caseData.getApplicants()).isPresent()) {
             String userToken = systemUserService.getSysUserToken();
             List<Element<PartyDetails>> applicants = caseData.getApplicants()
                 .stream()
-                .map(eachItem ->  Element.<PartyDetails>builder()
-                    .value(getApplicantWithOrg(eachItem.getValue(),userToken))
+                .map(eachItem -> Element.<PartyDetails>builder()
+                    .value(getApplicantWithOrg(eachItem.getValue(), userToken))
                     .id(eachItem.getId()).build())
                 .collect(Collectors.toList());
             caseData = caseData.toBuilder()
@@ -55,8 +55,8 @@ public class OrganisationService {
 
             List<Element<PartyDetails>> respondents = caseData.getRespondents()
                 .stream()
-                .map(eachItem ->  Element.<PartyDetails>builder()
-                    .value(getRespondentWithOrg(eachItem.getValue(),userToken))
+                .map(eachItem -> Element.<PartyDetails>builder()
+                    .value(getRespondentWithOrg(eachItem.getValue(), userToken))
                     .id(eachItem.getId()).build())
                 .collect(Collectors.toList());
 
@@ -82,7 +82,7 @@ public class OrganisationService {
     }
 
     public Organisations getOrganisationDetaiils(String userToken, String organisationID) {
-        log.info("Fetching organisation details for organisation id: {}",organisationID);
+        log.info("Fetching organisation details for organisation id: {}", organisationID);
 
         return organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
     }
@@ -90,17 +90,19 @@ public class OrganisationService {
     private PartyDetails getApplicantWithOrg(PartyDetails applicant, String userToken) {
 
         if (applicant.getSolicitorOrg() != null) {
-          if (null != applicant && applicant.getSolicitorOrg() != null) {
+            if (null != applicant && applicant.getSolicitorOrg() != null) {
 
-              String organisationID = applicant.getSolicitorOrg().getOrganisationID();
-              if (organisationID != null) {
-                  organisations = getOrganisationDetaiils(userToken, organisationID);
-  
-                  applicant = applicant.toBuilder()
-                      .organisations(organisations)
-                      .build();
-              }
-          }
-          return applicant;
-     }
+                String organisationID = applicant.getSolicitorOrg().getOrganisationID();
+                if (organisationID != null) {
+                    organisations = getOrganisationDetaiils(userToken, organisationID);
+
+                    applicant = applicant.toBuilder()
+                        .organisations(organisations)
+                        .build();
+                }
+            }
+            return applicant;
+        }
+        return applicant;
+    }
 }
