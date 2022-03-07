@@ -68,6 +68,7 @@ public enum Event {
             RELATIONSHIP_TO_RESPONDENT,
             RESPONDENT_BEHAVIOUR,
             FL401_HOME,
+            FL401_OTHER_PROCEEDINGS,
             ATTENDING_THE_HEARING,
             INTERNATIONAL_ELEMENT,
             WELSH_LANGUAGE_REQUIREMENTS
