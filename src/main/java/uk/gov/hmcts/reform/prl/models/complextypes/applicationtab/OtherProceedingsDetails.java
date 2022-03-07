@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.applicationtab;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,7 +12,9 @@ public class OtherProceedingsDetails {
 
     private final String previousOrOngoingProceedings;
     private final String caseNumber;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateStarted;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateEnded;
     private final String typeOfOrder;
     private final String otherTypeOfOrder;
