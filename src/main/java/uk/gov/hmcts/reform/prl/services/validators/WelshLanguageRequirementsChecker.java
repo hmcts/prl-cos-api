@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -17,6 +18,7 @@ import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.welsh;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@Slf4j
 @Service
 public class WelshLanguageRequirementsChecker implements EventChecker {
 
@@ -58,6 +60,9 @@ public class WelshLanguageRequirementsChecker implements EventChecker {
         if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(Yes)) {
             taskErrorService.addEventError(WELSH_LANGUAGE_REQUIREMENTS, WELSH_LANGUAGE_ERROR,
                                            WELSH_LANGUAGE_ERROR.getError());
+
+            log.info("MADE IT HERE");
+            log.info(welshLanguageRequirement.toString());
             return true;
         }
         return false;
