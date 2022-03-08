@@ -176,7 +176,7 @@ public class CallbackController {
         }
 
         if (documentLanguage.isGenWelsh()) {
-            GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateDocument(
+            GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
                 PRL_C100_DRAFT_WELSH_TEMPLATE
@@ -254,7 +254,7 @@ public class CallbackController {
         }
 
         if (documentLanguage.isGenWelsh()) {
-            GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateDocument(
+            GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
                 PRL_C8_WELSH_TEMPLATE
@@ -271,7 +271,7 @@ public class CallbackController {
             log.info("Generate C1A if allegations of harm is set to Yes and the passed value is {}",
                      caseData.getAllegationsOfHarmYesNo());
             if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
-                GeneratedDocumentInfo generatedC1AWelshDocumentInfo = dgsService.generateDocument(
+                GeneratedDocumentInfo generatedC1AWelshDocumentInfo = dgsService.generateWelshDocument(
                     authorisation,
                     uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
                     PRL_C1A_WELSH_TEMPLATE
@@ -283,7 +283,7 @@ public class CallbackController {
                     .documentFileName(PRL_C1A_WELSH_FILENAME).build());
             }
 
-            GeneratedDocumentInfo generatedFinalWelshDocumentInfo = dgsService.generateDocument(
+            GeneratedDocumentInfo generatedFinalWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
                 C100_FINAL_WELSH_TEMPLATE

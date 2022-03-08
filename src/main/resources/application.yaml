@@ -43,7 +43,7 @@ spring:
 
 azure:
   application-insights:
-    instrumentation-key: ${APP_INSIGHTS_INSTRUMENTATION_KEY:00000000-0000-0000-0000-000000000000}
+    instrumentation-key: ${rpe.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
 
 logging:
   level:
@@ -70,7 +70,7 @@ uk:
   gov:
     notify:
       api:
-        key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxx}
+        key: ${UK_GOV_NOTIFY_API_KEY:prltest-be03d538-db4c-4efe-8d36-b2a8c9d5131b-66fc91de-593f-440e-9f13-16524e72aec4}
         baseUrl: https://api.notifications.service.gov.uk
       email:
         templates:
@@ -79,10 +79,7 @@ uk:
             CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
             RETURNAPPLICATION: 41a7ffcd-a5ec-4377-ba50-59619ad0ac8c
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
-            COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
-            GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
-            SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -115,21 +112,20 @@ fees-register:
 
 
 idam:
-  s2s-auth:
-    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
-    microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
-    url: https://idam-api.aat.platform.hmcts.net
+    url: http://localhost:5000
+  s2s-auth:
+    url: http://localhost:4502
+    totp_secret: AABBCCDDEEFFGGHH
+    microservice: prl_cos_api
   client:
-    id: prl-cos-api
-    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
-
+    id: prl_cos_api
+    redirect_uri: https://localhost:9000/oauth2/callback
+    secret: OOOOOOOOOOOOOOOO
 prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:privatelaw-system-update@mailnesia.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:Password12!}
 
 
 
@@ -168,18 +164,17 @@ case_document_am:
   url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
 
 prl-dgs-api:
-  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
+  url: ${PRL_DGS_API_URL:http://localhost:4007}
 
 
 
 courtfinder:
   api:
-    url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
-
-
-launchdarkly:
-  sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
+    url: http://fact-api-aat.service.core-compute-aat.internal/
 
 rd_professional:
   api:
-    url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}
+    url: http://rd-professional-api-aat.service.core-compute-aat.internal
+
+launchdarkly:
+  sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
