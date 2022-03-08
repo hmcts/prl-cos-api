@@ -204,9 +204,19 @@ sourceSets {
     }
     resources.srcDir file('src/contractTest/resources')
   }
+  functionalTest {
+    java {
+      compileClasspath += main.output
+      runtimeClasspath += main.output
+      srcDir file('src/functionalTest/java')
+    }
+    resources.srcDir file('src/functionalTest/resources')
+  }
 }
 
 configurations {
+  functionalTestImplementation.extendsFrom testImplementation
+  functionalTestRuntime.extendsFrom testRuntime
   integrationTestImplementation.extendsFrom testImplementation
   integrationTestRuntime.extendsFrom testRuntime
 }
@@ -226,6 +236,12 @@ dependencyCheck {
 
 dependencies {
 
+  implementation 'org.testng:testng:7.1.0'
+  implementation 'org.testng:testng:7.1.0'
+  implementation 'org.testng:testng:7.1.0'
+  implementation 'org.testng:testng:7.1.0'
+  implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+  implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
   compileOnly("org.projectlombok:lombok:${versions.lombok}")
   testCompileOnly("org.projectlombok:lombok:${versions.lombok}")
@@ -330,6 +346,11 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
 
+  testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '4.5.1'
+  testImplementation group: 'io.rest-assured', name: 'json-path', version: '4.5.1'
+  testImplementation group: 'io.rest-assured', name: 'xml-path', version: '4.5.1'
+
+
   // integration test
   integrationTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   integrationTestImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versions.jacksonDatatypeJsr
@@ -354,6 +375,17 @@ dependencies {
       exclude group: 'io.reactivex', module: 'rxnetty-servo'
     }
   integrationTestImplementation(group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator)
+    {
+      exclude group: 'io.reactivex', module: 'io.reactivex'
+      exclude group: 'io.reactivex', module: 'rxnetty'
+      exclude group: 'io.reactivex', module: 'rxnetty-contexts'
+      exclude group: 'io.reactivex', module: 'rxnetty-servo'
+    }
+
+  // functionTest Implementation
+  functionalTestImplementation sourceSets.main.runtimeClasspath
+  functionalTestImplementation sourceSets.test.runtimeClasspath
+  functionalTestImplementation(group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator)
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'
       exclude group: 'io.reactivex', module: 'rxnetty'
@@ -398,11 +430,18 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
   }
 }
 
-task functional(type: Test, description: 'Runs functional tests.', group: 'Verification') {
+task integration(type: Test, description: 'Runs integration tests.', group: 'Verification') {
   useJUnitPlatform()
 
   setTestClassesDirs(sourceSets.integrationTest.output.classesDirs)
   setClasspath(sourceSets.integrationTest.runtimeClasspath)
+}
+
+task functional(type: Test, description: 'Runs functional tests.', group: 'Verification') {
+  useJUnitPlatform()
+
+  setTestClassesDirs(sourceSets.functionalTest.output.classesDirs)
+  setClasspath(sourceSets.functionalTest.runtimeClasspath)
 }
 
 task nightlyFunctional(type: Test, description: 'Runs the Nightly Only Functional tests.', group: 'Verification') {
