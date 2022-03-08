@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
@@ -86,6 +87,9 @@ public class FL401SubmitApplicationControllerTest {
     SolicitorEmailService solicitorEmailService;
 
     @Mock
+    FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
+
+    @Mock
     private Court court;
 
     @Mock
@@ -119,6 +123,45 @@ public class FL401SubmitApplicationControllerTest {
             .email("solicitor@example.com")
             .surname("userLast")
             .build();
+    }
+
+    @Test
+    public void testSubmitApplicationEventValidation() throws Exception {
+
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(fl401Applicant)
+            .courtEmailAddress("localcourt@test.com")
+            .dateSubmitted(String.valueOf("22-02-2022"))
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        CallbackResponse callbackResponse = CallbackResponse.builder()
+            .data(caseData)
+            .errors(Collections.singletonList("test"))
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        fl401SubmitApplicationController.fl401SubmitApplicationValidation(authToken, callbackRequest);
     }
 
     @Test
@@ -203,7 +246,7 @@ public class FL401SubmitApplicationControllerTest {
     }
 
     @Test
-    public void testSendToGateKeeperNotification() throws Exception {
+    public void testFl401SendApplicationNotification() throws Exception {
 
         PartyDetails fl401Applicant = PartyDetails.builder()
             .canYouProvideEmailAddress(YesOrNo.No)

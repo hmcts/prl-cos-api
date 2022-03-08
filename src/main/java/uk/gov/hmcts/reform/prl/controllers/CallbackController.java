@@ -160,26 +160,14 @@ public class CallbackController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData.toBuilder().issueDate(LocalDate.now());
-
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             PRL_C8_TEMPLATE
         );
-
-        caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(C8_DOC).build());
-
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("Generate C1A if allegations of harm is set to Yes and the passed value is {}",
                  caseData.getAllegationsOfHarmYesNo());
-
-        caseData = organisationService.getApplicantOrganisationDetails(caseData);
-        caseData = organisationService.getRespondentOrganisationDetails(caseData);
-
         if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
             GeneratedDocumentInfo generatedC1ADocumentInfo = dgsService.generateDocument(
                 authorisation,
@@ -192,6 +180,14 @@ public class CallbackController {
                 .documentHash(generatedC1ADocumentInfo.getHashToken())
                 .documentFileName(PRL_C1A_FILENAME).build());
         }
+        caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(C8_DOC).build());
+        caseData = organisationService.getApplicantOrganisationDetails(caseData);
+
+        caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
         GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
             authorisation,
@@ -210,7 +206,7 @@ public class CallbackController {
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
 
         caseDataUpdated.putAll(allTabsFields);
-        caseDataUpdated.put(ISSUE_DATE_FIELD,caseData.getIssueDate());
+        caseDataUpdated.put("issueDate",caseData.getIssueDate());
 
         try {
             caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
@@ -296,5 +292,23 @@ public class CallbackController {
             generatedDocumentInfo.getBinaryUrl()).documentHash(generatedDocumentInfo.getHashToken()).documentFileName(
             PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                 ? DRAFT_C_100_APPLICATION : DRAFT_FL401_APPLICATION + CommonUtils.formatCurrentDate("ddMMM").toLowerCase() + ".pdf").build()).build();
+    }
+
+    @PostMapping(path = "/copy-FL401-case-name-to-C100", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Copy fl401 case name to C100 Case name")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse copyFL401CasenameToC100CaseName(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
+            caseDataUpdated.put("applicantCaseName",caseDataUpdated.get("applicantOrRespondentCaseName"));
+        }
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }

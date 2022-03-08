@@ -89,6 +89,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         YesOrNo currAdd = party.getIsCurrentAddressKnown();
         if (currAdd != null && currAdd.equals(Yes)) {
             additionalFields = party.getAddress().getAddressLine1() != null;
+            additionalFields = party.getAddress().getPostCode() != null;
         }
         YesOrNo canProvideEmail = party.getCanYouProvideEmailAddress();
         if (canProvideEmail != null && canProvideEmail.equals(Yes)) {

@@ -34,7 +34,6 @@ public class CourtFinderService {
     public static final String PAPER_PROCESS_INCLUDING_C_100_APPLICATIONS = "Paper process including C100 applications";
     public static final String FAMILY = "Family";
     public static final String CHILD = "child";
-
     @Autowired
     private CourtFinderApi courtFinderApi;
 
@@ -88,7 +87,7 @@ public class CourtFinderService {
             return getFirstOtherPerson(child).getAddress().getPostCode();
         }
         //default to the applicant postcode
-        return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+        return getPostcodeFromWrappedParty(caseData.    getApplicants().get(0));
     }
 
     public CaseData setCourtNameAndId(CaseData caseData, Court court) {
@@ -100,7 +99,6 @@ public class CourtFinderService {
     private String getPostcodeFromWrappedParty(Element<PartyDetails> party) {
         return party.getValue().getAddress().getPostCode();
     }
-
 
     private String getPostcodeFromWrappedParty(PartyDetails partyDetails) {
         return partyDetails.getAddress().getPostCode();

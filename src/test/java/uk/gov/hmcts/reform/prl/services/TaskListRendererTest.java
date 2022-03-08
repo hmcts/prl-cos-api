@@ -79,7 +79,6 @@ public class TaskListRendererTest {
 
 
 
-
     private final List<EventValidationErrors> errors = List.of(
         EventValidationErrors.builder().event(ALLEGATIONS_OF_HARM)
             .errors(Collections.singletonList(ALLEGATIONS_OF_HARM_ERROR.toString())).build(),

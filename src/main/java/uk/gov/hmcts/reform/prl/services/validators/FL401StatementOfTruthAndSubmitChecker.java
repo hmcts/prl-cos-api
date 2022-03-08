@@ -53,7 +53,7 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
         boolean mandatoryFinished;
 
         for (Map.Entry<Event, EventChecker> e : mandatoryEvents.entrySet()) {
-            mandatoryFinished = e.getValue().isFinished(caseData);
+            mandatoryFinished = e.getValue().isFinished(caseData) || e.getValue().hasMandatoryCompleted(caseData);
             if (!mandatoryFinished) {
                 return false;
             }

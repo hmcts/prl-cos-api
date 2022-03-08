@@ -140,12 +140,12 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-        String caseworkerEmailId = "yogendra.upasani@hmcts.net";
+        String caseworkerEmailId = "fprl_caseworker_solicitor@mailinator.com";
         emailService.send(
             caseworkerEmailId,
             EmailTemplateNames.CASEWORKER,
             buildEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         );
 
     }
@@ -187,7 +187,7 @@ public class CaseWorkerEmailService {
             email,
             EmailTemplateNames.RETURNAPPLICATION,
             buildReturnApplicationEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         );
 
     }
@@ -210,7 +210,7 @@ public class CaseWorkerEmailService {
             email,
             EmailTemplateNames.GATEKEEPER,
             buildGatekeeperEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         ));
     }
 
@@ -227,7 +227,7 @@ public class CaseWorkerEmailService {
         }
 
         LocalDate issueDate = LocalDate.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
         return CaseWorkerEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
@@ -258,7 +258,7 @@ public class CaseWorkerEmailService {
             email,
             EmailTemplateNames.COURTADMIN,
             buildCourtAdminEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         ));
     }
 
@@ -278,9 +278,14 @@ public class CaseWorkerEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
+        List<YesOrNo> emailAddressInfo = applicants.stream()
+            .filter(eachParty -> null != eachParty.getIsEmailAddressConfidential()
+                && YesOrNo.Yes.equals(eachParty.getIsEmailAddressConfidential()))
+            .map(PartyDetails::getIsEmailAddressConfidential)
+            .collect(Collectors.toList());
+
         String isConfidential = NO;
-        if ((applicants.stream().noneMatch(PartyDetails::isCanYouProvideEmailAddress)
-            && applicants.stream().anyMatch(PartyDetails::isEmailAddressNull))
+        if (emailAddressInfo.contains(YesOrNo.Yes)
             || (applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
             || (child.stream().anyMatch(Child::hasConfidentialInfo))) {
             isConfidential = YES;
@@ -316,7 +321,7 @@ public class CaseWorkerEmailService {
             courtEmail,
             EmailTemplateNames.DA_LOCALCOURT,
             buildFl401LocalCourtAdminEmail(caseDetails),
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         );
     }
 
