@@ -31,7 +31,7 @@ public class WelshLangMapper {
     public static final Map<String,String> CA_WELSH_MAP = getCaWelshLangMap();
     public static final List<String> CA_WELSH_CONDITONAL_MAP = getCaConditionalFieldWelshLangMap();
 
-    private static Object applyWelshTranslation(Object key , Object obj) {
+    public static Object applyWelshTranslation(Object key , Object obj) {
         if(obj instanceof String) {
             if(!CA_WELSH_CONDITONAL_MAP.contains(obj)) {
                 if(key != null && CA_WELSH_MAP.containsKey(key + "_" + obj)) {
@@ -58,7 +58,7 @@ public class WelshLangMapper {
     }
 
     // Getting conditional fields from document...
-    public static List<String> getCaConditionalFieldWelshLangMap() {
+    private static List<String> getCaConditionalFieldWelshLangMap() {
         return Arrays.asList("isAtAddressLessThan5Years",
                              "typeOfChildArrangementsOrder",
                              "applicationPermissionRequired",
@@ -78,11 +78,12 @@ public class WelshLangMapper {
                              "ordersOtherInjunctive",
                              "ordersUndertakingInPlace",
                              "childrenKnownToLocalAuthority",
-                             "childrenSubjectOfChildProtectionPlan");
+                             "childrenSubjectOfChildProtectionPlan",
+                             "typeOfChildArrangementsOrder");
     }
 
     // Getting conditional fields and Rendering from document...
-    public static List<String> getCaConditionalAndRenderingFieldWelshLangMap() {
+    private static List<String> getCaConditionalAndRenderingFieldWelshLangMap() {
         return Arrays.asList("isAddressConfidential",
                              "isCaseUrgent",
                              "doYouNeedAWithoutNoticeHearing",
@@ -95,7 +96,7 @@ public class WelshLangMapper {
     }
 
     // Getting CA realted values map..
-    public static Map<String,String> getCaWelshLangMap() {
+    private static Map<String,String> getCaWelshLangMap() {
 
         Map<String, String> welshMap = new WeakHashMap<>();
 
