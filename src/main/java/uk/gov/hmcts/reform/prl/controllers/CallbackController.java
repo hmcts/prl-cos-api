@@ -192,13 +192,18 @@ public class CallbackController {
 
     @PostMapping(path = "/update-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to refresh the tabs")
-    public void updateApplication(
+    public AboutToStartOrSubmitCallbackResponse updateApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        allTabsService.updateAllTabs(caseData);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+
+        caseDataUpdated.putAll(allTabsFields);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/case-withdrawn-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
