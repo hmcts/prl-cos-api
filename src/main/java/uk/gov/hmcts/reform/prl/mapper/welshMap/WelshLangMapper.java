@@ -60,6 +60,7 @@ public class WelshLangMapper {
     // Getting conditional fields from document...
     public static List<String> getCaConditionalFieldWelshLangMap() {
         return Arrays.asList("isAtAddressLessThan5Years",
+                             "typeOfChildArrangementsOrder",
                              "applicationPermissionRequired",
                              "canYouProvideEmailAddress",
                              "childrenKnownToLocalAuthority",
@@ -75,13 +76,14 @@ public class WelshLangMapper {
                              "ordersForcedMarriageProtection",
                              "ordersRestraining",
                              "ordersOtherInjunctive",
-                             "ordersUndertakingInPlace");
+                             "ordersUndertakingInPlace",
+                             "childrenKnownToLocalAuthority",
+                             "childrenSubjectOfChildProtectionPlan");
     }
 
     // Getting conditional fields and Rendering from document...
     public static List<String> getCaConditionalAndRenderingFieldWelshLangMap() {
         return Arrays.asList("isAddressConfidential",
-                             "typeOfChildArrangementsOrder",
                              "isCaseUrgent",
                              "doYouNeedAWithoutNoticeHearing",
                              "doYouRequireAHearingWithReducedNotice",
