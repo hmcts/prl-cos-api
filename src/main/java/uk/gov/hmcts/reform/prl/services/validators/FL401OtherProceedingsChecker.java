@@ -77,13 +77,13 @@ public class FL401OtherProceedingsChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
-        if (ofNullable(caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding()).isPresent()
-            && ofNullable(caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding()).get().equals(yes)) {
-            taskErrorService.addEventError(FL401_OTHER_PROCEEDINGS, FL401_OTHER_PROCEEDINGS_ERROR,
-                                           FL401_OTHER_PROCEEDINGS_ERROR.getError()
-            );
-
-            return true;
+        if (ofNullable(caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding()).isPresent()) {
+            if (caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding().equals(yes)) {
+                taskErrorService.addEventError(FL401_OTHER_PROCEEDINGS, FL401_OTHER_PROCEEDINGS_ERROR,
+                                               FL401_OTHER_PROCEEDINGS_ERROR.getError()
+                );
+                return true;
+            }
         }
         return false;
     }
