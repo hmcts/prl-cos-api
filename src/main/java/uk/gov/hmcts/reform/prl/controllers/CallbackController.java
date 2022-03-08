@@ -285,15 +285,14 @@ public class CallbackController {
             PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? PRL_DRAFT_TEMPLATE
                 : PRL_FL401_DRAFT_TEMPLATE
         );
-        CaseData updatedCaseData = CaseData.builder().draftOrderDoc(Document.builder().documentUrl(
+
+        return CaseData.builder().draftOrderDoc(Document.builder().documentUrl(
             generatedDocumentInfo.getUrl()).documentBinaryUrl(
             generatedDocumentInfo.getBinaryUrl()).documentHash(generatedDocumentInfo.getHashToken()).documentFileName(
             PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                 ? DRAFT_C_100_APPLICATION : DRAFT_FL401_APPLICATION + CommonUtils.formatCurrentDate("ddMMM").toLowerCase() + ".pdf").build()).build();
-
-        return updatedCaseData;
     }
-  
+
     @PostMapping(path = "/copy-FL401-case-name-to-C100", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Copy fl401 case name to C100 Case name")
     @ApiResponses(value = {
