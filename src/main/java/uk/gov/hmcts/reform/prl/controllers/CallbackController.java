@@ -206,7 +206,7 @@ public class CallbackController {
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
 
         caseDataUpdated.putAll(allTabsFields);
-        caseDataUpdated.put("issueDate",caseData.getIssueDate());
+        caseDataUpdated.put(ISSUE_DATE_FIELD,caseData.getIssueDate());
 
         try {
             caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
