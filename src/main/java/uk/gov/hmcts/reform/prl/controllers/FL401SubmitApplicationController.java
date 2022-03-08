@@ -148,10 +148,14 @@ public class FL401SubmitApplicationController {
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
             && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
             caseData = caseData.toBuilder().build();
+            log.info("Case date with Home ----{}---- and respondent bahaviour === {} =====",
+                     caseData.getHome(), caseData.getRespondentBehaviourData());
         } else  if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
             caseDataUpdated.put("respondentBehaviourData", null);
+            log.info("Case date with respondent bahaviour === {} =====", caseDataUpdated.get("respondentBehaviourData"));
         } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
             caseDataUpdated.put("home", null);
+            log.info("Case date with home details === {} =====", caseDataUpdated.get("home"));
         }
 
         log.info("Generating the Final document of FL401 for case id " + caseData.getId());
