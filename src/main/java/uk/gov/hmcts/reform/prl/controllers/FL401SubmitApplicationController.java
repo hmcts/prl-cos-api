@@ -132,6 +132,7 @@ public class FL401SubmitApplicationController {
             Objects.requireNonNull(nearestDomesticAbuseCourt).getCourtEmailAddresses().get(0).getAddress());
 
         log.info("Generating the Final document of FL401 for case id " + caseData.getId());
+        log.info("Issue date for the application: {} ", caseData.getIssueDate());
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
