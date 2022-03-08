@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 public class UploadDocuments {
 
-    @JsonProperty("uploadDocuments")
+    @JsonProperty("uploadedDocuments")
     private final UploadDocument uploadDocuments;
 
     @JsonCreator
