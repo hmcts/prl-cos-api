@@ -22,6 +22,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
@@ -73,7 +75,7 @@ public class TaskListService {
             ? getFL401Events() : getC100Events();
     }
 
-    private List<Event> getC100Events() {
+    public List<Event> getC100Events() {
         return new ArrayList<>(List.of(
             CASE_NAME,
             TYPE_OF_APPLICATION,
@@ -95,7 +97,7 @@ public class TaskListService {
 
     }
 
-    private List<Event> getFL401Events() {
+    public List<Event> getFL401Events() {
         return new ArrayList<>(List.of(
             FL401_CASE_NAME,
             FL401_TYPE_OF_APPLICATION,
@@ -103,9 +105,10 @@ public class TaskListService {
             APPLICANT_DETAILS,
             RESPONDENT_DETAILS,
             RELATIONSHIP_TO_RESPONDENT,
-            RESPONDENT_BEHAVIOUR,
             FL401_APPLICANT_FAMILY_DETAILS,
-            OTHER_PROCEEDINGS,
+            RESPONDENT_BEHAVIOUR,
+            FL401_HOME,
+            FL401_OTHER_PROCEEDINGS,
             ATTENDING_THE_HEARING,
             INTERNATIONAL_ELEMENT,
             WELSH_LANGUAGE_REQUIREMENTS,
