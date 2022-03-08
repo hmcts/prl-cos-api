@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.dontKnow;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.no;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
+@Slf4j
 @Service
 public class FL401OtherProceedingsChecker implements EventChecker {
 
@@ -77,8 +79,11 @@ public class FL401OtherProceedingsChecker implements EventChecker {
 
     @Override
     public boolean isStarted(CaseData caseData) {
+
+        log.info(ofNullable(caseData.getFl401OtherProceedingDetails()).toString());
+
         if (ofNullable(caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding()).isPresent()) {
-            if (caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding().equals(yes)) {
+            if (ofNullable(caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding()).get().equals(yes)) {
                 taskErrorService.addEventError(FL401_OTHER_PROCEEDINGS, FL401_OTHER_PROCEEDINGS_ERROR,
                                                FL401_OTHER_PROCEEDINGS_ERROR.getError()
                 );
