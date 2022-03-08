@@ -64,8 +64,8 @@ public class EmailServiceTest {
         when(emailTemplatesConfig.getTemplates())
             .thenReturn(
                 ImmutableMap.of(
-                    LanguagePreference.ENGLISH, ImmutableMap.of(EmailTemplateNames.EXAMPLE, EMAIL_TEMPLATE_ID_1),
-                    LanguagePreference.WELSH, ImmutableMap.of(EmailTemplateNames.EXAMPLE, EMAIL_TEMPLATE_ID_2)
+                    LanguagePreference.english, ImmutableMap.of(EmailTemplateNames.EXAMPLE, EMAIL_TEMPLATE_ID_1),
+                    LanguagePreference.welsh, ImmutableMap.of(EmailTemplateNames.EXAMPLE, EMAIL_TEMPLATE_ID_2)
                 )
             );
         when(notificationClient.sendEmail(any(), any(), any(), any())).thenReturn(mock(SendEmailResponse.class));
@@ -78,7 +78,7 @@ public class EmailServiceTest {
             TEST_EMAIL,
             EmailTemplateNames.EXAMPLE,
             expectedEmailVars,
-            LanguagePreference.ENGLISH
+            LanguagePreference.english
         );
 
         verify(notificationClient).sendEmail(
@@ -97,7 +97,7 @@ public class EmailServiceTest {
         assertThrows(
             IllegalArgumentException.class,
             () -> emailService.send(
-                TEST_EMAIL, EmailTemplateNames.EXAMPLE, expectedEmailVars, LanguagePreference.WELSH
+                TEST_EMAIL, EmailTemplateNames.EXAMPLE, expectedEmailVars, LanguagePreference.welsh
             )
         );
 

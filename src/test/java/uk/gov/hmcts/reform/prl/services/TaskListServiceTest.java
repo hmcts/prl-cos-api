@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -21,6 +20,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
@@ -74,7 +75,6 @@ public class TaskListServiceTest {
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
-
     }
 
     @Test
@@ -89,9 +89,10 @@ public class TaskListServiceTest {
             Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
-            Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
             Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
+            Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
+            Task.builder().event(FL401_HOME).state(NOT_STARTED).build(),
+            Task.builder().event(FL401_OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
             Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
             Task.builder().event(INTERNATIONAL_ELEMENT).state(NOT_STARTED).build(),
             Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
@@ -100,9 +101,10 @@ public class TaskListServiceTest {
 
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
+
+
         assertThat(expectedTasks).isEqualTo(actualTasks);
 
     }
-
 }
 
