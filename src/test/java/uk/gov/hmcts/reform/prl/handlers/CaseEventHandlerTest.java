@@ -88,12 +88,12 @@ public class CaseEventHandlerTest {
         final String c100renderedTaskList = "<h1>Case Name</h1><h2>Miam</h2>";
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
-        when(taskListRenderer.render(c100Tasks, errors, true)).thenReturn(c100renderedTaskList);
+        when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         verify(taskListService).getTasksForOpenCase(caseData);
-        verify(taskListRenderer).render(c100Tasks, errors, true);
+        verify(taskListRenderer).render(c100Tasks, errors, true, caseData);
         verify(coreCaseDataService).triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -126,12 +126,12 @@ public class CaseEventHandlerTest {
         final List<EventValidationErrors> eventsErrors = Collections.emptyList();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(fl401Tasks);
-        when(taskListRenderer.render(fl401Tasks, eventsErrors, false)).thenReturn(fl410renderedTaskList);
+        when(taskListRenderer.render(fl401Tasks, eventsErrors, false, caseData)).thenReturn(fl410renderedTaskList);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         verify(taskListService).getTasksForOpenCase(caseData);
-        verify(taskListRenderer).render(fl401Tasks, eventsErrors, false);
+        verify(taskListRenderer).render(fl401Tasks, eventsErrors, false, caseData);
 
         verify(coreCaseDataService).triggerEvent(
             JURISDICTION,

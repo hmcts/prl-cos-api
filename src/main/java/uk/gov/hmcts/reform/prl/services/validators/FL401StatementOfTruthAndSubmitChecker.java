@@ -3,15 +3,20 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
@@ -39,7 +44,7 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
 
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
-        EnumMap<Event, EventChecker> mandatoryEvents = new EnumMap<Event, EventChecker>(Event.class);
+        EnumMap<Event, EventChecker> mandatoryEvents = new EnumMap<>(Event.class);
 
         mandatoryEvents.put(FL401_CASE_NAME, eventsChecker.caseNameChecker);
         mandatoryEvents.put(FL401_TYPE_OF_APPLICATION, eventsChecker.fl401ApplicationTypeChecker);
@@ -48,7 +53,19 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
         mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.respondentsChecker);
         mandatoryEvents.put(RELATIONSHIP_TO_RESPONDENT, eventsChecker.respondentRelationshipChecker);
         mandatoryEvents.put(FL401_APPLICANT_FAMILY_DETAILS, eventsChecker.fl401ApplicantFamilyChecker);
-        mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.respondentBehaviourChecker);
+
+        Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
+
+        if (typeOfApplicationOrders.isEmpty()
+            || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
+            && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
+            mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.respondentBehaviourChecker);
+            mandatoryEvents.put(FL401_HOME, eventsChecker.homeChecker);
+        } else  if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+            mandatoryEvents.put(FL401_HOME, eventsChecker.homeChecker);
+        } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
+            mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.respondentBehaviourChecker);
+        }
 
         boolean mandatoryFinished;
 
@@ -59,7 +76,7 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
             }
         }
 
-        EnumMap<Event, EventChecker> optionalEvents = new EnumMap<Event, EventChecker>(Event.class);
+        EnumMap<Event, EventChecker> optionalEvents = new EnumMap<>(Event.class);
 
         optionalEvents.put(OTHER_PROCEEDINGS, eventsChecker.otherProceedingsChecker);
         optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.attendingTheHearingChecker);
