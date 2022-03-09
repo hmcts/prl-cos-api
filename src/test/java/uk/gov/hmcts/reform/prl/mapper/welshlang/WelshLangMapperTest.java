@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.mapper.welshLang;
+package uk.gov.hmcts.reform.prl.mapper.welshlang;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class WelshLangMapperTest {
                           Map.class);
         Map<String, Object> caseDataValues = (Map<String, Object>) caseDataMap.get("case_data");
         caseDataValues.forEach((k,v) -> {
-            if(v != null) {
+            if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v);
                 caseDataValues.put(k, updatedWelshObj);
             }
