@@ -18,6 +18,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class SendgridServiceTest {
@@ -28,8 +29,6 @@ public class SendgridServiceTest {
     @Mock
     private SendGrid sendGrid;
 
-    @Mock
-    private C100JsonMapper c100JsonMapper;
     @Test
     public void TestSendEmail() throws IOException {
         Response response = new Response();
@@ -37,8 +36,10 @@ public class SendgridServiceTest {
         JsonObject jsonObject = new NullAwareJsonObjectBuilder()
             .add("applicantCaseName","hello")
             .build();
+        sendGrid = new SendGrid(null);
+        when(sendGrid.api(Mockito.any(Request.class))).thenReturn(response);
         sendgridService.sendEmail(jsonObject);
         //assertThrows(sendgridService.sendEmail(jsonObject),IOException);
-        //assertNotEquals(verify(sendGrid.api(Mockito.any(Request.class))).getStatusCode(),202);
+        assertEquals(verify(sendGrid.api(Mockito.any(Request.class))).getStatusCode(),200);
     }
 }
