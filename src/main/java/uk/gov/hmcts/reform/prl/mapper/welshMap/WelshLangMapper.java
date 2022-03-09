@@ -20,11 +20,13 @@ import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 
 public class WelshLangMapper {
 
@@ -33,7 +35,7 @@ public class WelshLangMapper {
 
     public static Object applyWelshTranslation(Object key , Object obj) {
         if(obj instanceof String) {
-            if(!CA_WELSH_CONDITONAL_MAP.contains(obj)) {
+            if(!CA_WELSH_CONDITONAL_MAP.contains(key)) {
                 if(key != null && CA_WELSH_MAP.containsKey(key + "_" + obj)) {
                     obj = CA_WELSH_MAP.get(key + "_" + obj);
                 } else if(CA_WELSH_MAP.containsKey(obj)) {
@@ -137,6 +139,8 @@ public class WelshLangMapper {
          */
         welshMap.put("doYouNeedAWithoutNoticeHearing_Yes","Ydw");
         welshMap.put("doYouNeedAWithoutNoticeHearing_No","Nac ydw");
+        welshMap.put("doYouRequireAHearingWithReducedNotice_Yes","Ydw");
+        welshMap.put("doYouRequireAHearingWithReducedNotice_No","Nac ydw");
 
 
         /**
