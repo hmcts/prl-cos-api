@@ -64,8 +64,11 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             if (others.size() == 0) {
                 return false;
             }
-            taskErrorService.addEventError(OTHER_PEOPLE_IN_THE_CASE, OTHER_PEOPLE_ERROR, OTHER_PEOPLE_ERROR.getError());
-            return others.stream().anyMatch(Objects::nonNull);
+            boolean started = others.stream().anyMatch(Objects::nonNull);
+            if (started) {
+                taskErrorService.addEventError(OTHER_PEOPLE_IN_THE_CASE, OTHER_PEOPLE_ERROR, OTHER_PEOPLE_ERROR.getError());
+                return true;
+            }
         }
         return false;
     }
