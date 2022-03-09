@@ -62,7 +62,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ApplicantTabServiceTest {
+public class ApplicationsTabServiceTest {
 
     @InjectMocks
     ApplicationsTabService applicationsTabService;
@@ -245,6 +245,14 @@ public class ApplicantTabServiceTest {
 
         emptyCaseData = CaseData.builder().build();
     }
+
+    @Test
+    public void testGetGenerators() {
+        assertEquals(applicationsTabService.getGenerators(), Collections.emptyMap());
+    }
+
+
+
 
     @Test
     public void testApplicantTableMapper() {
@@ -676,6 +684,27 @@ public class ApplicantTabServiceTest {
     public void testSpecificOrderMapping() {
         assertEquals(allegationsOfHarmOrders, applicationsTabService
             .getSpecificOrderDetails(emptyAllegationOfHarmOrder, caseDataWithParties));
+    }
+
+    @Test
+    public void testAllegationsOfHarmOrders() {
+        AllegationsOfHarmOrders allegationsOfHarmOrders = AllegationsOfHarmOrders.builder()
+            .ordersNonMolestation(YesOrNo.Yes)
+            .nonMolestationOrder(Order.builder()
+                                     .courtName("non mol test")
+                                     .build())
+            .build();
+        CaseData orderCaseData = CaseData.builder()
+            .ordersNonMolestation(YesOrNo.Yes)
+            .ordersNonMolestationCourtName("non mol test")
+            .build();
+        Map<String, Object> orderMap = Map.of(
+            "ordersNonMolestation", "Yes",
+            "nonMolestationOrder", Map.of("courtName", "non mol test")
+        );
+        when(objectMapper.convertValue(orderCaseData, AllegationsOfHarmOrders.class)).thenReturn(allegationsOfHarmOrders);
+        when(objectMapper.convertValue(allegationsOfHarmOrders, Map.class)).thenReturn(orderMap);
+        assertEquals(orderMap, applicationsTabService.getAllegationsOfHarmOrdersTable(orderCaseData));
     }
 
     @Test
