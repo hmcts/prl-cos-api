@@ -68,9 +68,6 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             }
             boolean started = others.stream().anyMatch(Objects::nonNull);
             if (started) {
-                log.info("----------------OTHER PEOPLE IN THE CASE STARTED--------------------------------");
-                log.info(othersToNotify.toString());
-
                 taskErrorService.addEventError(OTHER_PEOPLE_IN_THE_CASE, OTHER_PEOPLE_ERROR, OTHER_PEOPLE_ERROR.getError());
                 return true;
             }
