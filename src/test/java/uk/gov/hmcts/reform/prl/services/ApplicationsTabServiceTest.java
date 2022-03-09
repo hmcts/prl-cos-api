@@ -248,10 +248,8 @@ public class ApplicationsTabServiceTest {
 
     @Test
     public void testGetGenerators() {
-        assertEquals(applicationsTabService.getGenerators(), Collections.emptyList());
+        assertEquals(Collections.emptyList(), applicationsTabService.getGenerators());
     }
-
-
 
 
     @Test
