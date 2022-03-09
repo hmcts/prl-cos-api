@@ -7,6 +7,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class AppObjectMapper {
 
+    private AppObjectMapper() {
+        throw new IllegalStateException("Utility class");
+    }
+
     private static ObjectMapper om = null;
 
     public static ObjectMapper getObjectMapper() {
