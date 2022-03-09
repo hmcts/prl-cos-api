@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.Event.FL401_STATEMENT_OF_TRUTH;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
@@ -44,7 +44,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.STATEMENT_OF_TRUTH_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
@@ -149,7 +148,7 @@ public class TaskListRenderer {
                 } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
                                   + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
-                } else if (task.getEvent().equals(FL401_STATEMENT_OF_TRUTH)) {
+                } else if (task.getEvent().equals(FL401_SOT_AND_SUBMIT)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
                                   + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
                 } else {
@@ -169,7 +168,7 @@ public class TaskListRenderer {
                 if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
-                } else if (task.getEvent().equals(FL401_STATEMENT_OF_TRUTH)) {
+                } else if (task.getEvent().equals(FL401_SOT_AND_SUBMIT)) {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
                 } else {
@@ -237,7 +236,7 @@ public class TaskListRenderer {
 
         final TaskSection checkAndSignApplication = newSection("Check and sign application")
             .withTask(tasks.get(VIEW_PDF_DOCUMENT))
-            .withTask(tasks.get(FL401_STATEMENT_OF_TRUTH));
+            .withTask(tasks.get(FL401_SOT_AND_SUBMIT));
 
         return Stream.of(applicationDetails,
                          peopleInTheCase,

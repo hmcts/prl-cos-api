@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.Event.FL401_STATEMENT_OF_TRUTH;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
@@ -38,7 +38,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.STATEMENT_OF_TRUTH_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
@@ -105,7 +104,7 @@ public class TaskListServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
-            .typeOfApplicationLinkToCA(linkToCA)
+            .typeOfApplicationLinkToCA(linkToCA).build();
 
         List<Task> expectedTasks = List.of(
             Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
@@ -113,14 +112,16 @@ public class TaskListServiceTest {
             Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
             Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
             Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
             Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
+            Task.builder().event(UPLOAD_DOCUMENTS).state(NOT_STARTED).build(),
             Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_STATEMENT_OF_TRUTH).state(NOT_STARTED).build(),
-            Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build());
+            Task.builder().event(FL401_SOT_AND_SUBMIT).state(NOT_STARTED).build(),
+            Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build()
+            );
 
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
@@ -155,59 +156,14 @@ public class TaskListServiceTest {
             Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
             Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
-            Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
             Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
             Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
             Task.builder().event(UPLOAD_DOCUMENTS).state(NOT_STARTED).build(),
             Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_STATEMENT_OF_TRUTH).state(NOT_STARTED).build(),
-            Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build());
-
-        List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
-
-        assertThat(expectedTasks).isEqualTo(actualTasks);
-
-    }
-
-    @Test
-    public void getTasksShouldReturnOccupationOrderFl401ListOfTasks() {
-
-        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-
-        orderList.add(FL401OrderTypeEnum.occupationOrder);
-
-        orders = TypeOfApplicationOrders.builder()
-            .orderType(orderList)
-            .build();
-
-        linkToCA = LinkToCA.builder()
-            .linkToCaApplication(YesOrNo.Yes)
-            .caApplicationNumber("123")
-            .build();
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .typeOfApplicationOrders(orders)
-            .typeOfApplicationLinkToCA(linkToCA)
-            .build();
-
-        List<Task> expectedTasks = List.of(
-            Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
-            Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
-            Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
-            Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
-            Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
-            Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
-            Task.builder().event(UPLOAD_DOCUMENTS).state(NOT_STARTED).build(),
-            Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-            Task.builder().event(STATEMENT_OF_TRUTH_AND_SUBMIT).state(NOT_STARTED).build(),
+            Task.builder().event(FL401_SOT_AND_SUBMIT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_HOME).state(NOT_STARTED).build());
 
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
@@ -244,59 +200,14 @@ public class TaskListServiceTest {
             Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
             Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
-            Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
             Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
             Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
             Task.builder().event(UPLOAD_DOCUMENTS).state(NOT_STARTED).build(),
             Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_STATEMENT_OF_TRUTH).state(NOT_STARTED).build(),
-            Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_HOME).state(NOT_STARTED).build());
-
-        List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
-
-        assertThat(expectedTasks).isEqualTo(actualTasks);
-
-    }
-
-    @Test
-    public void getTasksShouldReturnOccupationAndNonMolestationOrderFl401ListOfTasks() {
-
-        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-
-        orderList.add(FL401OrderTypeEnum.occupationOrder);
-        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
-
-        orders = TypeOfApplicationOrders.builder()
-            .orderType(orderList)
-            .build();
-
-        linkToCA = LinkToCA.builder()
-            .linkToCaApplication(YesOrNo.Yes)
-            .caApplicationNumber("123")
-            .build();
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .typeOfApplicationOrders(orders)
-            .typeOfApplicationLinkToCA(linkToCA)
-            .build();
-
-        List<Task> expectedTasks = List.of(
-            Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
-            Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
-            Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
-            Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
-            Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
-            Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_STATEMENT_OF_TRUTH).state(NOT_STARTED).build(),
+            Task.builder().event(FL401_SOT_AND_SUBMIT).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
             Task.builder().event(FL401_HOME).state(NOT_STARTED).build());
 
