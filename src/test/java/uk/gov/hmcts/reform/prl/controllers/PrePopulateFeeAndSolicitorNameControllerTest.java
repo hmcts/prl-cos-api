@@ -150,6 +150,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+            .thenReturn(generatedDocumentInfo);
 
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
@@ -172,6 +174,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .thenReturn(caseData);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+            .thenReturn(generatedDocumentInfo);
 
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
@@ -184,7 +188,12 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
 
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.anyString()
+        );
+        verify(dgsService, times(1)).generateWelshDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.anyString()
@@ -197,6 +206,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
 
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
@@ -296,6 +307,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         );
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);

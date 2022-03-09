@@ -67,13 +67,13 @@ public class CallbackController {
     public static final String PRL_C1A_TEMPLATE = "PRL-C1A.docx";
     public static final String PRL_C1A_FILENAME = "C1A_Document.pdf";
     public static final String C8_WELSH_FILENAME = "C8Document_Welsh.pdf";
-    public static final String PRL_C8_WELSH_TEMPLATE = "PRL-C8-Welsh.docx";
-    public static final String PRL_C1A_WELSH_TEMPLATE = "PRL-C1A-Welsh.docx";
+    public static final String PRL_C8_WELSH_TEMPLATE = "PRL-C8-WelshLang.docx";
+    public static final String PRL_C1A_WELSH_TEMPLATE = "PRL-C1A-WelshLang.docx";
     public static final String PRL_C1A_WELSH_FILENAME = "C1A_Document_Welsh.pdf";
-    public static final String PRL_C100_DRAFT_WELSH_TEMPLATE = "PRL-Draft-C100-Welsh.docx";
+    public static final String PRL_C100_DRAFT_WELSH_TEMPLATE = "PRL-Draft-C100-WelshLang.docx";
     public static final String PRL_C100_DRAFT_WELSH_FILENAME = "Draft_C100_application_welsh.pdf";
     private static final String C100_FINAL_WELSH_FILENAME = "C100FinalDocumentWelsh.pdf";
-    private static final String C100_FINAL_WELSH_TEMPLATE = "C100-Final-Document-Welsh.docx";
+    private static final String C100_FINAL_WELSH_TEMPLATE = "PRL-Final-C100-WelshLang.docx";
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final OrganisationService organisationService;

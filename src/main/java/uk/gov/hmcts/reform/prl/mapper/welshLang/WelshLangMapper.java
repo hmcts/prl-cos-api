@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.mapper.welshMap;
+package uk.gov.hmcts.reform.prl.mapper.welshLang;
 
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
@@ -20,19 +20,23 @@ import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 public class WelshLangMapper {
 
+    /**
+     * C100 Welsh Lang Map
+     * */
     public static final Map<String,String> CA_WELSH_MAP = getCaWelshLangMap();
     public static final List<String> CA_WELSH_CONDITONAL_MAP = getCaConditionalFieldWelshLangMap();
 
+    /**
+     * Recursive mapper for replacing the English to Welsh
+    */
     public static Object applyWelshTranslation(Object key , Object obj) {
         if(obj instanceof String) {
             if(!CA_WELSH_CONDITONAL_MAP.contains(key)) {
@@ -58,8 +62,9 @@ public class WelshLangMapper {
         }
         return obj;
     }
-
-    // Getting conditional fields from document...
+    /**
+     * Excluding conditional fields for changing english to welsh
+     */
     private static List<String> getCaConditionalFieldWelshLangMap() {
         return Arrays.asList("isAtAddressLessThan5Years",
                              "typeOfChildArrangementsOrder",
@@ -84,20 +89,6 @@ public class WelshLangMapper {
                              "typeOfChildArrangementsOrder");
     }
 
-    // Getting conditional fields and Rendering from document...
-    private static List<String> getCaConditionalAndRenderingFieldWelshLangMap() {
-        return Arrays.asList("isAddressConfidential",
-                             "isCaseUrgent",
-                             "doYouNeedAWithoutNoticeHearing",
-                             "doYouRequireAHearingWithReducedNotice",
-                             "gender",
-                             "isEmailAddressConfidential",
-                             "isPhoneNumberConfidential",
-                             "isPersonIdentityConfidential",
-                             "familyMediatorMiam");
-    }
-
-    // Getting CA realted values map..
     private static Map<String,String> getCaWelshLangMap() {
 
         Map<String, String> welshMap = new WeakHashMap<>();
@@ -188,7 +179,8 @@ public class WelshLangMapper {
         welshMap.put(LiveWithEnum.anotherPerson.getDisplayedValue(), "Unigolyn arall nad yw wedi’i restru");
 
         /**
-         * Child Details - Do you need to keep the identity of the person that the child lives with confidential? (isPersonIdentityConfidential).
+         * Child Details - Do you need to keep the identity of the person that the child lives with confidential?
+         * (isPersonIdentityConfidential).
          */
         welshMap.put("isPersonIdentityConfidential_Yes","Ydw");
         welshMap.put("isPersonIdentityConfidential_No","Nac ydw");
@@ -215,9 +207,11 @@ public class WelshLangMapper {
          * MIAM.
          */
         welshMap.put(MiamExemptionsChecklistEnum.domesticViolence.getDisplayedValue(), "Trais domestig");
-        welshMap.put(MiamExemptionsChecklistEnum.childProtectionConcern.getDisplayedValue(), "Pryderon amddiffyn plant");
+        welshMap.put(MiamExemptionsChecklistEnum.childProtectionConcern.getDisplayedValue(),
+                     "Pryderon amddiffyn plant");
         welshMap.put(MiamExemptionsChecklistEnum.urgency.getDisplayedValue(), "Cais brys");
-        welshMap.put(MiamExemptionsChecklistEnum.previousMIAMattendance.getDisplayedValue(), "Eisoes wedi mynychu MIAM neu esemptiad MIAM blaenorol");
+        welshMap.put(MiamExemptionsChecklistEnum.previousMIAMattendance.getDisplayedValue(),
+                     "Eisoes wedi mynychu MIAM neu esemptiad MIAM blaenorol");
         welshMap.put(MiamExemptionsChecklistEnum.other.getDisplayedValue(), "Arall");
         welshMap.put(MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_22.getDisplayedValue(),
                      "Tystiolaeth sy’n dangos bod darpar barti wedi bod,"
