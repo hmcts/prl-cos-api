@@ -99,7 +99,6 @@ public class ApplicationsTabService implements TabService {
         applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
 
         log.info("inside the application tab service update");
-        log.info(applicationTab.toString());
 
         return applicationTab;
     }
