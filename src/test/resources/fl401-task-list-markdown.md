@@ -30,7 +30,7 @@
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
-<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401ApplicantFamilyDetails/fl401ApplicantFamilyDetails1'>Applicant's Family</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401ApplicantFamilyDetails/fl401ApplicantFamilyDetails1'>Applicant's family</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
@@ -118,7 +118,7 @@ Add applicant details in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigge
 
 Add details about relationship to respondent in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentRelationship/respondentRelationship1'>Relationship to respondent</a>
 
-Add details about applicant's family in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401ApplicantFamilyDetails/fl401ApplicantFamilyDetails1'>Applicant's Family</a>
+Add details about applicant's family in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401ApplicantFamilyDetails/fl401ApplicantFamilyDetails1'>Applicant's family</a>
 
 Add respondent details in <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details</a>
 

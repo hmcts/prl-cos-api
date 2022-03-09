@@ -39,8 +39,10 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.STATEMENT_OF_TRUTH_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
@@ -114,8 +116,10 @@ public class TaskListService {
             RELATIONSHIP_TO_RESPONDENT,
             FL401_APPLICANT_FAMILY_DETAILS,
             FL401_OTHER_PROCEEDINGS,
+            OTHER_PROCEEDINGS,
             ATTENDING_THE_HEARING,
             WELSH_LANGUAGE_REQUIREMENTS,
+            UPLOAD_DOCUMENTS,
             VIEW_PDF_DOCUMENT,
             FL401_STATEMENT_OF_TRUTH));
 
@@ -129,7 +133,6 @@ public class TaskListService {
         } else if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
             eventsList.add(RESPONDENT_BEHAVIOUR);
         }
-
         return eventsList;
     }
 }

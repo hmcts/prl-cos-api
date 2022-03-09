@@ -40,8 +40,10 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.STATEMENT_OF_TRUTH_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
@@ -111,8 +113,11 @@ public class TaskListRendererTest {
         Task.builder().event(FL401_OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
         Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
+        Task.builder().event(UPLOAD_DOCUMENTS).state(NOT_STARTED).build(),
         Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
         Task.builder().event(FL401_STATEMENT_OF_TRUTH).state(NOT_STARTED).build());
+        Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
+        Task.builder().event(STATEMENT_OF_TRUTH_AND_SUBMIT).state(NOT_STARTED).build());
 
     private final List<EventValidationErrors> fl401Errors = List.of(
         EventValidationErrors.builder().event(WITHOUT_NOTICE_ORDER)
