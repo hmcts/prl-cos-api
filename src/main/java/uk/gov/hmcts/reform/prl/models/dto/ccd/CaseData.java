@@ -41,14 +41,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.FL401UploadSupportDocumentsDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.FL401UploadWitnessDocumentsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.GatekeeperEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
-import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
@@ -61,18 +58,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.complextypes.UploadDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.documents.C8Document;
-import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
-import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
-import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
+import uk.gov.hmcts.reform.prl.models.documents.*;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
@@ -496,9 +487,9 @@ public class CaseData implements MappableObject {
     /**
      * FL401 Upload Documents.
      */
-    private final List<Element<UploadDocuments>> fl401UploadedDocuments;
-    private final List<Element<FL401UploadWitnessDocumentsDetails>> fl401UploadWitnessDocuments;
-    private final List<Element<FL401UploadSupportDocumentsDetails>> fl401UploadSupportDocuments;
+    private final List<UploadDocument> fl401UploadedDocuments;
+    private final List<UploadDocument> fl401UploadWitnessDocuments;
+    private final List<UploadDocument> fl401UploadSupportDocuments;
 
     /**
      * Send to Gatekeeper.
