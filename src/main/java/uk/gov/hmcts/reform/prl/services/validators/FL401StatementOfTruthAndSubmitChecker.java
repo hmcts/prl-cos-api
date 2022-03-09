@@ -50,7 +50,7 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
         mandatoryEvents.put(RELATIONSHIP_TO_RESPONDENT, eventsChecker.respondentRelationshipChecker);
         mandatoryEvents.put(FL401_APPLICANT_FAMILY_DETAILS, eventsChecker.fl401ApplicantFamilyChecker);
         mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.respondentBehaviourChecker);
-        mandatoryEvents.put(FL401_HOME, eventsChecker.respondentBehaviourChecker);
+        mandatoryEvents.put(FL401_HOME, eventsChecker.homeChecker);
 
         boolean mandatoryFinished;
 
