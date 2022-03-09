@@ -69,12 +69,12 @@ public class CaseEventHandlerTest {
         List<EventValidationErrors> errors = new ArrayList<>();
 
         EventValidationErrors error1 = EventValidationErrors.builder()
-                .event(FL401_TYPE_OF_APPLICATION)
-                .build();
+            .event(FL401_TYPE_OF_APPLICATION)
+            .build();
 
         EventValidationErrors error2 = EventValidationErrors.builder()
-                .event(ALLEGATIONS_OF_HARM)
-                .build();
+            .event(ALLEGATIONS_OF_HARM)
+            .build();
 
         errors.add(error1);
         errors.add(error2);
@@ -88,12 +88,12 @@ public class CaseEventHandlerTest {
         final String c100renderedTaskList = "<h1>Case Name</h1><h2>Miam</h2>";
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
-        when(taskListRenderer.render(c100Tasks, errors, true)).thenReturn(c100renderedTaskList);
+        when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         verify(taskListService).getTasksForOpenCase(caseData);
-        verify(taskListRenderer).render(c100Tasks, errors, true);
+        verify(taskListRenderer).render(c100Tasks, errors, true, caseData);
         verify(coreCaseDataService).triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -125,13 +125,14 @@ public class CaseEventHandlerTest {
 
         final List<EventValidationErrors> eventsErrors = Collections.emptyList();
 
-        when(taskListService.getTasksForOpenCase(caseData)).thenReturn(tasks);
-        when(taskListRenderer.render(tasks, eventsErrors, true, caseData)).thenReturn(renderedTaskLists);
+        when(taskListService.getTasksForOpenCase(caseData)).thenReturn(fl401Tasks);
+        when(taskListRenderer.render(fl401Tasks, eventsErrors, false, caseData)).thenReturn(fl410renderedTaskList);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         verify(taskListService).getTasksForOpenCase(caseData);
-        verify(taskListRenderer).render(tasks, eventsErrors, true, caseData);
+        verify(taskListRenderer).render(fl401Tasks, eventsErrors, false, caseData);
+
         verify(coreCaseDataService).triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -140,5 +141,4 @@ public class CaseEventHandlerTest {
             Map.of("taskList", fl410renderedTaskList,"id",String.valueOf(caseData.getId()))
         );
     }
-
 }
