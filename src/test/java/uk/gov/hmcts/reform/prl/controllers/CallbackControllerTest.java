@@ -232,6 +232,8 @@ public class CallbackControllerTest {
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+            .thenReturn(generatedDocumentInfo);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
@@ -245,7 +247,12 @@ public class CallbackControllerTest {
 
         callbackController.generateAndStoreDocument(authToken, callbackRequest);
 
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.anyString()
+        );
+        verify(dgsService, times(1)).generateWelshDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.anyString()
@@ -374,8 +381,9 @@ public class CallbackControllerTest {
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
             .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+            .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.issueAndSendToLocalCourt(
             authToken,
@@ -386,7 +394,12 @@ public class CallbackControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8WelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
-        verify(dgsService, times(6)).generateDocument(
+        verify(dgsService, times(3)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.anyString()
+        );
+        verify(dgsService, times(3)).generateWelshDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.anyString()
