@@ -106,10 +106,6 @@ public class ChildCheckerTest {
             .applicantsRelationshipToChild(specialGuardian)
             .respondentsRelationshipToChild(father)
             .childLiveWith(Collections.singletonList(respondent))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .parentalResponsibilityDetails("test")
             .build();
 
@@ -138,9 +134,6 @@ public class ChildCheckerTest {
             .applicantsRelationshipToChild(specialGuardian)
             .respondentsRelationshipToChild(father)
             .childLiveWith(Collections.singletonList(anotherPerson))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .parentalResponsibilityDetails("test")
             .build();
 
@@ -181,9 +174,6 @@ public class ChildCheckerTest {
             .applicantsRelationshipToChild(specialGuardian)
             .respondentsRelationshipToChild(father)
             .childLiveWith(Collections.singletonList(anotherPerson))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("test")
             .build();
@@ -224,9 +214,6 @@ public class ChildCheckerTest {
             .applicantsRelationshipToChild(specialGuardian)
             .respondentsRelationshipToChild(father)
             .childLiveWith(Collections.singletonList(anotherPerson))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("")
             .build();
@@ -275,9 +262,6 @@ public class ChildCheckerTest {
             .applicantsRelationshipToChild(specialGuardian)
             .respondentsRelationshipToChild(father)
             .childLiveWith(Collections.singletonList(anotherPerson))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("test")
             .build();

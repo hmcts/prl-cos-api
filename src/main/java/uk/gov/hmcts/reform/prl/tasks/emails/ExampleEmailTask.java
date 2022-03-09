@@ -39,6 +39,6 @@ public class ExampleEmailTask extends SendEmailTask {
 
     @Override
     protected LanguagePreference getLanguage(CaseDetails caseDetails) {
-        return LanguagePreference.ENGLISH;
+        return LanguagePreference.english;
     }
 }
