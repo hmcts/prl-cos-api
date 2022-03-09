@@ -69,12 +69,12 @@ public class CaseEventHandlerTest {
         List<EventValidationErrors> errors = new ArrayList<>();
 
         EventValidationErrors error1 = EventValidationErrors.builder()
-                .event(FL401_TYPE_OF_APPLICATION)
-                .build();
+            .event(FL401_TYPE_OF_APPLICATION)
+            .build();
 
         EventValidationErrors error2 = EventValidationErrors.builder()
-                .event(ALLEGATIONS_OF_HARM)
-                .build();
+            .event(ALLEGATIONS_OF_HARM)
+            .build();
 
         errors.add(error1);
         errors.add(error2);

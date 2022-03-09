@@ -44,8 +44,10 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.STATEMENT_OF_TRUTH_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
@@ -230,6 +232,9 @@ public class TaskListRenderer {
             .withTask(tasks.get(ATTENDING_THE_HEARING))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
+        final TaskSection uploadDocuments = newSection("Upload documents")
+            .withTask(tasks.get(UPLOAD_DOCUMENTS));
+
         final TaskSection checkAndSignApplication = newSection("Check and sign application")
             .withTask(tasks.get(VIEW_PDF_DOCUMENT))
             .withTask(tasks.get(FL401_STATEMENT_OF_TRUTH));
@@ -238,6 +243,7 @@ public class TaskListRenderer {
                          peopleInTheCase,
                          addCaseDetails,
                          additionalInformation,
+                         uploadDocuments,
                          checkAndSignApplication)
             .filter(TaskSection::hasAnyTask)
             .collect(toList());
