@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.mapper.welshLang;
+package uk.gov.hmcts.reform.prl.mapper.welshlang;
 
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
@@ -29,41 +29,42 @@ import java.util.WeakHashMap;
 public class WelshLangMapper {
 
     /**
-     * C100 Welsh Lang Map
+     * C100 Welsh Lang Map.
      * */
     public static final Map<String,String> CA_WELSH_MAP = getCaWelshLangMap();
     public static final List<String> CA_WELSH_CONDITONAL_MAP = getCaConditionalFieldWelshLangMap();
 
     /**
-     * Recursive mapper for replacing the English to Welsh
+     * Recursive mapper for replacing the English to Welsh.
     */
-    public static Object applyWelshTranslation(Object key , Object obj) {
-        if(obj instanceof String) {
-            if(!CA_WELSH_CONDITONAL_MAP.contains(key)) {
-                if(key != null && CA_WELSH_MAP.containsKey(key + "_" + obj)) {
+    public static Object applyWelshTranslation(Object key, Object obj) {
+        if (obj instanceof String) {
+            if (!CA_WELSH_CONDITONAL_MAP.contains(key)) {
+                if (key != null && CA_WELSH_MAP.containsKey(key + "_" + obj)) {
                     obj = CA_WELSH_MAP.get(key + "_" + obj);
-                } else if(CA_WELSH_MAP.containsKey(obj)) {
+                } else if (CA_WELSH_MAP.containsKey(obj)) {
                     obj = CA_WELSH_MAP.get(obj);
                 }
             }
-        } else if(obj instanceof List) {
+        } else if (obj instanceof List) {
             List<Object> list = (List)obj;
-            for(int i=0;i <list.size(); i++) {
+            for (int i = 0; i < list.size(); i++) {
                 Object eachObj = list.get(i);
                 list.set(i, applyWelshTranslation(null, eachObj));
             }
-        } else if(obj instanceof Map) {
+        } else if (obj instanceof Map) {
             Map<String, Object> innerMap = (Map<String, Object>)obj;
             innerMap.forEach((k,v) -> {
-                if(v!= null) {
+                if (v != null) {
                     innerMap.put(k,applyWelshTranslation(k,v));
                 }
             });
         }
         return obj;
     }
+
     /**
-     * Excluding conditional fields for changing english to welsh
+     * Excluding conditional fields for changing english to welsh.
      */
     private static List<String> getCaConditionalFieldWelshLangMap() {
         return Arrays.asList("isAtAddressLessThan5Years",
@@ -160,7 +161,8 @@ public class WelshLangMapper {
         welshMap.put("isPhoneNumberConfidential_No","Nac ydw");
 
         /**
-         * Child Details - What is the applicant's relationship to child? (applicantsRelationshipToChild) & What is the respondent’s relationship to Child 1? (respondentsRelationshipToChild).
+         * Child Details - What is the applicant's relationship to child?
+         * What is the respondent’s relationship to Child 1?.
          */
         welshMap.put(RelationshipsEnum.father.getDisplayedValue(),"Tad");
         welshMap.put(RelationshipsEnum.mother.getDisplayedValue(),"Mam");
@@ -229,9 +231,11 @@ public class WelshLangMapper {
                          + " neu mewn risg o ddioddef trais domestig gan y darpar barti hwnnw (neu gopi o’r asesiad hwnnw);");
         welshMap.put(MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_19.getDisplayedValue(),
                      "Llythyr neu adroddiad gan sefydliad sy’n darparu gwasanaethau cefnogi trais domestig yn y Deyrnas"
-                         + " Unedig yn cadarnhau- (i) bod cais am loches i unigolyn sydd, neu a oedd mewn perthynas teuluol â darpar barti, "
+                         + " Unedig yn cadarnhau- (i) bod cais am loches i unigolyn sydd, neu a oedd mewn perthynas teuluol"
+                         + " â darpar barti, "
                          + "wedi cael ei wrthod; (ii) y dyddiad y cafodd y cais am loches ei wrthod; a’u "
-                         + "(iii) bod wedi gwneud cais am loches oherwydd honiadau o drais domestig gan y darpar barti a gyfeiriwyd atynt ym mharagraff (i);");
+                         + "(iii) bod wedi gwneud cais am loches oherwydd honiadau o drais domestig gan y "
+                         + "darpar barti a gyfeiriwyd atynt ym mharagraff (i);");
         welshMap.put(MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_18.getDisplayedValue(),
                      "Llythyr- (i) gan sefydliad sy’n darparu gwasanaethau cefnogi trais domestig, "
                          + "neu elusen gofrestredig, a bod y llythyr yn cadarnhau bod y gwasanaeth- (a) wedi’i leoli yng Nghymru a Lloegr, "
@@ -244,8 +248,8 @@ public class WelshLangMapper {
                          + "(c) disgrifiad o’r gefnogaeth a roddwyd i’r darpar barti; "
                          + "a (d) datganiad o’r rhesymau pam bod y darpar barti angen y gefnogaeth honno;");
         welshMap.put(MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_17.getDisplayedValue(),
-                     "Llythyr gan swyddog a gyflogir gan awdurdod lleol neu gymdeithas tai (neu sefydliad cyfwerth yn Yr Alban neu yng Ngogledd Iwerddon) "
-                         + "yn cefnogi tenantiaid sy’n cynnwys- "
+                     "Llythyr gan swyddog a gyflogir gan awdurdod lleol neu gymdeithas tai (neu sefydliad cyfwerth yn "
+                         + "Yr Alban neu yng Ngogledd Iwerddon) yn cefnogi tenantiaid sy’n cynnwys- "
                          + "(i) datganiad sy’n nodi, yn eu barn broffesiynol resymol nhw, bod unigolyn y mae darpar barti yn,"
                          + " neu wedi bod mewn perthynas deuluol ag o/â hi yn, neu mewn risg o ddioddef trais domestig gan y darpar barti hwnnw; "
                          + "(ii) disgrifiad o’r materion penodol y gellir dibynnu arnynt i gefnogi’r farn honno; a "
@@ -276,7 +280,8 @@ public class WelshLangMapper {
                      "Ymgymeriad a roddwyd yng Nghymru a Lloegr dan adran 46 neu 63E Deddf Cyfraith Teulu 1996 (neu a roddwyd yn Yr Alban neu yng "
                          + "Ngogledd Iwerddon yn lle gwaharddeb gwarchod) gan ddarpar barti, ar yr amod na roddwyd traws-ymgymeriad mewn perthynas "
                          + "â thrais domestig gan ddarpar barti arall;");
-        welshMap.put(MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_7.getDisplayedValue(), "Gwaharddeb gwarchod perthnasol;");
+        welshMap.put(MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_7.getDisplayedValue(),
+                     "Gwaharddeb gwarchod perthnasol;");
         welshMap.put(MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_6.getDisplayedValue(),
                      "Hysbysiad diogelu rhag trais domestig a roddwyd dan adran 24 Deddf Troseddau a Diogelwch 2010 yn erbyn darpar barti;");
         welshMap.put(MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_5.getDisplayedValue(),
@@ -310,26 +315,33 @@ public class WelshLangMapper {
         welshMap.put(MiamUrgencyReasonChecklistEnum.miamUrgencyReasonChecklistEnum_Value_6.getDisplayedValue(),
                      "Mae yna risg y byddai plentyn yn cael ei gludo o’r Deyrnas Unedig yn anghyfreithlon, "
                          + "neu risg y byddai plentyn sydd y tu allan i Gymru a Lloegr ar hyn o bryd yn cael ei gadw’n anghyfreithlon");
-        welshMap.put(MiamUrgencyReasonChecklistEnum.miamUrgencyReasonChecklistEnum_Value_7.getDisplayedValue(), "Mae yna risg o niwed i blentyn");
+        welshMap.put(MiamUrgencyReasonChecklistEnum.miamUrgencyReasonChecklistEnum_Value_7.getDisplayedValue(),
+                     "Mae yna risg o niwed i blentyn");
         welshMap.put(MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_5.getDisplayedValue(),
-                     "Byddai’r cais yn cael ei wneud ynghylch achos presennol sy’n parhau ac roedd esemptiad MIAM yn berthnasol pan wnaed y cais ynghylch yr achos hwnnw");
+                     "Byddai’r cais yn cael ei wneud ynghylch achos presennol sy’n parhau ac roedd esemptiad MIAM yn "
+                         + "berthnasol pan wnaed y cais ynghylch yr achos hwnnw");
         welshMap.put(MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_4.getDisplayedValue(),
-                     "Byddai’r cais yn cael ei wneud ynghylch achos presennol sy’n parhau ac mi wnaeth y darpar geisydd fynychu MIAM cyn cychwyn yr achos hwnnw");
+                     "Byddai’r cais yn cael ei wneud ynghylch achos presennol sy’n parhau ac mi wnaeth y "
+                         + "darpar geisydd fynychu MIAM cyn cychwyn yr achos hwnnw");
         welshMap.put(MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_3.getDisplayedValue(),
-                     "Yn y 4 mis cyn gwneud y cais, bod yr unigolyn wedi ffeilio cais perthnasol i’r llys teulu yn cadarnhau bod esemptiad MIAM yn berthnasol"
+                     "Yn y 4 mis cyn gwneud y cais, bod yr unigolyn wedi ffeilio cais perthnasol i’r llys teulu yn "
+                         + "cadarnhau bod esemptiad MIAM yn berthnasol"
                          + " a bod y cais yn ymwneud â’r un anghydfod neu yr un anghydfod i raddau helaeth");
         welshMap.put(MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_2.getDisplayedValue(),
-                     "Adeg gwneud y cais, mae’r unigolyn yn cymryd rhan mewn math arall o broses i ddatrys anghydfod y tu allan i’r llys yn ymwneud â’r un "
+                     "Adeg gwneud y cais, mae’r unigolyn yn cymryd rhan mewn math arall o broses i ddatrys anghydfod y "
+                         + "tu allan i’r llys yn ymwneud â’r un "
                          + "anghydfod neu yr un anghydfod i raddau helaeth");
         welshMap.put(MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_1.getDisplayedValue(),
-                     "Yn y 4 mis cyn gwneud y cais, bod yr unigolyn wedi mynychu MIAM neu wedi cymryd rhan mewn math arall o broses i ddatrys anghydfod y "
+                     "Yn y 4 mis cyn gwneud y cais, bod yr unigolyn wedi mynychu MIAM neu wedi cymryd rhan mewn"
+                         + " math arall o broses i ddatrys anghydfod y "
                          + "tu allan i’r llys yn ymwneud â’r un anghydfod neu yr un anghydfod i raddau helaeth");
         welshMap.put(MiamOtherGroundsChecklistEnum.miamOtherGroundsChecklistEnum_Value_11.getDisplayedValue(),
                      "Nid oes gan yr un cyfryngwr teuluol awdurdodedig swyddfa o fewn pymtheg milltir i gartref y darpar geisydd.");
         welshMap.put(MiamOtherGroundsChecklistEnum.miamOtherGroundsChecklistEnum_Value_10.getDisplayedValue(),
                      "(i) mae’r darpar geisydd wedi cysylltu â’r holl gyfryngwyr teuluol awdurdodedig sydd â swyddfa o fewn pymtheg milltir "
                          + "i’w gartref neu ei chartref (neu dri ohonynt os oes tri neu fwy), ac mae pob un ohonynt wedi dweud na allant gynnal MIAM "
-                         + "o fewn pymtheg diwrnod busnes; a (ii) gellir darparu enwau, cyfeiriadau a rhifau ffôn neu gyfeiriadau e-bost y cyfryngwyr "
+                         + "o fewn pymtheg diwrnod busnes; a (ii) gellir darparu enwau, "
+                         + "cyfeiriadau a rhifau ffôn neu gyfeiriadau e-bost y cyfryngwyr "
                          + "teuluol awdurdodedig hynny a’r dyddiadau cysylltu i’r llys ar gais.");
         welshMap.put(MiamOtherGroundsChecklistEnum.miamOtherGroundsChecklistEnum_Value_9.getDisplayedValue(),
                      "Mae un o’r darpar bartïon yn blentyn yn rhinwedd Rheol 12.3(1)");
