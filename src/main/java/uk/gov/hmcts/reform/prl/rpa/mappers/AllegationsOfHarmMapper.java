@@ -165,7 +165,7 @@ public class AllegationsOfHarmMapper {
 
         Optional<List<Element<Behaviours>>> behavioursElementsCheck = ofNullable(behaviours);
         if (behavioursElementsCheck.isEmpty()) {
-            return null;
+            return JsonArray.EMPTY_JSON_ARRAY;
         }
         List<Behaviours> behavioursList = behaviours.stream()
             .map(Element::getValue)

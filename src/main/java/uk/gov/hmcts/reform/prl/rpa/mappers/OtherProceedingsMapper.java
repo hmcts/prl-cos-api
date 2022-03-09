@@ -39,7 +39,7 @@ public class OtherProceedingsMapper {
     public JsonArray mapExistingProceedings(List<Element<ProceedingDetails>> existingProceedings) {
         Optional<List<Element<ProceedingDetails>>> existingProceedingsElementCheck = ofNullable(existingProceedings);
         if (existingProceedingsElementCheck.isEmpty()) {
-            return null;
+            return JsonArray.EMPTY_JSON_ARRAY;
         }
         List<ProceedingDetails> otherPeopleInTheCaseList = existingProceedings.stream()
             .map(Element::getValue)
