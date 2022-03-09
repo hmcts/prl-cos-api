@@ -8,13 +8,13 @@ import uk.gov.hmcts.reform.prl.models.documents.UploadDocument;
 
 @Data
 @Builder
-public class fl401UploadWitnessDocumentsDetails {
+public class FL401UploadSupportDocumentsDetails {
 
-    @JsonProperty("uploadWitnessDocuments")
-    private final UploadDocument uploadWitnessDocuments;
+    @JsonProperty("uploadSupportDocuments")
+    private final UploadDocument uploadSupportDocuments;
 
     @JsonCreator
-    public fl401UploadWitnessDocumentsDetails(UploadDocument uploadWitnessDocuments) {
-        this.uploadWitnessDocuments = uploadWitnessDocuments;
+    public FL401UploadSupportDocumentsDetails(UploadDocument uploadSupportDocuments) {
+        this.uploadSupportDocuments = uploadSupportDocuments;
     }
 }
