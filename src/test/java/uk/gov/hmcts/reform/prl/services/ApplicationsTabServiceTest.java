@@ -248,7 +248,7 @@ public class ApplicationsTabServiceTest {
 
     @Test
     public void testGetGenerators() {
-        assertEquals(applicationsTabService.getGenerators(), Collections.emptyMap());
+        assertEquals(applicationsTabService.getGenerators(), Collections.emptyList());
     }
 
 
