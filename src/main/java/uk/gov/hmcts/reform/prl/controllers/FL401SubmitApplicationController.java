@@ -131,9 +131,9 @@ public class FL401SubmitApplicationController {
             .getEmailAddress(nearestDomesticAbuseCourt);
 
         if (courtEmailAddress.isPresent()) {
-            caseData.toBuilder().isCourtEmailFound("Yes");
+            caseDate = caseData.toBuilder().isCourtEmailFound("Yes").build();
         } else {
-            caseData.toBuilder().isCourtEmailFound("No");
+            caseData = caseData.toBuilder().isCourtEmailFound("No").build();
         }
 
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
@@ -192,9 +192,9 @@ public class FL401SubmitApplicationController {
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
         if (null != generatedDocumentC8Info && null != generatedDocumentInfo) {
-            caseData.toBuilder().isDocumentGenerated("Yes");
+            caseData = caseData.toBuilder().isDocumentGenerated("Yes").build();
         } else {
-            caseData.toBuilder().isDocumentGenerated("No");
+            caseData = caseData.toBuilder().isDocumentGenerated("No").build();
         }
 
         log.info(" Court email flag {} and document generation flag {}",
