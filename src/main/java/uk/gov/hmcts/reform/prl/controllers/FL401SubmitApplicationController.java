@@ -151,11 +151,15 @@ public class FL401SubmitApplicationController {
             log.info("Case date with Home ----{}---- and respondent bahaviour === {} =====",
                      caseData.getHome(), caseData.getRespondentBehaviourData());
         } else  if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
-            caseDataUpdated.put("respondentBehaviourData", null);
-            log.info("Case date with respondent bahaviour === {} =====", caseDataUpdated.get("respondentBehaviourData"));
+            caseData = caseData.toBuilder()
+                .respondentBehaviourData(null)
+                .build();
+            log.info("Case date with respondent bahaviour === {} =====", caseData.getRespondentBehaviourData());
         } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
-            caseDataUpdated.put("home", null);
-            log.info("Case date with home details === {} =====", caseDataUpdated.get("home"));
+            caseData = caseData.toBuilder()
+                .home(null)
+                .build();
+            log.info("Case date with home details === {} =====", caseData.getHome());
         }
 
         log.info("Generating the Final document of FL401 for case id " + caseData.getId());
@@ -194,6 +198,8 @@ public class FL401SubmitApplicationController {
             caseData.toBuilder().isDocumentGenerated("No");
         }
 
+        log.info(" Court email flag {} and document generation flag {}",
+                 caseData.getIsCourtEmailFound(), caseData.getIsDocumentGenerated());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
@@ -226,6 +232,8 @@ public class FL401SubmitApplicationController {
                 .isNotificationSent("No")
                 .build();
         }
+
+        log.info(" email notification flag{}", caseData.getIsNotificationSent());
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         caseData = caseData.toBuilder()
