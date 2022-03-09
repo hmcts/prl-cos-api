@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.Event.FL401_STATEMENT_OF_TRUTH;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
@@ -40,7 +40,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.STATEMENT_OF_TRUTH_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
@@ -88,8 +87,8 @@ public class TaskListRendererTest {
         Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
         Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
-        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build());
-
+        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build()
+    );
 
 
     private final List<EventValidationErrors> errors = List.of(
@@ -115,9 +114,8 @@ public class TaskListRendererTest {
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
         Task.builder().event(UPLOAD_DOCUMENTS).state(NOT_STARTED).build(),
         Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-        Task.builder().event(FL401_STATEMENT_OF_TRUTH).state(NOT_STARTED).build());
-        Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-        Task.builder().event(STATEMENT_OF_TRUTH_AND_SUBMIT).state(NOT_STARTED).build());
+        Task.builder().event(FL401_SOT_AND_SUBMIT).state(NOT_STARTED).build()
+    );
 
     private final List<EventValidationErrors> fl401Errors = List.of(
         EventValidationErrors.builder().event(WITHOUT_NOTICE_ORDER)
@@ -130,7 +128,8 @@ public class TaskListRendererTest {
     @Test
     public void shouldRenderFl401TaskList() throws IOException {
 
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-markdown.md"));
+        BufferedReader taskListMarkDown = new BufferedReader(new FileReader(
+            "src/test/resources/fl401-task-list-markdown.md"));
 
         List<String> lines = new ArrayList<>();
 
@@ -213,7 +212,8 @@ public class TaskListRendererTest {
     @Test
     public void shouldRenderFl401TaskListNonMolestationOrderType() throws IOException {
 
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-markdown.md"));
+        BufferedReader taskListMarkDown = new BufferedReader(new FileReader(
+            "src/test/resources/fl401-task-list-markdown.md"));
 
         List<String> lines = new ArrayList<>();
 
