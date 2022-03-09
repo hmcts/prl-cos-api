@@ -35,12 +35,12 @@ public class SendgridService {
 
     public void sendEmail(JsonObject caseData) throws IOException {
 
-        String subject = "Private Reform Law CCD Notification";
+        String subject = "Private Reform Law CCD Notification " + caseData.get("id");
         Content content = new Content("text/plain", " ");
         Attachments attachments = new Attachments();
         String data = Base64.getEncoder().encodeToString(caseData.toString().getBytes());
         attachments.setContent(data);
-        attachments.setFilename("Casedata.json");
+        attachments.setFilename(subject);
         attachments.setType("application/json");
         attachments.setDisposition("attachment");
         Mail mail = new Mail(new Email(fromEmail), subject, new Email(toEmail), content);
