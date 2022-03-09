@@ -357,7 +357,8 @@ public class CaseData implements MappableObject {
     private final CcdPaymentServiceRequestUpdate paymentCallbackServiceRequestUpdate;
     @JsonProperty("paymentServiceRequestReferenceNumber")
     private final String paymentServiceRequestReferenceNumber;
-
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate issueDate;
 
     @JsonProperty("solicitorName")
