@@ -31,7 +31,7 @@ public class RespondentsMapper {
     public JsonArray map(List<Element<PartyDetails>> respondents, Map<String, PartyDetails> respondentSolicitorMap) {
         Optional<List<Element<PartyDetails>>> respondentElementsCheck = ofNullable(respondents);
         if (respondentElementsCheck.isEmpty()) {
-            return null;
+            return JsonArray.EMPTY_JSON_ARRAY;
         }
         List<PartyDetails> respondentList = respondents.stream()
             .map(Element::getValue)

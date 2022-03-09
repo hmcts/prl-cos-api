@@ -26,7 +26,7 @@ public class OtherPeopleInTheCaseMapper {
     public JsonArray map(List<Element<PartyDetails>> otherPeopleInTheCase) {
         Optional<List<Element<PartyDetails>>> otherPeopleInTheCaseElementCheck = ofNullable(otherPeopleInTheCase);
         if (otherPeopleInTheCaseElementCheck.isEmpty()) {
-            return null;
+            return JsonArray.EMPTY_JSON_ARRAY;
         }
         List<PartyDetails> otherPeopleInTheCaseList = otherPeopleInTheCase.stream()
             .map(Element::getValue)
@@ -64,7 +64,7 @@ public class OtherPeopleInTheCaseMapper {
         Optional<List<Element<OtherPersonRelationshipToChild>>> personRelationshipToChildrenElementCheck = ofNullable(
             otherPersonRelationshipToChildren);
         if (personRelationshipToChildrenElementCheck.isEmpty()) {
-            return null;
+            return JsonArray.EMPTY_JSON_ARRAY;
         }
         List<OtherPersonRelationshipToChild> otherPeopleInTheCaseList = otherPersonRelationshipToChildren.stream()
             .map(Element::getValue)

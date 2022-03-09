@@ -42,7 +42,7 @@ public class AttendingTheHearingMapper {
 
         Optional<List<Element<InterpreterNeed>>> interpreterNeedsElementCheck = Optional.ofNullable(interpreterNeeds);
         if (interpreterNeedsElementCheck.isEmpty()) {
-            return null;
+            return JsonArray.EMPTY_JSON_ARRAY;
         }
         List<InterpreterNeed> interpreterNeedsList = interpreterNeeds.stream()
             .map(Element::getValue)
@@ -59,7 +59,7 @@ public class AttendingTheHearingMapper {
     private JsonArray mapWelshNeeds(List<Element<WelshNeed>> welshNeeds) {
         Optional<List<Element<WelshNeed>>> welshNeedsElementCheck = Optional.ofNullable(welshNeeds);
         if (welshNeedsElementCheck.isEmpty()) {
-            return null;
+            return JsonArray.EMPTY_JSON_ARRAY;
         }
         List<WelshNeed> welshNeedsList = welshNeeds.stream()
             .map(Element::getValue)

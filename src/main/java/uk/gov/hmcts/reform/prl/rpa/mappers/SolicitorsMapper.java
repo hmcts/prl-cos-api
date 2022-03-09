@@ -43,7 +43,7 @@ public class SolicitorsMapper {
                 .add("AddressLine3", contactInformation.getAddressLine3())
                 .build();
         }
-        return null;
+        return JsonObject.EMPTY_JSON_OBJECT;
     }
 
     public JsonArray mapSolicitorList(Map<String, PartyDetails> solicitorMap) {
@@ -104,7 +104,7 @@ public class SolicitorsMapper {
             && !org.getContactInformation().isEmpty()) {
             return mapSolicitorAddress(org.getContactInformation().get(0));
         } else {
-            return null;
+            return JsonObject.EMPTY_JSON_OBJECT;
         }
     }
 

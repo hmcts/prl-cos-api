@@ -28,7 +28,7 @@ public class ChildrenMapper {
     public JsonArray map(List<Element<Child>> children) {
         Optional<List<Element<Child>>> childElementsCheck = ofNullable(children);
         if (childElementsCheck.isEmpty()) {
-            return null;
+            return JsonArray.EMPTY_JSON_ARRAY;
         }
         List<Child> childList = children.stream()
             .map(Element::getValue)
@@ -64,7 +64,7 @@ public class ChildrenMapper {
     private JsonArray mapOtherPerson(List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild) {
         Optional<List<Element<OtherPersonWhoLivesWithChild>>> childElementsCheck = ofNullable(personWhoLivesWithChild);
         if (childElementsCheck.isEmpty()) {
-            return null;
+            return JsonArray.EMPTY_JSON_ARRAY;
         }
         List<OtherPersonWhoLivesWithChild> otherPersonList = personWhoLivesWithChild.stream()
             .map(Element::getValue)
