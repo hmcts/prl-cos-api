@@ -149,6 +149,9 @@ public class TaskListRenderer {
                 } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
                                   + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
+                } else if (task.getEvent().equals(FL401_STATEMENT_OF_TRUTH)) {
+                    lines.add(taskListRenderElements.renderDisabledLink(task)
+                                  + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage(NOT_STARTED_IMG, "Not started"));
