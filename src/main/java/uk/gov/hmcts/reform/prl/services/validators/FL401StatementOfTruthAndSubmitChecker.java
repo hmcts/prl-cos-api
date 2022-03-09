@@ -50,12 +50,14 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
         mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.respondentsChecker);
         mandatoryEvents.put(RELATIONSHIP_TO_RESPONDENT, eventsChecker.respondentRelationshipChecker);
         mandatoryEvents.put(FL401_APPLICANT_FAMILY_DETAILS, eventsChecker.fl401ApplicantFamilyChecker);
-        if (caseData.getTypeOfApplicationOrders().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
+        mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.respondentBehaviourChecker);
+        mandatoryEvents.put(FL401_HOME, eventsChecker.homeChecker);
+        /*if (caseData.getTypeOfApplicationOrders().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
             mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.respondentBehaviourChecker);
         }
         if (caseData.getTypeOfApplicationOrders().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
             mandatoryEvents.put(FL401_HOME, eventsChecker.homeChecker);
-        }
+        }*/
 
         boolean mandatoryFinished;
 
