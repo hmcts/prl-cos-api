@@ -47,7 +47,7 @@ public class OrganisationService {
         return caseData;
     }
 
-    public CaseData getRespondentOrganisationDetails(CaseData caseData) throws NotFoundException {
+    public CaseData getRespondentOrganisationDetails(CaseData caseData) {
 
         if (Optional.ofNullable(caseData.getRespondents()).isPresent()) {
             String userToken = systemUserService.getSysUserToken();

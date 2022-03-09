@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.json.JsonArray;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -88,12 +89,5 @@ public class CombinedMapperTest {
         CaseData caseData = CaseData.builder().build();
         assertNull(combinedMapper.map(caseData));
     }
-
-    @Test
-    public void testWithoutNullValues() {
-        CaseData caseData = CaseData.builder().respondents(respondents).build();
-        combinedMapper.map(caseData);
-    }
-
 
 }

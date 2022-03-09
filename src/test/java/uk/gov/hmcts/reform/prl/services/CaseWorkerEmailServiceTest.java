@@ -485,7 +485,7 @@ public class CaseWorkerEmailServiceTest {
             .build();
 
         caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(caseDetails);
-        assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
+        assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
 
     }
 

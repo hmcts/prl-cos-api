@@ -14,7 +14,7 @@ public class AllegationsOfHarmOrders {
     private final YesOrNo ordersOccupation;
     Order occupationOrder;
     private final YesOrNo ordersForcedMarriageProtection;
-    //Order forcedMarriageOrder;
+    Order forcedMarriageOrder;
     private final YesOrNo ordersRestraining;
     Order restrainingOrder;
     private final YesOrNo ordersOtherInjunctive;
