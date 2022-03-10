@@ -31,10 +31,11 @@ public enum Event {
     FL401_CASE_NAME("fl401CaseName", "Case name"),
     RESPONDENT_BEHAVIOUR("respondentBehaviour", "Respondent's behaviour"),
     WITHOUT_NOTICE_ORDER("withoutNoticeOrderDetails", "Without notice order"),
-    FL401_HOME("fl401Home", "The Home"),
+    FL401_HOME("fl401Home", "The home"),
     RELATIONSHIP_TO_RESPONDENT("respondentRelationship","Relationship to respondent"),
     FL401_TYPE_OF_APPLICATION("fl401TypeOfApplication", "Type of application"),
-    FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's Family"),
+    FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's family"),
+    UPLOAD_DOCUMENTS("uploadDocuments", "Upload documents"),
     FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings"),
     FL401_STATEMENT_OF_TRUTH("fl401StatementOfTruthAndSubmit", "Statement of truth and submit");
 
