@@ -123,6 +123,7 @@ public class RespondentsChecker implements EventChecker {
         fields.add(isCurrentAddressKnown);
         if (isCurrentAddressKnown.isPresent() && isCurrentAddressKnown.get().equals(Yes)) {
             fields.add(ofNullable(respondent.getAddress().getAddressLine1()));
+            fields.add(ofNullable(respondent.getAddress().getPostCode()));
         }
         Optional<YesNoDontKnow> isAtAddressLessThan5YearsWithDontKnow = ofNullable(respondent.getIsAtAddressLessThan5YearsWithDontKnow());
         fields.add(isAtAddressLessThan5YearsWithDontKnow);

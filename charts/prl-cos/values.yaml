@@ -39,3 +39,4 @@ java:
         - send-grid-api-key
         - rpa-notify-to-email
         - rpa-notify-from-email
+        - AppInsightsInstrumentationKey
