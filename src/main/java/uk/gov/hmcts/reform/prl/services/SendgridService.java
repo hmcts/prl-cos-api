@@ -15,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Base64;
 import java.io.IOException;
+import java.util.Base64;
 import javax.json.JsonObject;
 
 @Service
@@ -52,9 +52,6 @@ public class SendgridService {
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
             Response response = sg.api(request);
-            System.out.println(response.getStatusCode());
-            System.out.println(response.getBody());
-            System.out.println(response.getHeaders());
         } catch (IOException ex) {
             throw ex;
         }
