@@ -43,7 +43,7 @@ spring:
 
 azure:
   application-insights:
-    instrumentation-key: ${rpe.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+    instrumentation-key: ${APP_INSIGHTS_INSTRUMENTATION_KEY:00000000-0000-0000-0000-000000000000}
 
 logging:
   level:
@@ -82,6 +82,7 @@ uk:
             COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
             GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
+            SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -97,7 +98,7 @@ send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
   rpa:
     email:
-      to: bharadwajsairam.manchella@HMCTS.NET
+      to: PRL.Auto@justice.gov.uk
       from: ca@mail-prl-nonprod.aat.platform.hmcts.net
 
 payments:
@@ -121,21 +122,23 @@ fees-register:
 
 
 idam:
-  api:
-    url: http://localhost:5000
   s2s-auth:
-    url: http://localhost:4502
-    totp_secret: AABBCCDDEEFFGGHH
+    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+  api:
+    url: https://idam-api.aat.platform.hmcts.net
   client:
-    id: prl_cos_api
-    redirect_uri: https://localhost:9000/oauth2/callback
-    secret: OOOOOOOOOOOOOOOO
+    id: prl-cos-api
+    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
+    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
 
 prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:privatelaw-system-update@mailnesia.com}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:Password12!}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+
+
 
 security:
   oauth2:
@@ -176,11 +179,12 @@ prl-dgs-api:
 
 courtfinder:
   api:
-    url: http://fact-api-aat.service.core-compute-aat.internal/
+    url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
-rd_professional:
-  api:
-    url: http://rd-professional-api-aat.service.core-compute-aat.internal
 
 launchdarkly:
   sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
+
+rd_professional:
+  api:
+    url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}

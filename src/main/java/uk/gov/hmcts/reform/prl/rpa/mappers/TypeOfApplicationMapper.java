@@ -17,8 +17,8 @@ public class TypeOfApplicationMapper {
         return new NullAwareJsonObjectBuilder()
             .add(
                 "orderAppliedFor",
-                caseData.getOrdersApplyingFor() != null ?
-                caseData.getOrdersApplyingFor().isEmpty() ? null : caseData.getOrdersApplyingFor().stream()
+                caseData.getOrdersApplyingFor() != null
+                ? caseData.getOrdersApplyingFor().isEmpty() ? null : caseData.getOrdersApplyingFor().stream()
                     .map(OrderTypeEnum::getDisplayedValue).collect(Collectors.joining(", "))
                     : null
             )
