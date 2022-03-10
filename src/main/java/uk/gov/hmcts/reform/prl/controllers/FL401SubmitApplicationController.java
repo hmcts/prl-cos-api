@@ -88,12 +88,17 @@ public class FL401SubmitApplicationController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public CallbackResponse fl401SubmitApplicationValidation(@RequestHeader("Authorization")
                                                                  String authorisation,
-                                                             @RequestBody CallbackRequest callbackRequest)
-        throws Exception {
+                                                             @RequestBody CallbackRequest callbackRequest){
+
+
 
         List<String> errorList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info(caseData.toString());
         boolean mandatoryEventStatus = fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData);
+
+
+        log.info("----------------------------------Mandatory event status is:"  + mandatoryEventStatus);
 
         if (!mandatoryEventStatus) {
             errorList.add(
