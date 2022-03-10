@@ -76,7 +76,8 @@ public class RequestUpdateCallbackService {
                         serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)
                             ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
             );
-
+            log.info("Updated the state...");
+            log.info("Sending email...");
             solicitorEmailService.sendEmail(caseDetails);
             caseWorkerEmailService.sendEmail(caseDetails);
 
