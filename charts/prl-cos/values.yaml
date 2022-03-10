@@ -37,3 +37,4 @@ java:
         - test-genericpassword
         - launchDarkly-sdk-key
         - AppInsightsInstrumentationKey
+        - send-grid-api-key

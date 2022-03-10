@@ -27,3 +27,4 @@ spring:
         prl.test-genericpassword: PRL_GENERIC_PASSWORD
         prl.launchDarkly-sdk-key: LAUNCH_DARKLY_SDK_KEY
         prl.AppInsightsInstrumentationKey: APP_INSIGHTS_INSTRUMENTATION_KEY
+        prl.send-grid-api-key: SEND_GRID_API_KEY
