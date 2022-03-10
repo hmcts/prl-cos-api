@@ -35,5 +35,13 @@ public class TypeOfApplicationMapperTest {
         assertNotNull(typeOfApplicationMapper.map(caseDataInput));
     }
 
+    @Test
+    public void testForNoDataTypeOfApplicationMapper() {
+        List<OrderTypeEnum> orderType = new ArrayList<>();
+        orderType.add(OrderTypeEnum.childArrangementsOrder);
+        orderType.add(OrderTypeEnum.prohibitedStepsOrder);
+        CaseData caseDataInput = CaseData.builder().build();
+        assertNotNull(typeOfApplicationMapper.map(caseDataInput));
+    }
 
 }
