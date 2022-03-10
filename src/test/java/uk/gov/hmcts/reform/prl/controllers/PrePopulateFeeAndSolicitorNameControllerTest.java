@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -98,6 +99,18 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     @Mock
     private DocumentLanguageService documentLanguageService;
+
+    @Value("${document.templates.c100.c100_draft_template}")
+    protected String c100DraftTemplate;
+
+    @Value("${document.templates.c100.c100_draft_filename}")
+    protected String c100DraftFilename;
+
+    @Value("${document.templates.c100.c100_draft_welsh_template}")
+    protected String c100DraftWelshTemplate;
+
+    @Value("${document.templates.c100.c100_draft_welsh_filename}")
+    protected String c100DraftWelshFilename;
 
     public static final String authToken = "Bearer TestAuthToken";
     private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
