@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -36,8 +37,8 @@ public class OrganisationService {
             String userToken = systemUserService.getSysUserToken();
             List<Element<PartyDetails>> applicants = caseData.getApplicants()
                 .stream()
-                .map(eachItem -> Element.<PartyDetails>builder()
-                    .value(getApplicantWithOrg(eachItem.getValue(), userToken))
+                .map(eachItem ->  Element.<PartyDetails>builder()
+                    .value(getApplicantWithOrg(eachItem.getValue(),userToken))
                     .id(eachItem.getId()).build())
                 .collect(Collectors.toList());
             caseData = caseData.toBuilder()
@@ -72,10 +73,17 @@ public class OrganisationService {
 
             String organisationID = respondent.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
-                organisations = getOrganisationDetaiils(userToken, organisationID);
-                respondent = respondent.toBuilder()
-                    .organisations(organisations)
-                    .build();
+                try {
+                    organisations = getOrganisationDetaiils(userToken, organisationID);
+                    respondent = respondent.toBuilder()
+                        .organisations(organisations)
+                        .build();
+                } catch (HttpClientErrorException.NotFound e) {
+                    log.info("OrganisationsAPi return 404, organisation not present for {} {} ", organisationID, e.getMessage());
+                } catch (Exception e) {
+                    log.info("Error while fetching organisation details for orgId {} {} ", organisationID, e.getMessage());
+                }
+
             }
         }
         return respondent;
@@ -94,11 +102,17 @@ public class OrganisationService {
 
                 String organisationID = applicant.getSolicitorOrg().getOrganisationID();
                 if (organisationID != null) {
-                    organisations = getOrganisationDetaiils(userToken, organisationID);
+                    try {
+                        organisations = getOrganisationDetaiils(userToken, organisationID);
 
-                    applicant = applicant.toBuilder()
-                        .organisations(organisations)
-                        .build();
+                        applicant = applicant.toBuilder()
+                            .organisations(organisations)
+                            .build();
+                    } catch (HttpClientErrorException.NotFound e) {
+                        log.info("OrganisationsAPi return 404, organisation not present for {} {} ", organisationID, e.getMessage());
+                    } catch (Exception e) {
+                        log.info("Error while fetching organisation details for orgId {} {} ", organisationID, e.getMessage());
+                    }
                 }
             }
             return applicant;
