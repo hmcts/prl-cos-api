@@ -105,9 +105,6 @@ public class EventsChecker {
     WithoutNoticeOrderChecker withoutNoticeOrderChecker;
 
     @Autowired
-    UploadDocumentChecker uploadDocumentChecker;
-
-    @Autowired
     StatementTruthSubmitChecker statementTruthSubmitChecker;
 
 
