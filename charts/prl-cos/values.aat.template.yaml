@@ -14,6 +14,8 @@ java:
         - test-genericpassword
         - launchDarkly-sdk-key
         - send-grid-api-key
+        - rpa-notify-to-email
+        - rpa-notify-from-email
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
