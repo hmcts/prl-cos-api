@@ -171,6 +171,5 @@ public class OrganisationServiceTest {
             .respondents(listOfRespondents)
             .build();
         organisationService.getRespondentOrganisationDetails(caseData);
-
     }
 }

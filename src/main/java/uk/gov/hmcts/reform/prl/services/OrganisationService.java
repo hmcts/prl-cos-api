@@ -36,8 +36,8 @@ public class OrganisationService {
             String userToken = systemUserService.getSysUserToken();
             List<Element<PartyDetails>> applicants = caseData.getApplicants()
                 .stream()
-                .map(eachItem -> Element.<PartyDetails>builder()
-                    .value(getApplicantWithOrg(eachItem.getValue(), userToken))
+                .map(eachItem ->  Element.<PartyDetails>builder()
+                    .value(getApplicantWithOrg(eachItem.getValue(),userToken))
                     .id(eachItem.getId()).build())
                 .collect(Collectors.toList());
             caseData = caseData.toBuilder()
@@ -59,23 +59,24 @@ public class OrganisationService {
                     .value(getRespondentWithOrg(eachItem.getValue(), userToken))
                     .id(eachItem.getId()).build())
                 .collect(Collectors.toList());
-
             caseData = caseData.toBuilder().respondents(respondents).build();
         }
         return caseData;
     }
 
     private PartyDetails getRespondentWithOrg(PartyDetails respondent, String userToken) {
-
         if (respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)
             && respondent.getSolicitorOrg() != null) {
-
             String organisationID = respondent.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
-                organisations = getOrganisationDetaiils(userToken, organisationID);
-                respondent = respondent.toBuilder()
-                    .organisations(organisations)
-                    .build();
+                try {
+                    organisations = getOrganisationDetaiils(userToken, organisationID);
+                    respondent = respondent.toBuilder()
+                        .organisations(organisations)
+                        .build();
+                } catch (Exception e) {
+                    log.info("Error while fetching organisation details for orgId {} {} ", organisationID, e.getMessage());
+                }
             }
         }
         return respondent;
@@ -83,25 +84,22 @@ public class OrganisationService {
 
     public Organisations getOrganisationDetaiils(String userToken, String organisationID) {
         log.info("Fetching organisation details for organisation id: {}", organisationID);
-
         return organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
     }
 
     private PartyDetails getApplicantWithOrg(PartyDetails applicant, String userToken) {
-
         if (applicant.getSolicitorOrg() != null) {
-            if (null != applicant && applicant.getSolicitorOrg() != null) {
-
-                String organisationID = applicant.getSolicitorOrg().getOrganisationID();
-                if (organisationID != null) {
+            String organisationID = applicant.getSolicitorOrg().getOrganisationID();
+            if (organisationID != null) {
+                try {
                     organisations = getOrganisationDetaiils(userToken, organisationID);
-
                     applicant = applicant.toBuilder()
                         .organisations(organisations)
                         .build();
+                } catch (Exception e) {
+                    log.info("Error while fetching organisation details for orgId {} {} ", organisationID, e.getMessage());
                 }
             }
-            return applicant;
         }
         return applicant;
     }
