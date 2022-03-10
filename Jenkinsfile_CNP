@@ -32,7 +32,8 @@ def secrets = [
       secret('microservicekey-prl-cos-api', 'IDAM_S2S_AUTH_TOTP_SECRET'),
       secret('notification-client-api-key', 'UK_GOV_NOTIFY_API_KEY'),
       secret('test-genericpassword', 'PRL_GENERIC_PASSWORD'),
-      secret("launchDarkly-sdk-key", "LAUNCH_DARKLY_SDK_KEY")
+      secret("launchDarkly-sdk-key", "LAUNCH_DARKLY_SDK_KEY"),
+      secret("AppInsightsInstrumentationKey", "APP_INSIGHTS_INSTRUMENTATION_KEY")
    ]
 ]
 
@@ -77,7 +78,7 @@ withPipeline(type, product, component) {
   }
   onPR() {
     env.ENV = 'preview'
-    enableCleanupOfHelmReleaseOnSuccess()
+    // enableCleanupOfHelmReleaseOnSuccess()
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }
