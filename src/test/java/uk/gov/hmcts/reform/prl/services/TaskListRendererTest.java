@@ -1,7 +1,13 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Test;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
+import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 
 import java.io.BufferedReader;
@@ -36,16 +42,22 @@ import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ATTENDING_THE_HEARING_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_APPLICANT_FAMILY_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.WITHOUT_NOTICE_ORDER_ERROR;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.FINISHED;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.IN_PROGRESS;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 
 public class TaskListRendererTest {
+    private TypeOfApplicationOrders orders;
+    private LinkToCA linkToCA;
+
 
     private final TaskListRenderer taskListRenderer = new TaskListRenderer(
         new TaskListRenderElements(
@@ -90,23 +102,30 @@ public class TaskListRendererTest {
         Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
         Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
         Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
+        Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
         Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
-        Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
         Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
-        Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
-        Task.builder().event(FL401_HOME).state(NOT_STARTED).build(),
-        Task.builder().event(OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
         Task.builder().event(FL401_OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
         Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
+        Task.builder().event(UPLOAD_DOCUMENTS).state(NOT_STARTED).build(),
         Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-        Task.builder().event(FL401_STATEMENT_OF_TRUTH).state(NOT_STARTED).build());
+        Task.builder().event(FL401_STATEMENT_OF_TRUTH).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_HOME).state(NOT_STARTED).build(),
+        Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build());
+
+    private final List<EventValidationErrors> fl401Errors = List.of(
+        EventValidationErrors.builder().event(WITHOUT_NOTICE_ORDER)
+            .errors(Collections.singletonList(WITHOUT_NOTICE_ORDER_ERROR.toString())).build(),
+        EventValidationErrors.builder().event(FL401_APPLICANT_FAMILY_DETAILS)
+            .errors(Collections.singletonList(FL401_APPLICANT_FAMILY_ERROR.toString())).build()
+    );
 
     @Test
     public void shouldRenderFl401TaskList() throws IOException {
 
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/task-list-markdown.md"));
+        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-markdown.md"));
 
         List<String> lines = new ArrayList<>();
 
@@ -116,18 +135,38 @@ public class TaskListRendererTest {
             line = taskListMarkDown.readLine();
         }
 
+        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+        orderList.add(FL401OrderTypeEnum.occupationOrder);
+        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+
+        orders = TypeOfApplicationOrders.builder()
+            .orderType(orderList)
+            .build();
+
+        linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.Yes)
+            .caApplicationNumber("123")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .build();
+
         String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(fl401Tasks, errors, false);
+        String actualTaskList = taskListRenderer.render(fl401Tasks, fl401Errors, false, caseData);
 
         assertNotEquals(expectedTaskList, actualTaskList);
     }
 
     @Test
     public void shouldRenderTaskList() throws IOException {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        List<String> lines = new ArrayList<>();
 
         BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/task-list-markdown.md"));
-
-        List<String> lines = new ArrayList<>();
 
         String line = taskListMarkDown.readLine();
         while (line != null) {
@@ -136,7 +175,7 @@ public class TaskListRendererTest {
         }
 
         String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(tasks, errors, true);
+        String actualTaskList = taskListRenderer.render(tasks, errors, true, caseData);
 
         assertThat(expectedTaskList).isEqualTo(actualTaskList);
     }
@@ -145,7 +184,31 @@ public class TaskListRendererTest {
     public void shouldRenderTaskListWithNoErrors() throws IOException {
         List<EventValidationErrors> emptyErrors = Collections.emptyList();
 
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+
+        List<String> lines = new ArrayList<>();
+
         BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/task-list-no-errors.md"));
+
+        String line = taskListMarkDown.readLine();
+        while (line != null) {
+            lines.add(line);
+            line = taskListMarkDown.readLine();
+        }
+
+        String expectedTaskList = String.join("\n", lines);
+        String actualTaskList = taskListRenderer.render(tasks, emptyErrors, true, caseData);
+
+        assertEquals(expectedTaskList, actualTaskList);
+
+    }
+
+    @Test
+    public void shouldRenderFl401TaskListNonMolestationOrderType() throws IOException {
+
+        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-markdown.md"));
 
         List<String> lines = new ArrayList<>();
 
@@ -155,11 +218,26 @@ public class TaskListRendererTest {
             line = taskListMarkDown.readLine();
         }
 
+        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+
+        orders = TypeOfApplicationOrders.builder()
+            .orderType(orderList)
+            .build();
+
+        linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.Yes)
+            .caApplicationNumber("123")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .build();
+
         String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(tasks, emptyErrors, true);
+        String actualTaskList = taskListRenderer.render(fl401Tasks, fl401Errors, false, caseData);
 
-        assertEquals(expectedTaskList, actualTaskList);
-
+        assertNotEquals(expectedTaskList, actualTaskList);
     }
 }
-
