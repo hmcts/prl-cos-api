@@ -89,7 +89,6 @@ uk:
           email-id: C100applications@justice.gov.uk
           court-name: Court Name
 
-
 notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
@@ -130,8 +129,6 @@ prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
-
-
 
 security:
   oauth2:
@@ -183,3 +180,22 @@ launchdarkly:
 rd_professional:
   api:
     url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}
+
+document:
+    templates:
+      c100:
+        c100_final_template: C100-Final-Document.docx
+        c100_final_filename: C100FinalDocument.pdf
+        c100_draft_template: PRL-C100-Draft-Final.docx
+        c100_draft_filename:
+        c100_c8_template: PRL-C8-Final-Changes.docx
+        c100_c8_filename:
+        c100_c1a_template:
+        c100_c1a_filename:
+      fl401:
+        fl401_final_template:
+        fl401_fial_filename:
+        fl401_draft_template:
+        fl401_draft_filename:
+        fl401_ca_template:
+        fl401_c1a_filename:
