@@ -14,6 +14,7 @@ import static org.hamcrest.core.Is.is;
 
 @Ignore
 @RunWith(SpringRunner.class)
+@Ignore
 @SpringBootTest
 @TestPropertySource(properties = { "FEATURE_EXAMPLE=true", "FEATURE_EXAMPLE_OFF=false" })
 public class FeatureToggleServiceTest {

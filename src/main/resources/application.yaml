@@ -43,7 +43,7 @@ spring:
 
 azure:
   application-insights:
-    instrumentation-key: ${rpe.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+    instrumentation-key: ${APP_INSIGHTS_INSTRUMENTATION_KEY:00000000-0000-0000-0000-000000000000}
 
 logging:
   level:
@@ -80,6 +80,7 @@ uk:
             RETURNAPPLICATION: 41a7ffcd-a5ec-4377-ba50-59619ad0ac8c
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
+            SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -185,7 +186,7 @@ prl-dgs-api:
 
 courtfinder:
   api:
-    url: http://fact-api-aat.service.core-compute-aat.internal/
+    url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
 
 launchdarkly:

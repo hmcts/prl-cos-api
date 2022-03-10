@@ -29,7 +29,6 @@ public class CourtFinderService {
     @Autowired
     private CourtFinderApi courtFinderApi;
 
-
     public Court getClosestChildArrangementsCourt(CaseData caseData) throws NotFoundException {
 
         String postcode = getCorrectPartyPostcode(caseData);
@@ -88,7 +87,7 @@ public class CourtFinderService {
             return getFirstOtherPerson(child).getAddress().getPostCode();
         }
         //default to the applicant postcode
-        return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+        return getPostcodeFromWrappedParty(caseData.    getApplicants().get(0));
     }
 
     public CaseData setCourtNameAndId(CaseData caseData, Court court) {

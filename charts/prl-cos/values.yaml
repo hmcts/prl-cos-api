@@ -35,3 +35,4 @@ java:
         - notification-client-api-key
         - test-genericpassword
         - launchDarkly-sdk-key
+        - AppInsightsInstrumentationKey
