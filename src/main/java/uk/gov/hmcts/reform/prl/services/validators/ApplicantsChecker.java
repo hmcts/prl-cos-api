@@ -39,7 +39,6 @@ public class ApplicantsChecker implements EventChecker {
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-
             if (caseData.getApplicantsFL401() != null) {
                 Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getApplicantsFL401()).build();
                 applicantsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
@@ -49,7 +48,6 @@ public class ApplicantsChecker implements EventChecker {
         if (applicantsWrapped.isEmpty()) {
             return false;
         }
-
         List<PartyDetails> applicants = applicantsWrapped.get()
             .stream()
             .map(Element::getValue)
@@ -65,9 +63,11 @@ public class ApplicantsChecker implements EventChecker {
                 if (mandatoryCompleted) {
                     taskErrorService.removeError(APPLICANTS_DETAILS_ERROR);
                 } else {
-                    taskErrorService.addEventError(APPLICANT_DETAILS,
-                                                   APPLICANTS_DETAILS_ERROR,
-                                                   APPLICANTS_DETAILS_ERROR.getError());
+                    taskErrorService.addEventError(
+                        APPLICANT_DETAILS,
+                        APPLICANTS_DETAILS_ERROR,
+                        APPLICANTS_DETAILS_ERROR.getError()
+                    );
                 }
                 return false;
             }
@@ -86,8 +86,15 @@ public class ApplicantsChecker implements EventChecker {
 
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
-
-        Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
+        Optional<List<Element<PartyDetails>>> applicantsWrapped = Optional.empty();
+        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            if (caseData.getApplicantsFL401() != null) {
+                Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getApplicantsFL401()).build();
+                applicantsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
+            }
+        } else {
+            applicantsWrapped = ofNullable(caseData.getApplicants());
+        }
 
         boolean mandatoryCompleted = false;
 
@@ -98,7 +105,10 @@ public class ApplicantsChecker implements EventChecker {
                 .collect(Collectors.toList());
 
             for (PartyDetails applicant : applicants) {
-                mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant, caseData.getCaseTypeOfApplication());
+                mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(
+                    applicant,
+                    caseData.getCaseTypeOfApplication()
+                );
                 if (!mandatoryCompleted) {
                     break;
                 }
@@ -108,9 +118,11 @@ public class ApplicantsChecker implements EventChecker {
             taskErrorService.removeError(APPLICANTS_DETAILS_ERROR);
             return true;
         }
-        taskErrorService.addEventError(APPLICANT_DETAILS,
-                                       APPLICANTS_DETAILS_ERROR,
-                                       APPLICANTS_DETAILS_ERROR.getError());
+        taskErrorService.addEventError(
+            APPLICANT_DETAILS,
+            APPLICANTS_DETAILS_ERROR,
+            APPLICANTS_DETAILS_ERROR.getError()
+        );
         return false;
     }
 
