@@ -60,23 +60,53 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 public class CallbackController {
 
     @Value("${document.templates.c100.c100_final_template}")
-    protected String C100_FINAL_TEMPLATE;
-    private static final String DRAFT_C_100_APPLICATION = "Draft_C100_application.pdf";
-    public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
-    private static final String C8_DOC = "C8Document.pdf";
-    private static final String C100_FINAL_DOC = "C100FinalDocument.pdf";
-    private static final String C100_FINAL_TEMPLATE = "C100-Final-Document.docx";
-    public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
-    public static final String PRL_C1A_TEMPLATE = "PRL-C1A.docx";
-    public static final String PRL_C1A_FILENAME = "C1A_Document.pdf";
-    public static final String C8_WELSH_FILENAME = "C8Document_Welsh.pdf";
-    public static final String PRL_C8_WELSH_TEMPLATE = "PRL-C8-WelshLang.docx";
-    public static final String PRL_C1A_WELSH_TEMPLATE = "PRL-C1A-WelshLang.docx";
-    public static final String PRL_C1A_WELSH_FILENAME = "C1A_Document_Welsh.pdf";
-    public static final String PRL_C100_DRAFT_WELSH_TEMPLATE = "PRL-Draft-C100-WelshLang.docx";
-    public static final String PRL_C100_DRAFT_WELSH_FILENAME = "Draft_C100_application_welsh.pdf";
-    private static final String C100_FINAL_WELSH_FILENAME = "C100FinalDocumentWelsh.pdf";
-    private static final String C100_FINAL_WELSH_TEMPLATE = "PRL-Final-C100-WelshLang.docx";
+    protected String c100FinalTemplate;
+
+    @Value("${document.templates.c100.c100_final_filename}")
+    protected String c100FinalFilename;
+
+    @Value("${document.templates.c100.c100_draft_template}")
+    protected String c100DraftTemplate;
+
+    @Value("${document.templates.c100.c100_draft_filename}")
+    protected String c100DraftFilename;
+
+    @Value("${document.templates.c100.c100_c8_template}")
+    protected String c100C8Template;
+
+    @Value("${document.templates.c100.c100_c8_filename}")
+    protected String c100C8Filename;
+
+    @Value("${document.templates.c100.c100_c1a_template}")
+    protected String c100C1aTemplate;
+
+    @Value("${document.templates.c100.c100_c1a_filename}")
+    protected String c100C1aFilename;
+
+    @Value("${document.templates.c100.c100_final_welsh_template}")
+    protected String c100FinalWelshTemplate;
+
+    @Value("${document.templates.c100.c100_final_welsh_filename}")
+    protected String c100FinalWelshFilename;
+
+    @Value("${document.templates.c100.c100_draft_welsh_template}")
+    protected String c100DraftWelshTemplate;
+
+    @Value("${document.templates.c100.c100_draft_welsh_filename}")
+    protected String c100DraftWelshFilename;
+
+    @Value("${document.templates.c100.c100_c8_welsh_template}")
+    protected String c100C8WelshTemplate;
+
+    @Value("${document.templates.c100.c100_c8_welsh_filename}")
+    protected String c100C8WelshFilename;
+
+    @Value("${document.templates.c100.c100_c1a_welsh_template}")
+    protected String c100C1aWelshTemplate;
+
+    @Value("${document.templates.c100.c100_c1a_welsh_filename}")
+    protected String c100C1aWelshFilename;
+
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final OrganisationService organisationService;
@@ -167,7 +197,7 @@ public class CallbackController {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                PRL_DRAFT_TEMPLATE
+                c100DraftTemplate
             );
 
             caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -175,14 +205,14 @@ public class CallbackController {
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(DRAFT_C_100_APPLICATION).build());
+                .documentFileName(c100DraftFilename).build());
         }
 
         if (documentLanguage.isGenWelsh()) {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                PRL_C100_DRAFT_WELSH_TEMPLATE
+                c100DraftWelshTemplate
             );
 
             caseDataUpdated.put("isWelshDocGen", Yes.toString());
@@ -190,7 +220,7 @@ public class CallbackController {
                 .documentUrl(generatedWelshDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedWelshDocumentInfo.getBinaryUrl())
                 .documentHash(generatedWelshDocumentInfo.getHashToken())
-                .documentFileName(PRL_C100_DRAFT_WELSH_FILENAME).build());
+                .documentFileName(c100DraftWelshFilename).build());
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -214,14 +244,14 @@ public class CallbackController {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                PRL_C8_TEMPLATE
+                c100C8Template
             );
 
             caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(C8_DOC).build());
+                .documentFileName(c100C8Filename).build());
 
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
@@ -234,39 +264,39 @@ public class CallbackController {
                 GeneratedDocumentInfo generatedC1ADocumentInfo = dgsService.generateDocument(
                     authorisation,
                     uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                    PRL_C1A_TEMPLATE
+                    c100C1aTemplate
                 );
                 caseDataUpdated.put(DOCUMENT_FIELD_C1A, Document.builder()
                     .documentUrl(generatedC1ADocumentInfo.getUrl())
                     .documentBinaryUrl(generatedC1ADocumentInfo.getBinaryUrl())
                     .documentHash(generatedC1ADocumentInfo.getHashToken())
-                    .documentFileName(PRL_C1A_FILENAME).build());
+                    .documentFileName(c100C1aFilename).build());
             }
 
             GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                C100_FINAL_TEMPLATE
+                c100FinalTemplate
             );
 
             caseDataUpdated.put(DOCUMENT_FIELD_FINAL, Document.builder()
                 .documentUrl(generatedDocumentInfoFinal.getUrl())
                 .documentBinaryUrl(generatedDocumentInfoFinal.getBinaryUrl())
                 .documentHash(generatedDocumentInfoFinal.getHashToken())
-                .documentFileName(C100_FINAL_DOC).build());
+                .documentFileName(c100FinalFilename).build());
         }
 
         if (documentLanguage.isGenWelsh()) {
             GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                PRL_C8_WELSH_TEMPLATE
+                c100C8WelshTemplate
             );
             caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, Document.builder()
                 .documentUrl(generatedC8WelshDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedC8WelshDocumentInfo.getBinaryUrl())
                 .documentHash(generatedC8WelshDocumentInfo.getHashToken())
-                .documentFileName(C8_WELSH_FILENAME).build());
+                .documentFileName(c100C8WelshFilename).build());
 
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
@@ -277,26 +307,26 @@ public class CallbackController {
                 GeneratedDocumentInfo generatedC1AWelshDocumentInfo = dgsService.generateWelshDocument(
                     authorisation,
                     uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                    PRL_C1A_WELSH_TEMPLATE
+                    c100C1aWelshTemplate
                 );
                 caseDataUpdated.put(DOCUMENT_FIELD_C1A_WELSH, Document.builder()
                     .documentUrl(generatedC1AWelshDocumentInfo.getUrl())
                     .documentBinaryUrl(generatedC1AWelshDocumentInfo.getBinaryUrl())
                     .documentHash(generatedC1AWelshDocumentInfo.getHashToken())
-                    .documentFileName(PRL_C1A_WELSH_FILENAME).build());
+                    .documentFileName(c100C1aWelshFilename).build());
             }
 
             GeneratedDocumentInfo generatedFinalWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                C100_FINAL_WELSH_TEMPLATE
+                c100FinalWelshTemplate
             );
 
             caseDataUpdated.put(DOCUMENT_FIELD_FINAL_WELSH, Document.builder()
                 .documentUrl(generatedFinalWelshDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedFinalWelshDocumentInfo.getBinaryUrl())
                 .documentHash(generatedFinalWelshDocumentInfo.getHashToken())
-                .documentFileName(C100_FINAL_WELSH_FILENAME).build());
+                .documentFileName(c100FinalWelshFilename).build());
         }
 
         // Refreshing the page in the same event. Hence no external event call needed.

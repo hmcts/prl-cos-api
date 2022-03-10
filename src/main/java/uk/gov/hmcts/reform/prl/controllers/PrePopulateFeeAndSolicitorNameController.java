@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -63,11 +64,18 @@ public class PrePopulateFeeAndSolicitorNameController {
     private DocumentLanguageService documentLanguageService;
 
 
-    public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
-    private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
-    public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
-    public static final String PRL_C100_DRAFT_WELSH_TEMPLATE = "PRL-Draft-C100-Welsh.docx";
-    public static final String PRL_C100_DRAFT_WELSH_FILENAME = "Draft_C100_application_welsh.pdf";
+    @Value("${document.templates.c100.c100_draft_template}")
+    protected String c100DraftTemplate;
+
+    @Value("${document.templates.c100.c100_draft_filename}")
+    protected String c100DraftFilename;
+
+    @Value("${document.templates.c100.c100_draft_welsh_template}")
+    protected String c100DraftWelshTemplate;
+
+    @Value("${document.templates.c100.c100_draft_welsh_filename}")
+    protected String c100DraftWelshFilename;
+
     public static final String CURRENCY_SIGN_POUND = "£";
 
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -114,7 +122,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
-                PRL_DRAFT_TEMPLATE
+                c100DraftTemplate
             );
 
             caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
@@ -122,14 +130,14 @@ public class PrePopulateFeeAndSolicitorNameController {
                                                          .documentUrl(generatedDocumentInfo.getUrl())
                                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                          .documentHash(generatedDocumentInfo.getHashToken())
-                                                         .documentFileName(DRAFT_C_100_APPLICATION).build()).build();
+                                                         .documentFileName(c100DraftFilename).build()).build();
         }
 
         if (documentLanguage.isGenWelsh()) {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 callbackRequest.getCaseDetails(),
-                PRL_C100_DRAFT_WELSH_TEMPLATE
+                c100DraftWelshTemplate
             );
 
             caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())
@@ -137,7 +145,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                                                               .documentUrl(generatedWelshDocumentInfo.getUrl())
                                                               .documentBinaryUrl(generatedWelshDocumentInfo.getBinaryUrl())
                                                               .documentHash(generatedWelshDocumentInfo.getHashToken())
-                                                              .documentFileName(PRL_C100_DRAFT_WELSH_FILENAME).build()).build();
+                                                              .documentFileName(c100DraftWelshFilename).build()).build();
         }
 
         log.info("Saving Court name into DB..");

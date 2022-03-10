@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -111,16 +112,6 @@ public class CallbackControllerTest {
 
 
     public static final String authToken = "Bearer TestAuthToken";
-    public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
-    public static final String PRL_C8_TEMPLATE = "PRL-C8-Final-Changes.docx";
-    private static final String C100_FINAL_TEMPLATE = "C100-Final-Document.docx";
-    public static final String PRL_C1A_TEMPLATE = "PRL-C1A.docx";
-    private static final String C100_FINAL_WELSH_TEMPLATE = "C100-Final-Document-Welsh.docx";
-    public static final String PRL_C1A_WELSH_TEMPLATE = "PRL-C1A-Welsh.docx";
-    public static final String PRL_C8_WELSH_TEMPLATE = "PRL-C8-Welsh.docx";
-    public static final String PRL_C100_DRAFT_WELSH_TEMPLATE = "PRL-Draft-C100-Welsh.docx";
-    public static final String PRL_C100_DRAFT_WELSH_FILENAME = "Draft_C100_application_welsh.pdf";
-    private static final String C100_FINAL_WELSH_FILENAME = "C100FinalDocumentWelsh.pdf";
 
     @Before
     public void setUp() {
@@ -196,14 +187,14 @@ public class CallbackControllerTest {
                                .documentUrl(generatedDocumentInfo.getUrl())
                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                .documentHash(generatedDocumentInfo.getHashToken())
-                               .documentFileName("PRL-DRAFT-C100-20.docx")
+                               .documentFileName("c100DraftFilename.pdf")
                                .build())
             .id(123L)
             .draftOrderDocWelsh(Document.builder()
                                     .documentUrl(generatedDocumentInfo.getUrl())
                                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                     .documentHash(generatedDocumentInfo.getHashToken())
-                                    .documentFileName(PRL_C100_DRAFT_WELSH_FILENAME)
+                                    .documentFileName("c100DraftWelshFilename")
                                     .build())
             .applicants(applicantList)
             .build();
@@ -214,7 +205,7 @@ public class CallbackControllerTest {
                                          .documentUrl(generatedDocumentInfo.getUrl())
                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                          .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("PRL-DRAFT-C100-20.docx")
+                                         .documentFileName("test")
                                          .build())
                       .build())
             .build();
@@ -336,37 +327,37 @@ public class CallbackControllerTest {
                                       .documentUrl(generatedDocumentInfo.getUrl())
                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                       .documentHash(generatedDocumentInfo.getHashToken())
-                                      .documentFileName(PRL_C8_TEMPLATE)
+                                      .documentFileName("c100C8Template")
                                       .build())
                       .c1ADocument(Document.builder()
                                        .documentUrl(generatedDocumentInfo.getUrl())
                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                        .documentHash(generatedDocumentInfo.getHashToken())
-                                       .documentFileName(PRL_C8_TEMPLATE)
+                                       .documentFileName("c100C1aTemplate")
                                        .build())
                       .finalDocument(Document.builder()
                                          .documentUrl(generatedDocumentInfo.getUrl())
                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                          .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName(C100_FINAL_TEMPLATE)
+                                         .documentFileName("test")
                                          .build())
                       .c8WelshDocument(Document.builder()
                                            .documentUrl(generatedDocumentInfo.getUrl())
                                            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                            .documentHash(generatedDocumentInfo.getHashToken())
-                                           .documentFileName(PRL_C8_WELSH_TEMPLATE)
+                                           .documentFileName("test")
                                            .build())
                       .c1AWelshDocument(Document.builder()
                                             .documentUrl(generatedDocumentInfo.getUrl())
                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                             .documentHash(generatedDocumentInfo.getHashToken())
-                                            .documentFileName(PRL_C1A_WELSH_TEMPLATE)
+                                            .documentFileName("test")
                                             .build())
                       .finalWelshDocument(Document.builder()
                                               .documentUrl(generatedDocumentInfo.getUrl())
                                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                               .documentHash(generatedDocumentInfo.getHashToken())
-                                              .documentFileName(C100_FINAL_WELSH_TEMPLATE)
+                                              .documentFileName("test")
                                               .build())
                       .build())
             .build();
