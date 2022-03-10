@@ -90,16 +90,9 @@ public class FL401SubmitApplicationController {
                                                                  String authorisation,
                                                              @RequestBody CallbackRequest callbackRequest) {
 
-
-
         List<String> errorList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info(caseData.toString());
         boolean mandatoryEventStatus = fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData);
-
-
-        log.info("----------------------------------Mandatory event status is:"  + mandatoryEventStatus);
-
         if (!mandatoryEventStatus) {
             errorList.add(
                 "Statement of Truth and submit is not allowed for this case unless you finish all the mandatory events");
