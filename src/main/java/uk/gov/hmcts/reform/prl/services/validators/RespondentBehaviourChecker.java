@@ -26,6 +26,9 @@ public class RespondentBehaviourChecker implements EventChecker {
     public boolean isFinished(CaseData caseData) {
         RespondentBehaviour respondentBehaviourData = caseData.getRespondentBehaviourData();
         if (respondentBehaviourData == null) {
+            taskErrorService.addEventError(RESPONDENT_BEHAVIOUR,
+                                           RESPONDENT_BEHAVIOUR_ERROR,
+                                           RESPONDENT_BEHAVIOUR_ERROR.getError());
             return false;
         }
 

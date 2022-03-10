@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
+import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -39,6 +40,7 @@ public class RequestUpdateCallbackService {
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final UserService userService;
     private final ConfidentialityTabService confidentialityTabService;
+    private final C100JsonMapper c100JsonMapper;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
 
@@ -85,7 +87,8 @@ public class RequestUpdateCallbackService {
     }
 
     //todo This method will be deleted once we wipe out Fee and Pay Bypass
-    public void processCallbackForBypass(ServiceRequestUpdateDto serviceRequestUpdateDto, String authorisation) throws Exception {
+    public void processCallbackForBypass(ServiceRequestUpdateDto serviceRequestUpdateDto,
+                                         String authorisation) throws Exception {
 
         log.info("Processing the callback for the caseId {} with status {}", serviceRequestUpdateDto.getCcdCaseNumber(),
                  serviceRequestUpdateDto.getServiceRequestStatus()

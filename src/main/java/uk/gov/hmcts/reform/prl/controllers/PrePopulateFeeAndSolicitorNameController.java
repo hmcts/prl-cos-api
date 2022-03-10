@@ -89,7 +89,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
                 .applicantSolicitorEmailAddress(userDetails.getEmail())
                 .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
-                .feeAmount(feeResponse.getAmount().toString())
+                .feeAmount("£" + feeResponse.getAmount().toString())
                 .submitAndPayDownloadApplicationLink(Document.builder()
                                                          .documentUrl(generatedDocumentInfo.getUrl())
                                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())

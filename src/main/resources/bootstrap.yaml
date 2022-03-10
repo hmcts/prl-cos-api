@@ -26,3 +26,4 @@ spring:
         prl.notification-client-api-key: UK_GOV_NOTIFY_API_KEY
         prl.test-genericpassword: PRL_GENERIC_PASSWORD
         prl.launchDarkly-sdk-key: LAUNCH_DARKLY_SDK_KEY
+        prl.AppInsightsInstrumentationKey: APP_INSIGHTS_INSTRUMENTATION_KEY
