@@ -15,9 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.json.JsonObject;
 import java.io.IOException;
 import java.util.Base64;
+import javax.json.JsonObject;
 
 @Service
 @Slf4j
@@ -27,21 +27,23 @@ public class SendgridService {
     @Value("${send-grid.api-key}")
     private String apiKey;
 
-    public void sendEmail(JsonObject caseData) throws IOException {
-        Email from = new Email("sairam@mail-prl-nonprod.aat.platform.hmcts.net");
-        String subject = "Notification to RPA to create case in Familyman";
-        Email to = new Email("swaroopa.pendyala@HMCTS.NET");
-        //Email to = new Email("bharadwajsairam.manchella@HMCTS.NET");
-        //Content content = new Content("application/json", JSONObject.valueToString(caseData));
-        Content content = new Content("text/plain", "PFA the data to create a case in Family man");
-        Mail mail = new Mail(from, subject, to, content);
+    @Value("${send-grid.rpa.email.to}")
+    private String toEmail;
 
+    @Value("${send-grid.rpa.email.from}")
+    private String fromEmail;
+
+    public void sendEmail(JsonObject caseData) throws IOException {
+
+        String subject = "Private Reform Law CCD Notification " + caseData.get("id");
+        Content content = new Content("text/plain", " ");
         Attachments attachments = new Attachments();
         String data = Base64.getEncoder().encodeToString(caseData.toString().getBytes());
         attachments.setContent(data);
-        attachments.setFilename("Casedata.json");
+        attachments.setFilename(subject);
         attachments.setType("application/json");
         attachments.setDisposition("attachment");
+        Mail mail = new Mail(new Email(fromEmail), subject, new Email(toEmail), content);
         mail.addAttachments(attachments);
         SendGrid sg = new SendGrid(apiKey);
         Request request = new Request();
@@ -50,9 +52,6 @@ public class SendgridService {
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
             Response response = sg.api(request);
-            System.out.println(response.getStatusCode());
-            System.out.println(response.getBody());
-            System.out.println(response.getHeaders());
         } catch (IOException ex) {
             throw ex;
         }
