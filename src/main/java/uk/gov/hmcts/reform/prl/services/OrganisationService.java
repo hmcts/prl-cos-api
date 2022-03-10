@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -60,17 +59,14 @@ public class OrganisationService {
                     .value(getRespondentWithOrg(eachItem.getValue(), userToken))
                     .id(eachItem.getId()).build())
                 .collect(Collectors.toList());
-
             caseData = caseData.toBuilder().respondents(respondents).build();
         }
         return caseData;
     }
 
     private PartyDetails getRespondentWithOrg(PartyDetails respondent, String userToken) {
-
         if (respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)
             && respondent.getSolicitorOrg() != null) {
-
             String organisationID = respondent.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
                 try {
@@ -78,12 +74,9 @@ public class OrganisationService {
                     respondent = respondent.toBuilder()
                         .organisations(organisations)
                         .build();
-                } catch (HttpClientErrorException.NotFound e) {
-                    log.info("OrganisationsAPi return 404, organisation not present for {} {} ", organisationID, e.getMessage());
                 } catch (Exception e) {
                     log.info("Error while fetching organisation details for orgId {} {} ", organisationID, e.getMessage());
                 }
-
             }
         }
         return respondent;
@@ -91,31 +84,22 @@ public class OrganisationService {
 
     public Organisations getOrganisationDetaiils(String userToken, String organisationID) {
         log.info("Fetching organisation details for organisation id: {}", organisationID);
-
         return organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
     }
 
     private PartyDetails getApplicantWithOrg(PartyDetails applicant, String userToken) {
-
         if (applicant.getSolicitorOrg() != null) {
-            if (null != applicant && applicant.getSolicitorOrg() != null) {
-
-                String organisationID = applicant.getSolicitorOrg().getOrganisationID();
-                if (organisationID != null) {
-                    try {
-                        organisations = getOrganisationDetaiils(userToken, organisationID);
-
-                        applicant = applicant.toBuilder()
-                            .organisations(organisations)
-                            .build();
-                    } catch (HttpClientErrorException.NotFound e) {
-                        log.info("OrganisationsAPi return 404, organisation not present for {} {} ", organisationID, e.getMessage());
-                    } catch (Exception e) {
-                        log.info("Error while fetching organisation details for orgId {} {} ", organisationID, e.getMessage());
-                    }
+            String organisationID = applicant.getSolicitorOrg().getOrganisationID();
+            if (organisationID != null) {
+                try {
+                    organisations = getOrganisationDetaiils(userToken, organisationID);
+                    applicant = applicant.toBuilder()
+                        .organisations(organisations)
+                        .build();
+                } catch (Exception e) {
+                    log.info("Error while fetching organisation details for orgId {} {} ", organisationID, e.getMessage());
                 }
             }
-            return applicant;
         }
         return applicant;
     }
