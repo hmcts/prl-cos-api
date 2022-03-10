@@ -8,8 +8,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -65,9 +65,9 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
+@PropertySource(value = "classpath:application.yaml")
 public class CallbackControllerTest {
-
     @Mock
     private ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
 
@@ -221,9 +221,9 @@ public class CallbackControllerTest {
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
-        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -241,12 +241,12 @@ public class CallbackControllerTest {
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
-            Mockito.anyString()
+            Mockito.any()
         );
         verify(dgsService, times(1)).generateWelshDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
-            Mockito.anyString()
+            Mockito.any()
         );
         verify(organisationService,times(1))
             .getApplicantOrganisationDetails(caseData);
@@ -370,9 +370,9 @@ public class CallbackControllerTest {
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
-        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
@@ -388,12 +388,12 @@ public class CallbackControllerTest {
         verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
-            Mockito.anyString()
+            Mockito.any()
         );
         verify(dgsService, times(3)).generateWelshDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
-            Mockito.anyString()
+            Mockito.any()
         );
         verify(organisationService,times(1))
             .getApplicantOrganisationDetails(caseData);
