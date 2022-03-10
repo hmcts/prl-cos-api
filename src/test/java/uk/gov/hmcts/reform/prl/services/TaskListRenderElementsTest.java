@@ -74,4 +74,22 @@ public class TaskListRenderElementsTest {
 
         assertTrue(actual.containsAll(expected));
     }
+
+    @Test
+    public void shouldRenderNestedCollapsable() {
+        List<String> expected = new ArrayList<>();
+        expected.add("<details class='govuk-details'>");
+        expected.add("<summary class='govuk-details__summary'>");
+        expected.add("<span class='govuk-details__summary-text'>");
+        expected.add("Header");
+        expected.add("</span>");
+        expected.add("</summary>");
+        expected.add("<div class='govuk-details__text'>");
+        expected.add("</div>");
+        expected.add("</details>");
+
+        List<String> actual = underTest.renderNestedCollapsible("Header", emptyList());
+
+        assertTrue(actual.containsAll(expected));
+    }
 }
