@@ -95,7 +95,12 @@ public class AllegationsOfHarmMapperTest {
         assertNotNull(allegationsOfHarmMapper.map(caseData));
     }
 
+    @Test
+    public void testNoDataAllegationsOfHarmMapperMapBehaviours() {
 
+        CaseData caseData = CaseData.builder().build();
+        assertNotNull(allegationsOfHarmMapper.map(caseData));
+    }
 }
 
 

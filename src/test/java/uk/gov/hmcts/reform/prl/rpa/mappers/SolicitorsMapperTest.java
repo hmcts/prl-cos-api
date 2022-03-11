@@ -162,20 +162,6 @@ public class SolicitorsMapperTest {
     }
 
     @Test
-    public void testSolicitorFirstName() {
-        String fullName = solicitorsMapper.getSolicitorFullName(null,
-                                                                "LastName");
-        assertEquals("LastName", fullName);
-    }
-
-    @Test
-    public void testSolicitorLastName() {
-        String fullName = solicitorsMapper.getSolicitorFullName("FirstName",
-                                                                null);
-        assertEquals("FirstName", fullName);
-    }
-
-    @Test
     public void testSolicitorNullName() {
         String fullName = solicitorsMapper.getSolicitorFullName(null, null);
         assertNull(fullName);
