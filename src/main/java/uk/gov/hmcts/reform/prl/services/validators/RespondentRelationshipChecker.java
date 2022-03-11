@@ -31,7 +31,7 @@ public class RespondentRelationshipChecker implements EventChecker {
 
         if (respondentRelationObjectType.isPresent()) {
             if (respondentRelationObjectType.get().equals(RespondentRelationObjectType.builder()
-                                                              .applicantRelationshipEnum(ApplicantRelationshipEnum.noneOfTheAbove)
+                                                              .applicantRelationship(ApplicantRelationshipEnum.noneOfTheAbove)
                                                               .build())) {
                 finished = respondentRelationOptionsInfo.isPresent();
             } else {

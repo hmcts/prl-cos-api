@@ -26,6 +26,7 @@ public enum EventErrorsEnum {
     RELATIONSHIP_TO_RESPONDENT_ERROR("Ensure you have added all relevant information"),
     FL401_APPLICANT_FAMILY_ERROR("Ensure you have completed all relevant information"),
     FL401_TYPE_OF_APPLICATION_ERROR("Ensure you have added all relevant information"),
+    FL401_OTHER_PROCEEDINGS_ERROR("Ensure that all the relevant information has been added"),
     RESPONDENT_BEHAVIOUR_ERROR("Ensure you have added relevant information"),
     HOME_ERROR("Ensure you have added all relevant details");
 

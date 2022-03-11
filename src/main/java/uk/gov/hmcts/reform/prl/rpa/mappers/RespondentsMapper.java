@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
 
 import static java.util.Optional.ofNullable;
@@ -31,7 +32,7 @@ public class RespondentsMapper {
     public JsonArray map(List<Element<PartyDetails>> respondents, Map<String, PartyDetails> respondentSolicitorMap) {
         Optional<List<Element<PartyDetails>>> respondentElementsCheck = ofNullable(respondents);
         if (respondentElementsCheck.isEmpty()) {
-            return null;
+            return JsonValue.EMPTY_JSON_ARRAY;
         }
         List<PartyDetails> respondentList = respondents.stream()
             .map(Element::getValue)
