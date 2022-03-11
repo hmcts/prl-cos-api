@@ -51,7 +51,7 @@ public class CaseEventHandler {
         }
 
         final String taskList = taskListRenderer
-            .render(tasks, eventErrors, caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE));
+            .render(tasks, eventErrors, caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE), caseData);
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,

@@ -93,8 +93,9 @@ public class CaseEventHandlerTest {
         final List<EventValidationErrors> eventsErrors = Collections.emptyList();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
-        when(taskListRenderer.render(c100Tasks, eventsErrors, true)).thenReturn(c100renderedTaskList);
 
+        when(taskListRenderer.render(c100Tasks, eventsErrors, true)).thenReturn(c100renderedTaskList);
+      
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
         assertFalse(errors.contains(EventValidationErrors.builder()
@@ -104,7 +105,6 @@ public class CaseEventHandlerTest {
 
         verify(taskListService).getTasksForOpenCase(caseData);
         verify(taskListRenderer).render(c100Tasks, eventsErrors, true);
-
         verify(coreCaseDataService).triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -149,7 +149,7 @@ public class CaseEventHandlerTest {
         final List<EventValidationErrors> eventsErrors = Collections.emptyList();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(fl401Tasks);
-        when(taskListRenderer.render(fl401Tasks, eventsErrors, false)).thenReturn(fl410renderedTaskList);
+        when(taskListRenderer.render(fl401Tasks, eventsErrors, false, caseData)).thenReturn(fl410renderedTaskList);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
@@ -159,7 +159,7 @@ public class CaseEventHandlerTest {
                                         .build()));
 
         verify(taskListService).getTasksForOpenCase(caseData);
-        verify(taskListRenderer).render(fl401Tasks, eventsErrors, false);
+        verify(taskListRenderer).render(fl401Tasks, eventsErrors, false, caseData);
 
         verify(coreCaseDataService).triggerEvent(
             JURISDICTION,
