@@ -37,6 +37,6 @@ java:
         - test-genericpassword
         - launchDarkly-sdk-key
         - send-grid-api-key
-        - rpa-notify-to-email
+        - rpa-notify-to-email-test
         - rpa-notify-from-email
         - AppInsightsInstrumentationKey
