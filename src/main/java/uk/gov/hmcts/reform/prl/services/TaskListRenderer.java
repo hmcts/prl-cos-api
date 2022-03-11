@@ -58,7 +58,6 @@ public class TaskListRenderer {
 
     private static final String HORIZONTAL_LINE = "<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>";
     private static final String NEW_LINE = "<br/>";
-    private static final String NOT_STARTED_IMG = "not-started.png";
 
     private final TaskListRenderElements taskListRenderElements;
 
@@ -154,7 +153,7 @@ public class TaskListRenderer {
                                   + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage(NOT_STARTED_IMG, "Not started"));
+                                  + taskListRenderElements.renderImage("not-started.png", "Not started"));
                 }
                 break;
             case IN_PROGRESS:
@@ -168,10 +167,10 @@ public class TaskListRenderer {
             case FINISHED:
                 if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage(NOT_STARTED_IMG, "Not started yet"));
+                                  + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
                 } else if (task.getEvent().equals(FL401_STATEMENT_OF_TRUTH)) {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage(NOT_STARTED_IMG, "Not started yet"));
+                                  + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("finished.png", "Finished"));
@@ -232,18 +231,19 @@ public class TaskListRenderer {
             .withTask(tasks.get(ATTENDING_THE_HEARING))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
+        final TaskSection checkAndSignApplication = newSection("Check and sign application")
+            .withTask(tasks.get(VIEW_PDF_DOCUMENT))
+            .withTask(tasks.get(FL401_STATEMENT_OF_TRUTH));
+
         final TaskSection uploadDocuments = newSection("Upload documents")
             .withTask(tasks.get(UPLOAD_DOCUMENTS));
 
-        final TaskSection pdfApplication = newSection("View PDF application")
-            .withTask(tasks.get(VIEW_PDF_DOCUMENT))
-            .withTask(tasks.get(FL401_STATEMENT_OF_TRUTH));
         return Stream.of(applicationDetails,
                          peopleInTheCase,
                          addCaseDetails,
                          additionalInformation,
                          uploadDocuments,
-                         pdfApplication)
+                         checkAndSignApplication)
             .filter(TaskSection::hasAnyTask)
             .collect(toList());
     }
