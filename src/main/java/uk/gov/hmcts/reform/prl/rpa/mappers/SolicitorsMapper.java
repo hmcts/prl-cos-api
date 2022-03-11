@@ -92,10 +92,6 @@ public class SolicitorsMapper {
     public String getSolicitorFullName(String representativeFirstName, String representativeLastName) {
         if (representativeFirstName != null && representativeLastName != null) {
             return representativeFirstName + representativeLastName;
-        } else if (representativeFirstName == null) {
-            return representativeLastName != null ? representativeLastName : null;
-        } else if (representativeLastName == null) {
-            return representativeFirstName != null ? representativeFirstName : null;
         }
         return null;
     }

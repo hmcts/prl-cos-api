@@ -29,8 +29,10 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -44,7 +46,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.json.JsonValue;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -94,6 +99,12 @@ public class CallbackControllerTest {
 
     @Mock
     AllTabServiceImpl allTabsService;
+
+    @Mock
+    SendgridService sendgridService;
+
+    @Mock
+    C100JsonMapper c100JsonMapper;
 
     @Mock
     private CaseWorkerEmailService caseWorkerEmailService;
@@ -239,9 +250,6 @@ public class CallbackControllerTest {
             .applicantsRelationshipToChild(specialGuardian)
             .respondentsRelationshipToChild(father)
             .childLiveWith(Collections.singletonList(anotherPerson))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("test")
             .build();
@@ -332,9 +340,9 @@ public class CallbackControllerTest {
             .applicantsRelationshipToChild(specialGuardian)
             .respondentsRelationshipToChild(father)
             .childLiveWith(Collections.singletonList(anotherPerson))
-            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
+            //.childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            // .childrenKnownToLocalAuthorityTextArea("Test")
+            //.childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("test")
             .build();
@@ -438,5 +446,54 @@ public class CallbackControllerTest {
         callbackController.sendEmailForSendToGatekeeper(authToken, callbackRequest);
         verify(caseWorkerEmailService, times(1))
             .sendEmailToGateKeeper(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void resendNotificationtoRpaTest() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(1234L)
+            .build();
+        Map<String,Object> json = new HashMap<>();
+        json.put("id",1234L);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd
+            .client.model.CallbackRequest
+            .builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1234L)
+                             .data(json)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(json, CaseData.class)).thenReturn(caseData);
+        when(c100JsonMapper.map(caseData)).thenReturn(JsonValue.EMPTY_JSON_OBJECT);
+        callbackController.resendNotificationtoRpa(authToken, callbackRequest);
+        verify(sendgridService,times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
+    }
+  
+    public void testCopyFL401CasenameToC100CaseName() throws Exception {
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("applicantOrRespondentCaseName","test");
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .copyFL401CasenameToC100CaseName(authToken, callbackRequest);
+        assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
+    }
+
+    @Test
+    public void testCopyFL401CasenameToC100ForNullCaseName() throws Exception {
+
+        Map<String, Object> caseData = new HashMap<>();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .copyFL401CasenameToC100CaseName(authToken, callbackRequest);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
     }
 }

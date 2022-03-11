@@ -25,11 +25,9 @@ public class CaseEventService {
         String userToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(userToken);
 
-        List<CaseEventDetail> caseEventDetails = caseEventsApi.findEventDetailsForCase(userToken,
+        return caseEventsApi.findEventDetailsForCase(userToken,
             authTokenGenerator.generate(), systemUpdateUserId,
             JURISDICTION,
             CASE_TYPE, ccdCaseId);
-
-        return caseEventDetails;
     }
 }
