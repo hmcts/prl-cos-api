@@ -59,7 +59,7 @@ public class PartyDetails {
     private String phoneNumber;
     private String email;
     private Address address;
-    @JsonIgnore
+   
     private final Organisations organisations;
     private final String solicitorTelephone;
     @JsonIgnore
