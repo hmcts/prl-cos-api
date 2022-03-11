@@ -521,9 +521,9 @@ public class WelshLangMapper {
         welshMap.put(YesOrNo.Yes.toString(), "Ydy");
         welshMap.put(YesOrNo.No.toString(),"Nac ydy");
         welshMap.put(DontKnow.dontKnow.getDisplayedValue(), "Ddim yn gwybod");
-        welshMap.put(Gender.female.getDisplayedValue(), "Benyw");
-        welshMap.put(Gender.male.getDisplayedValue(), "Gwryw");
-        welshMap.put(Gender.other.getDisplayedValue(), "Maent yn uniaethu mewn rhyw ffordd arall");
+        welshMap.put(Gender.female.getDisplayedValue(), "Benywaidd");
+        welshMap.put(Gender.male.getDisplayedValue(), "Gwrywaidd");
+        welshMap.put(Gender.other.getDisplayedValue(), "Hunaniaeth ryweddol arall");
 
         /**
          * FL401 Type of Application.
