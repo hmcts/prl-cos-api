@@ -46,7 +46,7 @@ public class CaseEventHandler {
         }
 
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)) {
-            List<Event> events = taskListService.getFL401Events();
+            List<Event> events = taskListService.getFL401Events(caseData);
             eventErrors.removeIf(e -> !events.contains(e.getEvent()));
         }
 
