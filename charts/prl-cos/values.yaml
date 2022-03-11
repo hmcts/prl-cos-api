@@ -34,3 +34,6 @@ java:
         - system-update-user-username
         - system-update-user-password
         - notification-client-api-key
+        - test-genericpassword
+        - launchDarkly-sdk-key
+        - AppInsightsInstrumentationKey

@@ -4,17 +4,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskSection;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -24,17 +29,27 @@ import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.STATEMENT_OF_TRUTH_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskSection.newSection;
 
 @Service
@@ -47,12 +62,13 @@ public class TaskListRenderer {
     private final TaskListRenderElements taskListRenderElements;
 
 
-    public String render(List<Task> allTasks, List<EventValidationErrors> tasksErrors) {
+    public String render(List<Task> allTasks, List<EventValidationErrors> tasksErrors, boolean isC100CaseType, CaseData caseData) {
         final List<String> lines = new LinkedList<>();
 
         lines.add("<div class='width-50'>");
 
-        groupInSections(allTasks).forEach(section -> lines.addAll(renderSection(section)));
+        (isC100CaseType ? groupInSections(allTasks) : groupInSectionsForFL401(allTasks, caseData))
+            .forEach(section -> lines.addAll(renderSection(section)));
 
         lines.add("</div>");
 
@@ -176,5 +192,54 @@ public class TaskListRenderer {
     }
 
 
+    private List<TaskSection> groupInSectionsForFL401(List<Task> allTasks, CaseData caseData) {
+        final Map<Event, Task> tasks = allTasks.stream().collect(toMap(Task::getEvent, identity()));
+        Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
+
+        final TaskSection applicationDetails = newSection("Add application details")
+            .withTask(tasks.get(FL401_CASE_NAME))
+            .withTask(tasks.get(FL401_TYPE_OF_APPLICATION))
+            .withTask(tasks.get(WITHOUT_NOTICE_ORDER));
+
+        final TaskSection peopleInTheCase = newSection("Add people to the case")
+            .withTask(tasks.get(APPLICANT_DETAILS))
+            .withTask(tasks.get(RESPONDENT_DETAILS))
+            .withTask(tasks.get(FL401_APPLICANT_FAMILY_DETAILS));
+
+        final TaskSection addCaseDetails = newSection("Add case details")
+            .withTask(tasks.get(RELATIONSHIP_TO_RESPONDENT));
+
+        if (ordersOptional.isEmpty() || (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
+            && ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
+            addCaseDetails.withTask(tasks.get(RESPONDENT_BEHAVIOUR));
+            addCaseDetails.withTask(tasks.get(FL401_HOME));
+        } else  if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+            addCaseDetails.withTask(tasks.get(FL401_HOME));
+        } else if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
+            addCaseDetails.withTask(tasks.get(RESPONDENT_BEHAVIOUR));
+        }
+
+        final TaskSection additionalInformation = newSection("Add additional information")
+            .withInfo("Only complete if relevant")
+            .withTask(tasks.get(FL401_OTHER_PROCEEDINGS))
+            .withTask(tasks.get(ATTENDING_THE_HEARING))
+            .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
+
+        final TaskSection uploadDocuments = newSection("Upload documents")
+            .withTask(tasks.get(UPLOAD_DOCUMENTS));
+
+        final TaskSection pdfApplication = newSection("View PDF application")
+            .withTask(tasks.get(VIEW_PDF_DOCUMENT))
+            .withTask(tasks.get(STATEMENT_OF_TRUTH_AND_SUBMIT));
+
+        return Stream.of(applicationDetails,
+                         peopleInTheCase,
+                         addCaseDetails,
+                         additionalInformation,
+                         uploadDocuments,
+                         pdfApplication)
+            .filter(TaskSection::hasAnyTask)
+            .collect(toList());
+    }
 
 }

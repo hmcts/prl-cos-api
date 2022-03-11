@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -46,6 +47,7 @@ public class PrePopulateFeeAndSolicitorNameController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
     @Autowired
     private DgsService dgsService;
 
@@ -77,20 +79,23 @@ public class PrePopulateFeeAndSolicitorNameController {
             PRL_DRAFT_TEMPLATE
         );
 
+        Court closestChildArrangementsCourt = courtLocatorService
+            .getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
+                                                  .getCaseData());
+
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder()
                 .solicitorName(userDetails.getFullName())
                 .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
                 .applicantSolicitorEmailAddress(userDetails.getEmail())
                 .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
-                .feeAmount(feeResponse.getAmount().toString())
+                .feeAmount("£" + feeResponse.getAmount().toString())
                 .submitAndPayDownloadApplicationLink(Document.builder()
                                                          .documentUrl(generatedDocumentInfo.getUrl())
                                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                          .documentHash(generatedDocumentInfo.getHashToken())
                                                          .documentFileName(DRAFT_C_100_APPLICATION).build())
-                .courtName(courtLocatorService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
-                                                                                    .getCaseData()).getCourtName())
+                .courtName((closestChildArrangementsCourt != null)  ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                 .build(),
             CaseData.class
         );

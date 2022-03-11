@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -14,6 +15,11 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicantsCheckerTest {
 
@@ -23,6 +29,15 @@ public class ApplicantsCheckerTest {
     @InjectMocks
     private ApplicantsChecker applicantsChecker;
 
+    @Mock
+    private CaseData caseData;
+
+    @Before
+    public void setup() {
+        caseData = CaseData.builder().build();
+    }
+
+
     @Test
     public void whenApplicantPresentButNotCompleteThenIsFinishedReturnsFalse() {
 
@@ -30,19 +45,23 @@ public class ApplicantsCheckerTest {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
-        CaseData caseData = CaseData.builder().applicants(applicantList).build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicantList)
+            .build();
 
-        assert !applicantsChecker.isFinished(caseData);
-
+        assertFalse(applicantsChecker.isFinished(caseData));
     }
 
     @Test
     public void whenApplicantIsNotPresentThenIsFinishedReturnsFalse() {
 
-        CaseData caseData = CaseData.builder().applicants(null).build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(null)
+            .build();
 
-        assert !applicantsChecker.isFinished(caseData);
-
+        assertFalse(applicantsChecker.isFinished(caseData));
     }
 
     @Test
@@ -52,19 +71,22 @@ public class ApplicantsCheckerTest {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
-        CaseData caseData = CaseData.builder().applicants(applicantList).build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicantList)
+            .build();
 
-        assert applicantsChecker.isStarted(caseData);
-
+        assertTrue(applicantsChecker.isStarted(caseData));
     }
 
     @Test
     public void whenApplicantIsNotPresentThenIsStartedReturnsFalse() {
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(null)
+            .build();
 
-        CaseData caseData = CaseData.builder().applicants(null).build();
-
-        assert !applicantsChecker.isStarted(caseData);
-
+        assertFalse(applicantsChecker.isStarted(caseData));
     }
 
     @Test
@@ -74,19 +96,22 @@ public class ApplicantsCheckerTest {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
-        CaseData caseData = CaseData.builder().applicants(applicantList).build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicantList)
+            .build();
 
-        assert !applicantsChecker.hasMandatoryCompleted(caseData);
-
+        assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
     public void whenApplicantIsNotPresentThenHasMandatoryReturnsFalse() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicants(null)
+            .build();
 
-        CaseData caseData = CaseData.builder().applicants(null).build();
-
-        assert !applicantsChecker.hasMandatoryCompleted(caseData);
-
+        assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
@@ -96,7 +121,7 @@ public class ApplicantsCheckerTest {
             .country("UK")
             .build();
 
-       assert !applicantsChecker.verifyAddressCompleted(address);
+        assertFalse(applicantsChecker.verifyAddressCompleted(address));
     }
 
     @Test
@@ -111,9 +136,8 @@ public class ApplicantsCheckerTest {
             .postCode("N14 5EF")
             .build();
 
-        assert applicantsChecker.verifyAddressCompleted(address);
+        assertTrue(applicantsChecker.verifyAddressCompleted(address));
     }
-
 
 
 }

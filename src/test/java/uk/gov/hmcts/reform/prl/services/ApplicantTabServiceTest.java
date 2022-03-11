@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,15 +19,20 @@ import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
+import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChildDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.InternationalElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.LitigationCapacity;
@@ -53,6 +59,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicantTabServiceTest {
@@ -62,10 +69,6 @@ public class ApplicantTabServiceTest {
 
     @Mock
     ObjectMapper objectMapper;
-
-    @Mock
-    CoreCaseDataService coreCaseDataService;
-
 
     CaseData caseDataWithParties;
     CaseData emptyCaseData;
@@ -110,7 +113,7 @@ public class ApplicantTabServiceTest {
             .ordersOccupation(YesOrNo.Yes)
             .occupationOrder(order)
             .ordersForcedMarriageProtection(YesOrNo.Yes)
-            .forcedMarriageOrder(order)
+            //.forcedMarriageOrder(order)
             .ordersRestraining(YesOrNo.Yes)
             .restrainingOrder(order)
             .ordersOtherInjunctive(YesOrNo.Yes)
@@ -256,14 +259,155 @@ public class ApplicantTabServiceTest {
             .build();
 
         Element<Applicant> applicantElement = Element.<Applicant>builder().value(applicant).build();
-        List<Element<Applicant>> expectedApplicantList =  Collections.singletonList(applicantElement);
+        List<Element<Applicant>> expectedApplicantList = Collections.singletonList(applicantElement);
         Applicant emptyApplicant = Applicant.builder().build();
         Element<Applicant> emptyApplicantElement = Element.<Applicant>builder().value(emptyApplicant).build();
-        List<Element<Applicant>> emptyApplicantList =  Collections.singletonList(emptyApplicantElement);
+        List<Element<Applicant>> emptyApplicantList = Collections.singletonList(emptyApplicantElement);
 
         when(objectMapper.convertValue(partyDetails, Applicant.class)).thenReturn(applicant);
         assertEquals(expectedApplicantList, applicationsTabService.getApplicantsTable(caseDataWithParties));
         assertEquals(emptyApplicantList, applicationsTabService.getApplicantsTable(emptyCaseData));
+    }
+
+    @Test
+    public void testApplicantsConfidentialDetails() {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender(Gender.male)
+            .address(address)
+            .isAddressConfidential(YesOrNo.Yes)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .email("test@test.com")
+            .phoneNumber("1234567890")
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .build();
+
+        Applicant expectedApplicant = Applicant.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender(Gender.male.getDisplayedValue())
+            .address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build())
+            .isAddressConfidential(YesOrNo.Yes)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .email(THIS_INFORMATION_IS_CONFIDENTIAL)
+            .phoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .build();
+
+        Element<PartyDetails> applicantElement = Element.<PartyDetails>builder().value(partyDetails).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(applicantElement);
+        List<Element<Applicant>> expectedApplicantList = List.of(Element.<Applicant>builder().value(expectedApplicant).build());
+        when(objectMapper.convertValue(partyDetails, Applicant.class)).thenReturn(expectedApplicant);
+        List<Element<Applicant>> applicantsTable = applicationsTabService.getApplicantsTable(CaseData.builder().applicants(
+            applicantList).build());
+        List<Element<Applicant>> expectedEmptyApplicantList = List.of(Element.<Applicant>builder().value(Applicant.builder().build()).build());
+        assertEquals(1, applicantsTable.size());
+        Assert.assertEquals(applicantsTable, expectedApplicantList);
+        assertEquals(expectedEmptyApplicantList, applicationsTabService.getApplicantsTable(emptyCaseData));
+    }
+
+    @Test
+    public void testMaskingPartyDetails() {
+        PartyDetails partyDetails1 = PartyDetails.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender(Gender.male)
+            .address(address)
+            .isAddressConfidential(YesOrNo.Yes)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .email("test@test.com")
+            .phoneNumber("1234567890")
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        PartyDetails expectedPartDetails = PartyDetails.builder()
+            .firstName("First name")
+            .lastName("Last name")
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .gender(Gender.male)
+            .address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build())
+            .isAddressConfidential(YesOrNo.Yes)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .email(THIS_INFORMATION_IS_CONFIDENTIAL)
+            .phoneNumber("1234567890")
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+
+        assertEquals(1, List.of(partyDetails1).size());
+        assertEquals(
+            List.of(expectedPartDetails),
+            applicationsTabService.maskConfidentialDetails(List.of(partyDetails1))
+        );
+    }
+
+    @Test
+    public void testChildDetails() {
+
+        Child child = Child.builder().firstName("Test").lastName("Name").gender(Gender.male)
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .applicantsRelationshipToChild(RelationshipsEnum.father)
+            .orderAppliedFor(List.of(OrderTypeEnum.childArrangementsOrder, OrderTypeEnum.prohibitedStepsOrder))
+            .personWhoLivesWithChild(getOtherPersonList()).build();
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+
+        OtherPersonWhoLivesWithChildDetails confidentilPerson1 = OtherPersonWhoLivesWithChildDetails.builder()
+            .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails(THIS_INFORMATION_IS_CONFIDENTIAL)
+            .firstName(THIS_INFORMATION_IS_CONFIDENTIAL).lastName(THIS_INFORMATION_IS_CONFIDENTIAL)
+            .address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()).build();
+        OtherPersonWhoLivesWithChildDetails nonConfidentialPerson = OtherPersonWhoLivesWithChildDetails.builder()
+            .isPersonIdentityConfidential(YesOrNo.No).relationshipToChildDetails("test")
+            .firstName("test First Name").lastName("test Last Name").address(address).build();
+        OtherPersonWhoLivesWithChildDetails confidentilPerson2 = OtherPersonWhoLivesWithChildDetails.builder()
+            .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails(THIS_INFORMATION_IS_CONFIDENTIAL)
+            .firstName(THIS_INFORMATION_IS_CONFIDENTIAL).lastName(THIS_INFORMATION_IS_CONFIDENTIAL)
+            .address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()).build();
+
+        ChildDetails expetcedChildDetails = ChildDetails.builder().firstName("Test")
+            .lastName("Name").gender(Gender.male)
+            .dateOfBirth(LocalDate.of(1989, 11, 30))
+            .applicantsRelationshipToChild(RelationshipsEnum.father.getDisplayedValue())
+            .orderAppliedFor("Child Arrangements Order, Prohibited Steps Order")
+            .personWhoLivesWithChild(List.of(
+                Element
+                    .<OtherPersonWhoLivesWithChildDetails>builder().value(confidentilPerson1).build(),
+                Element.<OtherPersonWhoLivesWithChildDetails>builder().value(nonConfidentialPerson).build(),
+                Element.<OtherPersonWhoLivesWithChildDetails>builder().value(confidentilPerson2).build()
+            )).build();
+
+
+        assertEquals(
+            List.of(Element.<ChildDetails>builder().value(expetcedChildDetails).build()),
+            applicationsTabService.getChildDetails(CaseData.builder().children(listOfChildren).build())
+        );
+    }
+
+    private List<Element<OtherPersonWhoLivesWithChild>> getOtherPersonList() {
+        OtherPersonWhoLivesWithChild confidentilPerson1 = OtherPersonWhoLivesWithChild.builder()
+            .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
+            .firstName("test First Name").lastName("test Last Name").address(address).build();
+        OtherPersonWhoLivesWithChild nonConfidentialPerson = OtherPersonWhoLivesWithChild.builder()
+            .isPersonIdentityConfidential(YesOrNo.No).relationshipToChildDetails("test")
+            .firstName("test First Name").lastName("test Last Name").address(address).build();
+        OtherPersonWhoLivesWithChild confidentilPerson2 = OtherPersonWhoLivesWithChild.builder()
+            .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
+            .firstName("test First Name").lastName("test Last Name").address(address).build();
+
+        return List.of(
+            Element.<OtherPersonWhoLivesWithChild>builder().value(confidentilPerson1).build(),
+            Element.<OtherPersonWhoLivesWithChild>builder().value(nonConfidentialPerson).build(),
+            Element.<OtherPersonWhoLivesWithChild>builder().value(confidentilPerson2).build()
+        );
     }
 
     @Test
@@ -279,10 +423,10 @@ public class ApplicantTabServiceTest {
             .build();
 
         Element<Respondent> respondentElement = Element.<Respondent>builder().value(respondent).build();
-        List<Element<Respondent>> expectedRespondentList =  Collections.singletonList(respondentElement);
+        List<Element<Respondent>> expectedRespondentList = Collections.singletonList(respondentElement);
         Respondent emptyRespondent = Respondent.builder().build();
         Element<Respondent> emptyRespondentElement = Element.<Respondent>builder().value(emptyRespondent).build();
-        List<Element<Respondent>> emptyRespondentList =  Collections.singletonList(emptyRespondentElement);
+        List<Element<Respondent>> emptyRespondentList = Collections.singletonList(emptyRespondentElement);
 
         when(objectMapper.convertValue(partyDetails, Respondent.class)).thenReturn(respondent);
         assertEquals(expectedRespondentList, applicationsTabService.getRespondentsTable(caseDataWithParties));
@@ -312,9 +456,9 @@ public class ApplicantTabServiceTest {
             .doYouRequireAHearingWithReducedNotice(YesOrNo.No)
             .build();
         Map<String, Object> hearingUrgencyMap = Map.of(
-                    "isCaseUrgent", "Yes",
-                    "caseUrgencyTimeAndReason", "Test String",
-                    "doYouRequireAHearingWithReducedNotice", "No"
+            "isCaseUrgent", "Yes",
+            "caseUrgencyTimeAndReason", "Test String",
+            "doYouRequireAHearingWithReducedNotice", "No"
         );
 
         when(objectMapper.convertValue(caseDataWithParties, HearingUrgency.class)).thenReturn(hearingUrgency);
@@ -355,8 +499,10 @@ public class ApplicantTabServiceTest {
         when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOverview.class))
             .thenReturn(allegationsOfHarmOverview);
         when(objectMapper.convertValue(allegationsOfHarmOverview, Map.class)).thenReturn(allegationsOfHarmOverviewMap);
-        assertEquals(allegationsOfHarmOverviewMap,
-                     applicationsTabService.getAllegationsOfHarmOverviewTable(caseDataWithParties));
+        assertEquals(
+            allegationsOfHarmOverviewMap,
+            applicationsTabService.getAllegationsOfHarmOverviewTable(caseDataWithParties)
+        );
     }
 
     @Test
@@ -429,9 +575,11 @@ public class ApplicantTabServiceTest {
 
     @Test
     public void testOtherProceedingsOverviewTableMapper() {
-        Map<String, Object> completeOverviewMap = Map.of("previousOrOngoingProceedings",
-                                                 caseDataWithParties.getPreviousOrOngoingProceedingsForChildren()
-                                                     .getDisplayedValue());
+        Map<String, Object> completeOverviewMap = Map.of(
+            "previousOrOngoingProceedings",
+            caseDataWithParties.getPreviousOrOngoingProceedingsForChildren()
+                .getDisplayedValue()
+        );
         Map<String, Object> emptyOverviewMap = Map.of("previousOrOngoingProceedings", "");
 
         assertEquals(completeOverviewMap, applicationsTabService.getOtherProceedingsTable(caseDataWithParties));
@@ -460,8 +608,10 @@ public class ApplicantTabServiceTest {
         Element<OtherProceedingsDetails> emptyProceedingElement = Element
             .<OtherProceedingsDetails>builder().value(emptyProceeding).build();
 
-        assertEquals(Collections.singletonList(otherProceedingsDetailsElement),
-                     applicationsTabService.getOtherProceedingsDetailsTable(caseDataWithParties));
+        assertEquals(
+            Collections.singletonList(otherProceedingsDetailsElement),
+            applicationsTabService.getOtherProceedingsDetailsTable(caseDataWithParties)
+        );
         assertEquals(Collections.singletonList(emptyProceedingElement), applicationsTabService
             .getOtherProceedingsDetailsTable(emptyCaseData));
     }
@@ -620,11 +770,11 @@ public class ApplicantTabServiceTest {
 
         Element<OtherPersonInTheCase> otherPersonElement = Element.<OtherPersonInTheCase>builder()
             .value(otherPerson).build();
-        List<Element<OtherPersonInTheCase>> expectedList =  Collections.singletonList(otherPersonElement);
+        List<Element<OtherPersonInTheCase>> expectedList = Collections.singletonList(otherPersonElement);
         OtherPersonInTheCase emptyOtherPerson = OtherPersonInTheCase.builder().build();
         Element<OtherPersonInTheCase> emptyOtherElement = Element.<OtherPersonInTheCase>builder()
             .value(emptyOtherPerson).build();
-        List<Element<OtherPersonInTheCase>> expectedEmptyList =  Collections.singletonList(emptyOtherElement);
+        List<Element<OtherPersonInTheCase>> expectedEmptyList = Collections.singletonList(emptyOtherElement);
 
         when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class)).thenReturn(otherPerson);
         assertEquals(expectedList, applicationsTabService.getOtherPeopleInTheCaseTable(caseDataWithParties));

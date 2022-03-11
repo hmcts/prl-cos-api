@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 import uk.gov.hmcts.reform.prl.utils.TestConstants;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,10 +48,10 @@ public class ExampleSendEmailTest {
         callEndpointWithData();
 
         verify(emailService).send(
-            eq(TestConstants.TEST_SOLICITOR_EMAIL),
-            eq(EmailTemplateNames.EXAMPLE),
-            eq(expectedPersonalisation()),
-            eq(LanguagePreference.ENGLISH)
+            TestConstants.TEST_SOLICITOR_EMAIL,
+            EmailTemplateNames.EXAMPLE,
+            expectedPersonalisation(),
+            LanguagePreference.english
         );
     }
 

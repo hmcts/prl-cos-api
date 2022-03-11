@@ -15,12 +15,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
+import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @Slf4j
 @Component
@@ -37,6 +38,8 @@ public class RequestUpdateCallbackService {
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final UserService userService;
+    private final ConfidentialityTabService confidentialityTabService;
+    private final C100JsonMapper c100JsonMapper;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) throws Exception {
 
@@ -54,6 +57,16 @@ public class RequestUpdateCallbackService {
         );
 
         if (!Objects.isNull(caseDetails.getId())) {
+            if (confidentialityTabService
+                .updateConfidentialityDetails(caseDetails.getId(), objectMapper.convertValue(
+                    caseDetails.getData(),
+                    CaseData.class
+                ))) {
+                log.info(
+                    "Confidentiality details updated for caseId {}",
+                    caseDetails.getId()
+                );
+            }
             log.info(
                 "Updating the Case data with payment information for caseId {}",
                 serviceRequestUpdateDto.getCcdCaseNumber()
@@ -73,7 +86,8 @@ public class RequestUpdateCallbackService {
     }
 
     //todo This method will be deleted once we wipe out Fee and Pay Bypass
-    public void processCallbackForBypass(ServiceRequestUpdateDto serviceRequestUpdateDto, String authorisation) throws Exception {
+    public void processCallbackForBypass(ServiceRequestUpdateDto serviceRequestUpdateDto,
+                                         String authorisation) throws Exception {
 
         log.info("Processing the callback for the caseId {} with status {}", serviceRequestUpdateDto.getCcdCaseNumber(),
                  serviceRequestUpdateDto.getServiceRequestStatus()
@@ -89,6 +103,16 @@ public class RequestUpdateCallbackService {
         );
 
         if (!Objects.isNull(caseDetails.getId())) {
+            if (confidentialityTabService
+                .updateConfidentialityDetails(caseDetails.getId(), objectMapper.convertValue(
+                    caseDetails.getData(),
+                    CaseData.class
+                ))) {
+                log.info(
+                    "Confidentiality details updated for caseId {}",
+                    caseDetails.getId()
+                );
+            }
             log.info(
                 "Updating the Case data with payment information for caseId {}",
                 serviceRequestUpdateDto.getCcdCaseNumber()

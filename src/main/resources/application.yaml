@@ -1,5 +1,5 @@
 server:
-    port: 4044
+  port: 4044
 
 runs-locally: ${RUNS_LOCALLY:true}
 
@@ -42,26 +42,26 @@ spring:
 #            non_contextual_creation: true
 
 azure:
-    application-insights:
-      instrumentation-key: ${rpe.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+  application-insights:
+    instrumentation-key: ${APP_INSIGHTS_INSTRUMENTATION_KEY:00000000-0000-0000-0000-000000000000}
 
 logging:
-    level:
-      org.springframework.web: DEBUG
-      uk.gov.hmcts.reform.prl: DEBUG
-      au.com.dius.pact: DEBUG
-    pattern:
-      console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
+  level:
+    org.springframework.web: DEBUG
+    uk.gov.hmcts.reform.prl: DEBUG
+    au.com.dius.pact: DEBUG
+  pattern:
+    console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
 
 pba:
-    validation:
-      service:
-        api:
-          baseurl: ${PRD_API_BASEURL:http://localhost:8892}
+  validation:
+    service:
+      api:
+        baseurl: ${PRD_API_BASEURL:http://localhost:8892}
 
 feature-toggle:
-    toggle:
-      example: ${FEATURE_EXAMPLE:false}
+  toggle:
+    example: ${FEATURE_EXAMPLE:false}
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
@@ -77,24 +77,16 @@ uk:
           english:
             SOLICITOR: a080f4ce-a07f-43ec-a3f0-f196d83f7730
             CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
+            RETURNAPPLICATION: 41a7ffcd-a5ec-4377-ba50-59619ad0ac8c
+            WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
+            SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
           email-id: C100applications@justice.gov.uk
           court-name: Court Name
 
-    gov:
-      notify:
-        api:
-          key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxxx}
-          baseUrl: https://api.notifications.service.gov.uk
-        email:
-          templates:
-            english:
-              EXAMPLE: 2e00903c-46f4-46d6-9d94-d419ee30b927
-            welsh:
-              EXAMPLE: example-template-id-222
 
 notify:
   api-key: fake-key
@@ -134,33 +126,33 @@ idam:
 
 prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+
+
 
 security:
-    oauth2:
-      client:
-        provider:
-          oidc:
-            issuer-uri: ${idam.web.url}/o
-        registration:
-          oidc:
-            client-id: internal
-            client-secret: internal
+  oauth2:
+    client:
+      provider:
+        oidc:
+          issuer-uri: ${idam.web.url}/o
+      registration:
+        oidc:
+          client-id: internal
+          client-secret: internal
 core_case_data:
   api:
-    url: http://localhost:4452
+    url: ${CORE_CASE_DATA_API_URL:http://localhost:4452}
 
 auth:
-    idam:
+  idam:
+    client:
+      baseUrl: http://localhost:5000
+  provider:
+    service:
       client:
-        baseUrl: http://localhost:5000
-    provider:
-      service:
-        client:
-          baseUrl: http://localhost:4502
-
-
+        baseUrl: http://localhost:4502
 
 resources:
   images:
@@ -180,4 +172,12 @@ prl-dgs-api:
 
 courtfinder:
   api:
-    url: http://fact-api-aat.service.core-compute-aat.internal/
+    url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
+
+
+launchdarkly:
+  sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
+
+rd_professional:
+  api:
+    url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}

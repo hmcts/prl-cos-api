@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.applicants;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.children;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -19,20 +21,17 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AllegationsOfHarmCheckerTest {
-
     @Mock
     TaskErrorService taskErrorService;
+
     @InjectMocks
     AllegationsOfHarmChecker allegationsOfHarmChecker;
 
-
     @Test
     public void whenNoCaseDataThenIsStartedIsFalse() {
-
         CaseData casedata = CaseData.builder().build();
 
-        assert !allegationsOfHarmChecker.isStarted(casedata);
-
+        assertFalse(allegationsOfHarmChecker.isStarted(casedata));
     }
 
     @Test
@@ -41,9 +40,8 @@ public class AllegationsOfHarmCheckerTest {
             .allegationsOfHarmYesNo(Yes)
             .build();
 
-        assert  allegationsOfHarmChecker.isStarted(casedata);
+        assertTrue(allegationsOfHarmChecker.isStarted(casedata));
     }
-
 
 
     @Test
@@ -53,7 +51,7 @@ public class AllegationsOfHarmCheckerTest {
 
         boolean isFinished = allegationsOfHarmChecker.isFinished(casedata);
 
-        assert (!isFinished);
+        assertFalse(isFinished);
     }
 
     @Test
@@ -65,7 +63,7 @@ public class AllegationsOfHarmCheckerTest {
 
         boolean isFinished = allegationsOfHarmChecker.isFinished(casedata);
 
-        assert (isFinished);
+        assertTrue(isFinished);
     }
 
     @Test
@@ -74,7 +72,7 @@ public class AllegationsOfHarmCheckerTest {
 
         boolean isAbusePresent = allegationsOfHarmChecker.isStarted(casedata);
 
-        assert (!isAbusePresent);
+        assertFalse(isAbusePresent);
     }
 
     @Test
@@ -82,7 +80,7 @@ public class AllegationsOfHarmCheckerTest {
 
         CaseData casedata = CaseData.builder().build();
 
-        assert !allegationsOfHarmChecker.hasMandatoryCompleted(casedata);
+        assertFalse(allegationsOfHarmChecker.hasMandatoryCompleted(casedata));
 
     }
 
@@ -93,7 +91,7 @@ public class AllegationsOfHarmCheckerTest {
             .allegationsOfHarmYesNo(No)
             .build();
 
-        assert !allegationsOfHarmChecker.hasMandatoryCompleted(casedata);
+        assertFalse(allegationsOfHarmChecker.hasMandatoryCompleted(casedata));
 
     }
 
@@ -101,7 +99,7 @@ public class AllegationsOfHarmCheckerTest {
     public void whenNoCaseDataValidateFieldsReturnsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assert !allegationsOfHarmChecker.validateFields(caseData);
+        assertFalse(allegationsOfHarmChecker.validateFields(caseData));
     }
 
     @Test
@@ -111,14 +109,14 @@ public class AllegationsOfHarmCheckerTest {
             .physicalAbuseVictim(Collections.singletonList(applicants))
             .build();
 
+        assertTrue(allegationsOfHarmChecker.abusePresent(caseData));
     }
 
     @Test
     public void whenNoCaseDataThenValidateOtherConcernsIsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assert !allegationsOfHarmChecker.validateOtherConcerns(caseData);
-
+        assertFalse(allegationsOfHarmChecker.validateOtherConcerns(caseData));
     }
 
     @Test
@@ -129,14 +127,14 @@ public class AllegationsOfHarmCheckerTest {
             .allegationsOfHarmOtherConcernsCourtActions("Court actions")
             .build();
 
-        assert allegationsOfHarmChecker.validateOtherConcerns(caseData);
+        assertTrue(allegationsOfHarmChecker.validateOtherConcerns(caseData));
     }
 
     @Test
     public void whenNoCaseDataThenValidateChildContactIsFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assert !allegationsOfHarmChecker.validateChildContact(caseData);
+        assertFalse(allegationsOfHarmChecker.validateChildContact(caseData));
 
     }
 
@@ -148,7 +146,7 @@ public class AllegationsOfHarmCheckerTest {
             .agreeChildOtherContact(Yes)
             .build();
 
-        assert allegationsOfHarmChecker.validateChildContact(caseData);
+        assertTrue(allegationsOfHarmChecker.validateChildContact(caseData));
     }
 
     @Test
@@ -158,7 +156,7 @@ public class AllegationsOfHarmCheckerTest {
             .ordersNonMolestationCurrent(Yes)
             .build();
 
-        assert allegationsOfHarmChecker.validateNonMolestationOrder(caseData);
+        assertTrue(allegationsOfHarmChecker.validateNonMolestationOrder(caseData));
     }
 
     @Test
@@ -168,7 +166,7 @@ public class AllegationsOfHarmCheckerTest {
             .ordersOccupationCurrent(Yes)
             .build();
 
-        assert allegationsOfHarmChecker.validateOccupationOrder(caseData);
+        assertTrue(allegationsOfHarmChecker.validateOccupationOrder(caseData));
     }
 
     @Test
@@ -178,7 +176,7 @@ public class AllegationsOfHarmCheckerTest {
             .ordersForcedMarriageProtectionCurrent(Yes)
             .build();
 
-        assert allegationsOfHarmChecker.validateForcedMarriageProtectionOrder(caseData);
+        assertTrue(allegationsOfHarmChecker.validateForcedMarriageProtectionOrder(caseData));
     }
 
     @Test
@@ -188,7 +186,7 @@ public class AllegationsOfHarmCheckerTest {
             .ordersRestrainingCurrent(Yes)
             .build();
 
-        assert allegationsOfHarmChecker.validateRestrainingOrder(caseData);
+        assertTrue(allegationsOfHarmChecker.validateRestrainingOrder(caseData));
     }
 
     @Test
@@ -198,7 +196,7 @@ public class AllegationsOfHarmCheckerTest {
             .ordersOtherInjunctiveCurrent(Yes)
             .build();
 
-        assert allegationsOfHarmChecker.validateOtherInjunctiveOrder(caseData);
+        assertTrue(allegationsOfHarmChecker.validateOtherInjunctiveOrder(caseData));
     }
 
     @Test
@@ -208,14 +206,14 @@ public class AllegationsOfHarmCheckerTest {
             .ordersUndertakingInPlaceCurrent(Yes)
             .build();
 
-        assert allegationsOfHarmChecker.validateUndertakingInPlaceOrder(caseData);
+        assertTrue(allegationsOfHarmChecker.validateUndertakingInPlaceOrder(caseData));
     }
 
     @Test
     public void whenNoCaseDataThenAbductionSectionNotComplete() {
         CaseData caseData = CaseData.builder().build();
 
-        assert !allegationsOfHarmChecker.validateAbductionSection(caseData);
+        assertFalse(allegationsOfHarmChecker.validateAbductionSection(caseData));
     }
 
     @Test
@@ -224,7 +222,7 @@ public class AllegationsOfHarmCheckerTest {
             .allegationsOfHarmDomesticAbuseYesNo(Yes)
             .build();
 
-        assert allegationsOfHarmChecker.abusePresent(caseData);
+        assertTrue(allegationsOfHarmChecker.abusePresent(caseData));
     }
 
     @Test
@@ -234,7 +232,7 @@ public class AllegationsOfHarmCheckerTest {
             .abuseNatureDescription("Test String")
             .build();
 
-        assert !allegationsOfHarmChecker.validateBehaviour(behaviour);
+        assertFalse(allegationsOfHarmChecker.validateBehaviour(behaviour));
     }
 
     @Test
@@ -249,9 +247,7 @@ public class AllegationsOfHarmCheckerTest {
             .behavioursApplicantHelpAction("Action")
             .build();
 
-        assert allegationsOfHarmChecker.validateBehaviour(behaviour);
-
-
+        assertTrue(allegationsOfHarmChecker.validateBehaviour(behaviour));
     }
 
     @Test
@@ -264,12 +260,12 @@ public class AllegationsOfHarmCheckerTest {
 
         CaseData caseData = CaseData.builder()
             .allegationsOfHarmDomesticAbuseYesNo(Yes)
+            .allegationsOfHarmChildAbductionYesNo(No)
             .sexualAbuseVictim(Collections.singletonList(children))
             .behaviours(Collections.singletonList(wrappedBehaviour))
             .build();
 
-        assert allegationsOfHarmChecker.validateDomesticAbuseSection(caseData);
-
+        assertTrue(allegationsOfHarmChecker.validateDomesticAbuseSection(caseData));
     }
 
     @Test
@@ -277,10 +273,13 @@ public class AllegationsOfHarmCheckerTest {
 
         CaseData caseData = CaseData.builder()
             .allegationsOfHarmDomesticAbuseYesNo(Yes)
+            .allegationsOfHarmChildAbductionYesNo(Yes)
+            .childAbductionReasons("harm")
+            .previousAbductionThreats(Yes)
+            .previousAbductionThreatsDetails("none")
             .build();
 
-        assert !allegationsOfHarmChecker.validateDomesticAbuseSection(caseData);
-
+        assertFalse(allegationsOfHarmChecker.validateDomesticAbuseSection(caseData));
     }
 
     @Test
@@ -290,7 +289,7 @@ public class AllegationsOfHarmCheckerTest {
             .ordersRestrainingCourtName("Test Court Name")
             .build();
 
-        assert !allegationsOfHarmChecker.validateOrders(caseData);
+        assertFalse(allegationsOfHarmChecker.validateOrders(caseData));
     }
 
     @Test
@@ -300,7 +299,6 @@ public class AllegationsOfHarmCheckerTest {
             .ordersOtherInjunctiveCurrent(No)
             .build();
 
-        assert allegationsOfHarmChecker.validateOrders(caseData);
+        assertTrue(allegationsOfHarmChecker.validateOrders(caseData));
     }
-
 }

@@ -6,19 +6,21 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
-import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -30,9 +32,11 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
     private final String serviceAuth = "ServiceAuthorization";
     private final RequestUpdateCallbackService requestUpdateCallbackService;
     private final AuthTokenGenerator authTokenGenerator;
+    private final CourtFinderService courtLocatorService;
 
     @Autowired
-    ApplicationsTabService applicationsTabService;
+    @Qualifier("allTabsService")
+    AllTabsService tabService;
 
     @PostMapping(path = "/service-request-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Ways to pay will call this API and send the status of payment with other details")
@@ -67,12 +71,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
         try {
             log.info("**********************");
 
-            final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            final CaseData caseData = getCaseData(caseDetails);
-
-            log.info("Before application tab service submission");
-            applicationsTabService.updateApplicationTabData(caseData);
-            log.info("After application tab service");
+            final CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
 
             PaymentDto paymentDto = PaymentDto.builder()
                 .paymentAmount("232")
@@ -81,13 +80,25 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
                 .caseReference(String.valueOf(caseData.getId()))
                 .accountNumber("111111")
                 .build();
-            ServiceRequestUpdateDto serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+
+            final ServiceRequestUpdateDto serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
                 .serviceRequestReference(String.valueOf(caseData.getId()))
                 .ccdCaseNumber(String.valueOf(caseData.getId()))
                 .serviceRequestAmount("232")
                 .serviceRequestStatus("Paid")
                 .payment(paymentDto)
                 .build();
+
+            // Getting court name and save it to db.
+            Court closestChildArrangementsCourt = courtLocatorService
+                .getClosestChildArrangementsCourt(caseData);
+            if (closestChildArrangementsCourt != null) {
+                caseData.setCourtName(closestChildArrangementsCourt.getCourtName());
+            }
+            log.info("*** Court Name *** " + caseData.getCourtName());
+            //TODO: Have to set date of submission if payment is successful.
+            tabService.updateAllTabs(caseData);
+            log.info("After application tab service");
 
             requestUpdateCallbackService.processCallbackForBypass(serviceRequestUpdateDto, authorisation);
 
