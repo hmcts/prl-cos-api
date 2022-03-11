@@ -96,6 +96,10 @@ notify:
 
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
+  rpa:
+    email:
+      to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
+      from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
 
 payments:
   api:
