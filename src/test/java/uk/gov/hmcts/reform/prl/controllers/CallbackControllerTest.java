@@ -214,11 +214,19 @@ public class CallbackControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
@@ -233,6 +241,11 @@ public class CallbackControllerTest {
         callbackController.generateAndStoreDocument(authToken, callbackRequest);
 
         verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(1)).generateWelshDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.any()
@@ -325,7 +338,7 @@ public class CallbackControllerTest {
             Mockito.any()
         );
         verify(organisationService,times(1))
-            .getApplicantOrganisationDetailsForFL401(caseData);
+            .getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class));
         verifyNoMoreInteractions(dgsService);
         verifyNoMoreInteractions(organisationService);
     }
