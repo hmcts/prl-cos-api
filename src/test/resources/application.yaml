@@ -91,6 +91,9 @@ notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
 
+send-grid:
+  api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
+
 payments:
   api:
     url: ${PAY_URL:}
