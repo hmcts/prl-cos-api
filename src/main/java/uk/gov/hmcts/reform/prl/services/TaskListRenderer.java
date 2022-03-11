@@ -235,16 +235,15 @@ public class TaskListRenderer {
         final TaskSection uploadDocuments = newSection("Upload documents")
             .withTask(tasks.get(UPLOAD_DOCUMENTS));
 
-        final TaskSection checkAndSignApplication = newSection("View PDF application")
+        final TaskSection pdfApplication = newSection("View PDF application")
             .withTask(tasks.get(VIEW_PDF_DOCUMENT))
             .withTask(tasks.get(FL401_STATEMENT_OF_TRUTH));
-
         return Stream.of(applicationDetails,
                          peopleInTheCase,
                          addCaseDetails,
                          additionalInformation,
                          uploadDocuments,
-                         checkAndSignApplication)
+                         pdfApplication)
             .filter(TaskSection::hasAnyTask)
             .collect(toList());
     }

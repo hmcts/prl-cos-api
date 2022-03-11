@@ -115,12 +115,12 @@ public class TaskListService {
             RELATIONSHIP_TO_RESPONDENT,
             FL401_APPLICANT_FAMILY_DETAILS,
             FL401_OTHER_PROCEEDINGS,
-            OTHER_PROCEEDINGS,
             ATTENDING_THE_HEARING,
             WELSH_LANGUAGE_REQUIREMENTS,
             UPLOAD_DOCUMENTS,
             VIEW_PDF_DOCUMENT,
-            FL401_STATEMENT_OF_TRUTH));
+            FL401_STATEMENT_OF_TRUTH
+        ));
 
         if (ordersOptional.isEmpty() || (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
             &&
