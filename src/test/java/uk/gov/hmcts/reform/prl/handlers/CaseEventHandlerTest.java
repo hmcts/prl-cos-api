@@ -73,7 +73,7 @@ public class CaseEventHandlerTest {
 
         List<EventValidationErrors> errors = new ArrayList<>();
         errors.add(EventValidationErrors.builder()
-                   .event(TYPE_OF_APPLICATION)
+                       .event(TYPE_OF_APPLICATION)
                        .errors(Collections.singletonList(TYPE_OF_APPLICATION_ERROR.getError()))
                        .build());
         errors.add(EventValidationErrors.builder()
@@ -86,14 +86,15 @@ public class CaseEventHandlerTest {
 
         final List<Task> c100Tasks = List.of(
             Task.builder().event(CASE_NAME).state(FINISHED).build(),
-            Task.builder().event(MIAM).state(NOT_STARTED).build());
+            Task.builder().event(MIAM).state(NOT_STARTED).build()
+        );
 
         final String c100renderedTaskList = "<h1>Case Name</h1><h2>Miam</h2>";
 
         final List<EventValidationErrors> eventsErrors = Collections.emptyList();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
-        when(taskListRenderer.render(c100Tasks, eventsErrors, true)).thenReturn(c100renderedTaskList);
+        when(taskListRenderer.render(c100Tasks, eventsErrors, true, caseData)).thenReturn(c100renderedTaskList);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
@@ -103,14 +104,14 @@ public class CaseEventHandlerTest {
                                         .build()));
 
         verify(taskListService).getTasksForOpenCase(caseData);
-        verify(taskListRenderer).render(c100Tasks, eventsErrors, true);
+        verify(taskListRenderer).render(c100Tasks, eventsErrors, true, caseData);
 
         verify(coreCaseDataService).triggerEvent(
             JURISDICTION,
             CASE_TYPE,
             caseData.getId(),
             "internal-update-task-list",
-            Map.of("taskList", c100renderedTaskList,"id",String.valueOf(caseData.getId()))
+            Map.of("taskList", c100renderedTaskList, "id", String.valueOf(caseData.getId()))
         );
     }
 
@@ -137,12 +138,13 @@ public class CaseEventHandlerTest {
                        .errors(Collections.singletonList(RESPONDENT_BEHAVIOUR_ERROR.getError()))
                        .build());
 
-        when(taskListService.getFL401Events()).thenReturn(fl410Events);
+        when(taskListService.getFL401Events(caseData)).thenReturn(fl410Events);
         when(taskErrorService.getEventErrors(caseData)).thenReturn(errors);
 
         final List<Task> fl401Tasks = List.of(
             Task.builder().event(CASE_NAME).state(FINISHED).build(),
-            Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build());
+            Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build()
+        );
 
         final String fl410renderedTaskList = "<h1>Case Name</h1><h2>Type of Application</h2>";
 
@@ -166,7 +168,7 @@ public class CaseEventHandlerTest {
             CASE_TYPE,
             caseData.getId(),
             "internal-update-task-list",
-            Map.of("taskList", fl410renderedTaskList,"id",String.valueOf(caseData.getId()))
+            Map.of("taskList", fl410renderedTaskList, "id", String.valueOf(caseData.getId()))
         );
     }
 }
