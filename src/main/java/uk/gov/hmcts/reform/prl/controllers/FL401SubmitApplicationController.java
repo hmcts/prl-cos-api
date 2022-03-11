@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,9 +23,12 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
@@ -43,16 +47,41 @@ import java.util.Optional;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FL401SubmitApplicationController {
 
-    private static final String FL401_FINAL_TEMPLATE = "FL401-Final.docx";
-    private static final String FL401_FINAL_DOC = "FL401FinalDocument.pdf";
+    @Value("${document.templates.fl401.fl401_final_template}")
+    protected String fl401FinalTemplate;
+
+    @Value("${document.templates.fl401.fl401_final_filename}")
+    protected String fl401FinalFilename;
+
+    @Value("${document.templates.fl401.fl401_final_welsh_template}")
+    protected String fl401FinalWelshTemplate;
+
+    @Value("${document.templates.fl401.fl401_final_welsh_filename}")
+    protected String fl401FinalWelshFilename;
+
+    @Value("${document.templates.fl401.fl401_c8_template}")
+    protected String fl401C8Template;
+
+    @Value("${document.templates.fl401.fl401_c8_filename}")
+    protected String fl401C8Filename;
+
+    @Value("${document.templates.fl401.fl401_c8_welsh_template}")
+    protected String fl401C8WelshTemplate;
+
+    @Value("${document.templates.fl401.fl401_c8_welsh_filename}")
+    protected String fl401C8WelshFilename;
 
     @Autowired
     private CourtFinderService courtFinderService;
@@ -74,6 +103,12 @@ public class FL401SubmitApplicationController {
 
     @Autowired
     private DgsService dgsService;
+
+    @Autowired
+    private DocumentLanguageService documentLanguageService;
+
+    @Autowired
+    OrganisationService organisationService;
 
     @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to send FL401 application notification. ")
@@ -133,18 +168,33 @@ public class FL401SubmitApplicationController {
 
         log.info("Generating the Final document of FL401 for case id " + caseData.getId());
         log.info("Issue date for the application: {} ", caseData.getIssueDate());
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-            FL401_FINAL_TEMPLATE
-        );
-        log.info("Generated FL401 Document");
 
-        caseDataUpdated.put(FINAL_DOCUMENT_FIELD, Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(FL401_FINAL_DOC).build());
+        log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
+        caseData = organisationService.getApplicantOrganisationDetailsForFL401(caseData);
+        log.info("Called org service to update the org address .. for case id {} ", caseData.getId());
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}",
+                 documentLanguage.isGenEng(),documentLanguage.isGenWelsh());
+        if (documentLanguage.isGenEng()) {
+            caseDataUpdated.put("isEngDocGen", Yes.toString());
+            caseDataUpdated.put(FINAL_DOCUMENT_FIELD,
+                                generateDocumentField(generateDocument(authorisation, fl401FinalTemplate, caseData,
+                                                                       false)));
+            caseDataUpdated.put(DOCUMENT_FIELD_C8,
+                                generateDocumentField(generateDocument(authorisation, fl401C8Template, caseData,
+                                                                       false)));
+        }
+
+        if (documentLanguage.isGenWelsh()) {
+            caseDataUpdated.put("isWelshDocGen", Yes.toString());
+            caseDataUpdated.put(DOCUMENT_FIELD_FINAL_WELSH,
+                                generateDocumentField(generateDocument(authorisation, fl401FinalWelshTemplate,
+                                                                       caseData, true)));
+            caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH,
+                                generateDocumentField(generateDocument(authorisation, fl401C8WelshTemplate, caseData,
+                                                                       true)));
+        }
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -180,4 +230,38 @@ public class FL401SubmitApplicationController {
             .data(caseData)
             .build();
     }
+
+    private Document generateDocumentField(GeneratedDocumentInfo generatedDocumentInfo) {
+        if (null == generatedDocumentInfo) {
+            return null;
+        }
+        return Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(fl401FinalFilename).build();
+    }
+
+    private GeneratedDocumentInfo generateDocument(String authorisation, String template, CaseData caseData,
+                                                   boolean isWelsh)
+        throws Exception {
+        log.info("Generating the {} document for case id {} ", template, caseData.getId());
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        if (isWelsh) {
+            generatedDocumentInfo = dgsService.generateWelshDocument(
+                authorisation,
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                template
+            );
+        } else {
+            generatedDocumentInfo = dgsService.generateDocument(
+                authorisation,
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                template
+            );
+        }
+        log.info("Genereated the {} document for case id {} ", template, caseData.getId());
+        return generatedDocumentInfo;
+    }
+
 }

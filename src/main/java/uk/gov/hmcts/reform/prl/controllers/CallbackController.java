@@ -115,6 +115,12 @@ public class CallbackController {
     @Value("${document.templates.fl401.fl401_draft_template}")
     protected String fl401DraftTemplate;
 
+    @Value("${document.templates.fl401.fl401_draft_welsh_template}")
+    protected String fl401DraftWelshTemplate;
+
+    @Value("${document.templates.fl401.fl401_draft_welsh_filename}")
+    protected String fl401DraftWelshFileName;
+
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
     private final OrganisationService organisationService;
@@ -182,7 +188,6 @@ public class CallbackController {
         );
     }
 
-
     @PostMapping(path = "/generate-save-draft-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to generate and store document")
     public AboutToStartOrSubmitCallbackResponse generateAndStoreDocument(
@@ -204,12 +209,12 @@ public class CallbackController {
         log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}",
                  documentLanguage.isGenEng(),documentLanguage.isGenWelsh());
 
-
         if (documentLanguage.isGenEng()) {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                c100DraftTemplate
+                PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? c100DraftTemplate
+                    : fl401DraftTemplate
             );
 
             caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -217,14 +222,18 @@ public class CallbackController {
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(c100DraftFilename).build());
+                .documentFileName(PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                ? c100DraftFilename : fl401DraftFilename + CommonUtils.formatCurrentDate("ddMMM").toLowerCase()
+                + ".pdf").build());
         }
 
         if (documentLanguage.isGenWelsh()) {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                c100DraftWelshTemplate
+                PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                    ? c100DraftWelshTemplate
+                    : fl401DraftWelshTemplate
             );
 
             caseDataUpdated.put("isWelshDocGen", Yes.toString());
@@ -232,7 +241,10 @@ public class CallbackController {
                 .documentUrl(generatedWelshDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedWelshDocumentInfo.getBinaryUrl())
                 .documentHash(generatedWelshDocumentInfo.getHashToken())
-                .documentFileName(c100DraftWelshFilename).build());
+                .documentFileName(PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                      ? c100DraftWelshFilename : fl401DraftWelshFileName
+                    + CommonUtils.formatCurrentDate("ddMMM").toLowerCase()
+                    + ".pdf").build());
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -417,23 +429,6 @@ public class CallbackController {
         caseDataUpdated.putAll(allTabsFields);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    private CaseData getUpdatedCaseDataWithDoc(String authorisation, CaseData caseData) throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-            PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? c100DraftTemplate
-                : fl401DraftTemplate
-        );
-        CaseData updatedCaseData = CaseData.builder().draftOrderDoc(Document.builder().documentUrl(
-            generatedDocumentInfo.getUrl()).documentBinaryUrl(
-            generatedDocumentInfo.getBinaryUrl()).documentHash(generatedDocumentInfo.getHashToken()).documentFileName(
-            PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                ? c100DraftFilename : fl401DraftFilename + CommonUtils.formatCurrentDate("ddMMM").toLowerCase()
-                + ".pdf").build()).build();
-
-        return updatedCaseData;
     }
 
     @PostMapping(path = "/copy-FL401-case-name-to-C100", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
