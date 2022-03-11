@@ -51,6 +51,10 @@ public class PrlAppsConstants {
     public static final String COURT_DETAILS_URL = "courts/{court-slug}";
     public static final String DOMESTIC_ABUSE_POSTCODE_URL = SEARCH_RESULTS_POSTCODE_POSTCODE_SERVICE_AREA + "domestic-abuse";
 
+    public static final String DOCUMENT_FIELD_C1A_WELSH = "c1AWelshDocument";
+    public static final String DOCUMENT_FIELD_C8_WELSH = "c8WelshDocument";
+    public static final String DOCUMENT_FIELD_FINAL_WELSH = "finalWelshDocument";
+
     public static final String CHILD_ARRANGEMENT_CASE = "CHILD ARRANGEMENT CASE";
     public static final String ISSUE_EVENT_CODE = "001";
     public static final String ISSUE_EVENT_SEQUENCE = "1";
