@@ -58,6 +58,7 @@ public class WelshLanguageRequirementsChecker implements EventChecker {
         if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(Yes)) {
             taskErrorService.addEventError(WELSH_LANGUAGE_REQUIREMENTS, WELSH_LANGUAGE_ERROR,
                                            WELSH_LANGUAGE_ERROR.getError());
+
             return true;
         }
         return false;

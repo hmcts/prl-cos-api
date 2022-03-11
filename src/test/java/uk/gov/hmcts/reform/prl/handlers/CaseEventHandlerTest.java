@@ -21,16 +21,21 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.RandomUtils.nextLong;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
+import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RESPONDENT_BEHAVIOUR_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.TYPE_OF_APPLICATION_ERROR;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.FINISHED;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 
@@ -67,18 +72,16 @@ public class CaseEventHandlerTest {
         );
 
         List<EventValidationErrors> errors = new ArrayList<>();
+        errors.add(EventValidationErrors.builder()
+                   .event(TYPE_OF_APPLICATION)
+                       .errors(Collections.singletonList(TYPE_OF_APPLICATION_ERROR.getError()))
+                       .build());
+        errors.add(EventValidationErrors.builder()
+                       .event(FL401_TYPE_OF_APPLICATION)
+                       .errors(Collections.singletonList(FL401_TYPE_OF_APPLICATION_ERROR.getError()))
+                       .build());
 
-        EventValidationErrors error1 = EventValidationErrors.builder()
-            .event(FL401_TYPE_OF_APPLICATION)
-            .build();
-
-        EventValidationErrors error2 = EventValidationErrors.builder()
-            .event(ALLEGATIONS_OF_HARM)
-            .build();
-
-        errors.add(error1);
-        errors.add(error2);
-
+        when(taskListService.getC100Events()).thenReturn(c100Events);
         when(taskErrorService.getEventErrors(caseData)).thenReturn(errors);
 
         final List<Task> c100Tasks = List.of(
@@ -87,13 +90,21 @@ public class CaseEventHandlerTest {
 
         final String c100renderedTaskList = "<h1>Case Name</h1><h2>Miam</h2>";
 
+        final List<EventValidationErrors> eventsErrors = Collections.emptyList();
+
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
-        when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
+        when(taskListRenderer.render(c100Tasks, eventsErrors, true)).thenReturn(c100renderedTaskList);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
+        assertFalse(errors.contains(EventValidationErrors.builder()
+                                        .event(FL401_TYPE_OF_APPLICATION)
+                                        .errors(Collections.singletonList(FL401_TYPE_OF_APPLICATION_ERROR.getError()))
+                                        .build()));
+
         verify(taskListService).getTasksForOpenCase(caseData);
-        verify(taskListRenderer).render(c100Tasks, errors, true, caseData);
+        verify(taskListRenderer).render(c100Tasks, eventsErrors, true);
+
         verify(coreCaseDataService).triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -116,6 +127,18 @@ public class CaseEventHandlerTest {
             FL401_TYPE_OF_APPLICATION
         );
 
+        List<EventValidationErrors> errors = new ArrayList<>();
+        errors.add(EventValidationErrors.builder()
+                       .event(TYPE_OF_APPLICATION)
+                       .errors(Collections.singletonList(TYPE_OF_APPLICATION_ERROR.getError()))
+                       .build());
+        errors.add(EventValidationErrors.builder()
+                       .event(RESPONDENT_BEHAVIOUR)
+                       .errors(Collections.singletonList(RESPONDENT_BEHAVIOUR_ERROR.getError()))
+                       .build());
+
+        when(taskListService.getFL401Events()).thenReturn(fl410Events);
+        when(taskErrorService.getEventErrors(caseData)).thenReturn(errors);
 
         final List<Task> fl401Tasks = List.of(
             Task.builder().event(CASE_NAME).state(FINISHED).build(),
@@ -129,6 +152,11 @@ public class CaseEventHandlerTest {
         when(taskListRenderer.render(fl401Tasks, eventsErrors, false, caseData)).thenReturn(fl410renderedTaskList);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
+
+        assertFalse(errors.contains(EventValidationErrors.builder()
+                                        .event(TYPE_OF_APPLICATION)
+                                        .errors(Collections.singletonList(TYPE_OF_APPLICATION_ERROR.getError()))
+                                        .build()));
 
         verify(taskListService).getTasksForOpenCase(caseData);
         verify(taskListRenderer).render(fl401Tasks, eventsErrors, false, caseData);
