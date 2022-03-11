@@ -46,30 +46,41 @@ public class WelshLangMapper {
     public static final List<String> CA_WELSH_CONDITONAL_MAP = getCaConditionalFieldWelshLangMap();
 
     /**
+     * FL401 Welsh Lang Map.
+     * */
+    public static final Map<String,String> DA_WELSH_MAP = getDaWelshLangMap();
+    public static final List<String> DA_WELSH_CONDITONAL_MAP = getDaConditionalFieldWelshLangMap();
+
+    /**
      * Recursive mapper for replacing the English to Welsh.
     */
-    public static Object applyWelshTranslation(Object key, Object obj) {
+    public static Object applyWelshTranslation(Object key, Object obj, boolean isCA) {
         if (obj instanceof String) {
-            if (!CA_WELSH_CONDITONAL_MAP.contains(key)) {
-                if (key != null && CA_WELSH_MAP.containsKey(key + "_" + obj)) {
-                    obj = CA_WELSH_MAP.get(key + "_" + obj);
-                } else if (CA_WELSH_MAP.containsKey(obj)) {
-                    obj = CA_WELSH_MAP.get(obj);
-                }
-            }
+            obj = getValueFromMap(key, obj, isCA);
         } else if (obj instanceof List) {
             List<Object> list = (List)obj;
             for (int i = 0; i < list.size(); i++) {
                 Object eachObj = list.get(i);
-                list.set(i, applyWelshTranslation(null, eachObj));
+                list.set(i, applyWelshTranslation(null, eachObj, isCA));
             }
         } else if (obj instanceof Map) {
             Map<String, Object> innerMap = (Map<String, Object>)obj;
             innerMap.forEach((k,v) -> {
                 if (v != null) {
-                    innerMap.put(k,applyWelshTranslation(k,v));
+                    innerMap.put(k,applyWelshTranslation(k,v, isCA));
                 }
             });
+        }
+        return obj;
+    }
+
+    private static Object getValueFromMap(Object key, Object obj, boolean isCA) {
+        if (!(isCA ? CA_WELSH_CONDITONAL_MAP : DA_WELSH_CONDITONAL_MAP).contains(key)) {
+            if (key != null && (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).containsKey(key + "_" + obj)) {
+                obj = (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).get(key + "_" + obj);
+            } else if ((isCA ? CA_WELSH_MAP : DA_WELSH_MAP).containsKey(obj)) {
+                obj = (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).get(obj);
+            }
         }
         return obj;
     }

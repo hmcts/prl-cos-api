@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
@@ -49,7 +50,12 @@ public class DgsService {
         Map<String, Object> caseDataValues = (Map<String, Object>) caseDataMap.get("case_data");
         caseDataValues.forEach((k,v) -> {
             if (v != null) {
-                Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v);
+                Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
+                                                                               PrlAppsConstants.C100_CASE_TYPE
+                                                                                   .equalsIgnoreCase(
+                                                                                       caseDetails.getCaseData()
+                                                                                            .getCaseTypeOfApplication()
+                                                                                       ));
                 caseDataValues.put(k, updatedWelshObj);
             }
         });
