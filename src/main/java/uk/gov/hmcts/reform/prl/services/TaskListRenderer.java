@@ -44,10 +44,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.STATEMENT_OF_TRUTH_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
@@ -230,8 +228,7 @@ public class TaskListRenderer {
             .withTask(tasks.get(FL401_UPLOAD_DOCUMENTS));
 
         final TaskSection pdfApplication = newSection("View PDF application")
-            .withTask(tasks.get(VIEW_PDF_DOCUMENT))
-            .withTask(tasks.get(STATEMENT_OF_TRUTH_AND_SUBMIT));
+            .withTask(tasks.get(VIEW_PDF_DOCUMENT));
 
         return Stream.of(applicationDetails,
                          peopleInTheCase,
