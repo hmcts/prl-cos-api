@@ -2,23 +2,34 @@ package uk.gov.hmcts.reform.prl.mapper.welshlang;
 
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
+import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
+import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
+import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
+import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
+import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 import java.util.Arrays;
@@ -466,6 +477,243 @@ public class WelshLangMapper {
          */
         welshMap.put(LanguagePreference.english.getDisplayedValue(), "Saesneg");
         welshMap.put(LanguagePreference.welsh.getDisplayedValue(), "Cymraeg");
+
+        return welshMap;
+    }
+
+    /**
+     * FL401 Welsh Lang Map.
+     * */
+
+    /**
+     * Excluding conditional fields for changing english to welsh.
+     */
+    private static List<String> getDaConditionalFieldWelshLangMap() {
+        return Arrays.asList("");
+    }
+
+    // Getting Da conditional fields and Rendering from document...
+    private static List<String> getDaConditionalAndRenderingFieldWelshLangMap() {
+        return Arrays.asList("gender",
+                             "applicantsFL401.isAddressConfidential",
+                             "applicantsFL401.isEmailAddressConfidential",
+                             "applicantsFL401.isPhoneNumberConfidential");
+    }
+
+    private static Map<String,String> getDaWelshLangMap() {
+
+        Map<String, String> welshMap = new WeakHashMap<>();
+
+        /**
+         * Common Utils Yes, No, Don't know.
+         */
+        welshMap.put(YesOrNo.Yes.toString(), "Ydy");
+        welshMap.put(YesOrNo.No.toString(),"Nac ydy");
+        welshMap.put(DontKnow.dontKnow.getDisplayedValue(), "Ddim yn gwybod");
+        welshMap.put(Gender.female.getDisplayedValue(), "Benyw");
+        welshMap.put(Gender.male.getDisplayedValue(), "Gwryw");
+        welshMap.put(Gender.other.getDisplayedValue(), "Maent yn uniaethu mewn rhyw ffordd arall");
+
+        /**
+         * FL401 Type of Application.
+         */
+        welshMap.put(FL401OrderTypeEnum.nonMolestationOrder.getDisplayedValue(), "Gorchymyn rhag molestu");
+        welshMap.put(FL401OrderTypeEnum.occupationOrder.getDisplayedValue(), "Gorchymyn anheddu");
+
+        /**
+         * Without notice order. reasonForOrderWithoutGivingNotice.
+         */
+        welshMap.put("orderWithoutGivingNotice_Yes", "Ydw");
+        welshMap.put("orderWithoutGivingNotice_No", "Nac ydw");
+
+        /**
+         * Without notice order - Why do you want to apply without giving notice to the respondent?.
+         */
+        welshMap.put(ReasonForOrderWithoutGivingNoticeEnum.harmToApplicantOrChild.getDisplayedValue(),
+                     "Mae risg o niwed sylweddol i'r ceisydd neu i blentyn perthnasol, y gellir ei "
+                         + "phriodoli i ymddygiad yr atebydd, os na wneir y gorchymyn ar unwaith");
+        welshMap.put(ReasonForOrderWithoutGivingNoticeEnum.deferringApplicationIfNotImmediate.getDisplayedValue(),
+                     "Mae'n debygol y bydd y ceisydd yn cael ei rwystro neu ei atal rhag bwrw ymlaen â'r "
+                         + "cais os na wneir gorchymyn ar unwaith");
+        welshMap.put(ReasonForOrderWithoutGivingNoticeEnum.prejudiced.getDisplayedValue(),
+                     "Mae'r ceisydd yn credu bod yr atebydd yn ymwybodol o'r gweithrediadau ond ei fod "
+                         + "yn osgoi'r cyflwyno yn fwriadol ac y bydd y ceisydd neu blentyn perthnasol "
+                         + "yn cael ei niweidio'n ddifrifol gan yr oedi cyn cyflawni cyflwyniad dirprwyol");
+
+        /**
+         * Applicant's Details. applicantsFL401.
+         */
+        welshMap.put("isAddressConfidential_Yes","Oes");
+        welshMap.put("isAddressConfidential_No","Nac oes");
+        welshMap.put("isEmailAddressConfidential_Yes","Oes");
+        welshMap.put("isEmailAddressConfidential_No","Nac oes");
+        welshMap.put("canYouProvideEmailAddress_Yes","Gallaf");
+        welshMap.put("canYouProvideEmailAddress_No","Na allaf");
+        welshMap.put("isPhoneNumberConfidential_Yes","Oes");
+        welshMap.put("isPhoneNumberConfidential_No","Nac oes");
+
+        /**
+         * Respondent Details. respondentsFL401.
+         */
+        welshMap.put("isCurrentAddressKnown_Yes","Ydw");
+        welshMap.put("isCurrentAddressKnown_No","Nac ydw");
+        //welshMap.put("canYouProvideEmailAddress_Yes","Gallaf");
+        //welshMap.put("canYouProvideEmailAddress_No","Na allaf");
+        welshMap.put("canYouProvidePhoneNumber_Yes","Gallaf");
+        welshMap.put("canYouProvidePhoneNumber_No","Na allaf");
+
+        /**
+         * Relationship to respondent.
+         */
+        welshMap.put(ApplicantRelationshipEnum.marriedOrCivil.getDisplayedValue(),
+                     "Yn briod neu mewn partneriaeth sifil");
+        welshMap.put(ApplicantRelationshipEnum.formerlyMarriedOrCivil.getDisplayedValue(),
+                     "Yn briod neu mewn partneriaeth sifil o'r blaen");
+        welshMap.put(ApplicantRelationshipEnum.engagedOrProposed.getDisplayedValue(),
+                     "Wedi dyweddïo neu wedi cynnig partneriaeth sifil");
+        welshMap.put(ApplicantRelationshipEnum.formerlyEngagedOrProposed.getDisplayedValue(),
+                     "Wedi dyweddïo neu wedi cynnig partneriaeth sifil o'r blaen");
+        welshMap.put(ApplicantRelationshipEnum.liveTogether.getDisplayedValue(),
+                     "Yn cyd-fyw fel cwpl");
+        welshMap.put(ApplicantRelationshipEnum.foremerlyLivedTogether.getDisplayedValue(),
+                     "Yn cyd-fyw fel cwpl o'r blaen");
+        welshMap.put(ApplicantRelationshipEnum.bfGfOrPartnerNotLivedTogether.getDisplayedValue(),
+                     "Cariad neu bartner nad yw'n byw gydag ef/hi");
+        welshMap.put(ApplicantRelationshipEnum.formerBfGfOrPartnerNotLivedTogether.getDisplayedValue(),
+                     "Cariad neu bartner o'r blaen nad yw wedi byw gydag ef/hi");
+        welshMap.put(ApplicantRelationshipEnum.noneOfTheAbove.getDisplayedValue(),
+                     "Dim un o'r uchod");
+
+        /**
+         * Relationship to respondent. - Question followed None of the above.
+         */
+        welshMap.put(ApplicantRelationshipOptionsEnum.father.getDisplayedValue(),"Tad");
+        welshMap.put(ApplicantRelationshipOptionsEnum.mother.getDisplayedValue(),"Mam");
+        welshMap.put(ApplicantRelationshipOptionsEnum.son.getDisplayedValue(),"Mab");
+        welshMap.put(ApplicantRelationshipOptionsEnum.daughter.getDisplayedValue(),"Merch");
+        welshMap.put(ApplicantRelationshipOptionsEnum.brother.getDisplayedValue(),"Brawd");
+        welshMap.put(ApplicantRelationshipOptionsEnum.sister.getDisplayedValue(),"Chwaer");
+        welshMap.put(ApplicantRelationshipOptionsEnum.grandfather.getDisplayedValue(),"Taid/Tad-cu");
+        welshMap.put(ApplicantRelationshipOptionsEnum.grandmother.getDisplayedValue(),"Nain/Mam-gu");
+        welshMap.put(ApplicantRelationshipOptionsEnum.uncle.getDisplayedValue(),"Ewythr");
+        welshMap.put(ApplicantRelationshipOptionsEnum.aunt.getDisplayedValue(),"Modryb");
+        welshMap.put(ApplicantRelationshipOptionsEnum.nephew.getDisplayedValue(),"Nai");
+        welshMap.put(ApplicantRelationshipOptionsEnum.neice.getDisplayedValue(),"Nith");
+        welshMap.put(ApplicantRelationshipOptionsEnum.cousin.getDisplayedValue(),"Cefnder/Cyfnither");
+        welshMap.put(ApplicantRelationshipOptionsEnum.other.getDisplayedValue(),"Arall");
+
+        /**
+         * Applicant's Family 2 questions with answer yes no is missing in execel.
+         */
+
+        /**
+         * Respondent's Behaviour.
+         */
+        welshMap.put(ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_1.getDisplayedValue(),
+                     "Bod yn dreisgar neu fygythiol tuag ato ef/hi");
+        welshMap.put(ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_2.getDisplayedValue(),
+                     "Bygwth neu aflonyddu arno ef/hi");
+        welshMap.put(ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_3.getDisplayedValue(),
+                     "Postio neu gyhoeddi unrhyw beth amdano ef/hi mewn print neu'n ddigidol");
+        welshMap.put(ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_4.getDisplayedValue(),
+                     "Cysylltu ag ef/hi yn uniongyrchol");
+        welshMap.put(ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_5.getDisplayedValue(),
+                     "Achosi difrod i'w eiddo ef/hi");
+        welshMap.put(ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_6.getDisplayedValue(),
+                     "Achosi difrod i'w gartref ef/hi");
+        welshMap.put(ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_7.getDisplayedValue(),
+                     "Mynd at ei gartref ef/hi");
+        welshMap.put(ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_8.getDisplayedValue(),
+                     "Mynd yn agos i'w gartref ef/hi");
+        welshMap.put(ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_9.getDisplayedValue(),
+                     "Mynd yn agos i'w weithle ef/hi");
+
+        welshMap.put(ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1.getDisplayedValue(),
+                     "Bod yn dreisgar neu fygythiol tuag at y plentyn neu blant");
+        welshMap.put(ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_2.getDisplayedValue(),
+                     "Bygwth neu aflonyddu ar y plentyn neu blant");
+        welshMap.put(ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_3.getDisplayedValue(),
+                     "Postio neu gyhoeddi unrhyw beth am y plentyn neu blant mewn print neu'n ddigidol");
+        welshMap.put(ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_4.getDisplayedValue(),
+                     "Cysylltu â'r plentyn neu blant yn uniongyrchol heb gydsyniad y ceisydd");
+        welshMap.put(ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_5.getDisplayedValue(),
+                     "Mynd at neu'n agos i ysgol y plentyn neu blant");
+
+        /**
+         * The home.
+         */
+        welshMap.put(PeopleLivingAtThisAddressEnum.applicant.getDisplayedValue(),"Y ceisydd");
+        welshMap.put(PeopleLivingAtThisAddressEnum.respondent.getDisplayedValue(),"Yr atebydd");
+        welshMap.put(PeopleLivingAtThisAddressEnum.applicantChildren.getDisplayedValue(),"Plentyn neu blant y ceisydd");
+        welshMap.put(PeopleLivingAtThisAddressEnum.someoneElse.getDisplayedValue(),"Rhywun arall - noder");
+        welshMap.put(YesNoBothEnum.yesBothOfThem.getDisplayedValue(), "Ydynt, y ddau ohonynt");
+        welshMap.put(YesNoBothEnum.yesApplicant.getDisplayedValue(), "Ydy, y ceisydd");
+        welshMap.put(YesNoBothEnum.yesRespondent.getDisplayedValue(), "Ydy, yr atebydd");
+        welshMap.put(YesNoBothEnum.No.getDisplayedValue(), "Nac ydy");
+        welshMap.put("doAnyChildrenLiveAtAddress_Yes","Oes");
+        welshMap.put("doAnyChildrenLiveAtAddress_No","Nac oes");
+        welshMap.put("keepChildrenInfoConfidential_Yes","Oes");
+        welshMap.put("keepChildrenInfoConfidential_No","Nac oes");
+        welshMap.put("isRespondentResponsibleForChild_Yes","Oes");
+        welshMap.put("isRespondentResponsibleForChild_No","Nac oes");
+        welshMap.put("isPropertyAdapted_Yes","Oes");
+        welshMap.put("isPropertyAdapted_No","Nac oes");
+        welshMap.put("isThereMortgageOnProperty_Yes","Oes");
+        welshMap.put("isThereMortgageOnProperty_No","Nac oes");
+        welshMap.put(MortgageNamedAfterEnum.applicant.getDisplayedValue(),"Y ceisydd");
+        welshMap.put(MortgageNamedAfterEnum.respondent.getDisplayedValue(),"Yr atebydd");
+        welshMap.put(MortgageNamedAfterEnum.someoneElse.getDisplayedValue(),"Rhywun arall - noder");
+        welshMap.put("doesApplicantHaveHomeRights_Yes","Oes");
+        welshMap.put("doesApplicantHaveHomeRights_No","Nac oes");
+        welshMap.put(LivingSituationEnum.ableToStayInHome.getDisplayedValue(),"Mae'r ceisydd am allu aros yn ei gartref");
+        welshMap.put(LivingSituationEnum.ableToReturnHome.getDisplayedValue(),"Mae'r ceisydd am allu dychwelyd i'w gartref");
+        welshMap.put(LivingSituationEnum.restrictFromEnteringHome.getDisplayedValue(),
+                     "Nid yw'r ceisydd am i'r atebydd allu dod i mewn i'r cartref");
+        welshMap.put(LivingSituationEnum.awayFromHome.getDisplayedValue(),
+                     "Mae'r ceisydd am gadw'r atebydd i ffwrdd o'r ardal sydd o gwmpas ei gartref");
+        welshMap.put(LivingSituationEnum.limitRespondentInHome.getDisplayedValue(),
+                     "Mae'r ceisydd am gyfyngu ar ble mae'r atebydd yn gallu mynd yn ei gartref");
+        welshMap.put(FamilyHomeEnum.payForRepairs.getDisplayedValue(),
+                     "Mae ar y ceisydd angen i'r atebydd dalu am neu gyfrannu at gostau trwsio neu gynnal y cartref");
+        welshMap.put(FamilyHomeEnum.payOrContributeRent.getDisplayedValue(),
+                     "Mae ar y ceisydd angen i'r atebydd dalu am neu gyfrannu at y rhent neu'r morgais");
+        welshMap.put(FamilyHomeEnum.useHouseholdContents.getDisplayedValue(),
+                     "Mae angen i'r ceisydd gael y defnydd o'r dodrefn neu gynnwys arall y cartref");
+
+        /**
+         * Other Proceedings. fl401OtherProceedingDetails.
+         */
+        welshMap.put("hasPrevOrOngoingOtherProceeding_Yes","Oes");
+        welshMap.put("hasPrevOrOngoingOtherProceeding_No","Nac oes");
+
+        /**
+         * Attending the hearing.
+         */
+        welshMap.put("isWelshNeeded_yes","Bydd");
+        welshMap.put("isWelshNeeded_no","Na fydd");
+        welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Byddant eisiau siarad Cymraeg");
+        welshMap.put(SpokenOrWrittenWelshEnum.written.getDisplayedValue(), "Byddant eisiau darllen ac ysgrifennu yn Gymraeg");
+        welshMap.put("isInterpreterNeeded_yes","Ydw");
+        welshMap.put("isInterpreterNeeded_no","Nac ydw");
+        welshMap.put(PartyEnum.applicant.getDisplayedValue(), "Ceisydd");
+        welshMap.put(PartyEnum.respondent.getDisplayedValue(), "Atebydd");
+        welshMap.put(PartyEnum.other.getDisplayedValue(), "Pobl eraill yn yr achos");
+        welshMap.put("isDisabilityPresent_Yes","Oes");
+        welshMap.put("isDisabilityPresent_No","Nac oes");
+        welshMap.put("isSpecialArrangementsRequired_Yes","Bydd");
+        welshMap.put("isSpecialArrangementsRequired_No","Na fydd");
+
+        /**
+         * Welsh language requirement.
+         */
+        welshMap.put("welshLanguageRequirement_Yes","Oes");
+        welshMap.put("welshLanguageRequirement_No","Nac oes");
+        welshMap.put(LanguagePreference.english.getDisplayedValue(), "Saesneg");
+        welshMap.put(LanguagePreference.welsh.getDisplayedValue(), "Cymraeg");
+        welshMap.put("welshLanguageRequirementApplicationNeedEnglish_Yes","Oes");
+        welshMap.put("welshLanguageRequirementApplicationNeedEnglish_No","Nac oes");
+        welshMap.put("languageRequirementApplicationNeedWelsh_Yes","Oes");
+        welshMap.put("languageRequirementApplicationNeedWelsh_No","Nac oes");
 
         return welshMap;
     }
