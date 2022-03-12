@@ -57,6 +57,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -301,7 +302,6 @@ public class CaseData implements MappableObject {
     private final YesOrNo agreeChildSupervisedTime;
     private final YesOrNo agreeChildOtherContact;
 
-
     /**
      * Other people in the case.
      */
@@ -313,7 +313,6 @@ public class CaseData implements MappableObject {
 
     private final YesNoDontKnow previousOrOngoingProceedingsForChildren;
     private final List<Element<ProceedingDetails>> existingProceedings;
-
 
     /**
      * Attending the hearing.
@@ -360,6 +359,9 @@ public class CaseData implements MappableObject {
     @JsonProperty("paymentServiceRequestReferenceNumber")
     private final String paymentServiceRequestReferenceNumber;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate issueDate;
+
     @JsonProperty("solicitorName")
     private final String solicitorName;
     @JsonProperty("feeAmount")
@@ -372,8 +374,6 @@ public class CaseData implements MappableObject {
     private final Document c8Document;
     @JsonProperty("c1ADocument")
     private final Document c1ADocument;
-
-
 
     @JsonProperty("submitAndPayDownloadApplicationLink")
     private final Document submitAndPayDownloadApplicationLink;
@@ -395,7 +395,6 @@ public class CaseData implements MappableObject {
     private final List<Element<OtherDocuments>> otherDocuments;
 
     private final List<Element<UserInfo>> userInfo;
-
 
     /**
      * Return Application.
@@ -456,13 +455,20 @@ public class CaseData implements MappableObject {
     private final String respondentSolicitorEmailAddress;
     private final String caseworkerEmailAddress;
 
-
     /**
      * Court details.
      */
 
     private String courtName;
     private String courtId;
+    private String courtEmailAddress;
+
+    /**
+     * Final document.
+     */
+
+    @JsonProperty("finalDocument")
+    private final Document finalDocument;
 
     /**
      * Send and reply to messages.
@@ -499,5 +505,11 @@ public class CaseData implements MappableObject {
      * FL401 Other Proceedings.
      */
     private final FL401OtherProceedingDetails fl401OtherProceedingDetails;
+
+    /**
+     *  FL401 Statement Of Truth and Submit.
+     */
+    @JsonProperty("fl401StmtOfTruth")
+    private final StatementOfTruth fl401StmtOfTruth;
 
 }

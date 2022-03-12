@@ -5,9 +5,12 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 @Slf4j
 public class CommonUtils {
@@ -46,6 +49,17 @@ public class CommonUtils {
         return " ";
     }
 
+    public static String formatCurrentDate(String pattern) {
+        try {
+            DateFormat dateFormat = new SimpleDateFormat(pattern);
+            Date date = new Date();
+            return dateFormat.format(date);
+        } catch (Exception e) {
+            log.error("Error while formatting the date from casedetails to casedata.. " + e.getMessage());
+        }
+        return "";
+    }
+  
     public static String getYesOrNoValue(YesOrNo value) {
         return value != null ? value.getDisplayedValue() : null;
     }

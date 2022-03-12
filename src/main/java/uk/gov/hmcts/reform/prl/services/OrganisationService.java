@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +46,7 @@ public class OrganisationService {
         return caseData;
     }
 
-    public CaseData getRespondentOrganisationDetails(CaseData caseData) throws NotFoundException {
+    public CaseData getRespondentOrganisationDetails(CaseData caseData) {
 
         if (Optional.ofNullable(caseData.getRespondents()).isPresent()) {
             String userToken = systemUserService.getSysUserToken();
@@ -98,5 +97,16 @@ public class OrganisationService {
             }
         }
         return applicant;
+    }
+
+    public CaseData getApplicantOrganisationDetailsForFL401(CaseData caseData)  {
+        if (Optional.ofNullable(caseData.getApplicantsFL401()).isPresent()) {
+            String userToken = systemUserService.getSysUserToken();
+            PartyDetails applicantWithOrg = getApplicantWithOrg(caseData.getApplicantsFL401(), userToken);
+            caseData = caseData.toBuilder()
+                .applicantsFL401(applicantWithOrg)
+                .build();
+        }
+        return caseData;
     }
 }
