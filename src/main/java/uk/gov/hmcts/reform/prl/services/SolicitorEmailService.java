@@ -64,9 +64,9 @@ public class SolicitorEmailService {
             String applicantNames = String.join(", ", applicantNamesList);
 
             Court court = null;
-            court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
+            court = courtLocatorService.getNearestFamilyCourt(caseData);
 
-            return   SolicitorEmail.builder()
+            return  SolicitorEmail.builder()
                 .caseReference(String.valueOf(caseDetails.getId()))
                 .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
                 .applicantName(applicantNames)
@@ -86,7 +86,7 @@ public class SolicitorEmailService {
         );
 
         emailService.send(
-            "yogendra.upasani@hmcts.net",
+            "fprl_caseworker_solicitor@mailinator.com",
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
             LanguagePreference.english
@@ -141,5 +141,51 @@ public class SolicitorEmailService {
             LanguagePreference.english
         );
 
+    }
+
+    public void sendEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails)  {
+
+        log.info("trying to send email for Solicitor FL401 {} ====:", caseDetails.getId());
+
+        String solicitorEmail = "";
+
+        PartyDetails fl401Applicant = emailService.getCaseData(caseDetails)
+            .getApplicantsFL401();
+
+        log.info("collect applicants: {} ======",fl401Applicant);
+
+        String applicantSolicitorEmail = fl401Applicant.getSolicitorEmail();
+
+        log.info("collect applicant solicitoremail {} ======",applicantSolicitorEmail);
+        solicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
+
+        emailService.send(
+            solicitorEmail,
+            EmailTemplateNames.DA_SOLICITOR,
+            buildFl401SolicitorEmail(caseDetails),
+            LanguagePreference.english
+        );
+
+    }
+
+    public EmailTemplateVars buildFl401SolicitorEmail(CaseDetails caseDetails)  {
+
+        log.info("trying to build email for Solicitor FL401 {} ------:", caseDetails.getId());
+
+        CaseData caseData = emailService.getCaseData(caseDetails);
+
+        PartyDetails fl401Applicant = caseData
+            .getApplicantsFL401();
+
+        String applicantFullName = fl401Applicant.getFirstName() + " "  + fl401Applicant.getLastName();
+
+        return  SolicitorEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .applicantName(applicantFullName)
+            .courtName(caseData.getCourtName())
+            .courtEmail(caseData.getCourtEmailAddress())
+            .caseLink(manageCaseUrl + "/" + caseData.getId())
+            .build();
     }
 }

@@ -139,7 +139,7 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-        String caseworkerEmailId = "yogendra.upasani@hmcts.net";
+        String caseworkerEmailId = "fprl_caseworker_solicitor@mailinator.com";
         emailService.send(
             caseworkerEmailId,
             EmailTemplateNames.CASEWORKER,
@@ -277,9 +277,14 @@ public class CaseWorkerEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
+        List<YesOrNo> emailAddressInfo = applicants.stream()
+            .filter(eachParty -> null != eachParty.getIsEmailAddressConfidential()
+                && YesOrNo.Yes.equals(eachParty.getIsEmailAddressConfidential()))
+            .map(PartyDetails::getIsEmailAddressConfidential)
+            .collect(Collectors.toList());
+
         String isConfidential = NO;
-        if ((applicants.stream().noneMatch(PartyDetails::isCanYouProvideEmailAddress)
-            && applicants.stream().anyMatch(PartyDetails::isEmailAddressNull))
+        if (emailAddressInfo.contains(YesOrNo.Yes)
             || (applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
             || (child.stream().anyMatch(Child::hasConfidentialInfo))) {
             isConfidential = YES;
@@ -307,4 +312,42 @@ public class CaseWorkerEmailService {
             .build();
     }
 
+    public void sendEmailToFl401LocalCourt(CaseDetails caseDetails, String courtEmail) {
+
+        log.info("Sending FL401 email to localcourt for :{} =====", caseDetails.getId());
+
+        emailService.send(
+            courtEmail,
+            EmailTemplateNames.DA_LOCALCOURT,
+            buildFl401LocalCourtAdminEmail(caseDetails),
+            LanguagePreference.english
+        );
+    }
+
+    public EmailTemplateVars buildFl401LocalCourtAdminEmail(CaseDetails caseDetails) {
+
+        log.info("building FL401 email to localcourt for :{} =====", caseDetails.getId());
+        caseData = emailService.getCaseData(caseDetails);
+        PartyDetails fl401Applicant = caseData
+            .getApplicantsFL401();
+
+        String isConfidential = NO;
+        if (fl401Applicant.getCanYouProvideEmailAddress().equals(YesOrNo.Yes)
+            || (null != fl401Applicant.getIsEmailAddressConfidential()
+            && YesOrNo.Yes.equals(fl401Applicant.getIsEmailAddressConfidential()))
+            || (fl401Applicant.hasConfidentialInfo())) {
+            isConfidential = YES;
+        }
+
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        return CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .issueDate(issueDate.format(dateTimeFormatter))
+            .isConfidential(isConfidential)
+            .caseLink(manageCaseUrl + "/" + caseData.getId())
+            .build();
+    }
 }
