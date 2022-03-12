@@ -113,11 +113,11 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(dgsService.generateDocument(authToken,
                                           callbackRequest.getCaseDetails(),
-                                          "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
+                                          "PRL-C100-Draft-Final.docx")).thenReturn(generatedDocumentInfo);
 
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
-        when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
+        when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
             .thenReturn(court);
 
 
@@ -139,7 +139,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(dgsService.generateDocument(authToken,
                                           callbackRequest.getCaseDetails(),
-                                          "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
+                                          "PRL-C100-Draft-Final.docx")).thenReturn(generatedDocumentInfo);
 
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
@@ -149,7 +149,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         verify(dgsService).generateDocument(authToken,
                                             callbackRequest.getCaseDetails(),
-                                            "PRL-DRAFT-C100-20.docx");
+                                            "PRL-C100-Draft-Final.docx");
 
     }
 
@@ -163,7 +163,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(dgsService.generateDocument(authToken,
                                           callbackRequest.getCaseDetails(),
-                                          "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
+                                          "PRL-C100-Draft-Final.docx")).thenReturn(generatedDocumentInfo);
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
@@ -221,7 +221,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .courtName("testcourt")
             .build();
 
-        when(courtFinderService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails().getCaseData()))
+        when(courtFinderService.getNearestFamilyCourt(callbackRequest.getCaseDetails().getCaseData()))
             .thenReturn(court1);
 
         UserDetails userDetails = UserDetails.builder()
@@ -256,7 +256,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(dgsService.generateDocument(authToken,
                                          callbackRequest.getCaseDetails(),
-                                         "PRL-DRAFT-C100-20.docx")).thenReturn(generatedDocumentInfo);
+                                         "PRL-C100-Draft-Final.docx")).thenReturn(generatedDocumentInfo);
 
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);

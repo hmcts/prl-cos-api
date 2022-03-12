@@ -99,6 +99,6 @@ public class CaseSummaryTabService implements TabService {
 
     @Override
     public void calEventToRefreshUI() {
-
+        // no current implementation required.
     }
 }
