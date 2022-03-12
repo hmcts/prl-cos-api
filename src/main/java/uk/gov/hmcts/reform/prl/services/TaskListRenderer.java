@@ -44,7 +44,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.FL401_STATEMENT_OF_TRUTH;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
@@ -235,7 +234,7 @@ public class TaskListRenderer {
         final TaskSection uploadDocuments = newSection("Upload documents")
             .withTask(tasks.get(UPLOAD_DOCUMENTS));
 
-        final TaskSection pdfApplication = newSection("View PDF application")
+        final TaskSection pdfApplication = newSection("Check and sign application")
             .withTask(tasks.get(VIEW_PDF_DOCUMENT))
             .withTask(tasks.get(FL401_STATEMENT_OF_TRUTH));
 

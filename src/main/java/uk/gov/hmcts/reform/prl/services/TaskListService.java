@@ -39,7 +39,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.FL401_STATEMENT_OF_TRUTH;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
@@ -116,7 +115,6 @@ public class TaskListService {
             RELATIONSHIP_TO_RESPONDENT,
             FL401_APPLICANT_FAMILY_DETAILS,
             FL401_OTHER_PROCEEDINGS,
-            OTHER_PROCEEDINGS,
             ATTENDING_THE_HEARING,
             WELSH_LANGUAGE_REQUIREMENTS,
             UPLOAD_DOCUMENTS,
