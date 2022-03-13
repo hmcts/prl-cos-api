@@ -34,9 +34,10 @@ public enum Event {
     FL401_HOME("fl401Home", "The home"),
     RELATIONSHIP_TO_RESPONDENT("respondentRelationship","Relationship to respondent"),
     FL401_TYPE_OF_APPLICATION("fl401TypeOfApplication", "Type of application"),
-    FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's Family"),
+    FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's family"),
+    FL401_UPLOAD_DOCUMENTS("uploadDocuments", "Upload documents"),
     FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings"),
-    FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents");
+    FL401_STATEMENT_OF_TRUTH("fl401StatementOfTruthAndSubmit", "Statement of truth and submit");
 
     private final String id;
     private final String name;
@@ -68,7 +69,7 @@ public enum Event {
             RELATIONSHIP_TO_RESPONDENT,
             RESPONDENT_BEHAVIOUR,
             FL401_HOME,
-            OTHER_PROCEEDINGS,
+            FL401_OTHER_PROCEEDINGS,
             ATTENDING_THE_HEARING,
             INTERNATIONAL_ELEMENT,
             WELSH_LANGUAGE_REQUIREMENTS

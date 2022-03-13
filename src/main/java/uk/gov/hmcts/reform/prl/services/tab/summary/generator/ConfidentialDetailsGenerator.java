@@ -31,7 +31,7 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
         // Checking the Child details..
         Optional<List<Element<Child>>> childrenWrapped = ofNullable(caseData.getChildren());
 
-        if (childrenWrapped.isPresent() && childrenWrapped.get().size() != 0) {
+        if (childrenWrapped.isPresent() && !childrenWrapped.get().isEmpty()) {
             List<Child> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
@@ -42,7 +42,7 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
                     return YesOrNo.Yes.getDisplayedValue();
                 }
                 Optional<List<Element<OtherPersonWhoLivesWithChild>>> otherPersonWrapped = ofNullable(c.getPersonWhoLivesWithChild());
-                if (otherPersonWrapped.isPresent() && otherPersonWrapped.get().size() != 0) {
+                if (otherPersonWrapped.isPresent() && !otherPersonWrapped.get().isEmpty()) {
                     List<OtherPersonWhoLivesWithChild> otherPersonList = otherPersonWrapped.get()
                         .stream()
                         .map(Element::getValue)
@@ -59,7 +59,7 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
 
         // Checking the Applicant Details..
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
-        if (applicantsWrapped.isPresent() && applicantsWrapped.get().size() != 0) {
+        if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
             List<PartyDetails> applicants = applicantsWrapped.get()
                 .stream()
                 .map(Element::getValue)
