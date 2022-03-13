@@ -184,7 +184,7 @@ class EventsCheckerTest {
             Arguments.of(VIEW_PDF_DOCUMENT, pdfChecker),
             Arguments.of(SUBMIT_AND_PAY, submitAndPayChecker),
             Arguments.of(FL401_APPLICANT_FAMILY_DETAILS, fl401ApplicantFamilyChecker),
-            Arguments.of(FL401_UPLOAD_DOCUMENTS, pdfChecker));
+            Arguments.of(FL401_UPLOAD_DOCUMENTS, pdfChecker),
             Arguments.of(FL401_STATEMENT_OF_TRUTH, fl401StatementOfTruthAndSubmitChecker));
     }
 
