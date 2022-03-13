@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.Event.FL401_STATEMENT_OF_TRUTH;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
@@ -87,8 +87,8 @@ public class TaskListRendererTest {
         Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
         Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
-        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build());
-
+        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build()
+    );
 
 
     private final List<EventValidationErrors> errors = List.of(
@@ -111,7 +111,7 @@ public class TaskListRendererTest {
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
         Task.builder().event(UPLOAD_DOCUMENTS).state(NOT_STARTED).build(),
         Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-        Task.builder().event(FL401_STATEMENT_OF_TRUTH).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_SOT_AND_SUBMIT).state(NOT_STARTED).build(),
         Task.builder().event(FL401_HOME).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build());
 
@@ -122,18 +122,11 @@ public class TaskListRendererTest {
             .errors(Collections.singletonList(FL401_APPLICANT_FAMILY_ERROR.toString())).build()
     );
 
-    private final List<EventValidationErrors> fl401Errors = List.of(
-        EventValidationErrors.builder().event(WITHOUT_NOTICE_ORDER)
-            .errors(Collections.singletonList(WITHOUT_NOTICE_ORDER_ERROR.toString())).build(),
-        EventValidationErrors.builder().event(FL401_APPLICANT_FAMILY_DETAILS)
-            .errors(Collections.singletonList(FL401_APPLICANT_FAMILY_ERROR.toString())).build()
-    );
-
-
     @Test
     public void shouldRenderFl401TaskList() throws IOException {
 
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-markdown.md"));
+        BufferedReader taskListMarkDown = new BufferedReader(new FileReader(
+            "src/test/resources/fl401-task-list-markdown.md"));
 
         List<String> lines = new ArrayList<>();
 
@@ -216,7 +209,8 @@ public class TaskListRendererTest {
     @Test
     public void shouldRenderFl401TaskListNonMolestationOrderType() throws IOException {
 
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-markdown.md"));
+        BufferedReader taskListMarkDown = new BufferedReader(new FileReader(
+            "src/test/resources/fl401-task-list-markdown.md"));
 
         List<String> lines = new ArrayList<>();
 

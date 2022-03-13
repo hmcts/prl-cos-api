@@ -131,7 +131,7 @@ public class FL401SubmitApplicationController {
             .getEmailAddress(nearestDomesticAbuseCourt);
 
         if (courtEmailAddress.isPresent()) {
-            caseDate = caseData.toBuilder().isCourtEmailFound("Yes").build();
+            caseData = caseData.toBuilder().isCourtEmailFound("Yes").build();
         } else {
             caseData = caseData.toBuilder().isCourtEmailFound("No").build();
         }

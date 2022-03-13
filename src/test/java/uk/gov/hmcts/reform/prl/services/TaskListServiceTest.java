@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.Event.FL401_STATEMENT_OF_TRUTH;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
@@ -113,15 +113,16 @@ public class TaskListServiceTest {
             Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
             Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
             Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
             Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
             Task.builder().event(UPLOAD_DOCUMENTS).state(NOT_STARTED).build(),
             Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_STATEMENT_OF_TRUTH).state(NOT_STARTED).build(),
-            Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build());
+            Task.builder().event(FL401_SOT_AND_SUBMIT).state(NOT_STARTED).build(),
+            Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build()
+            );
 
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
@@ -156,14 +157,14 @@ public class TaskListServiceTest {
             Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
             Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
             Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
             Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
             Task.builder().event(UPLOAD_DOCUMENTS).state(NOT_STARTED).build(),
             Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_STATEMENT_OF_TRUTH).state(NOT_STARTED).build(),
+            Task.builder().event(FL401_SOT_AND_SUBMIT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_HOME).state(NOT_STARTED).build());
 
 
@@ -201,14 +202,14 @@ public class TaskListServiceTest {
             Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
             Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
-            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
+            Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
             Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
             Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
             Task.builder().event(UPLOAD_DOCUMENTS).state(NOT_STARTED).build(),
             Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-            Task.builder().event(FL401_STATEMENT_OF_TRUTH).state(NOT_STARTED).build(),
+            Task.builder().event(FL401_SOT_AND_SUBMIT).state(NOT_STARTED).build(),
             Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
             Task.builder().event(FL401_HOME).state(NOT_STARTED).build());
 
