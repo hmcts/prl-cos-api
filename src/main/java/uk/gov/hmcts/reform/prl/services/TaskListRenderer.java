@@ -234,7 +234,7 @@ public class TaskListRenderer {
         final TaskSection uploadDocuments = newSection("Upload documents")
             .withTask(tasks.get(UPLOAD_DOCUMENTS));
 
-        final TaskSection pdfApplication = newSection("View PDF application")
+        final TaskSection checkAndSignApplication = newSection("Check and sign application")
             .withTask(tasks.get(VIEW_PDF_DOCUMENT))
             .withTask(tasks.get(FL401_SOT_AND_SUBMIT));
 
@@ -243,7 +243,7 @@ public class TaskListRenderer {
                          addCaseDetails,
                          additionalInformation,
                          uploadDocuments,
-                         pdfApplication)
+                         checkAndSignApplication)
             .filter(TaskSection::hasAnyTask)
             .collect(toList());
     }
