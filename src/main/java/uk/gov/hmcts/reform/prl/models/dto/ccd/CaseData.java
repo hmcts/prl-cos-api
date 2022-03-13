@@ -512,4 +512,11 @@ public class CaseData implements MappableObject {
     @JsonProperty("fl401StmtOfTruth")
     private final StatementOfTruth fl401StmtOfTruth;
 
+    /**
+     *  FL401 submit status flags.
+     */
+    private String isCourtEmailFound;
+    private String isDocumentGenerated;
+    private String isNotificationSent;
+
 }

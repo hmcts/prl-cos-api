@@ -187,7 +187,7 @@ public class FL401SubmitApplicationControllerTest {
                                .documentUrl(generatedDocumentInfo.getUrl())
                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                .documentHash(generatedDocumentInfo.getHashToken())
-                               .documentFileName("PRL-DRAFT-C100-20.docx")
+                               .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -200,7 +200,7 @@ public class FL401SubmitApplicationControllerTest {
                                          .documentUrl(generatedDocumentInfo.getUrl())
                                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                          .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("PRL-DRAFT-C100-20.docx")
+                                         .documentFileName("FL401-Final.docx")
                                          .build())
                       .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                       .build())
@@ -229,7 +229,7 @@ public class FL401SubmitApplicationControllerTest {
             .thenReturn(court);
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
-        verify(dgsService, times(1)).generateDocument(
+        verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             Mockito.anyString()

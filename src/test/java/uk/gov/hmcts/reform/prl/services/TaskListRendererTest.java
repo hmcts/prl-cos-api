@@ -122,6 +122,14 @@ public class TaskListRendererTest {
             .errors(Collections.singletonList(FL401_APPLICANT_FAMILY_ERROR.toString())).build()
     );
 
+    private final List<EventValidationErrors> fl401Errors = List.of(
+        EventValidationErrors.builder().event(WITHOUT_NOTICE_ORDER)
+            .errors(Collections.singletonList(WITHOUT_NOTICE_ORDER_ERROR.toString())).build(),
+        EventValidationErrors.builder().event(FL401_APPLICANT_FAMILY_DETAILS)
+            .errors(Collections.singletonList(FL401_APPLICANT_FAMILY_ERROR.toString())).build()
+    );
+
+
     @Test
     public void shouldRenderFl401TaskList() throws IOException {
 
