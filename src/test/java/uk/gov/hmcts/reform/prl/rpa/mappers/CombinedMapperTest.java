@@ -89,11 +89,4 @@ public class CombinedMapperTest {
         assertNull(combinedMapper.map(caseData));
     }
 
-    @Test
-    public void testWithoutNullValues() {
-        CaseData caseData = CaseData.builder().respondents(respondents).build();
-        combinedMapper.map(caseData);
-    }
-
-
 }

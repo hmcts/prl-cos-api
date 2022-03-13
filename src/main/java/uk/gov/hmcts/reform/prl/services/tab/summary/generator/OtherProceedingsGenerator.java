@@ -33,11 +33,8 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
     private boolean hasOtherProceedings(CaseData caseData) {
         Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getPreviousOrOngoingProceedingsForChildren());
         Optional<List<Element<ProceedingDetails>>> proceedingsCheck = ofNullable(caseData.getExistingProceedings());
-        if (proceedingsCheck.isEmpty() || (proceedingCheck.isPresent() && !proceedingCheck.get()
-            .equals(YesNoDontKnow.yes))) {
-            return false;
-        }
-        return true;
+        return proceedingsCheck.isPresent() && (proceedingCheck.isEmpty() || proceedingCheck.get()
+            .equals(YesNoDontKnow.yes));
     }
 
     public List<Element<OtherProceedings>> getOtherProceedingsDetails(CaseData caseData) {
