@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -40,9 +42,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 
@@ -53,6 +57,8 @@ public class FL401SubmitApplicationController {
 
     private static final String FL401_FINAL_TEMPLATE = "FL401-Final.docx";
     private static final String FL401_FINAL_DOC = "FL401FinalDocument.pdf";
+    private static final String DA_C8_TEMPLATE = "PRL-DA-C8.docx";
+    private static final String DA_C8_DOC = "C8_Document.pdf";
 
     @Autowired
     private CourtFinderService courtFinderService;
@@ -124,12 +130,29 @@ public class FL401SubmitApplicationController {
         Optional<CourtEmailAddress> courtEmailAddress = courtFinderService
             .getEmailAddress(nearestDomesticAbuseCourt);
 
+        if (courtEmailAddress.isPresent()) {
+            caseData.toBuilder().isCourtEmailFound("Yes");
+        } else {
+            caseData.toBuilder().isCourtEmailFound("No");
+        }
+
+        Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(COURT_NAME_FIELD, nearestDomesticAbuseCourt != null
             ? nearestDomesticAbuseCourt.getCourtName() : "");
         caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, (nearestDomesticAbuseCourt != null
             && courtEmailAddress.isPresent()) ? courtEmailAddress.get().getAddress() :
             Objects.requireNonNull(nearestDomesticAbuseCourt).getCourtEmailAddresses().get(0).getAddress());
+
+        if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
+            && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
+            caseData = caseData.toBuilder().build();
+        } else  if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+            caseDataUpdated.put("respondentBehaviourData", null);
+        } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
+            caseDataUpdated.put("home", null);
+        }
 
         log.info("Generating the Final document of FL401 for case id " + caseData.getId());
         log.info("Issue date for the application: {} ", caseData.getIssueDate());
@@ -147,6 +170,26 @@ public class FL401SubmitApplicationController {
             .documentFileName(FL401_FINAL_DOC).build());
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
+        GeneratedDocumentInfo generatedDocumentC8Info = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+            DA_C8_TEMPLATE
+        );
+        log.info("Generated DA C8 Document");
+
+        caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
+            .documentUrl(generatedDocumentC8Info.getUrl())
+            .documentBinaryUrl(generatedDocumentC8Info.getBinaryUrl())
+            .documentHash(generatedDocumentC8Info.getHashToken())
+            .documentFileName(DA_C8_DOC).build());
+        caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
+
+        if (null != generatedDocumentC8Info && null != generatedDocumentInfo) {
+            caseData.toBuilder().isDocumentGenerated("Yes");
+        } else {
+            caseData.toBuilder().isDocumentGenerated("No");
+        }
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
@@ -163,13 +206,22 @@ public class FL401SubmitApplicationController {
         throws Exception {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
-        solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
-        caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+        try {
+            solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
+            caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+
+            caseData = caseData.toBuilder()
+                .isNotificationSent("Yes")
+                .build();
+        } catch (Exception e) {
+            log.error("Notification could not be sent due to {} ", e.getMessage());
+            caseData = caseData.toBuilder()
+                .isNotificationSent("No")
+                .build();
+        }
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         caseData = caseData.toBuilder()

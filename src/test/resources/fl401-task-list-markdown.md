@@ -30,7 +30,11 @@
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
+<<<<<<< HEAD
 <a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401ApplicantFamilyDetails/fl401ApplicantFamilyDetails1'>Applicant's family</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>
+=======
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/fl401ApplicantFamilyDetails/fl401ApplicantFamilyDetails1'>Applicant's Family</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>
+>>>>>>> 0a7eea67 (FL401 Submitted event for adding flags)
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
