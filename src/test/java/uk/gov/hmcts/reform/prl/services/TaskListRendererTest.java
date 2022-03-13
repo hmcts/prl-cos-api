@@ -87,8 +87,8 @@ public class TaskListRendererTest {
         Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
         Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build(),
-        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build()
-    );
+        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build());
+
 
 
     private final List<EventValidationErrors> errors = List.of(
@@ -113,7 +113,8 @@ public class TaskListRendererTest {
         Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
         Task.builder().event(FL401_SOT_AND_SUBMIT).state(NOT_STARTED).build(),
         Task.builder().event(FL401_HOME).state(NOT_STARTED).build(),
-        Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build());
+        Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build()
+    );
 
     private final List<EventValidationErrors> fl401Errors = List.of(
         EventValidationErrors.builder().event(WITHOUT_NOTICE_ORDER)
@@ -209,8 +210,7 @@ public class TaskListRendererTest {
     @Test
     public void shouldRenderFl401TaskListNonMolestationOrderType() throws IOException {
 
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader(
-            "src/test/resources/fl401-task-list-markdown.md"));
+        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-markdown.md"));
 
         List<String> lines = new ArrayList<>();
 

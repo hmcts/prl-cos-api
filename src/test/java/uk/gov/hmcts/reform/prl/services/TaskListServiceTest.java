@@ -104,8 +104,7 @@ public class TaskListServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
-            .typeOfApplicationLinkToCA(linkToCA)
-            .build();
+            .typeOfApplicationLinkToCA(linkToCA).build();
 
         List<Task> expectedTasks = List.of(
             Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
@@ -166,7 +165,6 @@ public class TaskListServiceTest {
             Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_SOT_AND_SUBMIT).state(NOT_STARTED).build(),
             Task.builder().event(FL401_HOME).state(NOT_STARTED).build());
-
 
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 

@@ -132,7 +132,6 @@ public class TaskListService {
         } else if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
             eventsList.add(RESPONDENT_BEHAVIOUR);
         }
-
         return eventsList;
     }
 }

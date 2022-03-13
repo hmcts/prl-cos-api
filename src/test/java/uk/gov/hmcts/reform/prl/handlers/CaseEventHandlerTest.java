@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
@@ -72,16 +73,18 @@ public class CaseEventHandlerTest {
         );
 
         List<EventValidationErrors> errors = new ArrayList<>();
-        errors.add(EventValidationErrors.builder()
-                       .event(TYPE_OF_APPLICATION)
-                       .errors(Collections.singletonList(TYPE_OF_APPLICATION_ERROR.getError()))
-                       .build());
-        errors.add(EventValidationErrors.builder()
-                       .event(FL401_TYPE_OF_APPLICATION)
-                       .errors(Collections.singletonList(FL401_TYPE_OF_APPLICATION_ERROR.getError()))
-                       .build());
 
-        when(taskListService.getC100Events()).thenReturn(c100Events);
+        EventValidationErrors error1 = EventValidationErrors.builder()
+            .event(FL401_TYPE_OF_APPLICATION)
+            .build();
+
+        EventValidationErrors error2 = EventValidationErrors.builder()
+            .event(ALLEGATIONS_OF_HARM)
+            .build();
+
+        errors.add(error1);
+        errors.add(error2);
+
         when(taskErrorService.getEventErrors(caseData)).thenReturn(errors);
 
         final List<Task> c100Tasks = List.of(
@@ -94,7 +97,8 @@ public class CaseEventHandlerTest {
         final List<EventValidationErrors> eventsErrors = Collections.emptyList();
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
-        when(taskListRenderer.render(c100Tasks, eventsErrors, true, caseData)).thenReturn(c100renderedTaskList);
+
+        when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
 
@@ -104,7 +108,7 @@ public class CaseEventHandlerTest {
                                         .build()));
 
         verify(taskListService).getTasksForOpenCase(caseData);
-        verify(taskListRenderer).render(c100Tasks, eventsErrors, true, caseData);
+        verify(taskListRenderer).render(c100Tasks, errors, true, caseData);
 
         verify(coreCaseDataService).triggerEvent(
             JURISDICTION,
