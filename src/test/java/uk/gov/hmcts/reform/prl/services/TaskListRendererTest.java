@@ -111,7 +111,9 @@ public class TaskListRendererTest {
         Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
         Task.builder().event(UPLOAD_DOCUMENTS).state(NOT_STARTED).build(),
         Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
-        Task.builder().event(FL401_SOT_AND_SUBMIT).state(NOT_STARTED).build()
+        Task.builder().event(FL401_SOT_AND_SUBMIT).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_HOME).state(NOT_STARTED).build(),
+        Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build()
     );
 
     private final List<EventValidationErrors> fl401Errors = List.of(
