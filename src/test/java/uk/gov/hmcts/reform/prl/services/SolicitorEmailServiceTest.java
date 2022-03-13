@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
@@ -162,7 +163,7 @@ public class SolicitorEmailServiceTest {
             .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
-        when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
         Assert.assertEquals(solicitorEmailService.buildEmail(caseDetails), email);
 
@@ -225,7 +226,7 @@ public class SolicitorEmailServiceTest {
             .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
-        when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
         solicitorEmailService.sendEmail(caseDetails);
         assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
@@ -289,7 +290,7 @@ public class SolicitorEmailServiceTest {
             .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
 
-        when(courtFinderService.getClosestChildArrangementsCourt(caseData)).thenReturn(court);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
         solicitorEmailService.sendEmailBypss(caseDetails, authToken);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
@@ -383,5 +384,82 @@ public class SolicitorEmailServiceTest {
         solicitorEmailService.sendEmailToSolicitor(caseDetails, userDetails);
         assertEquals("test@demo.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
+
+    @Test
+    public void testFL401SolicitorEmail() {
+
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .firstName("testUser")
+            .lastName("last test")
+            .solicitorEmail("testing@solicitor.com")
+            .build();
+
+        String applicantFullName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(fl401Applicant)
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .build();
+
+        EmailTemplateVars email = SolicitorEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .applicantName(applicantFullName)
+            .courtName(caseData.getCourtName())
+            .courtEmail(caseData.getCourtEmailAddress())
+            .caseLink(manageCaseUrl + "/" + caseData.getId())
+            .build();
+
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        assertEquals(email, solicitorEmailService.buildFl401SolicitorEmail(caseDetails));
+    }
+
+    @Test
+    public void testSendEmailToFl401LocalCourt() {
+
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .firstName("testUser")
+            .lastName("last test")
+            .solicitorEmail("testing@solicitor.com")
+            .build();
+
+        String applicantFullName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .email("testing@solicitor.com")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(fl401Applicant)
+            .courtEmailAddress("testing@solicitor.com")
+            .build();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", fl401Applicant.getSolicitorEmail());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+
+
+        String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
+
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
+
+        assertEquals("testing@solicitor.com", caseData.getCourtEmailAddress());
+    }
+
+
 }
 

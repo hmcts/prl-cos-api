@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_STATEMENT_OF_TRUTH;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
@@ -97,6 +98,9 @@ class EventsCheckerTest {
     @MockBean
     FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
 
+    @MockBean
+    FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
+
     @Autowired
     private EventsChecker eventsChecker;
 
@@ -157,7 +161,8 @@ class EventsCheckerTest {
             welshLanguageRequirementsChecker,
             pdfChecker,
             submitAndPayChecker,
-            fl401ApplicantFamilyChecker);
+            fl401ApplicantFamilyChecker,
+            fl401StatementOfTruthAndSubmitChecker);
     }
 
     private Stream<Arguments> getEventsValidators() {
@@ -180,6 +185,7 @@ class EventsCheckerTest {
             Arguments.of(SUBMIT_AND_PAY, submitAndPayChecker),
             Arguments.of(FL401_APPLICANT_FAMILY_DETAILS, fl401ApplicantFamilyChecker),
             Arguments.of(FL401_UPLOAD_DOCUMENTS, pdfChecker));
+            Arguments.of(FL401_STATEMENT_OF_TRUTH, fl401StatementOfTruthAndSubmitChecker));
     }
 
 }

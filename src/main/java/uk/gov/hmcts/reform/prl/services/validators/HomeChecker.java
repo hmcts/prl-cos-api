@@ -135,59 +135,64 @@ public class HomeChecker implements EventChecker {
     }
 
     private boolean mandatoryChildDetailsAreCompleted(Optional<List<Element<ChildrenLiveAtAddress>>> doAnyChildrenLiveAtAddressYes) {
-
-        List<ChildrenLiveAtAddress> childrenLiveAtAddress = doAnyChildrenLiveAtAddressYes.get()
+        if (doAnyChildrenLiveAtAddressYes.isPresent()) {
+            List<ChildrenLiveAtAddress> childrenLiveAtAddress = doAnyChildrenLiveAtAddressYes.get()
                 .stream()
                 .map(Element::getValue)
                 .collect(Collectors.toList());
-        boolean mandatoryFields = false;
-        for (ChildrenLiveAtAddress child : childrenLiveAtAddress) {
-            Optional<YesOrNo> ischildDetailConfidential = ofNullable(child.getKeepChildrenInfoConfidential());
-            Optional<String> age = ofNullable(child.getChildsAge());
-            Optional<String> fullname = ofNullable(child.getChildFullName());
-            Optional<YesOrNo> isRespondentResponsisbleYesNo = ofNullable(child.getIsRespondentResponsibleForChild());
-            mandatoryFields = ischildDetailConfidential.isPresent() && age.isPresent()
+            boolean mandatoryFields = false;
+            for (ChildrenLiveAtAddress child : childrenLiveAtAddress) {
+                Optional<YesOrNo> ischildDetailConfidential = ofNullable(child.getKeepChildrenInfoConfidential());
+                Optional<String> age = ofNullable(child.getChildsAge());
+                Optional<String> fullname = ofNullable(child.getChildFullName());
+                Optional<YesOrNo> isRespondentResponsisbleYesNo = ofNullable(child.getIsRespondentResponsibleForChild());
+                mandatoryFields = ischildDetailConfidential.isPresent() && age.isPresent()
                     && fullname.isPresent() && isRespondentResponsisbleYesNo.isPresent();
-            if (!mandatoryFields) {
-                return false;
+                if (!mandatoryFields) {
+                    return false;
+                }
             }
-        }
-        return mandatoryFields;
-    }
-
-    private boolean mandatoryMortgageDetailsAreCompleted(Optional<Mortgage> mortgage) {
-
-
-        boolean mandatoryFields = false;
-        if (mortgage.isPresent()) {
-            Mortgage mortgage1 = mortgage.get();
-            Optional<Address> mortgageAddress = ofNullable(mortgage1.getAddress());
-            Optional<List<MortgageNamedAfterEnum>> mortgageNamedAfter = ofNullable(mortgage1.getMortgageNamedAfter());
-            Optional<String> mortgageLenderName = ofNullable(mortgage1.getMortgageLenderName());
-            mandatoryFields = mortgageAddress.isPresent() && mortgageLenderName.isPresent()
-                && ((mortgageNamedAfter.isPresent()
-                && (mortgageNamedAfter.get().contains(MortgageNamedAfterEnum.someoneElse)
-                && !mortgage1.getTextAreaSomethingElse().isBlank()))
-                || (mortgageNamedAfter.isPresent() && !mortgageNamedAfter.get().contains(MortgageNamedAfterEnum.someoneElse)));
             return mandatoryFields;
         }
         return false;
     }
 
-    private boolean mandatoryLandlordDetailsAreCompleted(Optional<Landlord> landlord) {
+    private boolean mandatoryMortgageDetailsAreCompleted(Optional<Mortgage> mortgage) {
+        if (mortgage.isPresent()) {
+            boolean mandatoryFields = false;
+            if (mortgage.isPresent()) {
+                Mortgage mortgage1 = mortgage.get();
+                Optional<Address> mortgageAddress = ofNullable(mortgage1.getAddress());
+                Optional<List<MortgageNamedAfterEnum>> mortgageNamedAfter = ofNullable(mortgage1.getMortgageNamedAfter());
+                Optional<String> mortgageLenderName = ofNullable(mortgage1.getMortgageLenderName());
+                mandatoryFields = mortgageAddress.isPresent() && mortgageLenderName.isPresent()
+                    && ((mortgageNamedAfter.isPresent()
+                    && (mortgageNamedAfter.get().contains(MortgageNamedAfterEnum.someoneElse)
+                    && !mortgage1.getTextAreaSomethingElse().isBlank()))
+                    || (mortgageNamedAfter.isPresent() && !mortgageNamedAfter.get().contains(MortgageNamedAfterEnum.someoneElse)));
+                return mandatoryFields;
+            }
+            return false;
+        }
+        return false;
+    }
 
-        boolean mandatoryFields = false;
+    private boolean mandatoryLandlordDetailsAreCompleted(Optional<Landlord> landlord) {
         if (landlord.isPresent()) {
-            Landlord landlord1 = landlord.get();
-            Optional<String> landlordName = ofNullable(landlord1.getLandlordName());
-            Optional<Address> landlordAddress = ofNullable(landlord1.getAddress());
-            Optional<List<MortgageNamedAfterEnum>> mortgageNamedAfterList = ofNullable(landlord1.getMortgageNamedAfterList());
-            Optional<String> text = ofNullable(landlord1.getTextAreaSomethingElse());
-            mandatoryFields = landlordName.isPresent()
-                && (landlordAddress.isPresent() && verifyAddressCompleted(landlordAddress.get()))
-                && (mortgageNamedAfterList.isPresent()
-                && (!mortgageNamedAfterList.get().contains(MortgageNamedAfterEnum.someoneElse) || text.isPresent()));
-            return mandatoryFields;
+            boolean mandatoryFields = false;
+            if (landlord.isPresent()) {
+                Landlord landlord1 = landlord.get();
+                Optional<String> landlordName = ofNullable(landlord1.getLandlordName());
+                Optional<Address> landlordAddress = ofNullable(landlord1.getAddress());
+                Optional<List<MortgageNamedAfterEnum>> mortgageNamedAfterList = ofNullable(landlord1.getMortgageNamedAfterList());
+                Optional<String> text = ofNullable(landlord1.getTextAreaSomethingElse());
+                mandatoryFields = landlordName.isPresent()
+                    && (landlordAddress.isPresent() && verifyAddressCompleted(landlordAddress.get()))
+                    && (mortgageNamedAfterList.isPresent()
+                    && (!mortgageNamedAfterList.get().contains(MortgageNamedAfterEnum.someoneElse) || text.isPresent()));
+                return mandatoryFields;
+            }
+            return false;
         }
         return false;
     }

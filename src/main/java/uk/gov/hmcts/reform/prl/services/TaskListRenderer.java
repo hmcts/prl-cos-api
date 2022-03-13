@@ -33,6 +33,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_STATEMENT_OF_TRUTH;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
@@ -147,6 +148,9 @@ public class TaskListRenderer {
                 } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
                                   + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
+                } else if (task.getEvent().equals(FL401_STATEMENT_OF_TRUTH)) {
+                    lines.add(taskListRenderElements.renderDisabledLink(task)
+                                  + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("not-started.png", "Not started"));
@@ -162,6 +166,9 @@ public class TaskListRenderer {
                 break;
             case FINISHED:
                 if (task.getEvent().equals(SUBMIT_AND_PAY)) {
+                    lines.add(taskListRenderElements.renderLink(task)
+                                  + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
+                } else if (task.getEvent().equals(FL401_STATEMENT_OF_TRUTH)) {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
                 } else {
@@ -227,8 +234,9 @@ public class TaskListRenderer {
         final TaskSection uploadDocuments = newSection("Upload documents")
             .withTask(tasks.get(FL401_UPLOAD_DOCUMENTS));
 
-        final TaskSection pdfApplication = newSection("View PDF application")
-            .withTask(tasks.get(VIEW_PDF_DOCUMENT));
+        final TaskSection pdfApplication = newSection("Check and sign application")
+            .withTask(tasks.get(VIEW_PDF_DOCUMENT))
+            .withTask(tasks.get(FL401_STATEMENT_OF_TRUTH));
 
         return Stream.of(applicationDetails,
                          peopleInTheCase,
