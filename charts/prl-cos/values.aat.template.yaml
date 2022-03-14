@@ -13,6 +13,9 @@ java:
         - notification-client-api-key
         - test-genericpassword
         - launchDarkly-sdk-key
+        - send-grid-api-key
+        - rpa-notify-to-email-test
+        - rpa-notify-from-email
         - AppInsightsInstrumentationKey
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal

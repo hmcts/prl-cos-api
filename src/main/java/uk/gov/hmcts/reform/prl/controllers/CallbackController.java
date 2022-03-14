@@ -30,11 +30,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -47,6 +49,7 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -137,9 +140,12 @@ public class CallbackController {
     private final DocumentLanguageService documentLanguageService;
 
 
+    private final SendgridService sendgridService;
+    private final C100JsonMapper c100JsonMapper;
     /**
      * It's just an example - to be removed when there are real tasks sending emails.
      */
+
     @PostMapping(path = "/send-email", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to send email")
     @ApiResponses(value = {
@@ -277,6 +283,10 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        requireNonNull(caseData);
+        sendgridService.sendEmail(c100JsonMapper.map(caseData));
+
         caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -452,6 +462,23 @@ public class CallbackController {
 
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/resend-rpa", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Resend case data json to RPA")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse resendNotificationtoRpa(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        requireNonNull(caseData);
+        sendgridService.sendEmail(c100JsonMapper.map(caseData));
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

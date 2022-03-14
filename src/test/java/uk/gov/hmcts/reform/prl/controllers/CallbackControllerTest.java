@@ -36,10 +36,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -54,6 +56,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.json.JsonValue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -105,6 +108,12 @@ public class CallbackControllerTest {
 
     @Mock
     AllTabServiceImpl allTabsService;
+
+    @Mock
+    SendgridService sendgridService;
+
+    @Mock
+    C100JsonMapper c100JsonMapper;
 
     @Mock
     private OrganisationService organisationService;
@@ -843,6 +852,26 @@ public class CallbackControllerTest {
     }
 
     @Test
+    public void resendNotificationtoRpaTest() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(1234L)
+            .build();
+        Map<String,Object> json = new HashMap<>();
+        json.put("id",1234L);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd
+            .client.model.CallbackRequest
+            .builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1234L)
+                             .data(json)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(json, CaseData.class)).thenReturn(caseData);
+        when(c100JsonMapper.map(caseData)).thenReturn(JsonValue.EMPTY_JSON_OBJECT);
+        callbackController.resendNotificationtoRpa(authToken, callbackRequest);
+        verify(sendgridService,times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
+    }
+
     public void testCopyFL401CasenameToC100CaseName() throws Exception {
 
         Map<String, Object> caseData = new HashMap<>();
