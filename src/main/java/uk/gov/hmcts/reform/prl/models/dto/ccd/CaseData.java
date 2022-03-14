@@ -496,13 +496,6 @@ public class CaseData implements MappableObject {
     @JsonProperty("closedMessages")
     private final List<Element<Message>> closedMessages;
 
-
-    /**
-     * Final document.
-     */
-
-    @JsonProperty("finalDocument")
-    private final Document finalDocument;
     @JsonProperty("finalWelshDocument")
     private final Document finalWelshDocument;
 
