@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -22,6 +23,7 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.OTHER_PEOPLE_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
+@Slf4j
 @Service
 public class OtherPeopleInTheCaseChecker implements EventChecker {
 
@@ -64,8 +66,11 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             if (others.size() == 0) {
                 return false;
             }
-            taskErrorService.addEventError(OTHER_PEOPLE_IN_THE_CASE, OTHER_PEOPLE_ERROR, OTHER_PEOPLE_ERROR.getError());
-            return others.stream().anyMatch(Objects::nonNull);
+            boolean started = others.stream().anyMatch(Objects::nonNull);
+            if (started) {
+                taskErrorService.addEventError(OTHER_PEOPLE_IN_THE_CASE, OTHER_PEOPLE_ERROR, OTHER_PEOPLE_ERROR.getError());
+                return true;
+            }
         }
         return false;
     }

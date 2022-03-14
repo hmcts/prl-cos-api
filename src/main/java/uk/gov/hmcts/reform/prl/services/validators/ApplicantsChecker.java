@@ -55,7 +55,6 @@ public class ApplicantsChecker implements EventChecker {
 
         for (PartyDetails applicant : applicants) {
             Optional<String> dxNumber = ofNullable(applicant.getDxNumber());
-            log.info(applicant.toString());
             boolean mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant, caseData.getCaseTypeOfApplication());
             boolean dxCompleted = (dxNumber.isPresent() && !(dxNumber.get().isBlank()));
 
