@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -30,9 +31,12 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -102,6 +106,12 @@ public class FL401SubmitApplicationControllerTest {
     @Mock
     private CaseData caseData;
 
+    @Mock
+    private DocumentLanguageService documentLanguageService;
+
+    @Mock
+    OrganisationService organisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     private TypeOfApplicationOrders orders;
@@ -146,6 +156,8 @@ public class FL401SubmitApplicationControllerTest {
             .applicantsFL401(fl401Applicant)
             .courtEmailAddress("localcourt@test.com")
             .dateSubmitted(String.valueOf("22-02-2022"))
+            .welshLanguageRequirementApplication(LanguagePreference.english)
+            .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -389,6 +401,8 @@ public class FL401SubmitApplicationControllerTest {
             .applicantsFL401(applicant)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .welshLanguageRequirementApplication(LanguagePreference.english)
+            .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -405,8 +419,15 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.anyString()))
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -428,6 +449,7 @@ public class FL401SubmitApplicationControllerTest {
             .thenReturn(court);
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
+        verify(dgsService, times(2)).generateDocument(
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
@@ -525,7 +547,12 @@ public class FL401SubmitApplicationControllerTest {
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
-            Mockito.anyString()
+            Mockito.any()
+        );
+        verify(dgsService, times(2)).generateWelshDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
     }
