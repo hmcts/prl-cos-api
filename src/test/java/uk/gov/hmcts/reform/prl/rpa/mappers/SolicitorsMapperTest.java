@@ -34,6 +34,7 @@ import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorsMapperTest {
@@ -114,7 +115,7 @@ public class SolicitorsMapperTest {
     public void testSolicitorAddresswithoutFields() {
 
         ContactInformation contactInformation = null;
-        assertNull(solicitorsMapper.mapSolicitorAddress(contactInformation));
+        assertTrue(solicitorsMapper.mapSolicitorAddress(contactInformation).isEmpty());
     }
 
     @Test
