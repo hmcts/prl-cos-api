@@ -90,15 +90,6 @@
             "childrenSubjectOfChildProtectionPlan": null,
             "otherPersonWhoLivesWithChild": null,
             "isChildCurrentAddressKnown": "Yes",
-            "address": {
-              "AddressLine1": "reqwrew",
-              "AddressLine2": null,
-              "AddressLine3": null,
-              "PostTown": null,
-              "County": null,
-              "Country": null,
-              "PostCode": "EN1 2NG"
-            },
             "childUnsupervisedTime": "No",
             "childContactFromOtherRecipients": "No",
             "relationshipToApplicant": null,
@@ -110,7 +101,7 @@
         {
           "id": "29959b30-f49e-483b-a963-d53a88a93209",
           "value": {
-            "firstName": "Bridie",
+            "firstName": "Ball",
             "lastName": "Lowe",
             "previousName": null,
             "dateOfBirth": null,
