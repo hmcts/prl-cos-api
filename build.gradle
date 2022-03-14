@@ -400,7 +400,10 @@ dependencies {
   // functionTest Implementation
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
-  functionalTestImplementation(group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator)
+  functionalTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+  functionalTestImplementation group: 'org.springframework', name: 'spring-context-support'
+  functionalTestImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+  functionalTestImplementation (group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator)
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'
       exclude group: 'io.reactivex', module: 'rxnetty'

@@ -1,11 +1,17 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.RestAssured;
+import io.restassured.response.ValidatableResponse;
+import io.restassured.specification.RequestSpecification;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
 
 public class CallbackControllerFunctionalTest {
 
@@ -22,16 +28,68 @@ public class CallbackControllerFunctionalTest {
     @BeforeClass
     public static void setup() throws Exception {
         RestAssured.port = 4044;
-        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+        RestAssured.baseURI = "http://localhost";
     }
 
+    @Test
+    public void givenValidRequest_whenPostReqeuestToMiamValidatation_then200Response() throws Exception {
+        RequestSpecification request = RestAssured.given();
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+        request
+            .header("Authorization", userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/validate-miam-application-or-exemption")
+        .then().assertThat().statusCode(200);
+    }
 
 
     @Test
-    public  void testHealthForDgsApi() {
-
-        given().when()
+    public void givenNoAuthorization_whenPostRequestToDraftDocumentGeneration_then400Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+        RequestSpecification request = RestAssured.given();
+        request
+            .body(requestBody)
+            .when()
             .contentType("application/json")
-            .post("/validate-application-consideration-timetable").then().assertThat().statusCode(200);
+            .post("/generate-save-draft-document")
+            .then().assertThat().statusCode(400);
     }
+
+
+    @Test
+    public void givenRequestWithApplicantOrRespondentCaseName_whenEndPointCalled_ResponseContainsApplicantCaseName() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+        RequestSpecification request = RestAssured.given();
+        ValidatableResponse response =
+            request
+                .header("Authorization", userToken)
+                .body(requestBody)
+                .when()
+                .contentType("application/json")
+                .post("/copy-FL401-case-name-to-C100")
+                .then()
+                .body("data.applicantCaseName", equalTo("testString"))
+                .assertThat().statusCode(200);
+    }
+
+//    @Test
+//    public void givenValidAuthToken_whenGateKeeperEndPointCalled_thenResponseBodyContainsApplicationTabFields() throws Exception {
+//        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+//        RequestSpecification request = RestAssured.given();
+//        ValidatableResponse response =
+//            request
+//            .
+//                .body(requestBody)
+//                .when()
+//                .contentType("application/json")
+//                .post("/send-to-gatekeeper")
+//                .then()
+//                .body("$", hasKey("hearingUrgencyTable"))
+//                .assertThat().statusCode(200);
+//    }
+
+
+
 }
