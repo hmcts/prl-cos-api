@@ -3,11 +3,15 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
@@ -49,8 +53,20 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
         mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.respondentsChecker);
         mandatoryEvents.put(RELATIONSHIP_TO_RESPONDENT, eventsChecker.respondentRelationshipChecker);
         mandatoryEvents.put(FL401_APPLICANT_FAMILY_DETAILS, eventsChecker.fl401ApplicantFamilyChecker);
-        mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.respondentBehaviourChecker);
-        mandatoryEvents.put(FL401_HOME, eventsChecker.homeChecker);
+
+        Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
+
+        if (!ordersOptional.isPresent()) {
+            mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.respondentBehaviourChecker);
+            mandatoryEvents.put(FL401_HOME, eventsChecker.homeChecker);
+        } else {
+            if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
+                mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.respondentBehaviourChecker);
+            }
+            if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+                mandatoryEvents.put(FL401_HOME, eventsChecker.homeChecker);
+            }
+        }
 
         boolean mandatoryFinished;
 
