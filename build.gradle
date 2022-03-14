@@ -212,6 +212,14 @@ sourceSets {
     }
     resources.srcDir file('src/functionalTest/resources')
   }
+  smokeTest {
+    java {
+      compileClasspath += main.output + test.output
+      runtimeClasspath += main.output + test.output
+      srcDir file('src/smokeTest/java')
+    }
+    resources.srcDir file('src/smokeTest/resources')
+  }
 }
 
 configurations {
@@ -421,6 +429,10 @@ dependencies {
   contractTestCompile sourceSets.main.runtimeClasspath
   contractTestCompile sourceSets.test.runtimeClasspath
 
+  smokeTestCompile sourceSets.main.runtimeClasspath
+  smokeTestCompile sourceSets.test.runtimeClasspath
+
+
   integrationTestImplementation(sourceSets.test.output)
   testCompile 'com.github.hmcts:fortify-client:1.2.2:all'
 }
@@ -432,9 +444,11 @@ task fortifyScan(type: JavaExec)  {
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
-  useJUnit {
-    includeCategories 'uk.gov.hmcts.reform.prl.category.SmokeTest'
-  }
+  useJUnitPlatform()
+
+  setTestClassesDirs(sourceSets.smokeTest.output.classesDirs)
+  setClasspath(sourceSets.smokeTest.runtimeClasspath)
+
 }
 
 task integration(type: Test, description: 'Runs integration tests.', group: 'Verification') {
