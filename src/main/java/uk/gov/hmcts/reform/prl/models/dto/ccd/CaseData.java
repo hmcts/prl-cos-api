@@ -537,7 +537,7 @@ public class CaseData implements MappableObject {
     private final StatementOfTruth fl401StmtOfTruth;
 
 
-    private final String submitAndPayDownloadApplicationLinkText;
+    private String submitAndPayDownloadApplicationLinkText;
 
 
 
