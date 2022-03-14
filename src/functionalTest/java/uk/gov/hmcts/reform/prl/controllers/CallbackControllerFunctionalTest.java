@@ -28,7 +28,7 @@ public class CallbackControllerFunctionalTest {
 
 
     @Test
-    public  void testHealthForDgsApi(){
+    public  void testHealthForDgsApi() {
 
         given().when()
             .contentType("application/json")
