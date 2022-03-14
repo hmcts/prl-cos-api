@@ -57,6 +57,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -357,7 +358,7 @@ public class CaseData implements MappableObject {
     private final CcdPaymentServiceRequestUpdate paymentCallbackServiceRequestUpdate;
     @JsonProperty("paymentServiceRequestReferenceNumber")
     private final String paymentServiceRequestReferenceNumber;
-    
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate issueDate;
 
@@ -473,8 +474,19 @@ public class CaseData implements MappableObject {
 
     private String courtName;
     private String courtId;
+    private String courtEmailAddress;
 
     /**
+<<<<<<< HEAD
+=======
+     * Final document.
+     */
+
+    @JsonProperty("finalDocument")
+    private final Document finalDocument;
+
+    /**
+>>>>>>> 32e1a0c61663461be1670531a78e28e174331aae
      * Send and reply to messages.
      */
     @JsonUnwrapped
@@ -490,8 +502,6 @@ public class CaseData implements MappableObject {
      * Final document.
      */
 
-    @JsonProperty("finalDocument")
-    private final Document finalDocument;
     @JsonProperty("finalWelshDocument")
     private final Document finalWelshDocument;
 
@@ -518,5 +528,11 @@ public class CaseData implements MappableObject {
      * FL401 Other Proceedings.
      */
     private final FL401OtherProceedingDetails fl401OtherProceedingDetails;
+
+    /**
+     *  FL401 Statement Of Truth and Submit.
+     */
+    @JsonProperty("fl401StmtOfTruth")
+    private final StatementOfTruth fl401StmtOfTruth;
 
 }

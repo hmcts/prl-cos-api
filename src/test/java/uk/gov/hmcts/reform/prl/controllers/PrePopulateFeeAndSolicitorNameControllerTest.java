@@ -153,7 +153,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
-        when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
+        when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
             .thenReturn(court);
 
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
@@ -177,7 +177,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
+        when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
             .thenReturn(court);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -203,7 +203,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        when(courtFinderService.getClosestChildArrangementsCourt(caseDetails.getCaseData()))
+        when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
             .thenReturn(court);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -262,7 +262,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .courtName("testcourt")
             .build();
 
-        when(courtFinderService.getClosestChildArrangementsCourt(callbackRequest.getCaseDetails().getCaseData()))
+        when(courtFinderService.getNearestFamilyCourt(callbackRequest.getCaseDetails().getCaseData()))
             .thenReturn(court1);
 
         UserDetails userDetails = UserDetails.builder()

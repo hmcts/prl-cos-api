@@ -93,26 +93,35 @@ public class OrganisationService {
     private PartyDetails getApplicantWithOrg(PartyDetails applicant, String userToken) {
 
         if (applicant.getSolicitorOrg() != null) {
-            if (null != applicant && applicant.getSolicitorOrg() != null) {
 
-                String organisationID = applicant.getSolicitorOrg().getOrganisationID();
-                if (organisationID != null) {
-                    try {
-                        organisations = getOrganisationDetaiils(userToken, organisationID);
+            String organisationID = applicant.getSolicitorOrg().getOrganisationID();
+            if (organisationID != null) {
+                try {
+                    organisations = getOrganisationDetaiils(userToken, organisationID);
 
-                        applicant = applicant.toBuilder()
-                            .organisations(organisations)
-                            .build();
-                    } catch (Exception e) {
-                        log.info(
-                            "OrganisationsAPi return 404, organisation not present for {} {} ",
-                            organisationID,
-                            e.getMessage()
-                        );
-                    }
+                    applicant = applicant.toBuilder()
+                        .organisations(organisations)
+                        .build();
+                } catch (Exception e) {
+                    log.info(
+                        "OrganisationsAPi return 404, organisation not present for {} {} ",
+                        organisationID,
+                        e.getMessage()
+                    );
                 }
             }
         }
         return applicant;
+    }
+
+    public CaseData getApplicantOrganisationDetailsForFL401(CaseData caseData)  {
+        if (Optional.ofNullable(caseData.getApplicantsFL401()).isPresent()) {
+            String userToken = systemUserService.getSysUserToken();
+            PartyDetails applicantWithOrg = getApplicantWithOrg(caseData.getApplicantsFL401(), userToken);
+            caseData = caseData.toBuilder()
+                .applicantsFL401(applicantWithOrg)
+                .build();
+        }
+        return caseData;
     }
 }

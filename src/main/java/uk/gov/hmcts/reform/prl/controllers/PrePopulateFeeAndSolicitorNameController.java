@@ -94,7 +94,7 @@ public class PrePopulateFeeAndSolicitorNameController {
 
 
         Court closestChildArrangementsCourt = courtLocatorService
-            .getClosestChildArrangementsCourt(callbackRequest.getCaseDetails()
+            .getNearestFamilyCourt(callbackRequest.getCaseDetails()
                                                   .getCaseData());
 
         CaseData caseData = CaseData.builder()

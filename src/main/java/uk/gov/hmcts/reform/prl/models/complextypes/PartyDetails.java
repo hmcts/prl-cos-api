@@ -67,7 +67,8 @@ public class PartyDetails {
     private final YesOrNo respondentLivedWithApplicant;
 
     public boolean hasConfidentialInfo() {
-        return this.isAddressConfidential.equals(YesOrNo.Yes) || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
+        return this.isAddressConfidential.equals(YesOrNo.Yes)
+            || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
     }
 
     public boolean isCanYouProvideEmailAddress() {

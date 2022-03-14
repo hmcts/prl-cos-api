@@ -8,11 +8,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
@@ -64,9 +67,9 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
+@PropertySource(value = "classpath:application.yaml")
 public class CallbackControllerTest {
-
     @Mock
     private ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
 
@@ -108,7 +111,6 @@ public class CallbackControllerTest {
 
     @Mock
     private CaseWorkerEmailService caseWorkerEmailService;
-
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String PRL_DRAFT_TEMPLATE = "PRL-C100-Draft-Final.docx";
@@ -196,16 +198,18 @@ public class CallbackControllerTest {
                                .documentUrl(generatedDocumentInfo.getUrl())
                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                .documentHash(generatedDocumentInfo.getHashToken())
-                               .documentFileName("PRL-DRAFT-C100-20.docx")
+                               .documentFileName("c100DraftFilename.pdf")
                                .build())
             .id(123L)
             .draftOrderDocWelsh(Document.builder()
                                     .documentUrl(generatedDocumentInfo.getUrl())
                                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                     .documentHash(generatedDocumentInfo.getHashToken())
-                                    .documentFileName(PRL_C100_DRAFT_WELSH_FILENAME)
+                                    .documentFileName("c100DraftWelshFilename")
                                     .build())
             .applicants(applicantList)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -220,18 +224,21 @@ public class CallbackControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
@@ -248,12 +255,96 @@ public class CallbackControllerTest {
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
-            Mockito.anyString()
+            Mockito.any()
+        );
+        verifyNoMoreInteractions(dgsService);
+    }
+
+    @Test
+    public void testGenerateAndStoreDocumentForFL401() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .phoneNumber("1234567890")
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        CaseData caseData = CaseData.builder()
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("PRL-DRAFT-C100-20.docx")
+                               .build())
+            .applicants(applicantList)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+
+        CallbackResponse callbackResponse = CallbackResponse.builder()
+            .data(CaseData.builder()
+                      .draftOrderDoc(Document.builder()
+                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                         .documentFileName("PRL-DRAFT-C100-20.docx")
+                                         .build())
+                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+                      .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        callbackController.generateAndStoreDocument(authToken, callbackRequest);
+
+        verify(dgsService, times(2)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
         );
         verify(organisationService,times(1))
-            .getApplicantOrganisationDetails(caseData);
+            .getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class));
         verify(organisationService,times(1))
-            .getRespondentOrganisationDetails(caseData);
+            .getApplicantOrganisationDetails(Mockito.any(CaseData.class));
+        verify(organisationService,times(1))
+            .getRespondentOrganisationDetails(Mockito.any(CaseData.class));
         verifyNoMoreInteractions(dgsService);
         verifyNoMoreInteractions(organisationService);
     }
@@ -329,13 +420,13 @@ public class CallbackControllerTest {
                                       .documentUrl(generatedDocumentInfo.getUrl())
                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                       .documentHash(generatedDocumentInfo.getHashToken())
-                                      .documentFileName(PRL_C8_TEMPLATE)
+                                      .documentFileName("c100C8Template")
                                       .build())
                       .c1ADocument(Document.builder()
                                        .documentUrl(generatedDocumentInfo.getUrl())
                                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                        .documentHash(generatedDocumentInfo.getHashToken())
-                                       .documentFileName(PRL_C8_TEMPLATE)
+                                       .documentFileName("c100C1aTemplate")
                                        .build())
                       .finalDocument(Document.builder()
                                          .documentUrl(generatedDocumentInfo.getUrl())
@@ -370,12 +461,18 @@ public class CallbackControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
+
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.issueAndSendToLocalCourt(
             authToken,
@@ -389,7 +486,7 @@ public class CallbackControllerTest {
         verify(dgsService, times(6)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
-            Mockito.anyString()
+            Mockito.any()
         );
         verify(organisationService,times(1))
             .getApplicantOrganisationDetails(caseData);
