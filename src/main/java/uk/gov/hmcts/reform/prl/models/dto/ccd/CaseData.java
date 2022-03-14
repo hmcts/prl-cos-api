@@ -371,13 +371,26 @@ public class CaseData implements MappableObject {
     private final String feeCode;
     @JsonProperty("draftOrderDoc")
     private final Document draftOrderDoc;
+    @JsonProperty("draftOrderDocWelsh")
+    private final Document draftOrderDocWelsh;
     @JsonProperty("c8Document")
     private final Document c8Document;
+    @JsonProperty("c8WelshDocument")
+    private final Document c8WelshDocument;
     @JsonProperty("c1ADocument")
     private final Document c1ADocument;
+    @JsonProperty("c1AWelshDocument")
+    private final Document c1AWelshDocument;
+
+    @JsonProperty("isEngDocGen")
+    private final String isEngDocGen;
+    @JsonProperty("isWelshDocGen")
+    private final String isWelshDocGen;
 
     @JsonProperty("submitAndPayDownloadApplicationLink")
     private final Document submitAndPayDownloadApplicationLink;
+    @JsonProperty("submitAndPayDownloadApplicationWelshLink")
+    private final Document submitAndPayDownloadApplicationWelshLink;
 
     /**
      * Add case number.
@@ -466,13 +479,6 @@ public class CaseData implements MappableObject {
     private String reasonForAmendCourtDetails;
 
     /**
-     * Final document.
-     */
-
-    @JsonProperty("finalDocument")
-    private final Document finalDocument;
-
-    /**
      * Send and reply to messages.
      */
     @JsonUnwrapped
@@ -483,6 +489,15 @@ public class CaseData implements MappableObject {
     @JsonProperty("closedMessages")
     private final List<Element<Message>> closedMessages;
 
+
+    /**
+     * Final document.
+     */
+
+    @JsonProperty("finalDocument")
+    private final Document finalDocument;
+    @JsonProperty("finalWelshDocument")
+    private final Document finalWelshDocument;
 
     /**
      * Confidentiality details.
