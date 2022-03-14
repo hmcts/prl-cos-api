@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -21,8 +22,10 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -42,6 +45,7 @@ import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkf
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -159,7 +163,6 @@ public class CallbackControllerTest {
 
     @Test
     public void testGenerateAndStoreDocument() throws Exception {
-        //CaseDetails caseDetails  = CaseDetailsProvider.full();
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -167,6 +170,18 @@ public class CallbackControllerTest {
             .hashToken("testHashToken")
             .build();
 
+        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+        orderList.add(FL401OrderTypeEnum.occupationOrder);
+        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+
+        TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder()
+            .orderType(orderList)
+            .build();
+
+        LinkToCA linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.Yes)
+            .caApplicationNumber("123")
+            .build();
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .gender(Gender.male)
@@ -235,11 +250,24 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testGenerateAndStoreDocumentForFL401() throws Exception {
+    public void testGenerateAndStoreDocumentForFL401WithBothOrders() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
+            .build();
+
+        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+        orderList.add(FL401OrderTypeEnum.occupationOrder);
+        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+
+        TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder()
+            .orderType(orderList)
+            .build();
+
+        LinkToCA linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.Yes)
+            .caApplicationNumber("123")
             .build();
 
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
@@ -266,6 +294,8 @@ public class CallbackControllerTest {
                                .build())
             .applicants(applicantList)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
 
@@ -306,7 +336,182 @@ public class CallbackControllerTest {
             Mockito.anyString()
         );
         verifyNoMoreInteractions(dgsService);
+    }
 
+    @Test
+    public void testGenerateAndStoreDocumentForFL401WithNonMolestationOrders() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+
+        TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder()
+            .orderType(orderList)
+            .build();
+
+        LinkToCA linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.Yes)
+            .caApplicationNumber("123")
+            .build();
+
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .phoneNumber("1234567890")
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        CaseData caseData = CaseData.builder()
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("PRL-DRAFT-C100-20.docx")
+                               .build())
+            .applicants(applicantList)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+
+        CallbackResponse callbackResponse = CallbackResponse.builder()
+            .data(CaseData.builder()
+                      .draftOrderDoc(Document.builder()
+                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                         .documentFileName("PRL-DRAFT-C100-20.docx")
+                                         .build())
+                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+                      .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+            .thenReturn(generatedDocumentInfo);
+        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        callbackController.generateAndStoreDocument(authToken, callbackRequest);
+
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.anyString()
+        );
+        verifyNoMoreInteractions(dgsService);
+    }
+
+    @Test
+    public void testGenerateAndStoreDocumentForFL401WithOccupationOrders() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+
+        TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder()
+            .orderType(orderList)
+            .build();
+
+        LinkToCA linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.Yes)
+            .caApplicationNumber("123")
+            .build();
+
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .phoneNumber("1234567890")
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        CaseData caseData = CaseData.builder()
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("PRL-DRAFT-C100-20.docx")
+                               .build())
+            .applicants(applicantList)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+
+        CallbackResponse callbackResponse = CallbackResponse.builder()
+            .data(CaseData.builder()
+                      .draftOrderDoc(Document.builder()
+                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                         .documentFileName("PRL-DRAFT-C100-20.docx")
+                                         .build())
+                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+                      .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.anyString()))
+            .thenReturn(generatedDocumentInfo);
+        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        callbackController.generateAndStoreDocument(authToken, callbackRequest);
+
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.anyString()
+        );
+        verifyNoMoreInteractions(dgsService);
     }
 
     @Test

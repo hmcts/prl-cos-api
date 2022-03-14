@@ -294,7 +294,6 @@ public class FL401SubmitApplicationControllerTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
@@ -379,7 +378,100 @@ public class FL401SubmitApplicationControllerTest {
             .build();
 
         CaseData caseData = CaseData.builder()
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("FL401-Final.docx")
+                               .build())
+            .applicantsFL401(applicant)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .build();
+
+        CallbackResponse callbackResponse = CallbackResponse.builder()
+            .data(CaseData.builder()
+                      .draftOrderDoc(Document.builder()
+                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                         .documentFileName("FL401-Final.docx")
+                                         .build())
+                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+                      .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.anyString()))
+            .thenReturn(generatedDocumentInfo);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
+            CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
+        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
+
+        when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )))
+            .thenReturn(court);
+        fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
+
+        verify(dgsService, times(2)).generateDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            Mockito.anyString()
+        );
+        verifyNoMoreInteractions(dgsService);
+    }
+
+    @Test
+    public void testCourtNameAndEmailAddressReturnedWhileFamilyEmailAddressReturned_WithBothOrders() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+        orderList.add(FL401OrderTypeEnum.occupationOrder);
+        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+
+        orders = TypeOfApplicationOrders.builder()
+            .orderType(orderList)
+            .build();
+
+        linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.Yes)
+            .caApplicationNumber("123")
+            .build();
+
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .phoneNumber("1234567890")
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        CaseData caseData = CaseData.builder()
             .typeOfApplicationOrders(orders)
             .typeOfApplicationLinkToCA(linkToCA)
             .draftOrderDoc(Document.builder()
@@ -462,10 +554,49 @@ public class FL401SubmitApplicationControllerTest {
             .applicantCaseName("TestCaseName")
             .applicantsFL401(fl401Applicant)
             .courtEmailAddress("localcourt@test.com")
+            .isNotificationSent("Yes")
             .build();
 
         LocalDate issueDate = LocalDate.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .data(stringObjectMap).build()).build();
+
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+
+        fl401SubmitApplicationController.fl401SendApplicationNotification(authToken, callbackRequest);
+        verify(caseWorkerEmailService, times(1))
+            .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
+        verify(solicitorEmailService, times(1)).sendEmailToFl401Solicitor(
+            callbackRequest.getCaseDetails(),
+            userDetails
+        );
+    }
+
+    @Test
+    public void testFl401SendApplicationNotificationFailure() throws Exception {
+
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(fl401Applicant)
+            .courtEmailAddress("localcourt@test.com")
+            .isNotificationSent("No")
+            .build();
+
         Map<String, Object> stringObjectMap = new HashMap<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
