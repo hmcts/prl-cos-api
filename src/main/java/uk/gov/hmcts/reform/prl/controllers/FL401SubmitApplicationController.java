@@ -223,26 +223,6 @@ public class FL401SubmitApplicationController {
         }
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
-        GeneratedDocumentInfo generatedDocumentC8Info = dgsService.generateDocument(
-            authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-            DA_C8_TEMPLATE
-        );
-        log.info("Generated DA C8 Document");
-
-        caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
-            .documentUrl(generatedDocumentC8Info.getUrl())
-            .documentBinaryUrl(generatedDocumentC8Info.getBinaryUrl())
-            .documentHash(generatedDocumentC8Info.getHashToken())
-            .documentFileName(DA_C8_DOC).build());
-        caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
-
-        if (null != generatedDocumentC8Info && null != generatedDocumentInfo) {
-            caseData = caseData.toBuilder().isDocumentGenerated("Yes").build();
-        } else {
-            caseData = caseData.toBuilder().isDocumentGenerated("No").build();
-        }
-
         log.info(" Court email flag {} and document generation flag {}",
                  caseData.getIsCourtEmailFound(), caseData.getIsDocumentGenerated());
         return AboutToStartOrSubmitCallbackResponse.builder()

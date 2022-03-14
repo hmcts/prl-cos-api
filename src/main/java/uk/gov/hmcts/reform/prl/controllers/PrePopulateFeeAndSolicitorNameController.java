@@ -96,8 +96,6 @@ public class PrePopulateFeeAndSolicitorNameController {
             errorList.add(
                 "Submit and pay is not allowed for this case unless you finish all the mandatory events");
         } else {
-
-            UserDetails userDetails = userService.getUserDetails(authorisation);
             FeeResponse feeResponse = null;
             try {
                 feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
@@ -107,89 +105,64 @@ public class PrePopulateFeeAndSolicitorNameController {
                     .errors(errorList)
                     .build();
             }
-
             CaseData caseDataForOrgDetails = callbackRequest.getCaseDetails().getCaseData();
             caseDataForOrgDetails = organisationService.getApplicantOrganisationDetails(caseDataForOrgDetails);
             caseDataForOrgDetails = organisationService.getRespondentOrganisationDetails(caseDataForOrgDetails);
 
-
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                callbackRequest.getCaseDetails(),
-                PRL_DRAFT_TEMPLATE
-            );
-
             Court closestChildArrangementsCourt = courtLocatorService
                 .getNearestFamilyCourt(callbackRequest.getCaseDetails()
                                            .getCaseData());
+            UserDetails userDetails = userService.getUserDetails(authorisation);
+            caseData = CaseData.builder()
+                .solicitorName(userDetails.getFullName())
+                .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
+                .applicantSolicitorEmailAddress(userDetails.getEmail())
+                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
+                .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
+                .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
+                .build();
 
-            caseData = objectMapper.convertValue(
-                CaseData.builder()
-                    .solicitorName(userDetails.getFullName())
-                    .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
-                    .applicantSolicitorEmailAddress(userDetails.getEmail())
-                    .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
-                    .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
-                    .courtName((closestChildArrangementsCourt != null)  ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
+            log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}",
+                     documentLanguage.isGenEng(), documentLanguage.isGenWelsh()
+            );
+
+            if (documentLanguage.isGenEng()) {
+                GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+                    authorisation,
+                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
+                    c100DraftTemplate
+                );
+
+                caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
                     .submitAndPayDownloadApplicationLink(Document.builder()
                                                              .documentUrl(generatedDocumentInfo.getUrl())
                                                              .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                                              .documentHash(generatedDocumentInfo.getHashToken())
-                                                             .documentFileName(DRAFT_C_100_APPLICATION).build())
-                    .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
-                    .build(),
-                CaseData.class
-            );
+                                                             .documentFileName(c100DraftFilename).build()).build();
+            }
+
+            if (documentLanguage.isGenWelsh()) {
+                GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
+                    authorisation,
+                    callbackRequest.getCaseDetails(),
+                    c100DraftWelshTemplate
+                );
+
+                caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())
+                    .submitAndPayDownloadApplicationWelshLink(Document.builder()
+                                                                  .documentUrl(generatedWelshDocumentInfo.getUrl())
+                                                                  .documentBinaryUrl(generatedWelshDocumentInfo.getBinaryUrl())
+                                                                  .documentHash(generatedWelshDocumentInfo.getHashToken())
+                                                                  .documentFileName(c100DraftWelshFilename).build()).build();
+            }
+
+            log.info("Saving Court name into DB..");
         }
-        CaseData caseData = CaseData.builder()
-            .solicitorName(userDetails.getFullName())
-            .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
-            .applicantSolicitorEmailAddress(userDetails.getEmail())
-            .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
-            .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
-            .courtName((closestChildArrangementsCourt != null)  ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
-            .build();
-
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
-        log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}",
-                 documentLanguage.isGenEng(),documentLanguage.isGenWelsh());
-
-        if (documentLanguage.isGenEng()) {
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
-                c100DraftTemplate
-            );
-
-            caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
-                .submitAndPayDownloadApplicationLink(Document.builder()
-                                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                                         .documentFileName(c100DraftFilename).build()).build();
-        }
-
-        if (documentLanguage.isGenWelsh()) {
-            GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
-                authorisation,
-                callbackRequest.getCaseDetails(),
-                c100DraftWelshTemplate
-            );
-
-            caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())
-                .submitAndPayDownloadApplicationWelshLink(Document.builder()
-                                                              .documentUrl(generatedWelshDocumentInfo.getUrl())
-                                                              .documentBinaryUrl(generatedWelshDocumentInfo.getBinaryUrl())
-                                                              .documentHash(generatedWelshDocumentInfo.getHashToken())
-                                                              .documentFileName(c100DraftWelshFilename).build()).build();
-        }
-
-        log.info("Saving Court name into DB..");
 
         return CallbackResponse.builder()
             .data(caseData)
             .errors(errorList)
             .build();
-
     }
 }
