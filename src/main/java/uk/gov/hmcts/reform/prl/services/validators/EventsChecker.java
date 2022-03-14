@@ -102,9 +102,6 @@ public class EventsChecker {
     FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
 
     @Autowired
-    UploadDocumentChecker uploadDocumentChecker;
-
-    @Autowired
     FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
     @Autowired
@@ -141,7 +138,7 @@ public class EventsChecker {
         eventStatus.put(RESPONDENT_BEHAVIOUR, respondentBehaviourChecker);
         eventStatus.put(WITHOUT_NOTICE_ORDER, withoutNoticeOrderChecker);
         eventStatus.put(FL401_APPLICANT_FAMILY_DETAILS, fl401ApplicantFamilyChecker);
-        eventStatus.put(FL401_UPLOAD_DOCUMENTS, uploadDocumentChecker);
+        eventStatus.put(FL401_UPLOAD_DOCUMENTS, pdfChecker);
         eventStatus.put(FL401_OTHER_PROCEEDINGS, fl401OtherProceedingsChecker);
         eventStatus.put(FL401_SOT_AND_SUBMIT, fl401StatementOfTruthAndSubmitChecker);
 

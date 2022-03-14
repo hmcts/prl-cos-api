@@ -479,6 +479,13 @@ public class CaseData implements MappableObject {
     private String reasonForAmendCourtDetails;
 
     /**
+     * Final document.
+     */
+
+    @JsonProperty("finalDocument")
+    private final Document finalDocument;
+
+    /**
      * Send and reply to messages.
      */
     @JsonUnwrapped
@@ -489,13 +496,6 @@ public class CaseData implements MappableObject {
     @JsonProperty("closedMessages")
     private final List<Element<Message>> closedMessages;
 
-
-    /**
-     * Final document.
-     */
-
-    @JsonProperty("finalDocument")
-    private final Document finalDocument;
     @JsonProperty("finalWelshDocument")
     private final Document finalWelshDocument;
 
