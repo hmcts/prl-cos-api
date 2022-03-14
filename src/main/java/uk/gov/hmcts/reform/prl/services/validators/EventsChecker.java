@@ -102,9 +102,6 @@ public class EventsChecker {
     FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
 
     @Autowired
-    UploadDocumentChecker uploadDocumentChecker;
-
-    @Autowired
     FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
     @Autowired
