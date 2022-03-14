@@ -70,6 +70,7 @@ import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
+import uk.gov.hmcts.reform.prl.models.documents.UploadDocument;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
@@ -496,6 +497,13 @@ public class CaseData implements MappableObject {
      *  Withdraw Application.
      */
     private final WithdrawApplication withDrawApplicationData;
+
+    /**
+     * FL401 Upload Documents.
+     */
+    private final List<UploadDocument> fl401UploadedDocuments;
+    private final List<UploadDocument> fl401UploadWitnessDocuments;
+    private final List<UploadDocument> fl401UploadSupportDocuments;
 
     /**
      * Send to Gatekeeper.
