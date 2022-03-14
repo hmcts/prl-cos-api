@@ -232,6 +232,7 @@ public class FL401SubmitApplicationControllerTest {
             .thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
+
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -243,7 +244,10 @@ public class FL401SubmitApplicationControllerTest {
         Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
             CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
         Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
-
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
             objectMapper
@@ -252,6 +256,11 @@ public class FL401SubmitApplicationControllerTest {
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
         verify(dgsService, times(2)).generateDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(2)).generateWelshDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             Mockito.any()
@@ -344,9 +353,18 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
         verify(dgsService, times(2)).generateDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(2)).generateWelshDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             Mockito.any()
@@ -453,6 +471,10 @@ public class FL401SubmitApplicationControllerTest {
             Mockito.anyString(),
             any(CaseDetails.class),
             Mockito.any());
+        verify(dgsService, times(2)).generateWelshDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            Mockito.any());
         verifyNoMoreInteractions(dgsService);
     }
 
@@ -521,6 +543,9 @@ public class FL401SubmitApplicationControllerTest {
 
         when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
+        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(caseData);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
