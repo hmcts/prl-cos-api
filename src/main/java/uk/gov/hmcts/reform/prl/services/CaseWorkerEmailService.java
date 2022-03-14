@@ -44,6 +44,7 @@ public class CaseWorkerEmailService {
     private static final String STANDARAD_HEARING = "Standard hearing";
     private static final String YES = "Yes";
     private static final String NO = "No";
+    private static final String DATE_FORMAT = "dd-MM-yyyy";
 
     @Autowired
     private EmailService emailService;
@@ -226,7 +227,7 @@ public class CaseWorkerEmailService {
         }
 
         LocalDate issueDate = LocalDate.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
         return CaseWorkerEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
@@ -299,7 +300,7 @@ public class CaseWorkerEmailService {
         }
 
         LocalDate issueDate = LocalDate.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
         return CaseWorkerEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
@@ -340,7 +341,7 @@ public class CaseWorkerEmailService {
         }
 
         LocalDate issueDate = LocalDate.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
         return CaseWorkerEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
