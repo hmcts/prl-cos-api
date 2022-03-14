@@ -145,9 +145,13 @@ public class CallbackController {
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = organisationService.getApplicantOrganisationDetailsForFL401(caseData);
         }
+        CaseData updatedCaseData = getUpdatedCaseDataWithDoc(authorisation, caseData);
+        CaseData fieldAdded = updatedCaseData.toBuilder().submitAndPayDownloadApplicationLinkText(
+            PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "C100 draft" : "FL401 draft"
+        ).build();
         return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse
             .builder()
-            .data(getUpdatedCaseDataWithDoc(authorisation, caseData))
+            .data(fieldAdded)
             .build();
     }
 
@@ -289,11 +293,12 @@ public class CallbackController {
             generatedDocumentInfo.getUrl()).documentBinaryUrl(
             generatedDocumentInfo.getBinaryUrl()).documentHash(generatedDocumentInfo.getHashToken()).documentFileName(
             PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                ? DRAFT_C_100_APPLICATION : DRAFT_FL401_APPLICATION + CommonUtils.formatCurrentDate("ddMMM").toLowerCase() + ".pdf").build()).build();
+                ? DRAFT_C_100_APPLICATION : DRAFT_FL401_APPLICATION + CommonUtils.formatCurrentDate("ddMMM").toLowerCase() + ".pdf")
+                                                                        .build()).build();
 
         return updatedCaseData;
     }
-  
+
     @PostMapping(path = "/copy-FL401-case-name-to-C100", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Copy fl401 case name to C100 Case name")
     @ApiResponses(value = {
