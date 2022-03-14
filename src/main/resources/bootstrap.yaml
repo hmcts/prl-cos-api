@@ -27,6 +27,6 @@ spring:
         prl.test-genericpassword: PRL_GENERIC_PASSWORD
         prl.launchDarkly-sdk-key: LAUNCH_DARKLY_SDK_KEY
         prl.send-grid-api-key: SEND_GRID_API_KEY
-        rpa-notify-to-email-test: RPA_NOTIFY_TO_EMAIL
+        rpa-notify-to-email: RPA_NOTIFY_TO_EMAIL
         rpa-notify-from-email: RPA_NOTIFY_FROM_EMAIL
         prl.AppInsightsInstrumentationKey: APP_INSIGHTS_INSTRUMENTATION_KEY
