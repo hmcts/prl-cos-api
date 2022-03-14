@@ -228,7 +228,7 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.anyString()))
+        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
@@ -254,7 +254,7 @@ public class FL401SubmitApplicationControllerTest {
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
-            Mockito.anyString()
+            Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -323,7 +323,7 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.anyString()))
+        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
@@ -349,7 +349,7 @@ public class FL401SubmitApplicationControllerTest {
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
-            Mockito.anyString()
+            Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -450,11 +450,9 @@ public class FL401SubmitApplicationControllerTest {
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
         verify(dgsService, times(2)).generateDocument(
-        verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
-            Mockito.anyString()
-        );
+            Mockito.any());
         verifyNoMoreInteractions(dgsService);
     }
 
@@ -521,7 +519,7 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.anyString()))
+        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
