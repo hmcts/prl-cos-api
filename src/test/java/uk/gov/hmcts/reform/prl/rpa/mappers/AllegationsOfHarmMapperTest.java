@@ -75,7 +75,7 @@ public class AllegationsOfHarmMapperTest {
             .childrenLocationNow("LocationNow")
             .abductionPassportOfficeNotified(YesOrNo.Yes).agreeChildOtherContact(YesOrNo.Yes)
             .childrenLocationNow("locationNow").abductionPassportOfficeNotified(YesOrNo.Yes)
-            .abductionChildHasPassport(YesOrNo.Yes).abductionChildPassportPosession(AbductionChildPassportPossessionEnum.FATHER)
+            .abductionChildHasPassport(YesOrNo.Yes).abductionChildPassportPosession(AbductionChildPassportPossessionEnum.father)
             .abductionChildPassportPosessionOtherDetail("OtherDetails").build();
 
         assertNotNull(allegationsOfHarmMapper.map(caseData));
