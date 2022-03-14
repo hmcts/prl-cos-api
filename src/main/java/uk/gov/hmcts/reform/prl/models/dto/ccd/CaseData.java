@@ -513,7 +513,7 @@ public class CaseData implements MappableObject {
     private final StatementOfTruth fl401StmtOfTruth;
 
 
-    private String submitAndPayDownloadApplicationLinkText;
+    private String viewPDFlinkLabelText;
 
 
 
