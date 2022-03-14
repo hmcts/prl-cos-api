@@ -512,4 +512,9 @@ public class CaseData implements MappableObject {
     @JsonProperty("fl401StmtOfTruth")
     private final StatementOfTruth fl401StmtOfTruth;
 
+
+    private final String submitAndPayDownloadApplicationLinkText;
+
+
+
 }
