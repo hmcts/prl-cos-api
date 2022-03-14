@@ -29,13 +29,13 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
@@ -77,6 +77,9 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     @Mock
     private CaseData caseData;
 
+    @Mock
+    SubmitAndPayChecker submitAndPayChecker;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     @Before
@@ -111,6 +114,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
+        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+
         when(dgsService.generateDocument(authToken,
                                           callbackRequest.getCaseDetails(),
                                           "PRL-C100-Draft-Final.docx")).thenReturn(generatedDocumentInfo);
@@ -119,14 +124,9 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
             .thenReturn(court);
-
-
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
-
-        verify(userService).getUserDetails(authToken);
-
     }
 
     @Test
@@ -137,20 +137,15 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
 
+        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+
         when(dgsService.generateDocument(authToken,
                                           callbackRequest.getCaseDetails(),
                                           "PRL-C100-Draft-Final.docx")).thenReturn(generatedDocumentInfo);
 
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
-
         prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
-
-        verify(dgsService).generateDocument(authToken,
-                                            callbackRequest.getCaseDetails(),
-                                            "PRL-C100-Draft-Final.docx");
-
     }
 
     @Test
@@ -160,18 +155,14 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .caseDetails(caseDetails)
             .build();
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
+        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
 
         when(dgsService.generateDocument(authToken,
                                           callbackRequest.getCaseDetails(),
                                           "PRL-C100-Draft-Final.docx")).thenReturn(generatedDocumentInfo);
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
-
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
-
         prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
-
-        verify(feesService).fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
-
     }
 
     @Test
@@ -220,7 +211,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         Court court1 = Court.builder()
             .courtName("testcourt")
             .build();
-
+        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(courtFinderService.getNearestFamilyCourt(callbackRequest.getCaseDetails().getCaseData()))
             .thenReturn(court1);
 
@@ -260,13 +251,103 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
-
-        CallbackResponse callbackResponse = CallbackResponse.builder().data(caseData1).build();
-
-        when(prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest))
-            .thenReturn(callbackResponse);
-        verify(feesService).fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
-
+        CallbackResponse callbackResponse = CallbackResponse.builder()
+            .data(caseData1)
+            .errors(Collections.singletonList("test"))
+            .build();
+        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
     }
 
+    @Test
+    public void testAllDetailsWithSubmitAndPayCheckerAsFalse() throws Exception {
+
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .address(Address.builder()
+                         .postCode("SE1 9BA")
+                         .build())
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseDataForCourt = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .children(listOfChildren)
+            .courtName("testcourt")
+            .build();
+
+        CaseDetails caseDetails1 = CaseDetails.builder()
+            .caseData(caseDataForCourt)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .build();
+
+        Court court1 = Court.builder()
+            .courtName("testcourt")
+            .build();
+        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
+        when(courtFinderService.getNearestFamilyCourt(callbackRequest.getCaseDetails().getCaseData()))
+            .thenReturn(court1);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .build();
+
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();;
+
+        CaseData caseData1 = objectMapper.convertValue(
+            CaseData.builder()
+                .solicitorName(userDetails.getFullName())
+                .applicantSolicitorEmailAddress("test@gmail.com")
+                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
+                .feeAmount(feeResponse.getAmount().toString())
+                .submitAndPayDownloadApplicationLink(Document.builder()
+                                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                                         .documentFileName("Draft_c100_application.pdf").build())
+                .courtName(court1.getCourtName())
+                .build(),
+            CaseData.class
+        );
+
+        when(dgsService.generateDocument(authToken,
+                                         callbackRequest.getCaseDetails(),
+                                         "PRL-C100-Draft-Final.docx")).thenReturn(generatedDocumentInfo);
+
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
+            .thenReturn(caseData1);
+        CallbackResponse callbackResponse = CallbackResponse.builder()
+            .data(caseData1)
+            .errors(Collections.singletonList("test"))
+            .build();
+        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
+    }
 }
