@@ -179,20 +179,20 @@ public class FL401SubmitApplicationController {
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
             caseDataUpdated.put(FINAL_DOCUMENT_FIELD,
-                                generateDocumentField(generateDocument(authorisation, fl401FinalTemplate, caseData,
+                                generateDocumentField(fl401FinalFilename,generateDocument(authorisation, fl401FinalTemplate, caseData,
                                                                        false)));
             caseDataUpdated.put(DOCUMENT_FIELD_C8,
-                                generateDocumentField(generateDocument(authorisation, fl401C8Template, caseData,
+                                generateDocumentField(fl401C8Filename,generateDocument(authorisation, fl401C8Template, caseData,
                                                                        false)));
         }
 
         if (documentLanguage.isGenWelsh()) {
             caseDataUpdated.put("isWelshDocGen", Yes.toString());
             caseDataUpdated.put(DOCUMENT_FIELD_FINAL_WELSH,
-                                generateDocumentField(generateDocument(authorisation, fl401FinalWelshTemplate,
+                                generateDocumentField(fl401FinalWelshFilename,generateDocument(authorisation, fl401FinalWelshTemplate,
                                                                        caseData, true)));
             caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH,
-                                generateDocumentField(generateDocument(authorisation, fl401C8WelshTemplate, caseData,
+                                generateDocumentField(fl401C8WelshFilename,generateDocument(authorisation, fl401C8WelshTemplate, caseData,
                                                                        true)));
         }
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
@@ -231,7 +231,7 @@ public class FL401SubmitApplicationController {
             .build();
     }
 
-    private Document generateDocumentField(GeneratedDocumentInfo generatedDocumentInfo) {
+    private Document generateDocumentField(String fileName,GeneratedDocumentInfo generatedDocumentInfo) {
         if (null == generatedDocumentInfo) {
             return null;
         }
@@ -239,7 +239,7 @@ public class FL401SubmitApplicationController {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(fl401FinalFilename).build();
+            .documentFileName(fileName).build();
     }
 
     private GeneratedDocumentInfo generateDocument(String authorisation, String template, CaseData caseData,
