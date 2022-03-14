@@ -19,6 +19,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
@@ -30,7 +31,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
@@ -102,23 +102,16 @@ public class EventsChecker {
     FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
 
     @Autowired
+    UploadDocumentChecker uploadDocumentChecker;
+
+    @Autowired
     FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
     @Autowired
     WithoutNoticeOrderChecker withoutNoticeOrderChecker;
 
     @Autowired
-    UploadDocumentChecker uploadDocumentChecker;
-
-    @Autowired
-    StatementTruthSubmitChecker statementTruthSubmitChecker;
-
-
-
-
-    @Autowired
     FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
-
 
     private EnumMap<Event, EventChecker> eventStatus = new EnumMap<Event, EventChecker>(Event.class);
 
@@ -148,7 +141,7 @@ public class EventsChecker {
         eventStatus.put(RESPONDENT_BEHAVIOUR, respondentBehaviourChecker);
         eventStatus.put(WITHOUT_NOTICE_ORDER, withoutNoticeOrderChecker);
         eventStatus.put(FL401_APPLICANT_FAMILY_DETAILS, fl401ApplicantFamilyChecker);
-        eventStatus.put(UPLOAD_DOCUMENTS, uploadDocumentChecker);
+        eventStatus.put(FL401_UPLOAD_DOCUMENTS, uploadDocumentChecker);
         eventStatus.put(FL401_OTHER_PROCEEDINGS, fl401OtherProceedingsChecker);
         eventStatus.put(FL401_SOT_AND_SUBMIT, fl401StatementOfTruthAndSubmitChecker);
 

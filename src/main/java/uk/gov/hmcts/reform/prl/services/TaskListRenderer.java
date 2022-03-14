@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
@@ -46,7 +47,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
@@ -143,7 +143,7 @@ public class TaskListRenderer {
         switch (task.getState()) {
 
             case NOT_STARTED:
-                if (task.getEvent().equals(VIEW_PDF_DOCUMENT)) {
+                if (task.getEvent().equals(VIEW_PDF_DOCUMENT) || task.getEvent().equals(FL401_UPLOAD_DOCUMENTS)) {
                     lines.add(taskListRenderElements.renderLink(task));
                 } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
@@ -232,7 +232,7 @@ public class TaskListRenderer {
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
         final TaskSection uploadDocuments = newSection("Upload documents")
-            .withTask(tasks.get(UPLOAD_DOCUMENTS));
+            .withTask(tasks.get(FL401_UPLOAD_DOCUMENTS));
 
         final TaskSection checkAndSignApplication = newSection("Check and sign application")
             .withTask(tasks.get(VIEW_PDF_DOCUMENT))
