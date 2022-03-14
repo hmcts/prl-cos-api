@@ -61,6 +61,7 @@ import javax.json.JsonValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -604,7 +605,8 @@ public class CallbackControllerTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        CaseData caseData = CaseData.builder().children(listOfChildren).childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+        CaseData caseData = CaseData.builder().children(listOfChildren)
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
@@ -743,9 +745,6 @@ public class CallbackControllerTest {
             .applicantsRelationshipToChild(specialGuardian)
             .respondentsRelationshipToChild(father)
             .childLiveWith(Collections.singletonList(anotherPerson))
-            //.childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-            // .childrenKnownToLocalAuthorityTextArea("Test")
-            //.childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .parentalResponsibilityDetails("test")
             .build();
@@ -753,7 +752,8 @@ public class CallbackControllerTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        CaseData caseData = CaseData.builder().children(listOfChildren).childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+        CaseData caseData = CaseData.builder().children(listOfChildren)
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
@@ -762,12 +762,12 @@ public class CallbackControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
+        doNothing().when(allTabsService).updateAllTabs(any(CaseData.class));
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         callbackController.updateApplication(authToken, callbackRequest);
 
-        verify(allTabsService, times(1)).getAllTabsFields(any(CaseData.class));
+        verify(allTabsService, times(1)).updateAllTabs(any(CaseData.class));
     }
 
     @Test
