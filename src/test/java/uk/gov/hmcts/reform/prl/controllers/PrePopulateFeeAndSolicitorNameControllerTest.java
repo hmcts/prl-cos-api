@@ -187,6 +187,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     public void testWhenControllerCalledOneInvokeToDgsService() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -199,9 +201,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .thenReturn(court);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
+        when(submitAndPayChecker.hasMandatoryCompleted(callbackRequest.getCaseDetails().getCaseData())).thenReturn(true);
         prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
-
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
