@@ -389,7 +389,7 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse sendEmailNotificationOnCaseWithdraw(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws Exception {
+    ) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
@@ -417,7 +417,7 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse sendEmailForSendToGatekeeper(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws Exception {
+    ) {
 
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseWorkerEmailService.sendEmailToGateKeeper(caseDetails);
