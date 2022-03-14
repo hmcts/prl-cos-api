@@ -539,8 +539,6 @@ public class CaseData implements MappableObject {
     @JsonProperty("viewPDFlinkLabelText")
     private String viewPdfLinkLabelText;
 
-    private String viewPDFlinkLabelText;
-
 
     /**
      *  FL401 submit status flags.
