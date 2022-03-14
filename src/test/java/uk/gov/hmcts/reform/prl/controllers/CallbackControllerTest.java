@@ -50,7 +50,6 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -473,12 +472,12 @@ public class CallbackControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-        doNothing().when(allTabsService).updateAllTabs(any(CaseData.class));
+        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         callbackController.updateApplication(authToken, callbackRequest);
 
-        verify(allTabsService, times(1)).updateAllTabs(any(CaseData.class));
+        verify(allTabsService, times(1)).getAllTabsFields(any(CaseData.class));
     }
 
     @Test
