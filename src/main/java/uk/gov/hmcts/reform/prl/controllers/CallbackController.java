@@ -133,6 +133,8 @@ public class CallbackController {
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
 
+    public static final String PRL_FL401_DRAFT_TEMPLATE = "FL401-draft.docx";
+
     private final DgsService dgsService;
     private final ObjectMapper objectMapper;
     private final AllTabServiceImpl allTabsService;
@@ -402,18 +404,13 @@ public class CallbackController {
 
     @PostMapping(path = "/update-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to refresh the tabs")
-    public AboutToStartOrSubmitCallbackResponse updateApplication(
+    public void updateApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-
-        caseDataUpdated.putAll(allTabsFields);
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        allTabsService.updateAllTabs(caseData);
     }
 
     @PostMapping(path = "/case-withdrawn-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
