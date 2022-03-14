@@ -152,9 +152,6 @@ courtfinder:
   api:
     url: http://fact-api-aat.service.core-compute-aat.internal/
 
-launchdarkly:
-  sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
-
 rd_professional:
   api:
     url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}
@@ -166,3 +163,7 @@ send-grid:
     email:
       to: PRL.Auto@justice.gov.uk
       from: ca@mail-prl-nonprod.aat.platform.hmcts.net
+    url: http://rd-professional-api-aat.service.core-compute-aat.internal
+
+launchdarkly:
+  sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}

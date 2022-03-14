@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
 
 import static java.util.Optional.ofNullable;
@@ -175,7 +176,7 @@ public class AllegationsOfHarmMapper {
 
         Optional<List<Element<Behaviours>>> behavioursElementsCheck = ofNullable(behaviours);
         if (behavioursElementsCheck.isEmpty()) {
-            return null;
+            return JsonValue.EMPTY_JSON_ARRAY;
         }
         List<Behaviours> behavioursList = behaviours.stream()
             .map(Element::getValue)
