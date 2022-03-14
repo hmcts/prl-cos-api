@@ -237,8 +237,7 @@ public class FL401SubmitApplicationController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public CallbackResponse fl401SendApplicationNotification(@RequestHeader("Authorization")
                                                                      String authorisation,
-                                                                   @RequestBody CallbackRequest callbackRequest)
-        throws Exception {
+                                                                   @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
