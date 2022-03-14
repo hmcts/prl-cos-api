@@ -18,8 +18,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -144,6 +146,24 @@ public class CallbackController {
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = organisationService.getApplicantOrganisationDetailsForFL401(caseData);
+            Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
+            if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(
+                FL401OrderTypeEnum.occupationOrder)
+                && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
+                caseData = caseData.toBuilder().build();
+                log.info("Case date with Home ----{}---- and respondent bahaviour === {} =====",
+                         caseData.getHome(), caseData.getRespondentBehaviourData());
+            } else  if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+                caseData = caseData.toBuilder()
+                    .respondentBehaviourData(null)
+                    .build();
+                log.info("Case date with respondent bahaviour === {} =====", caseData.getRespondentBehaviourData());
+            } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
+                caseData = caseData.toBuilder()
+                    .home(null)
+                    .build();
+                log.info("Case date with home details === {} =====", caseData.getHome());
+            }
         }
         return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse
             .builder()
@@ -290,15 +310,14 @@ public class CallbackController {
             PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? PRL_DRAFT_TEMPLATE
                 : PRL_FL401_DRAFT_TEMPLATE
         );
-        CaseData updatedCaseData = CaseData.builder().draftOrderDoc(Document.builder().documentUrl(
+
+        return CaseData.builder().draftOrderDoc(Document.builder().documentUrl(
             generatedDocumentInfo.getUrl()).documentBinaryUrl(
             generatedDocumentInfo.getBinaryUrl()).documentHash(generatedDocumentInfo.getHashToken()).documentFileName(
             PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                 ? DRAFT_C_100_APPLICATION : DRAFT_FL401_APPLICATION + CommonUtils.formatCurrentDate("ddMMM").toLowerCase() + ".pdf").build()).build();
-
-        return updatedCaseData;
     }
-  
+
     @PostMapping(path = "/copy-FL401-case-name-to-C100", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Copy fl401 case name to C100 Case name")
     @ApiResponses(value = {

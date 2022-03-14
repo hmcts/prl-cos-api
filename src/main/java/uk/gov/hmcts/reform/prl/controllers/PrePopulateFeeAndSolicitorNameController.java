@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,7 @@ public class PrePopulateFeeAndSolicitorNameController {
     private UserService userService;
 
     private final CourtFinderService courtLocatorService;
+    private final SubmitAndPayChecker submitAndPayChecker;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -63,45 +65,56 @@ public class PrePopulateFeeAndSolicitorNameController {
     public CallbackResponse prePoppulateSolicitorAndFees(@RequestHeader("Authorization") String authorisation,
                                                          @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<String> errorList = new ArrayList<>();
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        FeeResponse feeResponse = null;
-        try {
-            feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
-        } catch (Exception e) {
-            errorList.add(e.getMessage());
-            return CallbackResponse.builder()
-                .errors(errorList)
-                .build();
+        CaseData caseData = null;
+        boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
+                                                                                     .getCaseDetails().getCaseData());
+
+        if (!mandatoryEventStatus) {
+            errorList.add(
+                "Submit and pay is not allowed for this case unless you finish all the mandatory events");
+        } else {
+
+            UserDetails userDetails = userService.getUserDetails(authorisation);
+            FeeResponse feeResponse = null;
+            try {
+                feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+            } catch (Exception e) {
+                errorList.add(e.getMessage());
+                return CallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
+            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+                authorisation,
+                callbackRequest.getCaseDetails(),
+                PRL_DRAFT_TEMPLATE
+            );
+
+            Court closestChildArrangementsCourt = courtLocatorService
+                .getNearestFamilyCourt(callbackRequest.getCaseDetails()
+                                           .getCaseData());
+
+            caseData = objectMapper.convertValue(
+                CaseData.builder()
+                    .solicitorName(userDetails.getFullName())
+                    .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
+                    .applicantSolicitorEmailAddress(userDetails.getEmail())
+                    .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
+                    .feeAmount("£" + feeResponse.getAmount().toString())
+                    .submitAndPayDownloadApplicationLink(Document.builder()
+                                                             .documentUrl(generatedDocumentInfo.getUrl())
+                                                             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                             .documentHash(generatedDocumentInfo.getHashToken())
+                                                             .documentFileName(DRAFT_C_100_APPLICATION).build())
+                    .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
+                    .build(),
+                CaseData.class
+            );
         }
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-            callbackRequest.getCaseDetails(),
-            PRL_DRAFT_TEMPLATE
-        );
-
-        Court closestChildArrangementsCourt = courtLocatorService
-            .getNearestFamilyCourt(callbackRequest.getCaseDetails()
-                                                  .getCaseData());
-
-        CaseData caseData = objectMapper.convertValue(
-            CaseData.builder()
-                .solicitorName(userDetails.getFullName())
-                .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
-                .applicantSolicitorEmailAddress(userDetails.getEmail())
-                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
-                .feeAmount("£" + feeResponse.getAmount().toString())
-                .submitAndPayDownloadApplicationLink(Document.builder()
-                                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                                         .documentFileName(DRAFT_C_100_APPLICATION).build())
-                .courtName((closestChildArrangementsCourt != null)  ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
-                .build(),
-            CaseData.class
-        );
 
         return CallbackResponse.builder()
             .data(caseData)
+            .errors(errorList)
             .build();
 
     }
