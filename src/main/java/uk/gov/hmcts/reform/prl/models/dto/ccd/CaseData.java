@@ -539,6 +539,7 @@ public class CaseData implements MappableObject {
     @JsonProperty("viewPDFlinkLabelText")
     private String viewPdfLinkLabelText;
 
+    private String submitAndPayDownloadApplicationLinkText;
 
 
     /**
