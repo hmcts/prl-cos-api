@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.json.JsonObject;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -80,7 +79,7 @@ public class ApplicantsMapperTest {
         applicants = null;
         assertEquals(Collections.emptyList(),applicantsMapper.map(applicants, applicantSolicitorMap));
     }
-  
+
     @Test
     public void testIfApplicantsIsEmpty() {
         applicants = Collections.emptyList();
