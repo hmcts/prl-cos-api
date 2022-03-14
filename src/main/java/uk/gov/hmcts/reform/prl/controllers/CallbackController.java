@@ -146,12 +146,11 @@ public class CallbackController {
             caseData = organisationService.getApplicantOrganisationDetailsForFL401(caseData);
         }
         CaseData updatedCaseData = getUpdatedCaseDataWithDoc(authorisation, caseData);
-        CaseData fieldAdded = updatedCaseData.toBuilder().submitAndPayDownloadApplicationLinkText(
-            PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "C100 draft" : "FL401 draft"
-        ).build();
+        updatedCaseData.setSubmitAndPayDownloadApplicationLinkText(
+            PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "C100 draft" : "FL401");
         return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse
             .builder()
-            .data(fieldAdded)
+            .data(updatedCaseData)
             .build();
     }
 
