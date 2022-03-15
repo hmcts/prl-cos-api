@@ -39,17 +39,34 @@ import java.util.WeakHashMap;
 
 public class WelshLangMapper {
 
+    public static final String WELSH_NO = "Nac ydy";
+    public static final String WELSH_NO_NAC_YDW = "Nac ydw";
+    public static final String WELSH_YES_GALLAF = "Gallaf";
+    public static final String WELSH_NO_NA_ALLAF = "Na allaf";
+    public static final String WELSH_YES_OES = "Oes";
+    public static final String WELSH_NO_NAC_OES = "Nac oes";
+    public static final String WELSH_NO_NA_FYDD = "Na fydd";
+    public static final String WELSH_OTHER = "Arall";
+    public static final String WELSH_APPLICANT = "Ceisydd";
+    public static final String WELSH_RESPONDENT = "Atebydd";
+    public static final String CAN_YOU_PROVIDE_EMAIL_ADDRESS_YES = "canYouProvideEmailAddress_Yes";
+    public static final String CAN_YOU_PROVIDE_EMAIL_ADDRESS_NO = "canYouProvideEmailAddress_No";
+
+    private WelshLangMapper() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * C100 Welsh Lang Map.
      */
-    public static final Map<String, String> CA_WELSH_MAP = getCaWelshLangMap();
-    public static final List<String> CA_WELSH_CONDITONAL_MAP = getCaConditionalFieldWelshLangMap();
+    protected static final Map<String, String> CA_WELSH_MAP = getCaWelshLangMap();
+    protected static final List<String> CA_WELSH_CONDITONAL_MAP = getCaConditionalFieldWelshLangMap();
 
     /**
      * FL401 Welsh Lang Map.
      */
-    public static final Map<String, String> DA_WELSH_MAP = getDaWelshLangMap();
-    public static final List<String> DA_WELSH_CONDITONAL_MAP = getDaConditionalFieldWelshLangMap();
+    protected static final Map<String, String> DA_WELSH_MAP = getDaWelshLangMap();
+    protected static final List<String> DA_WELSH_CONDITONAL_MAP = getDaConditionalFieldWelshLangMap();
 
     /**
      * Recursive mapper for replacing the English to Welsh.
@@ -122,7 +139,7 @@ public class WelshLangMapper {
          * Common Utils - Yes,No,Information is to be kept confidential,Gender,Don't know.
          */
         welshMap.put(YesOrNo.Yes.toString(), "Ydy");
-        welshMap.put(YesOrNo.No.toString(), "Nac ydy");
+        welshMap.put(YesOrNo.No.toString(), WELSH_NO);
         welshMap.put("confidential_mask", "Rhaid cadw’r wybodaeth hon yn gyfrinachol");
         welshMap.put(DontKnow.dontKnow.getDisplayedValue(), "Ddim yn gwybod");
         welshMap.put(Gender.female.getDisplayedValue(), "Benyw");     //will need as a condition
@@ -159,9 +176,9 @@ public class WelshLangMapper {
          * Hearing urgency - Do you need a without notice hearing?.
          */
         welshMap.put("doYouNeedAWithoutNoticeHearing_Yes", "Ydw");
-        welshMap.put("doYouNeedAWithoutNoticeHearing_No", "Nac ydw");
+        welshMap.put("doYouNeedAWithoutNoticeHearing_No", WELSH_NO_NAC_YDW);
         welshMap.put("doYouRequireAHearingWithReducedNotice_Yes", "Ydw");
-        welshMap.put("doYouRequireAHearingWithReducedNotice_No", "Nac ydw");
+        welshMap.put("doYouRequireAHearingWithReducedNotice_No", WELSH_NO_NAC_YDW);
 
 
         /**
@@ -175,19 +192,19 @@ public class WelshLangMapper {
          * Applicant -Details - Do you need to keep the address confidential?.
          */
         welshMap.put("isAddressConfidential_Yes", "Ydw");
-        welshMap.put("isAddressConfidential_No", "Nac ydw");
+        welshMap.put("isAddressConfidential_No", WELSH_NO_NAC_YDW);
 
         /**
          * Applicant -Details - Can you provide email address?.
          */
-        welshMap.put("canYouProvideEmailAddress_Yes", "Gallaf");
-        welshMap.put("canYouProvideEmailAddress_No", "Na allaf");
+        welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_YES, WELSH_YES_GALLAF);
+        welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_NO, WELSH_NO_NA_ALLAF);
 
         /**
          * Applicant -Details - Do you need to keep the contact number confidential?.
          */
         welshMap.put("isPhoneNumberConfidential_Yes", "Ydw");
-        welshMap.put("isPhoneNumberConfidential_No", "Nac ydw");
+        welshMap.put("isPhoneNumberConfidential_No", WELSH_NO_NAC_YDW);
 
         /**
          * Child Details - What is the applicant's relationship to child?
@@ -200,13 +217,13 @@ public class WelshLangMapper {
         welshMap.put(RelationshipsEnum.grandParent.getDisplayedValue(), "Nain/Taid");
         welshMap.put(RelationshipsEnum.guardian.getDisplayedValue(), "Gwarcheidwad");
         welshMap.put(RelationshipsEnum.specialGuardian.getDisplayedValue(), "Gwarcheidwad Arbennig");
-        welshMap.put(RelationshipsEnum.other.getDisplayedValue(), "Arall");
+        welshMap.put(RelationshipsEnum.other.getDisplayedValue(), WELSH_OTHER);
 
         /**
          * Child Details - Who does the child live with? (childLiveWith).
          */
-        welshMap.put(LiveWithEnum.applicant.getDisplayedValue(), "Ceisydd");
-        welshMap.put(LiveWithEnum.respondent.getDisplayedValue(), "Atebydd");
+        welshMap.put(LiveWithEnum.applicant.getDisplayedValue(), WELSH_APPLICANT);
+        welshMap.put(LiveWithEnum.respondent.getDisplayedValue(), WELSH_RESPONDENT);
         welshMap.put(LiveWithEnum.anotherPerson.getDisplayedValue(), "Unigolyn arall nad yw wedi’i restru");
 
         /**
@@ -214,25 +231,25 @@ public class WelshLangMapper {
          * (isPersonIdentityConfidential).
          */
         welshMap.put("isPersonIdentityConfidential_Yes", "Ydw");
-        welshMap.put("isPersonIdentityConfidential_No", "Nac ydw");
+        welshMap.put("isPersonIdentityConfidential_No", WELSH_NO_NAC_YDW);
 
         /**
          * Respondent - Can you provide email address?.
          */
-        welshMap.put("canYouProvideEmailAddress_Yes", "Gallaf");
-        welshMap.put("canYouProvideEmailAddress_No", "Na allaf");
+        welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_YES, WELSH_YES_GALLAF);
+        welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_NO, WELSH_NO_NA_ALLAF);
 
         /**
          * Respondent - Can you provide a contact number?.
          */
-        welshMap.put("canYouProvidePhoneNumber_Yes", "Gallaf");
-        welshMap.put("canYouProvidePhoneNumber_No", "Na allaf");
+        welshMap.put("canYouProvidePhoneNumber_Yes", WELSH_YES_GALLAF);
+        welshMap.put("canYouProvidePhoneNumber_No", WELSH_NO_NA_ALLAF);
 
         /**
          * Respondent - Do they have legal representation?.
          */
-        welshMap.put("doTheyHaveLegalRepresentation_Yes", "Nac oes");
-        welshMap.put("doTheyHaveLegalRepresentation_No", "Oes");
+        welshMap.put("doTheyHaveLegalRepresentation_Yes", WELSH_YES_OES);
+        welshMap.put("doTheyHaveLegalRepresentation_No", WELSH_NO_NAC_OES);
 
         /**
          * MIAM.
@@ -247,7 +264,7 @@ public class WelshLangMapper {
             MiamExemptionsChecklistEnum.previousMIAMattendance.getDisplayedValue(),
             "Eisoes wedi mynychu MIAM neu esemptiad MIAM blaenorol"
         );
-        welshMap.put(MiamExemptionsChecklistEnum.other.getDisplayedValue(), "Arall");
+        welshMap.put(MiamExemptionsChecklistEnum.other.getDisplayedValue(), WELSH_OTHER);
         welshMap.put(
             MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_22.getDisplayedValue(),
             "Tystiolaeth sy’n dangos bod darpar barti wedi bod,"
@@ -499,39 +516,43 @@ public class WelshLangMapper {
         /**
          * Allegations of harm.
          */
-        welshMap.put("allegationsOfHarmYesNo_Yes", "Oes");
-        welshMap.put("allegationsOfHarmYesNo_No", "Nac oes");
-        welshMap.put("allegationsOfHarmDomesticAbuseYesNo_Yes", "Oes");
-        welshMap.put("allegationsOfHarmDomesticAbuseYesNo_No", "Nac oes");
+        welshMap.put("allegationsOfHarmYesNo_Yes", WELSH_YES_OES);
+        welshMap.put("allegationsOfHarmYesNo_No", WELSH_NO_NAC_OES);
+        welshMap.put("allegationsOfHarmDomesticAbuseYesNo_Yes", WELSH_YES_OES);
+        welshMap.put("allegationsOfHarmDomesticAbuseYesNo_No", WELSH_NO_NAC_OES);
         welshMap.put(ApplicantOrChildren.applicants.getDisplayedValue(), "Ceisydd/Ceiswyr");
         welshMap.put(ApplicantOrChildren.children.getDisplayedValue(), "Plentyn/Plant");
         welshMap.put(AbductionChildPassportPossessionEnum.mother.getDisplayedValue(), "Mam");
         welshMap.put(AbductionChildPassportPossessionEnum.father.getDisplayedValue(), "Tad");
-        welshMap.put(AbductionChildPassportPossessionEnum.other.getDisplayedValue(), "Arall");
-        welshMap.put("allegationsOfHarmChildAbductionYesNo_Yes", "Oes");
-        welshMap.put("allegationsOfHarmChildAbductionYesNo_No", "Nac oes");
-        welshMap.put("allegationsOfHarmChildAbuseYesNo_Yes", "Oes");
-        welshMap.put("allegationsOfHarmChildAbuseYesNo_No", "Nac oes");
-        welshMap.put("allegationsOfHarmSubstanceAbuseYesNo_Yes", "Oes");
-        welshMap.put("allegationsOfHarmSubstanceAbuseYesNo_No", "Nac oes");
-        welshMap.put("allegationsOfHarmOtherConcernsYesNo_Yes", "Oes");
-        welshMap.put("allegationsOfHarmOtherConcernsYesNo_No", "Nac oes");
-        welshMap.put("ordersNonMolestation_Yes", "Oes");
-        welshMap.put("ordersNonMolestation_No", "Nac oes");
-        welshMap.put("ordersOccupation_Yes", "Oes");
-        welshMap.put("ordersOccupation_No", "Nac oes");
-        welshMap.put("ordersForcedMarriageProtection_Yes", "Oes");
-        welshMap.put("ordersForcedMarriageProtection_No", "Nac oes");
-        welshMap.put("ordersRestraining_Yes", "Oes");
-        welshMap.put("ordersRestraining_No", "Nac oes");
-        welshMap.put("ordersOtherInjunctive_Yes", "Oes");
-        welshMap.put("ordersOtherInjunctive_No", "Nac oes");
-        welshMap.put("ordersUndertakingInPlace_Yes", "Oes");
-        welshMap.put("ordersUndertakingInPlace_No", "Nac oes");
-        welshMap.put("abductionChildHasPassport_Yes", "Oes");
-        welshMap.put("abductionChildHasPassport_No", "Nac oes");
-        welshMap.put("abductionPreviousPoliceInvolvement_Yes", " "); //missing from excel
-        welshMap.put("abductionPreviousPoliceInvolvement_No", " ");
+        welshMap.put(AbductionChildPassportPossessionEnum.other.getDisplayedValue(), WELSH_OTHER);
+        welshMap.put("allegationsOfHarmChildAbductionYesNo_Yes", WELSH_YES_OES);
+        welshMap.put("allegationsOfHarmChildAbductionYesNo_No", WELSH_NO_NAC_OES);
+
+        welshMap.put("allegationsOfHarmChildAbuseYesNo_No", WELSH_NO_NAC_OES);
+        welshMap.put("allegationsOfHarmChildAbuseYesNo_Yes", WELSH_YES_OES);
+
+        welshMap.put("allegationsOfHarmSubstanceAbuseYesNo_Yes", WELSH_YES_OES);
+        welshMap.put("allegationsOfHarmOtherConcernsYesNo_Yes", WELSH_YES_OES);
+        welshMap.put("allegationsOfHarmSubstanceAbuseYesNo_No", WELSH_NO_NAC_OES);
+        welshMap.put("allegationsOfHarmOtherConcernsYesNo_No", WELSH_NO_NAC_OES);
+
+        welshMap.put("ordersNonMolestation_No", WELSH_NO_NAC_OES);
+        welshMap.put("ordersOccupation_Yes", WELSH_YES_OES);
+        welshMap.put("ordersOccupation_No", WELSH_NO_NAC_OES);
+        welshMap.put("ordersNonMolestation_Yes", WELSH_YES_OES);
+
+        welshMap.put("ordersForcedMarriageProtection_Yes", WELSH_YES_OES);
+        welshMap.put("ordersRestraining_Yes", WELSH_YES_OES);
+        welshMap.put("ordersOtherInjunctive_Yes", WELSH_YES_OES);
+        welshMap.put("ordersForcedMarriageProtection_No", WELSH_NO_NAC_OES);
+        welshMap.put("ordersRestraining_No", WELSH_NO_NAC_OES);
+        welshMap.put("ordersOtherInjunctive_No", WELSH_NO_NAC_OES);
+
+        welshMap.put("ordersUndertakingInPlace_Yes", WELSH_YES_OES);
+        welshMap.put("ordersUndertakingInPlace_No", WELSH_NO_NAC_OES);
+        welshMap.put("abductionChildHasPassport_No", WELSH_NO_NAC_OES);
+        welshMap.put("abductionChildHasPassport_Yes", WELSH_YES_OES);
+
 
         /**
          * Other Proceedings.
@@ -561,7 +582,7 @@ public class WelshLangMapper {
         /**
          * Attending the hearing.*/
         welshMap.put("isWelshNeeded_yes", "Bydd");
-        welshMap.put("isWelshNeeded_no", "Na fydd");
+        welshMap.put("isWelshNeeded_no", WELSH_NO_NA_FYDD);
         welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Byddant eisiau siarad Cymraeg");
         welshMap.put(
             SpokenOrWrittenWelshEnum.written.getDisplayedValue(),
@@ -569,30 +590,30 @@ public class WelshLangMapper {
         );
         welshMap.put(SpokenOrWrittenWelshEnum.both.getDisplayedValue(), "Y ddau");
         welshMap.put("isInterpreterNeeded_yes", "Bydd");
-        welshMap.put("isInterpreterNeeded_no", "Na fydd");
-        welshMap.put(PartyEnum.applicant.getDisplayedValue(), "Ceisydd");
-        welshMap.put(PartyEnum.respondent.getDisplayedValue(), "Atebydd");
+        welshMap.put("isInterpreterNeeded_no", WELSH_NO_NA_FYDD);
+        welshMap.put(PartyEnum.applicant.getDisplayedValue(), WELSH_APPLICANT);
+        welshMap.put(PartyEnum.respondent.getDisplayedValue(), WELSH_RESPONDENT);
         welshMap.put(PartyEnum.other.getDisplayedValue(), "Pobl eraill yn yr achos");
-        welshMap.put("isDisabilityPresent_Yes", "Oes");
-        welshMap.put("isDisabilityPresent_No", "Nac oes");
+        welshMap.put("isDisabilityPresent_Yes", WELSH_YES_OES);
+        welshMap.put("isDisabilityPresent_No", WELSH_NO_NAC_OES);
         welshMap.put("isSpecialArrangementsRequired_Yes", "Bydd");
-        welshMap.put("isSpecialArrangementsRequired_No", "Na fydd");
+        welshMap.put("isSpecialArrangementsRequired_No", WELSH_NO_NA_FYDD);
 
         /**
          * International Element.
          */
-        welshMap.put("habitualResidentInOtherState_Yes", "Oes");
-        welshMap.put("habitualResidentInOtherState_No", "Nac oes");
-        welshMap.put("jurisdictionIssue_Yes", "Oes");
-        welshMap.put("jurisdictionIssue_No", "Nac oes");
-        welshMap.put("requestToForeignAuthority_Yes", "Oes");
-        welshMap.put("requestToForeignAuthority_No", "Nac oes");
+        welshMap.put("habitualResidentInOtherState_Yes", WELSH_YES_OES);
+        welshMap.put("habitualResidentInOtherState_No", WELSH_NO_NAC_OES);
+        welshMap.put("jurisdictionIssue_Yes", WELSH_YES_OES);
+        welshMap.put("jurisdictionIssue_No", WELSH_NO_NAC_OES);
+        welshMap.put("requestToForeignAuthority_Yes", WELSH_YES_OES);
+        welshMap.put("requestToForeignAuthority_No", WELSH_NO_NAC_OES);
 
         /**
          * Litigation capacity.
          */
         welshMap.put("litigationCapacityOtherFactors_Yes", "Ydw");
-        welshMap.put("litigationCapacityOtherFactors_No", "Nac ydw");
+        welshMap.put("litigationCapacityOtherFactors_No", WELSH_NO_NAC_YDW);
 
         /**
          * Welsh language requirement.
@@ -614,16 +635,6 @@ public class WelshLangMapper {
         return Arrays.asList("");
     }
 
-    // Getting Da conditional fields and Rendering from document...
-    private static List<String> getDaConditionalAndRenderingFieldWelshLangMap() {
-        return Arrays.asList(
-            "gender",
-            "applicantsFL401.isAddressConfidential",
-            "applicantsFL401.isEmailAddressConfidential",
-            "applicantsFL401.isPhoneNumberConfidential"
-        );
-    }
-
     private static Map<String, String> getDaWelshLangMap() {
 
         Map<String, String> welshMap = new WeakHashMap<>();
@@ -632,7 +643,7 @@ public class WelshLangMapper {
          * Common Utils Yes, No, Don't know.
          */
         welshMap.put(YesOrNo.Yes.toString(), "Ydy");
-        welshMap.put(YesOrNo.No.toString(), "Nac ydy");
+        welshMap.put(YesOrNo.No.toString(), WELSH_NO);
         welshMap.put(DontKnow.dontKnow.getDisplayedValue(), "Ddim yn gwybod");
         welshMap.put(Gender.female.getDisplayedValue(), "Benywaidd");
         welshMap.put(Gender.male.getDisplayedValue(), "Gwrywaidd");
@@ -648,7 +659,7 @@ public class WelshLangMapper {
          * Without notice order. reasonForOrderWithoutGivingNotice.
          */
         welshMap.put("orderWithoutGivingNotice_Yes", "Ydw");
-        welshMap.put("orderWithoutGivingNotice_No", "Nac ydw");
+        welshMap.put("orderWithoutGivingNotice_No", WELSH_NO_NAC_YDW);
 
         /**
          * Without notice order - Why do you want to apply without giving notice to the respondent?.
@@ -673,24 +684,22 @@ public class WelshLangMapper {
         /**
          * Applicant's Details. applicantsFL401.
          */
-        welshMap.put("isAddressConfidential_Yes", "Oes");
-        welshMap.put("isAddressConfidential_No", "Nac oes");
-        welshMap.put("isEmailAddressConfidential_Yes", "Oes");
-        welshMap.put("isEmailAddressConfidential_No", "Nac oes");
-        welshMap.put("canYouProvideEmailAddress_Yes", "Gallaf");
-        welshMap.put("canYouProvideEmailAddress_No", "Na allaf");
-        welshMap.put("isPhoneNumberConfidential_Yes", "Oes");
-        welshMap.put("isPhoneNumberConfidential_No", "Nac oes");
+        welshMap.put("isAddressConfidential_Yes", WELSH_YES_OES);
+        welshMap.put("isAddressConfidential_No", WELSH_NO_NAC_OES);
+        welshMap.put("isEmailAddressConfidential_Yes", WELSH_YES_OES);
+        welshMap.put("isEmailAddressConfidential_No", WELSH_NO_NAC_OES);
+        welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_YES, WELSH_YES_GALLAF);
+        welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_NO, WELSH_NO_NA_ALLAF);
+        welshMap.put("isPhoneNumberConfidential_Yes", WELSH_YES_OES);
+        welshMap.put("isPhoneNumberConfidential_No", WELSH_NO_NAC_OES);
 
         /**
          * Respondent Details. respondentsFL401.
          */
         welshMap.put("isCurrentAddressKnown_Yes", "Ydw");
-        welshMap.put("isCurrentAddressKnown_No", "Nac ydw");
-        //welshMap.put("canYouProvideEmailAddress_Yes","Gallaf");
-        //welshMap.put("canYouProvideEmailAddress_No","Na allaf");
-        welshMap.put("canYouProvidePhoneNumber_Yes", "Gallaf");
-        welshMap.put("canYouProvidePhoneNumber_No", "Na allaf");
+        welshMap.put("isCurrentAddressKnown_No", WELSH_NO_NAC_YDW);
+        welshMap.put("canYouProvidePhoneNumber_Yes", WELSH_YES_GALLAF);
+        welshMap.put("canYouProvidePhoneNumber_No", WELSH_NO_NA_ALLAF);
 
         /**
          * Relationship to respondent.
@@ -748,7 +757,7 @@ public class WelshLangMapper {
         welshMap.put(ApplicantRelationshipOptionsEnum.nephew.getDisplayedValue(), "Nai");
         welshMap.put(ApplicantRelationshipOptionsEnum.neice.getDisplayedValue(), "Nith");
         welshMap.put(ApplicantRelationshipOptionsEnum.cousin.getDisplayedValue(), "Cefnder/Cyfnither");
-        welshMap.put(ApplicantRelationshipOptionsEnum.other.getDisplayedValue(), "Arall");
+        welshMap.put(ApplicantRelationshipOptionsEnum.other.getDisplayedValue(), WELSH_OTHER);
 
         /**
          * Applicant's Family 2 questions with answer yes no is missing in execel.
@@ -826,22 +835,22 @@ public class WelshLangMapper {
         welshMap.put(YesNoBothEnum.yesBothOfThem.getDisplayedValue(), "Ydynt, y ddau ohonynt");
         welshMap.put(YesNoBothEnum.yesApplicant.getDisplayedValue(), "Ydy, y ceisydd");
         welshMap.put(YesNoBothEnum.yesRespondent.getDisplayedValue(), "Ydy, yr atebydd");
-        welshMap.put(YesNoBothEnum.No.getDisplayedValue(), "Nac ydy");
-        welshMap.put("doAnyChildrenLiveAtAddress_Yes", "Oes");
-        welshMap.put("doAnyChildrenLiveAtAddress_No", "Nac oes");
-        welshMap.put("keepChildrenInfoConfidential_Yes", "Oes");
-        welshMap.put("keepChildrenInfoConfidential_No", "Nac oes");
-        welshMap.put("isRespondentResponsibleForChild_Yes", "Oes");
-        welshMap.put("isRespondentResponsibleForChild_No", "Nac oes");
-        welshMap.put("isPropertyAdapted_Yes", "Oes");
-        welshMap.put("isPropertyAdapted_No", "Nac oes");
-        welshMap.put("isThereMortgageOnProperty_Yes", "Oes");
-        welshMap.put("isThereMortgageOnProperty_No", "Nac oes");
+        welshMap.put(YesNoBothEnum.No.getDisplayedValue(), WELSH_NO);
+        welshMap.put("doAnyChildrenLiveAtAddress_Yes", WELSH_YES_OES);
+        welshMap.put("doAnyChildrenLiveAtAddress_No", WELSH_NO_NAC_OES);
+        welshMap.put("keepChildrenInfoConfidential_Yes", WELSH_YES_OES);
+        welshMap.put("isRespondentResponsibleForChild_Yes", WELSH_YES_OES);
+        welshMap.put("keepChildrenInfoConfidential_No", WELSH_NO_NAC_OES);
+        welshMap.put("isRespondentResponsibleForChild_No", WELSH_NO_NAC_OES);
+        welshMap.put("isPropertyAdapted_Yes", WELSH_YES_OES);
+        welshMap.put("isPropertyAdapted_No", WELSH_NO_NAC_OES);
+        welshMap.put("isThereMortgageOnProperty_Yes", WELSH_YES_OES);
+        welshMap.put("isThereMortgageOnProperty_No", WELSH_NO_NAC_OES);
         welshMap.put(MortgageNamedAfterEnum.applicant.getDisplayedValue(), "Y ceisydd");
         welshMap.put(MortgageNamedAfterEnum.respondent.getDisplayedValue(), "Yr atebydd");
         welshMap.put(MortgageNamedAfterEnum.someoneElse.getDisplayedValue(), "Rhywun arall - noder");
-        welshMap.put("doesApplicantHaveHomeRights_Yes", "Oes");
-        welshMap.put("doesApplicantHaveHomeRights_No", "Nac oes");
+        welshMap.put("doesApplicantHaveHomeRights_Yes", WELSH_YES_OES);
+        welshMap.put("doesApplicantHaveHomeRights_No", WELSH_NO_NAC_OES);
         welshMap.put(LivingSituationEnum.ableToStayInHome.getDisplayedValue(),
                      "Mae'r ceisydd am allu aros yn ei gartref");
         welshMap.put(LivingSituationEnum.ableToReturnHome.getDisplayedValue(),
@@ -874,40 +883,40 @@ public class WelshLangMapper {
         /**
          * Other Proceedings. fl401OtherProceedingDetails.
          */
-        welshMap.put("hasPrevOrOngoingOtherProceeding_Yes", "Oes");
-        welshMap.put("hasPrevOrOngoingOtherProceeding_No", "Nac oes");
+        welshMap.put("hasPrevOrOngoingOtherProceeding_Yes", WELSH_YES_OES);
+        welshMap.put("hasPrevOrOngoingOtherProceeding_No", WELSH_NO_NAC_OES);
 
         /**
          * Attending the hearing.
          */
         welshMap.put("isWelshNeeded_yes", "Bydd");
-        welshMap.put("isWelshNeeded_no", "Na fydd");
+        welshMap.put("isWelshNeeded_no", WELSH_NO_NA_FYDD);
         welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Byddant eisiau siarad Cymraeg");
         welshMap.put(
             SpokenOrWrittenWelshEnum.written.getDisplayedValue(),
             "Byddant eisiau darllen ac ysgrifennu yn Gymraeg"
         );
         welshMap.put("isInterpreterNeeded_yes", "Ydw");
-        welshMap.put("isInterpreterNeeded_no", "Nac ydw");
-        welshMap.put(PartyEnum.applicant.getDisplayedValue(), "Ceisydd");
-        welshMap.put(PartyEnum.respondent.getDisplayedValue(), "Atebydd");
+        welshMap.put("isInterpreterNeeded_no", WELSH_NO_NAC_YDW);
+        welshMap.put(PartyEnum.applicant.getDisplayedValue(), WELSH_APPLICANT);
+        welshMap.put(PartyEnum.respondent.getDisplayedValue(), WELSH_RESPONDENT);
         welshMap.put(PartyEnum.other.getDisplayedValue(), "Pobl eraill yn yr achos");
-        welshMap.put("isDisabilityPresent_Yes", "Oes");
-        welshMap.put("isDisabilityPresent_No", "Nac oes");
+        welshMap.put("isDisabilityPresent_Yes", WELSH_YES_OES);
+        welshMap.put("isDisabilityPresent_No", WELSH_NO_NAC_OES);
         welshMap.put("isSpecialArrangementsRequired_Yes", "Bydd");
-        welshMap.put("isSpecialArrangementsRequired_No", "Na fydd");
+        welshMap.put("isSpecialArrangementsRequired_No", WELSH_NO_NA_FYDD);
 
         /**
          * Welsh language requirement.
          */
-        welshMap.put("welshLanguageRequirement_Yes", "Oes");
-        welshMap.put("welshLanguageRequirement_No", "Nac oes");
+        welshMap.put("welshLanguageRequirement_Yes", WELSH_YES_OES);
+        welshMap.put("welshLanguageRequirement_No", WELSH_NO_NAC_OES);
         welshMap.put(LanguagePreference.english.getDisplayedValue(), "Saesneg");
         welshMap.put(LanguagePreference.welsh.getDisplayedValue(), "Cymraeg");
-        welshMap.put("welshLanguageRequirementApplicationNeedEnglish_Yes", "Oes");
-        welshMap.put("welshLanguageRequirementApplicationNeedEnglish_No", "Nac oes");
-        welshMap.put("languageRequirementApplicationNeedWelsh_Yes", "Oes");
-        welshMap.put("languageRequirementApplicationNeedWelsh_No", "Nac oes");
+        welshMap.put("welshLanguageRequirementApplicationNeedEnglish_Yes", WELSH_YES_OES);
+        welshMap.put("welshLanguageRequirementApplicationNeedEnglish_No", WELSH_NO_NAC_OES);
+        welshMap.put("languageRequirementApplicationNeedWelsh_Yes", WELSH_YES_OES);
+        welshMap.put("languageRequirementApplicationNeedWelsh_No", WELSH_NO_NAC_OES);
 
         return welshMap;
     }
