@@ -165,7 +165,7 @@ public class FL401SubmitApplicationControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
+                             .id(12345L)
                              .data(stringObjectMap)
                              .build())
             .build();
@@ -178,6 +178,7 @@ public class FL401SubmitApplicationControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         fl401SubmitApplicationController.fl401SubmitApplicationValidation(authToken, callbackRequest);
+        verify(fl401StatementOfTruthAndSubmitChecker, times(1)).hasMandatoryCompleted(caseData);
     }
 
     @Test
