@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
-import org.hamcrest.CoreMatchers;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.hasKey;
 
 public class TaskListControllerFunctionalTest {
 

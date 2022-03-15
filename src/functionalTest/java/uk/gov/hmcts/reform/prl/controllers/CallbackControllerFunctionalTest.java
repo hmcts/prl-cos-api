@@ -5,13 +5,9 @@ import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasKey;
 
 public class CallbackControllerFunctionalTest {
 
@@ -73,23 +69,5 @@ public class CallbackControllerFunctionalTest {
                 .body("data.applicantCaseName", equalTo("testString"))
                 .assertThat().statusCode(200);
     }
-
-//    @Test
-//    public void givenValidAuthToken_whenGateKeeperEndPointCalled_thenResponseBodyContainsApplicationTabFields() throws Exception {
-//        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-//        RequestSpecification request = RestAssured.given();
-//        ValidatableResponse response =
-//            request
-//            .
-//                .body(requestBody)
-//                .when()
-//                .contentType("application/json")
-//                .post("/send-to-gatekeeper")
-//                .then()
-//                .body("$", hasKey("hearingUrgencyTable"))
-//                .assertThat().statusCode(200);
-//    }
-
-
 
 }
