@@ -1,5 +1,5 @@
 server:
-  port: 4044
+    port: 4044
 
 runs-locally: ${RUNS_LOCALLY:true}
 
@@ -106,6 +106,7 @@ payments:
   api:
     url: ${PAY_URL:}
     callback-url: ${PAY_CALLBACK_URL:}
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
 
 fees-register:
   api:
@@ -161,6 +162,8 @@ auth:
     service:
       client:
         baseUrl: http://localhost:4502
+
+
 
 resources:
   images:

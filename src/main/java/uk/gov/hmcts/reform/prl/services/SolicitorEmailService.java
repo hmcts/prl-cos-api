@@ -84,23 +84,9 @@ public class SolicitorEmailService {
     public void sendEmail(CaseDetails caseDetails) {
         log.info("Sending the email to solicitor for caseId {}", caseDetails.getId()
         );
-
+        String applicantSolicitorEmailAddress = caseDetails.getData().get("applicantSolicitorEmailAddress").toString();
         emailService.send(
-            "fprl_caseworker_solicitor@mailinator.com",
-            EmailTemplateNames.SOLICITOR,
-            buildEmail(caseDetails),
-            LanguagePreference.english
-        );
-
-    }
-
-    /*
-     * Todo TO be removed once done with fee and pay bypass
-     * */
-    public void sendEmailBypss(CaseDetails caseDetails, String authorisation) {
-        log.info("inside send email bypass");
-        emailService.send(
-            "yogendra.upasani@hmcts.net",
+            applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
             LanguagePreference.english
