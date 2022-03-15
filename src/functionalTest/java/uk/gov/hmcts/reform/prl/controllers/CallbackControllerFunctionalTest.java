@@ -3,48 +3,75 @@ package uk.gov.hmcts.reform.prl.controllers;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 
+@Slf4j
+@SpringBootTest
+@RunWith( SpringRunner.class )
+@ContextConfiguration
 public class CallbackControllerFunctionalTest {
 
-    private final String jurisdiction = "PRIVATELAW";
-    private final String caseType = "PRLAPPS";
-    private final Long caseId = 1234567887654321L;
-    private final String eventName = "system-update";
     private final String userToken = "Bearer testToken";
-    private final String serviceAuthToken = "Bearer testServiceAuth";
-    private final String systemUserId = "systemUserID";
-    private final String eventToken = "eventToken";
-    private static final String VALID_INPUT_JSON = "CallBackRequest.json";
 
-    @BeforeClass
-    public static void setup() throws Exception {
-        RestAssured.port = 4044;
-        RestAssured.baseURI = "http://localhost";
-    }
+    private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
+    private static final String MIAM_VALIDATION_REQUEST_ERROR = "requests/call-back-controller-miam-request-error.json";
+    private static final String MIAM_VALIDATION_REQUEST_NO_ERROR = "requests/call-back-controller-miam-request-no-error.json";
+    private static final String APPLICANT_CASE_NAME_REQUEST = "requests/call-back-controller-applicant-case-name.json";
+    private static final String APPLICATION_TIMETABLE_REQUEST = "requests/call-back-controller-validate-application-timeframe-error.json";
+
+    private final String targetInstance =
+        StringUtils.defaultIfBlank(
+            System.getenv("TEST_URL"),
+            "http://localhost:4044"
+        );
+
+    private final RequestSpecification request = RestAssured.given().baseUri(targetInstance);
 
     @Test
-    public void givenValidRequest_whenPostReqeuestToMiamValidatation_then200Response() throws Exception {
-        RequestSpecification request = RestAssured.given();
-        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+    public void givenNoMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndMiamError() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MIAM_VALIDATION_REQUEST_ERROR);
         request
             .header("Authorization", userToken)
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/validate-miam-application-or-exemption")
-        .then().assertThat().statusCode(200);
+            .then()
+            .body("errors", contains("You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM"))
+            .assertThat().statusCode(200);
+    }
+
+    @Test
+    public void givenMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndNoErrors() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MIAM_VALIDATION_REQUEST_NO_ERROR);
+        request
+            .header("Authorization", userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/validate-miam-application-or-exemption")
+            .then()
+            .body("errors", Matchers.hasSize(0))
+            .assertThat().statusCode(200);
     }
 
 
     @Test
     public void givenNoAuthorization_whenPostRequestToDraftDocumentGeneration_then400Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-        RequestSpecification request = RestAssured.given();
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .body(requestBody)
             .when()
@@ -56,18 +83,30 @@ public class CallbackControllerFunctionalTest {
 
     @Test
     public void givenRequestWithApplicantOrRespondentCaseName_whenEndPointCalled_ResponseContainsApplicantCaseName() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-        RequestSpecification request = RestAssured.given();
-        ValidatableResponse response =
-            request
-                .header("Authorization", userToken)
-                .body(requestBody)
-                .when()
-                .contentType("application/json")
-                .post("/copy-FL401-case-name-to-C100")
-                .then()
-                .body("data.applicantCaseName", equalTo("testString"))
-                .assertThat().statusCode(200);
+        String requestBody = ResourceLoader.loadJson(APPLICANT_CASE_NAME_REQUEST);
+        request
+            .header("Authorization", userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/copy-FL401-case-name-to-C100")
+            .then()
+            .body("data.applicantCaseName", equalTo("Test Name"))
+            .assertThat().statusCode(200);
+    }
+
+    @Test
+    public void givenRequest_whenEndPointCalled_ResponseContainsApplicantCaseName() throws Exception {
+        String requestBody = ResourceLoader.loadJson(APPLICATION_TIMETABLE_REQUEST);
+        request
+            .header("Authorization", userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/validate-application-consideration-timetable")
+            .then()
+            .body("errors", contains("Please provide either days or hours in proposed timetable"))
+            .assertThat().statusCode(200);
     }
 
 }
