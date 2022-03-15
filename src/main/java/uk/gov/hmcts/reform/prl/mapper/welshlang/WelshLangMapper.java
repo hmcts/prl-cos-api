@@ -39,17 +39,23 @@ import java.util.WeakHashMap;
 
 public class WelshLangMapper {
 
+    public static final String WELSH_NO = "Nac ydy";
+
+    private WelshLangMapper() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * C100 Welsh Lang Map.
      */
-    public static final Map<String, String> CA_WELSH_MAP = getCaWelshLangMap();
-    public static final List<String> CA_WELSH_CONDITONAL_MAP = getCaConditionalFieldWelshLangMap();
+    protected static final Map<String, String> CA_WELSH_MAP = getCaWelshLangMap();
+    protected static final List<String> CA_WELSH_CONDITONAL_MAP = getCaConditionalFieldWelshLangMap();
 
     /**
      * FL401 Welsh Lang Map.
      */
-    public static final Map<String, String> DA_WELSH_MAP = getDaWelshLangMap();
-    public static final List<String> DA_WELSH_CONDITONAL_MAP = getDaConditionalFieldWelshLangMap();
+    protected static final Map<String, String> DA_WELSH_MAP = getDaWelshLangMap();
+    protected static final List<String> DA_WELSH_CONDITONAL_MAP = getDaConditionalFieldWelshLangMap();
 
     /**
      * Recursive mapper for replacing the English to Welsh.
@@ -122,7 +128,7 @@ public class WelshLangMapper {
          * Common Utils - Yes,No,Information is to be kept confidential,Gender,Don't know.
          */
         welshMap.put(YesOrNo.Yes.toString(), "Ydy");
-        welshMap.put(YesOrNo.No.toString(), "Nac ydy");
+        welshMap.put(YesOrNo.No.toString(), WELSH_NO);
         welshMap.put("confidential_mask", "Rhaid cadw’r wybodaeth hon yn gyfrinachol");
         welshMap.put(DontKnow.dontKnow.getDisplayedValue(), "Ddim yn gwybod");
         welshMap.put(Gender.female.getDisplayedValue(), "Benyw");     //will need as a condition
@@ -632,7 +638,7 @@ public class WelshLangMapper {
          * Common Utils Yes, No, Don't know.
          */
         welshMap.put(YesOrNo.Yes.toString(), "Ydy");
-        welshMap.put(YesOrNo.No.toString(), "Nac ydy");
+        welshMap.put(YesOrNo.No.toString(), WELSH_NO);
         welshMap.put(DontKnow.dontKnow.getDisplayedValue(), "Ddim yn gwybod");
         welshMap.put(Gender.female.getDisplayedValue(), "Benywaidd");
         welshMap.put(Gender.male.getDisplayedValue(), "Gwrywaidd");
@@ -826,7 +832,7 @@ public class WelshLangMapper {
         welshMap.put(YesNoBothEnum.yesBothOfThem.getDisplayedValue(), "Ydynt, y ddau ohonynt");
         welshMap.put(YesNoBothEnum.yesApplicant.getDisplayedValue(), "Ydy, y ceisydd");
         welshMap.put(YesNoBothEnum.yesRespondent.getDisplayedValue(), "Ydy, yr atebydd");
-        welshMap.put(YesNoBothEnum.No.getDisplayedValue(), "Nac ydy");
+        welshMap.put(YesNoBothEnum.No.getDisplayedValue(), WELSH_NO);
         welshMap.put("doAnyChildrenLiveAtAddress_Yes", "Oes");
         welshMap.put("doAnyChildrenLiveAtAddress_No", "Nac oes");
         welshMap.put("keepChildrenInfoConfidential_Yes", "Oes");
