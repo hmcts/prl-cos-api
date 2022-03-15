@@ -12,8 +12,8 @@ import uk.gov.hmcts.reform.prl.config.Features;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-@RunWith(SpringRunner.class)
 @Ignore
+@RunWith(SpringRunner.class)
 @SpringBootTest
 @TestPropertySource(properties = { "FEATURE_EXAMPLE=true", "FEATURE_EXAMPLE_OFF=false" })
 public class FeatureToggleServiceTest {

@@ -341,7 +341,7 @@ public class CourtFinderServiceTest {
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
         Assert.assertTrue(emailAddress.isPresent());
-        Assert.assertEquals(emailAddress.get().getAddress(),"brighton.breathingspace@justice.gov.uk");
+        Assert.assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
     }
 
     @Test
@@ -357,7 +357,7 @@ public class CourtFinderServiceTest {
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
         Assert.assertTrue(emailAddress.isPresent());
-        Assert.assertEquals(emailAddress.get().getAddress(),"brighton.breathingspace@justice.gov.uk");
+        Assert.assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
     }
 
     @Test
@@ -373,7 +373,7 @@ public class CourtFinderServiceTest {
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
         Assert.assertTrue(emailAddress.isPresent());
-        Assert.assertEquals(emailAddress.get().getAddress(),"brighton.breathingspace@justice.gov.uk");
+        Assert.assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
     }
 
     @Test
@@ -390,7 +390,7 @@ public class CourtFinderServiceTest {
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
         Assert.assertTrue(emailAddress.isPresent());
-        Assert.assertEquals(emailAddress.get().getAddress(),"brighton.breathingspace@justice.gov.uk");
+        Assert.assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
 
     }
 
@@ -407,7 +407,7 @@ public class CourtFinderServiceTest {
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
         Assert.assertTrue(emailAddress.isPresent());
-        Assert.assertEquals(emailAddress.get().getAddress(),"brighton.breathingspace@justice.gov.uk");
+        Assert.assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
     }
 
     @Test
@@ -438,7 +438,7 @@ public class CourtFinderServiceTest {
         Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
 
         Assert.assertTrue(emailAddress.isPresent());
-        Assert.assertEquals(emailAddress.get().getAddress(),"brighton.breathingspace@justice.gov.uk");
+        Assert.assertEquals("brighton.breathingspace@justice.gov.uk", emailAddress.get().getAddress());
     }
 
 
