@@ -127,7 +127,7 @@ public class FL401SubmitApplicationController {
         boolean mandatoryEventStatus = fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData);
         if (!mandatoryEventStatus) {
             errorList.add(
-                "Statement of Truth and submit is not allowed for this case unless you finish all the mandatory events");
+                "Statement of truth and submit is not allowed for this case unless you finish all the mandatory events");
         }
         return CallbackResponse.builder()
             .errors(errorList)
