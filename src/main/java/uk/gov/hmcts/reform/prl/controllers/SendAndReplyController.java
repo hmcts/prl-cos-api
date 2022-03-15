@@ -118,6 +118,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                 }
 
                 messages.removeAll(closedMessages);
+                caseDataMap.put("closedMessages", closedMessages);
             } else {
                 messages = sendAndReplyService.buildNewReplyMessage(
                     selectedValue,
