@@ -35,8 +35,6 @@ public class EmailService {
         onBeforeLog(email, templateName, templateVars.getCaseReference(), reference);
         final String templateId = getTemplateId(templateName, languagePreference);
 
-        log.info(toMap(templateVars).toString());
-
         try {
             SendEmailResponse response = notificationClient.sendEmail(templateId, email, toMap(templateVars),
                                                                       reference);
@@ -60,8 +58,8 @@ public class EmailService {
 
     private void onBeforeLog(String email, EmailTemplateNames name, String caseId, String reference) {
         log.info(
-            "CaseId: {}: attempting to send email {} to {}. Reference = {}",
-            caseId, name, EmailObfuscator.obfuscate(email), reference
+            "CaseId: {}: attempting to send email {} for Reference = {}",
+            caseId, name, reference
         );
     }
 

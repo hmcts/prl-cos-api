@@ -66,7 +66,7 @@ public class SolicitorEmailService {
             Court court = null;
             court = courtLocatorService.getNearestFamilyCourt(caseData);
 
-            return  SolicitorEmail.builder()
+            return SolicitorEmail.builder()
                 .caseReference(String.valueOf(caseDetails.getId()))
                 .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
                 .applicantName(applicantNames)
@@ -82,8 +82,7 @@ public class SolicitorEmailService {
 
 
     public void sendEmail(CaseDetails caseDetails) {
-        log.info("Sending the email to solicitor for caseId {}", caseDetails.getId()
-        );
+        log.info("Sending the email to solicitor for caseId {}", caseDetails.getId());
         String applicantSolicitorEmailAddress = caseDetails.getData().get("applicantSolicitorEmailAddress").toString();
         emailService.send(
             applicantSolicitorEmailAddress,
@@ -117,7 +116,8 @@ public class SolicitorEmailService {
             .collect(Collectors.toList());
 
         solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
-            && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(0)
+            && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(
+            0)
             : userDetails.getEmail();
 
         emailService.send(
@@ -129,7 +129,7 @@ public class SolicitorEmailService {
 
     }
 
-    public void sendEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails)  {
+    public void sendEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails) {
 
         log.info("trying to send email for Solicitor FL401 {} ====:", caseDetails.getId());
 
@@ -138,11 +138,7 @@ public class SolicitorEmailService {
         PartyDetails fl401Applicant = emailService.getCaseData(caseDetails)
             .getApplicantsFL401();
 
-        log.info("collect applicants: {} ======",fl401Applicant);
-
         String applicantSolicitorEmail = fl401Applicant.getSolicitorEmail();
-
-        log.info("collect applicant solicitoremail {} ======",applicantSolicitorEmail);
         solicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
 
         emailService.send(
@@ -154,7 +150,7 @@ public class SolicitorEmailService {
 
     }
 
-    public EmailTemplateVars buildFl401SolicitorEmail(CaseDetails caseDetails)  {
+    public EmailTemplateVars buildFl401SolicitorEmail(CaseDetails caseDetails) {
 
         log.info("trying to build email for Solicitor FL401 {} ------:", caseDetails.getId());
 
@@ -163,9 +159,9 @@ public class SolicitorEmailService {
         PartyDetails fl401Applicant = caseData
             .getApplicantsFL401();
 
-        String applicantFullName = fl401Applicant.getFirstName() + " "  + fl401Applicant.getLastName();
+        String applicantFullName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
 
-        return  SolicitorEmail.builder()
+        return SolicitorEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantFullName)
