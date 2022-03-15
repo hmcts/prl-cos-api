@@ -7,7 +7,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +35,7 @@ public class PrePopulateFeeAndSolicitorControllerIntegrationTest extends Integra
 
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 
-        HttpPost httpPost = new HttpPost( prePopulateUri);
+        HttpPost httpPost = new HttpPost(prePopulateUri);
         httpPost.addHeader("Authorization", "Bearer testauthtoken");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
