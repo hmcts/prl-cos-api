@@ -51,9 +51,9 @@ public class SendgridService {
             request.setMethod(Method.POST);
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
-            Response response = sg.api(request);
+            sg.api(request);
         } catch (IOException ex) {
-            throw ex;
+            throw new IOException(ex.getMessage());
         }
     }
 }
