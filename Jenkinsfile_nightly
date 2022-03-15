@@ -25,7 +25,7 @@ def secrets = [
     secret("AppInsightsInstrumentationKey", "APP_INSIGHTS_INSTRUMENTATION_KEY"),
     secret('send-grid-api-key', 'SEND_GRID_API_KEY'),
     secret('rpa-notify-to-email', 'RPA_NOTIFY_TO_EMAIL'),
-    secret("rpa-notify-from-preview-email", "RPA_NOTIFY_FROM_EMAIL")
+    secret("rpa-notify-from-email", "RPA_NOTIFY_FROM_EMAIL")
   ]
 ]
 

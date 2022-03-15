@@ -28,5 +28,5 @@ spring:
         prl.launchDarkly-sdk-key: LAUNCH_DARKLY_SDK_KEY
         prl.send-grid-api-key: SEND_GRID_API_KEY
         prl.rpa-notify-to-email: RPA_NOTIFY_TO_EMAIL
-        prl.rpa-notify-from-preview-email: RPA_NOTIFY_FROM_EMAIL
+        prl.rpa-notify-from-email: RPA_NOTIFY_FROM_EMAIL
         prl.AppInsightsInstrumentationKey: APP_INSIGHTS_INSTRUMENTATION_KEY
