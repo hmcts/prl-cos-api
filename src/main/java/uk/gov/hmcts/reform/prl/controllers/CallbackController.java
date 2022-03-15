@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
@@ -471,7 +472,7 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse resendNotificationtoRpa(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) throws Exception {
+    ) throws IOException {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         requireNonNull(caseData);
         sendgridService.sendEmail(c100JsonMapper.map(caseData));

@@ -44,7 +44,7 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
 
-        Map<String, Object> tempCaseDetails = new HashMap<String, Object>();
+        Map<String, Object> tempCaseDetails = new HashMap<>();
         // Get the Welsh Value of each object using Welsh Mapper
         Map<String, Object> caseDataMap  = AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class);
         Map<String, Object> caseDataValues = (Map<String, Object>) caseDataMap.get("case_data");

@@ -49,7 +49,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws Exception {
         try {
-            if (authorisationService.authorise(serviceAuthorization)) {
+            if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
                 requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
             }
         } catch (Exception ex) {
