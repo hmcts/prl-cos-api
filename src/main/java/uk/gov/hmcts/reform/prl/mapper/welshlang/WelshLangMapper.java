@@ -40,6 +40,7 @@ import java.util.WeakHashMap;
 public class WelshLangMapper {
 
     public static final String WELSH_NO = "Nac ydy";
+    public static final String WELSH_NO_NAC_YDW = "Nac ydw";
 
     private WelshLangMapper() {
         throw new IllegalStateException("Utility class");
@@ -165,9 +166,9 @@ public class WelshLangMapper {
          * Hearing urgency - Do you need a without notice hearing?.
          */
         welshMap.put("doYouNeedAWithoutNoticeHearing_Yes", "Ydw");
-        welshMap.put("doYouNeedAWithoutNoticeHearing_No", "Nac ydw");
+        welshMap.put("doYouNeedAWithoutNoticeHearing_No", WELSH_NO_NAC_YDW);
         welshMap.put("doYouRequireAHearingWithReducedNotice_Yes", "Ydw");
-        welshMap.put("doYouRequireAHearingWithReducedNotice_No", "Nac ydw");
+        welshMap.put("doYouRequireAHearingWithReducedNotice_No", WELSH_NO_NAC_YDW);
 
 
         /**
@@ -181,7 +182,7 @@ public class WelshLangMapper {
          * Applicant -Details - Do you need to keep the address confidential?.
          */
         welshMap.put("isAddressConfidential_Yes", "Ydw");
-        welshMap.put("isAddressConfidential_No", "Nac ydw");
+        welshMap.put("isAddressConfidential_No", WELSH_NO_NAC_YDW);
 
         /**
          * Applicant -Details - Can you provide email address?.
@@ -193,7 +194,7 @@ public class WelshLangMapper {
          * Applicant -Details - Do you need to keep the contact number confidential?.
          */
         welshMap.put("isPhoneNumberConfidential_Yes", "Ydw");
-        welshMap.put("isPhoneNumberConfidential_No", "Nac ydw");
+        welshMap.put("isPhoneNumberConfidential_No", WELSH_NO_NAC_YDW);
 
         /**
          * Child Details - What is the applicant's relationship to child?
@@ -220,7 +221,7 @@ public class WelshLangMapper {
          * (isPersonIdentityConfidential).
          */
         welshMap.put("isPersonIdentityConfidential_Yes", "Ydw");
-        welshMap.put("isPersonIdentityConfidential_No", "Nac ydw");
+        welshMap.put("isPersonIdentityConfidential_No", WELSH_NO_NAC_YDW);
 
         /**
          * Respondent - Can you provide email address?.
@@ -598,7 +599,7 @@ public class WelshLangMapper {
          * Litigation capacity.
          */
         welshMap.put("litigationCapacityOtherFactors_Yes", "Ydw");
-        welshMap.put("litigationCapacityOtherFactors_No", "Nac ydw");
+        welshMap.put("litigationCapacityOtherFactors_No", WELSH_NO_NAC_YDW);
 
         /**
          * Welsh language requirement.
@@ -654,7 +655,7 @@ public class WelshLangMapper {
          * Without notice order. reasonForOrderWithoutGivingNotice.
          */
         welshMap.put("orderWithoutGivingNotice_Yes", "Ydw");
-        welshMap.put("orderWithoutGivingNotice_No", "Nac ydw");
+        welshMap.put("orderWithoutGivingNotice_No", WELSH_NO_NAC_YDW);
 
         /**
          * Without notice order - Why do you want to apply without giving notice to the respondent?.
@@ -692,7 +693,7 @@ public class WelshLangMapper {
          * Respondent Details. respondentsFL401.
          */
         welshMap.put("isCurrentAddressKnown_Yes", "Ydw");
-        welshMap.put("isCurrentAddressKnown_No", "Nac ydw");
+        welshMap.put("isCurrentAddressKnown_No", WELSH_NO_NAC_YDW);
         //welshMap.put("canYouProvideEmailAddress_Yes","Gallaf");
         //welshMap.put("canYouProvideEmailAddress_No","Na allaf");
         welshMap.put("canYouProvidePhoneNumber_Yes", "Gallaf");
@@ -894,7 +895,7 @@ public class WelshLangMapper {
             "Byddant eisiau darllen ac ysgrifennu yn Gymraeg"
         );
         welshMap.put("isInterpreterNeeded_yes", "Ydw");
-        welshMap.put("isInterpreterNeeded_no", "Nac ydw");
+        welshMap.put("isInterpreterNeeded_no", WELSH_NO_NAC_YDW);
         welshMap.put(PartyEnum.applicant.getDisplayedValue(), "Ceisydd");
         welshMap.put(PartyEnum.respondent.getDisplayedValue(), "Atebydd");
         welshMap.put(PartyEnum.other.getDisplayedValue(), "Pobl eraill yn yr achos");
