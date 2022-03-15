@@ -540,7 +540,6 @@ public class CaseData implements MappableObject {
     private String viewPdfLinkLabelText;
 
 
-
     /**
      *  FL401 submit status flags.
      */
