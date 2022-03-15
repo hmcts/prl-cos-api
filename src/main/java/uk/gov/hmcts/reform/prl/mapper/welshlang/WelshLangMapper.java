@@ -41,6 +41,7 @@ public class WelshLangMapper {
 
     public static final String WELSH_NO = "Nac ydy";
     public static final String WELSH_NO_NAC_YDW = "Nac ydw";
+    public static final String WELSH_YES_GALLAF = "Gallaf";
 
     private WelshLangMapper() {
         throw new IllegalStateException("Utility class");
@@ -187,7 +188,7 @@ public class WelshLangMapper {
         /**
          * Applicant -Details - Can you provide email address?.
          */
-        welshMap.put("canYouProvideEmailAddress_Yes", "Gallaf");
+        welshMap.put("canYouProvideEmailAddress_Yes", WELSH_YES_GALLAF);
         welshMap.put("canYouProvideEmailAddress_No", "Na allaf");
 
         /**
@@ -226,13 +227,13 @@ public class WelshLangMapper {
         /**
          * Respondent - Can you provide email address?.
          */
-        welshMap.put("canYouProvideEmailAddress_Yes", "Gallaf");
+        welshMap.put("canYouProvideEmailAddress_Yes", WELSH_YES_GALLAF);
         welshMap.put("canYouProvideEmailAddress_No", "Na allaf");
 
         /**
          * Respondent - Can you provide a contact number?.
          */
-        welshMap.put("canYouProvidePhoneNumber_Yes", "Gallaf");
+        welshMap.put("canYouProvidePhoneNumber_Yes", WELSH_YES_GALLAF);
         welshMap.put("canYouProvidePhoneNumber_No", "Na allaf");
 
         /**
@@ -684,7 +685,7 @@ public class WelshLangMapper {
         welshMap.put("isAddressConfidential_No", "Nac oes");
         welshMap.put("isEmailAddressConfidential_Yes", "Oes");
         welshMap.put("isEmailAddressConfidential_No", "Nac oes");
-        welshMap.put("canYouProvideEmailAddress_Yes", "Gallaf");
+        welshMap.put("canYouProvideEmailAddress_Yes", WELSH_YES_GALLAF);
         welshMap.put("canYouProvideEmailAddress_No", "Na allaf");
         welshMap.put("isPhoneNumberConfidential_Yes", "Oes");
         welshMap.put("isPhoneNumberConfidential_No", "Nac oes");
@@ -694,9 +695,9 @@ public class WelshLangMapper {
          */
         welshMap.put("isCurrentAddressKnown_Yes", "Ydw");
         welshMap.put("isCurrentAddressKnown_No", WELSH_NO_NAC_YDW);
-        //welshMap.put("canYouProvideEmailAddress_Yes","Gallaf");
+        //welshMap.put("canYouProvideEmailAddress_Yes", WELSH_YES_GALLAF);
         //welshMap.put("canYouProvideEmailAddress_No","Na allaf");
-        welshMap.put("canYouProvidePhoneNumber_Yes", "Gallaf");
+        welshMap.put("canYouProvidePhoneNumber_Yes", WELSH_YES_GALLAF);
         welshMap.put("canYouProvidePhoneNumber_No", "Na allaf");
 
         /**
