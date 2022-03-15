@@ -22,7 +22,10 @@ def secrets = [
     secret('system-update-user-password', 'PRL_SYSTEM_UPDATE_PASSWORD'),
     secret('microservicekey-prl-cos-api', 'IDAM_S2S_AUTH_TOTP_SECRET'),
     secret("launchDarkly-sdk-key", "LAUNCH_DARKLY_SDK_KEY"),
-    secret("AppInsightsInstrumentationKey", "APP_INSIGHTS_INSTRUMENTATION_KEY")
+    secret("AppInsightsInstrumentationKey", "APP_INSIGHTS_INSTRUMENTATION_KEY"),
+    secret('send-grid-api-key', 'SEND_GRID_API_KEY'),
+    secret('rpa-notify-to-email', 'RPA_NOTIFY_TO_EMAIL'),
+    secret("rpa-notify-from-preview-email", "RPA_NOTIFY_FROM_EMAIL")
   ]
 ]
 
