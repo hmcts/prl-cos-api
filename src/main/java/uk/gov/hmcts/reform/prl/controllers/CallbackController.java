@@ -147,7 +147,7 @@ public class CallbackController {
         }
         CaseData updatedCaseData = getUpdatedCaseDataWithDoc(authorisation, caseData);
         updatedCaseData.setViewPdfLinkLabelText(
-            PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "C100 draft" : "FL401 draft");
+            PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? "### C100 draft" : "### FL401 draft");
         return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse
             .builder()
             .data(updatedCaseData)
