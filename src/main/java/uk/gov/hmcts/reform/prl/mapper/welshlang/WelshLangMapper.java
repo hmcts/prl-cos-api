@@ -49,6 +49,8 @@ public class WelshLangMapper {
     public static final String WELSH_OTHER = "Arall";
     public static final String WELSH_APPLICANT = "Ceisydd";
     public static final String WELSH_RESPONDENT = "Atebydd";
+    public static final String CAN_YOU_PROVIDE_EMAIL_ADDRESS_YES = "canYouProvideEmailAddress_Yes";
+    public static final String CAN_YOU_PROVIDE_EMAIL_ADDRESS_NO = "canYouProvideEmailAddress_No";
 
     private WelshLangMapper() {
         throw new IllegalStateException("Utility class");
@@ -195,8 +197,8 @@ public class WelshLangMapper {
         /**
          * Applicant -Details - Can you provide email address?.
          */
-        welshMap.put("canYouProvideEmailAddress_Yes", WELSH_YES_GALLAF);
-        welshMap.put("canYouProvideEmailAddress_No", WELSH_NO_NA_ALLAF);
+        welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_YES, WELSH_YES_GALLAF);
+        welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_NO, WELSH_NO_NA_ALLAF);
 
         /**
          * Applicant -Details - Do you need to keep the contact number confidential?.
@@ -234,8 +236,8 @@ public class WelshLangMapper {
         /**
          * Respondent - Can you provide email address?.
          */
-        welshMap.put("canYouProvideEmailAddress_Yes", WELSH_YES_GALLAF);
-        welshMap.put("canYouProvideEmailAddress_No", WELSH_NO_NA_ALLAF);
+        welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_YES, WELSH_YES_GALLAF);
+        welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_NO, WELSH_NO_NA_ALLAF);
 
         /**
          * Respondent - Can you provide a contact number?.
@@ -627,16 +629,6 @@ public class WelshLangMapper {
         return Arrays.asList("");
     }
 
-    // Getting Da conditional fields and Rendering from document...
-    private static List<String> getDaConditionalAndRenderingFieldWelshLangMap() {
-        return Arrays.asList(
-            "gender",
-            "applicantsFL401.isAddressConfidential",
-            "applicantsFL401.isEmailAddressConfidential",
-            "applicantsFL401.isPhoneNumberConfidential"
-        );
-    }
-
     private static Map<String, String> getDaWelshLangMap() {
 
         Map<String, String> welshMap = new WeakHashMap<>();
@@ -690,8 +682,8 @@ public class WelshLangMapper {
         welshMap.put("isAddressConfidential_No", WELSH_NO_NAC_OES);
         welshMap.put("isEmailAddressConfidential_Yes", WELSH_YES_OES);
         welshMap.put("isEmailAddressConfidential_No", WELSH_NO_NAC_OES);
-        welshMap.put("canYouProvideEmailAddress_Yes", WELSH_YES_GALLAF);
-        welshMap.put("canYouProvideEmailAddress_No", WELSH_NO_NA_ALLAF);
+        welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_YES, WELSH_YES_GALLAF);
+        welshMap.put(CAN_YOU_PROVIDE_EMAIL_ADDRESS_NO, WELSH_NO_NA_ALLAF);
         welshMap.put("isPhoneNumberConfidential_Yes", WELSH_YES_OES);
         welshMap.put("isPhoneNumberConfidential_No", WELSH_NO_NAC_OES);
 
