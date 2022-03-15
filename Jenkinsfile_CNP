@@ -33,7 +33,9 @@ def secrets = [
       secret('notification-client-api-key', 'UK_GOV_NOTIFY_API_KEY'),
       secret('test-genericpassword', 'PRL_GENERIC_PASSWORD'),
       secret("launchDarkly-sdk-key", "LAUNCH_DARKLY_SDK_KEY"),
-      secret("AppInsightsInstrumentationKey", "APP_INSIGHTS_INSTRUMENTATION_KEY")
+      secret("AppInsightsInstrumentationKey", "APP_INSIGHTS_INSTRUMENTATION_KEY"),
+      secret("idam-solicitor-username", "IDAM_SOLICITOR_USERNAME"),
+      secret("idam-solicitor-password", "IDAM_SOLICITOR_PASSWORD")
    ]
 ]
 

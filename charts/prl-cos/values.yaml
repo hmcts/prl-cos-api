@@ -37,3 +37,5 @@ java:
         - test-genericpassword
         - launchDarkly-sdk-key
         - AppInsightsInstrumentationKey
+        - idam-solicitor-username
+        - idam-solicitor-password
