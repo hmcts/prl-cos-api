@@ -31,8 +31,6 @@ public class PrePopulateFeeAndSolicitorControllerIntegrationTest extends Integra
     @Test
     public void givenTemplateAndJsonInput_ReturnStatus200() throws Exception {
 
-        assertTrue(true);
-
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 
         HttpPost httpPost = new HttpPost(prePopulateUri);

@@ -2,11 +2,23 @@
   "case_details": {
     "callback_response_status": "string",
     "case_data": {
-      "caseTypeOfApplication": "C100"
+      "caseTypeOfApplication": "C100",
+      "solicitorName": "test",
+      "userInfo": "userInfo",
+      "applicantSolicitorEmailAddress": "testemail",
+      "caseworkerEmailAddress": "testcaseworkeremail",
+      "feeAmount": "£232",
+      "submitAndPayDownloadApplicationLink": {
+        "documentUrl": "testDoc",
+        "documentBinaryUrl": "testBinary",
+        "documentHash": "testHash",
+        "documentFileName": "testFilename"
+      },
+      "courtName": "testCourtName"
     },
     "case_type_id": "string",
     "created_date": "2021-12-16T13:18:30.307Z",
-    "id": 1643814972454925,
+    "id": 1645102524592014,
     "jurisdiction": "string",
     "last_modified": "2021-12-16T13:18:30.307Z",
     "locked_by_user_id": 0,
@@ -17,11 +29,23 @@
   "case_details_before": {
     "callback_response_status": "string",
     "case_data": {
-      "caseTypeOfApplication": "C100"
+      "caseTypeOfApplication": "C100",
+      "solicitorName": "test",
+      "userInfo": [ "userInfo" ],
+      "applicantSolicitorEmailAddress": "testemail",
+      "caseworkerEmailAddress": "testcaseworkeremail",
+      "feeAmount": "£232",
+      "submitAndPayDownloadApplicationLink": {
+        "documentUrl": "testDoc",
+        "documentBinaryUrl": "testBinary",
+        "documentHash": "testHash",
+        "documentFileName": "testFilename"
+      },
+      "courtName": "testCourtName"
     },
     "case_type_id": "string",
     "created_date": "2021-12-16T13:18:30.307Z",
-    "id": 1643814972454925,
+    "id": 1645102524592014,
     "jurisdiction": "string",
     "last_modified": "2021-12-16T13:18:30.307Z",
     "locked_by_user_id": 0,

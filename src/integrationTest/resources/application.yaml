@@ -18,8 +18,8 @@ case:
 
 prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
   document:
     generate:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
@@ -111,14 +111,14 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:GT2V6PLQ34XGPTPM}
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
     baseUrl: https://idam-api.aat.platform.hmcts.net
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    secret: ${IDAM_CLIENT_SECRET:W7supXKMJgcEWKBS}
     clientId: xuiwebapp
     authorize:
       context-path: /oauth2/authorize
