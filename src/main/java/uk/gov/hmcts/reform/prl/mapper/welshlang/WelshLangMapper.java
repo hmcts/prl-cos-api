@@ -45,6 +45,7 @@ public class WelshLangMapper {
     public static final String WELSH_NO_NA_ALLAF = "Na allaf";
     public static final String WELSH_YES_OES = "Oes";
     public static final String WELSH_NO_NAC_OES = "Nac oes";
+    public static final String WELSH_NO_NA_FYDD = "Na fydd";
     public static final String WELSH_OTHER = "Arall";
     public static final String WELSH_APPLICANT = "Ceisydd";
     public static final String WELSH_RESPONDENT = "Atebydd";
@@ -573,7 +574,7 @@ public class WelshLangMapper {
         /**
          * Attending the hearing.*/
         welshMap.put("isWelshNeeded_yes", "Bydd");
-        welshMap.put("isWelshNeeded_no", "Na fydd");
+        welshMap.put("isWelshNeeded_no", WELSH_NO_NA_FYDD);
         welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Byddant eisiau siarad Cymraeg");
         welshMap.put(
             SpokenOrWrittenWelshEnum.written.getDisplayedValue(),
@@ -581,14 +582,14 @@ public class WelshLangMapper {
         );
         welshMap.put(SpokenOrWrittenWelshEnum.both.getDisplayedValue(), "Y ddau");
         welshMap.put("isInterpreterNeeded_yes", "Bydd");
-        welshMap.put("isInterpreterNeeded_no", "Na fydd");
+        welshMap.put("isInterpreterNeeded_no", WELSH_NO_NA_FYDD);
         welshMap.put(PartyEnum.applicant.getDisplayedValue(), WELSH_APPLICANT);
         welshMap.put(PartyEnum.respondent.getDisplayedValue(), WELSH_RESPONDENT);
         welshMap.put(PartyEnum.other.getDisplayedValue(), "Pobl eraill yn yr achos");
         welshMap.put("isDisabilityPresent_Yes", WELSH_YES_OES);
         welshMap.put("isDisabilityPresent_No", WELSH_NO_NAC_OES);
         welshMap.put("isSpecialArrangementsRequired_Yes", "Bydd");
-        welshMap.put("isSpecialArrangementsRequired_No", "Na fydd");
+        welshMap.put("isSpecialArrangementsRequired_No", WELSH_NO_NA_FYDD);
 
         /**
          * International Element.
@@ -699,8 +700,6 @@ public class WelshLangMapper {
          */
         welshMap.put("isCurrentAddressKnown_Yes", "Ydw");
         welshMap.put("isCurrentAddressKnown_No", WELSH_NO_NAC_YDW);
-        //welshMap.put("canYouProvideEmailAddress_Yes", WELSH_YES_GALLAF);
-        //welshMap.put("canYouProvideEmailAddress_No", WELSH_NO_NA_ALLAF);
         welshMap.put("canYouProvidePhoneNumber_Yes", WELSH_YES_GALLAF);
         welshMap.put("canYouProvidePhoneNumber_No", WELSH_NO_NA_ALLAF);
 
@@ -893,7 +892,7 @@ public class WelshLangMapper {
          * Attending the hearing.
          */
         welshMap.put("isWelshNeeded_yes", "Bydd");
-        welshMap.put("isWelshNeeded_no", "Na fydd");
+        welshMap.put("isWelshNeeded_no", WELSH_NO_NA_FYDD);
         welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Byddant eisiau siarad Cymraeg");
         welshMap.put(
             SpokenOrWrittenWelshEnum.written.getDisplayedValue(),
@@ -907,7 +906,7 @@ public class WelshLangMapper {
         welshMap.put("isDisabilityPresent_Yes", WELSH_YES_OES);
         welshMap.put("isDisabilityPresent_No", WELSH_NO_NAC_OES);
         welshMap.put("isSpecialArrangementsRequired_Yes", "Bydd");
-        welshMap.put("isSpecialArrangementsRequired_No", "Na fydd");
+        welshMap.put("isSpecialArrangementsRequired_No", WELSH_NO_NA_FYDD);
 
         /**
          * Welsh language requirement.
