@@ -30,28 +30,38 @@ public class AllegationsOfHarmMapper {
             )
             .add(
                 "physicalAbuseVictim",
-                caseData.getPhysicalAbuseVictim().isEmpty() ? null : caseData.getPhysicalAbuseVictim().stream()
+                caseData.getPhysicalAbuseVictim() != null
+                ? caseData.getPhysicalAbuseVictim().isEmpty() ? null : caseData.getPhysicalAbuseVictim().stream()
                     .map(ApplicantOrChildren::getDisplayedValue).collect(Collectors.joining(", "))
+                    : null
             )
             .add(
                 "emotionalAbuseVictim",
-                caseData.getEmotionalAbuseVictim().isEmpty() ? null : caseData.getEmotionalAbuseVictim().stream()
+                caseData.getEmotionalAbuseVictim() != null
+                ? caseData.getEmotionalAbuseVictim().isEmpty() ? null : caseData.getEmotionalAbuseVictim().stream()
                     .map(ApplicantOrChildren::getDisplayedValue).collect(Collectors.joining(", "))
+                    : null
             )
             .add(
                 "financialAbuseVictim",
-                caseData.getFinancialAbuseVictim().isEmpty() ? null : caseData.getFinancialAbuseVictim().stream()
+                caseData.getFinancialAbuseVictim() != null
+                ? caseData.getFinancialAbuseVictim().isEmpty() ? null : caseData.getFinancialAbuseVictim().stream()
                     .map(ApplicantOrChildren::getDisplayedValue).collect(Collectors.joining(", "))
+                    : null
             )
             .add(
                 "psychologicalAbuseVictim",
-                caseData.getPhysicalAbuseVictim().isEmpty() ? null : caseData.getPhysicalAbuseVictim().stream()
+                caseData.getPsychologicalAbuseVictim() != null
+                ? caseData.getPsychologicalAbuseVictim().isEmpty() ? null : caseData.getPhysicalAbuseVictim().stream()
                     .map(ApplicantOrChildren::getDisplayedValue).collect(Collectors.joining(", "))
+                    : null
             )
             .add(
                 "sexualAbuseVictim",
-                caseData.getSexualAbuseVictim().isEmpty() ? null : caseData.getSexualAbuseVictim().stream()
+                caseData.getSexualAbuseVictim() != null
+                ? caseData.getSexualAbuseVictim().isEmpty() ? null : caseData.getSexualAbuseVictim().stream()
                     .map(ApplicantOrChildren::getDisplayedValue).collect(Collectors.joining(", "))
+                    : null
             )
             .add(
                 "allegationsOfHarmChildAbductionYesNo",

@@ -125,10 +125,13 @@ public class RespondentsChecker implements EventChecker {
             fields.add(ofNullable(respondent.getAddress().getAddressLine1()));
             fields.add(ofNullable(respondent.getAddress().getPostCode()));
         }
-        Optional<YesNoDontKnow> isAtAddressLessThan5YearsWithDontKnow = ofNullable(respondent.getIsAtAddressLessThan5YearsWithDontKnow());
-        fields.add(isAtAddressLessThan5YearsWithDontKnow);
-        if (isAtAddressLessThan5YearsWithDontKnow.isPresent() && isAtAddressLessThan5YearsWithDontKnow.get().equals(YesNoDontKnow.yes)) {
-            fields.add(ofNullable(respondent.getAddressLivedLessThan5YearsDetails()));
+        if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
+            Optional<YesNoDontKnow> isAtAddressLessThan5YearsWithDontKnow = ofNullable(respondent.getIsAtAddressLessThan5YearsWithDontKnow());
+            fields.add(isAtAddressLessThan5YearsWithDontKnow);
+            if (isAtAddressLessThan5YearsWithDontKnow.isPresent() && isAtAddressLessThan5YearsWithDontKnow.get().equals(
+                YesNoDontKnow.yes)) {
+                fields.add(ofNullable(respondent.getAddressLivedLessThan5YearsDetails()));
+            }
         }
         Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(respondent.getCanYouProvideEmailAddress());
         fields.add(canYouProvideEmailAddress);

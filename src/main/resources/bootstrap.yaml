@@ -26,4 +26,10 @@ spring:
         prl.notification-client-api-key: UK_GOV_NOTIFY_API_KEY
         prl.test-genericpassword: PRL_GENERIC_PASSWORD
         prl.launchDarkly-sdk-key: LAUNCH_DARKLY_SDK_KEY
+        prl.send-grid-api-key: SEND_GRID_API_KEY
+        prl.rpa-notify-to-email: RPA_NOTIFY_TO_EMAIL
+        prl.rpa-notify-from-email: RPA_NOTIFY_FROM_EMAIL
         prl.AppInsightsInstrumentationKey: APP_INSIGHTS_INSTRUMENTATION_KEY
+        prl.southampton-court-email-address: SOUTHAMPTON_COURT_EMAIL_ADDRESS
+        prl.idam-solicitor-username: IDAM_SOLICITOR_USERNAME
+        prl.idam-solicitor-password: IDAM_SOLICITOR_PASSWORD

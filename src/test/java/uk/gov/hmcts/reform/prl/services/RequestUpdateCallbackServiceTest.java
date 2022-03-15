@@ -158,29 +158,4 @@ public class RequestUpdateCallbackServiceTest {
         return StartEventResponse.builder().eventId(eventId).token(eventToken).build();
     }
 
-    @Test
-    public void shouldProcessCallbackForByPass() throws Exception {
-
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).build();
-        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
-        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, Long.toString(caseId), eventName
-        ))
-            .thenReturn(buildStartEventResponse(eventName, eventToken));
-        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(caseId.toString())
-            .payment(PaymentDto.builder()
-                         .paymentAmount("123")
-                         .paymentMethod("cash")
-                         .paymentReference("reference")
-                         .caseReference("reference")
-                         .accountNumber("123445555")
-                         .build())
-            .serviceRequestStatus("Paid")
-            .build();
-
-        requestUpdateCallbackService.processCallbackForBypass(serviceRequestUpdateDto, authToken);
-        assertEquals(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString()), caseDetails);
-
-    }
 }

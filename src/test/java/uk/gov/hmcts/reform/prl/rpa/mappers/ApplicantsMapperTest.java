@@ -22,6 +22,7 @@ import javax.json.JsonObject;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicantsMapperTest {
@@ -72,6 +73,12 @@ public class ApplicantsMapperTest {
     @Test
     public void testApplicantsMapperMap() {
         assertNotNull(applicantsMapper.map(applicants, applicantSolicitorMap));
+    }
+
+    @Test
+    public void testIfApplicantsNull() {
+        applicants = null;
+        assertEquals(Collections.emptyList(),applicantsMapper.map(applicants, applicantSolicitorMap));
     }
 
     @Test
