@@ -178,13 +178,10 @@ public class FL401SubmitApplicationController {
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
             && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
             caseData = caseData.toBuilder().build();
-            log.info("Case date with Home ----{}---- and respondent bahaviour === {} =====",
-                     caseData.getHome(), caseData.getRespondentBehaviourData());
         } else  if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
             caseData = caseData.toBuilder()
                 .respondentBehaviourData(null)
                 .build();
-            log.info("Case date with respondent bahaviour === {} =====", caseData.getRespondentBehaviourData());
         } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
             caseData = caseData.toBuilder()
                 .home(null)
@@ -202,6 +199,7 @@ public class FL401SubmitApplicationController {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}",
                  documentLanguage.isGenEng(),documentLanguage.isGenWelsh());
+
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
             caseDataUpdated.put(FINAL_DOCUMENT_FIELD,
@@ -223,8 +221,6 @@ public class FL401SubmitApplicationController {
         }
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
-        log.info(" Court email flag {} and document generation flag {}",
-                 caseData.getIsCourtEmailFound(), caseData.getIsDocumentGenerated());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
@@ -256,8 +252,6 @@ public class FL401SubmitApplicationController {
                 .isNotificationSent("No")
                 .build();
         }
-
-        log.info(" email notification flag{}", caseData.getIsNotificationSent());
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         caseData = caseData.toBuilder()
@@ -298,6 +292,12 @@ public class FL401SubmitApplicationController {
                 template
             );
         }
+        if (null != generatedDocumentInfo) {
+            caseData = caseData.toBuilder().isDocumentGenerated("Yes").build();
+        } else {
+            caseData = caseData.toBuilder().isDocumentGenerated("No").build();
+        }
+
         log.info("Genereated the {} document for case id {} ", template, caseData.getId());
         return generatedDocumentInfo;
     }
