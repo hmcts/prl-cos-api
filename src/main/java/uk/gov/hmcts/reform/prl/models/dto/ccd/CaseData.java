@@ -359,6 +359,7 @@ public class CaseData implements MappableObject {
     @JsonProperty("paymentServiceRequestReferenceNumber")
     private final String paymentServiceRequestReferenceNumber;
 
+    @JsonIgnore
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate issueDate;
 
@@ -466,7 +467,7 @@ public class CaseData implements MappableObject {
     /**
      * Final document.
      */
-
+    @JsonIgnore
     @JsonProperty("finalDocument")
     private final Document finalDocument;
 
