@@ -1,14 +1,11 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.RestAssured;
-import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -20,7 +17,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 @Slf4j
 @SpringBootTest
-@RunWith( SpringRunner.class )
+@RunWith(SpringRunner.class)
 @ContextConfiguration
 public class CallbackControllerFunctionalTest {
 
@@ -50,7 +47,10 @@ public class CallbackControllerFunctionalTest {
             .contentType("application/json")
             .post("/validate-miam-application-or-exemption")
             .then()
-            .body("errors", contains("You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM"))
+            .body("errors",
+                  contains(
+                      "You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM")
+            )
             .assertThat().statusCode(200);
     }
 
