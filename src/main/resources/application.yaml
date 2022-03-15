@@ -222,3 +222,7 @@ document:
       fl401_draft_welsh_filename: Draft_DA_Welsh_application
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
+
+southampton:
+  court:
+    email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
