@@ -32,7 +32,7 @@ public class PrePopulateFeeAndSolicitorNameControllerFunctionalTest {
             "http://localhost:4044"
         );
 
-    private final RequestSpecification request = RestAssured.given().baseUri(targetInstance);
+    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
     public void givenValidAuthDetailsAndC100Case_whenEndPointCalled_ResponseContainsFeeInfo() throws Exception {

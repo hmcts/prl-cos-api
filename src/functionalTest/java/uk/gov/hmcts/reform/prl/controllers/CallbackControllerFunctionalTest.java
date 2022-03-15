@@ -35,7 +35,7 @@ public class CallbackControllerFunctionalTest {
             "http://localhost:4044"
         );
 
-    private final RequestSpecification request = RestAssured.given().baseUri(targetInstance);
+    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
     public void givenNoMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndMiamError() throws Exception {
