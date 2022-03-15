@@ -93,6 +93,13 @@ payments:
     url: ${PAY_URL:http://payment-api-aat.service.core-compute-aat.internal}
     callback-url: ${PAY_CALLBACK_URL:http://payment-api-demo.service.core-compute-demo.internal/service-request-update}
 
+send-grid:
+  api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
+  rpa:
+    email:
+      to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
+      from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
+
 fees-register:
   api:
     url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}
@@ -133,8 +140,6 @@ idam:
     username: ${IDAM_SOLICITOR_USERNAME:dummysolicitor@test.com}
     password: ${IDAM_SOLICITOR_PASSWORD:dummy}
 
-
-
 test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
@@ -154,8 +159,6 @@ case_document_am:
 
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
-
-
 
 courtfinder:
   api:

@@ -217,26 +217,20 @@ public class CallbackController {
                 FL401OrderTypeEnum.occupationOrder)
                 && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
                 caseData = caseData.toBuilder().build();
-                log.info("Case date with Home ----{}---- and respondent bahaviour === {} =====",
-                         caseData.getHome(), caseData.getRespondentBehaviourData());
             } else  if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
                 caseData = caseData.toBuilder()
                     .respondentBehaviourData(null)
                     .build();
-                log.info("Case date with respondent bahaviour === {} =====", caseData.getRespondentBehaviourData());
             } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
                 caseData = caseData.toBuilder()
                     .home(null)
                     .build();
-                log.info("Case date with home details === {} =====", caseData.getHome());
             }
         }
 
         Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}",
-                 documentLanguage.isGenEng(),documentLanguage.isGenWelsh());
 
         if (documentLanguage.isGenEng()) {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
@@ -294,8 +288,6 @@ public class CallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}",
-                 documentLanguage.isGenEng(),documentLanguage.isGenWelsh());
 
         if (documentLanguage.isGenEng()) {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
@@ -313,10 +305,6 @@ public class CallbackController {
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
-            log.info(
-                "Generate C1A if allegations of harm is set to Yes and the passed value is {}",
-                caseData.getAllegationsOfHarmYesNo()
-            );
             if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
                 GeneratedDocumentInfo generatedC1ADocumentInfo = dgsService.generateDocument(
                     authorisation,
@@ -358,8 +346,6 @@ public class CallbackController {
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
-            log.info("Generate C1A if allegations of harm is set to Yes and the passed value is {}",
-                     caseData.getAllegationsOfHarmYesNo());
             if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
                 GeneratedDocumentInfo generatedC1AWelshDocumentInfo = dgsService.generateWelshDocument(
                     authorisation,
