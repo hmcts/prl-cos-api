@@ -7,7 +7,6 @@ import com.sendgrid.Email;
 import com.sendgrid.Mail;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
-import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
