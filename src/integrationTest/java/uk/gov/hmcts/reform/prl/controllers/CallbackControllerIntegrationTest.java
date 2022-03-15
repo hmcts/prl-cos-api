@@ -75,16 +75,4 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
             httpResponse.getStatusLine().getStatusCode(),
             HttpStatus.SC_NOT_FOUND);
     }
-
-    @Test
-    public void testHealthForDgsApi() throws Exception {
-
-        Response response = SerenityRest.given()
-            .when()
-            .get("http://prl-dgs-aat.service.core-compute-aat.internal/health")
-            .andReturn();
-        assertEquals(response.getStatusCode(), HttpStatus.SC_OK);
-
-    }
-
 }
