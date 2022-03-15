@@ -58,6 +58,11 @@ public class TaskListRenderer {
 
     private static final String HORIZONTAL_LINE = "<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>";
     private static final String NEW_LINE = "<br/>";
+    private static final String NOT_STARTED = "not-started.png";
+    private static final String CANNOT_START_YET = "cannot-start-yet.png";
+    private static final String IN_PROGRESS = "in-progress.png";
+    private static final String INFORMATION_ADDED = "information-added.png";
+    private static final String FINISHED = "finished.png";
 
     private final TaskListRenderElements taskListRenderElements;
 
@@ -147,33 +152,33 @@ public class TaskListRenderer {
                     lines.add(taskListRenderElements.renderLink(task));
                 } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
-                                  + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
+                                  + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
                 } else if (task.getEvent().equals(FL401_STATEMENT_OF_TRUTH)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
-                                  + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
+                                  + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage("not-started.png", "Not started"));
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started"));
                 }
                 break;
             case IN_PROGRESS:
                 lines.add(taskListRenderElements.renderLink(task)
-                              + taskListRenderElements.renderImage("in-progress.png", "In progress"));
+                              + taskListRenderElements.renderImage(IN_PROGRESS, "In progress"));
                 break;
             case MANDATORY_COMPLETED:
                 lines.add(taskListRenderElements.renderLink(task)
-                              + taskListRenderElements.renderImage("information-added.png", "Information added"));
+                              + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added"));
                 break;
             case FINISHED:
                 if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
                 } else if (task.getEvent().equals(FL401_STATEMENT_OF_TRUTH)) {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage("finished.png", "Finished"));
+                                  + taskListRenderElements.renderImage(FINISHED, "Finished"));
                 }
                 break;
             default:
