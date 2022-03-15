@@ -533,20 +533,28 @@ public class WelshLangMapper {
 
         welshMap.put("allegationsOfHarmSubstanceAbuseYesNo_Yes", WELSH_YES_OES);
         welshMap.put("allegationsOfHarmSubstanceAbuseYesNo_No", WELSH_NO_NAC_OES);
+
         welshMap.put("allegationsOfHarmOtherConcernsYesNo_Yes", WELSH_YES_OES);
         welshMap.put("allegationsOfHarmOtherConcernsYesNo_No", WELSH_NO_NAC_OES);
+
         welshMap.put("ordersNonMolestation_Yes", WELSH_YES_OES);
         welshMap.put("ordersNonMolestation_No", WELSH_NO_NAC_OES);
+
         welshMap.put("ordersOccupation_Yes", WELSH_YES_OES);
         welshMap.put("ordersOccupation_No", WELSH_NO_NAC_OES);
+
         welshMap.put("ordersForcedMarriageProtection_Yes", WELSH_YES_OES);
         welshMap.put("ordersForcedMarriageProtection_No", WELSH_NO_NAC_OES);
+
         welshMap.put("ordersRestraining_Yes", WELSH_YES_OES);
         welshMap.put("ordersRestraining_No", WELSH_NO_NAC_OES);
+
         welshMap.put("ordersOtherInjunctive_Yes", WELSH_YES_OES);
         welshMap.put("ordersOtherInjunctive_No", WELSH_NO_NAC_OES);
+
         welshMap.put("ordersUndertakingInPlace_Yes", WELSH_YES_OES);
         welshMap.put("ordersUndertakingInPlace_No", WELSH_NO_NAC_OES);
+
         welshMap.put("abductionChildHasPassport_Yes", WELSH_YES_OES);
         welshMap.put("abductionChildHasPassport_No", WELSH_NO_NAC_OES);
 
