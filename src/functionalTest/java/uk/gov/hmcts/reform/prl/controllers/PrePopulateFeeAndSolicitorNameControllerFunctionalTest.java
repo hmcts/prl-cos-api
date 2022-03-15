@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.utils.FunctionalTest;
 
 import static org.hamcrest.Matchers.equalTo;
 
