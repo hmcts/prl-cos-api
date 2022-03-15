@@ -22,7 +22,8 @@ def secrets = [
     secret('system-update-user-password', 'PRL_SYSTEM_UPDATE_PASSWORD'),
     secret('microservicekey-prl-cos-api', 'IDAM_S2S_AUTH_TOTP_SECRET'),
     secret("launchDarkly-sdk-key", "LAUNCH_DARKLY_SDK_KEY"),
-    secret("AppInsightsInstrumentationKey", "APP_INSIGHTS_INSTRUMENTATION_KEY")
+    secret("AppInsightsInstrumentationKey", "APP_INSIGHTS_INSTRUMENTATION_KEY"),
+    secret("southampton-court-email-address", "SOUTHAMPTON_COURT_EMAIL_ADDRESS")
   ]
 ]
 

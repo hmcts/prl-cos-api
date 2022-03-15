@@ -41,3 +41,4 @@ java:
         - rpa-notify-to-email
         - rpa-notify-from-email
         - AppInsightsInstrumentationKey
+        - southampton-court-email-address

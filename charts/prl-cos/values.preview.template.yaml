@@ -15,6 +15,7 @@ java:
         - rpa-notify-to-email
         - rpa-notify-from-preview-email
         - AppInsightsInstrumentationKey
+        - southampton-court-email-address
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
