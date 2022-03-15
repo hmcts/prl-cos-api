@@ -81,7 +81,7 @@ uk:
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
-          email-id: C100applications@justice.gov.uk
+          email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
 
 notify:
@@ -195,3 +195,6 @@ document:
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
 
+southampton:
+  court:
+    email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}

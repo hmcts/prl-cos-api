@@ -140,9 +140,10 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmail(CaseDetails caseDetails) {
-        String caseworkerEmailId = "fprl_caseworker_solicitor@mailinator.com";
+        String caseworkerEmailAddress = caseDetails.getData().get("caseworkerEmailAddress").toString();
+
         emailService.send(
-            caseworkerEmailId,
+            caseworkerEmailAddress,
             EmailTemplateNames.CASEWORKER,
             buildEmail(caseDetails),
             LanguagePreference.english

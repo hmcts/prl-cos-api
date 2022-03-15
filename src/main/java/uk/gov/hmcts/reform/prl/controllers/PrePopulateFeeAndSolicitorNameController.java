@@ -78,6 +78,9 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Value("${document.templates.c100.c100_draft_welsh_filename}")
     protected String c100DraftWelshFilename;
 
+    @Value("${southampton.court.email-address}")
+    protected String southamptonCourtEmailAddress;
+
     public static final String CURRENCY_SIGN_POUND = "£";
 
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -117,7 +120,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .solicitorName(userDetails.getFullName())
                 .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
                 .applicantSolicitorEmailAddress(userDetails.getEmail())
-                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
+                .caseworkerEmailAddress(southamptonCourtEmailAddress)
                 .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
                 .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                 .build();
