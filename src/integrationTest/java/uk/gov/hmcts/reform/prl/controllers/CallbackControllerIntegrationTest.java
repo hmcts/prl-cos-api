@@ -7,6 +7,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -42,7 +43,6 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
 
     @DisplayName("temporary test to verify gov UK notifications integration")
     @Test
-    @Ignore
     public void sendEmail() {
         cosApiClient.sendEmail(CallbackRequest.builder()
                                    .caseDetails(CaseDetails.builder().build())
@@ -75,16 +75,4 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
             httpResponse.getStatusLine().getStatusCode(),
             HttpStatus.SC_NOT_FOUND);
     }
-
-    @Test
-    public void testHealthForDgsApi() throws Exception {
-
-        Response response = SerenityRest.given()
-            .when()
-            .get("http://prl-dgs-aat.service.core-compute-aat.internal/health")
-            .andReturn();
-        assertEquals(response.getStatusCode(), HttpStatus.SC_OK);
-
-    }
-
 }

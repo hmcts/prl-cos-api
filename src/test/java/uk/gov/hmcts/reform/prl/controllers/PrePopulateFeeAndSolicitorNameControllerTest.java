@@ -236,7 +236,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
-            .build();;
+            .build();
 
         CaseData caseData1 = objectMapper.convertValue(
             CaseData.builder()

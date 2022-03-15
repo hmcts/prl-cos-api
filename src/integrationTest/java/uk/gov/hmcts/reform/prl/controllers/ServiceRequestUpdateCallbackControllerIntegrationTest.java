@@ -41,21 +41,4 @@ public class ServiceRequestUpdateCallbackControllerIntegrationTest extends Integ
             httpResponse.getStatusLine().getStatusCode(),
             HttpStatus.SC_BAD_REQUEST);
     }
-    /*
-    @Ignore
-    @Test
-    public void whenValidRequestFormat_Return200() throws Exception {
-
-        HttpPost httpPost = new HttpPost(serviceUrl + serviceRequestContextPath);
-        String requestBody = ResourceLoader.loadJson(path);
-        httpPost.addHeader("Authorization", getAuthorizationToken());
-        httpPost.addHeader("Authorization", "ServiceAuthorization");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            HttpStatus.SC_OK,
-            httpResponse.getStatusLine().getStatusCode());
-    }*/
 }
