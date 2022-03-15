@@ -527,8 +527,10 @@ public class WelshLangMapper {
         welshMap.put(AbductionChildPassportPossessionEnum.other.getDisplayedValue(), WELSH_OTHER);
         welshMap.put("allegationsOfHarmChildAbductionYesNo_Yes", WELSH_YES_OES);
         welshMap.put("allegationsOfHarmChildAbductionYesNo_No", WELSH_NO_NAC_OES);
-        welshMap.put("allegationsOfHarmChildAbuseYesNo_Yes", WELSH_YES_OES);
+
         welshMap.put("allegationsOfHarmChildAbuseYesNo_No", WELSH_NO_NAC_OES);
+        welshMap.put("allegationsOfHarmChildAbuseYesNo_Yes", WELSH_YES_OES);
+
         welshMap.put("allegationsOfHarmSubstanceAbuseYesNo_Yes", WELSH_YES_OES);
         welshMap.put("allegationsOfHarmSubstanceAbuseYesNo_No", WELSH_NO_NAC_OES);
         welshMap.put("allegationsOfHarmOtherConcernsYesNo_Yes", WELSH_YES_OES);
