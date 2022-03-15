@@ -4,32 +4,45 @@ import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.CoreMatchers;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.hasKey;
 
 @Slf4j
+@SpringBootTest
+@RunWith( SpringRunner.class )
+@ContextConfiguration
 public class SendAndReplyControllerFunctionalTest {
 
-    private static final String VALID_INPUT_JSON = "CallBackRequest.json";
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
 
-    @BeforeClass
-    public static void setup() {
-        RestAssured.port = 4044;
-        RestAssured.baseURI = "http://localhost";
-    }
+    private static final String SEND_AND_REPLY_REQUEST = "requests/send-and-reply-request.json";
+
+    private final String targetInstance =
+        StringUtils.defaultIfBlank(
+            System.getenv("TEST_URL"),
+            "http://localhost:4044"
+        );
+
+    private final RequestSpecification request = RestAssured.given().baseUri(targetInstance);
 
     @Test
     public void givenValidUserDetails_whenAboutToSubmitEndPoint_thenBodyContainsUserEmail() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-        RequestSpecification request = RestAssured.given();
-        ValidatableResponse response =
+        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
             request
-            .header("Authorization", "Bearer 1234") //TODO: need real auth token
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -41,9 +54,7 @@ public class SendAndReplyControllerFunctionalTest {
 
     @Test
     public void givenBodyWithSendData_whenMidEventCallback_thenMessageReplyNotPopulated() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-        RequestSpecification request = RestAssured.given();
-        ValidatableResponse response =
+        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
             request
                 .header("Authorization", "Bearer 1234")
                 .body(requestBody)
@@ -58,9 +69,7 @@ public class SendAndReplyControllerFunctionalTest {
 
     @Test
     public void givenBodyWithNoMessages_whenAboutToSubmit_thenResponseContainsNoMessageData() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-        RequestSpecification request = RestAssured.given();
-        ValidatableResponse response =
+        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
             request
                 .header("Authorization", "Bearer 1234")
                 .body(requestBody)
@@ -75,9 +84,7 @@ public class SendAndReplyControllerFunctionalTest {
 
     @Test
     public void givenInValidRequest_whenSubmitted_then500Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-        RequestSpecification request = RestAssured.given();
-        ValidatableResponse response =
+        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
             request
                 .header("Authorization", "Bearer 1234")
                 .body(requestBody)

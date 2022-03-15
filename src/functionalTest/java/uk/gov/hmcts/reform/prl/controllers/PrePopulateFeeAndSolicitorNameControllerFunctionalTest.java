@@ -4,41 +4,50 @@ import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 import static org.hamcrest.Matchers.equalTo;
 
 @Slf4j
+@SpringBootTest
+@RunWith( SpringRunner.class )
+@ContextConfiguration
 public class PrePopulateFeeAndSolicitorNameControllerFunctionalTest {
+
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
 
     private static final String VALID_INPUT_JSON = "controller/valid-request-casedata-body.json";
 
-    @BeforeClass
-    public static void setup() {
-        RestAssured.port = 4044;
-        RestAssured.baseURI = "http://localhost";
-    }
+    private final String targetInstance =
+        StringUtils.defaultIfBlank(
+            System.getenv("TEST_URL"),
+            "http://localhost:4044"
+        );
+
+    private final RequestSpecification request = RestAssured.given().baseUri(targetInstance);
 
     @Test
     public void givenValidAuthDetailsAndC100Case_whenEndPointCalled_ResponseContainsFeeInfo() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-        RequestSpecification request = RestAssured.given();
-
-        ValidatableResponse response =
-            request
-                .header("Authorization", "Bearer 1234") //TODO: need real auth token
-                .body(requestBody)
-                .when()
-                .contentType("application/json")
-                .post("/getSolicitorAndFeeDetails")
-                .then()
-                .body("data.feeAmount", equalTo("£232.00"))
-                .assertThat().statusCode(200);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/getSolicitorAndFeeDetails")
+            .then()
+            .body("data.feeAmount", equalTo("£232.00"))
+            .assertThat().statusCode(200);
     }
-
-
-
 
 }

@@ -27,3 +27,5 @@ spring:
         prl.test-genericpassword: PRL_GENERIC_PASSWORD
         prl.launchDarkly-sdk-key: LAUNCH_DARKLY_SDK_KEY
         prl.AppInsightsInstrumentationKey: APP_INSIGHTS_INSTRUMENTATION_KEY
+        prl.idam-solicitor-username: IDAM_SOLICITOR_USERNAME
+        prl.idam-solicitor-password: IDAM_SOLICITOR_PASSWORD
