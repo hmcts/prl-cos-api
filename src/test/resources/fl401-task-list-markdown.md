@@ -96,7 +96,7 @@
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
-<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/statementOfTruthAndSubmit/statementOfTruthAndSubmit1'>Statement of Truth and Submit</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/statementOfTruthAndSubmit/statementOfTruthAndSubmit1'>Statement of truth and submit</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 

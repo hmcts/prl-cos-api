@@ -23,6 +23,7 @@ import javax.json.JsonObject;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendgridService {
 
+    public static final String PRL_RPA_NOTIFICATION = "Private Reform Law CCD Notification ";
     @Value("${send-grid.api-key}")
     private String apiKey;
 
@@ -34,7 +35,7 @@ public class SendgridService {
 
     public void sendEmail(JsonObject caseData) throws IOException {
 
-        String subject = "Private Reform Law CCD Notification " + caseData.get("id");
+        String subject = PRL_RPA_NOTIFICATION + caseData.get("id");
         Content content = new Content("text/plain", " ");
         Attachments attachments = new Attachments();
         String data = Base64.getEncoder().encodeToString(caseData.toString().getBytes());

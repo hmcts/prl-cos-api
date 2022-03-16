@@ -127,7 +127,7 @@ public class FL401SubmitApplicationController {
         boolean mandatoryEventStatus = fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData);
         if (!mandatoryEventStatus) {
             errorList.add(
-                "Statement of Truth and submit is not allowed for this case unless you finish all the mandatory events");
+                "Statement of truth and submit is not allowed for this case unless you finish all the mandatory events");
         }
         return CallbackResponse.builder()
             .errors(errorList)
@@ -186,7 +186,6 @@ public class FL401SubmitApplicationController {
             caseData = caseData.toBuilder()
                 .home(null)
                 .build();
-            log.info("Case date with home details === {} =====", caseData.getHome());
         }
 
         log.info("Generating the Final document of FL401 for case id " + caseData.getId());
@@ -197,8 +196,6 @@ public class FL401SubmitApplicationController {
         log.info("Called org service to update the org address .. for case id {} ", caseData.getId());
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}",
-                 documentLanguage.isGenEng(),documentLanguage.isGenWelsh());
 
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());

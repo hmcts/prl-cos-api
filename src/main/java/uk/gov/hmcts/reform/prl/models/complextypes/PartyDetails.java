@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.complextypes;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -59,7 +60,7 @@ public class PartyDetails {
     private String phoneNumber;
     private String email;
     private Address address;
-    @JsonIgnore
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final Organisations organisations;
     private final String solicitorTelephone;
     @JsonIgnore
