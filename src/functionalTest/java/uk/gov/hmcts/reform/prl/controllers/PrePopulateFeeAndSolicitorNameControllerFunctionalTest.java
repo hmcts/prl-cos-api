@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.contains;
 
 @Slf4j
 @SpringBootTest
@@ -32,10 +32,10 @@ public class PrePopulateFeeAndSolicitorNameControllerFunctionalTest {
             "http://localhost:4044"
         );
 
-    private final RequestSpecification request = RestAssured.given().baseUri(targetInstance);
+    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
-    public void givenValidAuthDetailsAndC100Case_whenEndPointCalled_ResponseContainsFeeInfo() throws Exception {
+    public void givenValidAuthDetailsAndC100Case_whenEndPointCalledWithoutCompleteCase_ResponseContainsError() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -44,7 +44,7 @@ public class PrePopulateFeeAndSolicitorNameControllerFunctionalTest {
             .contentType("application/json")
             .post("/getSolicitorAndFeeDetails")
             .then()
-            .body("data.feeAmount", equalTo("£232.00"))
+            .body("errors", contains("Submit and pay is not allowed for this case unless you finish all the mandatory events"))
             .assertThat().statusCode(200);
     }
 

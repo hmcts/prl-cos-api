@@ -531,7 +531,7 @@ public class CaseData implements MappableObject {
     private final FL401OtherProceedingDetails fl401OtherProceedingDetails;
 
     /**
-     *  FL401 Statement Of Truth and Submit.
+     *  FL401 Statement Of truth and submit.
      */
     @JsonProperty("fl401StmtOfTruth")
     private final StatementOfTruth fl401StmtOfTruth;
