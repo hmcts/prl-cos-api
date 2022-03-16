@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
@@ -18,13 +20,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class FL401ApplicationTypeCheckerTest {
 
     @Mock
     private TaskErrorService taskErrorService;
 
     @Mock
-    private FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
+    FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
 
     private CaseData caseData;
     private TypeOfApplicationOrders orders;
@@ -34,9 +37,7 @@ public class FL401ApplicationTypeCheckerTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        caseData = CaseData.builder().build();
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-
         orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
 
         orders = TypeOfApplicationOrders.builder()
@@ -58,7 +59,7 @@ public class FL401ApplicationTypeCheckerTest {
     @Test
     public void whenAllRequiredFieldsCompletedThenIsFinishedReturnsTrue() {
 
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .typeOfApplicationOrders(orders)
             .typeOfApplicationLinkToCA(linkToCA)
             .build();
@@ -83,7 +84,7 @@ public class FL401ApplicationTypeCheckerTest {
             .caApplicationNumber("123")
             .build();
 
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .typeOfApplicationOrders(orders)
             .typeOfApplicationLinkToCA(linkToCA)
             .build();
@@ -110,7 +111,7 @@ public class FL401ApplicationTypeCheckerTest {
             .linkToCaApplication(YesOrNo.No)
             .build();
 
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .typeOfApplicationOrders(orders)
             .typeOfApplicationLinkToCA(linkToCA)
             .build();
