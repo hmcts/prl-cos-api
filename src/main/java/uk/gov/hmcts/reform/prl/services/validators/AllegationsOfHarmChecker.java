@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum.OTHER;
+import static uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum.other;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -203,7 +203,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
                 boolean abductionChildPassportPosessionCompleted = abductionChildPassportPosession.isPresent();
 
                 if (abductionChildPassportPosessionCompleted) {
-                    if (abductionChildPassportPosession.get().equals(OTHER)) {
+                    if (abductionChildPassportPosession.get().equals(other)) {
                         passportPossessionCompleted = abductionChildPassportPosessionOtherDetail.isPresent();
                     } else {
                         passportPossessionCompleted = true;

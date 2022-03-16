@@ -15,6 +15,7 @@ import java.util.Date;
 @Slf4j
 public class CommonUtils {
     public static final String DATE_OF_SUBMISSION_FORMAT = "dd-MM-yyyy";
+    public static final String ERROR_STRING = "Error while formatting the date from casedetails to casedata.. ";
 
     private CommonUtils() {
 
@@ -31,7 +32,7 @@ public class CommonUtils {
                 return localDateTime.format(formatter);
             }
         } catch (Exception e) {
-            log.error("Error while formatting the date from casedetails to casedata.. " + e.getMessage());
+            log.error(ERROR_STRING + e.getMessage());
         }
         return " ";
     }
@@ -44,7 +45,7 @@ public class CommonUtils {
                 return parse.format(formatter);
             }
         } catch (Exception e) {
-            log.error("Error while formatting the date from casedetails to casedata.. " + e.getMessage());
+            log.error(ERROR_STRING + e.getMessage());
         }
         return " ";
     }
@@ -55,11 +56,11 @@ public class CommonUtils {
             Date date = new Date();
             return dateFormat.format(date);
         } catch (Exception e) {
-            log.error("Error while formatting the date from casedetails to casedata.. " + e.getMessage());
+            log.error(ERROR_STRING + e.getMessage());
         }
         return "";
     }
-  
+
     public static String getYesOrNoValue(YesOrNo value) {
         return value != null ? value.getDisplayedValue() : null;
     }

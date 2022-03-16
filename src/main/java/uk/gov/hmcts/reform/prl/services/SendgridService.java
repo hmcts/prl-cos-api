@@ -7,7 +7,6 @@ import com.sendgrid.Email;
 import com.sendgrid.Mail;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
-import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +23,7 @@ import javax.json.JsonObject;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendgridService {
 
+    public static final String PRL_RPA_NOTIFICATION = "Private Reform Law CCD Notification ";
     @Value("${send-grid.api-key}")
     private String apiKey;
 
@@ -35,7 +35,7 @@ public class SendgridService {
 
     public void sendEmail(JsonObject caseData) throws IOException {
 
-        String subject = "Private Reform Law CCD Notification " + caseData.get("id");
+        String subject = PRL_RPA_NOTIFICATION + caseData.get("id");
         Content content = new Content("text/plain", " ");
         Attachments attachments = new Attachments();
         String data = Base64.getEncoder().encodeToString(caseData.toString().getBytes());
@@ -51,9 +51,9 @@ public class SendgridService {
             request.setMethod(Method.POST);
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
-            Response response = sg.api(request);
+            sg.api(request);
         } catch (IOException ex) {
-            throw ex;
+            throw new IOException(ex.getMessage());
         }
     }
 }

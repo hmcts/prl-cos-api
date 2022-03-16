@@ -54,7 +54,6 @@ public class SolicitorsMapper {
     }
 
     public JsonObject callOrgSearchFormSolicitorMap(String id, PartyDetails party) {
-        log.info("Fetching the organisation details for org {}", party.getSolicitorOrg());
         if (party.getSolicitorOrg() != null && party.getSolicitorOrg().getOrganisationID() != null) {
             Organisations org = organisationService.getOrganisationDetaiils(
                 systemUserService.getSysUserToken(),

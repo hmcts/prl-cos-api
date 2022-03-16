@@ -70,6 +70,7 @@ import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
+import uk.gov.hmcts.reform.prl.models.documents.UploadDocument;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
@@ -371,13 +372,26 @@ public class CaseData implements MappableObject {
     private final String feeCode;
     @JsonProperty("draftOrderDoc")
     private final Document draftOrderDoc;
+    @JsonProperty("draftOrderDocWelsh")
+    private final Document draftOrderDocWelsh;
     @JsonProperty("c8Document")
     private final Document c8Document;
+    @JsonProperty("c8WelshDocument")
+    private final Document c8WelshDocument;
     @JsonProperty("c1ADocument")
     private final Document c1ADocument;
+    @JsonProperty("c1AWelshDocument")
+    private final Document c1AWelshDocument;
+
+    @JsonProperty("isEngDocGen")
+    private final String isEngDocGen;
+    @JsonProperty("isWelshDocGen")
+    private final String isWelshDocGen;
 
     @JsonProperty("submitAndPayDownloadApplicationLink")
     private final Document submitAndPayDownloadApplicationLink;
+    @JsonProperty("submitAndPayDownloadApplicationWelshLink")
+    private final Document submitAndPayDownloadApplicationWelshLink;
 
     /**
      * Add case number.
@@ -463,6 +477,7 @@ public class CaseData implements MappableObject {
     private String courtName;
     private String courtId;
     private String courtEmailAddress;
+    private String reasonForAmendCourtDetails;
 
     /**
      * Final document.
@@ -482,6 +497,8 @@ public class CaseData implements MappableObject {
     @JsonProperty("closedMessages")
     private final List<Element<Message>> closedMessages;
 
+    @JsonProperty("finalWelshDocument")
+    private final Document finalWelshDocument;
 
     /**
      * Confidentiality details.
@@ -498,6 +515,13 @@ public class CaseData implements MappableObject {
     private final WithdrawApplication withDrawApplicationData;
 
     /**
+     * FL401 Upload Documents.
+     */
+    private final List<UploadDocument> fl401UploadedDocuments;
+    private final List<UploadDocument> fl401UploadWitnessDocuments;
+    private final List<UploadDocument> fl401UploadSupportDocuments;
+
+    /**
      * Send to Gatekeeper.
      */
     private final List<Element<GatekeeperEmail>> gatekeeper;
@@ -508,9 +532,20 @@ public class CaseData implements MappableObject {
     private final FL401OtherProceedingDetails fl401OtherProceedingDetails;
 
     /**
-     *  FL401 Statement Of Truth and Submit.
+     *  FL401 Statement Of truth and submit.
      */
     @JsonProperty("fl401StmtOfTruth")
     private final StatementOfTruth fl401StmtOfTruth;
+
+    @JsonProperty("viewPDFlinkLabelText")
+    private String viewPdfLinkLabelText;
+
+
+    /**
+     *  FL401 submit status flags.
+     */
+    private String isCourtEmailFound;
+    private String isDocumentGenerated;
+    private String isNotificationSent;
 
 }
