@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +40,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
 public class PrePopulateFeeAndSolicitorNameController {
 
     @Autowired
@@ -50,8 +48,11 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Autowired
     private UserService userService;
 
-    private final CourtFinderService courtLocatorService;
-    private final SubmitAndPayChecker submitAndPayChecker;
+    @Autowired
+    CourtFinderService courtLocatorService;
+
+    @Autowired
+    SubmitAndPayChecker submitAndPayChecker;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -126,9 +127,6 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .build();
 
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
-            log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}",
-                     documentLanguage.isGenEng(), documentLanguage.isGenWelsh()
-            );
 
             if (documentLanguage.isGenEng()) {
                 GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(

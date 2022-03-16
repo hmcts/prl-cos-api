@@ -21,8 +21,6 @@ public class FeeService {
     public FeeResponse fetchFeeDetails(FeeType feeType) throws Exception {
         FeesConfig.FeeParameters parameters = feesConfig.getFeeParametersByFeeType(feeType);
         try {
-            log.debug("Making request to Fee Register with parameters : {} ", parameters);
-
             FeeResponse fee = feesRegisterApi.findFee(
                 parameters.getChannel(),
                 parameters.getEvent(),
@@ -31,8 +29,6 @@ public class FeeService {
                 parameters.getKeyword(),
                 parameters.getService()
             );
-
-            log.debug("Fee response: {} ", fee);
 
             return fee;
         } catch (FeignException ex) {
