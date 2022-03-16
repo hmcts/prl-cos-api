@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.hmcts.reform.prl.utils.EmailObfuscator;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
 import uk.gov.service.notify.SendEmailResponse;
@@ -35,8 +34,6 @@ public class EmailService {
         onBeforeLog(email, templateName, templateVars.getCaseReference(), reference);
         final String templateId = getTemplateId(templateName, languagePreference);
 
-        log.info(toMap(templateVars).toString());
-
         try {
             SendEmailResponse response = notificationClient.sendEmail(templateId, email, toMap(templateVars),
                                                                       reference);
@@ -60,8 +57,8 @@ public class EmailService {
 
     private void onBeforeLog(String email, EmailTemplateNames name, String caseId, String reference) {
         log.info(
-            "CaseId: {}: attempting to send email {} to {}. Reference = {}",
-            caseId, name, EmailObfuscator.obfuscate(email), reference
+            "CaseId: {}: attempting to send email {} for Reference = {}",
+            caseId, name, reference
         );
     }
 
