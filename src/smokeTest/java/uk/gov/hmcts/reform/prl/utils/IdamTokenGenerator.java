@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.cosapi.utils;
+package uk.gov.hmcts.reform.prl.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

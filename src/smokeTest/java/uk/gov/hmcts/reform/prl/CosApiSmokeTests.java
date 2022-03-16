@@ -23,10 +23,8 @@ import static org.hamcrest.Matchers.hasKey;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class C100CreateCaseSmokeTest {
+public class CosApiSmokeTests {
 
-
-    private static final String MIAM_VALIDATION_REQUEST_NO_ERROR = "requests/call-back-controller-miam-request-no-error.json";
     private static final String SEND_AND_REPLY_REQUEST = "requests/send-and-reply-request.json";
     private static final String VALID_INPUT_JSON = "controller/valid-request-casedata-body.json";
     public static final String LOCALHOST_4044 = "http://localhost:4044";
