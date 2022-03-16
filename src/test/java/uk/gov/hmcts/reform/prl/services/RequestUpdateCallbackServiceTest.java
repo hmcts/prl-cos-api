@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -16,10 +17,13 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +60,8 @@ public class RequestUpdateCallbackServiceTest {
     @Mock
     private ConfidentialityTabService confidentialityTabService;
 
+    @Mock
+    AllTabServiceImpl allTabService;
 
     @InjectMocks
     RequestUpdateCallbackService requestUpdateCallbackService;
@@ -119,10 +125,11 @@ public class RequestUpdateCallbackServiceTest {
 
     @Test
     public void shouldProcessCallback() throws Exception {
-
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).build();
+        CaseData caseData = CaseData.builder().id(1L).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).data(Map.of("id", 1)).build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
-        when(confidentialityTabService.updateConfidentialityDetails(any(), any())).thenReturn(true);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
         when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                      caseType, Long.toString(caseId), eventName
         ))
