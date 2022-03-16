@@ -4,17 +4,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskSection;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -28,7 +33,9 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
@@ -51,16 +58,21 @@ public class TaskListRenderer {
 
     private static final String HORIZONTAL_LINE = "<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>";
     private static final String NEW_LINE = "<br/>";
+    private static final String NOT_STARTED = "not-started.png";
+    private static final String CANNOT_START_YET = "cannot-start-yet.png";
+    private static final String IN_PROGRESS = "in-progress.png";
+    private static final String INFORMATION_ADDED = "information-added.png";
+    private static final String FINISHED = "finished.png";
 
     private final TaskListRenderElements taskListRenderElements;
 
 
-    public String render(List<Task> allTasks, List<EventValidationErrors> tasksErrors, boolean isC100CaseType) {
+    public String render(List<Task> allTasks, List<EventValidationErrors> tasksErrors, boolean isC100CaseType, CaseData caseData) {
         final List<String> lines = new LinkedList<>();
 
         lines.add("<div class='width-50'>");
 
-        (isC100CaseType ? groupInSections(allTasks) : groupInSectionsForFL401(allTasks))
+        (isC100CaseType ? groupInSections(allTasks) : groupInSectionsForFL401(allTasks, caseData))
             .forEach(section -> lines.addAll(renderSection(section)));
 
         lines.add("</div>");
@@ -136,31 +148,37 @@ public class TaskListRenderer {
         switch (task.getState()) {
 
             case NOT_STARTED:
-                if (task.getEvent().equals(VIEW_PDF_DOCUMENT)) {
+                if (task.getEvent().equals(VIEW_PDF_DOCUMENT) || task.getEvent().equals(FL401_UPLOAD_DOCUMENTS)) {
                     lines.add(taskListRenderElements.renderLink(task));
                 } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
-                                  + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
+                                  + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
+                } else if (task.getEvent().equals(FL401_SOT_AND_SUBMIT)) {
+                    lines.add(taskListRenderElements.renderDisabledLink(task)
+                                  + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage("not-started.png", "Not started"));
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started"));
                 }
                 break;
             case IN_PROGRESS:
                 lines.add(taskListRenderElements.renderLink(task)
-                              + taskListRenderElements.renderImage("in-progress.png", "In progress"));
+                              + taskListRenderElements.renderImage(IN_PROGRESS, "In progress"));
                 break;
             case MANDATORY_COMPLETED:
                 lines.add(taskListRenderElements.renderLink(task)
-                              + taskListRenderElements.renderImage("information-added.png", "Information added"));
+                              + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added"));
                 break;
             case FINISHED:
                 if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
+                } else if (task.getEvent().equals(FL401_SOT_AND_SUBMIT)) {
+                    lines.add(taskListRenderElements.renderLink(task)
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage("finished.png", "Finished"));
+                                  + taskListRenderElements.renderImage(FINISHED, "Finished"));
                 }
                 break;
             default:
@@ -185,8 +203,9 @@ public class TaskListRenderer {
     }
 
 
-    private List<TaskSection> groupInSectionsForFL401(List<Task> allTasks) {
+    private List<TaskSection> groupInSectionsForFL401(List<Task> allTasks, CaseData caseData) {
         final Map<Event, Task> tasks = allTasks.stream().collect(toMap(Task::getEvent, identity()));
+        Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
 
         final TaskSection applicationDetails = newSection("Add application details")
             .withTask(tasks.get(FL401_CASE_NAME))
@@ -199,25 +218,37 @@ public class TaskListRenderer {
             .withTask(tasks.get(FL401_APPLICANT_FAMILY_DETAILS));
 
         final TaskSection addCaseDetails = newSection("Add case details")
-            .withTask(tasks.get(RELATIONSHIP_TO_RESPONDENT))
-            .withTask(tasks.get(RESPONDENT_BEHAVIOUR))
-            .withTask(tasks.get(FL401_HOME));
+            .withTask(tasks.get(RELATIONSHIP_TO_RESPONDENT));
+
+        if (ordersOptional.isEmpty() || (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
+            && ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
+            addCaseDetails.withTask(tasks.get(RESPONDENT_BEHAVIOUR));
+            addCaseDetails.withTask(tasks.get(FL401_HOME));
+        } else  if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+            addCaseDetails.withTask(tasks.get(FL401_HOME));
+        } else if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
+            addCaseDetails.withTask(tasks.get(RESPONDENT_BEHAVIOUR));
+        }
 
         final TaskSection additionalInformation = newSection("Add additional information")
             .withInfo("Only complete if relevant")
             .withTask(tasks.get(FL401_OTHER_PROCEEDINGS))
             .withTask(tasks.get(ATTENDING_THE_HEARING))
-            .withTask(tasks.get(INTERNATIONAL_ELEMENT))
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
-        final TaskSection pdfApplication = newSection("View PDF application")
-            .withTask(tasks.get(VIEW_PDF_DOCUMENT));
+        final TaskSection uploadDocuments = newSection("Upload documents")
+            .withTask(tasks.get(FL401_UPLOAD_DOCUMENTS));
+
+        final TaskSection checkAndSignApplication = newSection("Check and sign application")
+            .withTask(tasks.get(VIEW_PDF_DOCUMENT))
+            .withTask(tasks.get(FL401_SOT_AND_SUBMIT));
 
         return Stream.of(applicationDetails,
                          peopleInTheCase,
                          addCaseDetails,
                          additionalInformation,
-                         pdfApplication)
+                         uploadDocuments,
+                         checkAndSignApplication)
             .filter(TaskSection::hasAnyTask)
             .collect(toList());
     }

@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,6 +27,7 @@ public class PartyDetails {
     private final String firstName;
     private final String lastName;
     private final String previousName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOfBirth;
     private final DontKnow isDateOfBirthUnknown;
     private final Gender gender;
@@ -55,18 +60,23 @@ public class PartyDetails {
     private String phoneNumber;
     private String email;
     private Address address;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private final Organisations organisations;
     private final String solicitorTelephone;
+    @JsonIgnore
     private final String caseTypeOfApplication;
     private final YesOrNo respondentLivedWithApplicant;
 
     public boolean hasConfidentialInfo() {
-        return this.isAddressConfidential.equals(YesOrNo.Yes) || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
+        return this.isAddressConfidential.equals(YesOrNo.Yes)
+            || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
     }
 
     public boolean isCanYouProvideEmailAddress() {
         return this.canYouProvideEmailAddress.equals(YesOrNo.No);
     }
 
+    @JsonIgnore
     public boolean isEmailAddressNull() {
         if (isCanYouProvideEmailAddress()) {
             return this.isEmailAddressConfidential == YesOrNo.No;

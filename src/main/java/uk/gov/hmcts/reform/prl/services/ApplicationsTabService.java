@@ -98,20 +98,17 @@ public class ApplicationsTabService implements TabService {
         applicationTab.put("childDetailsTable", getChildDetails(caseData));
         applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
 
-        log.info("inside the application tab service update");
-        log.info(applicationTab.toString());
-
         return applicationTab;
     }
 
     @Override
     public List<FieldGenerator> getGenerators() {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @Override
     public void calEventToRefreshUI() {
-
+        // no current implementation required.
     }
 
     public List<Element<ChildDetails>> getChildDetails(CaseData caseData) {
@@ -486,7 +483,7 @@ public class ApplicationsTabService implements TabService {
                 .orderCurrent(caseData.getOrdersForcedMarriageProtectionCurrent())
                 .courtName(caseData.getOrdersForcedMarriageProtectionCourtName())
                 .build();
-            //allegationsOfHarmOrders.setForcedMarriageOrder(forOrder);
+            allegationsOfHarmOrders.setForcedMarriageProtectionOrder(forOrder);
         }
 
         Optional<YesOrNo> resYesNo = ofNullable(allegationsOfHarmOrders.getOrdersRestraining());

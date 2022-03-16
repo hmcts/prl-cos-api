@@ -1,14 +1,21 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 @Slf4j
 public class CommonUtils {
     public static final String DATE_OF_SUBMISSION_FORMAT = "dd-MM-yyyy";
+    public static final String ERROR_STRING = "Error while formatting the date from casedetails to casedata.. ";
 
     private CommonUtils() {
 
@@ -25,7 +32,7 @@ public class CommonUtils {
                 return localDateTime.format(formatter);
             }
         } catch (Exception e) {
-            log.error("Error while formatting the date from casedetails to casedata.. " + e.getMessage());
+            log.error(ERROR_STRING + e.getMessage());
         }
         return " ";
     }
@@ -38,8 +45,34 @@ public class CommonUtils {
                 return parse.format(formatter);
             }
         } catch (Exception e) {
-            log.error("Error while formatting the date from casedetails to casedata.. " + e.getMessage());
+            log.error(ERROR_STRING + e.getMessage());
         }
         return " ";
+    }
+
+    public static String formatCurrentDate(String pattern) {
+        try {
+            DateFormat dateFormat = new SimpleDateFormat(pattern);
+            Date date = new Date();
+            return dateFormat.format(date);
+        } catch (Exception e) {
+            log.error(ERROR_STRING + e.getMessage());
+        }
+        return "";
+    }
+
+    public static String getYesOrNoValue(YesOrNo value) {
+        return value != null ? value.getDisplayedValue() : null;
+    }
+
+    public static String getYesOrNoDontKnowValue(YesNoDontKnow value) {
+        return value != null ? value.getDisplayedValue() : null;
+    }
+
+    public static String getSolicitorId(PartyDetails party) {
+        if (party.getSolicitorOrg() != null && party.getSolicitorOrg().getOrganisationID() != null) {
+            return "SOL_" + party.getSolicitorOrg().getOrganisationID();
+        }
+        return null;
     }
 }
