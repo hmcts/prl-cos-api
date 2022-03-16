@@ -488,7 +488,7 @@ public class CaseData implements MappableObject {
     /**
      * Send and reply to messages.
      */
-    @JsonUnwrapped
+    @JsonProperty("sendAndReplyEventData")
     private final SendAndReplyEventData sendAndReplyEventData;
     @JsonProperty("openMessages")
     private final List<Element<Message>> openMessages;
