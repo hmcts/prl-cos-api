@@ -4,19 +4,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.rpa.mappers.AddressMapper;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import javax.json.spi.JsonProvider;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 
 @RunWith(MockitoJUnitRunner.class)
