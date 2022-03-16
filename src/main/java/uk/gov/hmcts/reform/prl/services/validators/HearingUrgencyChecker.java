@@ -74,7 +74,7 @@ public class HearingUrgencyChecker implements EventChecker {
 
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
-        return  ofNullable(caseData.getIsCaseUrgent()).isPresent();
+        return  false;
     }
 
 }
