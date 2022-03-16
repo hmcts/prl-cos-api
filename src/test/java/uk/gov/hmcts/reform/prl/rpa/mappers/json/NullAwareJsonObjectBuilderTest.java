@@ -27,7 +27,7 @@ public class NullAwareJsonObjectBuilderTest {
         delegate.add("keyString","value");
         delegate.add("keyJsonValue",JsonValue.FALSE);
         assertEquals(nullAwareJsonObjectBuilder.add("keyString","value").build().get("keyString"),delegate.build().get("keyString"));
-        assertEquals(nullAwareJsonObjectBuilder.add("keyJsonValue",JsonValue.FALSE).build().get("keyJsonValue"),JsonValue.FALSE);
+        assertEquals(JsonValue.FALSE,nullAwareJsonObjectBuilder.add("keyJsonValue",JsonValue.FALSE).build().get("keyJsonValue"));
     }
 
     @Test
