@@ -127,9 +127,6 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .build();
 
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
-            log.info("Based on Welsh Language requirement document generated will in English: {} and Welsh {}",
-                     documentLanguage.isGenEng(), documentLanguage.isGenWelsh()
-            );
 
             if (documentLanguage.isGenEng()) {
                 GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(

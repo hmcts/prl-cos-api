@@ -97,7 +97,6 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         if (eventData.getChooseSendOrReply().equals(SEND)) {
             Message newMessage = sendAndReplyService.buildNewSendMessage(caseData);
-            log.info(String.format("New message sent to %s", newMessage.getRecipientEmail()));
             List<Element<Message>> listOfMessages = sendAndReplyService.addNewMessage(caseData, newMessage);
             caseDataMap.putAll(sendAndReplyService.returnMapOfOpenMessages(listOfMessages));
 
@@ -120,7 +119,6 @@ public class SendAndReplyController extends AbstractCallbackController {
 
                 messages.removeAll(closedMessages);
                 caseDataMap.put("closedMessages", closedMessages);
-
             } else {
                 messages = sendAndReplyService.buildNewReplyMessage(
                     selectedValue,
