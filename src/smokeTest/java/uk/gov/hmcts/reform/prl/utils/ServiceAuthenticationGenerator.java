@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.cosapi.utils;
+package uk.gov.hmcts.reform.prl.utils;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
