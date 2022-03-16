@@ -34,6 +34,7 @@ public class RequestUpdateCallbackServiceTest {
     private final String caseType = "PRLAPPS";
     private final Long caseId = 1234567887654321L;
     private final String eventName = "paymentSuccessCallback";
+    private final String eventFailureName = "paymentFailureCallback";
     public static final String authToken = "Bearer TestAuthToken";
     private final String serviceAuthToken = "Bearer testServiceAuth";
     private final String systemUserId = "systemUserID";
@@ -150,6 +151,35 @@ public class RequestUpdateCallbackServiceTest {
         assertEquals(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString()), caseDetails);
 
     }
+
+    @Test
+    public void shouldProcessPendingCallback() throws Exception {
+        CaseData caseData = CaseData.builder().id(1L).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf("123")).data(Map.of("id", 1)).build();
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                     caseType, Long.toString(caseId), eventFailureName
+        ))
+            .thenReturn(buildStartEventResponse(eventName, eventToken));
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentMethod("cash")
+                         .paymentReference("reference")
+                         .caseReference("reference")
+                         .accountNumber("123445555")
+                         .build())
+            .serviceRequestStatus("Paidn")
+            .build();
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+        assertEquals(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString()), caseDetails);
+
+    }
+
 
     private CaseDataContent buildCaseDataContent(String eventId, String eventToken, Object caseData) {
         return CaseDataContent.builder()
