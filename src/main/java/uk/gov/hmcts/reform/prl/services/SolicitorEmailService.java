@@ -171,7 +171,7 @@ public class SolicitorEmailService {
             .build();
     }
 
-    public void sendWithDrawEmailToDASolicitor(CaseDetails caseDetails, UserDetails userDetails) {
+    public void sendWithDrawEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails) {
         String fl401SolicitorEmail = "";
 
         PartyDetails fl401Applicant = emailService.getCaseData(caseDetails)

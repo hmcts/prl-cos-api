@@ -955,6 +955,6 @@ public class CallbackControllerTest {
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
         verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToDASolicitor(callbackRequest.getCaseDetails(), userDetails);
+            .sendWithDrawEmailToFl401Solicitor(callbackRequest.getCaseDetails(), userDetails);
     }
 }

@@ -430,7 +430,7 @@ public class SolicitorEmailServiceTest {
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
-        solicitorEmailService.sendWithDrawEmailToDASolicitor(caseDetails, userDetails);
+        solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
 
         assertEquals("testing@solicitor.com", email);
     }

@@ -423,9 +423,8 @@ public class CallbackController {
                 // Getting the tab fields and add it to the casedetails..
                 Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
                 caseDataUpdated.putAll(allTabsFields);
-            }
-            else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                solicitorEmailService.sendWithDrawEmailToDASolicitor(caseDetails, userDetails);
+            } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
