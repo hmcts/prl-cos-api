@@ -45,7 +45,7 @@ public class SubmitAndPayChecker implements EventChecker {
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
 
-        EnumMap<Event, EventChecker> mandatoryEvents = new EnumMap<Event, EventChecker>(Event.class);
+        EnumMap<Event, EventChecker> mandatoryEvents = new EnumMap<>(Event.class);
 
         mandatoryEvents.put(CASE_NAME, eventsChecker.getCaseNameChecker());
         mandatoryEvents.put(TYPE_OF_APPLICATION, eventsChecker.getApplicationTypeChecker());
@@ -65,7 +65,7 @@ public class SubmitAndPayChecker implements EventChecker {
             }
         }
 
-        EnumMap<Event, EventChecker> optionalEvents = new EnumMap<Event, EventChecker>(Event.class);
+        EnumMap<Event, EventChecker> optionalEvents = new EnumMap<>(Event.class);
 
         optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE, eventsChecker.getOtherPeopleInTheCaseChecker());
         optionalEvents.put(OTHER_PROCEEDINGS, eventsChecker.getOtherProceedingsChecker());
