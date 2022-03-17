@@ -81,6 +81,8 @@ public class ReturnApplicationService {
     public String getReturnMessageForTaskList(CaseData caseData) {
         StringBuilder returnMsgStr = new StringBuilder();
 
+        returnMsgStr.append("<div class='govuk-box-highlight'><strong><h1>Application has been returned</h1></strong></div>\"" + "\n\n");
+
         returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
 
         for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
