@@ -159,10 +159,8 @@ public class TaskListRenderer {
             case NOT_STARTED:
                 if (task.getEvent().equals(VIEW_PDF_DOCUMENT) || task.getEvent().equals(FL401_UPLOAD_DOCUMENTS)) {
                     lines.add(taskListRenderElements.renderLink(task));
-                } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
-                    lines.add(taskListRenderElements.renderDisabledLink(task)
-                                  + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
-                } else if (task.getEvent().equals(FL401_SOT_AND_SUBMIT)) {
+                } else if (task.getEvent().equals(SUBMIT_AND_PAY) || task.getEvent().equals(FL401_SOT_AND_SUBMIT)
+                    || task.getEvent().equals(SUBMIT)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
                                   + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
                 } else {
