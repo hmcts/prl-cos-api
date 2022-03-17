@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
@@ -71,7 +72,7 @@ import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
 import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
 import uk.gov.hmcts.reform.prl.models.documents.UploadDocument;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
-import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -487,13 +488,26 @@ public class CaseData implements MappableObject {
     /**
      * Send and reply to messages.
      */
-    @JsonProperty("sendAndReplyEventData")
-    private final SendAndReplyEventData sendAndReplyEventData;
     @JsonProperty("openMessages")
     private final List<Element<Message>> openMessages;
 
     @JsonProperty("closedMessages")
     private final List<Element<Message>> closedMessages;
+
+    @JsonProperty("messageObject")
+    MessageMetaData messageMetaData;
+    String messageContent;
+    Object replyMessageDynamicList;
+    Message messageReply;
+    SendOrReply chooseSendOrReply;
+
+    public static String[] temporaryFields() {
+        return new String[]{
+            "replyMessageDynamicList", "messageReply", "messageContent",
+            "messageReply", "messageMetaData"
+        };
+    }
+
 
     @JsonProperty("finalWelshDocument")
     private final Document finalWelshDocument;

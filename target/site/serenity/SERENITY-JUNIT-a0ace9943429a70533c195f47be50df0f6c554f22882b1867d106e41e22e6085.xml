@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><testsuite errors="1" failures="0" name="uk.gov.hmcts.reform.prl.controllers.FeeAndPayServiceRequestControllerIntegrationTest" skipped="0" tests="1" time="15.0" timestamp="2022-03-16 05:07:53"><testcase classname="uk.gov.hmcts.reform.prl.controllers.FeeAndPayServiceRequestControllerIntegrationTest" name="When valid request format return200"><error message="Token generation failed with code: 401 body: {&#xA;    &#34;error&#34;: &#34;Wrong user and/or password&#34;,&#xA;    &#34;code&#34;: &#34;INCORRECT_CREDENTIALS&#34;&#xA;}" type="java.lang.IllegalStateException">Token generation failed with code: 401 body: {
+    "error": "Wrong user and/or password",
+    "code": "INCORRECT_CREDENTIALS"
+}</error><system-err>Token generation failed with code: 401 body: {
+    "error": "Wrong user and/or password",
+    "code": "INCORRECT_CREDENTIALS"
+}
+uk.gov.hmcts.reform.prl.IntegrationTest.generateUserTokenWithNoRoles(IntegrationTest.java:165)
+uk.gov.hmcts.reform.prl.IntegrationTest.getUserToken(IntegrationTest.java:116)
+uk.gov.hmcts.reform.prl.IntegrationTest.getAuthorizationToken(IntegrationTest.java:122)
+uk.gov.hmcts.reform.prl.controllers.FeeAndPayServiceRequestControllerIntegrationTest.whenValidRequestFormat_Return200(FeeAndPayServiceRequestControllerIntegrationTest.java:64)
+org.springframework.test.context.junit4.statements.RunBeforeTestMethodCallbacks.evaluate(RunBeforeTestMethodCallbacks.java:75)
+org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks.evaluate(RunAfterTestMethodCallbacks.java:86)
+</system-err></testcase></testsuite>
