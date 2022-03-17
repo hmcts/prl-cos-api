@@ -617,6 +617,7 @@ public class CallbackControllerTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder().children(listOfChildren)
+            .consentOrder(YesOrNo.No)
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)

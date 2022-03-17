@@ -42,11 +42,19 @@
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
-<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/miam/miam1'>MIAM</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started'/>
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHin-progress.png' title='In progress'/>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
-<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarm/allegationsOfHarm1'>Allegations of harm</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHin-progress.png' title='In progress'/>
+<br/>
+
+## MIAM details
+
+<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.</div>
+
+<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
+
+<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/miam/miam1'>MIAM</a><img align='right' height='25px' src='NO IMAGE URL IN THIS BRANCHnot-started.png' title='Not started'/>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
