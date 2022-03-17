@@ -27,6 +27,7 @@ public enum Event {
     WELSH_LANGUAGE_REQUIREMENTS("welshLanguageRequirements", "Welsh language requirements"),
     VIEW_PDF_DOCUMENT("viewPdfDocument", "View PDF application"),
     SUBMIT_AND_PAY("submitAndPay", "Submit and pay"),
+    SUBMIT("submit", "Submit"),
     // FL401 Events
     FL401_CASE_NAME("fl401CaseName", "Case name"),
     RESPONDENT_BEHAVIOUR("respondentBehaviour", "Respondent's behaviour"),
