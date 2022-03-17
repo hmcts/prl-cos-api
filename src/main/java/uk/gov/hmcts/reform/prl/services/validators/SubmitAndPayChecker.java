@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.EnumMap;
@@ -53,7 +54,9 @@ public class SubmitAndPayChecker implements EventChecker {
         mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.applicantsChecker);
         mandatoryEvents.put(CHILD_DETAILS, eventsChecker.childChecker);
         mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.respondentsChecker);
-        mandatoryEvents.put(MIAM, eventsChecker.miamChecker);
+        if (caseData.getConsentOrder() != null && caseData.getConsentOrder().equals(YesOrNo.No)) {
+            mandatoryEvents.put(MIAM, eventsChecker.miamChecker);
+        }
         mandatoryEvents.put(ALLEGATIONS_OF_HARM, eventsChecker.allegationsOfHarmChecker);
 
         boolean mandatoryFinished;
@@ -73,7 +76,9 @@ public class SubmitAndPayChecker implements EventChecker {
         optionalEvents.put(INTERNATIONAL_ELEMENT, eventsChecker.internationalElementChecker);
         optionalEvents.put(LITIGATION_CAPACITY, eventsChecker.litigationCapacityChecker);
         optionalEvents.put(WELSH_LANGUAGE_REQUIREMENTS, eventsChecker.welshLanguageRequirementsChecker);
-
+        if (caseData.getConsentOrder() != null && caseData.getConsentOrder().equals(YesOrNo.Yes)) {
+            optionalEvents.put(MIAM, eventsChecker.miamChecker);
+        }
         boolean optionalFinished;
 
         for (Map.Entry<Event, EventChecker> e : optionalEvents.entrySet()) {
@@ -82,7 +87,6 @@ public class SubmitAndPayChecker implements EventChecker {
                 return false;
             }
         }
-
         return true;
     }
 }

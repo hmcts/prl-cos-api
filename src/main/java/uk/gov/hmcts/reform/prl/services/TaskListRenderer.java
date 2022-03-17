@@ -72,7 +72,7 @@ public class TaskListRenderer {
 
         lines.add("<div class='width-50'>");
 
-        (isC100CaseType ? groupInSections(allTasks) : groupInSectionsForFL401(allTasks, caseData))
+        (isC100CaseType ? groupInSections(allTasks, caseData) : groupInSectionsForFL401(allTasks, caseData))
             .forEach(section -> lines.addAll(renderSection(section)));
 
         lines.add("</div>");
@@ -82,9 +82,8 @@ public class TaskListRenderer {
         return String.join("\n\n", lines);
     }
 
-    private List<TaskSection> groupInSections(List<Task> allTasks) {
+    private List<TaskSection> groupInSections(List<Task> allTasks,CaseData caseData) {
         final Map<Event, Task> tasks = allTasks.stream().collect(toMap(Task::getEvent, identity()));
-
         final TaskSection applicationDetails = newSection("Add application details")
             .withTask(tasks.get(CASE_NAME))
             .withTask(tasks.get(TYPE_OF_APPLICATION))
@@ -96,8 +95,11 @@ public class TaskListRenderer {
             .withTask(tasks.get(RESPONDENT_DETAILS));
 
         final TaskSection requiredDetails = newSection("Add required details")
-            .withTask(tasks.get(MIAM))
             .withTask(tasks.get(ALLEGATIONS_OF_HARM));
+
+        final TaskSection miamDetails = newSection("MIAM details")
+            .withInfo("MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.")
+            .withTask(tasks.get(MIAM));
 
         final TaskSection additionalInformation = newSection("Add additional information")
             .withInfo("Only complete if relevant")
@@ -117,6 +119,7 @@ public class TaskListRenderer {
         return Stream.of(applicationDetails,
                          peopleInTheCase,
                          requiredDetails,
+                         miamDetails,
                          additionalInformation,
                          pdfApplication,
                          submitAndPay)
@@ -252,5 +255,4 @@ public class TaskListRenderer {
             .filter(TaskSection::hasAnyTask)
             .collect(toList());
     }
-
 }
