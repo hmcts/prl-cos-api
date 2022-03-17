@@ -77,4 +77,18 @@ public class ReturnApplicationService {
         return returnMsgStr.toString();
 
     }
+
+    public String getReturnMessageForTaskList(CaseData caseData) {
+        StringBuilder returnMsgStr = new StringBuilder();
+
+        returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
+
+        for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
+            returnMsgStr.append(reasonEnum.getReturnMsgText());
+        }
+
+        returnMsgStr.append("Resolve these concerns and resend your application." +
+                                "You have been emailed the full details of your application return");
+
+    }
 }
