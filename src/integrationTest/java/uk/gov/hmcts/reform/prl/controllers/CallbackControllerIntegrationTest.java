@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.response.Response;
 import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
-import net.serenitybdd.rest.SerenityRest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
@@ -75,16 +74,4 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
             httpResponse.getStatusLine().getStatusCode(),
             HttpStatus.SC_NOT_FOUND);
     }
-
-    @Test
-    public void testHealthForDgsApi() throws Exception {
-
-        Response response = SerenityRest.given()
-            .when()
-            .get("http://prl-dgs-aat.service.core-compute-aat.internal/health")
-            .andReturn();
-        assertEquals(response.getStatusCode(), HttpStatus.SC_OK);
-
-    }
-
 }
