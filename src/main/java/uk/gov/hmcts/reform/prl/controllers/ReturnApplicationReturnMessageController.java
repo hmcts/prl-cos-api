@@ -79,6 +79,7 @@ public class ReturnApplicationReturnMessageController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         caseDataUpdated.putAll(allTabsFields);
+        caseDataUpdated.put("taskListReturn", returnApplicationService.getReturnMessageForTaskList(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

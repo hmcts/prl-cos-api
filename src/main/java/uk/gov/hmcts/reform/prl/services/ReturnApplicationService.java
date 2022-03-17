@@ -90,5 +90,7 @@ public class ReturnApplicationService {
         returnMsgStr.append("Resolve these concerns and resend your application." +
                                 "You have been emailed the full details of your application return");
 
+        return returnMsgStr.toString();
+
     }
 }
