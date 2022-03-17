@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -32,6 +33,7 @@ public class RespondentBehaviourCheckerTest {
 
     @Before
     public void setUp() {
+        MockitoAnnotations.openMocks(this);
         caseData = CaseData.builder().build();
     }
 

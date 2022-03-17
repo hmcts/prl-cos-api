@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
@@ -21,6 +23,11 @@ public class HearingUrgencyCheckerTest {
 
     @InjectMocks
     HearingUrgencyChecker hearingUrgencyChecker;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
     public void notFinishedWhenIsCaseUrgentNotSet() {
@@ -97,16 +104,6 @@ public class HearingUrgencyCheckerTest {
         boolean isMandatory = hearingUrgencyChecker.hasMandatoryCompleted(casedata);
 
         assertFalse(isMandatory);
-    }
-
-    @Test
-    public void mandatoryCompletedIfIsCaseUrgentSetToNo() {
-
-        CaseData casedata = CaseData.builder().isCaseUrgent(No).build();
-
-        boolean isMandatory = hearingUrgencyChecker.hasMandatoryCompleted(casedata);
-
-        assertTrue(isMandatory);
     }
 
 }
