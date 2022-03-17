@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.EnumMap;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
@@ -112,7 +113,7 @@ public class EventsChecker {
     @Autowired
     FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
 
-    private EnumMap<Event, EventChecker> eventStatus = new EnumMap<Event, EventChecker>(Event.class);
+    private Map<Event, EventChecker> eventStatus = new EnumMap<>(Event.class);
 
     @PostConstruct
     public void init() {
@@ -158,7 +159,7 @@ public class EventsChecker {
         return eventStatus.get(event).hasMandatoryCompleted(caseData);
     }
 
-    public EnumMap<Event, EventChecker> getEventStatus() {
+    public Map<Event, EventChecker> getEventStatus() {
         return eventStatus;
     }
 }
