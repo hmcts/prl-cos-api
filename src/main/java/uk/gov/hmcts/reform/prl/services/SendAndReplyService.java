@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
-import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -131,8 +130,7 @@ public class SendAndReplyService {
 
 
     public Message buildNewSendMessage(CaseData caseData) {
-        SendAndReplyEventData eventData = objectMapper.convertValue(caseData, SendAndReplyEventData.class);
-        MessageMetaData metaData = eventData.getMessageMetaData();
+        MessageMetaData metaData = caseData.getMessageMetaData();
 
         return Message.builder()
             .status(OPEN)
@@ -140,9 +138,9 @@ public class SendAndReplyService {
             .senderEmail(metaData.getSenderEmail())
             .recipientEmail(metaData.getRecipientEmail())
             .messageSubject(metaData.getMessageSubject())
-            .messageHistory(buildMessageHistory(metaData.getSenderEmail(), eventData.getMessageContent()))
+            .messageHistory(buildMessageHistory(metaData.getSenderEmail(), caseData.getMessageContent()))
             .messageUrgency(ofNullable(metaData.getMessageUrgency()).orElse(""))
-            .latestMessage(eventData.getMessageContent())
+            .latestMessage(caseData.getMessageContent())
             .updatedTime(dateTime.now())
             .build();
     }
@@ -150,7 +148,7 @@ public class SendAndReplyService {
     public Map<String, Object> populateReplyMessageFields(CaseData caseData, String auth) {
         Map<String, Object> data = new HashMap<>();
         UUID messageId = elementUtils.getDynamicListSelectedValue(
-            caseData.getSendAndReplyEventData().getReplyMessageDynamicList(), objectMapper);
+            caseData.getReplyMessageDynamicList(), objectMapper);
 
         Optional<Message> previousMessageOptional = caseData.getOpenMessages().stream()
             .filter(element -> element.getId().equals(messageId))
