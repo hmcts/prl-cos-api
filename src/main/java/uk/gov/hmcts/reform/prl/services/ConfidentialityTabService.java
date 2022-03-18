@@ -19,10 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-
-
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -31,7 +27,7 @@ public class ConfidentialityTabService {
     private final CoreCaseDataService coreCaseDataService;
 
 
-    public boolean updateConfidentialityDetails(Long id, CaseData caseData) {
+    public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
 
         List<PartyDetails> applicants = caseData.getApplicants().stream()
             .map(Element::getValue)
@@ -44,20 +40,12 @@ public class ConfidentialityTabService {
 
         List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(children);
 
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            id,
-            "internal-update-application-tab",
-            Map.of(
-                "applicantsConfidentialDetails",
-                applicantsConfidentialDetails,
-                "childrenConfidentialDetails",
-                childrenConfidentialDetails
-            )
+        return Map.of(
+            "applicantsConfidentialDetails",
+            applicantsConfidentialDetails,
+            "childrenConfidentialDetails",
+            childrenConfidentialDetails
         );
-
-        return true;
 
     }
 
