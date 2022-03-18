@@ -36,7 +36,8 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
             return true;
         }
         taskErrorService.addEventError(FL401_APPLICANT_FAMILY_DETAILS, FL401_APPLICANT_FAMILY_ERROR,
-                                       FL401_APPLICANT_FAMILY_ERROR.getError());
+                                           FL401_APPLICANT_FAMILY_ERROR.getError()
+        );
         return false;
     }
 
@@ -44,9 +45,9 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
     public boolean isStarted(CaseData caseData) {
         Optional<ApplicantFamilyDetails> applicantFamilyDetailsWrapped = ofNullable(caseData.getApplicantFamilyDetails());
 
-        if (applicantFamilyDetailsWrapped.isPresent() && !applicantFamilyDetailsWrapped.isEmpty()) {
+        if (!applicantFamilyDetailsWrapped.isEmpty()) {
             Optional<YesOrNo> doesApplicantHasChild = ofNullable(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren());
-            if (doesApplicantHasChild.get().equals(Yes)) {
+            if (!doesApplicantHasChild.isEmpty() && Yes.equals(doesApplicantHasChild.get())) {
                 return true;
             }
         }
@@ -74,12 +75,12 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
 
         Optional<YesOrNo> doesApplicantHasChild = ofNullable(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren());
 
-        if (doesApplicantHasChild.isPresent() && doesApplicantHasChild.get().equals(Yes)) {
+        if (!doesApplicantHasChild.isEmpty() && Yes.equals(doesApplicantHasChild.get())) {
 
             Optional<List<Element<ApplicantChild>>> applicantChildrenWrapped
                 = ofNullable(caseData.getApplicantChildDetails());
 
-            if (applicantChildrenWrapped.isPresent() && applicantChildrenWrapped.get().size() != 0) {
+            if (!applicantChildrenWrapped.isEmpty() && !applicantChildrenWrapped.get().isEmpty()) {
                 List<ApplicantChild> applicantChildren = applicantChildrenWrapped.get()
                     .stream()
                     .map(Element::getValue)
