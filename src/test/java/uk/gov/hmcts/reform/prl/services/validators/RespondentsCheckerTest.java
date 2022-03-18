@@ -5,6 +5,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -12,7 +15,9 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -45,7 +50,7 @@ public class RespondentsCheckerTest {
     public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
-      
+
         assertFalse(respondentsChecker.hasMandatoryCompleted(caseData));
     }
 
@@ -78,4 +83,23 @@ public class RespondentsCheckerTest {
 
         assertTrue(respondentsChecker.respondentDetailsStarted(respondent));
     }
+
+    @Test
+    public void testThatC100SpecificFieldsAreReturned() {
+        PartyDetails respondent = PartyDetails.builder()
+            .gender(Gender.other)
+            .otherGender("Other gender")
+            .isPlaceOfBirthKnown(YesOrNo.Yes)
+            .placeOfBirth("Test place")
+            .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+            .addressLivedLessThan5YearsDetails("test details")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorEmail("test@gmail.com").build();
+
+        List<Optional> actual = respondentsChecker.getSpecificC100Fields(respondent);
+        assertEquals(8, actual.size());
+        assertTrue(actual.contains(Optional.ofNullable(respondent.getOtherGender())));
+    }
+
+
 }

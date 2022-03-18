@@ -108,30 +108,13 @@ public class RespondentsChecker implements EventChecker {
             fields.add(ofNullable(respondent.getDateOfBirth()));
         }
         if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
-            Optional<Gender> gender = ofNullable(respondent.getGender());
-            fields.add(gender);
-            if (gender.isPresent() && gender.get().equals(Gender.other)) {
-                fields.add(ofNullable(respondent.getOtherGender()));
-            }
-            Optional<YesOrNo> isPlaceOfBirthKnown = ofNullable(respondent.getIsPlaceOfBirthKnown());
-            fields.add(isPlaceOfBirthKnown);
-            if (isPlaceOfBirthKnown.isPresent() && isPlaceOfBirthKnown.get().equals(Yes)) {
-                fields.add(ofNullable(respondent.getPlaceOfBirth()));
-            }
+            fields.addAll(getSpecificC100Fields(respondent));
         }
         Optional<YesOrNo> isCurrentAddressKnown = ofNullable(respondent.getIsCurrentAddressKnown());
         fields.add(isCurrentAddressKnown);
         if (isCurrentAddressKnown.isPresent() && isCurrentAddressKnown.get().equals(Yes)) {
             fields.add(ofNullable(respondent.getAddress().getAddressLine1()));
             fields.add(ofNullable(respondent.getAddress().getPostCode()));
-        }
-        if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
-            Optional<YesNoDontKnow> isAtAddressLessThan5YearsWithDontKnow = ofNullable(respondent.getIsAtAddressLessThan5YearsWithDontKnow());
-            fields.add(isAtAddressLessThan5YearsWithDontKnow);
-            if (isAtAddressLessThan5YearsWithDontKnow.isPresent() && isAtAddressLessThan5YearsWithDontKnow.get().equals(
-                YesNoDontKnow.yes)) {
-                fields.add(ofNullable(respondent.getAddressLivedLessThan5YearsDetails()));
-            }
         }
         Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(respondent.getCanYouProvideEmailAddress());
         fields.add(canYouProvideEmailAddress);
@@ -143,14 +126,6 @@ public class RespondentsChecker implements EventChecker {
         if (canYouProvidePhoneNumber.isPresent() && canYouProvidePhoneNumber.get().equals(Yes)) {
             fields.add(ofNullable(respondent.getPhoneNumber()));
         }
-        if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
-            Optional<YesNoDontKnow> doTheyHaveLegalRepresentation = ofNullable(respondent.getDoTheyHaveLegalRepresentation());
-            fields.add(doTheyHaveLegalRepresentation);
-            if (doTheyHaveLegalRepresentation.isPresent() && doTheyHaveLegalRepresentation.get().equals(YesNoDontKnow.yes)) {
-                fields.add(ofNullable(respondent.getSolicitorEmail()));
-            }
-        }
-
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
     }
@@ -183,6 +158,35 @@ public class RespondentsChecker implements EventChecker {
         fields.add(ofNullable(respondent.getSendSignUpLink()));
 
         return  fields.stream().anyMatch(Optional::isPresent);
+
+    }
+
+
+    public List<Optional> getSpecificC100Fields(PartyDetails respondent) {
+        List<Optional> fields = new ArrayList<>();
+        Optional<Gender> gender = ofNullable(respondent.getGender());
+        fields.add(gender);
+        if (gender.isPresent() && gender.get().equals(Gender.other)) {
+            fields.add(ofNullable(respondent.getOtherGender()));
+        }
+        Optional<YesOrNo> isPlaceOfBirthKnown = ofNullable(respondent.getIsPlaceOfBirthKnown());
+        fields.add(isPlaceOfBirthKnown);
+        if (isPlaceOfBirthKnown.isPresent() && isPlaceOfBirthKnown.get().equals(Yes)) {
+            fields.add(ofNullable(respondent.getPlaceOfBirth()));
+        }
+        Optional<YesNoDontKnow> isAtAddressLessThan5YearsWithDontKnow = ofNullable(respondent.getIsAtAddressLessThan5YearsWithDontKnow());
+        fields.add(isAtAddressLessThan5YearsWithDontKnow);
+        if (isAtAddressLessThan5YearsWithDontKnow.isPresent() && isAtAddressLessThan5YearsWithDontKnow.get().equals(
+            YesNoDontKnow.yes)) {
+            fields.add(ofNullable(respondent.getAddressLivedLessThan5YearsDetails()));
+        }
+        Optional<YesNoDontKnow> doTheyHaveLegalRepresentation = ofNullable(respondent.getDoTheyHaveLegalRepresentation());
+        fields.add(doTheyHaveLegalRepresentation);
+        if (doTheyHaveLegalRepresentation.isPresent() && doTheyHaveLegalRepresentation.get().equals(YesNoDontKnow.yes)) {
+            fields.add(ofNullable(respondent.getSolicitorEmail()));
+        }
+
+        return fields;
 
     }
 
