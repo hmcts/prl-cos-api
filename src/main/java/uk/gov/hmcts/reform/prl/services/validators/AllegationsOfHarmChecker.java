@@ -101,19 +101,31 @@ public class AllegationsOfHarmChecker implements EventChecker {
                 && ordersOtherInjunctive.isPresent()
                 && ordersUndertakingInPlace.isPresent();
 
-            isFinished = validateDomesticAbuseSection(caseData)
+            /*isFinished = validateDomesticAbuseSection(caseData)
                 && validateOrders(caseData)
                 && previousOrders
                 && behavioursCompleted
                 && validateAbductionSection(caseData)
                 && validateOtherConcerns(caseData)
-                && validateChildContact(caseData);
+                && validateChildContact(caseData);*/
+
+            isFinished = sectionCheckIsFinish(previousOrders, behavioursCompleted, caseData);
 
         } else {
             isFinished = allegationsOfHarmYesNo.isPresent();
         }
 
         return isFinished;
+    }
+
+    public boolean sectionCheckIsFinish(boolean previousOrders, boolean behavioursCompleted, CaseData caseData){
+        return validateDomesticAbuseSection(caseData)
+            && validateOrders(caseData)
+            && previousOrders
+            && behavioursCompleted
+            && validateAbductionSection(caseData)
+            && validateOtherConcerns(caseData)
+            && validateChildContact(caseData);
     }
 
 
