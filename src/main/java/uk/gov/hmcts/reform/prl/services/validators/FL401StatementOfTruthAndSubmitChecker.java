@@ -53,20 +53,7 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
         mandatoryEvents.put(RELATIONSHIP_TO_RESPONDENT, eventsChecker.getRespondentRelationshipChecker());
         mandatoryEvents.put(FL401_APPLICANT_FAMILY_DETAILS, eventsChecker.getFl401ApplicantFamilyChecker());
 
-        Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
-
-        if (ordersOptional.isEmpty() || (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
-            && ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
-            mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.getRespondentBehaviourChecker());
-            mandatoryEvents.put(FL401_HOME, eventsChecker.getHomeChecker());
-        } else {
-            if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
-                mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.getRespondentBehaviourChecker());
-            }
-            if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
-                mandatoryEvents.put(FL401_HOME, eventsChecker.getHomeChecker());
-            }
-        }
+        populateManadatoryEvents(caseData, mandatoryEvents);
 
         boolean mandatoryFinished;
 
@@ -93,5 +80,22 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
         }
 
         return true;
+    }
+
+    private void populateManadatoryEvents(CaseData caseData, EnumMap<Event, EventChecker> mandatoryEvents) {
+        Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
+
+        if (ordersOptional.isEmpty() || (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
+            && ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
+            mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.getRespondentBehaviourChecker());
+            mandatoryEvents.put(FL401_HOME, eventsChecker.getHomeChecker());
+        } else {
+            if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
+                mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.getRespondentBehaviourChecker());
+            }
+            if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+                mandatoryEvents.put(FL401_HOME, eventsChecker.getHomeChecker());
+            }
+        }
     }
 }

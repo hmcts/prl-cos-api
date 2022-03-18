@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
+import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 
@@ -24,7 +25,7 @@ public class FeeService {
     public FeeResponse fetchFeeDetails(FeeType feeType) throws Exception {
         FeesConfig.FeeParameters parameters = feesConfig.getFeeParametersByFeeType(feeType);
         try {
-            FeeResponse fee = feesRegisterApi.findFee(
+            return feesRegisterApi.findFee(
                 parameters.getChannel(),
                 parameters.getEvent(),
                 parameters.getJurisdiction1(),
@@ -32,14 +33,12 @@ public class FeeService {
                 parameters.getKeyword(),
                 parameters.getService()
             );
-
-            return fee;
         } catch (FeignException ex) {
             log.error("Fee response error for {}\n\tstatus: {} => message: \"{}\"",
                       parameters, ex.status(), ex.contentUTF8(), ex
             );
 
-            throw new Exception(ex);
+            throw new WorkflowException(ex.getMessage(), ex);
         }
     }
 }
