@@ -25,7 +25,7 @@ public class HearingUrgencyChecker implements EventChecker {
     @Override
     public boolean isFinished(CaseData caseData) {
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
 
         Optional<YesOrNo> isCaseUrgent = ofNullable(caseData.getIsCaseUrgent());
         fields.add(isCaseUrgent);

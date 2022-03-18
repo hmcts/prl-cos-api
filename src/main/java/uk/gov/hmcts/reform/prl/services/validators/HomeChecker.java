@@ -70,7 +70,7 @@ public class HomeChecker implements EventChecker {
     private boolean mandatoryHomeCompleted(Optional<Home> home) {
 
         if (home.isPresent()) {
-            List<Optional> fields = new ArrayList<>();
+            List<Optional<?>> fields = new ArrayList<>();
             fields.add(ofNullable(home.get().getAddress()));
             fields.add(ofNullable(home.get().getPeopleLivingAtThisAddress()));
             fields.add(ofNullable(home.get().getEverLivedAtTheAddress()));

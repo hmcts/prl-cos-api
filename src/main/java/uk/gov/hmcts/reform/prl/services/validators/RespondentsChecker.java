@@ -92,7 +92,7 @@ public class RespondentsChecker implements EventChecker {
 
     public boolean validateMandatoryFieldsForRespondent(PartyDetails respondent, String caseTypeOfApplication) {
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
 
         fields.add(ofNullable(respondent.getFirstName()));
         fields.add(ofNullable(respondent.getLastName()));
@@ -151,7 +151,7 @@ public class RespondentsChecker implements EventChecker {
 
     public boolean respondentDetailsStarted(PartyDetails respondent) {
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(respondent.getFirstName()));
         fields.add(ofNullable(respondent.getLastName()));
         fields.add(ofNullable(respondent.getDateOfBirth()));

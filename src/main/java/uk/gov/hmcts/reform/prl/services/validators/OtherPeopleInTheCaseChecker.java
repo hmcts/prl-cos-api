@@ -104,7 +104,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             additionalFields = party.getPhoneNumber() != null;
         }
 
-        List<Optional> childFields = new ArrayList<>();
+        List<Optional<String>> childFields = new ArrayList<>();
 
         Optional<List<Element<OtherPersonRelationshipToChild>>> otherPersonRelationshipList
                                     = ofNullable(party.getOtherPersonRelationshipToChildren());
