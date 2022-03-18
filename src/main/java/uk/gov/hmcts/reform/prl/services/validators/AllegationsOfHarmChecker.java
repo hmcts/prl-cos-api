@@ -294,7 +294,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(behaviour.getBehavioursApplicantHelpSoughtWho());
         Optional<String> behavioursApplicantHelpAction = ofNullable(behaviour.getBehavioursApplicantHelpAction());
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(abuseNatureDescription);
         fields.add(behavioursStartDateAndLength);
         fields.add(behavioursNature);

@@ -36,7 +36,7 @@ public class RespondentBehaviourChecker implements EventChecker {
         boolean otherReasonCompleted = (otherReason.isPresent() && !(otherReason.get().isBlank()));
         Optional<List<ApplicantStopFromRespondentDoingEnum>> applicantStopRespondentList
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoing());
-        if (otherReasonCompleted && (applicantStopRespondentList.isPresent() && !applicantStopRespondentList.isEmpty())) {
+        if (otherReasonCompleted && applicantStopRespondentList.isPresent()) {
             taskErrorService.removeError(RESPONDENT_BEHAVIOUR_ERROR);
             return true;
         } else {
