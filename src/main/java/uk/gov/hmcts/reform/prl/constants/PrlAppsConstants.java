@@ -43,6 +43,7 @@ public class PrlAppsConstants {
     public static final String COURT_EMAIL_ADDRESS_FIELD = "courtEmailAddress";
     public static final String FINAL_DOCUMENT_FIELD = "finalDocument";
     public static final String ISSUE_DATE_FIELD = "issueDate";
+    public static final String DATE_SUBMITTED_FIELD = "dateSubmitted";
 
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
 

@@ -38,11 +38,10 @@ public class ApplicantsChecker implements EventChecker {
 
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
-        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            if (caseData.getApplicantsFL401() != null) {
-                Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getApplicantsFL401()).build();
-                applicantsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
-            }
+        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+            && caseData.getApplicantsFL401() != null) {
+            Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getApplicantsFL401()).build();
+            applicantsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
         }
 
         if (applicantsWrapped.isEmpty()) {
@@ -55,7 +54,10 @@ public class ApplicantsChecker implements EventChecker {
 
         for (PartyDetails applicant : applicants) {
             Optional<String> dxNumber = ofNullable(applicant.getDxNumber());
-            boolean mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(applicant, caseData.getCaseTypeOfApplication());
+            boolean mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(
+                applicant,
+                caseData.getCaseTypeOfApplication()
+            );
             boolean dxCompleted = (dxNumber.isPresent() && !(dxNumber.get().isBlank()));
 
             if (!(mandatoryCompleted && dxCompleted)) {
@@ -97,7 +99,7 @@ public class ApplicantsChecker implements EventChecker {
 
         boolean mandatoryCompleted = false;
 
-        if (applicantsWrapped.isPresent() && applicantsWrapped.get().size() != 0) {
+        if (!applicantsWrapped.isEmpty() && !applicantsWrapped.get().isEmpty()) {
             List<PartyDetails> applicants = applicantsWrapped.get()
                 .stream()
                 .map(Element::getValue)
@@ -163,6 +165,16 @@ public class ApplicantsChecker implements EventChecker {
         fields.add(ofNullable(applicant.getRepresentativeFirstName()));
         fields.add(ofNullable(applicant.getRepresentativeLastName()));
         fields.add(ofNullable(applicant.getSolicitorEmail()));
+        if (addSolicitorAddressFields(applicant, fields)) {
+            return false;
+        }
+
+        return fields.stream().noneMatch(Optional::isEmpty)
+
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+    }
+
+    private boolean addSolicitorAddressFields(PartyDetails applicant, List<Optional> fields) {
         Optional<Organisation> solicitorOrg = ofNullable(applicant.getSolicitorOrg());
         if (solicitorOrg.isPresent() && (solicitorOrg.get().getOrganisationID() != null)) {
             fields.add(solicitorOrg);
@@ -171,14 +183,11 @@ public class ApplicantsChecker implements EventChecker {
             if (solicitorAddress.isPresent()
                 && (ofNullable(solicitorAddress.get().getAddressLine1()).isEmpty()
                 && ofNullable(solicitorAddress.get().getPostCode()).isEmpty())) {
-                return false;
+                return true;
             }
             fields.add(solicitorAddress);
         }
-
-        return fields.stream().noneMatch(Optional::isEmpty)
-
-            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+        return false;
     }
 
     public boolean verifyAddressCompleted(Address address) {
