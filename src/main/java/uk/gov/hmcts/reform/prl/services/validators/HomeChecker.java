@@ -116,7 +116,7 @@ public class HomeChecker implements EventChecker {
 
             }
 
-            boolean addressPresent = verifyAddressCompleted(home);
+            boolean addressPresent = verifyAddressPresent(home);
 
             return fields.stream().noneMatch(Optional::isEmpty)
                 && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""))
@@ -124,7 +124,8 @@ public class HomeChecker implements EventChecker {
         }
         return false;
     }
-    public boolean verifyAddressCompleted(Optional<Home> home) {
+
+    public boolean verifyAddressPresent(Optional<Home> home) {
         return ofNullable(home.get().getAddress()).isPresent()
             && ofNullable(home.get().getAddress().getAddressLine1()).isPresent()
             && !home.get().getAddress().getAddressLine1().isBlank();
