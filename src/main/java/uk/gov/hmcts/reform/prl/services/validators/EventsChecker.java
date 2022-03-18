@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.EnumMap;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
@@ -35,6 +37,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 
+@Getter
 @Service
 public class EventsChecker {
 
@@ -110,7 +113,7 @@ public class EventsChecker {
     @Autowired
     FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
 
-    private EnumMap<Event, EventChecker> eventStatus = new EnumMap<Event, EventChecker>(Event.class);
+    private Map<Event, EventChecker> eventStatus = new EnumMap<>(Event.class);
 
     @PostConstruct
     public void init() {
@@ -156,7 +159,7 @@ public class EventsChecker {
         return eventStatus.get(event).hasMandatoryCompleted(caseData);
     }
 
-    public EnumMap<Event, EventChecker> getEventStatus() {
+    public Map<Event, EventChecker> getEventStatus() {
         return eventStatus;
     }
 }
