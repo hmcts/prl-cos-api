@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 public enum PermissionRequiredEnum {
 
     yes("Yes"),
-    noNowSought("No - permission now sought"),
+    noNowSought("No, permission now sought"),
     noNotRequired("No, permission is not required");
 
     private final String displayedValue;
