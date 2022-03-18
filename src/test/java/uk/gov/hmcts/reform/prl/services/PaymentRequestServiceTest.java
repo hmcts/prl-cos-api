@@ -159,10 +159,8 @@ public class PaymentRequestServiceTest {
 
     @Test
     public void shouldThrowNullPointerException() throws Exception {
+        callbackRequest = CallbackRequest.builder().build();
         assertThrows(NullPointerException.class, () -> {
-            callbackRequest = CallbackRequest.builder()
-                .build();
-
             PaymentServiceResponse psr = paymentRequestService.createServiceRequest(callbackRequest, "");
         });
     }

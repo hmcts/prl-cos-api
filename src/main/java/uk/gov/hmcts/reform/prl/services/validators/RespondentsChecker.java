@@ -33,12 +33,9 @@ public class RespondentsChecker implements EventChecker {
     public boolean isFinished(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
 
-        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-
-            if (caseData.getRespondentsFL401() != null) {
-                Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getRespondentsFL401()).build();
-                respondentsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
-            }
+        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) && caseData.getRespondentsFL401() != null) {
+            Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getRespondentsFL401()).build();
+            respondentsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
         }
 
         if (respondentsWrapped.isPresent() && respondentsWrapped.get().size() != 0) {
@@ -65,12 +62,9 @@ public class RespondentsChecker implements EventChecker {
     public boolean isStarted(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> respondentWrapped = ofNullable(caseData.getRespondents());
 
-        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-
-            if (caseData.getRespondentsFL401() != null) {
+        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) && caseData.getRespondentsFL401() != null) {
                 Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getRespondentsFL401()).build();
                 respondentWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
-            }
         }
 
         boolean anyStarted = false;
