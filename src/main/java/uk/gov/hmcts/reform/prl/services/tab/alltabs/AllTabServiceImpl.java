@@ -63,8 +63,7 @@ public class AllTabServiceImpl implements AllTabsService {
     }
 
     public void updateAllTabsIncludingConfTab(CaseData caseData) {
-        Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(
-            caseData.getId(), caseData);
+        Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
         Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
         combinedFieldsMap.putAll(confidentialDetails);
 
