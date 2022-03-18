@@ -86,7 +86,7 @@ public class FeeServiceTest {
         assertNotEquals(BigDecimal.valueOf(65.00), actualResult);
     }
 
-    @Test
+    @Test(expected = FeignException.class)
     public void whenFeeDetailsNotFetchedThrowError() throws Exception {
 
         FeesConfig.FeeParameters feeParameters = FeesConfig.FeeParameters
