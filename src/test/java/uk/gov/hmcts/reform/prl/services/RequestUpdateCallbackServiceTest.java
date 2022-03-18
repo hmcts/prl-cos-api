@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
@@ -63,6 +64,12 @@ public class RequestUpdateCallbackServiceTest {
 
     @Mock
     AllTabServiceImpl allTabService;
+
+    @Mock
+    private Court court;
+
+    @Mock
+    private CourtFinderService courtFinderService;
 
     @InjectMocks
     RequestUpdateCallbackService requestUpdateCallbackService;
@@ -135,6 +142,7 @@ public class RequestUpdateCallbackServiceTest {
                                                      caseType, Long.toString(caseId), eventName
         ))
             .thenReturn(buildStartEventResponse(eventName, eventToken));
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(caseId.toString())
             .payment(PaymentDto.builder()
@@ -163,6 +171,7 @@ public class RequestUpdateCallbackServiceTest {
                                                      caseType, Long.toString(caseId), eventFailureName
         ))
             .thenReturn(buildStartEventResponse(eventName, eventToken));
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(caseId.toString())
             .payment(PaymentDto.builder()
