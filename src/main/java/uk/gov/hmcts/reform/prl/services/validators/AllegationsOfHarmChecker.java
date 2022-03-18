@@ -242,7 +242,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
 
         if (abductionPreviousPoliceInvolvementCompleted) {
             if (!abductionPreviousPoliceInvolvement.isEmpty()
-                && Yes.equals(abductionPreviousPoliceInvolvement)) {
+                && Yes.equals(abductionPreviousPoliceInvolvement.get())) {
                 policeCompleted = abductionPreviousPoliceInvolvementDetails.isPresent();
             } else {
                 policeCompleted = true;
