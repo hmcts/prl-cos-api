@@ -33,59 +33,28 @@ public class MiamChecker implements EventChecker {
     @Override
     public boolean isFinished(CaseData caseData) {
 
-        boolean finished;
-
         Optional<YesOrNo> applicantAttendedMiam = ofNullable(caseData.getApplicantAttendedMiam());
-        Optional<YesOrNo> claimingExemptionMiam = ofNullable(caseData.getClaimingExemptionMiam());
-        Optional<YesOrNo> familyMediatiorMiam = ofNullable(caseData.getFamilyMediatorMiam());
 
-        Optional<String> mediatorRegNumber = ofNullable(caseData.getMediatorRegistrationNumber());
-        Optional<String> mediatorServiceName = ofNullable(caseData.getFamilyMediatorServiceName());
-        Optional<String> mediatorSoleTrader = ofNullable(caseData.getSoleTraderName());
-        Optional<MiamDocument> miamCertDocument = ofNullable(caseData.getMiamCertificationDocumentUpload());
+        boolean attended = applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(Yes);
 
-        if (applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(Yes)) {
-            finished = mediatorRegNumber.isPresent()
-                && mediatorServiceName.isPresent()
-                && mediatorSoleTrader.isPresent()
-                && miamCertDocument.isPresent();
+        if (attended && miamAttendedComplete(caseData)) {
+            taskErrorService.removeError(MIAM_ERROR);
+            return true;
+        }
 
-            if (finished) {
-                taskErrorService.removeError(MIAM_ERROR);
-                return true;
-            }
-        } else if ((applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(No))
-            && (claimingExemptionMiam.isPresent() && claimingExemptionMiam.get().equals(Yes))
-            && (familyMediatiorMiam.isPresent() && familyMediatiorMiam.get().equals(Yes))) {
-
-            Optional<String> mediatorRegNumber1 = ofNullable(caseData.getMediatorRegistrationNumber1());
-            Optional<String> mediatorServiceName1 = ofNullable(caseData.getFamilyMediatorServiceName1());
-            Optional<String> mediatorSoleTrader1 = ofNullable(caseData.getSoleTraderName1());
-            Optional<MiamDocument> miamCertDocument1 = ofNullable(caseData.getMiamCertificationDocumentUpload1());
-
-            finished = mediatorRegNumber1.isPresent()
-                && mediatorServiceName1.isPresent()
-                && mediatorSoleTrader1.isPresent()
-                && miamCertDocument1.isPresent();
-
-            if (finished) {
-                taskErrorService.removeError(MIAM_ERROR);
-                return true;
-            }
+        if (mediatorSignOffFieldsComplete(caseData) && miamMediatorSignOffComplete(caseData)) {
+            taskErrorService.removeError(MIAM_ERROR);
+            return true;
         } else {
             Optional<List<MiamExemptionsChecklistEnum>> exceptions = ofNullable(caseData.getMiamExemptionsChecklist());
-            if (exceptions.isPresent()) {
-                finished =  checkMiamExemptions(caseData);
-                if (finished) {
-                    taskErrorService.removeError(MIAM_ERROR);
-                    return true;
-                }
+            if (exceptions.isPresent() && checkMiamExemptions(caseData)) {
+                taskErrorService.removeError(MIAM_ERROR);
+                return true;
             }
         }
         taskErrorService.addEventError(MIAM, MIAM_ERROR, MIAM_ERROR.getError());
         return false;
     }
-
 
 
     @Override
@@ -129,6 +98,44 @@ public class MiamChecker implements EventChecker {
         }
 
         return dvCompleted && urgencyCompleted && prevAttendCompleted && otherCompleted && childProtectionCompleted;
+
+    }
+
+    public boolean miamAttendedComplete(CaseData caseData) {
+        Optional<String> mediatorRegNumber = ofNullable(caseData.getMediatorRegistrationNumber());
+        Optional<String> mediatorServiceName = ofNullable(caseData.getFamilyMediatorServiceName());
+        Optional<String> mediatorSoleTrader = ofNullable(caseData.getSoleTraderName());
+        Optional<MiamDocument> miamCertDocument = ofNullable(caseData.getMiamCertificationDocumentUpload());
+
+        return mediatorRegNumber.isPresent()
+                && mediatorServiceName.isPresent()
+                && mediatorSoleTrader.isPresent()
+                && miamCertDocument.isPresent();
+
+    }
+
+    public boolean miamMediatorSignOffComplete(CaseData caseData) {
+        Optional<String> mediatorRegNumber1 = ofNullable(caseData.getMediatorRegistrationNumber1());
+        Optional<String> mediatorServiceName1 = ofNullable(caseData.getFamilyMediatorServiceName1());
+        Optional<String> mediatorSoleTrader1 = ofNullable(caseData.getSoleTraderName1());
+        Optional<MiamDocument> miamCertDocument1 = ofNullable(caseData.getMiamCertificationDocumentUpload1());
+
+        return mediatorRegNumber1.isPresent()
+                && mediatorServiceName1.isPresent()
+                && mediatorSoleTrader1.isPresent()
+                && miamCertDocument1.isPresent();
+
+    }
+
+    public boolean mediatorSignOffFieldsComplete(CaseData caseData) {
+        Optional<YesOrNo> applicantAttendedMiam = ofNullable(caseData.getApplicantAttendedMiam());
+        Optional<YesOrNo> claimingExemptionMiam = ofNullable(caseData.getClaimingExemptionMiam());
+        Optional<YesOrNo> familyMediatiorMiam = ofNullable(caseData.getFamilyMediatorMiam());
+
+        return (applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(No))
+            && (claimingExemptionMiam.isPresent() && claimingExemptionMiam.get().equals(Yes))
+            && (familyMediatiorMiam.isPresent() && familyMediatiorMiam.get().equals(Yes));
+
 
     }
 

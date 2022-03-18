@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -116,5 +115,41 @@ public class MiamCheckerTest {
             .build();
 
         assertTrue(miamChecker.isFinished(caseData));
+    }
+
+
+    @Test
+    public void whenCaseDataContainsMiamAttendedComplete_thenMethodReturnsTrue() {
+        CaseData caseData = CaseData.builder()
+            .mediatorRegistrationNumber("12345")
+            .familyMediatorServiceName("test")
+            .soleTraderName("test")
+            .miamCertificationDocumentUpload(MiamDocument.builder().build())
+            .build();
+
+        assertTrue(miamChecker.miamAttendedComplete(caseData));
+    }
+
+    @Test
+    public void whenCaseDataContainsMiamSignoffComplete_thenMethodReturnsTrue() {
+        CaseData caseData = CaseData.builder()
+            .mediatorRegistrationNumber1("12345")
+            .familyMediatorServiceName1("test")
+            .soleTraderName1("test")
+            .miamCertificationDocumentUpload1(MiamDocument.builder().build())
+            .build();
+
+        assertTrue(miamChecker.miamMediatorSignOffComplete(caseData));
+    }
+
+    @Test
+    public void whenCorrectMiamFieldsSelectedForSignOff_thenReturnTrue() {
+        CaseData caseData = CaseData.builder()
+            .applicantAttendedMiam(No)
+            .claimingExemptionMiam(Yes)
+            .familyMediatorMiam(Yes)
+            .build();
+
+        assertTrue(miamChecker.mediatorSignOffFieldsComplete(caseData));
     }
 }
