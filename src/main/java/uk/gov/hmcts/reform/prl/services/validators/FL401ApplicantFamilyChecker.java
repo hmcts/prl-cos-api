@@ -64,7 +64,7 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
 
         Optional<ApplicantFamilyDetails> applicantFamilyDetailsWrapped = ofNullable(caseData.getApplicantFamilyDetails());
 
-        if (applicantFamilyDetailsWrapped.isPresent() && !applicantFamilyDetailsWrapped.isEmpty()) {
+        if (applicantFamilyDetailsWrapped.isPresent()) {
             isFinished = validateFields(caseData);
         }
         return isFinished;
