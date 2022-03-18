@@ -126,12 +126,12 @@ public class HomeChecker implements EventChecker {
     }
 
     public boolean verifyAddressPresent(Optional<Home> home) {
-       if (home.isPresent()) {
-           return ofNullable(home.get().getAddress()).isPresent()
-               && ofNullable(home.get().getAddress().getAddressLine1()).isPresent()
-               && !home.get().getAddress().getAddressLine1().isBlank();
-       }
-       return false;
+        if (home.isPresent()) {
+            return ofNullable(home.get().getAddress()).isPresent()
+                && ofNullable(home.get().getAddress().getAddressLine1()).isPresent()
+                && !home.get().getAddress().getAddressLine1().isBlank();
+        }
+        return false;
     }
 
     private boolean mandatoryChildDetailsAreCompleted(Optional<List<Element<ChildrenLiveAtAddress>>> doAnyChildrenLiveAtAddressYes) {
