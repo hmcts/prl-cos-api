@@ -184,12 +184,12 @@ public class AllegationsOfHarmChecker implements EventChecker {
         boolean passportPossessionCompleted = false;
         boolean policeCompleted = false;
 
-        if (childAbduction.isPresent() && childAbduction.get().equals(No)) {
+        if (childAbduction.isPresent() && No.equals(childAbduction.get())) {
             return true;
         }
 
         if (childAbduction.isPresent()) {
-            if (childAbduction.get().equals(Yes)) {
+            if (Yes.equals(childAbduction.get())) {
                 abductionSectionCompleted = childAbductionReasons.isPresent();
 
                 boolean previousAbductionThreatsCompleted = previousAbductionThreats.isPresent();
@@ -241,7 +241,8 @@ public class AllegationsOfHarmChecker implements EventChecker {
         boolean abductionPreviousPoliceInvolvementCompleted) {
 
         if (abductionPreviousPoliceInvolvementCompleted) {
-            if (abductionPreviousPoliceInvolvement.get().equals(Yes)) {
+            if (!abductionPreviousPoliceInvolvement.isEmpty()
+                && Yes.equals(abductionPreviousPoliceInvolvement)) {
                 policeCompleted = abductionPreviousPoliceInvolvementDetails.isPresent();
             } else {
                 policeCompleted = true;
@@ -257,7 +258,8 @@ public class AllegationsOfHarmChecker implements EventChecker {
         boolean abductionChildPassportPossessionCompleted) {
 
         if (abductionChildPassportPossessionCompleted) {
-            if (abductionChildPassportPossession.get().equals(other)) {
+            if (!abductionChildPassportPossession.isEmpty()
+                && other.equals(abductionChildPassportPossession.get())) {
                 passportPossessionCompleted = abductionChildPassportPossessionOtherDetail.isPresent();
             } else {
                 passportPossessionCompleted = true;
@@ -273,7 +275,8 @@ public class AllegationsOfHarmChecker implements EventChecker {
         boolean previousAbductionThreatsCompleted) {
 
         if (previousAbductionThreatsCompleted) {
-            if (previousAbductionThreats.get().equals(Yes)) {
+            if (!previousAbductionThreats.isEmpty()
+                && Yes.equals(previousAbductionThreats.get())) {
                 previousThreatSectionComplete = previousAbductionThreatsDetails.isPresent();
             } else {
                 previousThreatSectionComplete = true;
@@ -296,13 +299,15 @@ public class AllegationsOfHarmChecker implements EventChecker {
         fields.add(behavioursStartDateAndLength);
         fields.add(behavioursNature);
         fields.add(behavioursApplicantSoughtHelp);
-        if (behavioursApplicantSoughtHelp.isPresent() && behavioursApplicantSoughtHelp.get().equals(Yes)) {
+        if (behavioursApplicantSoughtHelp.isPresent()
+            && behavioursApplicantSoughtHelp.get().equals(Yes)) {
             fields.add(behavioursApplicantHelpSoughtWho);
             fields.add(behavioursApplicantHelpAction);
         }
 
         return fields.stream().noneMatch(Optional::isEmpty)
-            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+            && fields.stream().filter(Optional::isPresent)
+            .map(Optional::get).noneMatch(field -> field.equals(""));
 
     }
 
