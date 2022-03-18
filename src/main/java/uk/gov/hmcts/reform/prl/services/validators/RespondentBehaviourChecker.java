@@ -36,7 +36,7 @@ public class RespondentBehaviourChecker implements EventChecker {
         boolean otherReasonCompleted = (otherReason.isPresent() && !(otherReason.get().isBlank()));
         Optional<List<ApplicantStopFromRespondentDoingEnum>> applicantStopRespondentList
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoing());
-        if (otherReasonCompleted && (applicantStopRespondentList.isPresent() && applicantStopRespondentList.get().size() != 0)) {
+        if (otherReasonCompleted && (applicantStopRespondentList.isPresent() && !applicantStopRespondentList.isEmpty())) {
             taskErrorService.removeError(RESPONDENT_BEHAVIOUR_ERROR);
             return true;
         } else {
@@ -62,8 +62,8 @@ public class RespondentBehaviourChecker implements EventChecker {
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoingToChild());
         boolean anyStarted = false;
 
-        if (otherReasonCompleted || (applicantStopRespondentList.isPresent() && applicantStopRespondentList.get().size() != 0)
-            || (applicantStopFromRespondentDoingToChildList.isPresent() && applicantStopFromRespondentDoingToChildList.get().size() != 0)) {
+        if (otherReasonCompleted || (applicantStopRespondentList.isPresent() && !applicantStopRespondentList.isEmpty())
+            || (applicantStopFromRespondentDoingToChildList.isPresent() && !applicantStopFromRespondentDoingToChildList.isEmpty())) {
             anyStarted = true;
         }
 
@@ -82,7 +82,7 @@ public class RespondentBehaviourChecker implements EventChecker {
         Optional<List<ApplicantStopFromRespondentDoingEnum>> applicantStopRespondentList
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoing());
         return otherReasonCompleted
-            && applicantStopRespondentList.isPresent() && applicantStopRespondentList.get().size() != 0;
+            && applicantStopRespondentList.isPresent() && !applicantStopRespondentList.isEmpty();
     }
 
 }
