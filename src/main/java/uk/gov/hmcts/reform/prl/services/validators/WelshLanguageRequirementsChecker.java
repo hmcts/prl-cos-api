@@ -38,14 +38,14 @@ public class WelshLanguageRequirementsChecker implements EventChecker {
         if (applicationLanguage.isPresent()
             && applicationLanguage.get().equals(english)
             && welshRequirements.isPresent()) {
-                taskErrorService.removeError(WELSH_LANGUAGE_ERROR);
-                return  true;
+            taskErrorService.removeError(WELSH_LANGUAGE_ERROR);
+            return true;
         }
         if (applicationLanguage.isPresent()
             && applicationLanguage.get().equals(welsh)
             && englishRequirements.isPresent()) {
-                taskErrorService.removeError(WELSH_LANGUAGE_ERROR);
-                return  true;
+            taskErrorService.removeError(WELSH_LANGUAGE_ERROR);
+            return true;
         }
         return false;
     }
@@ -57,7 +57,8 @@ public class WelshLanguageRequirementsChecker implements EventChecker {
 
         if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(Yes)) {
             taskErrorService.addEventError(WELSH_LANGUAGE_REQUIREMENTS, WELSH_LANGUAGE_ERROR,
-                                           WELSH_LANGUAGE_ERROR.getError());
+                                           WELSH_LANGUAGE_ERROR.getError()
+            );
 
             return true;
         }
