@@ -118,7 +118,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
         return isFinished;
     }
 
-    public boolean sectionCheckIsFinish(boolean previousOrders, boolean behavioursCompleted, CaseData caseData){
+    public boolean sectionCheckIsFinish(boolean previousOrders, boolean behavioursCompleted, CaseData caseData) {
         return validateDomesticAbuseSection(caseData)
             && validateOrders(caseData)
             && previousOrders
