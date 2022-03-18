@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.exception.CaseNotFoundException;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
@@ -46,6 +47,7 @@ public class RequestUpdateCallbackService {
     private final UserService userService;
     private final AllTabServiceImpl allTabService;
     private final C100JsonMapper c100JsonMapper;
+    private final CourtFinderService courtFinderService;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
 
@@ -99,20 +101,27 @@ public class RequestUpdateCallbackService {
         }
     }
 
-    private CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto, CaseData caseData) {
-        if (serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)) {
-            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-            caseData = caseData.toBuilder()
-                .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
-                .state(State.SUBMITTED_PAID)
-                .build();
+    private CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,
+                                                          CaseData caseData) {
+        try {
+            Court closestChildArrangementsCourt = courtFinderService.getNearestFamilyCourt(caseData);
+            if (serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)) {
+                ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+                caseData = caseData.toBuilder()
+                    .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
+                    .state(State.SUBMITTED_PAID)
+                    .build();
 
-        } else {
-            caseData = caseData.toBuilder()
-                .state(State.SUBMITTED_NOT_PAID)
-                .build();
+            } else {
+                caseData = caseData.toBuilder()
+                    .state(State.SUBMITTED_NOT_PAID)
+                    .build();
+            }
+            caseData.toBuilder().courtName(closestChildArrangementsCourt != null
+                                               ? closestChildArrangementsCourt.getCourtName() : "");
+        } catch (Exception e) {
+            log.info("Error while populating case date in payment request call {}", caseData.getId());
         }
-
         return caseData;
     }
 
