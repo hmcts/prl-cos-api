@@ -35,7 +35,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
 
         Optional<List<Element<PartyDetails>>> othersToNotify = ofNullable(caseData.getOthersToNotify());
 
-        if (othersToNotify.isPresent() && !othersToNotify.isEmpty()) {
+        if (othersToNotify.isPresent()) {
             List<PartyDetails> others = caseData.getOthersToNotify()
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
