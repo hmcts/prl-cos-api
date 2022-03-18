@@ -82,10 +82,9 @@ public class HomeChecker implements EventChecker {
             fields.add(ofNullable(home.get().getLivingSituation()));
             fields.add(ofNullable(home.get().getFamilyHome()));
 
-            if (ofNullable(home.get().getPeopleLivingAtThisAddress()).isPresent()) {
-                if (home.get().getPeopleLivingAtThisAddress().contains(PeopleLivingAtThisAddressEnum.someoneElse)) {
-                    fields.add(ofNullable(home.get().getTextAreaSomethingElse()));
-                }
+            if (ofNullable(home.get().getPeopleLivingAtThisAddress()).isPresent() &&
+                home.get().getPeopleLivingAtThisAddress().contains(PeopleLivingAtThisAddressEnum.someoneElse)) {
+                fields.add(ofNullable(home.get().getTextAreaSomethingElse()));
             }
 
             if (ofNullable(home.get().getEverLivedAtTheAddress()).isPresent()) {
