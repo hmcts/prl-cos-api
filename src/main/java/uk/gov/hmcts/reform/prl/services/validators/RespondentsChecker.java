@@ -38,7 +38,7 @@ public class RespondentsChecker implements EventChecker {
             respondentsWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
         }
 
-        if (respondentsWrapped.isPresent() && respondentsWrapped.get().size() != 0) {
+        if (respondentsWrapped.isPresent() && !respondentsWrapped.isEmpty()) {
             List<PartyDetails> respondents = respondentsWrapped.get()
                 .stream()
                 .map(Element::getValue)
@@ -69,7 +69,7 @@ public class RespondentsChecker implements EventChecker {
 
         boolean anyStarted = false;
 
-        if (respondentWrapped.isPresent() && respondentWrapped.get().size() != 0) {
+        if (respondentWrapped.isPresent() && !respondentWrapped.isEmpty()) {
             List<PartyDetails> respondents = respondentWrapped.get()
                 .stream()
                 .map(Element::getValue)

@@ -35,7 +35,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
 
         Optional<List<Element<PartyDetails>>> othersToNotify = ofNullable(caseData.getOthersToNotify());
 
-        if (othersToNotify.isPresent() && othersToNotify.get().size() != 0) {
+        if (othersToNotify.isPresent() && !othersToNotify.isEmpty()) {
             List<PartyDetails> others = caseData.getOthersToNotify()
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
@@ -63,7 +63,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
 
-            if (others.size() == 0) {
+            if (others.isEmpty()) {
                 return false;
             }
             boolean started = others.stream().anyMatch(Objects::nonNull);
@@ -113,9 +113,9 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             return false;
         }
 
-        otherPersonRelationshipList.get().stream().map(Element::getValue).forEach(everyChild -> {
-            childFields.add(ofNullable(everyChild.getPersonRelationshipToChild()));
-        });
+        otherPersonRelationshipList.get().stream().map(Element::getValue).forEach(everyChild ->
+            childFields.add(ofNullable(everyChild.getPersonRelationshipToChild()))
+        );
 
         boolean baseFields = allNonEmpty(
             party.getFirstName(),
