@@ -96,7 +96,7 @@ public class RespondentsCheckerTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .solicitorEmail("test@gmail.com").build();
 
-        List<Optional> actual = respondentsChecker.getSpecificC100Fields(respondent);
+        List<Optional<?>> actual = respondentsChecker.getSpecificC100Fields(respondent);
         assertEquals(8, actual.size());
         assertTrue(actual.contains(Optional.ofNullable(respondent.getOtherGender())));
     }
