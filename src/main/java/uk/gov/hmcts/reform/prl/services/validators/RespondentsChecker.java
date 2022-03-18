@@ -63,8 +63,8 @@ public class RespondentsChecker implements EventChecker {
         Optional<List<Element<PartyDetails>>> respondentWrapped = ofNullable(caseData.getRespondents());
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) && caseData.getRespondentsFL401() != null) {
-                Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getRespondentsFL401()).build();
-                respondentWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
+            Element<PartyDetails> wrappedPartyDetails = Element.<PartyDetails>builder().value(caseData.getRespondentsFL401()).build();
+            respondentWrapped = ofNullable(Collections.singletonList(wrappedPartyDetails));
         }
 
         boolean anyStarted = false;
