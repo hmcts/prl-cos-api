@@ -407,7 +407,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
         Optional<YesOrNo> agreeChildOtherContact = ofNullable(caseData.getAgreeChildOtherContact());
 
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(agreeChildUnsupervisedTime);
         fields.add(agreeChildSupervisedTime);
         fields.add(agreeChildOtherContact);
