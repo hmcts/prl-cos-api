@@ -15,8 +15,7 @@ import uk.gov.hmcts.reform.prl.models.FeeType;
 
 import java.math.BigDecimal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -100,7 +99,7 @@ public class FeeServiceTest {
             .build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
-        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenThrow(FeignException.class);
+        assertNotNull(when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenThrow(FeignException.class));
 
     }
 }
