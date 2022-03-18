@@ -102,7 +102,7 @@ public class SolicitorEmailService {
             .build();
     }
 
-    public void sendEmailToSolicitor(CaseDetails caseDetails, UserDetails userDetails) {
+    public void sendWithDrawEmailToSolicitor(CaseDetails caseDetails, UserDetails userDetails) {
         String solicitorEmail = "";
         CaseData caseData = emailService.getCaseData(caseDetails);
         List<PartyDetails> applicants = caseData
@@ -169,5 +169,22 @@ public class SolicitorEmailService {
             .courtEmail(caseData.getCourtEmailAddress())
             .caseLink(manageCaseUrl + "/" + caseData.getId())
             .build();
+    }
+
+    public void sendWithDrawEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails) {
+        String fl401SolicitorEmail = "";
+
+        PartyDetails fl401Applicant = emailService.getCaseData(caseDetails)
+            .getApplicantsFL401();
+
+        String applicantSolicitorEmail = fl401Applicant.getSolicitorEmail();
+        fl401SolicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
+
+        emailService.send(
+            fl401SolicitorEmail,
+            EmailTemplateNames.WITHDRAW,
+            buildCaseWithdrawEmail(caseDetails),
+            LanguagePreference.english
+        );
     }
 }
