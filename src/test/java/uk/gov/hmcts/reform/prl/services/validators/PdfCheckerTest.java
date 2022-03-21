@@ -1,42 +1,49 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static org.junit.Assert.assertFalse;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PdfCheckerTest {
 
+    @InjectMocks
+    PdfChecker pdfChecker;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
-    void whenNoCaseDataFinishedShouldReturnFalse() {
+    public void whenNoCaseDataFinishedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().build();
-
-        PdfChecker pdfChecker = new PdfChecker();
         assertFalse(pdfChecker.isFinished(caseData));
     }
 
     @Test
-    void whenNoCaseDataStartedShouldReturnFalse() {
+    public void whenNoCaseDataStartedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().build();
-
-        PdfChecker pdfChecker = new PdfChecker();
         assertFalse(pdfChecker.isStarted(caseData));
     }
 
     @Test
-    void whenNoCaseDataHasMandatoryCompletedShouldReturnFalse() {
+    public void whenNoCaseDataHasMandatoryCompletedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().build();
-
-        PdfChecker pdfChecker = new PdfChecker();
         assertFalse(pdfChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
-    void whenCaseDataPresentFinishedShouldReturnFalse() {
+    public void whenCaseDataPresentFinishedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name")
             .isCaseUrgent(Yes)
             .childAbductionReasons("Test string")
@@ -44,13 +51,12 @@ public class PdfCheckerTest {
             .jurisdictionIssue(No)
             .build();
 
-        PdfChecker pdfChecker = new PdfChecker();
         assertFalse(pdfChecker.isFinished(caseData));
 
     }
 
     @Test
-    void whenCaseDataPresentStartedShouldReturnFalse() {
+    public void whenCaseDataPresentStartedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name")
             .isCaseUrgent(Yes)
             .childAbductionReasons("Test string")
@@ -58,13 +64,11 @@ public class PdfCheckerTest {
             .jurisdictionIssue(No)
             .build();
 
-        PdfChecker pdfChecker = new PdfChecker();
         assertFalse(pdfChecker.isStarted(caseData));
-
     }
 
     @Test
-    void whenCaseDataPresentHasMandatoryCompletedShouldReturnFalse() {
+    public void whenCaseDataPresentHasMandatoryCompletedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name")
             .isCaseUrgent(Yes)
             .childAbductionReasons("Test string")
@@ -72,8 +76,6 @@ public class PdfCheckerTest {
             .jurisdictionIssue(No)
             .build();
 
-
-        PdfChecker pdfChecker = new PdfChecker();
         assertFalse(pdfChecker.hasMandatoryCompleted(caseData));
     }
 }

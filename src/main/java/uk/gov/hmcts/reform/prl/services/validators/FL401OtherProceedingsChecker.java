@@ -38,9 +38,9 @@ public class FL401OtherProceedingsChecker implements EventChecker {
             caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding());
 
         if (otherProceedings.isPresent()
-            && (otherProceedings.get().equals(no) || otherProceedings.get().equals(dontKnow))) {
+            && (no.equals(otherProceedings.get()) || dontKnow.equals(otherProceedings.get()))) {
             taskErrorService.removeError(FL401_OTHER_PROCEEDINGS_ERROR);
-            return  true;
+            return true;
         }
 
         Optional<List<Element<FL401Proceedings>>> proceedingDetails = ofNullable(
@@ -48,12 +48,12 @@ public class FL401OtherProceedingsChecker implements EventChecker {
 
         if (proceedingDetails.isPresent()) {
             List<FL401Proceedings> allProceedings = proceedingDetails.get()
-                                                .stream()
-                                                .map(Element::getValue)
-                                                .collect(Collectors.toList());
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
 
             //if a collection item is added and then removed the collection exists as length 0
-            if (allProceedings.size() == 0) {
+            if (allProceedings.isEmpty()) {
                 return false;
             }
 
@@ -78,15 +78,15 @@ public class FL401OtherProceedingsChecker implements EventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
 
-        if (ofNullable(caseData.getFl401OtherProceedingDetails()).isPresent()) {
-            if (ofNullable(caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding()).isPresent()) {
-                if (ofNullable(caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding()).get().equals(
-                    yes)) {
-                    taskErrorService.addEventError(FL401_OTHER_PROCEEDINGS, FL401_OTHER_PROCEEDINGS_ERROR,
-                                                   FL401_OTHER_PROCEEDINGS_ERROR.getError()
-                    );
-                    return true;
-                }
+        if (!ofNullable(caseData.getFl401OtherProceedingDetails()).isEmpty()) {
+            Optional<YesNoDontKnow> hasPrevOrOngoingOtherProceeding
+                = ofNullable(caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding());
+
+            if (!hasPrevOrOngoingOtherProceeding.isEmpty() && yes.equals(hasPrevOrOngoingOtherProceeding.get())) {
+                taskErrorService.addEventError(FL401_OTHER_PROCEEDINGS, FL401_OTHER_PROCEEDINGS_ERROR,
+                                               FL401_OTHER_PROCEEDINGS_ERROR.getError()
+                );
+                return true;
             }
         }
         return false;
