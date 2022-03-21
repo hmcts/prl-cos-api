@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -84,6 +85,19 @@ public class RespondentsCheckerTest {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName").build();
 
         CaseData caseData = CaseData.builder().caseTypeOfApplication("Test")
+            .build();
+
+        Assert.assertFalse(respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData.getCaseTypeOfApplication()));
+    }
+
+    @Test
+    public void whenIncompleteC100CaseDataValidateMandatoryFieldsForRespondentReturnsFalse() {
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("TestName")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
 
         Assert.assertFalse(respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData.getCaseTypeOfApplication()));
