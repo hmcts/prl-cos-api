@@ -346,4 +346,43 @@ public class HomeCheckerTest {
         Assert.assertTrue(fields.size() >= 1 && !fields.get(0).isEmpty());
     }
 
+    @Test
+    public void whenNoDataIsAddressPresentReturnTrue () {
+        Address address = Address.builder()
+            .addressLine1("Test")
+            .addressLine2("Test")
+            .addressLine3("Test")
+            .county("London")
+            .country("UK")
+            .postTown("Southgate")
+            .postCode("N14 5EF")
+            .build();
+
+        Home homefull = Home.builder()
+            .address(address)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .home(homefull)
+            .build();
+
+        Optional<Home> home = ofNullable(caseData.getHome());
+
+       assertTrue(homeChecker.isAddressPresent(home));
+    }
+
+    @Test
+    public void whenNoDataIsAddressPresentReturnFalse() {
+        Home homefull = Home.builder()
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .home(homefull)
+            .build();
+
+        Optional<Home> home = ofNullable(caseData.getHome());
+
+        assertFalse(homeChecker.isAddressPresent(home));
+    }
+
 }
