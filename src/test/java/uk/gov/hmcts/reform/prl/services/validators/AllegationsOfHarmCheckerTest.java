@@ -391,15 +391,44 @@ public class AllegationsOfHarmCheckerTest {
         ));
     }
 
-    @Test
-    public void testCaseForAbusePresent () {
 
-        CaseData caseData = CaseData.builder()
-            .allegationsOfHarmDomesticAbuseYesNo(Yes)
-            .allegationsOfHarmDomesticAbuseYesNo(Yes)
+    @Test
+    public void whenAllCaseDataPresentValidateFieldsReturnTrue () {
+
+        Behaviours behaviour = Behaviours.builder()
+            .abuseNatureDescription("Test")
+            .behavioursStartDateAndLength("5 days")
+            .behavioursNature("Testing")
+            .behavioursApplicantSoughtHelp(Yes)
+            .behavioursApplicantHelpSoughtWho("Who from")
+            .behavioursApplicantHelpAction("Action")
             .build();
 
-        assertTrue (allegationsOfHarmChecker.abusePresent(caseData));
+        Element<Behaviours> wrappedBehaviour = Element.<Behaviours>builder()
+            .value(behaviour)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .allegationsOfHarmYesNo(Yes)
+            .allegationsOfHarmDomesticAbuseYesNo(Yes)
+            .behaviours(Collections.singletonList(wrappedBehaviour))
+            .physicalAbuseVictim(Collections.singletonList(applicants))
+            .ordersNonMolestation(No)
+            .ordersOccupation(No)
+            .ordersForcedMarriageProtection(No)
+            .ordersRestraining(No)
+            .ordersOtherInjunctive(No)
+            .ordersUndertakingInPlace(No)
+            .allegationsOfHarmChildAbductionYesNo(No)
+            .allegationsOfHarmOtherConcernsYesNo(No)
+            .allegationsOfHarmOtherConcernsCourtActions("testing")
+            .allegationsOfHarmOtherConcerns(No)
+            .agreeChildUnsupervisedTime(No)
+            .agreeChildSupervisedTime(No)
+            .agreeChildOtherContact(No)
+            .build();
+
+        assertTrue (allegationsOfHarmChecker.validateFields(caseData));
 
     }
 }
