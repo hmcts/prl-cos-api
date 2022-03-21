@@ -163,7 +163,7 @@ public class RespondentsChecker implements EventChecker {
 
 
     public List<Optional<?>> getSpecificC100Fields(PartyDetails respondent) {
-        List<Optional<?>> fields = new ArrayList<>();
+        List<Optional> fields = new ArrayList<>();
         Optional<Gender> gender = ofNullable(respondent.getGender());
         fields.add(gender);
         if (gender.isPresent() && gender.get().equals(Gender.other)) {
