@@ -43,7 +43,7 @@ public class RespondentBehaviourCheckerTest {
     }
 
     @Test
-    public void whenotherReasonCaseDataPresentThenIsStartedReturnsTrue() {
+    public void whenOtherReasonCaseDataPresentThenIsStartedReturnsTrue() {
         RespondentBehaviour respondentBehaviour = RespondentBehaviour.builder()
             .otherReasonApplicantWantToStopFromRespondentDoing("testing")
             .build();
