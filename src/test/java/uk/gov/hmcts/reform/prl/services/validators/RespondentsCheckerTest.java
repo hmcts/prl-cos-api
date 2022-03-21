@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -16,6 +17,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RespondentsCheckerTest {
@@ -81,7 +85,7 @@ public class RespondentsCheckerTest {
     }
 
     @Test
-    public void whenNoDAteIsGenderCompletedFieldShouldEmpty() {
+    public void whenNoDataIsGenderCompletedFieldShouldEmpty() {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isGenderCompleted(respondent,fields);
@@ -97,6 +101,28 @@ public class RespondentsCheckerTest {
             .build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isGenderCompleted(respondent,fields);
+        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+
+    }
+
+    @Test
+    public void whenNoDataIsPlaceOfBirthCompletedFieldShouldEmpty() {
+        PartyDetails respondent = PartyDetails.builder().build();
+        List<Optional<?>> fields = new ArrayList<>();
+        respondentsChecker.isPlaceOfBirthCompleted(respondent,fields);
+        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+    }
+
+    @Test
+    public void whenDataPresentIsPlaceOfBirthCompletedFieldShouldNotNull() {
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("TestName")
+            .isPlaceOfBirthKnown(Yes)
+            .placeOfBirth("testing")
+            .build();
+
+        List<Optional<?>> fields = new ArrayList<>();
+        respondentsChecker.isPlaceOfBirthCompleted(respondent,fields);
         Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
 
     }
