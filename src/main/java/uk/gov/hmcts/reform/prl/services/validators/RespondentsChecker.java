@@ -105,7 +105,7 @@ public class RespondentsChecker implements EventChecker {
             isGenderCompleted(respondent, fields);
             isPlaceOfBirthCompleted(respondent, fields);
             isAtAddressLessThan5YearsCompleted(respondent, fields);
-            isDoTheyhaveLegalRepresentationCompleted(respondent, fields);
+            isDoTheyHaveLegalRepresentationCompleted(respondent, fields);
         }
 
         Optional<YesOrNo> isCurrentAddressKnown = ofNullable(respondent.getIsCurrentAddressKnown());
@@ -121,7 +121,7 @@ public class RespondentsChecker implements EventChecker {
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
     }
 
-    private void isDoTheyhaveLegalRepresentationCompleted(PartyDetails respondent, List<Optional<?>> fields) {
+    public void isDoTheyHaveLegalRepresentationCompleted(PartyDetails respondent, List<Optional<?>> fields) {
         Optional<YesNoDontKnow> doTheyHaveLegalRepresentation = ofNullable(respondent.getDoTheyHaveLegalRepresentation());
         fields.add(doTheyHaveLegalRepresentation);
         if (doTheyHaveLegalRepresentation.isPresent() && doTheyHaveLegalRepresentation.get().equals(YesNoDontKnow.yes)) {
@@ -129,7 +129,7 @@ public class RespondentsChecker implements EventChecker {
         }
     }
 
-    private void isCanYouProvidePhoneNumberCompleted(PartyDetails respondent, List<Optional<?>> fields) {
+    public void isCanYouProvidePhoneNumberCompleted(PartyDetails respondent, List<Optional<?>> fields) {
         Optional<YesOrNo> canYouProvidePhoneNumber = ofNullable(respondent.getCanYouProvidePhoneNumber());
         fields.add(canYouProvidePhoneNumber);
         if (canYouProvidePhoneNumber.isPresent() && canYouProvidePhoneNumber.get().equals(Yes)) {
@@ -137,7 +137,7 @@ public class RespondentsChecker implements EventChecker {
         }
     }
 
-    private void isCanYouProvideEmailAddressCompleted(PartyDetails respondent, List<Optional<?>> fields) {
+    public void isCanYouProvideEmailAddressCompleted(PartyDetails respondent, List<Optional<?>> fields) {
         Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(respondent.getCanYouProvideEmailAddress());
         fields.add(canYouProvideEmailAddress);
         if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(Yes)) {
@@ -145,7 +145,7 @@ public class RespondentsChecker implements EventChecker {
         }
     }
 
-    private void isAtAddressLessThan5YearsCompleted(PartyDetails respondent, List<Optional<?>> fields) {
+    public void isAtAddressLessThan5YearsCompleted(PartyDetails respondent, List<Optional<?>> fields) {
         Optional<YesNoDontKnow> isAtAddressLessThan5YearsWithDontKnow = ofNullable(respondent.getIsAtAddressLessThan5YearsWithDontKnow());
         fields.add(isAtAddressLessThan5YearsWithDontKnow);
         if (isAtAddressLessThan5YearsWithDontKnow.isPresent() && isAtAddressLessThan5YearsWithDontKnow.get().equals(
@@ -154,14 +154,14 @@ public class RespondentsChecker implements EventChecker {
         }
     }
 
-    private void isCurrentAddressCompleted(PartyDetails respondent, List<Optional<?>> fields, Optional<YesOrNo> isCurrentAddressKnown) {
+    public void isCurrentAddressCompleted(PartyDetails respondent, List<Optional<?>> fields, Optional<YesOrNo> isCurrentAddressKnown) {
         if (isCurrentAddressKnown.isPresent() && isCurrentAddressKnown.get().equals(Yes)) {
             fields.add(ofNullable(respondent.getAddress().getAddressLine1()));
             fields.add(ofNullable(respondent.getAddress().getPostCode()));
         }
     }
 
-    private void isPlaceOfBirthCompleted(PartyDetails respondent, List<Optional<?>> fields) {
+    public void isPlaceOfBirthCompleted(PartyDetails respondent, List<Optional<?>> fields) {
         Optional<YesOrNo> isPlaceOfBirthKnown = ofNullable(respondent.getIsPlaceOfBirthKnown());
         fields.add(isPlaceOfBirthKnown);
         if (isPlaceOfBirthKnown.isPresent() && isPlaceOfBirthKnown.get().equals(Yes)) {
@@ -169,7 +169,7 @@ public class RespondentsChecker implements EventChecker {
         }
     }
 
-    private void isGenderCompleted(PartyDetails respondent, List<Optional<?>> fields) {
+    public void isGenderCompleted(PartyDetails respondent, List<Optional<?>> fields) {
         Optional<Gender> gender = ofNullable(respondent.getGender());
         fields.add(gender);
         if (gender.isPresent() && gender.get().equals(Gender.other)) {
@@ -177,7 +177,7 @@ public class RespondentsChecker implements EventChecker {
         }
     }
 
-    private void isDateOfBirthCompleted(PartyDetails respondent, List<Optional<?>> fields, Optional<YesOrNo> isDateOfBirthKnown) {
+    public void isDateOfBirthCompleted(PartyDetails respondent, List<Optional<?>> fields, Optional<YesOrNo> isDateOfBirthKnown) {
         if (isDateOfBirthKnown.isPresent() && isDateOfBirthKnown.get().equals(Yes)) {
             fields.add(ofNullable(respondent.getDateOfBirth()));
         }

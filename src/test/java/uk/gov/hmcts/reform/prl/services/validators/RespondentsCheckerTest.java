@@ -5,16 +5,18 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RespondentsCheckerTest {
@@ -45,7 +47,7 @@ public class RespondentsCheckerTest {
     public void whenNoCaseDataThenHasMandatoryReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
-      
+
         assertFalse(respondentsChecker.hasMandatoryCompleted(caseData));
     }
 
@@ -77,5 +79,26 @@ public class RespondentsCheckerTest {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName").build();
 
         assertTrue(respondentsChecker.respondentDetailsStarted(respondent));
+    }
+
+    @Test
+    public void whenNoDAteIsGenderCompletedFieldShouldEmpty() {
+        PartyDetails respondent = PartyDetails.builder().build();
+        List<Optional<?>> fields = new ArrayList<>();
+        respondentsChecker.isGenderCompleted(respondent,fields);
+        assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+    }
+
+    @Test
+    public void whenDataPresentIsGenderCompletedFieldShouldNotNull() {
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("TestName")
+            .gender(Gender.other)
+            .otherGender("Testing")
+            .build();
+        List<Optional<?>> fields = new ArrayList<>();
+        respondentsChecker.isGenderCompleted(respondent,fields);
+        assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+
     }
 }
