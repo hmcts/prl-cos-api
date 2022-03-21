@@ -94,12 +94,14 @@ public class AllegationsOfHarmChecker implements EventChecker {
             Optional<YesOrNo> ordersOtherInjunctive = ofNullable(caseData.getOrdersOtherInjunctive());
             Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(caseData.getOrdersUndertakingInPlace());
 
-            boolean previousOrders = ordersNonMolestation.isPresent()
-                && ordersOccupation.isPresent()
-                && ordersForcedMarriageProtection.isPresent()
-                && ordersRestraining.isPresent()
-                && ordersOtherInjunctive.isPresent()
-                && ordersUndertakingInPlace.isPresent();
+            boolean previousOrders = isPreviousOrdersFinished(
+                ordersNonMolestation,
+                ordersOccupation,
+                ordersForcedMarriageProtection,
+                ordersRestraining,
+                ordersOtherInjunctive,
+                ordersUndertakingInPlace
+            );
 
             isFinished = isSectionsFinished(caseData, behavioursCompleted, previousOrders);
 
@@ -108,6 +110,16 @@ public class AllegationsOfHarmChecker implements EventChecker {
         }
 
         return isFinished;
+    }
+
+    private boolean isPreviousOrdersFinished(Optional<YesOrNo> ordersNonMolestation, Optional<YesOrNo> ordersOccupation, Optional<YesOrNo> ordersForcedMarriageProtection, Optional<YesOrNo> ordersRestraining, Optional<YesOrNo> ordersOtherInjunctive, Optional<YesOrNo> ordersUndertakingInPlace) {
+        boolean previousOrders = ordersNonMolestation.isPresent()
+            && ordersOccupation.isPresent()
+            && ordersForcedMarriageProtection.isPresent()
+            && ordersRestraining.isPresent()
+            && ordersOtherInjunctive.isPresent()
+            && ordersUndertakingInPlace.isPresent();
+        return previousOrders;
     }
 
     private boolean isSectionsFinished(CaseData caseData, boolean behavioursCompleted, boolean previousOrders) {
