@@ -149,7 +149,7 @@ public class HomeChecker implements EventChecker {
         }
     }
 
-    private void getIntendToLiveAtTheAddress(Optional<Home> home, List<Optional<?>> fields) {
+    public void getIntendToLiveAtTheAddress(Optional<Home> home, List<Optional<?>> fields) {
         if (home.isPresent()
             && ofNullable(home.get().getEverLivedAtTheAddress()).isPresent()
             && home.get().getEverLivedAtTheAddress().equals(YesNoBothEnum.No)) {
@@ -157,7 +157,7 @@ public class HomeChecker implements EventChecker {
         }
     }
 
-    private void getDetailPeopleLivingAtThisAddress(Optional<Home> home, List<Optional<?>> fields) {
+    public void getDetailPeopleLivingAtThisAddress(Optional<Home> home, List<Optional<?>> fields) {
         if (home.isPresent() && ofNullable(home.get().getPeopleLivingAtThisAddress()).isPresent()
             && home.get().getPeopleLivingAtThisAddress().contains(PeopleLivingAtThisAddressEnum.someoneElse)) {
             fields.add(ofNullable(home.get().getTextAreaSomethingElse()));
