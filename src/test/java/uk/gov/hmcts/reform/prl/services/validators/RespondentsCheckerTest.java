@@ -20,6 +20,7 @@ import java.util.Optional;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RespondentsCheckerTest {
@@ -99,6 +100,22 @@ public class RespondentsCheckerTest {
         List<Optional<?>> actual = respondentsChecker.getSpecificC100Fields(respondent);
         assertEquals(8, actual.size());
         assertTrue(actual.contains(Optional.ofNullable(respondent.getOtherGender())));
+    }
+
+    @Test
+    public void whenCaseTypeIsC100AndIncompleteData_thenC100FieldsAddedToFieldsListAndFinishedReturnFalse() {
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("TestName")
+            .gender(Gender.other)
+            .otherGender("Gender")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .respondents(Collections.singletonList(element(respondent)))
+            .build();
+
+        assertFalse(respondentsChecker.isFinished(caseData));
     }
 
 
