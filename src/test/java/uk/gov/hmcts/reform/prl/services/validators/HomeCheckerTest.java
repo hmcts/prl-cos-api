@@ -242,7 +242,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenDataPresentGetIntendToLiveAtTheAddress() {
+    public void whenDataPresentGetIntendToLiveAtTheAddressFieldsNotEmpty() {
         Home homefull = Home.builder()
             .everLivedAtTheAddress(YesNoBothEnum.No)
             .intendToLiveAtTheAddress(YesNoBothEnum.yesBothOfThem)
@@ -259,7 +259,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenNoDataGetIntendToLiveAtTheAddress() {
+    public void whenNoDataGetIntendToLiveAtTheAddressFieldsIsEmpty() {
         Home homefull = Home.builder()
             .build();
         CaseData caseData = CaseData.builder()
@@ -271,5 +271,35 @@ public class HomeCheckerTest {
         List<Optional<?>> fields = new ArrayList<>();
         homeChecker.getIntendToLiveAtTheAddress(home, fields);
         Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+    }
+
+    @Test
+    public void whenNoDataGetDetailPeopleLivingAtThisAddressFieldsIsEmpty() {
+        Home homefull = Home.builder()
+            .build();
+        CaseData caseData = CaseData.builder()
+            .home(homefull)
+            .build();
+        Optional<Home> home = ofNullable(caseData.getHome());
+        List<Optional<?>> fields = new ArrayList<>();
+        homeChecker.getDetailPeopleLivingAtThisAddress(home,fields);
+        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+    }
+
+    @Test
+    public void whenDataPresentGetDetailPeopleLivingAtThisAddressFieldsIsNotEmpty() {
+        Home homefull = Home.builder()
+            .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.someoneElse))
+            .textAreaSomethingElse("Testing")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .home(homefull)
+            .build();
+
+        Optional<Home> home = ofNullable(caseData.getHome());
+
+        List<Optional<?>> fields = new ArrayList<>();
+        homeChecker.getDetailPeopleLivingAtThisAddress(home, fields);
+        Assert.assertTrue(fields.size() >= 1 && !fields.get(0).isEmpty());
     }
 }
