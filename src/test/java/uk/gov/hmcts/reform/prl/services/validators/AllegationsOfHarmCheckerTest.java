@@ -393,7 +393,7 @@ public class AllegationsOfHarmCheckerTest {
 
 
     @Test
-    public void whenAllCaseDataPresentValidateFieldsReturnTrue () {
+    public void whenAllCaseDataPresentValidateFieldsReturnTrue() {
 
         Behaviours behaviour = Behaviours.builder()
             .abuseNatureDescription("Test")
@@ -428,7 +428,7 @@ public class AllegationsOfHarmCheckerTest {
             .agreeChildOtherContact(No)
             .build();
 
-        assertTrue (allegationsOfHarmChecker.validateFields(caseData));
+        assertTrue(allegationsOfHarmChecker.validateFields(caseData));
 
     }
 }
