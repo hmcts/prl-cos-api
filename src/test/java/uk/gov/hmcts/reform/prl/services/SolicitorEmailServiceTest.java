@@ -95,7 +95,7 @@ public class SolicitorEmailServiceTest {
             .courtName("testcourt")
             .build();
 
-        List<Court> courtList  = new ArrayList<>();
+        List<Court> courtList = new ArrayList<>();
         courtList.add(court);
 
         serviceArea = ServiceArea.builder()
@@ -229,7 +229,7 @@ public class SolicitorEmailServiceTest {
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
         solicitorEmailService.sendEmail(caseDetails);
-        assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
+        assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
     @Test
@@ -261,7 +261,8 @@ public class SolicitorEmailServiceTest {
             .email("test@demo.com")
             .build();
 
-        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(applicantList.get(0).getEmail())
+        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
+            applicantList.get(0).getEmail())
             : userDetails.getEmail();
 
         Map<String, Object> data = new HashMap<>();
@@ -305,7 +306,8 @@ public class SolicitorEmailServiceTest {
             .email("test@demo.com")
             .build();
 
-        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(applicantList.get(0).getEmail())
+        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
+            applicantList.get(0).getEmail())
             : userDetails.getEmail();
 
         Map<String, Object> data = new HashMap<>();
