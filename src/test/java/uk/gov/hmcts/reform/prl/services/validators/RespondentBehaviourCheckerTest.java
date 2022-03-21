@@ -68,6 +68,7 @@ public class RespondentBehaviourCheckerTest {
         assertTrue(respondentBehaviourChecker.isStarted(caseData));
     }
 
+
     @Test
     public void whenAllDetailsPresentThenIsStartedReturnsTrue() {
         RespondentBehaviour respondentBehaviour = RespondentBehaviour.builder()

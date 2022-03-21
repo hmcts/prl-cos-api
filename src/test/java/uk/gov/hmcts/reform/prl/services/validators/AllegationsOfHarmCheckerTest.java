@@ -390,4 +390,16 @@ public class AllegationsOfHarmCheckerTest {
             ordersUndertakingInPlace
         ));
     }
+
+    @Test
+    public void testCaseForAbusePresent () {
+
+        CaseData caseData = CaseData.builder()
+            .allegationsOfHarmDomesticAbuseYesNo(Yes)
+            .allegationsOfHarmDomesticAbuseYesNo(Yes)
+            .build();
+
+        assertTrue (allegationsOfHarmChecker.abusePresent(caseData));
+
+    }
 }
