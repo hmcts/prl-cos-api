@@ -63,29 +63,24 @@ public class AllegationsOfHarmChecker implements EventChecker {
     public boolean validateFields(CaseData caseData) {
         Optional<YesOrNo> allegationsOfHarmYesNo = ofNullable(caseData.getAllegationsOfHarmYesNo());
 
-        boolean isFinished;
-
         if (allegationsOfHarmYesNo.isPresent() && allegationsOfHarmYesNo.get().equals(Yes)) {
 
-            boolean behavioursCompleted = true;
+            Optional<List<Element<Behaviours>>> behavioursWrapped = ofNullable(caseData.getBehaviours());
 
-            if (abusePresent(caseData)) {
-                Optional<List<Element<Behaviours>>> behavioursWrapped = ofNullable(caseData.getBehaviours());
-                if (behavioursWrapped.isPresent()
-                    && !behavioursWrapped.get().isEmpty()) {
-                    List<Behaviours> behaviours = behavioursWrapped.get()
-                        .stream()
-                        .map(Element::getValue)
-                        .collect(Collectors.toList());
+            if (abusePresent(caseData) && (behavioursWrapped.isPresent() && !behavioursWrapped.get().isEmpty())) {
+                List<Behaviours> behaviours = behavioursWrapped.get()
+                    .stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
 
-                    for (Behaviours behaviour : behaviours) {
-                        behavioursCompleted = validateBehaviour(behaviour);
-                        if (!behavioursCompleted) {
-                            return false;
-                        }
+                for (Behaviours behaviour : behaviours) {
+                    boolean behavioursCompleted = validateBehaviour(behaviour);
+                    if (!behavioursCompleted) {
+                        return false;
                     }
                 }
             }
+
 
             Optional<YesOrNo> ordersNonMolestation = ofNullable(caseData.getOrdersNonMolestation());
             Optional<YesOrNo> ordersOccupation = ofNullable(caseData.getOrdersOccupation());
@@ -101,19 +96,16 @@ public class AllegationsOfHarmChecker implements EventChecker {
                 && ordersOtherInjunctive.isPresent()
                 && ordersUndertakingInPlace.isPresent();
 
-            isFinished = validateDomesticAbuseSection(caseData)
+            return validateDomesticAbuseSection(caseData)
                 && validateOrders(caseData)
                 && previousOrders
-                && behavioursCompleted
                 && validateAbductionSection(caseData)
                 && validateOtherConcerns(caseData)
                 && validateChildContact(caseData);
-
-        } else {
-            isFinished = allegationsOfHarmYesNo.isPresent();
         }
 
-        return isFinished;
+        return allegationsOfHarmYesNo.isPresent();
+
     }
 
 
