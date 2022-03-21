@@ -302,4 +302,18 @@ public class HomeCheckerTest {
         homeChecker.getDetailPeopleLivingAtThisAddress(home, fields);
         Assert.assertTrue(fields.size() >= 1 && !fields.get(0).isEmpty());
     }
+
+    @Test
+    public void whenNoDataIsChildDetailsAreCompletedIsEmpty() {
+        Home homefull = Home.builder()
+            .build();
+        CaseData caseData = CaseData.builder()
+            .home(homefull)
+            .build();
+        Optional<Home> home = ofNullable(caseData.getHome());
+        List<Optional<?>> fields = new ArrayList<>();
+        homeChecker.isChildDetailsAreCompleted(home,fields);
+        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+    }
+
 }
