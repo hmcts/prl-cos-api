@@ -118,13 +118,12 @@ public class AllegationsOfHarmChecker implements EventChecker {
                                             Optional<YesOrNo> ordersRestraining,
                                             Optional<YesOrNo> ordersOtherInjunctive,
                                             Optional<YesOrNo> ordersUndertakingInPlace) {
-        boolean previousOrders = ordersNonMolestation.isPresent()
+        return ordersNonMolestation.isPresent()
             && ordersOccupation.isPresent()
             && ordersForcedMarriageProtection.isPresent()
             && ordersRestraining.isPresent()
             && ordersOtherInjunctive.isPresent()
             && ordersUndertakingInPlace.isPresent();
-        return previousOrders;
     }
 
     public boolean isSectionsFinished(CaseData caseData, boolean behavioursCompleted, boolean previousOrders) {

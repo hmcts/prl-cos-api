@@ -330,4 +330,31 @@ public class AllegationsOfHarmCheckerTest {
             ordersUndertakingInPlace
         ));
     }
+
+    @Test
+    public void whenAllDataPresentIsPreviousOrdersFinishedReturnFalse() {
+        CaseData caseData = CaseData.builder()
+            .ordersNonMolestation(Yes)
+            .ordersOccupation(No)
+            .ordersForcedMarriageProtection(No)
+            .ordersRestraining(No)
+            .ordersOtherInjunctive(No)
+            .ordersUndertakingInPlace(No)
+            .build();
+        Optional<YesOrNo> ordersNonMolestation = ofNullable(caseData.getOrdersNonMolestation());
+        Optional<YesOrNo> ordersOccupation = ofNullable(caseData.getOrdersOccupation());
+        Optional<YesOrNo> ordersForcedMarriageProtection = ofNullable(caseData.getOrdersForcedMarriageProtection());
+        Optional<YesOrNo> ordersRestraining = ofNullable(caseData.getOrdersRestraining());
+        Optional<YesOrNo> ordersOtherInjunctive = ofNullable(caseData.getOrdersOtherInjunctive());
+        Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(caseData.getOrdersUndertakingInPlace());
+
+        assertFalse(allegationsOfHarmChecker.isPreviousOrdersFinished(
+            ordersNonMolestation,
+            ordersOccupation,
+            ordersForcedMarriageProtection,
+            ordersRestraining,
+            ordersOtherInjunctive,
+            ordersUndertakingInPlace
+        ));
+    }
 }
