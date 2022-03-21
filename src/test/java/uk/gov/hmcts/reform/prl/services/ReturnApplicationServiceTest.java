@@ -127,12 +127,12 @@ public class ReturnApplicationServiceTest {
     public void testGetReturnMessageForTaskList() {
         StringBuilder returnMsgStr = new StringBuilder();
 
-        returnMsgStr.append("<div class='govuk-box-highlight'><strong><h1>Application has been returned</h1></strong></div>\"" + "\n\n");
+        returnMsgStr.append("<div><span class='govuk-warning-text__icon'><strong><h2>Application has been returned</h2></strong></div>\"" + "\n\n");
 
         returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
 
         for (RejectReasonEnum reasonEnum : casedata.getRejectReason()) {
-            returnMsgStr.append(reasonEnum.getReturnMsgText());
+            returnMsgStr.append(reasonEnum.getDisplayedValue());
         }
 
         returnMsgStr.append("Resolve these concerns and resend your application."
