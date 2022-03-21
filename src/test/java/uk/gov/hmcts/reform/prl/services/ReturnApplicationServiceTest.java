@@ -133,6 +133,7 @@ public class ReturnApplicationServiceTest {
 
         for (RejectReasonEnum reasonEnum : casedata.getRejectReason()) {
             returnMsgStr.append(reasonEnum.getDisplayedValue());
+            returnMsgStr.append("\n\n");
         }
 
         returnMsgStr.append("Resolve these concerns and resend your application."
