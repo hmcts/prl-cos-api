@@ -1,12 +1,16 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -17,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -27,6 +32,17 @@ public class RespondentsCheckerTest {
 
     @InjectMocks
     RespondentsChecker respondentsChecker;
+
+    Address address;
+
+    @Before
+    public void setUp() {
+        address = Address.builder()
+            .addressLine1("55 Test Street")
+            .postTown("Town")
+            .postCode("N12 3BH")
+            .build();
+    }
 
     @Test
     public void whenNoCaseDataThenIsStartedReturnsFalse() {
@@ -121,6 +137,71 @@ public class RespondentsCheckerTest {
 
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isPlaceOfBirthCompleted(respondent,fields);
+        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+
+    }
+
+    @Test
+    public void whenNoDataIsCurrentAddressCompletedFieldShouldEmpty() {
+        PartyDetails respondent = PartyDetails.builder().build();
+        List<Optional<?>> fields = new ArrayList<>();
+        respondentsChecker.isCurrentAddressCompleted(respondent,fields);
+        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+    }
+
+    @Test
+    public void whenDataPresentIsCurrentAddressCompletedFieldShouldNotNull() {
+        PartyDetails respondent = PartyDetails.builder()
+            .isCurrentAddressKnown(Yes)
+            .isPlaceOfBirthKnown(Yes)
+            .placeOfBirth("testing")
+            .address(address)
+            .build();
+
+        List<Optional<?>> fields = new ArrayList<>();
+        respondentsChecker.isCurrentAddressCompleted(respondent,fields);
+        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+
+    }
+
+    @Test
+    public void whenNoDataIsCanYouProvideEmailAddressCompletedFieldShouldEmpty() {
+        PartyDetails respondent = PartyDetails.builder().build();
+        List<Optional<?>> fields = new ArrayList<>();
+        respondentsChecker.isCanYouProvideEmailAddressCompleted(respondent,fields);
+        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+    }
+
+    @Test
+    public void whenDataPresentIsCanYouProvideEmailAddressCompletedFieldShouldNotNull() {
+        PartyDetails respondent = PartyDetails.builder()
+            .canYouProvideEmailAddress(Yes)
+            .email("testing@gmail.com")
+            .build();
+
+        List<Optional<?>> fields = new ArrayList<>();
+        respondentsChecker.isCanYouProvideEmailAddressCompleted(respondent,fields);
+        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+
+    }
+
+    @Test
+    public void whenNoDataIsAtAddressLessThan5YearsCompletedFieldShouldEmpty() {
+        PartyDetails respondent = PartyDetails.builder().build();
+        List<Optional<?>> fields = new ArrayList<>();
+        respondentsChecker.isAtAddressLessThan5YearsCompleted(respondent,fields);
+        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+    }
+
+    @Test
+    public void whenDataPresentIsAtAddressLessThan5YearsCompletedFieldShouldNotNull() {
+        PartyDetails respondent = PartyDetails.builder()
+            .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+            .addressLivedLessThan5YearsDetails("testing")
+            .build();
+
+        List<Optional<?>> fields = new ArrayList<>();
+        respondentsChecker.isAtAddressLessThan5YearsCompleted(respondent,fields);
         Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
 
     }

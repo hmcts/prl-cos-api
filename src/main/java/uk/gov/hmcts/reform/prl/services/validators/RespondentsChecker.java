@@ -108,10 +108,7 @@ public class RespondentsChecker implements EventChecker {
             isDoTheyHaveLegalRepresentationCompleted(respondent, fields);
         }
 
-        Optional<YesOrNo> isCurrentAddressKnown = ofNullable(respondent.getIsCurrentAddressKnown());
-        fields.add(isCurrentAddressKnown);
-
-        isCurrentAddressCompleted(respondent, fields, isCurrentAddressKnown);
+        isCurrentAddressCompleted(respondent, fields);
 
         isCanYouProvideEmailAddressCompleted(respondent, fields);
 
@@ -154,7 +151,9 @@ public class RespondentsChecker implements EventChecker {
         }
     }
 
-    public void isCurrentAddressCompleted(PartyDetails respondent, List<Optional<?>> fields, Optional<YesOrNo> isCurrentAddressKnown) {
+    public void isCurrentAddressCompleted(PartyDetails respondent, List<Optional<?>> fields) {
+        Optional<YesOrNo> isCurrentAddressKnown = ofNullable(respondent.getIsCurrentAddressKnown());
+        fields.add(isCurrentAddressKnown);
         if (isCurrentAddressKnown.isPresent() && isCurrentAddressKnown.get().equals(Yes)) {
             fields.add(ofNullable(respondent.getAddress().getAddressLine1()));
             fields.add(ofNullable(respondent.getAddress().getPostCode()));
