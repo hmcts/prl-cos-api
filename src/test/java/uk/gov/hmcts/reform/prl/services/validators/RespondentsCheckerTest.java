@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -16,8 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
-
 @RunWith(MockitoJUnitRunner.class)
 public class RespondentsCheckerTest {
 
@@ -32,7 +31,7 @@ public class RespondentsCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        assertFalse(respondentsChecker.isStarted(caseData));
+        Assert.assertFalse(respondentsChecker.isStarted(caseData));
     }
 
     @Test
@@ -40,7 +39,7 @@ public class RespondentsCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        assertFalse(respondentsChecker.isFinished(caseData));
+        Assert.assertFalse(respondentsChecker.isFinished(caseData));
     }
 
     @Test
@@ -48,7 +47,7 @@ public class RespondentsCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
 
-        assertFalse(respondentsChecker.hasMandatoryCompleted(caseData));
+        Assert.assertFalse(respondentsChecker.hasMandatoryCompleted(caseData));
     }
 
     @Test
@@ -61,7 +60,7 @@ public class RespondentsCheckerTest {
             .respondents(applicantList)
             .build();
 
-        assertTrue(respondentsChecker.isStarted(caseData));
+        Assert.assertTrue(respondentsChecker.isStarted(caseData));
     }
 
     @Test
@@ -71,14 +70,14 @@ public class RespondentsCheckerTest {
         CaseData caseData = CaseData.builder().caseTypeOfApplication("Test")
             .build();
 
-        assertFalse(respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData.getCaseTypeOfApplication()));
+        Assert.assertFalse(respondentsChecker.validateMandatoryFieldsForRespondent(respondent, caseData.getCaseTypeOfApplication()));
     }
 
     @Test
     public void whenIncompleteCaseDataRespondentsDetailsStartedReturnsTrue() {
         PartyDetails respondent = PartyDetails.builder().firstName("TestName").build();
 
-        assertTrue(respondentsChecker.respondentDetailsStarted(respondent));
+        Assert.assertTrue(respondentsChecker.respondentDetailsStarted(respondent));
     }
 
     @Test
@@ -86,7 +85,7 @@ public class RespondentsCheckerTest {
         PartyDetails respondent = PartyDetails.builder().build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isGenderCompleted(respondent,fields);
-        assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
     }
 
     @Test
@@ -98,7 +97,7 @@ public class RespondentsCheckerTest {
             .build();
         List<Optional<?>> fields = new ArrayList<>();
         respondentsChecker.isGenderCompleted(respondent,fields);
-        assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
 
     }
 }
