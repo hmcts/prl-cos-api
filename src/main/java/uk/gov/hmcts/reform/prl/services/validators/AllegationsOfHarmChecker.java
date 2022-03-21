@@ -112,7 +112,12 @@ public class AllegationsOfHarmChecker implements EventChecker {
         return isFinished;
     }
 
-    private boolean isPreviousOrdersFinished(Optional<YesOrNo> ordersNonMolestation, Optional<YesOrNo> ordersOccupation, Optional<YesOrNo> ordersForcedMarriageProtection, Optional<YesOrNo> ordersRestraining, Optional<YesOrNo> ordersOtherInjunctive, Optional<YesOrNo> ordersUndertakingInPlace) {
+    public boolean isPreviousOrdersFinished(Optional<YesOrNo> ordersNonMolestation,
+                                            Optional<YesOrNo> ordersOccupation,
+                                            Optional<YesOrNo> ordersForcedMarriageProtection,
+                                            Optional<YesOrNo> ordersRestraining,
+                                            Optional<YesOrNo> ordersOtherInjunctive,
+                                            Optional<YesOrNo> ordersUndertakingInPlace) {
         boolean previousOrders = ordersNonMolestation.isPresent()
             && ordersOccupation.isPresent()
             && ordersForcedMarriageProtection.isPresent()
@@ -122,7 +127,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
         return previousOrders;
     }
 
-    private boolean isSectionsFinished(CaseData caseData, boolean behavioursCompleted, boolean previousOrders) {
+    public boolean isSectionsFinished(CaseData caseData, boolean behavioursCompleted, boolean previousOrders) {
         boolean isFinished;
         isFinished = validateDomesticAbuseSection(caseData)
             && validateOrders(caseData)
