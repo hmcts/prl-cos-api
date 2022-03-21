@@ -103,7 +103,7 @@ public class HomeChecker implements EventChecker {
         return false;
     }
 
-    private boolean isAddressPresent(Optional<Home> home) {
+    public boolean isAddressPresent(Optional<Home> home) {
         boolean addressPresent = false;
         if (home.isPresent()) {
             addressPresent = ofNullable(home.get().getAddress()).isPresent()
@@ -114,7 +114,7 @@ public class HomeChecker implements EventChecker {
         return addressPresent;
     }
 
-    private void isMandatoryLandlordDetailsAreCompleted(Optional<Home> home, List<Optional<?>> fields) {
+    public void isMandatoryLandlordDetailsAreCompleted(Optional<Home> home, List<Optional<?>> fields) {
         if (home.isPresent()
             && ofNullable(home.get().getIsPropertyRented()).isPresent()
             && home.get().getIsPropertyRented().equals(YesOrNo.Yes)
@@ -123,7 +123,7 @@ public class HomeChecker implements EventChecker {
         }
     }
 
-    private void isMandatoryMortgageDetailsAreCompleted(Optional<Home> home, List<Optional<?>> fields) {
+    public void isMandatoryMortgageDetailsAreCompleted(Optional<Home> home, List<Optional<?>> fields) {
         if (home.isPresent()
             && ofNullable(home.get().getIsThereMortgageOnProperty()).isPresent()
             && home.get().getIsThereMortgageOnProperty().equals(YesOrNo.Yes)
@@ -132,7 +132,7 @@ public class HomeChecker implements EventChecker {
         }
     }
 
-    private void isHowIsThePropertyAdaptedComplete(Optional<Home> home, List<Optional<?>> fields) {
+    public void isHowIsThePropertyAdaptedComplete(Optional<Home> home, List<Optional<?>> fields) {
         if (home.isPresent()
             && ofNullable(home.get().getIsPropertyAdapted()).isPresent()
             && home.get().getIsPropertyAdapted().equals(YesOrNo.Yes)) {
@@ -140,7 +140,7 @@ public class HomeChecker implements EventChecker {
         }
     }
 
-    private void isChildDetailsAreCompleted(Optional<Home> home, List<Optional<?>> fields) {
+    public void isChildDetailsAreCompleted(Optional<Home> home, List<Optional<?>> fields) {
         if (home.isPresent()
             && ofNullable(home.get().getDoAnyChildrenLiveAtAddress()).isPresent()
             && home.get().getDoAnyChildrenLiveAtAddress().equals(YesOrNo.Yes)
@@ -165,7 +165,7 @@ public class HomeChecker implements EventChecker {
     }
 
 
-    private boolean mandatoryChildDetailsAreCompleted(Optional<List<Element<ChildrenLiveAtAddress>>> doAnyChildrenLiveAtAddressYes) {
+    public boolean mandatoryChildDetailsAreCompleted(Optional<List<Element<ChildrenLiveAtAddress>>> doAnyChildrenLiveAtAddressYes) {
         if (doAnyChildrenLiveAtAddressYes.isPresent()) {
             List<ChildrenLiveAtAddress> childrenLiveAtAddress = doAnyChildrenLiveAtAddressYes.get()
                 .stream()
