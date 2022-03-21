@@ -46,6 +46,14 @@ public class AllegationsOfHarmCheckerTest {
         assertTrue(allegationsOfHarmChecker.isStarted(casedata));
     }
 
+    @Test
+    public void whenAllegationOfHarmSelectedNoIsStartedFalse() {
+        CaseData casedata = CaseData.builder()
+            .allegationsOfHarmYesNo(No)
+            .build();
+
+        assertFalse(allegationsOfHarmChecker.isStarted(casedata));
+    }
 
     @Test
     public void whenNoCaseDataThenNotFinished() {
