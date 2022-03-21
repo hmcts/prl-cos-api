@@ -127,7 +127,7 @@ public class ReturnApplicationServiceTest {
     public void testGetReturnMessageForTaskList() {
         StringBuilder returnMsgStr = new StringBuilder();
 
-        returnMsgStr.append("<div><span class='govuk-warning-text__icon'><strong><h2>Application has been returned</h2></strong></div>\"" + "\n\n");
+        returnMsgStr.append("<span class='govuk-warning-text__icon'><div><strong><h2>Application has been returned</h2></strong></div>\"" + "\n\n");
 
         returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
 
