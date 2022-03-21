@@ -332,7 +332,7 @@ public class AllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenAllDataPresentIsPreviousOrdersFinishedReturnFalse() {
+    public void whenAllDataPresentIsPreviousOrdersFinishedReturnTrue() {
         CaseData caseData = CaseData.builder()
             .ordersNonMolestation(Yes)
             .ordersOccupation(No)
@@ -348,7 +348,7 @@ public class AllegationsOfHarmCheckerTest {
         Optional<YesOrNo> ordersOtherInjunctive = ofNullable(caseData.getOrdersOtherInjunctive());
         Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(caseData.getOrdersUndertakingInPlace());
 
-        assertFalse(allegationsOfHarmChecker.isPreviousOrdersFinished(
+        assertTrue(allegationsOfHarmChecker.isPreviousOrdersFinished(
             ordersNonMolestation,
             ordersOccupation,
             ordersForcedMarriageProtection,
