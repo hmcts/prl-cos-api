@@ -101,7 +101,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
                 && ordersOtherInjunctive.isPresent()
                 && ordersUndertakingInPlace.isPresent();
 
-            isFinished = sectionCheckIsFinish(previousOrders, behavioursCompleted, caseData);
+            isFinished = isSectionsFinished(caseData, behavioursCompleted, previousOrders);
 
         } else {
             isFinished = allegationsOfHarmYesNo.isPresent();
@@ -110,16 +110,17 @@ public class AllegationsOfHarmChecker implements EventChecker {
         return isFinished;
     }
 
-    public boolean sectionCheckIsFinish(boolean previousOrders, boolean behavioursCompleted, CaseData caseData) {
-        return validateDomesticAbuseSection(caseData)
+    private boolean isSectionsFinished(CaseData caseData, boolean behavioursCompleted, boolean previousOrders) {
+        boolean isFinished;
+        isFinished = validateDomesticAbuseSection(caseData)
             && validateOrders(caseData)
             && previousOrders
             && behavioursCompleted
             && validateAbductionSection(caseData)
             && validateOtherConcerns(caseData)
             && validateChildContact(caseData);
+        return isFinished;
     }
-
 
     public boolean abusePresent(CaseData caseData) {
         Optional<YesOrNo> domesticAbuse = ofNullable(caseData.getAllegationsOfHarmDomesticAbuseYesNo());
