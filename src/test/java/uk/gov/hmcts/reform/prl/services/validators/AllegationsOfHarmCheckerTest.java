@@ -7,9 +7,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
+import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import java.time.LocalDate;
 import java.util.Collections;
 
 import static org.junit.Assert.assertFalse;
@@ -301,4 +303,35 @@ public class AllegationsOfHarmCheckerTest {
 
         assertTrue(allegationsOfHarmChecker.validateOrders(caseData));
     }
+
+    @Test
+    public void whenAllegationsOfHarmPresentWithNoBehaviourData_thenValidateReturnsFalse() {
+        CaseData caseData = CaseData.builder()
+            .allegationsOfHarmYesNo(Yes)
+            .allegationsOfHarmDomesticAbuseYesNo(Yes)
+            .sexualAbuseVictim(Collections.singletonList(applicants))
+            .allegationsOfHarmChildAbuseYesNo(No)
+            .allegationsOfHarmChildAbductionYesNo(No)
+            .ordersOccupation(No)
+            .ordersForcedMarriageProtection(No)
+            .ordersRestraining(No)
+            .ordersOtherInjunctive(No)
+            .ordersOtherInjunctive(No)
+            .ordersNonMolestation(Yes)
+            .ordersNonMolestationDateIssued(LocalDate.of(2022, 10, 20))
+            .ordersNonMolestationEndDate(LocalDate.of(2023, 10, 20))
+            .ordersNonMolestationCourtName("Test Court")
+            .ordersNonMolestationCurrent(No)
+            .ordersNonMolestationDocument(OtherDocument.builder().build())
+            .allegationsOfHarmOtherConcerns(No)
+            .agreeChildOtherContact(No)
+            .agreeChildSupervisedTime(No)
+            .agreeChildUnsupervisedTime(No)
+            .build();
+
+        assertFalse(allegationsOfHarmChecker.validateFields(caseData));
+    }
+
+
+
 }
