@@ -58,7 +58,11 @@
         "isEmailAddressConfidential": "No",
         "respondentLivedWithApplicant": null,
         "doTheyHaveLegalRepresentation": null,
-        "addressLivedLessThan5YearsDetails": null,
+        "addressLivedLessThan5YearsDetails": null
+      },
+      "withDrawApplicationData": {
+        "withDrawApplication": "Yes",
+        "withDrawApplicationReason": "Test"
       }
     },
     "case_type_id": "string",
