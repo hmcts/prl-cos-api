@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,8 +22,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Mortgage;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -235,5 +239,37 @@ public class HomeCheckerTest {
             .home(homefull)
             .build();
         assertTrue(homeChecker.isFinished(caseData));
+    }
+
+    @Test
+    public void whenDataPresentGetIntendToLiveAtTheAddress() {
+        Home homefull = Home.builder()
+            .everLivedAtTheAddress(YesNoBothEnum.No)
+            .intendToLiveAtTheAddress(YesNoBothEnum.yesBothOfThem)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .home(homefull)
+            .build();
+
+        Optional<Home> home = ofNullable(caseData.getHome());
+
+        List<Optional<?>> fields = new ArrayList<>();
+        homeChecker.getIntendToLiveAtTheAddress(home, fields);
+        Assert.assertTrue(fields.size() >= 1 && !fields.get(0).isEmpty());
+    }
+
+    @Test
+    public void whenNoDataGetIntendToLiveAtTheAddress() {
+        Home homefull = Home.builder()
+            .build();
+        CaseData caseData = CaseData.builder()
+            .home(homefull)
+            .build();
+
+        Optional<Home> home = ofNullable(caseData.getHome());
+
+        List<Optional<?>> fields = new ArrayList<>();
+        homeChecker.getIntendToLiveAtTheAddress(home, fields);
+        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
     }
 }
