@@ -135,10 +135,10 @@ public class SolicitorEmailService {
 
         String solicitorEmail = "";
 
-        PartyDetails fl401Applicant = emailService.getCaseData(caseDetails)
-            .getApplicantsFL401();
+        String applicantSolicitorEmail = emailService.getCaseData(caseDetails)
+            .getApplicantsFL401()
+            .getSolicitorEmail();
 
-        String applicantSolicitorEmail = fl401Applicant.getSolicitorEmail();
         solicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
 
         emailService.send(
@@ -174,10 +174,10 @@ public class SolicitorEmailService {
     public void sendWithDrawEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails) {
         String fl401SolicitorEmail = "";
 
-        PartyDetails fl401Applicant = emailService.getCaseData(caseDetails)
-            .getApplicantsFL401();
+        String applicantSolicitorEmail = emailService.getCaseData(caseDetails)
+            .getApplicantsFL401()
+            .getSolicitorEmail();
 
-        String applicantSolicitorEmail = fl401Applicant.getSolicitorEmail();
         fl401SolicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
 
         emailService.send(
