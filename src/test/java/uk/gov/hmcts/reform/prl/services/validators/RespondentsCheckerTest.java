@@ -203,4 +203,26 @@ public class RespondentsCheckerTest {
         Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
 
     }
+
+    @Test
+    public void whenNoDataIsDoTheyHaveLegalRepresentationCompletedFieldShouldEmpty() {
+        PartyDetails respondent = PartyDetails.builder().build();
+        List<Optional<?>> fields = new ArrayList<>();
+        respondentsChecker.isDoTheyHaveLegalRepresentationCompleted(respondent,fields);
+        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+    }
+
+    @Test
+    public void whenDataPresentIsDoTheyHaveLegalRepresentationCompletedFieldShouldNotNull() {
+        PartyDetails respondent = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorEmail("solicitor@gmail.com")
+            .build();
+
+        List<Optional<?>> fields = new ArrayList<>();
+        respondentsChecker.isDoTheyHaveLegalRepresentationCompleted(respondent,fields);
+        Assert.assertTrue(fields.size() > 1 && !fields.get(0).isEmpty());
+
+    }
+
 }
