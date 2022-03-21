@@ -98,55 +98,89 @@ public class RespondentsChecker implements EventChecker {
         fields.add(ofNullable(respondent.getLastName()));
         Optional<YesOrNo> isDateOfBirthKnown = ofNullable(respondent.getIsDateOfBirthKnown());
         fields.add(isDateOfBirthKnown);
-        if (isDateOfBirthKnown.isPresent() && isDateOfBirthKnown.get().equals(Yes)) {
-            fields.add(ofNullable(respondent.getDateOfBirth()));
-        }
+
+        isDateOfBirthCompleted(respondent, fields, isDateOfBirthKnown);
+
         if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
-            Optional<Gender> gender = ofNullable(respondent.getGender());
-            fields.add(gender);
-            if (gender.isPresent() && gender.get().equals(Gender.other)) {
-                fields.add(ofNullable(respondent.getOtherGender()));
-            }
-            Optional<YesOrNo> isPlaceOfBirthKnown = ofNullable(respondent.getIsPlaceOfBirthKnown());
-            fields.add(isPlaceOfBirthKnown);
-            if (isPlaceOfBirthKnown.isPresent() && isPlaceOfBirthKnown.get().equals(Yes)) {
-                fields.add(ofNullable(respondent.getPlaceOfBirth()));
-            }
+            isGenderCompleted(respondent, fields);
+            isPlaceOfBirthCompleted(respondent, fields);
+            isAtAddressLessThan5YearsCompleted(respondent, fields);
+            isDoTheyhaveLegalRepresentationCompleted(respondent, fields);
         }
+
         Optional<YesOrNo> isCurrentAddressKnown = ofNullable(respondent.getIsCurrentAddressKnown());
         fields.add(isCurrentAddressKnown);
-        if (isCurrentAddressKnown.isPresent() && isCurrentAddressKnown.get().equals(Yes)) {
-            fields.add(ofNullable(respondent.getAddress().getAddressLine1()));
-            fields.add(ofNullable(respondent.getAddress().getPostCode()));
+
+        isCurrentAddressCompleted(respondent, fields, isCurrentAddressKnown);
+
+        isCanYouProvideEmailAddressCompleted(respondent, fields);
+
+        isCanYouProvidePhoneNumberCompleted(respondent, fields);
+
+        return fields.stream().noneMatch(Optional::isEmpty)
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+    }
+
+    private void isDoTheyhaveLegalRepresentationCompleted(PartyDetails respondent, List<Optional<?>> fields) {
+        Optional<YesNoDontKnow> doTheyHaveLegalRepresentation = ofNullable(respondent.getDoTheyHaveLegalRepresentation());
+        fields.add(doTheyHaveLegalRepresentation);
+        if (doTheyHaveLegalRepresentation.isPresent() && doTheyHaveLegalRepresentation.get().equals(YesNoDontKnow.yes)) {
+            fields.add(ofNullable(respondent.getSolicitorEmail()));
         }
-        if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
-            Optional<YesNoDontKnow> isAtAddressLessThan5YearsWithDontKnow = ofNullable(respondent.getIsAtAddressLessThan5YearsWithDontKnow());
-            fields.add(isAtAddressLessThan5YearsWithDontKnow);
-            if (isAtAddressLessThan5YearsWithDontKnow.isPresent() && isAtAddressLessThan5YearsWithDontKnow.get().equals(
-                YesNoDontKnow.yes)) {
-                fields.add(ofNullable(respondent.getAddressLivedLessThan5YearsDetails()));
-            }
-        }
-        Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(respondent.getCanYouProvideEmailAddress());
-        fields.add(canYouProvideEmailAddress);
-        if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(Yes)) {
-            fields.add(ofNullable(respondent.getEmail()));
-        }
+    }
+
+    private void isCanYouProvidePhoneNumberCompleted(PartyDetails respondent, List<Optional<?>> fields) {
         Optional<YesOrNo> canYouProvidePhoneNumber = ofNullable(respondent.getCanYouProvidePhoneNumber());
         fields.add(canYouProvidePhoneNumber);
         if (canYouProvidePhoneNumber.isPresent() && canYouProvidePhoneNumber.get().equals(Yes)) {
             fields.add(ofNullable(respondent.getPhoneNumber()));
         }
-        if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
-            Optional<YesNoDontKnow> doTheyHaveLegalRepresentation = ofNullable(respondent.getDoTheyHaveLegalRepresentation());
-            fields.add(doTheyHaveLegalRepresentation);
-            if (doTheyHaveLegalRepresentation.isPresent() && doTheyHaveLegalRepresentation.get().equals(YesNoDontKnow.yes)) {
-                fields.add(ofNullable(respondent.getSolicitorEmail()));
-            }
-        }
+    }
 
-        return fields.stream().noneMatch(Optional::isEmpty)
-            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+    private void isCanYouProvideEmailAddressCompleted(PartyDetails respondent, List<Optional<?>> fields) {
+        Optional<YesOrNo> canYouProvideEmailAddress = ofNullable(respondent.getCanYouProvideEmailAddress());
+        fields.add(canYouProvideEmailAddress);
+        if (canYouProvideEmailAddress.isPresent() && canYouProvideEmailAddress.get().equals(Yes)) {
+            fields.add(ofNullable(respondent.getEmail()));
+        }
+    }
+
+    private void isAtAddressLessThan5YearsCompleted(PartyDetails respondent, List<Optional<?>> fields) {
+        Optional<YesNoDontKnow> isAtAddressLessThan5YearsWithDontKnow = ofNullable(respondent.getIsAtAddressLessThan5YearsWithDontKnow());
+        fields.add(isAtAddressLessThan5YearsWithDontKnow);
+        if (isAtAddressLessThan5YearsWithDontKnow.isPresent() && isAtAddressLessThan5YearsWithDontKnow.get().equals(
+            YesNoDontKnow.yes)) {
+            fields.add(ofNullable(respondent.getAddressLivedLessThan5YearsDetails()));
+        }
+    }
+
+    private void isCurrentAddressCompleted(PartyDetails respondent, List<Optional<?>> fields, Optional<YesOrNo> isCurrentAddressKnown) {
+        if (isCurrentAddressKnown.isPresent() && isCurrentAddressKnown.get().equals(Yes)) {
+            fields.add(ofNullable(respondent.getAddress().getAddressLine1()));
+            fields.add(ofNullable(respondent.getAddress().getPostCode()));
+        }
+    }
+
+    private void isPlaceOfBirthCompleted(PartyDetails respondent, List<Optional<?>> fields) {
+        Optional<YesOrNo> isPlaceOfBirthKnown = ofNullable(respondent.getIsPlaceOfBirthKnown());
+        fields.add(isPlaceOfBirthKnown);
+        if (isPlaceOfBirthKnown.isPresent() && isPlaceOfBirthKnown.get().equals(Yes)) {
+            fields.add(ofNullable(respondent.getPlaceOfBirth()));
+        }
+    }
+
+    private void isGenderCompleted(PartyDetails respondent, List<Optional<?>> fields) {
+        Optional<Gender> gender = ofNullable(respondent.getGender());
+        fields.add(gender);
+        if (gender.isPresent() && gender.get().equals(Gender.other)) {
+            fields.add(ofNullable(respondent.getOtherGender()));
+        }
+    }
+
+    private void isDateOfBirthCompleted(PartyDetails respondent, List<Optional<?>> fields, Optional<YesOrNo> isDateOfBirthKnown) {
+        if (isDateOfBirthKnown.isPresent() && isDateOfBirthKnown.get().equals(Yes)) {
+            fields.add(ofNullable(respondent.getDateOfBirth()));
+        }
     }
 
     public boolean respondentDetailsStarted(PartyDetails respondent) {
