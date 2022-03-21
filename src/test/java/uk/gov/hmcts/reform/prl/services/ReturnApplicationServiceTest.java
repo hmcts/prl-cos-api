@@ -127,7 +127,8 @@ public class ReturnApplicationServiceTest {
     public void testGetReturnMessageForTaskList() {
         StringBuilder returnMsgStr = new StringBuilder();
 
-        returnMsgStr.append("<span class='govuk-warning-text__icon'><div><strong><h2>Application has been returned</h2></strong></div>\"" + "\n\n");
+        returnMsgStr.append("<div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!"
+                                + "</span><strong class='govuk-warning-text__text'>Application has been returned</strong></div>" + "\n\n");
 
         returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
 
@@ -137,7 +138,7 @@ public class ReturnApplicationServiceTest {
         }
 
         returnMsgStr.append("Resolve these concerns and resend your application."
-                                + "You have been emailed the full details of your application return");
+                                + "You have been emailed the full details of your application return.");
 
 
         assertEquals(returnMsgStr.toString(), returnApplicationService.getReturnMessageForTaskList(casedata));
