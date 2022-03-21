@@ -115,59 +115,63 @@ public class HomeChecker implements EventChecker {
     }
 
     private void isMandatoryLandlordDetailsAreCompleted(Optional<Home> home, List<Optional<?>> fields) {
-        if (ofNullable(home.get().getIsPropertyRented()).isPresent()
-            && home.get().getIsPropertyRented().equals(YesOrNo.Yes)
-            && !mandatoryLandlordDetailsAreCompleted(ofNullable(home.get().getLandlords()))) {
-            fields.add(ofNullable(null));
+        if (home.isPresent()) {
+            if (ofNullable(home.get().getIsPropertyRented()).isPresent()
+                && home.get().getIsPropertyRented().equals(YesOrNo.Yes)
+                && !mandatoryLandlordDetailsAreCompleted(ofNullable(home.get().getLandlords()))) {
+                fields.add(ofNullable(null));
 
+            }
         }
     }
 
     private void isMandatoryMortgageDetailsAreCompleted(Optional<Home> home, List<Optional<?>> fields) {
-        if (ofNullable(home.get().getIsThereMortgageOnProperty()).isPresent()
-            && home.get().getIsThereMortgageOnProperty().equals(YesOrNo.Yes)
-            && !mandatoryMortgageDetailsAreCompleted(ofNullable(home.get().getMortgages()))) {
-            fields.add(ofNullable(null));
+        if (home.isPresent()) {
+            if (ofNullable(home.get().getIsThereMortgageOnProperty()).isPresent()
+                && home.get().getIsThereMortgageOnProperty().equals(YesOrNo.Yes)
+                && !mandatoryMortgageDetailsAreCompleted(ofNullable(home.get().getMortgages()))) {
+                fields.add(ofNullable(null));
+            }
         }
     }
 
     private void isHowIsThePropertyAdaptedComplete(Optional<Home> home, List<Optional<?>> fields) {
-        if (ofNullable(home.get().getIsPropertyAdapted()).isPresent()
-            && home.get().getIsPropertyAdapted().equals(YesOrNo.Yes)) {
-            fields.add(ofNullable(home.get().getHowIsThePropertyAdapted()));
+        if (home.isPresent()) {
+            if (ofNullable(home.get().getIsPropertyAdapted()).isPresent()
+                && home.get().getIsPropertyAdapted().equals(YesOrNo.Yes)) {
+                fields.add(ofNullable(home.get().getHowIsThePropertyAdapted()));
+            }
         }
     }
 
     private void isChildDetailsAreCompleted(Optional<Home> home, List<Optional<?>> fields) {
-        if (ofNullable(home.get().getDoAnyChildrenLiveAtAddress()).isPresent()
-            && home.get().getDoAnyChildrenLiveAtAddress().equals(YesOrNo.Yes)
-            && !mandatoryChildDetailsAreCompleted(ofNullable(home.get().getChildren()))) {
-            fields.add(ofNullable(null));
+        if (home.isPresent()) {
+            if (ofNullable(home.get().getDoAnyChildrenLiveAtAddress()).isPresent()
+                && home.get().getDoAnyChildrenLiveAtAddress().equals(YesOrNo.Yes)
+                && !mandatoryChildDetailsAreCompleted(ofNullable(home.get().getChildren()))) {
+                fields.add(ofNullable(null));
+            }
         }
     }
 
     private void getIntendToLiveAtTheAddress(Optional<Home> home, List<Optional<?>> fields) {
-        if (ofNullable(home.get().getEverLivedAtTheAddress()).isPresent()
-            && home.get().getEverLivedAtTheAddress().equals(YesNoBothEnum.No)) {
-            fields.add(ofNullable(home.get().getIntendToLiveAtTheAddress()));
+        if (home.isPresent()) {
+            if (ofNullable(home.get().getEverLivedAtTheAddress()).isPresent()
+                && home.get().getEverLivedAtTheAddress().equals(YesNoBothEnum.No)) {
+                fields.add(ofNullable(home.get().getIntendToLiveAtTheAddress()));
+            }
         }
     }
 
     private void getDetailPeopleLivingAtThisAddress(Optional<Home> home, List<Optional<?>> fields) {
-        if (ofNullable(home.get().getPeopleLivingAtThisAddress()).isPresent()
-            && home.get().getPeopleLivingAtThisAddress().contains(PeopleLivingAtThisAddressEnum.someoneElse)) {
-            fields.add(ofNullable(home.get().getTextAreaSomethingElse()));
+        if (home.isPresent()) {
+            if (ofNullable(home.get().getPeopleLivingAtThisAddress()).isPresent()
+                && home.get().getPeopleLivingAtThisAddress().contains(PeopleLivingAtThisAddressEnum.someoneElse)) {
+                fields.add(ofNullable(home.get().getTextAreaSomethingElse()));
+            }
         }
     }
 
-    public boolean verifyAddressPresent(Optional<Home> home) {
-        if (home.isPresent()) {
-            return ofNullable(home.get().getAddress()).isPresent()
-                && ofNullable(home.get().getAddress().getAddressLine1()).isPresent()
-                && !home.get().getAddress().getAddressLine1().isBlank();
-        }
-        return false;
-    }
 
     private boolean mandatoryChildDetailsAreCompleted(Optional<List<Element<ChildrenLiveAtAddress>>> doAnyChildrenLiveAtAddressYes) {
         if (doAnyChildrenLiveAtAddressYes.isPresent()) {
