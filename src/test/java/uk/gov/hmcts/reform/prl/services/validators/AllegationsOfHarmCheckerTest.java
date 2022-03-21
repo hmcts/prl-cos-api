@@ -373,7 +373,7 @@ public class AllegationsOfHarmCheckerTest {
         Optional<YesOrNo> ordersOtherInjunctive = ofNullable(caseData.getOrdersOtherInjunctive());
         Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(caseData.getOrdersUndertakingInPlace());
 
-        assertTrue(allegationsOfHarmChecker.isPreviousOrdersFinished(
+        assertFalse(allegationsOfHarmChecker.isPreviousOrdersFinished(
             ordersNonMolestation,
             ordersOccupation,
             ordersForcedMarriageProtection,
