@@ -359,11 +359,9 @@ public class AllegationsOfHarmCheckerTest {
     }
 
     @Test
-    public void whenAllDataPresentAsYesIsPreviousOrdersFinishedReturnTrue() {
+    public void whenPartialDataPresentAsYesIsPreviousOrdersFinishedReturnTrue() {
         CaseData caseData = CaseData.builder()
             .ordersNonMolestation(Yes)
-            .ordersOccupation(Yes)
-            .ordersForcedMarriageProtection(Yes)
             .ordersRestraining(Yes)
             .ordersOtherInjunctive(Yes)
             .ordersUndertakingInPlace(Yes)
