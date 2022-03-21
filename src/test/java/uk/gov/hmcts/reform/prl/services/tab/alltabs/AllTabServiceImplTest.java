@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
@@ -33,6 +34,9 @@ public class AllTabServiceImplTest {
 
     @Mock
     CoreCaseDataService coreCaseDataService;
+
+    @Mock
+    ConfidentialityTabService confidentialityTabService;
 
     @Mock
     @Qualifier("caseSummaryTab")
@@ -60,6 +64,16 @@ public class AllTabServiceImplTest {
     public void testAllTabsService() {
 
         allTabService.updateAllTabs(CASE_DATA);
+
+        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+        verify(applicationsTabService).updateTab(CASE_DATA);
+        verify(caseSummaryTabService).updateTab(CASE_DATA);
+    }
+
+    @Test
+    public void testAllTabsServiceIncConfTab() {
+
+        allTabService.updateAllTabsIncludingConfTab(CASE_DATA);
 
         verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
         verify(applicationsTabService).updateTab(CASE_DATA);
