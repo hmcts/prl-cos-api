@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
@@ -225,6 +226,22 @@ public class AllegationsOfHarmCheckerTest {
         CaseData caseData = CaseData.builder().build();
 
         assertFalse(allegationsOfHarmChecker.validateAbductionSection(caseData));
+    }
+
+    @Test
+    public void whenCaseDataPresentThenAbductionSectionReturnTrue() {
+        CaseData caseData = CaseData.builder()
+            .allegationsOfHarmChildAbductionYesNo(Yes)
+            .childAbductionReasons("testing")
+            .previousAbductionThreats(Yes)
+            .previousAbductionThreatsDetails("Details")
+            .abductionPassportOfficeNotified(No)
+            .abductionChildHasPassport(Yes)
+            .abductionChildPassportPosession(AbductionChildPassportPossessionEnum.mother)
+            .abductionPreviousPoliceInvolvement(No)
+            .build();
+
+        assertTrue(allegationsOfHarmChecker.validateAbductionSection(caseData));
     }
 
     @Test
