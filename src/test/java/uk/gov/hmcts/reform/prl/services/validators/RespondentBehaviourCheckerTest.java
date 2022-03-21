@@ -11,7 +11,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
+import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_1;
@@ -38,6 +40,23 @@ public class RespondentBehaviourCheckerTest {
     @Test
     public void whenNoCaseDataThenIsStartedReturnsFalse() {
         assertFalse(respondentBehaviourChecker.isStarted(caseData));
+    }
+
+    @Test
+    public void whenotherReasonCaseDataPresentThenIsStartedReturnsTrue() {
+        RespondentBehaviour respondentBehaviour = RespondentBehaviour.builder()
+            .otherReasonApplicantWantToStopFromRespondentDoing("testing")
+            .build();
+
+        caseData = caseData.toBuilder()
+            .respondentBehaviourData(respondentBehaviour).build();
+
+        Optional<String> otherReason = ofNullable(respondentBehaviour.getOtherReasonApplicantWantToStopFromRespondentDoing());
+
+        boolean otherReasonCompleted = otherReason.isPresent() && !(otherReason.get().isBlank());
+        assertTrue(otherReasonCompleted);
+
+        assertTrue(respondentBehaviourChecker.isStarted(caseData));
     }
 
     @Test
