@@ -104,9 +104,13 @@ public class HomeChecker implements EventChecker {
     }
 
     private boolean isAddressPresent(Optional<Home> home) {
-        boolean addressPresent = ofNullable(home.get().getAddress()).isPresent()
-            && ofNullable(home.get().getAddress().getAddressLine1()).isPresent()
-            && !home.get().getAddress().getAddressLine1().isBlank();
+        boolean addressPresent = false;
+        if (home.isPresent()) {
+            addressPresent = ofNullable(home.get().getAddress()).isPresent()
+                && ofNullable(home.get().getAddress().getAddressLine1()).isPresent()
+                && !home.get().getAddress().getAddressLine1().isBlank();
+        }
+
         return addressPresent;
     }
 
