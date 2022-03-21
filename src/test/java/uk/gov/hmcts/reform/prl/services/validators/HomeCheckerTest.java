@@ -316,4 +316,34 @@ public class HomeCheckerTest {
         Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
     }
 
+    @Test
+    public void whenNoDataPresentIsHowIsThePropertyAdaptedCompleteIsEmpty() {
+        Home homefull = Home.builder()
+            .build();
+        CaseData caseData = CaseData.builder()
+            .home(homefull)
+            .build();
+        Optional<Home> home = ofNullable(caseData.getHome());
+        List<Optional<?>> fields = new ArrayList<>();
+        homeChecker.isHowIsThePropertyAdaptedComplete(home,fields);
+        Assert.assertFalse(fields.size() > 1 && !fields.get(0).isEmpty());
+    }
+
+    @Test
+    public void whenDataPresentIsHowIsThePropertyAdaptedCompleteIsNotEmpty() {
+        Home homefull = Home.builder()
+            .isPropertyAdapted(YesOrNo.Yes)
+            .howIsThePropertyAdapted("testing")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .home(homefull)
+            .build();
+
+        Optional<Home> home = ofNullable(caseData.getHome());
+
+        List<Optional<?>> fields = new ArrayList<>();
+        homeChecker.isHowIsThePropertyAdaptedComplete(home, fields);
+        Assert.assertTrue(fields.size() >= 1 && !fields.get(0).isEmpty());
+    }
+
 }
