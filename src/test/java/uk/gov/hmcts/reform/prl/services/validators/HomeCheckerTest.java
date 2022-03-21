@@ -347,7 +347,7 @@ public class HomeCheckerTest {
     }
 
     @Test
-    public void whenNoDataIsAddressPresentReturnTrue () {
+    public void whenNoDataIsAddressPresentReturnTrue() {
         Address address = Address.builder()
             .addressLine1("Test")
             .addressLine2("Test")
@@ -367,8 +367,7 @@ public class HomeCheckerTest {
             .build();
 
         Optional<Home> home = ofNullable(caseData.getHome());
-
-       assertTrue(homeChecker.isAddressPresent(home));
+        assertTrue(homeChecker.isAddressPresent(home));
     }
 
     @Test
