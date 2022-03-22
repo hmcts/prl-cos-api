@@ -83,10 +83,12 @@ public class MiamChecker implements EventChecker {
                 }
             }
         }
-        if (!(hasConsentOrder.isPresent() && hasConsentOrder.get().equals(Yes) && !isStarted(caseData))) {
+        if (!(hasConsentOrder.isPresent() && hasConsentOrder.get().equals(Yes))) {
             taskErrorService.addEventError(MIAM, MIAM_ERROR, MIAM_ERROR.getError());
         }
-
+        else{
+            taskErrorService.removeError(MIAM_ERROR);
+        }
         return false;
     }
 
