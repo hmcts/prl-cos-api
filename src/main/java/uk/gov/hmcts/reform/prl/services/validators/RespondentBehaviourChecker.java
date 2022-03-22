@@ -33,10 +33,9 @@ public class RespondentBehaviourChecker implements EventChecker {
         }
 
         Optional<String>  otherReason = ofNullable(respondentBehaviourData.getOtherReasonApplicantWantToStopFromRespondentDoing());
-        boolean otherReasonCompleted = (otherReason.isPresent() && !(otherReason.get().isBlank()));
         Optional<List<ApplicantStopFromRespondentDoingEnum>> applicantStopRespondentList
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoing());
-        if (otherReasonCompleted && applicantStopRespondentList.isPresent()) {
+        if (otherReason.isPresent() && applicantStopRespondentList.isPresent()) {
             taskErrorService.removeError(RESPONDENT_BEHAVIOUR_ERROR);
             return true;
         } else {
@@ -55,14 +54,13 @@ public class RespondentBehaviourChecker implements EventChecker {
             return false;
         }
         Optional<String>  otherReason = ofNullable(respondentBehaviourData.getOtherReasonApplicantWantToStopFromRespondentDoing());
-        boolean otherReasonCompleted = (otherReason.isPresent() && !(otherReason.get().isBlank()));
         Optional<List<ApplicantStopFromRespondentDoingEnum>> applicantStopRespondentList
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoing());
         Optional<List<ApplicantStopFromRespondentDoingToChildEnum>> applicantStopFromRespondentDoingToChildList
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoingToChild());
         boolean anyStarted = false;
 
-        if (otherReasonCompleted || applicantStopRespondentList.isPresent() || applicantStopFromRespondentDoingToChildList.isPresent()) {
+        if (otherReason.isPresent() || applicantStopRespondentList.isPresent() || applicantStopFromRespondentDoingToChildList.isPresent()) {
             anyStarted = true;
         }
 
@@ -76,11 +74,9 @@ public class RespondentBehaviourChecker implements EventChecker {
             return false;
         }
         Optional<String>  otherReason = ofNullable(respondentBehaviourData.getOtherReasonApplicantWantToStopFromRespondentDoing());
-        boolean otherReasonCompleted = (otherReason.isPresent() && !(otherReason.get().isBlank()));
         Optional<List<ApplicantStopFromRespondentDoingEnum>> applicantStopRespondentList
             = ofNullable(respondentBehaviourData.getApplicantWantToStopFromRespondentDoing());
-        return otherReasonCompleted
-            && applicantStopRespondentList.isPresent() && !applicantStopRespondentList.isEmpty();
+        return otherReason.isPresent() && applicantStopRespondentList.isPresent();
     }
 
 }
