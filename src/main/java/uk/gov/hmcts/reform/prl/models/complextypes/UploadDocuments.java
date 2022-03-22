@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.models.documents.UploadDocument;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 
 @Data
@@ -12,10 +12,10 @@ import uk.gov.hmcts.reform.prl.models.documents.UploadDocument;
 public class UploadDocuments {
 
     @JsonProperty("uploadedDocuments")
-    private final UploadDocument uploadDocuments;
+    private final Document uploadDocuments;
 
     @JsonCreator
-    public UploadDocuments(UploadDocument uploadDocuments) {
+    public UploadDocuments(Document uploadDocuments) {
         this.uploadDocuments = uploadDocuments;
     }
 }
