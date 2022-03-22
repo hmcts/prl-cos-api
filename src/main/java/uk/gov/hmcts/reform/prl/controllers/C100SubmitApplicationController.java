@@ -157,23 +157,11 @@ public class C100SubmitApplicationController {
         Map<String, Object> caseDataUpdated = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
         if (result.equalsIgnoreCase(State.SUBMITTED_PAID.getValue())) {
-            caseWorkerEmailService.sendEmail(caseDetails);
-            solicitorEmailService.sendEmail(caseDetails);
-            allTabService.updateAllTabs(caseData);
             caseDataUpdated.put("state", State.SUBMITTED_PAID);
-
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated)
-                .state(State.SUBMITTED_PAID.getValue())
-                .build();
 
         }
 
         if (result.equalsIgnoreCase(State.CASE_ISSUE.getValue())) {
-            caseWorkerEmailService.sendEmail(caseDetails);
-            solicitorEmailService.sendEmail(caseDetails);
-            allTabService.updateAllTabs(caseData);
-
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
 
@@ -235,14 +223,14 @@ public class C100SubmitApplicationController {
             }
             caseDataUpdated.put("state", State.CASE_ISSUE);
 
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated)
-                .state(State.CASE_ISSUE.getValue())
-                .build();
-
         }
+        caseWorkerEmailService.sendEmail(caseDetails);
+        solicitorEmailService.sendEmail(caseDetails);
+        allTabService.updateAllTabs(caseData);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
+            .state(result)
             .build();
     }
 
