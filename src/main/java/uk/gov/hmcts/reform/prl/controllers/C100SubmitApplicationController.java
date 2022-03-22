@@ -21,7 +21,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
+import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
@@ -31,6 +33,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.*;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -49,6 +53,55 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class C100SubmitApplicationController {
+
+    @Value("${document.templates.c100.c100_final_template}")
+    protected String c100FinalTemplate;
+
+    @Value("${document.templates.c100.c100_final_filename}")
+    protected String c100FinalFilename;
+
+    @Value("${document.templates.c100.c100_draft_template}")
+    protected String c100DraftTemplate;
+
+    @Value("${document.templates.c100.c100_draft_filename}")
+    protected String c100DraftFilename;
+
+    @Value("${document.templates.c100.c100_c8_template}")
+    protected String c100C8Template;
+
+    @Value("${document.templates.c100.c100_c8_filename}")
+    protected String c100C8Filename;
+
+    @Value("${document.templates.c100.c100_c1a_template}")
+    protected String c100C1aTemplate;
+
+    @Value("${document.templates.c100.c100_c1a_filename}")
+    protected String c100C1aFilename;
+
+    @Value("${document.templates.c100.c100_final_welsh_template}")
+    protected String c100FinalWelshTemplate;
+
+    @Value("${document.templates.c100.c100_final_welsh_filename}")
+    protected String c100FinalWelshFilename;
+
+    @Value("${document.templates.c100.c100_draft_welsh_template}")
+    protected String c100DraftWelshTemplate;
+
+    @Value("${document.templates.c100.c100_draft_welsh_filename}")
+    protected String c100DraftWelshFilename;
+
+    @Value("${document.templates.c100.c100_c8_welsh_template}")
+    protected String c100C8WelshTemplate;
+
+    @Value("${document.templates.c100.c100_c8_welsh_filename}")
+    protected String c100C8WelshFilename;
+
+    @Value("${document.templates.c100.c100_c1a_welsh_template}")
+    protected String c100C1aWelshTemplate;
+
+    @Value("${document.templates.c100.c100_c1a_welsh_filename}")
+    protected String c100C1aWelshFilename;
+
 
     @Autowired
     private CourtFinderService courtFinderService;
@@ -77,6 +130,9 @@ public class C100SubmitApplicationController {
     @Autowired
     OrganisationService organisationService;
 
+    @Autowired
+    AllTabServiceImpl allTabService;
+
     @PostMapping(path = "/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to change the state and document generation and submit application. ")
     @ApiResponses(value = {
@@ -90,9 +146,6 @@ public class C100SubmitApplicationController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        // REtunr--> case_issue --- > Retunr --> submitted --> hearing- atypeljksjdkf-
-        // Retunr --> case_issue --> hearing- atypeljksjdkf-
-
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
         String result = eventsForCase.stream().map(CaseEventDetail::getStateId)
             .skip(eventsForCase.indexOf(State.AWAITING_RESUBMISSION_TO_HMCTS) + 1)
@@ -101,10 +154,94 @@ public class C100SubmitApplicationController {
             .findFirst()
             .orElse("");
 
-        Map<String, Object> stringObjectMap = caseData.toMap(AppObjectMapper.getObjectMapper());
-        stringObjectMap.put("state", State.CASE_ISSUE);
+        Map<String, Object> caseDataUpdated = caseData.toMap(CcdObjectMapper.getObjectMapper());
+
+        if (result.equalsIgnoreCase(State.SUBMITTED_PAID.getValue())) {
+            caseWorkerEmailService.sendEmail(caseDetails);
+            solicitorEmailService.sendEmail(caseDetails);
+            allTabService.updateAllTabs(caseData);
+            caseDataUpdated.put("state", State.SUBMITTED_PAID);
+
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated)
+                .state(State.SUBMITTED_PAID.getValue())
+                .build();
+
+        }
+
+        if (result.equalsIgnoreCase(State.CASE_ISSUE.getValue())) {
+            caseWorkerEmailService.sendEmail(caseDetails);
+            solicitorEmailService.sendEmail(caseDetails);
+            allTabService.updateAllTabs(caseData);
+
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
+
+            if (documentLanguage.isGenEng()) {
+                GeneratedDocumentInfo generatedDocumentInfo = generateDocument(authorisation,
+                                                                               c100C8Template,
+                                                                               caseData,
+                                                                               false);
+
+                caseDataUpdated.put(DOCUMENT_FIELD_C8, generateDocumentField(c100C8Filename, generatedDocumentInfo));
+
+                caseData = organisationService.getApplicantOrganisationDetails(caseData);
+                caseData = organisationService.getRespondentOrganisationDetails(caseData);
+
+                if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
+                    GeneratedDocumentInfo generatedC1ADocumentInfo = generateDocument(authorisation,
+                                                                                      c100C1aTemplate,
+                                                                                      caseData,
+                                                                                      false);
+
+                    caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(c100C1aFilename, generatedC1ADocumentInfo));
+                }
+
+                GeneratedDocumentInfo generatedDocumentInfoFinal = generateDocument(authorisation,
+                                                                                    c100FinalTemplate,
+                                                                                    caseData,
+                                                                                   false);
+
+                caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(c100FinalFilename, generatedDocumentInfoFinal));
+
+            }
+            if (documentLanguage.isGenWelsh()) {
+                GeneratedDocumentInfo generatedDocumentInfo = generateDocument(authorisation,
+                                                                               c100C8Template,
+                                                                               caseData,
+                                                                               true);
+
+                caseDataUpdated.put(DOCUMENT_FIELD_C8, generateDocumentField(c100C8Filename, generatedDocumentInfo));
+
+                caseData = organisationService.getApplicantOrganisationDetails(caseData);
+                caseData = organisationService.getRespondentOrganisationDetails(caseData);
+
+                if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
+                    GeneratedDocumentInfo generatedC1ADocumentInfo = generateDocument(authorisation,
+                                                                                      c100C1aTemplate,
+                                                                                      caseData,
+                                                                                      true);
+
+                    caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(c100C1aFilename, generatedC1ADocumentInfo));
+                }
+
+                GeneratedDocumentInfo generatedDocumentInfoFinal = generateDocument(authorisation,
+                                                                                    c100FinalTemplate,
+                                                                                    caseData,
+                                                                                    true);
+
+                caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(c100FinalFilename, generatedDocumentInfoFinal));
+
+            }
+
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated)
+                .state(State.CASE_ISSUE.getValue())
+                .build();
+
+        }
+
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(stringObjectMap)
             .build();
     }
 
