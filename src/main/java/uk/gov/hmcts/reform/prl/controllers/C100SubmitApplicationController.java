@@ -233,6 +233,7 @@ public class C100SubmitApplicationController {
                 caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(c100FinalFilename, generatedDocumentInfoFinal));
 
             }
+            caseDataUpdated.put("state", State.CASE_ISSUE);
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
