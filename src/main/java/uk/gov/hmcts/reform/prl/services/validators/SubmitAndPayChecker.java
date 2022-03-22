@@ -54,7 +54,7 @@ public class SubmitAndPayChecker implements EventChecker {
         mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.applicantsChecker);
         mandatoryEvents.put(CHILD_DETAILS, eventsChecker.childChecker);
         mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.respondentsChecker);
-        if (caseData.getConsentOrder() != null && caseData.getConsentOrder().equals(YesOrNo.No)) {
+        if (YesOrNo.No.equals(caseData.getConsentOrder()) || caseData.getConsentOrder() == null) {
             mandatoryEvents.put(MIAM, eventsChecker.miamChecker);
         }
         mandatoryEvents.put(ALLEGATIONS_OF_HARM, eventsChecker.allegationsOfHarmChecker);
@@ -76,7 +76,7 @@ public class SubmitAndPayChecker implements EventChecker {
         optionalEvents.put(INTERNATIONAL_ELEMENT, eventsChecker.internationalElementChecker);
         optionalEvents.put(LITIGATION_CAPACITY, eventsChecker.litigationCapacityChecker);
         optionalEvents.put(WELSH_LANGUAGE_REQUIREMENTS, eventsChecker.welshLanguageRequirementsChecker);
-        if (caseData.getConsentOrder() != null && caseData.getConsentOrder().equals(YesOrNo.Yes)) {
+        if (YesOrNo.Yes.equals(caseData.getConsentOrder())) {
             optionalEvents.put(MIAM, eventsChecker.miamChecker);
         }
         boolean optionalFinished;

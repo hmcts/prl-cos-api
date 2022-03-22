@@ -280,7 +280,7 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (caseData.getConsentOrder().equals(YesOrNo.No)) {
+        if (YesOrNo.No.equals(caseData.getConsentOrder())) {
             requireNonNull(caseData);
             sendgridService.sendEmail(c100JsonMapper.map(caseData));
         }

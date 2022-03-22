@@ -72,7 +72,7 @@ public class TaskListRenderer {
 
         lines.add("<div class='width-50'>");
 
-        (isC100CaseType ? groupInSections(allTasks, caseData) : groupInSectionsForFL401(allTasks, caseData))
+        (isC100CaseType ? groupInSections(allTasks) : groupInSectionsForFL401(allTasks, caseData))
             .forEach(section -> lines.addAll(renderSection(section)));
 
         lines.add("</div>");
@@ -82,7 +82,7 @@ public class TaskListRenderer {
         return String.join("\n\n", lines);
     }
 
-    private List<TaskSection> groupInSections(List<Task> allTasks,CaseData caseData) {
+    private List<TaskSection> groupInSections(List<Task> allTasks) {
         final Map<Event, Task> tasks = allTasks.stream().collect(toMap(Task::getEvent, identity()));
         final TaskSection applicationDetails = newSection("Add application details")
             .withTask(tasks.get(CASE_NAME))
