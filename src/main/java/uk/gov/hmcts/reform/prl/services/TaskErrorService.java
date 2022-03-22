@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TaskErrorService {
 
-    Map<EventErrorsEnum, EventValidationErrors> eventErrors = new HashMap<>();
+    Map<EventErrorsEnum, EventValidationErrors> eventErrors = new EnumMap<>(EventErrorsEnum.class);
 
     public List<EventValidationErrors> getEventErrors(CaseData caseData) {
 
