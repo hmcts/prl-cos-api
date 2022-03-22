@@ -264,7 +264,6 @@ public class CallbackControllerTest {
             .build();
 
         callbackController.generateAndStoreDocument(authToken, callbackRequest);
-
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
@@ -489,7 +488,7 @@ public class CallbackControllerTest {
             .build();
 
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+        orderList.add(FL401OrderTypeEnum.occupationOrder);
 
         TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder()
             .orderType(orderList)
@@ -884,6 +883,7 @@ public class CallbackControllerTest {
         verify(sendgridService,times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
     }
 
+    @Test
     public void testCopyFL401CasenameToC100CaseName() throws Exception {
 
         Map<String, Object> caseData = new HashMap<>();
