@@ -17,8 +17,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
@@ -33,7 +33,6 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
 
     @Override
     public boolean isFinished(CaseData caseData) {
-
         return hasMandatoryCompleted(caseData);
     }
 
@@ -46,27 +45,15 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
     public boolean hasMandatoryCompleted(CaseData caseData) {
         EnumMap<Event, EventChecker> mandatoryEvents = new EnumMap<>(Event.class);
 
-        mandatoryEvents.put(FL401_CASE_NAME, eventsChecker.caseNameChecker);
-        mandatoryEvents.put(FL401_TYPE_OF_APPLICATION, eventsChecker.fl401ApplicationTypeChecker);
-        mandatoryEvents.put(WITHOUT_NOTICE_ORDER, eventsChecker.withoutNoticeOrderChecker);
-        mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.applicantsChecker);
-        mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.respondentsChecker);
-        mandatoryEvents.put(RELATIONSHIP_TO_RESPONDENT, eventsChecker.respondentRelationshipChecker);
-        mandatoryEvents.put(FL401_APPLICANT_FAMILY_DETAILS, eventsChecker.fl401ApplicantFamilyChecker);
+        mandatoryEvents.put(FL401_CASE_NAME, eventsChecker.getCaseNameChecker());
+        mandatoryEvents.put(FL401_TYPE_OF_APPLICATION, eventsChecker.getFl401ApplicationTypeChecker());
+        mandatoryEvents.put(WITHOUT_NOTICE_ORDER, eventsChecker.getWithoutNoticeOrderChecker());
+        mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.getApplicantsChecker());
+        mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.getRespondentsChecker());
+        mandatoryEvents.put(RELATIONSHIP_TO_RESPONDENT, eventsChecker.getRespondentRelationshipChecker());
+        mandatoryEvents.put(FL401_APPLICANT_FAMILY_DETAILS, eventsChecker.getFl401ApplicantFamilyChecker());
 
-        Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
-
-        if (!ordersOptional.isPresent()) {
-            mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.respondentBehaviourChecker);
-            mandatoryEvents.put(FL401_HOME, eventsChecker.homeChecker);
-        } else {
-            if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
-                mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.respondentBehaviourChecker);
-            }
-            if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
-                mandatoryEvents.put(FL401_HOME, eventsChecker.homeChecker);
-            }
-        }
+        populateManadatoryEvents(caseData, mandatoryEvents);
 
         boolean mandatoryFinished;
 
@@ -79,9 +66,9 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
 
         EnumMap<Event, EventChecker> optionalEvents = new EnumMap<>(Event.class);
 
-        optionalEvents.put(OTHER_PROCEEDINGS, eventsChecker.otherProceedingsChecker);
-        optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.attendingTheHearingChecker);
-        optionalEvents.put(WELSH_LANGUAGE_REQUIREMENTS, eventsChecker.welshLanguageRequirementsChecker);
+        optionalEvents.put(FL401_OTHER_PROCEEDINGS, eventsChecker.getFl401OtherProceedingsChecker());
+        optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.getAttendingTheHearingChecker());
+        optionalEvents.put(WELSH_LANGUAGE_REQUIREMENTS, eventsChecker.getWelshLanguageRequirementsChecker());
 
         boolean optionalFinished;
 
@@ -93,5 +80,22 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
         }
 
         return true;
+    }
+
+    private void populateManadatoryEvents(CaseData caseData, EnumMap<Event, EventChecker> mandatoryEvents) {
+        Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
+
+        if (ordersOptional.isEmpty() || (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
+            && ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
+            mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.getRespondentBehaviourChecker());
+            mandatoryEvents.put(FL401_HOME, eventsChecker.getHomeChecker());
+        } else {
+            if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
+                mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.getRespondentBehaviourChecker());
+            }
+            if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+                mandatoryEvents.put(FL401_HOME, eventsChecker.getHomeChecker());
+            }
+        }
     }
 }
