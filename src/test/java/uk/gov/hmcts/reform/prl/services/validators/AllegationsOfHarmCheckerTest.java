@@ -122,7 +122,7 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenOtherConcernsPresentThenValidateOtherConcernsTrue() {
         CaseData caseData = CaseData.builder()
-            .allegationsOfHarmOtherConcernsYesNo(Yes)
+            .allegationsOfHarmOtherConcerns(Yes)
             .allegationsOfHarmOtherConcernsDetails("Details")
             .allegationsOfHarmOtherConcernsCourtActions("Court actions")
             .build();
