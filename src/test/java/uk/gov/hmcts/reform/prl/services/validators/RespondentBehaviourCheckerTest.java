@@ -132,10 +132,32 @@ public class RespondentBehaviourCheckerTest {
     }
 
     @Test
-    public void whenDataHasMandatoryCompletedReturnsTrue() {
+    public void whenOneMandatoryFilledHasMandatoryCompletedReturnsFalse() {
+        RespondentBehaviour respondentBehaviour = RespondentBehaviour.builder()
+            .otherReasonApplicantWantToStopFromRespondentDoing("Test data").build();
+        caseData = caseData.toBuilder()
+            .respondentBehaviourData(respondentBehaviour).build();
+
+        assertFalse(respondentBehaviourChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenPartialMandatoryFilledHasMandatoryCompletedReturnsFalse() {
+        RespondentBehaviour respondentBehaviour = RespondentBehaviour.builder()
+            .applicantWantToStopFromRespondentDoing(Collections.singletonList(applicantStopFromRespondentEnum_Value_1))
+            .build();
+        caseData = caseData.toBuilder()
+            .respondentBehaviourData(respondentBehaviour).build();
+
+        assertFalse(respondentBehaviourChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenAllDataHasMandatoryCompletedReturnsTrue() {
         RespondentBehaviour respondentBehaviour = RespondentBehaviour.builder()
             .otherReasonApplicantWantToStopFromRespondentDoing("Test data")
-            .applicantWantToStopFromRespondentDoing(Collections.singletonList(applicantStopFromRespondentEnum_Value_1)).build();;
+            .applicantWantToStopFromRespondentDoing(Collections.singletonList(applicantStopFromRespondentEnum_Value_1))
+            .build();
         caseData = caseData.toBuilder()
             .respondentBehaviourData(respondentBehaviour).build();
 
