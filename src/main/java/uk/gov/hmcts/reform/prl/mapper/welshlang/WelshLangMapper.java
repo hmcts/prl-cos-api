@@ -122,7 +122,6 @@ public class WelshLangMapper {
         return Arrays.asList(
             "isAtAddressLessThan5Years",
             "typeOfChildArrangementsOrder",
-            "applicationPermissionRequired",
             "canYouProvideEmailAddress",
             "childrenKnownToLocalAuthority",
             "isDateOfBirthKnown",
