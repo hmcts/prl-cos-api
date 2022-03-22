@@ -90,15 +90,14 @@ public class RespondentBehaviourCheckerTest {
     }
 
     @Test
-    public void whenAllDetailsProvidedIsFinishedReturnsTrue() {
+    public void whenPartialDetailsProvidedIsFinishedReturnsFalse() {
         RespondentBehaviour respondentBehaviour = RespondentBehaviour.builder()
-            .otherReasonApplicantWantToStopFromRespondentDoing("Test data")
             .applicantWantToStopFromRespondentDoingToChild(Collections.singletonList(applicantStopFromRespondentDoingToChildEnum_Value_1))
             .applicantWantToStopFromRespondentDoing(Collections.singletonList(applicantStopFromRespondentEnum_Value_1)).build();
         caseData = caseData.toBuilder()
             .respondentBehaviourData(respondentBehaviour).build();
 
-        assertTrue(respondentBehaviourChecker.isFinished(caseData));
+        assertFalse(respondentBehaviourChecker.isFinished(caseData));
     }
 
     @Test
