@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -19,7 +20,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -45,19 +45,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 @Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class C100SubmitApplicationController {
+public class C100ReSubmitApplicationController {
 
     @Value("${document.templates.c100.c100_final_template}")
     protected String c100FinalTemplate;
 
     @Value("${document.templates.c100.c100_final_filename}")
     protected String c100FinalFilename;
-
-    @Value("${document.templates.c100.c100_draft_template}")
-    protected String c100DraftTemplate;
-
-    @Value("${document.templates.c100.c100_draft_filename}")
-    protected String c100DraftFilename;
 
     @Value("${document.templates.c100.c100_c8_template}")
     protected String c100C8Template;
@@ -76,12 +70,6 @@ public class C100SubmitApplicationController {
 
     @Value("${document.templates.c100.c100_final_welsh_filename}")
     protected String c100FinalWelshFilename;
-
-    @Value("${document.templates.c100.c100_draft_welsh_template}")
-    protected String c100DraftWelshTemplate;
-
-    @Value("${document.templates.c100.c100_draft_welsh_filename}")
-    protected String c100DraftWelshFilename;
 
     @Value("${document.templates.c100.c100_c8_welsh_template}")
     protected String c100C8WelshTemplate;
@@ -146,84 +134,104 @@ public class C100SubmitApplicationController {
                 || State.CASE_ISSUE.equals(previousState))
             .findFirst()
             .orElse("");
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        Map<String, Object> caseDataUpdated = caseData.toMap(CcdObjectMapper.getObjectMapper());
-
-        if (result.equalsIgnoreCase(State.SUBMITTED_PAID.getValue())) {
-            caseDataUpdated.put("state", State.SUBMITTED_PAID);
-        }
-
-        if (result.equalsIgnoreCase(State.CASE_ISSUE.getValue())) {
-            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-
-
-            if (documentLanguage.isGenEng()) {
-                GeneratedDocumentInfo generatedDocumentInfo = generateDocument(authorisation,
-                                                                               c100C8Template,
-                                                                               caseData,
-                                                                               false);
-
-                caseDataUpdated.put(DOCUMENT_FIELD_C8, generateDocumentField(c100C8Filename, generatedDocumentInfo));
-
+        if(!ObjectUtils.isEmpty(result)) {
+            // For submitted state - No docs will be generated.
+            if (result.equalsIgnoreCase(State.SUBMITTED_PAID.getValue())) {
+                caseDataUpdated.put("state", State.SUBMITTED_PAID);
+            }
+            // For Case issue state - All docs will be regenerated.
+            if (result.equalsIgnoreCase(State.CASE_ISSUE.getValue())) {
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
                 caseData = organisationService.getApplicantOrganisationDetails(caseData);
                 caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
-                if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
-                    GeneratedDocumentInfo generatedC1ADocumentInfo = generateDocument(authorisation,
-                                                                                      c100C1aTemplate,
-                                                                                      caseData,
-                                                                                      false);
-
-                    caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(c100C1aFilename, generatedC1ADocumentInfo));
-                }
-
-                GeneratedDocumentInfo generatedDocumentInfoFinal = generateDocument(authorisation,
-                                                                                    c100FinalTemplate,
-                                                                                    caseData,
-                                                                                   false);
-
-                caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(c100FinalFilename, generatedDocumentInfoFinal));
-
+                generateDocuments(authorisation, caseData, caseDataUpdated, documentLanguage);
+                caseDataUpdated.put("state", State.CASE_ISSUE);
             }
-            if (documentLanguage.isGenWelsh()) {
-                GeneratedDocumentInfo generatedDocumentInfo = generateDocument(authorisation,
-                                                                               c100C8Template,
-                                                                               caseData,
-                                                                               true);
-
-                caseDataUpdated.put(DOCUMENT_FIELD_C8, generateDocumentField(c100C8Filename, generatedDocumentInfo));
-
-                caseData = organisationService.getApplicantOrganisationDetails(caseData);
-                caseData = organisationService.getRespondentOrganisationDetails(caseData);
-
-                if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
-                    GeneratedDocumentInfo generatedC1ADocumentInfo = generateDocument(authorisation,
-                                                                                      c100C1aTemplate,
-                                                                                      caseData,
-                                                                                      true);
-
-                    caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(c100C1aFilename, generatedC1ADocumentInfo));
-                }
-
-                GeneratedDocumentInfo generatedDocumentInfoFinal = generateDocument(authorisation,
-                                                                                    c100FinalTemplate,
-                                                                                    caseData,
-                                                                                    true);
-
-                caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(c100FinalFilename, generatedDocumentInfoFinal));
-
-            }
-            caseDataUpdated.put("state", State.CASE_ISSUE);
-
+            caseWorkerEmailService.sendEmail(caseDetails);
+            solicitorEmailService.sendEmail(caseDetails);
+            allTabService.updateAllTabs(caseData);
         }
-        caseWorkerEmailService.sendEmail(caseDetails);
-        solicitorEmailService.sendEmail(caseDetails);
-        allTabService.updateAllTabs(caseData);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
-            .state(result)
             .build();
+    }
+
+    private Map<String, Object> generateDocuments(String authorisation, CaseData caseData,
+                                                  Map<String, Object> caseDataUpdated,
+                                   DocumentLanguage documentLanguage) throws Exception {
+        if (documentLanguage.isGenEng()) {
+            caseDataUpdated.put(DOCUMENT_FIELD_C8, generateDocumentField(
+                c100C8Filename,
+                generateDocument(
+                    authorisation,
+                    c100C8Template,
+                    caseData,
+                    false
+                )
+            ));
+
+            if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
+                caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(
+                    c100C1aFilename,
+                    generateDocument(
+                        authorisation,
+                        c100C1aTemplate,
+                        caseData,
+                        false
+                    )
+                ));
+            }
+
+            caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(
+                c100FinalFilename,
+                generateDocument(
+                    authorisation,
+                    c100FinalTemplate,
+                    caseData,
+                    false
+                )
+            ));
+
+        }
+        if (documentLanguage.isGenWelsh()) {
+            caseDataUpdated.put(DOCUMENT_FIELD_C8, generateDocumentField(
+                c100C8WelshFilename,
+                generateDocument(
+                    authorisation,
+                    c100C8WelshTemplate,
+                    caseData,
+                    true
+                )
+            ));
+
+            if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
+                caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(
+                    c100C1aWelshFilename,
+                    generateDocument(
+                        authorisation,
+                        c100C1aWelshTemplate,
+                        caseData,
+                        true
+                    )
+                ));
+            }
+            caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(
+                c100FinalWelshFilename,
+                generateDocument(
+                    authorisation,
+                    c100FinalWelshTemplate,
+                    caseData,
+                    true
+                )
+            ));
+
+        }
+
+        return caseDataUpdated;
     }
 
     private Document generateDocumentField(String fileName,GeneratedDocumentInfo generatedDocumentInfo) {
@@ -242,6 +250,7 @@ public class C100SubmitApplicationController {
         throws Exception {
         log.info("Generating the {} document for case id {} ", template, caseData.getId());
         GeneratedDocumentInfo generatedDocumentInfo = null;
+        caseData = caseData.toBuilder().isDocumentGenerated("No").build();
         if (isWelsh) {
             generatedDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
@@ -257,8 +266,6 @@ public class C100SubmitApplicationController {
         }
         if (null != generatedDocumentInfo) {
             caseData = caseData.toBuilder().isDocumentGenerated("Yes").build();
-        } else {
-            caseData = caseData.toBuilder().isDocumentGenerated("No").build();
         }
 
         log.info("Genereated the {} document for case id {} ", template, caseData.getId());
