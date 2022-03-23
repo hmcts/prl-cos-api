@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 public class C100SubmitApplicationControllerTest {
 
     @InjectMocks
-    C100SubmitApplicationController c100SubmitApplicationController;
+    C100ReSubmitApplicationController c100ReSubmitApplicationController;
 
     @Mock
     CaseEventService caseEventService;
@@ -80,7 +80,7 @@ public class C100SubmitApplicationControllerTest {
 
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        AboutToStartOrSubmitCallbackResponse response = c100SubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
         assertEquals(response.getData().get("state"), State.SUBMITTED_PAID.getValue());
         verify(caseWorkerEmailService).sendEmail(caseDetails);
