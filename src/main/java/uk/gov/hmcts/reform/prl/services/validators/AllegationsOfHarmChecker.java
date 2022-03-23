@@ -94,20 +94,16 @@ public class AllegationsOfHarmChecker implements EventChecker {
             Optional<YesOrNo> ordersOtherInjunctive = ofNullable(caseData.getOrdersOtherInjunctive());
             Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(caseData.getOrdersUndertakingInPlace());
 
-            boolean previousOrders = ordersNonMolestation.isPresent()
-                && ordersOccupation.isPresent()
-                && ordersForcedMarriageProtection.isPresent()
-                && ordersRestraining.isPresent()
-                && ordersOtherInjunctive.isPresent()
-                && ordersUndertakingInPlace.isPresent();
+            boolean previousOrders = isPreviousOrdersFinished(
+                ordersNonMolestation,
+                ordersOccupation,
+                ordersForcedMarriageProtection,
+                ordersRestraining,
+                ordersOtherInjunctive,
+                ordersUndertakingInPlace
+            );
 
-            isFinished = validateDomesticAbuseSection(caseData)
-                && validateOrders(caseData)
-                && previousOrders
-                && behavioursCompleted
-                && validateAbductionSection(caseData)
-                && validateOtherConcerns(caseData)
-                && validateChildContact(caseData);
+            isFinished = isSectionsFinished(caseData, behavioursCompleted, previousOrders);
 
         } else {
             isFinished = allegationsOfHarmYesNo.isPresent();
@@ -116,6 +112,31 @@ public class AllegationsOfHarmChecker implements EventChecker {
         return isFinished;
     }
 
+    public boolean isPreviousOrdersFinished(Optional<YesOrNo> ordersNonMolestation,
+                                            Optional<YesOrNo> ordersOccupation,
+                                            Optional<YesOrNo> ordersForcedMarriageProtection,
+                                            Optional<YesOrNo> ordersRestraining,
+                                            Optional<YesOrNo> ordersOtherInjunctive,
+                                            Optional<YesOrNo> ordersUndertakingInPlace) {
+        return ordersNonMolestation.isPresent()
+            && ordersOccupation.isPresent()
+            && ordersForcedMarriageProtection.isPresent()
+            && ordersRestraining.isPresent()
+            && ordersOtherInjunctive.isPresent()
+            && ordersUndertakingInPlace.isPresent();
+    }
+
+    public boolean isSectionsFinished(CaseData caseData, boolean behavioursCompleted, boolean previousOrders) {
+        boolean isFinished;
+        isFinished = validateDomesticAbuseSection(caseData)
+            && validateOrders(caseData)
+            && previousOrders
+            && behavioursCompleted
+            && validateAbductionSection(caseData)
+            && validateOtherConcerns(caseData)
+            && validateChildContact(caseData);
+        return isFinished;
+    }
 
     public boolean abusePresent(CaseData caseData) {
         Optional<YesOrNo> domesticAbuse = ofNullable(caseData.getAllegationsOfHarmDomesticAbuseYesNo());
@@ -294,7 +315,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(behaviour.getBehavioursApplicantHelpSoughtWho());
         Optional<String> behavioursApplicantHelpAction = ofNullable(behaviour.getBehavioursApplicantHelpAction());
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(abuseNatureDescription);
         fields.add(behavioursStartDateAndLength);
         fields.add(behavioursNature);
@@ -385,11 +406,11 @@ public class AllegationsOfHarmChecker implements EventChecker {
     }
 
     public boolean validateOtherConcerns(CaseData caseData) {
-        Optional<YesOrNo> allegationsOfHarmOtherConcerns = ofNullable(caseData.getAllegationsOfHarmOtherConcernsYesNo());
+        Optional<YesOrNo> allegationsOfHarmOtherConcerns = ofNullable(caseData.getAllegationsOfHarmOtherConcerns());
         Optional<String> allegationsOfHarmOtherConcernsDetails = ofNullable(caseData.getAllegationsOfHarmOtherConcernsDetails());
         Optional<String> allegationsOfHarmOtherConcernsCourtActions = ofNullable(caseData.getAllegationsOfHarmOtherConcernsCourtActions());
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(allegationsOfHarmOtherConcerns);
         if (allegationsOfHarmOtherConcerns.isPresent() && allegationsOfHarmOtherConcerns.get().equals(Yes)) {
             fields.add(allegationsOfHarmOtherConcernsDetails);
@@ -407,7 +428,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
         Optional<YesOrNo> agreeChildOtherContact = ofNullable(caseData.getAgreeChildOtherContact());
 
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(agreeChildUnsupervisedTime);
         fields.add(agreeChildSupervisedTime);
         fields.add(agreeChildOtherContact);
