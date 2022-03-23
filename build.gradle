@@ -247,10 +247,10 @@ dependencyCheck {
 
 dependencies {
 
-  implementation 'org.testng:testng:7.1.0'
-  implementation 'org.testng:testng:7.1.0'
-  implementation 'org.testng:testng:7.1.0'
-  implementation 'org.testng:testng:7.1.0'
+  implementation 'org.testng:testng:7.5'
+  implementation 'org.testng:testng:7.5'
+  implementation 'org.testng:testng:7.5'
+  implementation 'org.testng:testng:7.5'
   implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
   implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
