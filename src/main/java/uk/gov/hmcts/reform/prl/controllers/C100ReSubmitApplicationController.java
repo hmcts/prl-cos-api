@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -35,8 +35,12 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
@@ -128,36 +132,44 @@ public class C100ReSubmitApplicationController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
-        String result = eventsForCase.stream().map(CaseEventDetail::getStateId)
-            .skip(eventsForCase.indexOf(State.AWAITING_RESUBMISSION_TO_HMCTS) + 1)
-            .filter((previousState) -> State.SUBMITTED_PAID.equals(previousState)
-                || State.CASE_ISSUE.equals(previousState))
-            .findFirst()
-            .orElse("");
+        Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
+            eachState -> getPreviousState(eachState)).findFirst();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        if(!ObjectUtils.isEmpty(result)) {
+        if (previousStates.isPresent()) {
             // For submitted state - No docs will be generated.
-            if (result.equalsIgnoreCase(State.SUBMITTED_PAID.getValue())) {
+            if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
                 caseDataUpdated.put("state", State.SUBMITTED_PAID);
+                ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+                caseData = caseData.setDateSubmittedAndIssueDate();
+                caseDataUpdated.put("dateSubmitted", caseData.getDateSubmitted());
+                caseDataUpdated.put("dateAndTimeSubmitted", DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
             }
             // For Case issue state - All docs will be regenerated.
-            if (result.equalsIgnoreCase(State.CASE_ISSUE.getValue())) {
-                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            if (State.CASE_ISSUE.getValue().equalsIgnoreCase(previousStates.get())) {
                 caseData = organisationService.getApplicantOrganisationDetails(caseData);
                 caseData = organisationService.getRespondentOrganisationDetails(caseData);
+                caseData = caseData.setIssueDate();
 
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
                 generateDocuments(authorisation, caseData, caseDataUpdated, documentLanguage);
                 caseDataUpdated.put("state", State.CASE_ISSUE);
+                caseDataUpdated.put(PrlAppsConstants.ISSUE_DATE_FIELD, caseData.getIssueDate());
             }
             caseWorkerEmailService.sendEmail(caseDetails);
             solicitorEmailService.sendEmail(caseDetails);
-            allTabService.updateAllTabs(caseData);
+            caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
+    }
+
+    private static boolean getPreviousState(String eachState) {
+        return (!eachState.equalsIgnoreCase(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()))
+            && (eachState.equalsIgnoreCase(State.SUBMITTED_PAID.getValue())
+            || eachState.equalsIgnoreCase(State.CASE_ISSUE.getValue()));
     }
 
     private Map<String, Object> generateDocuments(String authorisation, CaseData caseData,
