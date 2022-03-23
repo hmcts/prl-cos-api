@@ -406,7 +406,7 @@ public class AllegationsOfHarmChecker implements EventChecker {
     }
 
     public boolean validateOtherConcerns(CaseData caseData) {
-        Optional<YesOrNo> allegationsOfHarmOtherConcerns = ofNullable(caseData.getAllegationsOfHarmOtherConcernsYesNo());
+        Optional<YesOrNo> allegationsOfHarmOtherConcerns = ofNullable(caseData.getAllegationsOfHarmOtherConcerns());
         Optional<String> allegationsOfHarmOtherConcernsDetails = ofNullable(caseData.getAllegationsOfHarmOtherConcernsDetails());
         Optional<String> allegationsOfHarmOtherConcernsCourtActions = ofNullable(caseData.getAllegationsOfHarmOtherConcernsCourtActions());
 
