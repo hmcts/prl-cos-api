@@ -251,8 +251,8 @@ dependencies {
   implementation 'org.testng:testng:7.1.0'
   implementation 'org.testng:testng:7.1.0'
   implementation 'org.testng:testng:7.1.0'
-  implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
-  implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+  implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+  implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
   compileOnly("org.projectlombok:lombok:${versions.lombok}")
   testCompileOnly("org.projectlombok:lombok:${versions.lombok}")
