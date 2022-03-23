@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
-import uk.gov.hmcts.reform.prl.models.documents.CorrespondenceDocument;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 
@@ -15,6 +15,6 @@ public class Correspondence {
     private final String documentName;
     @JsonProperty("notes")
     private final String notes;
-    private final CorrespondenceDocument documentCorrespondence;
+    private final Document documentCorrespondence;
     private final List<RestrictToCafcassHmcts> restrictCheckboxCorrespondence;
 }
