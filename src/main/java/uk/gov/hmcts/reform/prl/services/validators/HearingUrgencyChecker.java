@@ -25,7 +25,7 @@ public class HearingUrgencyChecker implements EventChecker {
     @Override
     public boolean isFinished(CaseData caseData) {
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
 
         Optional<YesOrNo> isCaseUrgent = ofNullable(caseData.getIsCaseUrgent());
         fields.add(isCaseUrgent);
@@ -48,7 +48,7 @@ public class HearingUrgencyChecker implements EventChecker {
         boolean finished = fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 
-        if (finished) {
+        if (finished || hasMandatoryCompleted(caseData)) {
             taskErrorService.removeError(HEARING_URGENCY_ERROR);
             return true;
         } else {
