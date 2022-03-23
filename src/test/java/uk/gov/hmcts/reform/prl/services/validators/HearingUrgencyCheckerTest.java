@@ -65,8 +65,6 @@ public class HearingUrgencyCheckerTest {
             .areRespondentsAwareOfProceedings(No)
             .doYouRequireAHearingWithReducedNotice(No)
             .build();
-
-
         boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
 
         assertTrue(isFinished);
@@ -84,8 +82,23 @@ public class HearingUrgencyCheckerTest {
             .areRespondentsAwareOfProceedings(No)
             .doYouRequireAHearingWithReducedNotice(Yes)
             .build();
+        boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
 
+        assertTrue(isFinished);
+    }
 
+    @Test
+    public void finishedWhenRespondentsAwareOfProceedingsSetToYes() {
+
+        CaseData casedata = CaseData.builder().isCaseUrgent(Yes)
+            .caseUrgencyTimeAndReason("reason")
+            .effortsMadeWithRespondents("efforts")
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .reasonsForApplicationWithoutNotice("test")
+            .setOutReasonsBelow("test")
+            .areRespondentsAwareOfProceedings(Yes)
+            .doYouRequireAHearingWithReducedNotice(Yes)
+            .build();
         boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
 
         assertTrue(isFinished);
