@@ -136,7 +136,7 @@ public class C100ReSubmitApplicationController {
             .orElse("");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        if(!ObjectUtils.isEmpty(result)) {
+        if (!ObjectUtils.isEmpty(result)) {
             // For submitted state - No docs will be generated.
             if (result.equalsIgnoreCase(State.SUBMITTED_PAID.getValue())) {
                 caseDataUpdated.put("state", State.SUBMITTED_PAID);
