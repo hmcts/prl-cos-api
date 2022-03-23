@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import javax.annotation.processing.Generated;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -45,38 +46,20 @@ public class C100ReSubmitApplicationControllerTest {
     @Value("${document.templates.c100.c100_final_template}")
     protected String c100FinalTemplate;
 
-    @Value("${document.templates.c100.c100_final_filename}")
-    protected String c100FinalFilename;
-
     @Value("${document.templates.c100.c100_c8_template}")
     protected String c100C8Template;
-
-    @Value("${document.templates.c100.c100_c8_filename}")
-    protected String c100C8Filename;
 
     @Value("${document.templates.c100.c100_c1a_template}")
     protected String c100C1aTemplate;
 
-    @Value("${document.templates.c100.c100_c1a_filename}")
-    protected String c100C1aFilename;
-
     @Value("${document.templates.c100.c100_final_welsh_template}")
     protected String c100FinalWelshTemplate;
-
-    @Value("${document.templates.c100.c100_final_welsh_filename}")
-    protected String c100FinalWelshFilename;
 
     @Value("${document.templates.c100.c100_c8_welsh_template}")
     protected String c100C8WelshTemplate;
 
-    @Value("${document.templates.c100.c100_c8_welsh_filename}")
-    protected String c100C8WelshFilename;
-
     @Value("${document.templates.c100.c100_c1a_welsh_template}")
     protected String c100C1aWelshTemplate;
-
-    @Value("${document.templates.c100.c100_c1a_welsh_filename}")
-    protected String c100C1aWelshFilename;
 
     @InjectMocks
     C100ReSubmitApplicationController c100ReSubmitApplicationController;
@@ -120,6 +103,7 @@ public class C100ReSubmitApplicationControllerTest {
 
         caseDetails = CaseDetails.builder()
             .id(12345L)
+            .data(Map.of("caseTypeOfApplication", "C100"))
             .build();
 
         callbackRequest = CallbackRequest.builder()
@@ -144,8 +128,6 @@ public class C100ReSubmitApplicationControllerTest {
         when(dgsService.generateDocument(auth, prlCaseDetails, c100C8Template)).thenReturn(englishC8);
         when(dgsService.generateDocument(auth, prlCaseDetails, c100C8WelshTemplate)).thenReturn(welshC8);
 
-        when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
-        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseData);
 
     }
 
@@ -185,6 +167,9 @@ public class C100ReSubmitApplicationControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
+        when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseData);
+
         AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
         assertEquals(response.getData().get("state"), State.CASE_ISSUE.getValue());
@@ -219,6 +204,8 @@ public class C100ReSubmitApplicationControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataNoAllegations);
         when(caseEventService.findEventsForCase(String.valueOf(caseDataNoAllegations.getId()))).thenReturn(caseEvents);
         when(documentLanguageService.docGenerateLang(caseDataNoAllegations)).thenReturn(documentLanguage);
+        when(organisationService.getApplicantOrganisationDetails(caseDataNoAllegations)).thenReturn(caseDataNoAllegations);
+        when(organisationService.getRespondentOrganisationDetails(caseDataNoAllegations)).thenReturn(caseDataNoAllegations);
 
         AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
