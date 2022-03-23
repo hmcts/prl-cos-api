@@ -12,7 +12,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasKey;
+
 
 @Slf4j
 @SpringBootTest
