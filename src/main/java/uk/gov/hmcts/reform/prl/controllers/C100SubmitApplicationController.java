@@ -46,7 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 @Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class C100SubmitApplicationController extends AbstractCallbackController{
+public class C100SubmitApplicationController {
 
     @Value("${document.templates.c100.c100_final_template}")
     protected String c100FinalTemplate;
@@ -220,8 +220,6 @@ public class C100SubmitApplicationController extends AbstractCallbackController{
         caseWorkerEmailService.sendEmail(caseDetails);
         solicitorEmailService.sendEmail(caseDetails);
         allTabService.updateAllTabs(caseData);
-        publishEvent(new CaseDataChanged(caseData));
-
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
