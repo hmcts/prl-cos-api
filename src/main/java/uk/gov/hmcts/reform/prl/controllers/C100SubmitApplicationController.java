@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -45,7 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 @Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class C100SubmitApplicationController {
+public class C100SubmitApplicationController extends AbstractCallbackController{
 
     @Value("${document.templates.c100.c100_final_template}")
     protected String c100FinalTemplate;
@@ -219,6 +220,8 @@ public class C100SubmitApplicationController {
         caseWorkerEmailService.sendEmail(caseDetails);
         solicitorEmailService.sendEmail(caseDetails);
         allTabService.updateAllTabs(caseData);
+        publishEvent(new CaseDataChanged(caseData));
+
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
