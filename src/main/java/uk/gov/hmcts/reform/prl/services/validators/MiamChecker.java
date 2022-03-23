@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -42,7 +42,7 @@ public class MiamChecker implements EventChecker {
         Optional<String> mediatorRegNumber = ofNullable(caseData.getMediatorRegistrationNumber());
         Optional<String> mediatorServiceName = ofNullable(caseData.getFamilyMediatorServiceName());
         Optional<String> mediatorSoleTrader = ofNullable(caseData.getSoleTraderName());
-        Optional<MiamDocument> miamCertDocument = ofNullable(caseData.getMiamCertificationDocumentUpload());
+        Optional<Document> miamCertDocument = ofNullable(caseData.getMiamCertificationDocumentUpload());
 
         if (applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(Yes)) {
             finished = mediatorRegNumber.isPresent()
@@ -57,7 +57,7 @@ public class MiamChecker implements EventChecker {
             Optional<String> mediatorRegNumber1 = ofNullable(caseData.getMediatorRegistrationNumber1());
             Optional<String> mediatorServiceName1 = ofNullable(caseData.getFamilyMediatorServiceName1());
             Optional<String> mediatorSoleTrader1 = ofNullable(caseData.getSoleTraderName1());
-            Optional<MiamDocument> miamCertDocument1 = ofNullable(caseData.getMiamCertificationDocumentUpload1());
+            Optional<Document> miamCertDocument1 = ofNullable(caseData.getMiamCertificationDocumentUpload1());
 
             finished = mediatorRegNumber1.isPresent()
                 && mediatorServiceName1.isPresent()
