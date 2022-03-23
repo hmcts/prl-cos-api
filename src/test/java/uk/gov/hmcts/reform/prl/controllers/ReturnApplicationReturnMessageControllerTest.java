@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -59,6 +60,9 @@ public class ReturnApplicationReturnMessageControllerTest {
 
     @Mock
     private CaseWorkerEmailService caseWorkerEmailService;
+
+    @Mock
+    private EventService eventPublisher;
 
     @Mock
     private AllTabServiceImpl allTabsService;
