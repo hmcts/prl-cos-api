@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.handlers.CaseEventHandler;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
@@ -41,6 +41,8 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
     private final CaseWorkerEmailService caseWorkerEmailService;
     @Autowired
     private AllTabServiceImpl allTabsService;
+    @Autowired
+    CaseEventHandler caseEventHandler;
 
     @PostMapping(path = "/return-application-return-message", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to get return message of the return application ")
@@ -83,7 +85,9 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
 
         caseDataUpdated.putAll(allTabsFields);
         caseDataUpdated.put("taskListReturn", returnApplicationService.getReturnMessageForTaskList(caseData));
-        publishEvent(new CaseDataChanged(caseData));
+
+        String updatedTaskList = caseEventHandler.getUpdatedTaskList(caseData);
+        caseDataUpdated.put("taskList", updatedTaskList);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
