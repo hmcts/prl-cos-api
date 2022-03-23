@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
@@ -28,7 +29,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-public class ReturnApplicationReturnMessageController {
+public class ReturnApplicationReturnMessageController extends AbstractCallbackController {
 
     @Autowired
     private UserService userService;
@@ -82,6 +83,7 @@ public class ReturnApplicationReturnMessageController {
 
         caseDataUpdated.putAll(allTabsFields);
         caseDataUpdated.put("taskListReturn", returnApplicationService.getReturnMessageForTaskList(caseData));
+        publishEvent(new CaseDataChanged(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
