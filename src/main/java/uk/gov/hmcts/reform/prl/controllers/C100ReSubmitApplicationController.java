@@ -41,6 +41,7 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 
 @Slf4j
 @RestController
@@ -186,7 +187,7 @@ public class C100ReSubmitApplicationController {
                 ));
             }
 
-            caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(
+            caseDataUpdated.put(DOCUMENT_FIELD_FINAL, generateDocumentField(
                 c100FinalFilename,
                 generateDocument(
                     authorisation,
@@ -219,7 +220,7 @@ public class C100ReSubmitApplicationController {
                     )
                 ));
             }
-            caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(
+            caseDataUpdated.put(DOCUMENT_FIELD_FINAL, generateDocumentField(
                 c100FinalWelshFilename,
                 generateDocument(
                     authorisation,
