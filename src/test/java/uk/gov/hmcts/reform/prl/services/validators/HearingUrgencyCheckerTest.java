@@ -73,6 +73,25 @@ public class HearingUrgencyCheckerTest {
     }
 
     @Test
+    public void finishedWhenIsReducedNoticeHearingSetToYes() {
+
+        CaseData casedata = CaseData.builder().isCaseUrgent(Yes)
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .caseUrgencyTimeAndReason("reason")
+            .effortsMadeWithRespondents("efforts")
+            .reasonsForApplicationWithoutNotice("test")
+            .setOutReasonsBelow("test")
+            .areRespondentsAwareOfProceedings(No)
+            .doYouRequireAHearingWithReducedNotice(Yes)
+            .build();
+
+
+        boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
+
+        assertTrue(isFinished);
+    }
+
+    @Test
     public void startedWhenNonEmptyCaseData() {
 
         CaseData casedata = CaseData.builder()
