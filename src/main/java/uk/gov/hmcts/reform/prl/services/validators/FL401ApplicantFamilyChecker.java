@@ -64,7 +64,7 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
 
         Optional<ApplicantFamilyDetails> applicantFamilyDetailsWrapped = ofNullable(caseData.getApplicantFamilyDetails());
 
-        if (applicantFamilyDetailsWrapped.isPresent() && !applicantFamilyDetailsWrapped.isEmpty()) {
+        if (applicantFamilyDetailsWrapped.isPresent()) {
             isFinished = validateFields(caseData);
         }
         return isFinished;
@@ -103,7 +103,7 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
     public boolean validateMandatoryFieldsCompleted(ApplicantChild applicantChild) {
         Optional<YesOrNo> applicantRespondentShareParental = ofNullable(applicantChild.getApplicantRespondentShareParental());
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(applicantChild.getFullName()));
         fields.add(ofNullable(applicantChild.getDateOfBirth()));
         fields.add(ofNullable(applicantChild.getApplicantChildRelationship()));
