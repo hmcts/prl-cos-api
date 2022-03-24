@@ -524,7 +524,6 @@ public class CaseData implements MappableObject {
     /**
      * FL401 Upload Documents.
      */
-    private final List<Document> fl401UploadedDocuments;
     private final List<Document> fl401UploadWitnessDocuments;
     private final List<Document> fl401UploadSupportDocuments;
 
