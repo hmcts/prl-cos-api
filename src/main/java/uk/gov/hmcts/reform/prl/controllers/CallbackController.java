@@ -145,6 +145,7 @@ public class CallbackController {
 
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
+
     /**
      * It's just an example - to be removed when there are real tasks sending emails.
      */
@@ -212,24 +213,20 @@ public class CallbackController {
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = organisationService.getApplicantOrganisationDetailsForFL401(caseData);
-            Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
-            if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(
-                FL401OrderTypeEnum.occupationOrder)
-                && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
-                caseData = caseData.toBuilder().build();
-            } else  if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
-                caseData = caseData.toBuilder()
-                    .respondentBehaviourData(null)
-                    .build();
-            } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
-                caseData = caseData.toBuilder()
-                    .home(null)
-                    .build();
-            }
+            caseData = buildTypeOfApplicationCaseData(caseData);
         }
 
         Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
 
+        buildGeneratedDocumentCaseData(authorisation, caseData, caseDataUpdated);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private void buildGeneratedDocumentCaseData(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        CaseData caseData, Map<String, Object> caseDataUpdated)
+        throws Exception {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         if (documentLanguage.isGenEng()) {
@@ -246,8 +243,9 @@ public class CallbackController {
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentFileName(PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                ? c100DraftFilename : fl401DraftFilename + CommonUtils.formatCurrentDate("ddMMM").toLowerCase()
-                + ".pdf").build());
+                                      ? c100DraftFilename : fl401DraftFilename
+                    + CommonUtils.formatCurrentDate("ddMMM").toLowerCase()
+                    + ".pdf").build());
         }
 
         if (documentLanguage.isGenWelsh()) {
@@ -269,8 +267,24 @@ public class CallbackController {
                     + CommonUtils.formatCurrentDate("ddMMM").toLowerCase()
                     + ".pdf").build());
         }
+    }
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    private CaseData buildTypeOfApplicationCaseData(CaseData caseData) {
+        Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
+        if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(
+            FL401OrderTypeEnum.occupationOrder)
+            && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
+            caseData = caseData.toBuilder().build();
+        } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+            caseData = caseData.toBuilder()
+                .respondentBehaviourData(null)
+                .build();
+        } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
+            caseData = caseData.toBuilder()
+                .home(null)
+                .build();
+        }
+        return caseData;
     }
 
     @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -377,7 +391,7 @@ public class CallbackController {
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
 
         caseDataUpdated.putAll(allTabsFields);
-        caseDataUpdated.put("issueDate",caseData.getIssueDate());
+        caseDataUpdated.put("issueDate", caseData.getIssueDate());
 
         try {
             caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
@@ -479,7 +493,7 @@ public class CallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
-            caseDataUpdated.put("applicantCaseName",caseDataUpdated.get("applicantOrRespondentCaseName"));
+            caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();

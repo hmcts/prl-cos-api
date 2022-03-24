@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChildDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -52,12 +53,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 
@@ -94,6 +97,8 @@ public class ApplicationsTabServiceTest {
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
+            .otherPersonRelationshipToChildren(List.of(Element.<OtherPersonRelationshipToChild>builder().value(
+                OtherPersonRelationshipToChild.builder().personRelationshipToChild("Bro").build()).build()))
             .email("test@test.com")
             .build();
 
@@ -396,6 +401,30 @@ public class ApplicationsTabServiceTest {
             List.of(Element.<ChildDetails>builder().value(expetcedChildDetails).build()),
             applicationsTabService.getChildDetails(CaseData.builder().children(listOfChildren).build())
         );
+    }
+
+    @Test
+    public void testWithEmptyChildDetails() {
+        ChildDetails child = ChildDetails.builder().build();
+        Element<ChildDetails> app = Element.<ChildDetails>builder().value(child).build();
+        List<Element<ChildDetails>> childFinalList = new ArrayList<>();
+        childFinalList.add(app);
+        assertEquals(applicationsTabService.getChildDetails(CaseData.builder().build()),childFinalList);
+    }
+
+    @Test
+    public void testUpdateTab() {
+        when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class))
+            .thenReturn(OtherPersonInTheCase.builder().build());
+        when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOrders.class))
+            .thenReturn(allegationsOfHarmOrders);
+        when(objectMapper.convertValue(caseDataWithParties, ChildAbductionDetails.class))
+            .thenReturn(
+            ChildAbductionDetails.builder().build());
+        when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOtherConcerns.class))
+            .thenReturn(AllegationsOfHarmOtherConcerns.builder().build());
+
+        assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
     }
 
     private List<Element<OtherPersonWhoLivesWithChild>> getOtherPersonList() {
