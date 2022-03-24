@@ -138,11 +138,12 @@ public class C100ReSubmitApplicationController {
 
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
         Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
-            eachState -> getPreviousState(eachState)).findFirst();
+            C100ReSubmitApplicationController::getPreviousState).findFirst();
         Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
         if (previousStates.isPresent()) {
             // For submitted state - No docs will be generated.
             if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
+                caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
                 caseDataUpdated.put("state", State.SUBMITTED_PAID);
                 ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
                 caseData = caseData.setDateSubmittedAndIssueDate();
@@ -154,6 +155,7 @@ public class C100ReSubmitApplicationController {
                 caseData = organisationService.getApplicantOrganisationDetails(caseData);
                 caseData = organisationService.getRespondentOrganisationDetails(caseData);
                 caseData = caseData.setIssueDate();
+                caseData = caseData.toBuilder().state(State.CASE_ISSUE).build();
 
                 DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
                 generateDocuments(authorisation, caseData, caseDataUpdated, documentLanguage);

@@ -145,7 +145,7 @@ public class C100ReSubmitApplicationControllerTest {
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
-        assertEquals(response.getData().get("state"), State.SUBMITTED_PAID);
+        assertEquals(State.SUBMITTED_PAID, response.getData().get("state"));
         verify(caseWorkerEmailService).sendEmail(caseDetails);
         verify(solicitorEmailService).sendEmail(caseDetails);
         verify(allTabService).getAllTabsFields(caseData);
@@ -175,7 +175,7 @@ public class C100ReSubmitApplicationControllerTest {
 
         AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
-        assertEquals(response.getData().get("state"), State.CASE_ISSUE);
+        assertEquals(State.CASE_ISSUE, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL));
@@ -213,7 +213,7 @@ public class C100ReSubmitApplicationControllerTest {
 
         AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
-        assertEquals(response.getData().get("state"), State.CASE_ISSUE);
+        assertEquals(State.CASE_ISSUE, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL_WELSH));
         assertFalse(response.getData().containsKey(DOCUMENT_FIELD_C1A_WELSH));
@@ -247,7 +247,7 @@ public class C100ReSubmitApplicationControllerTest {
 
         AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
-        assertEquals(response.getData().get("state"), State.CASE_ISSUE);
+        assertEquals(State.CASE_ISSUE, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL_WELSH));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A_WELSH));
