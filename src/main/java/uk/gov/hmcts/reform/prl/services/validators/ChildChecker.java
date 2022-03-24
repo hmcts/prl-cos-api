@@ -36,7 +36,7 @@ public class ChildChecker implements EventChecker {
 
         Optional<List<Element<Child>>> childrenWrapped = ofNullable(caseData.getChildren());
 
-        if (childrenWrapped.isPresent() && childrenWrapped.get().size() != 0) {
+        if (!childrenWrapped.isEmpty() && !childrenWrapped.get().isEmpty()) {
             List<Child> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
@@ -63,7 +63,7 @@ public class ChildChecker implements EventChecker {
 
         boolean anyStarted = false;
 
-        if (childrenWrapped.isPresent() && childrenWrapped.get().size() != 0) {
+        if (!childrenWrapped.isEmpty() && !childrenWrapped.get().isEmpty()) {
             List<Child> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
@@ -103,8 +103,8 @@ public class ChildChecker implements EventChecker {
         }
         if (childLivesWith.isPresent() && childLivesWith.get().contains(anotherPerson)) {
             Optional<List<Element<OtherPersonWhoLivesWithChild>>> personWhoLivesWithChildList =  ofNullable(child.getPersonWhoLivesWithChild());
-            if (!personWhoLivesWithChildList.isPresent() || (personWhoLivesWithChildList.isPresent()
-                && personWhoLivesWithChildList.get().equals(Collections.emptyList()))) {
+            if (personWhoLivesWithChildList.isEmpty()
+                || (personWhoLivesWithChildList.get().equals(Collections.emptyList()))) {
                 return false;
             }
             personWhoLivesWithChildList.get().stream().map(Element::getValue).forEach(eachRow -> {
