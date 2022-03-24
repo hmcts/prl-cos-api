@@ -33,7 +33,7 @@ public class MiamChecker implements EventChecker {
     @Override
     public boolean isFinished(CaseData caseData) {
 
-        boolean finished;
+        boolean finished = false;
 
         Optional<YesOrNo> applicantAttendedMiam = ofNullable(caseData.getApplicantAttendedMiam());
         Optional<YesOrNo> claimingExemptionMiam = ofNullable(caseData.getClaimingExemptionMiam());
@@ -50,10 +50,6 @@ public class MiamChecker implements EventChecker {
                 && mediatorSoleTrader.isPresent()
                 && miamCertDocument.isPresent();
 
-            if (finished) {
-                taskErrorService.removeError(MIAM_ERROR);
-                return true;
-            }
         } else if ((applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(No))
             && (claimingExemptionMiam.isPresent() && claimingExemptionMiam.get().equals(Yes))
             && (familyMediatiorMiam.isPresent() && familyMediatiorMiam.get().equals(Yes))) {
@@ -68,22 +64,21 @@ public class MiamChecker implements EventChecker {
                 && mediatorSoleTrader1.isPresent()
                 && miamCertDocument1.isPresent();
 
-            if (finished) {
-                taskErrorService.removeError(MIAM_ERROR);
-                return true;
-            }
         } else {
             Optional<List<MiamExemptionsChecklistEnum>> exceptions = ofNullable(caseData.getMiamExemptionsChecklist());
             if (exceptions.isPresent()) {
                 finished =  checkMiamExemptions(caseData);
-                if (finished) {
-                    taskErrorService.removeError(MIAM_ERROR);
-                    return true;
-                }
             }
         }
-        taskErrorService.addEventError(MIAM, MIAM_ERROR, MIAM_ERROR.getError());
-        return false;
+
+        if (finished) {
+            taskErrorService.removeError(MIAM_ERROR);
+            return true;
+        } else {
+            taskErrorService.addEventError(MIAM, MIAM_ERROR, MIAM_ERROR.getError());
+            return false;
+        }
+
     }
 
 
