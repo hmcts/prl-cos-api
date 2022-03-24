@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
@@ -140,7 +141,7 @@ public class C100ReSubmitApplicationController {
         Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
             C100ReSubmitApplicationController::getPreviousState).findFirst();
         Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
-        log.info("All states: " + eventsForCase.stream().map(CaseEventDetail::getStateId));
+        eventsForCase.stream().map(CaseEventDetail::getStateId).collect(Collectors.toList()).forEach(log::info);
         if (previousStates.isPresent()) {
             log.info("The previous state is: " + previousStates.get());
             // For submitted state - No docs will be generated.
