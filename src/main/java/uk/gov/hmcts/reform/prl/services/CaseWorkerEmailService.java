@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -209,7 +210,8 @@ public class CaseWorkerEmailService {
 
         emailList.forEach(email ->   emailService.send(
             email,
-            EmailTemplateNames.GATEKEEPER,
+            PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                ? EmailTemplateNames.GATEKEEPER_FL401 : EmailTemplateNames.GATEKEEPER,
             buildGatekeeperEmail(caseDetails),
             LanguagePreference.english
         ));
@@ -222,7 +224,7 @@ public class CaseWorkerEmailService {
         String typeOfHearing = "";
         String isCaseUrgent = NO;
 
-        if (caseData.getIsCaseUrgent().equals(YesOrNo.Yes)) {
+        if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
             typeOfHearing = URGENT_CASE;
             isCaseUrgent = YES;
         }
