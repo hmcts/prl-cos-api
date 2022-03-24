@@ -29,6 +29,17 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
 
     private String isConfidentialDetailsAvailable(CaseData caseData) {
         // Checking the Child details..
+        if (validateChildrensDetails(caseData)) {
+            return YesOrNo.Yes.getDisplayedValue();
+        }
+        if (validateApplicantDetails(caseData)) {
+            return YesOrNo.Yes.getDisplayedValue();
+        }
+
+        return YesOrNo.No.getDisplayedValue();
+    }
+
+    private boolean validateChildrensDetails(CaseData caseData) {
         Optional<List<Element<Child>>> childrenWrapped = ofNullable(caseData.getChildren());
 
         if (childrenWrapped.isPresent() && !childrenWrapped.get().isEmpty()) {
@@ -39,7 +50,7 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
 
             for (Child c : children) {
                 if (YesOrNo.Yes.equals(c.getIsChildAddressConfidential())) {
-                    return YesOrNo.Yes.getDisplayedValue();
+                    return true;
                 }
                 Optional<List<Element<OtherPersonWhoLivesWithChild>>> otherPersonWrapped = ofNullable(c.getPersonWhoLivesWithChild());
                 if (otherPersonWrapped.isPresent() && !otherPersonWrapped.get().isEmpty()) {
@@ -50,16 +61,19 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
                     boolean isConfidentialDetailsAvaialble = otherPersonList.stream()
                         .anyMatch(eachPerson -> YesOrNo.Yes.equals(eachPerson.getIsPersonIdentityConfidential()));
                     if (isConfidentialDetailsAvaialble) {
-                        return YesOrNo.Yes.getDisplayedValue();
+                        return true;
                     }
                 }
 
             }
         }
+        return false;
+    }
 
+    private boolean validateApplicantDetails(CaseData caseData) {
         // Checking the Applicant Details..
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
-        if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
+        if (!applicantsWrapped.isEmpty() && !applicantsWrapped.get().isEmpty()) {
             List<PartyDetails> applicants = applicantsWrapped.get()
                 .stream()
                 .map(Element::getValue)
@@ -69,11 +83,10 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
                 if (YesOrNo.Yes.equals(applicant.getIsAddressConfidential())
                     || YesOrNo.Yes.equals(applicant.getIsPhoneNumberConfidential())
                     || YesOrNo.Yes.equals(applicant.getIsEmailAddressConfidential())) {
-                    return YesOrNo.Yes.getDisplayedValue();
+                    return true;
                 }
             }
         }
-
-        return YesOrNo.No.getDisplayedValue();
+        return false;
     }
 }

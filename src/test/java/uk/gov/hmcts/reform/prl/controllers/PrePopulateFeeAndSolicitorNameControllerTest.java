@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -175,12 +176,12 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
             .thenReturn(court);
 
-
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
-        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest));
+
     }
 
     @Test
@@ -202,7 +203,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(submitAndPayChecker.hasMandatoryCompleted(Mockito.any(CaseData.class))).thenReturn(true);
-        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
+        prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest);
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
@@ -233,7 +234,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
-        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest));
     }
 
     @Test
@@ -327,6 +328,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
-        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest));
     }
 }

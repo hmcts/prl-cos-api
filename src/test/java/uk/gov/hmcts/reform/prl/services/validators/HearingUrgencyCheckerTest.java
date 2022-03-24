@@ -99,14 +99,4 @@ public class HearingUrgencyCheckerTest {
         assertFalse(isMandatory);
     }
 
-    @Test
-    public void mandatoryCompletedIfIsCaseUrgentSetToNo() {
-
-        CaseData casedata = CaseData.builder().isCaseUrgent(No).build();
-
-        boolean isMandatory = hearingUrgencyChecker.hasMandatoryCompleted(casedata);
-
-        assertTrue(isMandatory);
-    }
-
 }

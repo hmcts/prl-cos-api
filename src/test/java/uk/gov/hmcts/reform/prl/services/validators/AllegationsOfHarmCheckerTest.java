@@ -5,13 +5,17 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
+import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.applicants;
@@ -43,6 +47,14 @@ public class AllegationsOfHarmCheckerTest {
         assertTrue(allegationsOfHarmChecker.isStarted(casedata));
     }
 
+    @Test
+    public void whenAllegationOfHarmSelectedNoIsStartedFalse() {
+        CaseData casedata = CaseData.builder()
+            .allegationsOfHarmYesNo(No)
+            .build();
+
+        assertFalse(allegationsOfHarmChecker.isStarted(casedata));
+    }
 
     @Test
     public void whenNoCaseDataThenNotFinished() {
@@ -122,7 +134,7 @@ public class AllegationsOfHarmCheckerTest {
     @Test
     public void whenOtherConcernsPresentThenValidateOtherConcernsTrue() {
         CaseData caseData = CaseData.builder()
-            .allegationsOfHarmOtherConcernsYesNo(Yes)
+            .allegationsOfHarmOtherConcerns(Yes)
             .allegationsOfHarmOtherConcernsDetails("Details")
             .allegationsOfHarmOtherConcernsCourtActions("Court actions")
             .build();
@@ -217,6 +229,22 @@ public class AllegationsOfHarmCheckerTest {
     }
 
     @Test
+    public void whenCaseDataPresentThenAbductionSectionReturnTrue() {
+        CaseData caseData = CaseData.builder()
+            .allegationsOfHarmChildAbductionYesNo(Yes)
+            .childAbductionReasons("testing")
+            .previousAbductionThreats(Yes)
+            .previousAbductionThreatsDetails("Details")
+            .abductionPassportOfficeNotified(No)
+            .abductionChildHasPassport(Yes)
+            .abductionChildPassportPosession(AbductionChildPassportPossessionEnum.mother)
+            .abductionPreviousPoliceInvolvement(No)
+            .build();
+
+        assertTrue(allegationsOfHarmChecker.validateAbductionSection(caseData));
+    }
+
+    @Test
     public void whenAnyAbusePresentThenReturnTrue() {
         CaseData caseData = CaseData.builder()
             .allegationsOfHarmDomesticAbuseYesNo(Yes)
@@ -300,5 +328,152 @@ public class AllegationsOfHarmCheckerTest {
             .build();
 
         assertTrue(allegationsOfHarmChecker.validateOrders(caseData));
+    }
+
+    @Test
+    public void whenNoDataIsSectionsFinishedReturnFalse() {
+        CaseData caseData = CaseData.builder().build();
+        assertFalse(allegationsOfHarmChecker.isSectionsFinished(caseData,false,false));
+    }
+
+    @Test
+    public void whenNoDataIsPreviousOrdersFinishedReturnFalse() {
+        CaseData caseData = CaseData.builder().build();
+        Optional<YesOrNo> ordersNonMolestation = ofNullable(caseData.getOrdersNonMolestation());
+        Optional<YesOrNo> ordersOccupation = ofNullable(caseData.getOrdersOccupation());
+        Optional<YesOrNo> ordersForcedMarriageProtection = ofNullable(caseData.getOrdersForcedMarriageProtection());
+        Optional<YesOrNo> ordersRestraining = ofNullable(caseData.getOrdersRestraining());
+        Optional<YesOrNo> ordersOtherInjunctive = ofNullable(caseData.getOrdersOtherInjunctive());
+        Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(caseData.getOrdersUndertakingInPlace());
+
+        assertFalse(allegationsOfHarmChecker.isPreviousOrdersFinished(
+            ordersNonMolestation,
+            ordersOccupation,
+            ordersForcedMarriageProtection,
+            ordersRestraining,
+            ordersOtherInjunctive,
+            ordersUndertakingInPlace
+        ));
+    }
+
+    @Test
+    public void whenDataPresentIsPreviousOrdersFinishedReturnFalse() {
+        CaseData caseData = CaseData.builder()
+            .ordersNonMolestation(No)
+            .ordersOccupation(No)
+            .ordersForcedMarriageProtection(No)
+            .ordersRestraining(No)
+            .ordersOtherInjunctive(No)
+            .ordersUndertakingInPlace(No)
+            .build();
+
+        Optional<YesOrNo> ordersNonMolestation = ofNullable(caseData.getOrdersNonMolestation());
+        Optional<YesOrNo> ordersOccupation = ofNullable(caseData.getOrdersOccupation());
+        Optional<YesOrNo> ordersForcedMarriageProtection = ofNullable(caseData.getOrdersForcedMarriageProtection());
+        Optional<YesOrNo> ordersRestraining = ofNullable(caseData.getOrdersRestraining());
+        Optional<YesOrNo> ordersOtherInjunctive = ofNullable(caseData.getOrdersOtherInjunctive());
+        Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(caseData.getOrdersUndertakingInPlace());
+
+        assertTrue(allegationsOfHarmChecker.isPreviousOrdersFinished(
+            ordersNonMolestation,
+            ordersOccupation,
+            ordersForcedMarriageProtection,
+            ordersRestraining,
+            ordersOtherInjunctive,
+            ordersUndertakingInPlace
+        ));
+    }
+
+    @Test
+    public void whenAllDataPresentIsPreviousOrdersFinishedReturnTrue() {
+        CaseData caseData = CaseData.builder()
+            .ordersNonMolestation(No)
+            .ordersOccupation(No)
+            .ordersForcedMarriageProtection(No)
+            .ordersRestraining(No)
+            .ordersOtherInjunctive(No)
+            .ordersUndertakingInPlace(No)
+            .build();
+        Optional<YesOrNo> ordersNonMolestation = ofNullable(caseData.getOrdersNonMolestation());
+        Optional<YesOrNo> ordersOccupation = ofNullable(caseData.getOrdersOccupation());
+        Optional<YesOrNo> ordersForcedMarriageProtection = ofNullable(caseData.getOrdersForcedMarriageProtection());
+        Optional<YesOrNo> ordersRestraining = ofNullable(caseData.getOrdersRestraining());
+        Optional<YesOrNo> ordersOtherInjunctive = ofNullable(caseData.getOrdersOtherInjunctive());
+        Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(caseData.getOrdersUndertakingInPlace());
+
+        assertTrue(allegationsOfHarmChecker.isPreviousOrdersFinished(
+            ordersNonMolestation,
+            ordersOccupation,
+            ordersForcedMarriageProtection,
+            ordersRestraining,
+            ordersOtherInjunctive,
+            ordersUndertakingInPlace
+        ));
+    }
+
+    @Test
+    public void whenPartialDataPresentAsYesIsPreviousOrdersFinishedReturnTrue() {
+        CaseData caseData = CaseData.builder()
+            .ordersNonMolestation(Yes)
+            .ordersRestraining(Yes)
+            .ordersOtherInjunctive(Yes)
+            .ordersUndertakingInPlace(Yes)
+            .build();
+        Optional<YesOrNo> ordersNonMolestation = ofNullable(caseData.getOrdersNonMolestation());
+        Optional<YesOrNo> ordersOccupation = ofNullable(caseData.getOrdersOccupation());
+        Optional<YesOrNo> ordersForcedMarriageProtection = ofNullable(caseData.getOrdersForcedMarriageProtection());
+        Optional<YesOrNo> ordersRestraining = ofNullable(caseData.getOrdersRestraining());
+        Optional<YesOrNo> ordersOtherInjunctive = ofNullable(caseData.getOrdersOtherInjunctive());
+        Optional<YesOrNo> ordersUndertakingInPlace = ofNullable(caseData.getOrdersUndertakingInPlace());
+
+        assertFalse(allegationsOfHarmChecker.isPreviousOrdersFinished(
+            ordersNonMolestation,
+            ordersOccupation,
+            ordersForcedMarriageProtection,
+            ordersRestraining,
+            ordersOtherInjunctive,
+            ordersUndertakingInPlace
+        ));
+    }
+
+
+    @Test
+    public void whenAllCaseDataPresentValidateFieldsReturnTrue() {
+
+        Behaviours behaviour = Behaviours.builder()
+            .abuseNatureDescription("Test")
+            .behavioursStartDateAndLength("5 days")
+            .behavioursNature("Testing")
+            .behavioursApplicantSoughtHelp(Yes)
+            .behavioursApplicantHelpSoughtWho("Who from")
+            .behavioursApplicantHelpAction("Action")
+            .build();
+
+        Element<Behaviours> wrappedBehaviour = Element.<Behaviours>builder()
+            .value(behaviour)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .allegationsOfHarmYesNo(Yes)
+            .allegationsOfHarmDomesticAbuseYesNo(Yes)
+            .behaviours(Collections.singletonList(wrappedBehaviour))
+            .physicalAbuseVictim(Collections.singletonList(applicants))
+            .ordersNonMolestation(No)
+            .ordersOccupation(No)
+            .ordersForcedMarriageProtection(No)
+            .ordersRestraining(No)
+            .ordersOtherInjunctive(No)
+            .ordersUndertakingInPlace(No)
+            .allegationsOfHarmChildAbductionYesNo(No)
+            .allegationsOfHarmOtherConcernsYesNo(No)
+            .allegationsOfHarmOtherConcernsCourtActions("testing")
+            .allegationsOfHarmOtherConcerns(No)
+            .agreeChildUnsupervisedTime(No)
+            .agreeChildSupervisedTime(No)
+            .agreeChildOtherContact(No)
+            .build();
+
+        assertTrue(allegationsOfHarmChecker.validateFields(caseData));
+
     }
 }
