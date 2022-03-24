@@ -219,6 +219,4 @@ public class C100ReSubmitApplicationControllerTest {
 
     }
 
-
-
 }
