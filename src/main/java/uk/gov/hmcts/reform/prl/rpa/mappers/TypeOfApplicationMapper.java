@@ -14,14 +14,18 @@ public class TypeOfApplicationMapper {
 
     public JsonObject map(CaseData caseData) {
 
+        String orderAppliedForJson = null;
+
+        if (caseData.getOrdersApplyingFor() != null && !caseData.getOrdersApplyingFor().isEmpty()) {
+            orderAppliedForJson = caseData.getOrdersApplyingFor()
+                .stream()
+                .map(OrderTypeEnum::getDisplayedValue)
+                .collect(Collectors.joining(", "));
+        }
+
+
         return new NullAwareJsonObjectBuilder()
-            .add(
-                "orderAppliedFor",
-                caseData.getOrdersApplyingFor() != null
-                ? caseData.getOrdersApplyingFor().isEmpty() ? null : caseData.getOrdersApplyingFor().stream()
-                    .map(OrderTypeEnum::getDisplayedValue).collect(Collectors.joining(", "))
-                    : null
-            )
+            .add("orderAppliedFor", orderAppliedForJson)
             .add(
                 "typeOfChildArrangementsOrder",
                 caseData.getTypeOfChildArrangementsOrder() != null
