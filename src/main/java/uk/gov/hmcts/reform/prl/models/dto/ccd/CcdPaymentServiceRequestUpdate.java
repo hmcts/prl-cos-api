@@ -18,7 +18,7 @@ public class CcdPaymentServiceRequestUpdate {
     private String ccdCaseNumber;
     private String serviceRequestAmount;
     private String serviceRequestStatus;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private LocalDateTime callBackUpdateTimestamp;
     private CcdPayment payment;
 
