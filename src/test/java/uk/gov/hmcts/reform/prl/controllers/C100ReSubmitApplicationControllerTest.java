@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -33,8 +32,11 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -44,20 +46,38 @@ public class C100ReSubmitApplicationControllerTest {
     @Value("${document.templates.c100.c100_final_template}")
     protected String c100FinalTemplate;
 
+    @Value("${document.templates.c100.c100_final_filename}")
+    protected String c100FinalFilename;
+
     @Value("${document.templates.c100.c100_c8_template}")
     protected String c100C8Template;
+
+    @Value("${document.templates.c100.c100_c8_filename}")
+    protected String c100C8Filename;
 
     @Value("${document.templates.c100.c100_c1a_template}")
     protected String c100C1aTemplate;
 
+    @Value("${document.templates.c100.c100_c1a_filename}")
+    protected String c100C1aFilename;
+
     @Value("${document.templates.c100.c100_final_welsh_template}")
     protected String c100FinalWelshTemplate;
+
+    @Value("${document.templates.c100.c100_final_welsh_filename}")
+    protected String c100FinalWelshFilename;
 
     @Value("${document.templates.c100.c100_c8_welsh_template}")
     protected String c100C8WelshTemplate;
 
+    @Value("${document.templates.c100.c100_c8_welsh_filename}")
+    protected String c100C8WelshFilename;
+
     @Value("${document.templates.c100.c100_c1a_welsh_template}")
     protected String c100C1aWelshTemplate;
+
+    @Value("${document.templates.c100.c100_c1a_welsh_filename}")
+    protected String c100C1aWelshFilename;
 
     @InjectMocks
     C100ReSubmitApplicationController c100ReSubmitApplicationController;
@@ -111,22 +131,6 @@ public class C100ReSubmitApplicationControllerTest {
         uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails prlCaseDetails = uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
             .caseData(caseData)
             .build();
-
-        GeneratedDocumentInfo englishFinal = GeneratedDocumentInfo.builder().build();
-        GeneratedDocumentInfo welshFinal = GeneratedDocumentInfo.builder().build();
-        GeneratedDocumentInfo englishC1a = GeneratedDocumentInfo.builder().build();
-        GeneratedDocumentInfo welshC1a = GeneratedDocumentInfo.builder().build();
-        GeneratedDocumentInfo englishC8 = GeneratedDocumentInfo.builder().build();
-        GeneratedDocumentInfo welshC8 = GeneratedDocumentInfo.builder().build();
-
-        when(dgsService.generateDocument(auth, prlCaseDetails, c100FinalTemplate)).thenReturn(englishFinal);
-        when(dgsService.generateDocument(auth, prlCaseDetails, c100FinalWelshTemplate)).thenReturn(welshFinal);
-        when(dgsService.generateDocument(auth, prlCaseDetails, c100C1aTemplate)).thenReturn(englishC1a);
-        when(dgsService.generateDocument(auth, prlCaseDetails, c100C1aWelshTemplate)).thenReturn(welshC1a);
-        when(dgsService.generateDocument(auth, prlCaseDetails, c100C8Template)).thenReturn(englishC8);
-        when(dgsService.generateDocument(auth, prlCaseDetails, c100C8WelshTemplate)).thenReturn(welshC8);
-
-
     }
 
     @Test
@@ -141,10 +145,10 @@ public class C100ReSubmitApplicationControllerTest {
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
-        assertEquals(response.getData().get("state"), State.SUBMITTED_PAID.getValue());
+        assertEquals(response.getData().get("state"), State.SUBMITTED_PAID);
         verify(caseWorkerEmailService).sendEmail(caseDetails);
         verify(solicitorEmailService).sendEmail(caseDetails);
-        verify(allTabService).updateAllTabs(caseData);
+        verify(allTabService).getAllTabsFields(caseData);
 
     }
 
@@ -160,6 +164,7 @@ public class C100ReSubmitApplicationControllerTest {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder()
             .isGenEng(true)
+            .isGenWelsh(false)
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -170,13 +175,13 @@ public class C100ReSubmitApplicationControllerTest {
 
         AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
-        assertEquals(response.getData().get("state"), State.CASE_ISSUE.getValue());
+        assertEquals(response.getData().get("state"), State.CASE_ISSUE);
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL));
         verify(caseWorkerEmailService).sendEmail(caseDetails);
         verify(solicitorEmailService).sendEmail(caseDetails);
-        verify(allTabService).updateAllTabs(caseData);
+        verify(allTabService).getAllTabsFields(caseData);
 
     }
 
@@ -196,6 +201,7 @@ public class C100ReSubmitApplicationControllerTest {
         );
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenWelsh(true)
             .isGenEng(false)
             .build();
 
@@ -207,13 +213,47 @@ public class C100ReSubmitApplicationControllerTest {
 
         AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
-        assertEquals(response.getData().get("state"), State.CASE_ISSUE.getValue());
-        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
-        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL));
-        assertFalse(response.getData().containsKey(DOCUMENT_FIELD_C1A));
+        assertEquals(response.getData().get("state"), State.CASE_ISSUE);
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+        assertFalse(response.getData().containsKey(DOCUMENT_FIELD_C1A_WELSH));
         verify(caseWorkerEmailService).sendEmail(caseDetails);
         verify(solicitorEmailService).sendEmail(caseDetails);
-        verify(allTabService).updateAllTabs(caseData);
+        verify(allTabService).getAllTabsFields(caseDataNoAllegations);
+
+    }
+
+    @Test
+    public void givenAllegationsOfHarmAndWelsh_whenLastEventWasIssued_thenIssuedPathFollowedAndCorrectDocsGenerated() throws Exception {
+
+        List<CaseEventDetail> caseEvents = List.of(
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.CASE_ISSUE.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
+        );
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenWelsh(true)
+            .isGenEng(false)
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
+        when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
+
+        assertEquals(response.getData().get("state"), State.CASE_ISSUE);
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+        assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A_WELSH));
+        verify(caseWorkerEmailService).sendEmail(caseDetails);
+        verify(solicitorEmailService).sendEmail(caseDetails);
+        verify(allTabService).getAllTabsFields(caseData);
 
     }
 

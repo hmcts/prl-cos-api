@@ -38,14 +38,18 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 
 @Slf4j
 @RestController
@@ -135,7 +139,7 @@ public class C100ReSubmitApplicationController {
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
         Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
             eachState -> getPreviousState(eachState)).findFirst();
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
         if (previousStates.isPresent()) {
             // For submitted state - No docs will be generated.
             if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
@@ -210,7 +214,7 @@ public class C100ReSubmitApplicationController {
 
         }
         if (documentLanguage.isGenWelsh()) {
-            caseDataUpdated.put(DOCUMENT_FIELD_C8, generateDocumentField(
+            caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, generateDocumentField(
                 c100C8WelshFilename,
                 generateDocument(
                     authorisation,
@@ -221,7 +225,7 @@ public class C100ReSubmitApplicationController {
             ));
 
             if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
-                caseDataUpdated.put(DOCUMENT_FIELD_C1A, generateDocumentField(
+                caseDataUpdated.put(DOCUMENT_FIELD_C1A_WELSH, generateDocumentField(
                     c100C1aWelshFilename,
                     generateDocument(
                         authorisation,
@@ -231,7 +235,7 @@ public class C100ReSubmitApplicationController {
                     )
                 ));
             }
-            caseDataUpdated.put(DOCUMENT_FIELD_FINAL, generateDocumentField(
+            caseDataUpdated.put(DOCUMENT_FIELD_FINAL_WELSH, generateDocumentField(
                 c100FinalWelshFilename,
                 generateDocument(
                     authorisation,
