@@ -219,7 +219,7 @@ public class ConfidentialityTabServiceTest {
             partyDetailsSecondRec
         );
         CaseData caseData = CaseData.builder().applicants(listOfPartyDetails).children(listOfChild).build();
-        Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(1L, caseData);
+        Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
 
         assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("childrenConfidentialDetails"));

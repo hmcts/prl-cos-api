@@ -27,7 +27,7 @@ public class ConfidentialityTabService {
     private final CoreCaseDataService coreCaseDataService;
 
 
-    public Map<String, Object> updateConfidentialityDetails(Long id, CaseData caseData) {
+    public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
 
         List<PartyDetails> applicants = caseData.getApplicants().stream()
             .map(Element::getValue)

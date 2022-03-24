@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -33,7 +33,7 @@ public class MiamChecker implements EventChecker {
     @Override
     public boolean isFinished(CaseData caseData) {
 
-        boolean finished;
+        boolean finished = false;
 
         Optional<YesOrNo> applicantAttendedMiam = ofNullable(caseData.getApplicantAttendedMiam());
         Optional<YesOrNo> claimingExemptionMiam = ofNullable(caseData.getClaimingExemptionMiam());
@@ -42,7 +42,7 @@ public class MiamChecker implements EventChecker {
         Optional<String> mediatorRegNumber = ofNullable(caseData.getMediatorRegistrationNumber());
         Optional<String> mediatorServiceName = ofNullable(caseData.getFamilyMediatorServiceName());
         Optional<String> mediatorSoleTrader = ofNullable(caseData.getSoleTraderName());
-        Optional<MiamDocument> miamCertDocument = ofNullable(caseData.getMiamCertificationDocumentUpload());
+        Optional<Document> miamCertDocument = ofNullable(caseData.getMiamCertificationDocumentUpload());
 
         if (applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(Yes)) {
             finished = mediatorRegNumber.isPresent()
@@ -50,10 +50,6 @@ public class MiamChecker implements EventChecker {
                 && mediatorSoleTrader.isPresent()
                 && miamCertDocument.isPresent();
 
-            if (finished) {
-                taskErrorService.removeError(MIAM_ERROR);
-                return true;
-            }
         } else if ((applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(No))
             && (claimingExemptionMiam.isPresent() && claimingExemptionMiam.get().equals(Yes))
             && (familyMediatiorMiam.isPresent() && familyMediatiorMiam.get().equals(Yes))) {
@@ -61,29 +57,28 @@ public class MiamChecker implements EventChecker {
             Optional<String> mediatorRegNumber1 = ofNullable(caseData.getMediatorRegistrationNumber1());
             Optional<String> mediatorServiceName1 = ofNullable(caseData.getFamilyMediatorServiceName1());
             Optional<String> mediatorSoleTrader1 = ofNullable(caseData.getSoleTraderName1());
-            Optional<MiamDocument> miamCertDocument1 = ofNullable(caseData.getMiamCertificationDocumentUpload1());
+            Optional<Document> miamCertDocument1 = ofNullable(caseData.getMiamCertificationDocumentUpload1());
 
             finished = mediatorRegNumber1.isPresent()
                 && mediatorServiceName1.isPresent()
                 && mediatorSoleTrader1.isPresent()
                 && miamCertDocument1.isPresent();
 
-            if (finished) {
-                taskErrorService.removeError(MIAM_ERROR);
-                return true;
-            }
         } else {
             Optional<List<MiamExemptionsChecklistEnum>> exceptions = ofNullable(caseData.getMiamExemptionsChecklist());
             if (exceptions.isPresent()) {
                 finished =  checkMiamExemptions(caseData);
-                if (finished) {
-                    taskErrorService.removeError(MIAM_ERROR);
-                    return true;
-                }
             }
         }
-        taskErrorService.addEventError(MIAM, MIAM_ERROR, MIAM_ERROR.getError());
-        return false;
+
+        if (finished) {
+            taskErrorService.removeError(MIAM_ERROR);
+            return true;
+        } else {
+            taskErrorService.addEventError(MIAM, MIAM_ERROR, MIAM_ERROR.getError());
+            return false;
+        }
+
     }
 
 
