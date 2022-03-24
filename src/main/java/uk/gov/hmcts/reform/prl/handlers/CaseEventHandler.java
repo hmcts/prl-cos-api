@@ -36,6 +36,19 @@ public class CaseEventHandler {
     public void handleCaseDataChange(final CaseDataChanged event) {
         final CaseData caseData = event.getCaseData();
 
+        final String taskList = getUpdatedTaskList(caseData);
+
+        coreCaseDataService.triggerEvent(
+            JURISDICTION,
+            CASE_TYPE,
+            caseData.getId(),
+            "internal-update-task-list",
+            Map.of("taskList", taskList,"id",String.valueOf(caseData.getId()))
+
+        );
+    }
+
+    public String getUpdatedTaskList(CaseData caseData) {
         final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
 
         List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
@@ -52,15 +65,7 @@ public class CaseEventHandler {
 
         final String taskList = taskListRenderer
             .render(tasks, eventErrors, caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE), caseData);
-
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            "internal-update-task-list",
-            Map.of("taskList", taskList,"id",String.valueOf(caseData.getId()))
-
-        );
+        return taskList;
     }
 }
 
