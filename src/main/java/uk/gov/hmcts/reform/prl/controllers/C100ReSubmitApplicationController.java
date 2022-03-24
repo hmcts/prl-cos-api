@@ -141,9 +141,7 @@ public class C100ReSubmitApplicationController {
         Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
             C100ReSubmitApplicationController::getPreviousState).findFirst();
         Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
-        eventsForCase.stream().map(CaseEventDetail::getStateId).collect(Collectors.toList()).forEach(log::info);
         if (previousStates.isPresent()) {
-            log.info("The previous state is: " + previousStates.get());
             // For submitted state - No docs will be generated.
             if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
                 caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
@@ -152,6 +150,8 @@ public class C100ReSubmitApplicationController {
                 caseData = caseData.setDateSubmittedAndIssueDate();
                 caseDataUpdated.put("dateSubmitted", caseData.getDateSubmitted());
                 caseDataUpdated.put("dateAndTimeSubmitted", DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
+                caseWorkerEmailService.sendEmail(caseDetails);
+                solicitorEmailService.sendEmail(caseDetails);
             }
             // For Case issue state - All docs will be regenerated.
             if (State.CASE_ISSUE.getValue().equalsIgnoreCase(previousStates.get())) {
@@ -164,10 +164,11 @@ public class C100ReSubmitApplicationController {
                 generateDocuments(authorisation, caseData, caseDataUpdated, documentLanguage);
                 caseDataUpdated.put("state", State.CASE_ISSUE);
                 caseDataUpdated.put(PrlAppsConstants.ISSUE_DATE_FIELD, caseData.getIssueDate());
+                caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
             }
-            caseWorkerEmailService.sendEmail(caseDetails);
-            solicitorEmailService.sendEmail(caseDetails);
+
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+            caseDataUpdated.put("confidentialityDisclaimerSubmit", Map.of("confidentialityChecksChecked", null));
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
