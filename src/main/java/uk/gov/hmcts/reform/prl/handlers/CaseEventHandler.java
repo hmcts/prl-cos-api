@@ -63,9 +63,9 @@ public class CaseEventHandler {
             eventErrors.removeIf(e -> !events.contains(e.getEvent()));
         }
 
-        final String taskList = taskListRenderer
+        return taskListRenderer
             .render(tasks, eventErrors, caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE), caseData);
-        return taskList;
+
     }
 }
 
