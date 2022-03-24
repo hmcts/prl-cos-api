@@ -109,6 +109,8 @@ public class C100ReSubmitApplicationControllerTest {
     private CallbackRequest callbackRequest;
     private CaseDetails caseDetails;
     private CaseData caseData;
+    private CaseData caseDataSubmitted;
+    private CaseData caseDataIssued;
     private static final String auth = "auth";
 
 
@@ -116,6 +118,17 @@ public class C100ReSubmitApplicationControllerTest {
     public void init() throws Exception {
         caseData = CaseData.builder()
             .id(12345L)
+            .allegationsOfHarmYesNo(Yes)
+            .build();
+        caseDataSubmitted = CaseData.builder()
+            .id(12345L)
+            .state(State.SUBMITTED_PAID)
+            .allegationsOfHarmYesNo(Yes)
+            .build();
+
+        caseDataIssued = CaseData.builder()
+            .id(12345L)
+            .state(State.CASE_ISSUE)
             .allegationsOfHarmYesNo(Yes)
             .build();
 
@@ -128,8 +141,12 @@ public class C100ReSubmitApplicationControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails prlCaseDetails = uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
-            .caseData(caseData)
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails prlCaseDetailsSubmitted = uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
+            .caseData(caseDataSubmitted)
+            .build();
+
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails prlCaseDetailsIssued = uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
+            .caseData(caseDataIssued)
             .build();
     }
 
@@ -141,14 +158,14 @@ public class C100ReSubmitApplicationControllerTest {
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
 
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataSubmitted);
+        when(caseEventService.findEventsForCase(String.valueOf(caseDataSubmitted.getId()))).thenReturn(caseEvents);
         AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
         assertEquals(State.SUBMITTED_PAID, response.getData().get("state"));
         verify(caseWorkerEmailService).sendEmail(caseDetails);
         verify(solicitorEmailService).sendEmail(caseDetails);
-        verify(allTabService).getAllTabsFields(caseData);
+        verify(allTabService).getAllTabsFields(caseDataSubmitted);
 
     }
 
@@ -169,9 +186,9 @@ public class C100ReSubmitApplicationControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
-        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
+        when(documentLanguageService.docGenerateLang(caseDataIssued)).thenReturn(documentLanguage);
 
         AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
@@ -181,7 +198,7 @@ public class C100ReSubmitApplicationControllerTest {
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL));
         verify(caseWorkerEmailService).sendEmail(caseDetails);
         verify(solicitorEmailService).sendEmail(caseDetails);
-        verify(allTabService).getAllTabsFields(caseData);
+        verify(allTabService).getAllTabsFields(caseDataIssued);
 
     }
 
@@ -189,6 +206,7 @@ public class C100ReSubmitApplicationControllerTest {
     public void givenNoAllegationsOfHarmAndWelsh_whenLastEventWasIssued_thenIssuedPathFollowedAndCorrectDocsGenerated() throws Exception {
         CaseData caseDataNoAllegations = CaseData.builder()
             .id(12345L)
+            .state(State.CASE_ISSUE)
             .allegationsOfHarmYesNo(No)
             .build();
 
@@ -205,11 +223,11 @@ public class C100ReSubmitApplicationControllerTest {
             .isGenEng(false)
             .build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataNoAllegations);
-        when(caseEventService.findEventsForCase(String.valueOf(caseDataNoAllegations.getId()))).thenReturn(caseEvents);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataNoAllegations);
         when(documentLanguageService.docGenerateLang(caseDataNoAllegations)).thenReturn(documentLanguage);
-        when(organisationService.getApplicantOrganisationDetails(caseDataNoAllegations)).thenReturn(caseDataNoAllegations);
-        when(organisationService.getRespondentOrganisationDetails(caseDataNoAllegations)).thenReturn(caseDataNoAllegations);
 
         AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
@@ -241,9 +259,9 @@ public class C100ReSubmitApplicationControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
-        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
+        when(documentLanguageService.docGenerateLang(caseDataIssued)).thenReturn(documentLanguage);
 
         AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
@@ -253,7 +271,7 @@ public class C100ReSubmitApplicationControllerTest {
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A_WELSH));
         verify(caseWorkerEmailService).sendEmail(caseDetails);
         verify(solicitorEmailService).sendEmail(caseDetails);
-        verify(allTabService).getAllTabsFields(caseData);
+        verify(allTabService).getAllTabsFields(caseDataIssued);
 
     }
 
