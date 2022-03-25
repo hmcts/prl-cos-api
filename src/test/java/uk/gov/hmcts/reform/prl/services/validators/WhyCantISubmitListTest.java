@@ -243,7 +243,9 @@ public class WhyCantISubmitListTest {
     public void testRelationshipToRespondentCheckerAddsError() {
 
         respondentRelationshipChecker.isFinished(caseData);
-        verify(taskErrorService).addEventError(RELATIONSHIP_TO_RESPONDENT, RELATIONSHIP_TO_RESPONDENT_ERROR, RELATIONSHIP_TO_RESPONDENT_ERROR.getError());
+        verify(taskErrorService).addEventError(RELATIONSHIP_TO_RESPONDENT,
+                                               RELATIONSHIP_TO_RESPONDENT_ERROR,
+                                               RELATIONSHIP_TO_RESPONDENT_ERROR.getError());
     }
 
     @Test
@@ -257,7 +259,9 @@ public class WhyCantISubmitListTest {
     public void testFL401ApplicationTypeCheckerAddsError() {
 
         fl401ApplicationTypeChecker.isFinished(caseData);
-        verify(taskErrorService).addEventError(FL401_TYPE_OF_APPLICATION, FL401_TYPE_OF_APPLICATION_ERROR, FL401_TYPE_OF_APPLICATION_ERROR.getError());
+        verify(taskErrorService).addEventError(FL401_TYPE_OF_APPLICATION,
+                                               FL401_TYPE_OF_APPLICATION_ERROR,
+                                               FL401_TYPE_OF_APPLICATION_ERROR.getError());
     }
 
     @Test
