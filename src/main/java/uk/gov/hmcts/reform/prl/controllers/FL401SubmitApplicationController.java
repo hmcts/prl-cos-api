@@ -198,14 +198,4 @@ public class FL401SubmitApplicationController {
             .build();
     }
 
-    private Document generateDocumentField(String fileName,GeneratedDocumentInfo generatedDocumentInfo) {
-        if (null == generatedDocumentInfo) {
-            return null;
-        }
-        return Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(fileName).build();
-    }
 }

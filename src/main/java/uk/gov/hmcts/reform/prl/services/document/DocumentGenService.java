@@ -144,7 +144,7 @@ public class DocumentGenService {
 
     public Map<String, Object> generateDocuments(String authorisation, CaseData caseData) throws Exception {
 
-        Map<String, Object> updatedCaseData = new HashMap<String, Object>();
+        Map<String, Object> updatedCaseData = new HashMap<>();
 
         caseData = fillOrgDetails(caseData);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -174,7 +174,7 @@ public class DocumentGenService {
 
     public Map<String, Object> generateDraftDocuments(String authorisation, CaseData caseData) throws Exception {
 
-        Map<String, Object> updatedCaseData = new HashMap<String, Object>();
+        Map<String, Object> updatedCaseData = new HashMap<>();
 
         caseData = fillOrgDetails(caseData);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -238,53 +238,56 @@ public class DocumentGenService {
     private String getFileName(CaseData caseData, String docGenFor, boolean isWelsh) {
         String caseTypeOfApp = caseData.getCaseTypeOfApplication();
         String fileName = "";
-        if (docGenFor.equalsIgnoreCase(C8_HINT)) {
-            fileName =  C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)
-                ? (!isWelsh ? c100C8Filename : c100C8WelshFilename) : (!isWelsh
-                ? fl401C8Filename : fl401C8WelshFilename);
-        }
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)
-            && docGenFor.equalsIgnoreCase(C1A_HINT)) {
-            fileName =  !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
-        }
-        if (docGenFor.equalsIgnoreCase(FINAL_HINT)) {
-            fileName =  C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)
-                ? (!isWelsh ? c100FinalFilename : c100FinalWelshFilename) : (!isWelsh
-                ? fl401FinalFilename : fl401FinalWelshFilename);
-        }
 
-        if (docGenFor.equalsIgnoreCase(DRAFT_HINT)) {
-            fileName =  C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)
-                ? (!isWelsh ? c100DraftFilename : c100DraftWelshFilename) : (!isWelsh
-                ? fl401DraftFilename : fl401DraftWelshFileName);
+        switch (docGenFor) {
+            case C8_HINT:
+                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+                    fileName = !isWelsh ? c100C8Filename : c100C8WelshFilename;
+                } else {
+                    fileName = !isWelsh ? fl401C8Filename : fl401C8WelshFilename;
+                }
+            break;
+            case C1A_HINT:
+                fileName =  !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
+            break;
+            case FINAL_HINT:
+                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+                    fileName = !isWelsh ? c100FinalFilename : c100FinalWelshFilename;
+                } else {
+                    fileName = !isWelsh ? fl401FinalFilename : fl401FinalWelshFilename;
+                }
+            break;
+            case DRAFT_HINT:
+                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+                    fileName = !isWelsh ? c100DraftFilename : c100DraftWelshFilename;
+                } else {
+                    fileName = !isWelsh ? fl401DraftFilename : fl401DraftWelshFileName;
+                }
         }
-
         return fileName;
     }
 
     private String getTemplate(CaseData caseData, String docGenFor, boolean isWelsh) {
         String caseTypeOfApp = caseData.getCaseTypeOfApplication();
         String template = "";
-        if (docGenFor.equalsIgnoreCase(C8_HINT)) {
-            template =  C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)
-                ? (!isWelsh ? c100C8Template : c100C8WelshTemplate) : (!isWelsh
-                ? fl401C8Template : fl401C8WelshTemplate);
-        }
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)
-            && docGenFor.equalsIgnoreCase(C1A_HINT)) {
-            template =  !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
-        }
 
-        if (docGenFor.equalsIgnoreCase(FINAL_HINT)) {
-            template =  C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)
-                ? (!isWelsh ? c100FinalTemplate : c100FinalWelshTemplate) :
-                (!isWelsh ? fl401FinalTemplate : fl401FinalWelshTemplate);
-        }
-
-        if (docGenFor.equalsIgnoreCase(DRAFT_HINT)) {
-            template =  C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)
-                ? (!isWelsh ? c100DraftTemplate : c100DraftWelshTemplate) :
-                (!isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate);
+        switch (docGenFor) {
+            case C8_HINT:
+                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+                    template = !isWelsh ? c100C8Template : c100C8WelshTemplate;
+                } else {
+                    template = !isWelsh ? fl401C8Template : fl401C8WelshTemplate;
+                }
+            break;
+            case C1A_HINT:
+                template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
+            break;
+            case FINAL_HINT:
+                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+                    template = !isWelsh ? c100DraftTemplate : c100DraftWelshTemplate;
+                } else {
+                    template = !isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate;
+                }
         }
 
         return template;
