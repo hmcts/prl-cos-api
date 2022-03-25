@@ -35,7 +35,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
 
         Optional<List<Element<PartyDetails>>> othersToNotify = ofNullable(caseData.getOthersToNotify());
 
-        if (othersToNotify.isPresent() && othersToNotify.get().size() != 0) {
+        if (othersToNotify.isPresent()) {
             List<PartyDetails> others = caseData.getOthersToNotify()
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
@@ -63,7 +63,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
 
-            if (others.size() == 0) {
+            if (others.isEmpty()) {
                 return false;
             }
             boolean started = others.stream().anyMatch(Objects::nonNull);
@@ -93,8 +93,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         }
         YesOrNo currAdd = party.getIsCurrentAddressKnown();
         if (currAdd != null && currAdd.equals(Yes)) {
-            additionalFields = party.getAddress().getAddressLine1() != null;
-            additionalFields = party.getAddress().getPostCode() != null;
+            additionalFields = party.getAddress().getAddressLine1() != null && party.getAddress().getPostCode() != null;
         }
         YesOrNo canProvideEmail = party.getCanYouProvideEmailAddress();
         if (canProvideEmail != null && canProvideEmail.equals(Yes)) {
@@ -105,7 +104,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             additionalFields = party.getPhoneNumber() != null;
         }
 
-        List<Optional> childFields = new ArrayList<>();
+        List<Optional<String>> childFields = new ArrayList<>();
 
         Optional<List<Element<OtherPersonRelationshipToChild>>> otherPersonRelationshipList
                                     = ofNullable(party.getOtherPersonRelationshipToChildren());
@@ -114,9 +113,9 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             return false;
         }
 
-        otherPersonRelationshipList.get().stream().map(Element::getValue).forEach(everyChild -> {
-            childFields.add(ofNullable(everyChild.getPersonRelationshipToChild()));
-        });
+        otherPersonRelationshipList.get().stream().map(Element::getValue).forEach(everyChild ->
+            childFields.add(ofNullable(everyChild.getPersonRelationshipToChild()))
+        );
 
         boolean baseFields = allNonEmpty(
             party.getFirstName(),
