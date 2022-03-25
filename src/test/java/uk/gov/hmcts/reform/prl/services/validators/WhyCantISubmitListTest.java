@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
@@ -21,28 +22,42 @@ import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.APPLICANTS_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ATTENDING_THE_HEARING_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILD_DETAILS_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_APPLICANT_FAMILY_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_OTHER_PROCEEDINGS_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.FL401_TYPE_OF_APPLICATION_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.HEARING_URGENCY_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.HOME_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.INTERNATIONAL_ELEMENT_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.LITIGATION_CAPACITY_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.MIAM_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.OTHER_PEOPLE_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.OTHER_PROCEEDINGS_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RELATIONSHIP_TO_RESPONDENT_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RESPONDENT_BEHAVIOUR_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RESPONDENT_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.TYPE_OF_APPLICATION_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.WELSH_LANGUAGE_ERROR;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.WITHOUT_NOTICE_ORDER_ERROR;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WhyCantISubmitListTest {
@@ -88,6 +103,28 @@ public class WhyCantISubmitListTest {
 
     @InjectMocks
     OtherProceedingsChecker otherProceedingsChecker;
+
+
+    @InjectMocks
+    WithoutNoticeOrderChecker withoutNoticeOrderChecker;
+
+    @InjectMocks
+    RespondentRelationshipChecker respondentRelationshipChecker;
+
+    @InjectMocks
+    FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
+
+    @InjectMocks
+    FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
+
+    @InjectMocks
+    FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
+
+    @InjectMocks
+    RespondentBehaviourChecker respondentBehaviourChecker;
+
+    @InjectMocks
+    HomeChecker homeChecker;
 
     private CaseData caseData;
 
@@ -161,7 +198,6 @@ public class WhyCantISubmitListTest {
 
     @Test
     public void testHearingUrgencyCheckerAddsError() {
-
         hearingUrgencyChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(HEARING_URGENCY, HEARING_URGENCY_ERROR, HEARING_URGENCY_ERROR.getError());
     }
@@ -194,5 +230,57 @@ public class WhyCantISubmitListTest {
         caseData = caseData.toBuilder().previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes).build();
         otherProceedingsChecker.isStarted(caseData);
         verify(taskErrorService).addEventError(OTHER_PROCEEDINGS, OTHER_PROCEEDINGS_ERROR, OTHER_PROCEEDINGS_ERROR.getError());
+    }
+
+    @Test
+    public void testWithoutNoticeOrderCheckerAddsError() {
+
+        withoutNoticeOrderChecker.isFinished(caseData);
+        verify(taskErrorService).addEventError(WITHOUT_NOTICE_ORDER, WITHOUT_NOTICE_ORDER_ERROR, WITHOUT_NOTICE_ORDER_ERROR.getError());
+    }
+
+    @Test
+    public void testRelationshipToRespondentCheckerAddsError() {
+
+        respondentRelationshipChecker.isFinished(caseData);
+        verify(taskErrorService).addEventError(RELATIONSHIP_TO_RESPONDENT, RELATIONSHIP_TO_RESPONDENT_ERROR, RELATIONSHIP_TO_RESPONDENT_ERROR.getError());
+    }
+
+    @Test
+    public void testApplicantFamilyCheckerAddsError() {
+
+        fl401ApplicantFamilyChecker.isFinished(caseData);
+        verify(taskErrorService).addEventError(FL401_APPLICANT_FAMILY_DETAILS, FL401_APPLICANT_FAMILY_ERROR, FL401_APPLICANT_FAMILY_ERROR.getError());
+    }
+
+    @Test
+    public void testFL401ApplicationTypeCheckerAddsError() {
+
+        fl401ApplicationTypeChecker.isFinished(caseData);
+        verify(taskErrorService).addEventError(FL401_TYPE_OF_APPLICATION, FL401_TYPE_OF_APPLICATION_ERROR, FL401_TYPE_OF_APPLICATION_ERROR.getError());
+    }
+
+    @Test
+    public void testFl401OtherProceedingsCheckerAddsError() {
+        caseData = caseData.toBuilder()
+            .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder()
+                                             .hasPrevOrOngoingOtherProceeding(YesNoDontKnow.yes).build())
+            .build();
+        fl401OtherProceedingsChecker.isStarted(caseData);
+        verify(taskErrorService).addEventError(FL401_OTHER_PROCEEDINGS, FL401_OTHER_PROCEEDINGS_ERROR, FL401_OTHER_PROCEEDINGS_ERROR.getError());
+    }
+
+    @Test
+    public void testRespondentsBehaviourCheckerAddsError() {
+
+        respondentBehaviourChecker.isFinished(caseData);
+        verify(taskErrorService).addEventError(RESPONDENT_BEHAVIOUR, RESPONDENT_BEHAVIOUR_ERROR, RESPONDENT_BEHAVIOUR_ERROR.getError());
+    }
+
+    @Test
+    public void testHomeCheckerAddsError() {
+
+        homeChecker.isFinished(caseData);
+        verify(taskErrorService).addEventError(FL401_HOME, HOME_ERROR, HOME_ERROR.getError());
     }
 }
