@@ -558,7 +558,7 @@ public class CaseData implements MappableObject {
     private String isNotificationSent;
 
 
-    public CaseData setDateSubmittedAndIssueDate() {
+    public CaseData setDateSubmittedDate() {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         this.toBuilder()
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
