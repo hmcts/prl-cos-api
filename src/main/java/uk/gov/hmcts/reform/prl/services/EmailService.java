@@ -31,7 +31,7 @@ public class EmailService {
                      EmailTemplateVars templateVars,
                      LanguagePreference languagePreference) {
         final String reference = templateVars.getCaseReference();
-        onBeforeLog(email, templateName, templateVars.getCaseReference(), reference);
+        onBeforeLog(templateName, templateVars.getCaseReference(), reference);
         final String templateId = getTemplateId(templateName, languagePreference);
 
         try {
@@ -55,7 +55,7 @@ public class EmailService {
         return objectMapper.convertValue(templateVars, Map.class);
     }
 
-    private void onBeforeLog(String email, EmailTemplateNames name, String caseId, String reference) {
+    private void onBeforeLog(EmailTemplateNames name, String caseId, String reference) {
         log.info(
             "CaseId: {}: attempting to send email {} for Reference = {}",
             caseId, name, reference
