@@ -42,7 +42,6 @@ public class MiamChecker implements EventChecker {
         Optional<String> mediatorRegNumber = ofNullable(caseData.getMediatorRegistrationNumber());
         Optional<String> mediatorServiceName = ofNullable(caseData.getFamilyMediatorServiceName());
         Optional<String> mediatorSoleTrader = ofNullable(caseData.getSoleTraderName());
-        Optional<YesOrNo> hasConsentOrder = ofNullable(caseData.getConsentOrder());
         Optional<Document> miamCertDocument = ofNullable(caseData.getMiamCertificationDocumentUpload());
 
         if (applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(Yes)) {
@@ -74,7 +73,8 @@ public class MiamChecker implements EventChecker {
         if (finished) {
             taskErrorService.removeError(MIAM_ERROR);
             return true;
-        } 
+        }
+        Optional<YesOrNo> hasConsentOrder = ofNullable(caseData.getConsentOrder());
         taskErrorService.addEventError(MIAM, MIAM_ERROR, MIAM_ERROR.getError());
         if (hasConsentOrder.isPresent() && YesOrNo.Yes.equals(hasConsentOrder.get())) {
             taskErrorService.removeError(MIAM_ERROR);
