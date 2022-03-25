@@ -48,16 +48,16 @@ public class SubmitAndPayChecker implements EventChecker {
 
         EnumMap<Event, EventChecker> mandatoryEvents = new EnumMap<>(Event.class);
 
-        mandatoryEvents.put(CASE_NAME, eventsChecker.caseNameChecker);
-        mandatoryEvents.put(TYPE_OF_APPLICATION, eventsChecker.applicationTypeChecker);
-        mandatoryEvents.put(HEARING_URGENCY, eventsChecker.hearingUrgencyChecker);
-        mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.applicantsChecker);
-        mandatoryEvents.put(CHILD_DETAILS, eventsChecker.childChecker);
-        mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.respondentsChecker);
+        mandatoryEvents.put(CASE_NAME, eventsChecker.getCaseNameChecker());
+        mandatoryEvents.put(TYPE_OF_APPLICATION, eventsChecker.getApplicationTypeChecker());
+        mandatoryEvents.put(HEARING_URGENCY, eventsChecker.getHearingUrgencyChecker());
+        mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.getApplicantsChecker());
+        mandatoryEvents.put(CHILD_DETAILS, eventsChecker.getChildChecker());
+        mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.getRespondentsChecker());
         if (YesOrNo.No.equals(caseData.getConsentOrder()) || caseData.getConsentOrder() == null) {
-            mandatoryEvents.put(MIAM, eventsChecker.miamChecker);
+            mandatoryEvents.put(MIAM, eventsChecker.getMiamChecker());
         }
-        mandatoryEvents.put(ALLEGATIONS_OF_HARM, eventsChecker.allegationsOfHarmChecker);
+        mandatoryEvents.put(ALLEGATIONS_OF_HARM, eventsChecker.getAllegationsOfHarmChecker());
 
         boolean mandatoryFinished;
 
@@ -70,14 +70,14 @@ public class SubmitAndPayChecker implements EventChecker {
 
         EnumMap<Event, EventChecker> optionalEvents = new EnumMap<>(Event.class);
 
-        optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE, eventsChecker.otherPeopleInTheCaseChecker);
-        optionalEvents.put(OTHER_PROCEEDINGS, eventsChecker.otherProceedingsChecker);
-        optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.attendingTheHearingChecker);
-        optionalEvents.put(INTERNATIONAL_ELEMENT, eventsChecker.internationalElementChecker);
-        optionalEvents.put(LITIGATION_CAPACITY, eventsChecker.litigationCapacityChecker);
-        optionalEvents.put(WELSH_LANGUAGE_REQUIREMENTS, eventsChecker.welshLanguageRequirementsChecker);
+        optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE, eventsChecker.getOtherPeopleInTheCaseChecker());
+        optionalEvents.put(OTHER_PROCEEDINGS, eventsChecker.getOtherProceedingsChecker());
+        optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.getAttendingTheHearingChecker());
+        optionalEvents.put(INTERNATIONAL_ELEMENT, eventsChecker.getInternationalElementChecker());
+        optionalEvents.put(LITIGATION_CAPACITY, eventsChecker.getLitigationCapacityChecker());
+        optionalEvents.put(WELSH_LANGUAGE_REQUIREMENTS, eventsChecker.getWelshLanguageRequirementsChecker());
         if (YesOrNo.Yes.equals(caseData.getConsentOrder())) {
-            optionalEvents.put(MIAM, eventsChecker.miamChecker);
+            optionalEvents.put(MIAM, eventsChecker.getMiamChecker());
         }
         boolean optionalFinished;
 
