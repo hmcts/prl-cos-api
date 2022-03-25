@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -41,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -91,7 +91,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     private CaseData caseData;
 
     @Mock
-    SubmitAndPayChecker submitAndPayChecker;
+    private SubmitAndPayChecker submitAndPayChecker;
 
     @Mock
     private OrganisationService organisationService;
@@ -176,16 +176,15 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
             .thenReturn(court);
 
-
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
-        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest));
+
     }
 
     @Test
-    @Ignore
     public void testWhenControllerCalledOneInvokeToDgsService() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -203,8 +202,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .thenReturn(court);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(submitAndPayChecker.hasMandatoryCompleted(callbackRequest.getCaseDetails().getCaseData())).thenReturn(true);
-        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
+        when(submitAndPayChecker.hasMandatoryCompleted(Mockito.any(CaseData.class))).thenReturn(true);
+        prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest);
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
@@ -235,7 +234,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
-        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest));
     }
 
     @Test
@@ -329,15 +328,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
-        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
-    }
-
-    @Test
-    @Ignore
-    public void testAllDetailsWithSubmitAndPayCheckerAsFalse() throws Exception {
-
-        prePopulateFeeAndSolicitorNameController.prePoppulateSolicitorAndFees(authToken, callbackRequest);
-
-        verify(feesService).fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest));
     }
 }

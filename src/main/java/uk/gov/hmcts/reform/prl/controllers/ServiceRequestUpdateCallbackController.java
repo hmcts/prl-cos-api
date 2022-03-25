@@ -7,16 +7,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
-import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 
@@ -27,37 +23,28 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequiredArgsConstructor
 public class ServiceRequestUpdateCallbackController extends AbstractCallbackController {
 
-    private final String serviceAuth = "ServiceAuthorization";
     private final RequestUpdateCallbackService requestUpdateCallbackService;
-    private final AuthTokenGenerator authTokenGenerator;
-    private final AuthorisationService authorisationService;
-    private final CourtFinderService courtLocatorService;
-
 
     @Autowired
     @Qualifier("allTabsService")
     AllTabsService tabService;
 
-    @PostMapping(path = "/service-request-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PutMapping(path = "/service-request-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Ways to pay will call this API and send the status of payment with other details")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
     public void serviceRequestUpdate(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestHeader(serviceAuth) String serviceAuthorization,
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
-    ) throws Exception {
+    ) throws WorkflowException {
         try {
-            if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
-                requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-            }
+            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         } catch (Exception ex) {
             log.error(
                 "Payment callback is unsuccessful for the CaseID: {}",
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
-            throw new Exception(ex.getMessage());
+            throw new WorkflowException(ex.getMessage(), ex);
         }
     }
 }
