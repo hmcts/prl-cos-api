@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
-import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -33,7 +32,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
-import static uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData.temporaryFields;
+import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
 
 
 @Slf4j
@@ -69,11 +68,10 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
-        SendAndReplyEventData eventData = caseData.getSendAndReplyEventData();
         Map<String, Object> caseDataMap = new HashMap<>();
 
         List<String> errors = new ArrayList<>();
-        if (eventData.getChooseSendOrReply().equals(REPLY)) {
+        if (caseData.getChooseSendOrReply().equals(REPLY)) {
             if (!sendAndReplyService.hasMessages(caseData)) {
                 errors.add("There are no messages to respond to.");
             } else {
@@ -92,21 +90,19 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
-        SendAndReplyEventData eventData = caseData.getSendAndReplyEventData();
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
-        if (eventData.getChooseSendOrReply().equals(SEND)) {
+        if (caseData.getChooseSendOrReply().equals(SEND)) {
             Message newMessage = sendAndReplyService.buildNewSendMessage(caseData);
             List<Element<Message>> listOfMessages = sendAndReplyService.addNewMessage(caseData, newMessage);
             caseDataMap.putAll(sendAndReplyService.returnMapOfOpenMessages(listOfMessages));
 
         } else {
             UUID selectedValue = elementUtils
-                .getDynamicListSelectedValue(caseData.getSendAndReplyEventData()
-                                                 .getReplyMessageDynamicList(), objectMapper);
+                .getDynamicListSelectedValue(caseData.getReplyMessageDynamicList(), objectMapper);
 
             List<Element<Message>> messages;
-            if (eventData.getMessageReply().getIsReplying().equals(YesOrNo.No)) {
+            if (caseData.getMessageReply().getIsReplying().equals(YesOrNo.No)) {
                 messages = sendAndReplyService.closeMessage(selectedValue, caseData);
                 log.info(String.format("Closing message with id: %s", selectedValue));
                 List<Element<Message>> closedMessages = messages.stream()
@@ -122,10 +118,9 @@ public class SendAndReplyController extends AbstractCallbackController {
             } else {
                 messages = sendAndReplyService.buildNewReplyMessage(
                     selectedValue,
-                    eventData.getMessageReply(),
+                    caseData.getMessageReply(),
                     caseData.getOpenMessages()
                 );
-                log.info(String.format("Sending reply message to %s", eventData.getMessageReply().getReplyTo()));
             }
 
             messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));

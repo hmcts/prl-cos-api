@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
@@ -26,7 +27,7 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
 
-        Map<String, Object> tempCaseDetails = new HashMap<String, Object>();
+        Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put("caseDetails", AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
@@ -37,7 +38,7 @@ public class DgsService {
 
         } catch (Exception ex) {
             log.error("Error generating and storing document for case {}", caseDetails.getCaseId());
-            throw new Exception(ex.getMessage());
+            throw new DocumentGenerationException(ex.getMessage(), ex);
         }
         return generatedDocumentInfo;
     }
@@ -46,16 +47,17 @@ public class DgsService {
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
         // Get the Welsh Value of each object using Welsh Mapper
-        Map<String, Object> caseDataMap  = AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class);
+        Map<String, Object> caseDataMap = AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class);
         Map<String, Object> caseDataValues = (Map<String, Object>) caseDataMap.get("case_data");
-        caseDataValues.forEach((k,v) -> {
+        caseDataValues.forEach((k, v) -> {
             if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
                                                                                PrlAppsConstants.C100_CASE_TYPE
                                                                                    .equalsIgnoreCase(
                                                                                        caseDetails.getCaseData()
-                                                                                            .getCaseTypeOfApplication()
-                                                                                       ));
+                                                                                           .getCaseTypeOfApplication()
+                                                                                   )
+                );
                 caseDataValues.put(k, updatedWelshObj);
             }
         });
@@ -71,7 +73,7 @@ public class DgsService {
 
         } catch (Exception ex) {
             log.error("Error generating and storing document for case {}", caseDetails.getCaseId());
-            throw new Exception(ex.getMessage());
+            throw new DocumentGenerationException(ex.getMessage(), ex);
         }
         return generatedDocumentInfo;
     }

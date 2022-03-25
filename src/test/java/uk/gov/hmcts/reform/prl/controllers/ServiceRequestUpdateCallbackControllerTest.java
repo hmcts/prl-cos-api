@@ -67,7 +67,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
         when(authorisationService.authorise(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(authToken,serviceAuthToken,serviceRequestUpdateDto);
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceRequestUpdateDto);
 
         verify(requestUpdateCallbackService).processCallback(serviceRequestUpdateDto);
         verifyNoMoreInteractions(requestUpdateCallbackService);
@@ -83,7 +83,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
         when(authorisationService.authorise(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(authToken, serviceAuthToken,serviceRequestUpdateDto);
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceRequestUpdateDto);
 
         verifyNoMoreInteractions(feesService);
 

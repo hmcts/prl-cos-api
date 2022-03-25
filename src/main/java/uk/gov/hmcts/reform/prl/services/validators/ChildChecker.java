@@ -36,7 +36,7 @@ public class ChildChecker implements EventChecker {
 
         Optional<List<Element<Child>>> childrenWrapped = ofNullable(caseData.getChildren());
 
-        if (childrenWrapped.isPresent() && childrenWrapped.get().size() != 0) {
+        if (!childrenWrapped.isEmpty() && !childrenWrapped.get().isEmpty()) {
             List<Child> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
@@ -63,7 +63,7 @@ public class ChildChecker implements EventChecker {
 
         boolean anyStarted = false;
 
-        if (childrenWrapped.isPresent() && childrenWrapped.get().size() != 0) {
+        if (!childrenWrapped.isEmpty() && !childrenWrapped.get().isEmpty()) {
             List<Child> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
@@ -85,7 +85,7 @@ public class ChildChecker implements EventChecker {
 
     private boolean validateMandatoryFieldsCompleted(Child child) {
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(child.getFirstName()));
         fields.add(ofNullable(child.getLastName()));
         fields.add(ofNullable(child.getDateOfBirth()));
@@ -103,8 +103,8 @@ public class ChildChecker implements EventChecker {
         }
         if (childLivesWith.isPresent() && childLivesWith.get().contains(anotherPerson)) {
             Optional<List<Element<OtherPersonWhoLivesWithChild>>> personWhoLivesWithChildList =  ofNullable(child.getPersonWhoLivesWithChild());
-            if (!personWhoLivesWithChildList.isPresent() || (personWhoLivesWithChildList.isPresent()
-                && personWhoLivesWithChildList.get().equals(Collections.emptyList()))) {
+            if (personWhoLivesWithChildList.isEmpty()
+                || (personWhoLivesWithChildList.get().equals(Collections.emptyList()))) {
                 return false;
             }
             personWhoLivesWithChildList.get().stream().map(Element::getValue).forEach(eachRow -> {
@@ -126,7 +126,7 @@ public class ChildChecker implements EventChecker {
     }
 
     private boolean validateAdditionalFieldsCompleted(CaseData caseData) {
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
 
         Optional<YesNoDontKnow> childLocalAuth = ofNullable(caseData.getChildrenKnownToLocalAuthority());
         fields.add(childLocalAuth);
@@ -141,7 +141,7 @@ public class ChildChecker implements EventChecker {
 
     private boolean validateAnyFieldStarted(Child c) {
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(c.getFirstName()));
         fields.add(ofNullable(c.getLastName()));
         fields.add(ofNullable(c.getDateOfBirth()));

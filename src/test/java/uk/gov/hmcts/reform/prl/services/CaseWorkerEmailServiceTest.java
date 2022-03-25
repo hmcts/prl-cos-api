@@ -353,7 +353,7 @@ public class CaseWorkerEmailServiceTest {
             .build();
 
         caseWorkerEmailService.sendEmail(caseDetails);
-        assertEquals(caseDetails.getData().get("caseworkerEmailAddress").toString(), "test@test.com");
+        assertEquals("test@test.com", caseDetails.getData().get("caseworkerEmailAddress").toString());
     }
 
     @Test
