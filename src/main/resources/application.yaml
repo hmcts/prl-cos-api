@@ -122,7 +122,6 @@ fees-register:
 
 # NEW BELOW THIS LINE
 
-
 idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
@@ -139,6 +138,7 @@ prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+
 
 security:
   oauth2:
