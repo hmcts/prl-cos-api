@@ -246,23 +246,26 @@ public class DocumentGenService {
                 } else {
                     fileName = !isWelsh ? fl401C8Filename : fl401C8WelshFilename;
                 }
-            break;
+                break;
             case C1A_HINT:
                 fileName =  !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
-            break;
+                break;
             case FINAL_HINT:
                 if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
                     fileName = !isWelsh ? c100FinalFilename : c100FinalWelshFilename;
                 } else {
                     fileName = !isWelsh ? fl401FinalFilename : fl401FinalWelshFilename;
                 }
-            break;
+                break;
             case DRAFT_HINT:
                 if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
                     fileName = !isWelsh ? c100DraftFilename : c100DraftWelshFilename;
                 } else {
                     fileName = !isWelsh ? fl401DraftFilename : fl401DraftWelshFileName;
                 }
+                break;
+            default:
+                fileName = "";
         }
         return fileName;
     }
@@ -278,18 +281,20 @@ public class DocumentGenService {
                 } else {
                     template = !isWelsh ? fl401C8Template : fl401C8WelshTemplate;
                 }
-            break;
+                break;
             case C1A_HINT:
                 template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
-            break;
+                break;
             case FINAL_HINT:
                 if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
                     template = !isWelsh ? c100DraftTemplate : c100DraftWelshTemplate;
                 } else {
                     template = !isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate;
                 }
+                break;
+            default:
+                template = "";
         }
-
         return template;
     }
 }
