@@ -40,10 +40,10 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
-public class C100ReSubmitApplicationControllerTest {
+public class ResubmitApplicationControllerTest {
 
     @InjectMocks
-    C100ReSubmitApplicationController c100ReSubmitApplicationController;
+    ResubmitApplicationController resubmitApplicationController;
 
     @Mock
     CaseEventService caseEventService;
@@ -120,7 +120,7 @@ public class C100ReSubmitApplicationControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataSubmitted);
         when(caseEventService.findEventsForCase(String.valueOf(caseDataSubmitted.getId()))).thenReturn(caseEvents);
-        AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
         assertEquals(State.SUBMITTED_PAID, response.getData().get("state"));
         verify(caseWorkerEmailService).sendEmail(caseDetails);
@@ -153,7 +153,7 @@ public class C100ReSubmitApplicationControllerTest {
                                DOCUMENT_FIELD_C1A, "test",
                                DOCUMENT_FIELD_FINAL, "test"
             ));
-        AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
         assertEquals(State.CASE_ISSUE, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
@@ -193,7 +193,7 @@ public class C100ReSubmitApplicationControllerTest {
             .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test", DOCUMENT_FIELD_FINAL_WELSH, "test"
             ));
 
-        AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
         assertEquals(State.CASE_ISSUE, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
@@ -230,7 +230,7 @@ public class C100ReSubmitApplicationControllerTest {
                               DOCUMENT_FIELD_C1A_WELSH, "test"
             ));
 
-        AboutToStartOrSubmitCallbackResponse response = c100ReSubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
         assertEquals(State.CASE_ISSUE, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));

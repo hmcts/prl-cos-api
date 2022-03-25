@@ -46,7 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 @Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class C100ReSubmitApplicationController {
+public class ResubmitApplicationController {
 
     @Autowired
     private CourtFinderService courtFinderService;
@@ -90,7 +90,7 @@ public class C100ReSubmitApplicationController {
 
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
         Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
-            C100ReSubmitApplicationController::getPreviousState).findFirst();
+            ResubmitApplicationController::getPreviousState).findFirst();
         Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
         if (previousStates.isPresent()) {
             // For submitted state - No docs will be generated.
