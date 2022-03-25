@@ -42,7 +42,7 @@ public class MiamChecker implements EventChecker {
         Optional<String> mediatorRegNumber = ofNullable(caseData.getMediatorRegistrationNumber());
         Optional<String> mediatorServiceName = ofNullable(caseData.getFamilyMediatorServiceName());
         Optional<String> mediatorSoleTrader = ofNullable(caseData.getSoleTraderName());
-        Optional<MiamDocument> miamCertDocument = ofNullable(caseData.getMiamCertificationDocumentUpload());
+        Optional<Document> miamCertDocument = ofNullable(caseData.getMiamCertificationDocumentUpload());
         Optional<YesOrNo> hasConsentOrder = ofNullable(caseData.getConsentOrder());
 
         if (applicantAttendedMiam.isPresent() && applicantAttendedMiam.get().equals(Yes)) {
