@@ -97,7 +97,7 @@ send-grid:
 
 payments:
   api:
-    url: ${PAY_URL:http://payment-api-aat.service.core-compute-aat.internal}
+    url: ${PAY_URL:http://payment-api-demo.service.core-compute-aat.internal}
     callback-url: ${PAY_CALLBACK_URL:http://payment-api-demo.service.core-compute-demo.internal/service-request-update}
   authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
 
