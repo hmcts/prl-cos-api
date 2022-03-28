@@ -60,7 +60,7 @@ public class ReturnApplicationService {
 
         boolean hasSelectedOption = allNonEmpty(caseData.getRejectReason());
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            hasSelectedOption = allNonEmpty(caseData.getFl401rejectReason());
+            hasSelectedOption = allNonEmpty(caseData.getFl401RejectReason());
         }
         if (hasSelectedOption) {
             noOptionSelected = false;
@@ -84,7 +84,7 @@ public class ReturnApplicationService {
             }
 
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            for (FL401RejectReasonEnum reasonEnum : caseData.getFl401rejectReason()) {
+            for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
             }
         }
