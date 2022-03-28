@@ -134,7 +134,8 @@ public class FL401SubmitApplicationController {
             ? nearestDomesticAbuseCourt.getCourtName() : "");
 
         caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, (nearestDomesticAbuseCourt != null
-            && courtEmailAddress.isPresent()) ? courtEmailAddress.get().getAddress() : "");
+            && courtEmailAddress.isPresent()) ? courtEmailAddress.get().getAddress() :
+            Objects.requireNonNull(nearestDomesticAbuseCourt).getCourtEmailAddresses().get(0).getAddress());
 
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
             && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
