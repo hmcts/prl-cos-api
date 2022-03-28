@@ -132,9 +132,9 @@ public class FL401SubmitApplicationController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(COURT_NAME_FIELD, nearestDomesticAbuseCourt != null
             ? nearestDomesticAbuseCourt.getCourtName() : "");
+
         caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, (nearestDomesticAbuseCourt != null
-            && courtEmailAddress.isPresent()) ? courtEmailAddress.get().getAddress() :
-            Objects.requireNonNull(nearestDomesticAbuseCourt).getCourtEmailAddresses().get(0).getAddress());
+            && courtEmailAddress.isPresent()) ? courtEmailAddress.get().getAddress() : "");
 
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
             && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
