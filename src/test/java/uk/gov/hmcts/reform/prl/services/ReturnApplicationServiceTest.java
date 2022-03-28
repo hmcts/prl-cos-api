@@ -172,7 +172,7 @@ public class ReturnApplicationServiceTest {
                 returnMsgStr.append(reasonEnum.getDisplayedValue());
             }
 
-        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(casedata .getCaseTypeOfApplication())) {
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(casedata.getCaseTypeOfApplication())) {
             for (FL401RejectReasonEnum reasonEnum : casedata.getFl401rejectReason()) {
                 returnMsgStr.append(reasonEnum.getDisplayedValue());
             }
