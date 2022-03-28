@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -127,6 +128,43 @@ public class ResubmitApplicationController {
             .data(caseDataUpdated)
             .build();
     }
+
+    @PostMapping(path = "/fl401/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to change the state and send notifications.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Resubmission completed"),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse fl401resubmitApplication(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
+        Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
+            ResubmitApplicationController::getPreviousState).findFirst();
+        Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
+
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+
+        if (State.CASE_ISSUE.getValue().equalsIgnoreCase(previousStates.get())) {
+            try {
+                solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
+                caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+                caseDataUpdated.put("isNotificationSent", "Yes");
+            } catch (Exception e) {
+                log.error("Notification could not be sent due to {} ", e.getMessage());
+                caseDataUpdated.put("isNotificationSent", "No");
+            }
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
+            .build();
+    }
+
+
+
 
     private static boolean getPreviousState(String eachState) {
         return (!eachState.equalsIgnoreCase(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()))
