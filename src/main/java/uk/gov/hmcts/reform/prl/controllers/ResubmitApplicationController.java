@@ -148,18 +148,20 @@ public class ResubmitApplicationController {
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
-        if (State.CASE_ISSUE.getValue().equalsIgnoreCase(previousStates.get())) {
-            caseData = caseData.setIssueDate();
-            caseData = caseData.toBuilder().state(State.CASE_ISSUE).build();
-            caseDataUpdated.put(STATE_FIELD, State.CASE_ISSUE);
-            caseDataUpdated.put(PrlAppsConstants.ISSUE_DATE_FIELD, caseData.getIssueDate());
-            try {
-                solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
-                caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
-                caseDataUpdated.put("isNotificationSent", "Yes");
-            } catch (Exception e) {
-                log.error("Notification could not be sent due to {} ", e.getMessage());
-                caseDataUpdated.put("isNotificationSent", "No");
+        if (previousStates.isPresent()) {
+            if (State.CASE_ISSUE.getValue().equalsIgnoreCase(previousStates.get())) {
+                caseData = caseData.setIssueDate();
+                caseData = caseData.toBuilder().state(State.CASE_ISSUE).build();
+                caseDataUpdated.put(STATE_FIELD, State.CASE_ISSUE);
+                caseDataUpdated.put(PrlAppsConstants.ISSUE_DATE_FIELD, caseData.getIssueDate());
+                try {
+                    solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
+                    caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+                    caseDataUpdated.put("isNotificationSent", "Yes");
+                } catch (Exception e) {
+                    log.error("Notification could not be sent due to {} ", e.getMessage());
+                    caseDataUpdated.put("isNotificationSent", "No");
+                }
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder()
