@@ -10,6 +10,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -161,6 +162,7 @@ public class CaseWorkerEmailServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
             .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.prohibitedStepsOrder))
@@ -540,8 +542,46 @@ public class CaseWorkerEmailServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicantCaseName("TestCaseName")
             .applicants(listOfApplicants)
+            .build();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", "test@test.com");
+
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        EmailTemplateVars email = CaseWorkerEmail.builder()
+            .caseName(caseData.getApplicantCaseName())
+            .contentFromDev(caseData.getReturnMessage())
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+        caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(caseDetails);
+        assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+
+    }
+
+    @Test
+    public void sendFl401ReturnApplicationEmailSuccessfully() {
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(applicant)
             .build();
 
         Map<String, Object> data = new HashMap<>();
