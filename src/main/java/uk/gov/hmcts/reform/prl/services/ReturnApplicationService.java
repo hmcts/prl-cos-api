@@ -105,9 +105,15 @@ public class ReturnApplicationService {
 
         returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
 
-        for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
-            returnMsgStr.append(reasonEnum.getDisplayedValue());
-            returnMsgStr.append("\n\n");
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
+                returnMsgStr.append(reasonEnum.getReturnMsgText());
+            }
+
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            for (FL401RejectReasonEnum reasonEnum : caseData.getFl401rejectReason()) {
+                returnMsgStr.append(reasonEnum.getReturnMsgText());
+            }
         }
 
         returnMsgStr.append("Resolve these concerns and resend your application."
