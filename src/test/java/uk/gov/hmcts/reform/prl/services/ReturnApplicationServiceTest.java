@@ -167,9 +167,15 @@ public class ReturnApplicationServiceTest {
 
         returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
 
-        for (RejectReasonEnum reasonEnum : casedata.getRejectReason()) {
-            returnMsgStr.append(reasonEnum.getDisplayedValue());
-            returnMsgStr.append("\n\n");
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(casedata.getCaseTypeOfApplication())) {
+            for (RejectReasonEnum reasonEnum : casedata.getRejectReason()) {
+                returnMsgStr.append(reasonEnum.getDisplayedValue());
+            }
+
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(casedata .getCaseTypeOfApplication())) {
+            for (FL401RejectReasonEnum reasonEnum : casedata.getFl401rejectReason()) {
+                returnMsgStr.append(reasonEnum.getDisplayedValue());
+            }
         }
 
         returnMsgStr.append("Resolve these concerns and resend your application."
