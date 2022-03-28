@@ -118,6 +118,7 @@ public class ResubmitApplicationController {
             }
 
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+            // remove the tick from submit screens so not present if resubmitted again
             caseDataUpdated.put("confidentialityDisclaimerSubmit", Collections.singletonMap("confidentialityChecksChecked", null));
             caseDataUpdated.put("submitAgreeStatement", null);
         }
