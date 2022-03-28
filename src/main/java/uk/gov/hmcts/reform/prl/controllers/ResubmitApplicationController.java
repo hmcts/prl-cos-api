@@ -119,6 +119,7 @@ public class ResubmitApplicationController {
 
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
             caseDataUpdated.put("confidentialityDisclaimerSubmit", Collections.singletonMap("confidentialityChecksChecked", null));
+            caseDataUpdated.put("submitAgreeStatement", null);
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
