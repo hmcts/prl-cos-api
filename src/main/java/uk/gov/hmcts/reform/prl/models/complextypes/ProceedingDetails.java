@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
@@ -15,7 +16,9 @@ public class ProceedingDetails {
 
     private final ProceedingsEnum previousOrOngoingProceedings;
     private final String caseNumber;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateStarted;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateEnded;
     private final List<TypeOfOrderEnum> typeOfOrder;
     private final String otherTypeOfOrder;

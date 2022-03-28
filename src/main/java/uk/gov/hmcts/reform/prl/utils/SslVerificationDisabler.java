@@ -18,16 +18,17 @@ public class SslVerificationDisabler {
     public static void turnOffSslVerification() throws KeyManagementException, NoSuchAlgorithmException {
         TrustManager[] trustAllCerts = new TrustManager[] {
             new X509TrustManager() {
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                    return null;
-                }
-
                 public void checkClientTrusted(X509Certificate[] certs, String authType) {
                     /* no check actually performed to suppress errors for self-signed certs */
                 }
 
                 public void checkServerTrusted(X509Certificate[] certs, String authType) {
                     /* no check actually performed to suppress errors for self-signed certs */
+                }
+
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[0];
                 }
             }
         };

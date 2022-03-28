@@ -18,10 +18,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PbaOrganisationResponse;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -47,6 +49,9 @@ public class PbaClientConsumerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockBean
+    private AuthorisationService authorisationService;
 
     @BeforeEach
     public void setUpEachTest() throws InterruptedException {

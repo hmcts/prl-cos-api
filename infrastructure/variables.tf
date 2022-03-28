@@ -1,17 +1,17 @@
-variable "product" {}
-
-variable "component" {}
-
-variable "location" {
-  default = "UK South"
+variable "common_tags" {
+  type = map
 }
 
-variable "env" {}
+variable "product" {
+  type = string
+  default = "prl"
+}
 
-variable "subscription" {}
+variable "component" {
+  type = string
+  default = "cos"
+}
 
-variable "deployment_namespace" {}
-
-variable "common_tags" {
-  type = "map"
+variable "env" {
+  type = string
 }

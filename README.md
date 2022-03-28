@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/hmcts/prl-cos-api.svg?branch=master)](https://travis-ci.org/hmcts/prl-cos-api)
 
-## Notess
+# Notes
 
 Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you will need to set `spring.main.allow-bean-definition-overriding` to `true`.
 
@@ -35,7 +35,7 @@ Create docker image:
   docker-compose build
 ```
 
-Run the distribution (created in `build/install/prl-cos-api` directory)
+Run the distributions (created in `build/install/prl-cos-api` directory)
 by executing the following command:
 
 ```bash

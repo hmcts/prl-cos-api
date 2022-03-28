@@ -4,11 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.hmcts.reform.prl.utils.EmailObfuscator;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
 import uk.gov.service.notify.SendEmailResponse;
@@ -29,8 +30,8 @@ public class EmailService {
                      EmailTemplateNames templateName,
                      EmailTemplateVars templateVars,
                      LanguagePreference languagePreference) {
-        final String reference = generateReference();
-        onBeforeLog(email, templateName, templateVars.getCaseReference(), reference);
+        final String reference = templateVars.getCaseReference();
+        onBeforeLog(templateName, templateVars.getCaseReference(), reference);
         final String templateId = getTemplateId(templateName, languagePreference);
 
         try {
@@ -54,18 +55,23 @@ public class EmailService {
         return objectMapper.convertValue(templateVars, Map.class);
     }
 
-    private void onBeforeLog(String email, EmailTemplateNames name, String caseId, String reference) {
+    private void onBeforeLog(EmailTemplateNames name, String caseId, String reference) {
         log.info(
-            "CaseId: {}: attempting to send email {} to {}. Reference = {}",
-            caseId, name, EmailObfuscator.obfuscate(email), reference
+            "CaseId: {}: attempting to send email {} for Reference = {}",
+            caseId, name, reference
         );
-    }
-
-    private String generateReference() {
-        return UUID.randomUUID().toString();
     }
 
     private String getTemplateId(EmailTemplateNames templateName, LanguagePreference languagePreference) {
         return emailTemplatesConfig.getTemplates().get(languagePreference).get(templateName);
+    }
+
+    protected CaseData getCaseData(CaseDetails caseDetails) {
+
+        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            .toBuilder()
+            .id(caseDetails.getId())
+            .build();
+
     }
 }

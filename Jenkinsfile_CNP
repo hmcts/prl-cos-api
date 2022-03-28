@@ -11,27 +11,43 @@ properties([
 def type = "java"
 def product = "prl"
 def component = "cos"
-
-static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
-  [$class     : 'AzureKeyVaultSecret',
-   secretType : 'Secret',
-   name       : secretName,
-   version    : '',
-   envVariable: envVar
-  ]
-}
-
-def secrets = [
-  'prl-${env}': [
-  ]
-]
+def channel = '#prl-tech-notifications'
 
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
+static Map<String, Object> secret(String secretName, String envVariable) {
+ [$class     : 'AzureKeyVaultSecret',
+  secretType : 'Secret',
+  name       : secretName,
+  envVariable: envVariable
+ ]
+}
+
+def secrets = [
+   'prl-${env}':[
+      secret('prl-cos-idam-client-secret', 'IDAM_CLIENT_SECRET'),
+      secret('system-update-user-username', 'SYSTEM_UPDATE_USER_USERNAME'),
+      secret('system-update-user-password', 'PRL_SYSTEM_UPDATE_PASSWORD'),
+      secret('microservicekey-prl-cos-api', 'IDAM_S2S_AUTH_TOTP_SECRET'),
+      secret('notification-client-api-key', 'UK_GOV_NOTIFY_API_KEY'),
+      secret('test-genericpassword', 'PRL_GENERIC_PASSWORD'),
+      secret("launchDarkly-sdk-key", "LAUNCH_DARKLY_SDK_KEY"),
+      secret("AppInsightsInstrumentationKey", "APP_INSIGHTS_INSTRUMENTATION_KEY"),
+      secret("southampton-court-email-address", "SOUTHAMPTON_COURT_EMAIL_ADDRESS"),
+      secret("idam-solicitor-username", "IDAM_SOLICITOR_USERNAME"),
+      secret("idam-solicitor-password", "IDAM_SOLICITOR_PASSWORD"),
+      secret("send-grid-api-key", "SEND_GRID_API_KEY"),
+      secret("rpa-notify-to-email", "RPA_NOTIFY_TO_EMAIL"),
+      secret("rpa-notify-from-email", "RPA_NOTIFY_FROM_EMAIL")
+   ]
+]
+
 withPipeline(type, product, component) {
+  pipelineConf = config;
   loadVaultSecrets(secrets)
   enableAksStagingDeployment()
+  enableSlackNotifications(channel)
   disableLegacyDeployment()
 
   after('checkout') {
@@ -63,6 +79,12 @@ withPipeline(type, product, component) {
   }
 
   onMaster() {
+    env.ENV = 'aat'
+    enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
+  }
+  onPR() {
+    env.ENV = 'preview'
+    // enableCleanupOfHelmReleaseOnSuccess()
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
   }
 }

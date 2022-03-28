@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.utils.SslVerificationDisabler;
 
 import javax.annotation.PostConstruct;
 
-@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.prl"})
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.prl.*", "uk.gov.hmcts.reform.prl.services", "uk.gov.hmcts.reform.idam.client"})
 /*
  I don't know why this was not working, but I did what was suggested here:
  https://stackoverflow.com/questions/26889970/
@@ -24,7 +24,8 @@ import javax.annotation.PostConstruct;
  */
 @SpringBootConfiguration
 @EnableAutoConfiguration
-@ComponentScan(basePackages = "uk.gov.hmcts.reform.prl")
+@ComponentScan(basePackages = {  "uk.gov.hmcts.reform.prl", "uk.gov.hmcts.reform.prl.services",
+    "uk.gov.hmcts.reform.prl.config","uk.gov.hmcts.reform.ccd.document"})
 @Slf4j
 public class Application {
 

@@ -37,6 +37,8 @@ public abstract class SendEmailTask implements Task<CaseDetails> {
 
     @Override
     public CaseDetails execute(TaskContext context, CaseDetails caseDetails) {
+
+
         final String caseId = caseDetails.getCaseId();
         final String templateName = getTemplate().name();
 

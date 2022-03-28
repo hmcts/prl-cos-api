@@ -1,0 +1,37 @@
+{
+  "provider": {
+    "name": "Idam_api"
+  },
+  "consumer": {
+    "name": "prl_cos"
+  },
+  "interactions": [
+    {
+      "description": "a request to generate solicitor details",
+      "request": {
+        "method": "GET",
+        "path": "/details",
+        "headers": {
+          "Authorization": "TestServiceAuthToken",
+          "Content-Type": "application/json"
+        }
+      },
+      "response": {
+        "status": 200
+      },
+      "providerStates": [
+        {
+          "name": "A request to get solicitor name"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.1.11"
+    }
+  }
+}
