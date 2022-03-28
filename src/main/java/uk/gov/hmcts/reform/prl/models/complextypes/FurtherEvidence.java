@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
-import uk.gov.hmcts.reform.prl.models.documents.FurtherEvidenceDocument;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 
@@ -12,6 +12,6 @@ import java.util.List;
 @Builder
 public class FurtherEvidence {
     private final FurtherEvidenceDocumentType typeOfDocumentFurtherEvidence;
-    private final FurtherEvidenceDocument documentFurtherEvidence;
+    private final Document documentFurtherEvidence;
     private final List<RestrictToCafcassHmcts> restrictCheckboxFurtherEvidence;
 }

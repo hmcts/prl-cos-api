@@ -16,7 +16,7 @@ public abstract class AbstractWorkflow<T> implements Workflow<T> {
     public T execute(Task<T>[] tasks, DefaultTaskContext context, T payload, Pair... pairs) throws WorkflowException {
         threadLocalContext.set(context);
 
-        for (Pair pair : pairs) {
+        for (Pair<Object, Object> pair : pairs) {
             getContext().setTransientObject(pair.getKey().toString(), pair.getValue());
         }
 
