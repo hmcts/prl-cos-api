@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -535,10 +536,19 @@ public class CaseWorkerEmailServiceTest {
             .lastName("TestLast")
             .build();
 
+        PartyDetails applicant2 = PartyDetails.builder()
+            .firstName("TestFirst2")
+            .lastName("TestLast3")
+            .build();
+
         String applicantNames = "TestFirst TestLast";
 
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+        Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(applicant2).build();
+        List<Element<PartyDetails>> listOfApplicants = new ArrayList<>();
+        listOfApplicants.add(wrappedApplicants);
+        listOfApplicants.add(wrappedApplicant2);
+
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -837,5 +847,6 @@ public class CaseWorkerEmailServiceTest {
 
         assertEquals("testing@localcourt.com", caseData.getCourtEmailAddress());
     }
+
 }
 

@@ -185,7 +185,7 @@ public class CaseWorkerEmailService {
             if (applicants.size() > 1) {
                 email = caseData.getApplicantSolicitorEmailAddress();
             }
-        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        } else {
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
 

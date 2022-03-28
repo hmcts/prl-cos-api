@@ -409,7 +409,7 @@ public class CaseData implements MappableObject {
      * Return Application.
      */
     private final List<RejectReasonEnum> rejectReason;
-    private final List<FL401RejectReasonEnum> fl401rejectReason;
+    private final List<FL401RejectReasonEnum> fl401RejectReason;
     private final String returnMessage;
 
     /**
