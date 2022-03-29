@@ -174,7 +174,7 @@ public class ReturnApplicationServiceTest {
             }
 
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(casedata.getCaseTypeOfApplication())) {
-            for (FL401RejectReasonEnum reasonEnum : casedata.getFl401rejectReason()) {
+            for (FL401RejectReasonEnum reasonEnum : casedata.getFl401RejectReason()) {
                 returnMsgStr.append(reasonEnum.getDisplayedValue());
             }
         }
