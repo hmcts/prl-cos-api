@@ -129,9 +129,10 @@ public class FL401SubmitApplicationController {
             caseData = caseData.toBuilder().isCourtEmailFound("No").build();
             if (ofNullable(caseData.getCourtEmailAddress()).isPresent()) {
                 caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD,  caseData.getCourtEmailAddress());
+            } else {
+                caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD,  " ");
             }
         }
-
         caseDataUpdated.put(COURT_NAME_FIELD, nearestDomesticAbuseCourt != null
             ? nearestDomesticAbuseCourt.getCourtName() : "");
 
