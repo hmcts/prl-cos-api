@@ -35,10 +35,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
-import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
@@ -135,8 +133,8 @@ public class FL401SubmitApplicationController {
             ? nearestDomesticAbuseCourt.getCourtName() : "");
         caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, (nearestDomesticAbuseCourt != null
             && courtEmailAddress.isPresent()) ? courtEmailAddress.get().getAddress() :
-            ofNullable(nearestDomesticAbuseCourt.getCourtEmailAddresses()).isPresent() ?
-            nearestDomesticAbuseCourt.getCourtEmailAddresses().get(0) : "");
+            ofNullable(nearestDomesticAbuseCourt.getCourtEmailAddresses()).isPresent()
+                ? nearestDomesticAbuseCourt.getCourtEmailAddresses().get(0) : "");
 
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
             && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
