@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -246,7 +247,10 @@ public class FL401SubmitApplicationControllerTest {
 
         Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
             CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
-        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
+
+        when(courtFinderService.getEmailAddress(closestDomesticAbuseCourt))
+            .thenReturn(ofNullable(CourtEmailAddress.builder().build()));
+
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(fl401DocsMap);
         when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
