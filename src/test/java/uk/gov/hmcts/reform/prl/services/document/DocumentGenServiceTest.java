@@ -31,6 +31,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -142,6 +144,28 @@ public class DocumentGenServiceTest {
         verifyNoMoreInteractions(dgsService);
     }
 
+
+    @Test
+    public void testGenerateDraftDocumentEng() throws Exception {
+        CaseData caseData = CaseData.builder().build();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
+
+        Map<String, Object> docMap = documentGenService.generateDraftDocuments(authToken, caseData);
+        assertTrue(docMap.containsKey(DRAFT_DOCUMENT_FIELD));
+
+    }
+
+    @Test
+    public void testGenerateDraftDocumentWelsh() throws Exception {
+        CaseData caseData = CaseData.builder().build();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
+
+        Map<String, Object> docMap = documentGenService.generateDraftDocuments(authToken, caseData);
+        assertTrue(docMap.containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
+
+    }
 }
 
 
