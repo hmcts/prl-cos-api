@@ -33,6 +33,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_RESUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
@@ -244,9 +245,17 @@ public class TaskListRenderer {
         final TaskSection uploadDocuments = newSection("Upload documents")
             .withTask(tasks.get(FL401_UPLOAD_DOCUMENTS));
 
-        final TaskSection checkAndSignApplication = newSection("Check and sign application")
-            .withTask(tasks.get(VIEW_PDF_DOCUMENT))
-            .withTask(tasks.get(FL401_SOT_AND_SUBMIT));
+        final TaskSection checkAndSignApplication;
+
+        if (caseData.getState().equals(AWAITING_RESUBMISSION_TO_HMCTS)) {
+            checkAndSignApplication = newSection("Check and sign application")
+                .withTask(tasks.get(VIEW_PDF_DOCUMENT))
+                .withTask(tasks.get(FL401_SOT_AND_SUBMIT));
+        } else {
+            checkAndSignApplication = newSection("Check and sign application")
+                .withTask(tasks.get(VIEW_PDF_DOCUMENT))
+                .withTask(tasks.get(FL401_RESUBMIT));
+        }
 
         return Stream.of(applicationDetails,
                          peopleInTheCase,
