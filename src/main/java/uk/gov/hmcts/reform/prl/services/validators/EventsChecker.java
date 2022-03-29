@@ -19,6 +19,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_RESUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
@@ -117,6 +118,9 @@ public class EventsChecker {
     @Autowired
     private SubmitChecker submitChecker;
 
+    @Autowired
+    private FL401ResubmitChecker fl401ResubmitChecker;
+
     private Map<Event, EventChecker> eventStatus = new EnumMap<>(Event.class);
 
     @PostConstruct
@@ -149,7 +153,7 @@ public class EventsChecker {
         eventStatus.put(FL401_UPLOAD_DOCUMENTS, pdfChecker);
         eventStatus.put(FL401_OTHER_PROCEEDINGS, fl401OtherProceedingsChecker);
         eventStatus.put(FL401_SOT_AND_SUBMIT, fl401StatementOfTruthAndSubmitChecker);
-
+        eventStatus.put(FL401_RESUBMIT, fl401ResubmitChecker);
     }
 
     public boolean isFinished(Event event, CaseData caseData) {
