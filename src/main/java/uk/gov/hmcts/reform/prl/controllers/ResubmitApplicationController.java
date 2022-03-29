@@ -148,25 +148,23 @@ public class ResubmitApplicationController {
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
-        if (previousStates.isPresent()) {
-            if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
-                caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
-                caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
-                ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-                caseData = caseData.setDateSubmittedDate();
-                caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
-                caseDataUpdated.put(
-                    DATE_AND_TIME_SUBMITTED_FIELD,
-                    DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)
-                );
-                try {
-                    solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
-                    caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
-                    caseDataUpdated.put("isNotificationSent", "Yes");
-                } catch (Exception e) {
-                    log.error("Notification could not be sent due to {} ", e.getMessage());
-                    caseDataUpdated.put("isNotificationSent", "No");
-                }
+        if (previousStates.isPresent() && State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
+            caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
+            caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+            caseData = caseData.setDateSubmittedDate();
+            caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
+            caseDataUpdated.put(
+                DATE_AND_TIME_SUBMITTED_FIELD,
+                DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)
+            );
+            try {
+                solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
+                caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+                caseDataUpdated.put("isNotificationSent", "Yes");
+            } catch (Exception e) {
+                log.error("Notification could not be sent due to {} ", e.getMessage());
+                caseDataUpdated.put("isNotificationSent", "No");
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder()
