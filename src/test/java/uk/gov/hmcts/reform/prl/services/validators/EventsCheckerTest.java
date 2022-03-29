@@ -37,7 +37,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
@@ -102,9 +101,6 @@ class EventsCheckerTest {
     @MockBean
     FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
-    @MockBean
-    SubmitChecker submitChecker;
-
     @Autowired
     private EventsChecker eventsChecker;
 
@@ -166,8 +162,7 @@ class EventsCheckerTest {
             pdfChecker,
             submitAndPayChecker,
             fl401ApplicantFamilyChecker,
-            fl401StatementOfTruthAndSubmitChecker,
-            submitChecker);
+            fl401StatementOfTruthAndSubmitChecker);
     }
 
     private Stream<Arguments> getEventsValidators() {
@@ -188,7 +183,6 @@ class EventsCheckerTest {
             Arguments.of(WELSH_LANGUAGE_REQUIREMENTS, welshLanguageRequirementsChecker),
             Arguments.of(VIEW_PDF_DOCUMENT, pdfChecker),
             Arguments.of(SUBMIT_AND_PAY, submitAndPayChecker),
-            Arguments.of(SUBMIT, submitChecker),
             Arguments.of(FL401_APPLICANT_FAMILY_DETAILS, fl401ApplicantFamilyChecker),
             Arguments.of(FL401_UPLOAD_DOCUMENTS, pdfChecker),
             Arguments.of(FL401_SOT_AND_SUBMIT, fl401StatementOfTruthAndSubmitChecker));
