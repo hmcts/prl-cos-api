@@ -109,11 +109,13 @@ public class ReturnApplicationService {
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
                 returnMsgStr.append(reasonEnum.getDisplayedValue());
+                returnMsgStr.append("\n\n");
             }
 
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
                 returnMsgStr.append(reasonEnum.getDisplayedValue());
+                returnMsgStr.append("\n\n");
             }
         }
 
