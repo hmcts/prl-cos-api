@@ -132,6 +132,9 @@ public class FL401SubmitApplicationController {
             }
         }
 
+        caseDataUpdated.put(COURT_NAME_FIELD, nearestDomesticAbuseCourt != null
+            ? nearestDomesticAbuseCourt.getCourtName() : "");
+
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
 
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
