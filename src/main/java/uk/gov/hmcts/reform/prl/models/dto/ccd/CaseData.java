@@ -390,7 +390,7 @@ public class CaseData implements MappableObject {
      * Add case number.
      */
     private final String familymanCaseNumber;
-
+    private final String fl401FamilymanCaseNumber;
     /**
      * Manage Documents.
      */
