@@ -13,6 +13,7 @@ java:
         - launchDarkly-sdk-key
         - send-grid-api-key
         - rpa-notify-to-email
+        - rpa-notify-from-email
         - rpa-notify-from-preview-email
         - AppInsightsInstrumentationKey
         - southampton-court-email-address
