@@ -287,6 +287,13 @@ public class DocumentGenService {
                 break;
             case FINAL_HINT:
                 if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+                    template = !isWelsh ? c100FinalTemplate : c100FinalWelshTemplate;
+                } else {
+                    template = !isWelsh ? fl401FinalTemplate : fl401FinalWelshTemplate;
+                }
+                break;
+            case DRAFT_HINT:
+                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
                     template = !isWelsh ? c100DraftTemplate : c100DraftWelshTemplate;
                 } else {
                     template = !isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate;
