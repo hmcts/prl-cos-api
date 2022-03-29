@@ -295,7 +295,7 @@ public class FL401SubmitApplicationController {
             caseData = caseData.toBuilder().isDocumentGenerated("No").build();
         }
 
-        log.info("Genereated the {} document for case id {} ", template, caseData.getId());
+        log.info("Generated the {} document for case id {} ", template, caseData.getId());
         return generatedDocumentInfo;
     }
 
