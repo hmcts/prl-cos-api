@@ -149,11 +149,16 @@ public class ResubmitApplicationController {
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
         if (previousStates.isPresent()) {
-            if (State.CASE_ISSUE.getValue().equalsIgnoreCase(previousStates.get())) {
-                caseData = caseData.setIssueDate();
-                caseData = caseData.toBuilder().state(State.CASE_ISSUE).build();
-                caseDataUpdated.put(STATE_FIELD, State.CASE_ISSUE);
-                caseDataUpdated.put(PrlAppsConstants.ISSUE_DATE_FIELD, caseData.getIssueDate());
+            if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
+                caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
+                caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
+                ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+                caseData = caseData.setDateSubmittedDate();
+                caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
+                caseDataUpdated.put(
+                    DATE_AND_TIME_SUBMITTED_FIELD,
+                    DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)
+                );
                 try {
                     solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
                     caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
@@ -168,9 +173,6 @@ public class ResubmitApplicationController {
             .data(caseDataUpdated)
             .build();
     }
-
-
-
 
     private static boolean getPreviousState(String eachState) {
         return (!eachState.equalsIgnoreCase(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()))
