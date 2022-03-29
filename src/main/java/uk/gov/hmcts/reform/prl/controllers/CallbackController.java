@@ -448,12 +448,12 @@ public class CallbackController {
                 if (localCourtAdmin.isPresent()) {
                     Optional<LocalCourtAdminEmail> localCourtAdminEmail = localCourtAdmin.get().stream().map(Element::getValue)
                         .findFirst();
-                    if (localCourtAdmin.isPresent()) {
+                    if (localCourtAdminEmail.isPresent()) {
                         String email = localCourtAdminEmail.get().getEmail();
                         caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails,email);
                     }
                 }
-            } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            } else {
                 solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
                 caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails,caseData.getCourtEmailAddress());
             }
