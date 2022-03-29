@@ -352,4 +352,29 @@ public class CaseWorkerEmailService {
             .caseLink(manageCaseUrl + "/" + caseData.getId())
             .build();
     }
+
+    public void sendWithdrawApplicationEmailToLocalCourt(CaseDetails caseDetails, String courtEmail) {
+
+        log.info("*** Sending FL401 withdraw application email to localcourt for case :{} ***", caseDetails.getId());
+
+        emailService.send(
+            courtEmail,
+            EmailTemplateNames.WITHDRAW_AFTER_ISSUED_LOCAL_COURT,
+            buildLocalCourtAdminEmailForWithdrawAfterIssued(caseDetails),
+            LanguagePreference.english
+        );
+    }
+
+    public EmailTemplateVars buildLocalCourtAdminEmailForWithdrawAfterIssued(CaseDetails caseDetails) {
+
+        log.info("*** building email to localcourt for withdraw after issued for case:{} ***", caseDetails.getId());
+        caseData = emailService.getCaseData(caseDetails);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+
+        return CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
+            .build();
+    }
 }
