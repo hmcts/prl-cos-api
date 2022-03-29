@@ -237,6 +237,7 @@ public class TaskListRendererTest {
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
             .typeOfApplicationLinkToCA(linkToCA)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
 
         String expectedTaskList = String.join("\n", lines);

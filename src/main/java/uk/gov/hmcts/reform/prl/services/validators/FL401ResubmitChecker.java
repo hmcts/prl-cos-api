@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 @Service
-public class FL401ResubmitChecker implements EventChecker{
+public class FL401ResubmitChecker implements EventChecker {
 
     @Autowired
     FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
