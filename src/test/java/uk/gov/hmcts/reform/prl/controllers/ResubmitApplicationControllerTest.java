@@ -265,8 +265,8 @@ public class ResubmitApplicationControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
 
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.
-            fl401resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController
+            .fl401resubmitApplication(auth, callbackRequest);
 
         verify(solicitorEmailService).sendEmailToFl401Solicitor(caseDetails, userDetails);
         verify(caseWorkerEmailService).sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
