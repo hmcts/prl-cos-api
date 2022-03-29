@@ -198,4 +198,43 @@ public class FL401SubmitApplicationController {
             .build();
     }
 
+    private Document generateDocumentField(String fileName,GeneratedDocumentInfo generatedDocumentInfo) {
+        if (null == generatedDocumentInfo) {
+            return null;
+        }
+        return Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(fileName).build();
+    }
+
+    private GeneratedDocumentInfo generateDocument(String authorisation, String template, CaseData caseData,
+                                                   boolean isWelsh)
+        throws Exception {
+        log.info("Generating the {} document for case id {} ", template, caseData.getId());
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        if (isWelsh) {
+            generatedDocumentInfo = dgsService.generateWelshDocument(
+                authorisation,
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                template
+            );
+        } else {
+            generatedDocumentInfo = dgsService.generateDocument(
+                authorisation,
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                template
+            );
+        }
+        if (null != generatedDocumentInfo) {
+            caseData = caseData.toBuilder().isDocumentGenerated("Yes").build();
+        } else {
+            caseData = caseData.toBuilder().isDocumentGenerated("No").build();
+        }
+
+        log.info("Generated the {} document for case id {} ", template, caseData.getId());
+        return generatedDocumentInfo;
+    }
+
 }
