@@ -53,7 +53,7 @@ public class ReturnApplicationServiceTest {
             .applicantCaseName("TestCase")
             .applicantsFL401(applicant)
             .id(123L)
-            .fl401rejectReason(Collections.singletonList(witnessStatementNotProvided))
+            .fl401RejectReason(Collections.singletonList(witnessStatementNotProvided))
             .build();
 
         userDetails = UserDetails.builder()
@@ -85,7 +85,8 @@ public class ReturnApplicationServiceTest {
 
         casedata = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .fl401rejectReason(Collections.singletonList(witnessStatementNotProvided))
+            .fl401RejectReason(Collections.singletonList(witnessStatementNotProvided))
+
             .build();
 
         assertFalse(returnApplicationService.noRejectReasonSelected(casedata));
@@ -197,7 +198,7 @@ public class ReturnApplicationServiceTest {
             .append("Thank you for your application."
                         + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n");
 
-        for (FL401RejectReasonEnum reasonEnum : caseDataFl401.getFl401rejectReason()) {
+        for (FL401RejectReasonEnum reasonEnum : caseDataFl401.getFl401RejectReason()) {
             returnMsgStr.append(reasonEnum.getReturnMsgText());
         }
 
