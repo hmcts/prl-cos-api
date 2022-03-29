@@ -178,11 +178,13 @@ public class DocumentGenService {
 
         caseData = fillOrgDetails(caseData);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-
+        log.info("Selected Language for generating the docs English => {}, Welsh => {}" , documentLanguage.isGenEng(), documentLanguage.isGenWelsh());
         if (documentLanguage.isGenEng()) {
+            updatedCaseData.put("isEngDocGen", Yes.toString());
             updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
         }
         if (documentLanguage.isGenWelsh()) {
+            updatedCaseData.put("isWelshDocGen", Yes.toString());
             updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
         }
 
