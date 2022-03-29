@@ -120,21 +120,19 @@ public class FL401SubmitApplicationController {
         Optional<CourtEmailAddress> courtEmailAddress = courtFinderService
             .getEmailAddress(nearestDomesticAbuseCourt);
 
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
         if (courtEmailAddress.isPresent()) {
             caseData = caseData.toBuilder().isCourtEmailFound("Yes").build();
+            caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD,  courtEmailAddress.get().getAddress());
         } else {
             caseData = caseData.toBuilder().isCourtEmailFound("No").build();
+            if (ofNullable(caseData.getCourtEmailAddress()).isPresent()) {
+                caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD,  caseData.getCourtEmailAddress());
+            }
         }
 
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
-
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(COURT_NAME_FIELD, nearestDomesticAbuseCourt != null
-            ? nearestDomesticAbuseCourt.getCourtName() : "");
-        caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, (nearestDomesticAbuseCourt != null
-            && courtEmailAddress.isPresent()) ? courtEmailAddress.get().getAddress() :
-            ofNullable(nearestDomesticAbuseCourt.getCourtEmailAddresses()).isPresent()
-                ? nearestDomesticAbuseCourt.getCourtEmailAddresses().get(0) : "");
 
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
             && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
