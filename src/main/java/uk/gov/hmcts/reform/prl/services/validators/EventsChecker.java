@@ -43,79 +43,79 @@ import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 public class EventsChecker {
 
     @Autowired
-    CaseNameChecker caseNameChecker;
+    private CaseNameChecker caseNameChecker;
 
     @Autowired
-    ApplicationTypeChecker applicationTypeChecker;
+    private ApplicationTypeChecker applicationTypeChecker;
 
     @Autowired
-    HearingUrgencyChecker hearingUrgencyChecker;
+    private HearingUrgencyChecker hearingUrgencyChecker;
 
     @Autowired
-    ApplicantsChecker applicantsChecker;
+    private ApplicantsChecker applicantsChecker;
 
     @Autowired
-    ChildChecker childChecker;
+    private ChildChecker childChecker;
 
     @Autowired
-    RespondentsChecker respondentsChecker;
+    private RespondentsChecker respondentsChecker;
 
     @Autowired
-    RespondentBehaviourChecker respondentBehaviourChecker;
+    private RespondentBehaviourChecker respondentBehaviourChecker;
 
     @Autowired
-    MiamChecker miamChecker;
+    private MiamChecker miamChecker;
 
     @Autowired
-    AllegationsOfHarmChecker allegationsOfHarmChecker;
+    private AllegationsOfHarmChecker allegationsOfHarmChecker;
 
     @Autowired
-    OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
+    private OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
 
     @Autowired
-    OtherProceedingsChecker otherProceedingsChecker;
+    private OtherProceedingsChecker otherProceedingsChecker;
 
     @Autowired
-    AttendingTheHearingChecker attendingTheHearingChecker;
+    private AttendingTheHearingChecker attendingTheHearingChecker;
 
     @Autowired
-    InternationalElementChecker internationalElementChecker;
+    private InternationalElementChecker internationalElementChecker;
 
     @Autowired
-    LitigationCapacityChecker litigationCapacityChecker;
+    private LitigationCapacityChecker litigationCapacityChecker;
 
     @Autowired
-    WelshLanguageRequirementsChecker welshLanguageRequirementsChecker;
+    private WelshLanguageRequirementsChecker welshLanguageRequirementsChecker;
 
     @Autowired
-    PdfChecker pdfChecker;
+    private PdfChecker pdfChecker;
 
     @Autowired
-    SubmitAndPayChecker submitAndPayChecker;
+    private SubmitAndPayChecker submitAndPayChecker;
 
     @Autowired
-    HomeChecker homeChecker;
+    private HomeChecker homeChecker;
 
     @Autowired
-    RespondentRelationshipChecker respondentRelationshipChecker;
+    private RespondentRelationshipChecker respondentRelationshipChecker;
 
     @Autowired
-    FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
+    private FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
 
     @Autowired
-    FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
+    private FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
 
     @Autowired
-    FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
+    private FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
     @Autowired
-    WithoutNoticeOrderChecker withoutNoticeOrderChecker;
+    private WithoutNoticeOrderChecker withoutNoticeOrderChecker;
 
     @Autowired
-    FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
+    private FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
 
     @Autowired
-    SubmitChecker submitChecker;
+    private SubmitChecker submitChecker;
 
     private Map<Event, EventChecker> eventStatus = new EnumMap<>(Event.class);
 
