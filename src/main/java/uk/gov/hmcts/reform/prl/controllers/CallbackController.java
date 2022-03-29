@@ -445,8 +445,12 @@ public class CallbackController {
                 solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
                 Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
                 if (localCourtAdmin.isPresent()) {
-                    String email = localCourtAdmin.get().stream().map(Element::getValue).findFirst().get().getEmail();
-                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails,email);
+                    Optional<LocalCourtAdminEmail> localCourtAdminEmail = localCourtAdmin.get().stream().map(Element::getValue)
+                        .findFirst();
+                    if (localCourtAdmin.isPresent()) {
+                        String email = localCourtAdminEmail.get().getEmail();
+                        caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails,email);
+                    }
                 }
             } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
