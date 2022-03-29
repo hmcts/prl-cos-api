@@ -100,6 +100,11 @@ public class EventCheckerTest {
         assertTrue(eventsChecker.isStarted(Event.FL401_APPLICANT_FAMILY_DETAILS, caseData));
     }
 
+    @Test
+    public void checkGetEventStatus() {
+        assertTrue(eventsChecker.getEventStatus().containsKey(Event.APPLICANT_DETAILS));
+    }
+
 
 
 
