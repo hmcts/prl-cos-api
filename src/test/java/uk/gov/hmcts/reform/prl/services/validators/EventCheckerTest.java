@@ -103,6 +103,7 @@ public class EventCheckerTest {
     @Test
     public void checkGetEventStatus() {
         assertTrue(eventsChecker.getEventStatus().containsKey(Event.APPLICANT_DETAILS));
+        assertTrue(eventsChecker.getEventStatus().containsValue(applicantsChecker));
     }
 
 
