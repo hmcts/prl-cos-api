@@ -441,7 +441,9 @@ public class CallbackController {
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         List<String> stateList = List.of(State.AWAITING_SUBMISSION_TO_HMCTS.getValue(),"CLOSED",
                                          State.SUBMITTED_NOT_PAID.getValue(),
-                                         State.SUBMITTED_PAID.getValue());
+                                         State.SUBMITTED_PAID.getValue(),State.AWAITING_RESUBMISSION_TO_HMCTS.getValue());
+        log.info("*** previous state *** {}", previousState);
+        log.info("*** Events previous states *** {}", eventsForCase.toString());
         if (previousState.isPresent() && !stateList.contains(previousState.get())) {
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
