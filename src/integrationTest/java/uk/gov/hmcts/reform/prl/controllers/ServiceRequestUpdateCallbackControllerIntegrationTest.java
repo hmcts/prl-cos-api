@@ -4,6 +4,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 //import org.apache.http.entity.StringEntity;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 //import org.junit.Ignore;
 import org.junit.Test;
@@ -12,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
+import uk.gov.hmcts.reform.prl.ResourceLoader;
 
 import java.io.IOException;
 
@@ -41,21 +44,20 @@ public class ServiceRequestUpdateCallbackControllerIntegrationTest extends Integ
             httpResponse.getStatusLine().getStatusCode(),
             HttpStatus.SC_BAD_REQUEST);
     }
-    /*
-    @Ignore
+
     @Test
     public void whenValidRequestFormat_Return200() throws Exception {
 
-        HttpPost httpPost = new HttpPost(serviceUrl + serviceRequestContextPath);
+        HttpPut httpPut = new HttpPut(serviceUrl + serviceRequestContextPath);
         String requestBody = ResourceLoader.loadJson(path);
-        httpPost.addHeader("Authorization", getAuthorizationToken());
-        httpPost.addHeader("Authorization", "ServiceAuthorization");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPut.addHeader("Authorization", getAuthorizationToken());
+        httpPut.addHeader("Authorization", "ServiceAuthorization");
+        httpPut.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        httpPut.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPut);
         assertEquals(
             HttpStatus.SC_OK,
             httpResponse.getStatusLine().getStatusCode());
-    }*/
+    }
 }
