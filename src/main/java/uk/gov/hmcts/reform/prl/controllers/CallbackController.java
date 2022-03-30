@@ -557,7 +557,11 @@ public class CallbackController {
 
     private static boolean getPreviousState(String eachState) {
         return (!eachState.equalsIgnoreCase(State.CASE_WITHDRAWN.getValue())
-            || eachState.equalsIgnoreCase(State.CASE_ISSUE.getValue()));
+            && (!eachState.equalsIgnoreCase(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()))
+            && (!eachState.equalsIgnoreCase(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()))
+            && (!eachState.equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue()))
+            && (!eachState.equalsIgnoreCase(State.SUBMITTED_PAID.getValue())))
+            || eachState.equalsIgnoreCase(State.CASE_ISSUE.getValue());
     }
 
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated) {
