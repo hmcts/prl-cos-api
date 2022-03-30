@@ -39,23 +39,10 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
 
-    @DisplayName("temporary test to verify gov UK notifications integration")
-    @Test
-    @Ignore
-    public void sendEmail() {
-        cosApiClient.sendEmail(CallbackRequest.builder()
-                                   .caseDetails(CaseDetails.builder().build())
-                                   .build());
-    }
-
-
     @Test
     public void testDocumentGenerate_return200() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-
-        Response response = callDocGenerateAndSave(requestBody);
-
         HttpGet httpGet = new HttpGet(documentPrlGenerateUri);
         httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);

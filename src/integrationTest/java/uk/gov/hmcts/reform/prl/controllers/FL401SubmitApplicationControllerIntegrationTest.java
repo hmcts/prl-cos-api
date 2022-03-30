@@ -1,22 +1,30 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
 
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringBootTest(classes = {FL401SubmitApplicationControllerIntegrationTest.class, Application.class})
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@ContextConfiguration
 public class FL401SubmitApplicationControllerIntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
@@ -25,6 +33,9 @@ public class FL401SubmitApplicationControllerIntegrationTest {
     private final String fl401ValidationUrl = "/fl401-submit-application-validation";
 
     private final String validBody = "requests/FL401-case-data.json";
+
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
 
     @Test
     public void whenFL401ValidationRequestShouldReturn200() throws Exception {

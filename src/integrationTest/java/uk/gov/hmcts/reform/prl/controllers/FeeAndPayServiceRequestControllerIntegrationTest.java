@@ -48,18 +48,10 @@ public class FeeAndPayServiceRequestControllerIntegrationTest extends Integratio
             HttpStatus.SC_BAD_REQUEST);
     }
 
-    @Ignore
     @Test
     public void whenValidRequestFormat_Return200() throws Exception {
 
         HttpPost httpPost = new HttpPost(serviceUrl + feeAndPayServiceRequestControllerEndPoint);
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(
-            CaseDetails.builder().caseId("1639090820727541")
-                .caseData(CaseData.builder()
-                              .id(1639090820727541L)
-                              .build())
-                .build()
-        ).build();
 
         String requestBody = ResourceLoader.loadJson(path);
         httpPost.addHeader("Authorization", getAuthorizationToken());

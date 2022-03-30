@@ -44,7 +44,6 @@ public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @Ignore
     public void whenValidRequestFormat_Return200() throws Exception {
 
         HttpPost httpPost = new HttpPost(serviceUrl + caseInitiationControllerEndpoint);
