@@ -134,6 +134,12 @@ idam:
       context-path: /oauth2/token
   user:
     genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
+  solicitor:
+    username: ${IDAM_SOLICITOR_USERNAME:fprl_caseworker_solicitor@mailinator.com}
+    password: ${IDAM_SOLICITOR_PASSWORD:Nagoya0102}
+  system-update:
+    username: ${IDAM_SOLICITOR_USERNAME:dummysolicitor@test.com}
+    password: ${IDAM_SOLICITOR_PASSWORD:dummy}
 
 core_case_data:
   api:
