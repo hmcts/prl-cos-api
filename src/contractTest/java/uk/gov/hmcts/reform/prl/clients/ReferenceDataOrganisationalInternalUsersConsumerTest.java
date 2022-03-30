@@ -8,13 +8,15 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @PactTestFor(providerName = "referenceData_organisationalInternal", port = "8894")
 @TestPropertySource(
-    properties = {"rd_professional.api.url=localhost:8894", "idam.api.url=localhost:5000"} )
+    properties = {"rd_professional.api.url=localhost:8894", "idam.api.url=localhost:5000"}
+)
 public class ReferenceDataOrganisationalInternalUsersConsumerTest extends ReferenceDataConsumerTestBase {
 
     @Pact(provider = "referenceData_organisationalInternal", consumer = "fpl_ccdConfiguration")
