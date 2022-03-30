@@ -43,7 +43,7 @@ public class ReturnApplicationService {
                 legalName = caseData.getSolicitorName();
             }
 
-        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        } else {
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
             String legalFirstName = fl401Applicant.getRepresentativeFirstName();
@@ -83,7 +83,7 @@ public class ReturnApplicationService {
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
             }
 
-        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        } else {
             for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
             }
