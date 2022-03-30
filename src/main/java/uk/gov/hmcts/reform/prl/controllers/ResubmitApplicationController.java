@@ -167,6 +167,7 @@ public class ResubmitApplicationController {
                 caseDataUpdated.put("isNotificationSent", "No");
             }
         }
+        caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
