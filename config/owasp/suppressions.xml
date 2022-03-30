@@ -35,9 +35,9 @@
     <cve>CVE-2022-23181</cve>
   </suppress>
   <suppress>
-  <notes><![CDATA[
+    <notes><![CDATA[
       Jackson data binding
   ]]></notes>
-  <cve>CVE-2020-36518</cve>
-</suppress>
+    <cve>CVE-2020-36518</cve>
+  </suppress>
 </suppressions>
