@@ -37,6 +37,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -115,7 +117,13 @@ public class CallbackControllerTest {
     SendgridService sendgridService;
 
     @Mock
+    DocumentLanguageService documentLanguageService;
+
+    @Mock
     C100JsonMapper c100JsonMapper;
+
+    @Mock
+    DgsService dgsService;
 
     @Mock
     private OrganisationService organisationService;
@@ -271,7 +279,7 @@ public class CallbackControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-      
+
         callbackController.generateAndStoreDocument(authToken, callbackRequest);
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
