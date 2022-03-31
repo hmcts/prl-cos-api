@@ -224,13 +224,15 @@ public class CallbackController {
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            solicitorEmailService.sendEmailToSolicitor(caseDetails, userDetails);
-
-            // Refreshing the page in the same event. Hence no external event call needed.
-            // Getting the tab fields and add it to the casedetails..
-            Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-
-            caseDataUpdated.putAll(allTabsFields);
+            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
+                // Refreshing the page in the same event. Hence no external event call needed.
+                // Getting the tab fields and add it to the casedetails..
+                Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+                caseDataUpdated.putAll(allTabsFields);
+            } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
+            }
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
