@@ -11,7 +11,6 @@ import java.time.LocalDate;
 @Builder
 @Jacksonized
 public class StatementOfTruth {
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate date;
     private final String fullname;
