@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.clients;
+package uk.gov.hmcts.reform.prl.clients.refdata;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit5.PactTestFor;
