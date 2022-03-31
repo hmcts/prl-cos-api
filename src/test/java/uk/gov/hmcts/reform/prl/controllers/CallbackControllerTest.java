@@ -37,12 +37,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
-import uk.gov.hmcts.reform.prl.services.DgsService;
-import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
@@ -59,12 +58,18 @@ import javax.json.JsonValue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -92,9 +97,6 @@ public class CallbackControllerTest {
     private WorkflowResult workflowResult;
 
     @Mock
-    private DgsService dgsService;
-
-    @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
 
     @Mock
@@ -119,12 +121,18 @@ public class CallbackControllerTest {
     private OrganisationService organisationService;
 
     @Mock
-    private DocumentLanguageService documentLanguageService;
-
-    @Mock
     private CaseWorkerEmailService caseWorkerEmailService;
 
+    @Mock
+    private DocumentGenService documentGenService;
+
     public static final String authToken = "Bearer TestAuthToken";
+
+    private static final Map<String, Object> c100DraftMap = new HashMap<>();
+    private static final Map<String, Object> c100DocsMap = new HashMap<>();
+
+    private static final Map<String, Object> fl401DraftMap = new HashMap<>();
+    private static final Map<String, Object> fl401DocsMap = new HashMap<>();
 
     @Before
     public void setUp() {
@@ -138,6 +146,24 @@ public class CallbackControllerTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
+
+        c100DraftMap.put(PrlAppsConstants.DRAFT_DOCUMENT_FIELD, "test");
+        c100DraftMap.put(PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD, "test");
+
+        c100DocsMap.put(PrlAppsConstants.DOCUMENT_FIELD_C8, "test");
+        c100DocsMap.put(PrlAppsConstants.DOCUMENT_FIELD_C1A, "test");
+        c100DocsMap.put(PrlAppsConstants.DOCUMENT_FIELD_FINAL, "test");
+        c100DocsMap.put(DOCUMENT_FIELD_C8_WELSH, "test");
+        c100DocsMap.put(DOCUMENT_FIELD_C1A_WELSH, "test");
+        c100DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
+
+        fl401DraftMap.put(PrlAppsConstants.DRAFT_DOCUMENT_FIELD, "test");
+        fl401DraftMap.put(PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD, "test");
+
+        fl401DocsMap.put(PrlAppsConstants.DOCUMENT_FIELD_C8, "test");
+        fl401DocsMap.put(PrlAppsConstants.DOCUMENT_FIELD_FINAL, "test");
+        fl401DocsMap.put(DOCUMENT_FIELD_C8_WELSH, "test");
+        fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
     }
 
     @Test
@@ -228,18 +254,13 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(c100DraftMap);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
-        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
@@ -250,7 +271,7 @@ public class CallbackControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
+      
         callbackController.generateAndStoreDocument(authToken, callbackRequest);
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
@@ -321,16 +342,10 @@ public class CallbackControllerTest {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
-        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(documentGenService.generateDraftDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(fl401DraftMap);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -340,22 +355,10 @@ public class CallbackControllerTest {
                              .build())
             .build();
 
-        callbackController.generateAndStoreDocument(authToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(authToken, callbackRequest);
 
-        verify(dgsService, times(1)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verify(dgsService, times(1)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verify(organisationService,times(1))
-            .getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class));
-        verifyNoMoreInteractions(dgsService);
-        verifyNoMoreInteractions(organisationService);
+        assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_FIELD));
+        assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
     }
 
     @Test
@@ -409,14 +412,11 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
-        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
+
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(documentGenService.generateDraftDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(fl401DraftMap);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
@@ -428,19 +428,10 @@ public class CallbackControllerTest {
                              .build())
             .build();
 
-        callbackController.generateAndStoreDocument(authToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(authToken, callbackRequest);
 
-        verify(dgsService, times(1)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verify(dgsService, times(1)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verifyNoMoreInteractions(dgsService);
+        assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_FIELD));
+        assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
     }
 
     @Test
@@ -495,14 +486,12 @@ public class CallbackControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(documentGenService.generateDraftDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(fl401DraftMap);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -512,14 +501,10 @@ public class CallbackControllerTest {
                              .build())
             .build();
 
-        callbackController.generateAndStoreDocument(authToken, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(authToken, callbackRequest);
 
-        verify(dgsService, times(1)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verifyNoMoreInteractions(dgsService);
+        assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_FIELD));
+        assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
     }
 
     @Test
@@ -596,12 +581,7 @@ public class CallbackControllerTest {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
-        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(c100DocsMap);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.issueAndSendToLocalCourt(
             authToken,
@@ -612,21 +592,7 @@ public class CallbackControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8WelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
-        verify(dgsService, times(3)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verify(dgsService, times(3)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verify(organisationService,times(1))
-            .getApplicantOrganisationDetails(caseData);
-        verify(organisationService,times(2))
-            .getRespondentOrganisationDetails(caseData);
-        verifyNoMoreInteractions(dgsService);
+
         verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
     }
 
@@ -729,8 +695,11 @@ public class CallbackControllerTest {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
         CaseData caseData = CaseData.builder()
-                           .withDrawApplicationData(withdrawApplication)
-                           .applicants(applicantList).build();
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .withDrawApplicationData(withdrawApplication)
+            .applicants(applicantList)
+            .build();
+
         Map<String, Object> stringObjectMap = new HashMap<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -743,7 +712,7 @@ public class CallbackControllerTest {
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
         verify(solicitorEmailService, times(1))
-            .sendEmailToSolicitor(callbackRequest.getCaseDetails(), userDetails);
+            .sendWithDrawEmailToSolicitor(callbackRequest.getCaseDetails(), userDetails);
     }
 
     @Test
@@ -888,5 +857,50 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .copyFL401CasenameToC100CaseName(authToken, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
+    }
+
+    @Test
+    public void testSendCaseWithdrawNotificationForFL401() throws Exception {
+        WithdrawApplication withdrawApplication = WithdrawApplication.builder()
+            .withDrawApplication(YesOrNo.Yes)
+            .withDrawApplicationReason("Test data")
+            .build();
+
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .firstName("testUser")
+            .lastName("last test")
+            .solicitorEmail("testing@solicitor.com")
+            .build();
+
+        String applicantFullName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .email("testing@solicitor.com")
+            .build();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", fl401Applicant.getSolicitorEmail());
+
+        String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .withDrawApplicationData(withdrawApplication)
+            .applicantsFL401(fl401Applicant)
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .data(stringObjectMap).build()).build();
+
+        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
+        verify(solicitorEmailService, times(1))
+            .sendWithDrawEmailToFl401Solicitor(callbackRequest.getCaseDetails(), userDetails);
     }
 }
