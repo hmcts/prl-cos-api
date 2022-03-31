@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.ZoneId;
@@ -51,6 +52,9 @@ public class SendAndReplyControllerTest {
 
     @Mock
     ElementUtils elementUtils;
+
+    @Mock
+    AllTabServiceImpl allTabService;
 
     CaseData replyCaseData;
     Map<String, Object> caseDataMap;

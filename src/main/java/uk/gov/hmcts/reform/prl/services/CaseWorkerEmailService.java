@@ -163,34 +163,42 @@ public class CaseWorkerEmailService {
             .contentFromDev(returnMessage)
             .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .build();
-
     }
 
+
     public void sendReturnApplicationEmailToSolicitor(CaseDetails caseDetails) {
-
         caseData = emailService.getCaseData(caseDetails);
+        String email = "";
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> applicants = caseData
+                .getApplicants()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
 
-        List<PartyDetails> applicants = caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
+            List<String> applicantEmailList = applicants.stream()
+                .map(PartyDetails::getSolicitorEmail)
+                .collect(Collectors.toList());
 
-        List<String> applicantEmailList = applicants.stream()
-            .map(PartyDetails::getSolicitorEmail)
-            .collect(Collectors.toList());
+            email = applicantEmailList.get(0);
 
-        String email = applicantEmailList.get(0);
+            if (applicants.size() > 1) {
+                email = caseData.getApplicantSolicitorEmailAddress();
+            }
+        } else {
+            PartyDetails fl401Applicant = caseData
+                .getApplicantsFL401();
 
-        if (applicants.size() > 1) {
-            email = caseData.getApplicantSolicitorEmailAddress();
+            email = fl401Applicant.getSolicitorEmail();
         }
+
         emailService.send(
             email,
             EmailTemplateNames.RETURNAPPLICATION,
             buildReturnApplicationEmail(caseDetails),
             LanguagePreference.english
         );
+
 
     }
 
