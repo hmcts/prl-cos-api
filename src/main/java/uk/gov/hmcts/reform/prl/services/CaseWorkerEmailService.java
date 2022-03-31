@@ -218,7 +218,8 @@ public class CaseWorkerEmailService {
 
         emailList.forEach(email ->   emailService.send(
             email,
-            EmailTemplateNames.GATEKEEPER,
+            PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                ? EmailTemplateNames.GATEKEEPER_FL401 : EmailTemplateNames.GATEKEEPER,
             buildGatekeeperEmail(caseDetails),
             LanguagePreference.english
         ));
@@ -231,7 +232,7 @@ public class CaseWorkerEmailService {
         String typeOfHearing = "";
         String isCaseUrgent = NO;
 
-        if (caseData.getIsCaseUrgent().equals(YesOrNo.Yes)) {
+        if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
             typeOfHearing = URGENT_CASE;
             isCaseUrgent = YES;
         }
