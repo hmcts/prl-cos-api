@@ -178,11 +178,13 @@ public class DocumentGenService {
 
         caseData = fillOrgDetails(caseData);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-
+        log.info("Selected Language for generating the docs English => {}, Welsh => {}", documentLanguage.isGenEng(), documentLanguage.isGenWelsh());
         if (documentLanguage.isGenEng()) {
+            updatedCaseData.put("isEngDocGen", Yes.toString());
             updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
         }
         if (documentLanguage.isGenWelsh()) {
+            updatedCaseData.put("isWelshDocGen", Yes.toString());
             updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
         }
 
@@ -286,6 +288,13 @@ public class DocumentGenService {
                 template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
                 break;
             case FINAL_HINT:
+                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+                    template = !isWelsh ? c100FinalTemplate : c100FinalWelshTemplate;
+                } else {
+                    template = !isWelsh ? fl401FinalTemplate : fl401FinalWelshTemplate;
+                }
+                break;
+            case DRAFT_HINT:
                 if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
                     template = !isWelsh ? c100DraftTemplate : c100DraftWelshTemplate;
                 } else {

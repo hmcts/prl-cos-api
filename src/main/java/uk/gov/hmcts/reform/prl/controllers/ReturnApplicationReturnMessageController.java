@@ -79,15 +79,16 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
 
         // Refreshing the page in the same event. Hence no external event call needed.
         // Getting the tab fields and add it to the casedetails..
-        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        caseDataUpdated.putAll(allTabsFields);
         caseDataUpdated.put("taskListReturn", returnApplicationService.getReturnMessageForTaskList(caseData));
 
         String updatedTaskList = caseEventHandler.getUpdatedTaskList(caseData);
         caseDataUpdated.put("taskList", updatedTaskList);
+
+        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+        caseDataUpdated.putAll(allTabsFields);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

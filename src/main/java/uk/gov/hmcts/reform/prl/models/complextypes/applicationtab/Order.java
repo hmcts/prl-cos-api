@@ -10,7 +10,6 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class Order {
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateIssued;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

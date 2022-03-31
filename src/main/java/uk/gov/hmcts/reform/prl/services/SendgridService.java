@@ -52,6 +52,7 @@ public class SendgridService {
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
             sg.api(request);
+            log.info("Notification to RPA sent successfully");
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
         }

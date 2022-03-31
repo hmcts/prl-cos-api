@@ -197,5 +197,4 @@ public class FL401SubmitApplicationController {
             .data(caseData)
             .build();
     }
-
 }
