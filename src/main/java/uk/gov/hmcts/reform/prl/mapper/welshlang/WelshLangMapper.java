@@ -92,14 +92,26 @@ public class WelshLangMapper {
     }
 
     private static Object getValueFromMap(Object key, Object obj, boolean isCA) {
-        if (!(isCA ? CA_WELSH_CONDITONAL_MAP : DA_WELSH_CONDITONAL_MAP).contains(key)) {
-            if (key != null && (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).containsKey(key + "_" + obj)) {
+        if (validateConditionalKey(key, isCA)) {
+            if (validateMappingKey(key, obj, isCA)) {
                 obj = (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).get(key + "_" + obj);
-            } else if ((isCA ? CA_WELSH_MAP : DA_WELSH_MAP).containsKey(obj)) {
+            } else if (validateObject(obj, isCA)) {
                 obj = (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).get(obj);
             }
         }
         return obj;
+    }
+
+    private static boolean validateObject(Object obj, boolean isCA) {
+        return (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).containsKey(obj);
+    }
+
+    private static boolean validateMappingKey(Object key, Object obj, boolean isCA) {
+        return key != null && (isCA ? CA_WELSH_MAP : DA_WELSH_MAP).containsKey(key + "_" + obj);
+    }
+
+    private static boolean validateConditionalKey(Object key, boolean isCA) {
+        return !(isCA ? CA_WELSH_CONDITONAL_MAP : DA_WELSH_CONDITONAL_MAP).contains(key);
     }
 
     /**
@@ -755,7 +767,7 @@ public class WelshLangMapper {
         welshMap.put(ApplicantRelationshipOptionsEnum.uncle.getDisplayedValue(), "Ewythr");
         welshMap.put(ApplicantRelationshipOptionsEnum.aunt.getDisplayedValue(), "Modryb");
         welshMap.put(ApplicantRelationshipOptionsEnum.nephew.getDisplayedValue(), "Nai");
-        welshMap.put(ApplicantRelationshipOptionsEnum.neice.getDisplayedValue(), "Nith");
+        welshMap.put(ApplicantRelationshipOptionsEnum.niece.getDisplayedValue(), "Nith");
         welshMap.put(ApplicantRelationshipOptionsEnum.cousin.getDisplayedValue(), "Cefnder/Cyfnither");
         welshMap.put(ApplicantRelationshipOptionsEnum.other.getDisplayedValue(), WELSH_OTHER);
 

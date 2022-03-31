@@ -50,6 +50,7 @@ import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
@@ -218,6 +219,9 @@ public class FL401SubmitApplicationController {
         }
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
@@ -243,17 +247,13 @@ public class FL401SubmitApplicationController {
             caseData = caseData.toBuilder()
                 .isNotificationSent("Yes")
                 .build();
+
         } catch (Exception e) {
             log.error("Notification could not be sent due to {} ", e.getMessage());
             caseData = caseData.toBuilder()
                 .isNotificationSent("No")
                 .build();
         }
-
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        caseData = caseData.toBuilder()
-            .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
-            .build();
 
         return CallbackResponse.builder()
             .data(caseData)
@@ -295,7 +295,7 @@ public class FL401SubmitApplicationController {
             caseData = caseData.toBuilder().isDocumentGenerated("No").build();
         }
 
-        log.info("Genereated the {} document for case id {} ", template, caseData.getId());
+        log.info("Generated the {} document for case id {} ", template, caseData.getId());
         return generatedDocumentInfo;
     }
 

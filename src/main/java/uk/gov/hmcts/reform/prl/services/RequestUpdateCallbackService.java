@@ -11,14 +11,20 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.exception.CaseNotFoundException;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -39,8 +45,9 @@ public class RequestUpdateCallbackService {
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final UserService userService;
-    private final ConfidentialityTabService confidentialityTabService;
+    private final AllTabServiceImpl allTabService;
     private final C100JsonMapper c100JsonMapper;
+    private final CourtFinderService courtFinderService;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
 
@@ -59,16 +66,22 @@ public class RequestUpdateCallbackService {
         );
 
         if (!Objects.isNull(caseDetails.getId())) {
-            if (confidentialityTabService
-                .updateConfidentialityDetails(caseDetails.getId(), objectMapper.convertValue(
-                    caseDetails.getData(),
-                    CaseData.class
-                ))) {
-                log.info(
-                    "Confidentiality details updated for caseId {}",
-                    caseDetails.getId()
-                );
-            }
+            CaseData caseData = objectMapper.convertValue(
+                caseDetails.getData(),
+                CaseData.class
+            );
+            log.info(
+                "Refreshing tab based on the payment response for caseid {} ",
+                serviceRequestUpdateDto.getCcdCaseNumber()
+            );
+            caseData = getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, caseData);
+            allTabService.updateAllTabsIncludingConfTab(caseData);
+
+            log.info(
+                "Refreshed the tab for caseid {} ",
+                serviceRequestUpdateDto.getCcdCaseNumber()
+            );
+
             log.info(
                 "Updating the Case data with payment information for caseId {}",
                 serviceRequestUpdateDto.getCcdCaseNumber()
@@ -86,6 +99,30 @@ public class RequestUpdateCallbackService {
             log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());
             throw new CaseNotFoundException("Case not present");
         }
+    }
+
+    private CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,
+                                                          CaseData caseData) {
+        try {
+            Court closestChildArrangementsCourt = courtFinderService.getNearestFamilyCourt(caseData);
+            if (serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)) {
+                ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+                caseData = caseData.toBuilder()
+                    .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
+                    .state(State.SUBMITTED_PAID)
+                    .build();
+
+            } else {
+                caseData = caseData.toBuilder()
+                    .state(State.SUBMITTED_NOT_PAID)
+                    .build();
+            }
+            caseData = caseData.toBuilder().courtName(closestChildArrangementsCourt != null
+                                               ? closestChildArrangementsCourt.getCourtName() : "").build();
+        } catch (Exception e) {
+            log.info("Error while populating case date in payment request call {}", caseData.getId());
+        }
+        return caseData;
     }
 
 

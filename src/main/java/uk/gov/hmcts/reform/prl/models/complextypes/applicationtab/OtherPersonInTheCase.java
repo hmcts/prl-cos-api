@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.applicationtab;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -18,6 +19,7 @@ public class OtherPersonInTheCase {
     private final String lastName;
     private final String previousName;
     private final YesOrNo isDateOfBirthKnown;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOfBirth;
     private final String gender;
     private final String otherGender;
