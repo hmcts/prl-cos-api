@@ -73,7 +73,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
@@ -206,92 +205,6 @@ public class CallbackControllerTest {
         verify(validateMiamApplicationOrExemptionWorkflow).run(callbackRequest);
         verifyNoMoreInteractions(validateMiamApplicationOrExemptionWorkflow);
 
-    }
-
-    @Test
-    public void testGenerateAndStoreDocument() throws Exception {
-
-        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-        orderList.add(FL401OrderTypeEnum.occupationOrder);
-        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
-
-        TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder()
-            .orderType(orderList)
-            .build();
-
-        LinkToCA linkToCA = LinkToCA.builder()
-            .linkToCaApplication(YesOrNo.Yes)
-            .caApplicationNumber("123")
-            .build();
-        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
-            .representativeLastName("Xyz")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
-            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-
-        CaseData caseData = CaseData.builder()
-            .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
-            .languageRequirementApplicationNeedWelsh(Yes)
-            .draftOrderDoc(Document.builder()
-                               .documentUrl(generatedDocumentInfo.getUrl())
-                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                               .documentHash(generatedDocumentInfo.getHashToken())
-                               .documentFileName("c100DraftFilename.pdf")
-                               .build())
-            .id(123L)
-            .draftOrderDocWelsh(Document.builder()
-                                    .documentUrl(generatedDocumentInfo.getUrl())
-                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                    .documentHash(generatedDocumentInfo.getHashToken())
-                                    .documentFileName("c100DraftWelshFilename")
-                                    .build())
-            .applicants(applicantList)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(c100DraftMap);
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
-            .thenReturn(caseData);
-        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
-            .thenReturn(caseData);
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        callbackController.generateAndStoreDocument(authToken, callbackRequest);
-        verify(dgsService, times(1)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verify(dgsService, times(1)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verifyNoMoreInteractions(dgsService);
     }
 
     @Test
