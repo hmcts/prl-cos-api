@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
+import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
 import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
@@ -121,7 +122,6 @@ public class WelshLangMapper {
         return Arrays.asList(
             "isAtAddressLessThan5Years",
             "typeOfChildArrangementsOrder",
-            "applicationPermissionRequired",
             "canYouProvideEmailAddress",
             "childrenKnownToLocalAuthority",
             "isDateOfBirthKnown",
@@ -182,7 +182,8 @@ public class WelshLangMapper {
          * Type of Application - Have you applied to the court for permission to make this application?.
          */
         welshMap.put("applicationPermissionRequired_Yes", "Do");
-        welshMap.put("applicationPermissionRequired_No", "Naddo, nid oes rhaid cael caniatâd");
+        welshMap.put(PermissionRequiredEnum.noNowSought.getDisplayedValue(), "Naddo, gwneir cais am ganiatâd nawr");
+        welshMap.put(PermissionRequiredEnum.noNotRequired.getDisplayedValue(), "Naddo, nid oes rhaid cael caniatâd");
 
         /**
          * Hearing urgency - Do you need a without notice hearing?.
@@ -767,7 +768,7 @@ public class WelshLangMapper {
         welshMap.put(ApplicantRelationshipOptionsEnum.uncle.getDisplayedValue(), "Ewythr");
         welshMap.put(ApplicantRelationshipOptionsEnum.aunt.getDisplayedValue(), "Modryb");
         welshMap.put(ApplicantRelationshipOptionsEnum.nephew.getDisplayedValue(), "Nai");
-        welshMap.put(ApplicantRelationshipOptionsEnum.neice.getDisplayedValue(), "Nith");
+        welshMap.put(ApplicantRelationshipOptionsEnum.niece.getDisplayedValue(), "Nith");
         welshMap.put(ApplicantRelationshipOptionsEnum.cousin.getDisplayedValue(), "Cefnder/Cyfnither");
         welshMap.put(ApplicantRelationshipOptionsEnum.other.getDisplayedValue(), WELSH_OTHER);
 

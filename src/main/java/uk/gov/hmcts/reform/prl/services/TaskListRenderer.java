@@ -45,11 +45,13 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
+import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_RESUBMISSION_TO_HMCTS;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskSection.newSection;
 
 @Service
@@ -72,7 +74,7 @@ public class TaskListRenderer {
 
         lines.add("<div class='width-50'>");
 
-        (isC100CaseType ? groupInSections(allTasks) : groupInSectionsForFL401(allTasks, caseData))
+        (isC100CaseType ? groupInSections(allTasks, caseData) : groupInSectionsForFL401(allTasks, caseData))
             .forEach(section -> lines.addAll(renderSection(section)));
 
         lines.add("</div>");
@@ -82,7 +84,7 @@ public class TaskListRenderer {
         return String.join("\n\n", lines);
     }
 
-    private List<TaskSection> groupInSections(List<Task> allTasks) {
+    private List<TaskSection> groupInSections(List<Task> allTasks, CaseData caseData) {
         final Map<Event, Task> tasks = allTasks.stream().collect(toMap(Task::getEvent, identity()));
         final TaskSection applicationDetails = newSection("Add application details")
             .withTask(tasks.get(CASE_NAME))
@@ -113,8 +115,15 @@ public class TaskListRenderer {
         final TaskSection pdfApplication = newSection("View PDF application")
             .withTask(tasks.get(VIEW_PDF_DOCUMENT));
 
-        final TaskSection submitAndPay = newSection("Submit and pay")
-            .withTask(tasks.get(SUBMIT_AND_PAY));
+        final TaskSection submit;
+
+        if (caseData.getState().equals(AWAITING_RESUBMISSION_TO_HMCTS)) {
+            submit = newSection("Submit")
+                .withTask(tasks.get(SUBMIT));
+        } else {
+            submit = newSection("Submit and pay")
+                .withTask(tasks.get(SUBMIT_AND_PAY));
+        }
 
         return Stream.of(applicationDetails,
                          peopleInTheCase,
@@ -122,7 +131,7 @@ public class TaskListRenderer {
                          miamDetails,
                          additionalInformation,
                          pdfApplication,
-                         submitAndPay)
+                         submit)
             .filter(TaskSection::hasAnyTask)
             .collect(toList());
     }
@@ -153,10 +162,8 @@ public class TaskListRenderer {
             case NOT_STARTED:
                 if (task.getEvent().equals(VIEW_PDF_DOCUMENT) || task.getEvent().equals(FL401_UPLOAD_DOCUMENTS)) {
                     lines.add(taskListRenderElements.renderLink(task));
-                } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
-                    lines.add(taskListRenderElements.renderDisabledLink(task)
-                                  + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
-                } else if (task.getEvent().equals(FL401_SOT_AND_SUBMIT)) {
+                } else if (task.getEvent().equals(SUBMIT_AND_PAY) || task.getEvent().equals(FL401_SOT_AND_SUBMIT)
+                    || task.getEvent().equals(SUBMIT)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
                                   + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
                 } else {
@@ -173,10 +180,8 @@ public class TaskListRenderer {
                               + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added"));
                 break;
             case FINISHED:
-                if (task.getEvent().equals(SUBMIT_AND_PAY)) {
-                    lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
-                } else if (task.getEvent().equals(FL401_SOT_AND_SUBMIT)) {
+                if (task.getEvent().equals(SUBMIT_AND_PAY) || task.getEvent().equals(FL401_SOT_AND_SUBMIT)
+                    || task.getEvent().equals(SUBMIT)) {
                     lines.add(taskListRenderElements.renderLink(task)
                                   + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
                 } else {

@@ -287,6 +287,8 @@ public class ApplicationsTabService implements TabService {
         TypeOfApplication typeOfApplication = TypeOfApplication.builder()
             .ordersApplyingFor(String.join(", ", ordersApplyingFor))
             .typeOfChildArrangementsOrder(typeOfChildArrangementsOrder)
+            .applicationPermissionRequired(caseData.getApplicationPermissionRequired().getDisplayedValue())
+            .applicationPermissionRequiredReason(caseData.getApplicationPermissionRequiredReason())
             .natureOfOrder(natureOfOrder)
             .build();
 
