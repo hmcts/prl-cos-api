@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.prl.Application;
+import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
 
@@ -20,10 +22,10 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringBootTest
+@SpringBootTest(classes = {Application.class, FL401SubmitApplicationControllerIntegrationTest.class})
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class FL401SubmitApplicationControllerIntegrationTest {
+public class FL401SubmitApplicationControllerIntegrationTest extends IntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;
@@ -33,7 +35,7 @@ public class FL401SubmitApplicationControllerIntegrationTest {
     private final String validBody = "requests/FL401-case-data.json";
 
     @Autowired
-    protected IdamTokenGenerator idamTokenGenerator;
+    IdamTokenGenerator idamTokenGenerator;
 
     @Test
     public void whenFL401ValidationRequestShouldReturn200() throws Exception {
@@ -56,7 +58,7 @@ public class FL401SubmitApplicationControllerIntegrationTest {
 
         HttpPost httpPost = new HttpPost("http://localhost:4044/fl401-generate-document-submit-application");
         String requestBody = ResourceLoader.loadJson(validBody);
-        httpPost.addHeader("Authorization", "TestAuth");
+        httpPost.addHeader("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor());
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);

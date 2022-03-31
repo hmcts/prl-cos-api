@@ -1,11 +1,11 @@
-package uk.gov.hmcts.reform.prl.clients;
+package uk.gov.hmcts.reform.prl.clients.refdata;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients(basePackages = {
-    "uk.gov.hmcts.reform.rd.client"
+    "uk.gov.hmcts.reform.prl.clients"
 })
 public class OrganisationApiConsumerApplication {
 }

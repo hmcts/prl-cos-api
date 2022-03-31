@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.clients;
+package uk.gov.hmcts.reform.prl.clients.fee;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;

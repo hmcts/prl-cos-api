@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.clients;
+package uk.gov.hmcts.reform.prl.clients.refdata;
 
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
@@ -8,6 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
+import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 
@@ -15,7 +17,7 @@ import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @PactFolder("pacts")
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = OrganisationApiConsumerApplication.class)
+@ContextConfiguration(classes = {OrganisationApiConsumerApplication.class, IdamApiConsumerApplication.class})
 public class ReferenceDataConsumerTestBase {
 
     @Autowired

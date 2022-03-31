@@ -16,16 +16,14 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringBootTest(classes = {SendAndReplyController.class, Application.class})
+@SpringBootTest(classes = {ReturnApplicationReturnMessageControllerIntegrationTest.class, Application.class})
 
-public class SendAndReplyController {
+public class ReturnApplicationReturnMessageControllerIntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;
 
-    private final String taskListControllerEndPoint = "/update-task-list/submitted";
-
-    private final String validBody = "requests/send-and-reply-case-data.json";
+    private final String validBody = "requests/C100-case-data.json";
 
     @Test
     public void whenInvalidRequestFormat_Return400() throws IOException {
@@ -38,9 +36,9 @@ public class SendAndReplyController {
     }
 
     @Test
-    public void whenSendAndReplyAboutToStartValidRequest_Return200() throws Exception {
+    public void whenReturnApplicationReturnMessageValidRequest_Return200() throws Exception {
 
-        HttpPost httpPost = new HttpPost(serviceUrl + "/send-and-reply-to-messages/about-to-start");
+        HttpPost httpPost = new HttpPost(serviceUrl + "/return-application-return-message");
         String requestBody = ResourceLoader.loadJson(validBody);
         httpPost.addHeader("Authorization", "TestAuth");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
@@ -52,4 +50,19 @@ public class SendAndReplyController {
             httpResponse.getStatusLine().getStatusCode());
     }
 
+
+    @Test
+    public void whenReturnApplicationNotificationValidRequest_Return200() throws Exception {
+
+        HttpPost httpPost = new HttpPost(serviceUrl + "/return-application-notification");
+        String requestBody = ResourceLoader.loadJson(validBody);
+        httpPost.addHeader("Authorization", "TestAuth");
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(
+            HttpStatus.SC_OK,
+            httpResponse.getStatusLine().getStatusCode());
+    }
 }
