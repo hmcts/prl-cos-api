@@ -22,6 +22,8 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
@@ -69,25 +71,6 @@ public class CallbackController {
 
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
-
-    /**
-     * It's just an example - to be removed when there are real tasks sending emails.
-     */
-
-    @PostMapping(path = "/send-email", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to send email")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public ResponseEntity<uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse> sendEmail(
-        @RequestBody @ApiParam("CaseData") CallbackRequest request
-    ) throws WorkflowException {
-        return ok(
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
-                .data(exampleService.executeExampleWorkflow(request.getCaseDetails()))
-                .build()
-        );
-    }
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -169,10 +152,10 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        requireNonNull(caseData);
-        sendgridService.sendEmail(c100JsonMapper.map(caseData));
-
+        if (YesOrNo.No.equals(caseData.getConsentOrder())) {
+            requireNonNull(caseData);
+            sendgridService.sendEmail(c100JsonMapper.map(caseData));
+        }
         caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
