@@ -768,7 +768,7 @@ public class WelshLangMapper {
         welshMap.put(ApplicantRelationshipOptionsEnum.uncle.getDisplayedValue(), "Ewythr");
         welshMap.put(ApplicantRelationshipOptionsEnum.aunt.getDisplayedValue(), "Modryb");
         welshMap.put(ApplicantRelationshipOptionsEnum.nephew.getDisplayedValue(), "Nai");
-        welshMap.put(ApplicantRelationshipOptionsEnum.neice.getDisplayedValue(), "Nith");
+        welshMap.put(ApplicantRelationshipOptionsEnum.niece.getDisplayedValue(), "Nith");
         welshMap.put(ApplicantRelationshipOptionsEnum.cousin.getDisplayedValue(), "Cefnder/Cyfnither");
         welshMap.put(ApplicantRelationshipOptionsEnum.other.getDisplayedValue(), WELSH_OTHER);
 
