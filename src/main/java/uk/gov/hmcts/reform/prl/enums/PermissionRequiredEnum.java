@@ -9,9 +9,9 @@ import lombok.RequiredArgsConstructor;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum PermissionRequiredEnum {
 
-    yes("yes"),
-    noNowSought("no now sought"),
-    noNotRequired("no, permission not required");
+    yes("Yes"),
+    noNowSought("No, permission now sought"),
+    noNotRequired("No, permission is not required");
 
     private final String displayedValue;
 
