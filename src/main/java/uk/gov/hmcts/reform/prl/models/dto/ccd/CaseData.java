@@ -71,6 +71,9 @@ import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -93,6 +96,7 @@ public class CaseData implements MappableObject {
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
+    private final String dateSubmittedAndTime;
 
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;
@@ -553,4 +557,22 @@ public class CaseData implements MappableObject {
     private String isDocumentGenerated;
     private String isNotificationSent;
 
+
+    public CaseData setDateSubmittedDate() {
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        this.toBuilder()
+            .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
+            .dateSubmittedAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime))
+            .build();
+
+        return this;
+    }
+
+    public CaseData setIssueDate() {
+        this.toBuilder()
+            .issueDate(LocalDate.now())
+            .build();
+
+        return this;
+    }
 }
