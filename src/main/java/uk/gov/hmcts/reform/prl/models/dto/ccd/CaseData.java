@@ -64,19 +64,16 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.documents.C8Document;
-import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
-import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
-import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
-import uk.gov.hmcts.reform.prl.models.documents.UploadDocument;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -99,6 +96,7 @@ public class CaseData implements MappableObject {
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
+    private final String dateSubmittedAndTime;
 
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;
@@ -131,9 +129,9 @@ public class CaseData implements MappableObject {
      * Upload documents.
      */
 
-    private final List<ContactOrderDocument> contactOrderDocumentsUploaded;
-    private final List<C8Document> c8FormDocumentsUploaded;
-    private final List<OtherDocument> otherDocumentsUploaded;
+    private final List<Document> contactOrderDocumentsUploaded;
+    private final List<Document> c8FormDocumentsUploaded;
+    private final List<Document> otherDocumentsUploaded;
 
     /**
      * People in the case.
@@ -160,7 +158,7 @@ public class CaseData implements MappableObject {
     private final ChildArrangementOrderTypeEnum typeOfChildArrangementsOrder;
     private final String natureOfOrder;
     private final YesOrNo consentOrder;
-    private final ConsentOrderDocument draftConsentOrderFile;
+    private final Document draftConsentOrderFile;
     private final PermissionRequiredEnum applicationPermissionRequired;
     private final String applicationPermissionRequiredReason;
     private final String applicationDetails;
@@ -216,11 +214,11 @@ public class CaseData implements MappableObject {
     private final String familyMediatorServiceName;
     private final String soleTraderName;
     //TODO: refactor to remove duplicated details screen
-    private final MiamDocument miamCertificationDocumentUpload;
+    private final Document miamCertificationDocumentUpload;
     private final String mediatorRegistrationNumber1;
     private final String familyMediatorServiceName1;
     private final String soleTraderName1;
-    private final MiamDocument miamCertificationDocumentUpload1;
+    private final Document miamCertificationDocumentUpload1;
 
     /**
      * Allegations of harm.
@@ -260,42 +258,42 @@ public class CaseData implements MappableObject {
     private final LocalDate ordersNonMolestationEndDate;
     private final YesOrNo ordersNonMolestationCurrent;
     private final String ordersNonMolestationCourtName;
-    private final OtherDocument ordersNonMolestationDocument;
+    private final Document ordersNonMolestationDocument;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOccupationDateIssued;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOccupationEndDate;
     private final YesOrNo ordersOccupationCurrent;
     private final String ordersOccupationCourtName;
-    private final OtherDocument ordersOccupationDocument;
+    private final Document ordersOccupationDocument;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersForcedMarriageProtectionDateIssued;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersForcedMarriageProtectionEndDate;
     private final YesOrNo ordersForcedMarriageProtectionCurrent;
     private final String ordersForcedMarriageProtectionCourtName;
-    private final OtherDocument ordersForcedMarriageProtectionDocument;
+    private final Document ordersForcedMarriageProtectionDocument;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersRestrainingDateIssued;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersRestrainingEndDate;
     private final YesOrNo ordersRestrainingCurrent;
     private final String ordersRestrainingCourtName;
-    private final OtherDocument ordersRestrainingDocument;
+    private final Document ordersRestrainingDocument;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOtherInjunctiveDateIssued;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOtherInjunctiveEndDate;
     private final YesOrNo ordersOtherInjunctiveCurrent;
     private final String ordersOtherInjunctiveCourtName;
-    private final OtherDocument ordersOtherInjunctiveDocument;
+    private final Document ordersOtherInjunctiveDocument;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersUndertakingInPlaceDateIssued;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersUndertakingInPlaceEndDate;
     private final YesOrNo ordersUndertakingInPlaceCurrent;
     private final String ordersUndertakingInPlaceCourtName;
-    private final OtherDocument ordersUndertakingInPlaceDocument;
+    private final Document ordersUndertakingInPlaceDocument;
     private final YesOrNo allegationsOfHarmOtherConcerns;
     private final String allegationsOfHarmOtherConcernsDetails;
     private final String allegationsOfHarmOtherConcernsCourtActions;
@@ -529,9 +527,8 @@ public class CaseData implements MappableObject {
     /**
      * FL401 Upload Documents.
      */
-    private final List<UploadDocument> fl401UploadedDocuments;
-    private final List<UploadDocument> fl401UploadWitnessDocuments;
-    private final List<UploadDocument> fl401UploadSupportDocuments;
+    private final List<Document> fl401UploadWitnessDocuments;
+    private final List<Document> fl401UploadSupportDocuments;
 
     /**
      * Send to Gatekeeper.
@@ -560,4 +557,22 @@ public class CaseData implements MappableObject {
     private String isDocumentGenerated;
     private String isNotificationSent;
 
+
+    public CaseData setDateSubmittedDate() {
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        this.toBuilder()
+            .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
+            .dateSubmittedAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime))
+            .build();
+
+        return this;
+    }
+
+    public CaseData setIssueDate() {
+        this.toBuilder()
+            .issueDate(LocalDate.now())
+            .build();
+
+        return this;
+    }
 }
