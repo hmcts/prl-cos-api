@@ -81,4 +81,26 @@ public class DgsServiceTest {
 
     }
 
+    @Test
+    public void testToGenerateWelshDocument() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseId("123")
+            .caseData(caseData)
+            .build();
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        when(dgsService.generateWelshDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE)).thenReturn(generatedDocumentInfo);
+
+        assertEquals(dgsService.generateWelshDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE),generatedDocumentInfo);
+
+    }
 }

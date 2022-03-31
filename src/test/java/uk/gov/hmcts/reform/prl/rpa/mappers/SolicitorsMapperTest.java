@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
@@ -34,6 +35,8 @@ import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorsMapperTest {
@@ -111,10 +114,26 @@ public class SolicitorsMapperTest {
     }
 
     @Test
+    public void testCallOrgSearchFormSolicitorMapWithNullParty() {
+        assertNotNull(solicitorsMapper.callOrgSearchFormSolicitorMap("123", PartyDetails.builder().build()));
+    }
+
+    @Test
+    public void testCallOrgSearchFormSolicitorMapWithPartyDetails() {
+        PartyDetails partyDetails = PartyDetails
+            .builder()
+            .solicitorOrg(Organisation.builder().organisationID("1234").build())
+            .build();
+        when(organisationService1.getOrganisationDetaiils(Mockito.any(),Mockito.any()))
+            .thenReturn(Organisations.builder().build());
+        assertNotNull(solicitorsMapper.callOrgSearchFormSolicitorMap("123", partyDetails));
+    }
+
+    @Test
     public void testSolicitorAddresswithoutFields() {
 
         ContactInformation contactInformation = null;
-        assertNull(solicitorsMapper.mapSolicitorAddress(contactInformation));
+        assertTrue(solicitorsMapper.mapSolicitorAddress(contactInformation).isEmpty());
     }
 
     @Test
@@ -201,6 +220,4 @@ public class SolicitorsMapperTest {
         solicitorMap.put("134", partyDetails);
         assertNotNull(solicitorsMapper.mapSolicitorList(solicitorMap));
     }
-
-
 }

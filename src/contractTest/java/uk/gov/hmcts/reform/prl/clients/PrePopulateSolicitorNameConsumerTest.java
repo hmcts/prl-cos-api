@@ -27,6 +27,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.IdamApi;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.io.IOException;
@@ -58,6 +59,9 @@ public class PrePopulateSolicitorNameConsumerTest {
     @MockBean
     private AuthTokenGenerator serviceTokenGenerator;
 
+    @MockBean
+    private AuthorisationService authorisationService;
+
     private static final String SERVICE_AUTH_TOKEN = "TestServiceAuthToken";
     private static final String INPUT_REQUEST = "<html><body><div>Case Details: {{ caseNo }}</div></body></html>";
 
@@ -81,7 +85,8 @@ public class PrePopulateSolicitorNameConsumerTest {
             .path("/details")
             .method("GET")
             .headers(HttpHeaders.AUTHORIZATION, SERVICE_AUTH_TOKEN,
-                     HttpHeaders.CONTENT_TYPE, "application/json")
+                     HttpHeaders.CONTENT_TYPE, "application/json"
+            )
 
             .willRespondWith()
             .status(HttpStatus.SC_OK)

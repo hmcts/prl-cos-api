@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
 
 import static java.util.Optional.ofNullable;
@@ -21,37 +22,59 @@ import static java.util.Optional.ofNullable;
 public class AllegationsOfHarmMapper {
 
     public JsonObject map(CaseData caseData) {
+
+        String physicalAbuseVictimJson = null;
+        String emotionalAbuseVictimJson = null;
+        String financialAbuseVictimJson = null;
+        String psychologicalAbuseVictimJson = null;
+        String sexualAbuseVictimJson = null;
+
+        if (caseData.getPhysicalAbuseVictim() != null && !caseData.getPhysicalAbuseVictim().isEmpty()) {
+            physicalAbuseVictimJson = caseData.getPhysicalAbuseVictim()
+                    .stream()
+                    .map(ApplicantOrChildren::getDisplayedValue)
+                    .collect(Collectors.joining(", "));
+        }
+
+        if (caseData.getEmotionalAbuseVictim() != null && !caseData.getEmotionalAbuseVictim().isEmpty()) {
+            emotionalAbuseVictimJson = caseData.getEmotionalAbuseVictim()
+                .stream()
+                .map(ApplicantOrChildren::getDisplayedValue)
+                .collect(Collectors.joining(", "));
+        }
+
+        if (caseData.getFinancialAbuseVictim() != null && !caseData.getFinancialAbuseVictim().isEmpty()) {
+            financialAbuseVictimJson = caseData.getFinancialAbuseVictim()
+                .stream()
+                .map(ApplicantOrChildren::getDisplayedValue)
+                .collect(Collectors.joining(", "));
+        }
+
+        if (caseData.getPsychologicalAbuseVictim() != null && !caseData.getPsychologicalAbuseVictim().isEmpty()) {
+            psychologicalAbuseVictimJson = caseData.getPhysicalAbuseVictim()
+                .stream()
+                .map(ApplicantOrChildren::getDisplayedValue)
+                .collect(Collectors.joining(", "));
+        }
+
+        if (caseData.getSexualAbuseVictim() != null && !caseData.getSexualAbuseVictim().isEmpty()) {
+            sexualAbuseVictimJson = caseData.getSexualAbuseVictim()
+                .stream()
+                .map(ApplicantOrChildren::getDisplayedValue)
+                .collect(Collectors.joining(", "));
+        }
+
         return new NullAwareJsonObjectBuilder()
             .add("allegationsOfHarmYesNo", CommonUtils.getYesOrNoValue(caseData.getAllegationsOfHarmYesNo()))
             .add(
                 "allegationsOfHarmDomesticAbuseYesNo",
                 CommonUtils.getYesOrNoValue(caseData.getAllegationsOfHarmChildAbuseYesNo())
             )
-            .add(
-                "physicalAbuseVictim",
-                caseData.getPhysicalAbuseVictim().isEmpty() ? null : caseData.getPhysicalAbuseVictim().stream()
-                    .map(ApplicantOrChildren::getDisplayedValue).collect(Collectors.joining(", "))
-            )
-            .add(
-                "emotionalAbuseVictim",
-                caseData.getEmotionalAbuseVictim().isEmpty() ? null : caseData.getEmotionalAbuseVictim().stream()
-                    .map(ApplicantOrChildren::getDisplayedValue).collect(Collectors.joining(", "))
-            )
-            .add(
-                "financialAbuseVictim",
-                caseData.getFinancialAbuseVictim().isEmpty() ? null : caseData.getFinancialAbuseVictim().stream()
-                    .map(ApplicantOrChildren::getDisplayedValue).collect(Collectors.joining(", "))
-            )
-            .add(
-                "psychologicalAbuseVictim",
-                caseData.getPhysicalAbuseVictim().isEmpty() ? null : caseData.getPhysicalAbuseVictim().stream()
-                    .map(ApplicantOrChildren::getDisplayedValue).collect(Collectors.joining(", "))
-            )
-            .add(
-                "sexualAbuseVictim",
-                caseData.getSexualAbuseVictim().isEmpty() ? null : caseData.getSexualAbuseVictim().stream()
-                    .map(ApplicantOrChildren::getDisplayedValue).collect(Collectors.joining(", "))
-            )
+            .add("physicalAbuseVictim", physicalAbuseVictimJson)
+            .add("emotionalAbuseVictim", emotionalAbuseVictimJson)
+            .add("financialAbuseVictim",  financialAbuseVictimJson)
+            .add("psychologicalAbuseVictim", psychologicalAbuseVictimJson)
+            .add("sexualAbuseVictim", sexualAbuseVictimJson)
             .add(
                 "allegationsOfHarmChildAbductionYesNo",
                 CommonUtils.getYesOrNoValue(caseData.getAllegationsOfHarmChildAbductionYesNo())
@@ -165,7 +188,7 @@ public class AllegationsOfHarmMapper {
 
         Optional<List<Element<Behaviours>>> behavioursElementsCheck = ofNullable(behaviours);
         if (behavioursElementsCheck.isEmpty()) {
-            return null;
+            return JsonValue.EMPTY_JSON_ARRAY;
         }
         List<Behaviours> behavioursList = behaviours.stream()
             .map(Element::getValue)

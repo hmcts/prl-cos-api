@@ -33,7 +33,9 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
@@ -43,10 +45,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.STATEMENT_OF_TRUTH_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
@@ -58,6 +58,11 @@ public class TaskListRenderer {
 
     private static final String HORIZONTAL_LINE = "<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>";
     private static final String NEW_LINE = "<br/>";
+    private static final String NOT_STARTED = "not-started.png";
+    private static final String CANNOT_START_YET = "cannot-start-yet.png";
+    private static final String IN_PROGRESS = "in-progress.png";
+    private static final String INFORMATION_ADDED = "information-added.png";
+    private static final String FINISHED = "finished.png";
 
     private final TaskListRenderElements taskListRenderElements;
 
@@ -143,31 +148,37 @@ public class TaskListRenderer {
         switch (task.getState()) {
 
             case NOT_STARTED:
-                if (task.getEvent().equals(VIEW_PDF_DOCUMENT)) {
+                if (task.getEvent().equals(VIEW_PDF_DOCUMENT) || task.getEvent().equals(FL401_UPLOAD_DOCUMENTS)) {
                     lines.add(taskListRenderElements.renderLink(task));
                 } else if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderDisabledLink(task)
-                                  + taskListRenderElements.renderImage("cannot-start-yet.png", "Cannot start yet"));
+                                  + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
+                } else if (task.getEvent().equals(FL401_SOT_AND_SUBMIT)) {
+                    lines.add(taskListRenderElements.renderDisabledLink(task)
+                                  + taskListRenderElements.renderImage(CANNOT_START_YET, "Cannot start yet"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage("not-started.png", "Not started"));
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started"));
                 }
                 break;
             case IN_PROGRESS:
                 lines.add(taskListRenderElements.renderLink(task)
-                              + taskListRenderElements.renderImage("in-progress.png", "In progress"));
+                              + taskListRenderElements.renderImage(IN_PROGRESS, "In progress"));
                 break;
             case MANDATORY_COMPLETED:
                 lines.add(taskListRenderElements.renderLink(task)
-                              + taskListRenderElements.renderImage("information-added.png", "Information added"));
+                              + taskListRenderElements.renderImage(INFORMATION_ADDED, "Information added"));
                 break;
             case FINISHED:
                 if (task.getEvent().equals(SUBMIT_AND_PAY)) {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage("not-started.png", "Not started yet"));
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
+                } else if (task.getEvent().equals(FL401_SOT_AND_SUBMIT)) {
+                    lines.add(taskListRenderElements.renderLink(task)
+                                  + taskListRenderElements.renderImage(NOT_STARTED, "Not started yet"));
                 } else {
                     lines.add(taskListRenderElements.renderLink(task)
-                                  + taskListRenderElements.renderImage("finished.png", "Finished"));
+                                  + taskListRenderElements.renderImage(FINISHED, "Finished"));
                 }
                 break;
             default:
@@ -226,18 +237,18 @@ public class TaskListRenderer {
             .withTask(tasks.get(WELSH_LANGUAGE_REQUIREMENTS));
 
         final TaskSection uploadDocuments = newSection("Upload documents")
-            .withTask(tasks.get(UPLOAD_DOCUMENTS));
+            .withTask(tasks.get(FL401_UPLOAD_DOCUMENTS));
 
-        final TaskSection pdfApplication = newSection("View PDF application")
+        final TaskSection checkAndSignApplication = newSection("Check and sign application")
             .withTask(tasks.get(VIEW_PDF_DOCUMENT))
-            .withTask(tasks.get(STATEMENT_OF_TRUTH_AND_SUBMIT));
+            .withTask(tasks.get(FL401_SOT_AND_SUBMIT));
 
         return Stream.of(applicationDetails,
                          peopleInTheCase,
                          addCaseDetails,
                          additionalInformation,
                          uploadDocuments,
-                         pdfApplication)
+                         checkAndSignApplication)
             .filter(TaskSection::hasAnyTask)
             .collect(toList());
     }

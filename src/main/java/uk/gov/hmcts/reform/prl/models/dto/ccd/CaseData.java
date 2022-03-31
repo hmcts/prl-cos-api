@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,6 +30,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
@@ -57,20 +57,16 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.documents.C8Document;
-import uk.gov.hmcts.reform.prl.models.documents.ConsentOrderDocument;
-import uk.gov.hmcts.reform.prl.models.documents.ContactOrderDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
-import uk.gov.hmcts.reform.prl.models.documents.OtherDocument;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
-import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -129,9 +125,9 @@ public class CaseData implements MappableObject {
      * Upload documents.
      */
 
-    private final List<ContactOrderDocument> contactOrderDocumentsUploaded;
-    private final List<C8Document> c8FormDocumentsUploaded;
-    private final List<OtherDocument> otherDocumentsUploaded;
+    private final List<Document> contactOrderDocumentsUploaded;
+    private final List<Document> c8FormDocumentsUploaded;
+    private final List<Document> otherDocumentsUploaded;
 
     /**
      * People in the case.
@@ -158,7 +154,7 @@ public class CaseData implements MappableObject {
     private final ChildArrangementOrderTypeEnum typeOfChildArrangementsOrder;
     private final String natureOfOrder;
     private final YesOrNo consentOrder;
-    private final ConsentOrderDocument draftConsentOrderFile;
+    private final Document draftConsentOrderFile;
     private final PermissionRequiredEnum applicationPermissionRequired;
     private final String applicationPermissionRequiredReason;
     private final String applicationDetails;
@@ -214,11 +210,11 @@ public class CaseData implements MappableObject {
     private final String familyMediatorServiceName;
     private final String soleTraderName;
     //TODO: refactor to remove duplicated details screen
-    private final MiamDocument miamCertificationDocumentUpload;
+    private final Document miamCertificationDocumentUpload;
     private final String mediatorRegistrationNumber1;
     private final String familyMediatorServiceName1;
     private final String soleTraderName1;
-    private final MiamDocument miamCertificationDocumentUpload1;
+    private final Document miamCertificationDocumentUpload1;
 
     /**
      * Allegations of harm.
@@ -258,49 +254,48 @@ public class CaseData implements MappableObject {
     private final LocalDate ordersNonMolestationEndDate;
     private final YesOrNo ordersNonMolestationCurrent;
     private final String ordersNonMolestationCourtName;
-    private final OtherDocument ordersNonMolestationDocument;
+    private final Document ordersNonMolestationDocument;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOccupationDateIssued;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOccupationEndDate;
     private final YesOrNo ordersOccupationCurrent;
     private final String ordersOccupationCourtName;
-    private final OtherDocument ordersOccupationDocument;
+    private final Document ordersOccupationDocument;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersForcedMarriageProtectionDateIssued;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersForcedMarriageProtectionEndDate;
     private final YesOrNo ordersForcedMarriageProtectionCurrent;
     private final String ordersForcedMarriageProtectionCourtName;
-    private final OtherDocument ordersForcedMarriageProtectionDocument;
+    private final Document ordersForcedMarriageProtectionDocument;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersRestrainingDateIssued;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersRestrainingEndDate;
     private final YesOrNo ordersRestrainingCurrent;
     private final String ordersRestrainingCourtName;
-    private final OtherDocument ordersRestrainingDocument;
+    private final Document ordersRestrainingDocument;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOtherInjunctiveDateIssued;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersOtherInjunctiveEndDate;
     private final YesOrNo ordersOtherInjunctiveCurrent;
     private final String ordersOtherInjunctiveCourtName;
-    private final OtherDocument ordersOtherInjunctiveDocument;
+    private final Document ordersOtherInjunctiveDocument;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersUndertakingInPlaceDateIssued;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate ordersUndertakingInPlaceEndDate;
     private final YesOrNo ordersUndertakingInPlaceCurrent;
     private final String ordersUndertakingInPlaceCourtName;
-    private final OtherDocument ordersUndertakingInPlaceDocument;
+    private final Document ordersUndertakingInPlaceDocument;
     private final YesOrNo allegationsOfHarmOtherConcerns;
     private final String allegationsOfHarmOtherConcernsDetails;
     private final String allegationsOfHarmOtherConcernsCourtActions;
     private final YesOrNo agreeChildUnsupervisedTime;
     private final YesOrNo agreeChildSupervisedTime;
     private final YesOrNo agreeChildOtherContact;
-
 
     /**
      * Other people in the case.
@@ -313,7 +308,6 @@ public class CaseData implements MappableObject {
 
     private final YesNoDontKnow previousOrOngoingProceedingsForChildren;
     private final List<Element<ProceedingDetails>> existingProceedings;
-
 
     /**
      * Attending the hearing.
@@ -360,6 +354,9 @@ public class CaseData implements MappableObject {
     @JsonProperty("paymentServiceRequestReferenceNumber")
     private final String paymentServiceRequestReferenceNumber;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate issueDate;
+
     @JsonProperty("solicitorName")
     private final String solicitorName;
     @JsonProperty("feeAmount")
@@ -368,15 +365,26 @@ public class CaseData implements MappableObject {
     private final String feeCode;
     @JsonProperty("draftOrderDoc")
     private final Document draftOrderDoc;
+    @JsonProperty("draftOrderDocWelsh")
+    private final Document draftOrderDocWelsh;
     @JsonProperty("c8Document")
     private final Document c8Document;
+    @JsonProperty("c8WelshDocument")
+    private final Document c8WelshDocument;
     @JsonProperty("c1ADocument")
     private final Document c1ADocument;
+    @JsonProperty("c1AWelshDocument")
+    private final Document c1AWelshDocument;
 
-
+    @JsonProperty("isEngDocGen")
+    private final String isEngDocGen;
+    @JsonProperty("isWelshDocGen")
+    private final String isWelshDocGen;
 
     @JsonProperty("submitAndPayDownloadApplicationLink")
     private final Document submitAndPayDownloadApplicationLink;
+    @JsonProperty("submitAndPayDownloadApplicationWelshLink")
+    private final Document submitAndPayDownloadApplicationWelshLink;
 
     /**
      * Add case number.
@@ -395,7 +403,6 @@ public class CaseData implements MappableObject {
     private final List<Element<OtherDocuments>> otherDocuments;
 
     private final List<Element<UserInfo>> userInfo;
-
 
     /**
      * Return Application.
@@ -456,25 +463,48 @@ public class CaseData implements MappableObject {
     private final String respondentSolicitorEmailAddress;
     private final String caseworkerEmailAddress;
 
-
     /**
      * Court details.
      */
 
     private String courtName;
     private String courtId;
+    private String courtEmailAddress;
+    private String reasonForAmendCourtDetails;
+
+    /**
+     * Final document.
+     */
+
+    @JsonProperty("finalDocument")
+    private final Document finalDocument;
 
     /**
      * Send and reply to messages.
      */
-    @JsonUnwrapped
-    private final SendAndReplyEventData sendAndReplyEventData;
     @JsonProperty("openMessages")
     private final List<Element<Message>> openMessages;
 
     @JsonProperty("closedMessages")
     private final List<Element<Message>> closedMessages;
 
+    @JsonProperty("messageObject")
+    MessageMetaData messageMetaData;
+    String messageContent;
+    Object replyMessageDynamicList;
+    Message messageReply;
+    SendOrReply chooseSendOrReply;
+
+    public static String[] temporaryFields() {
+        return new String[]{
+            "replyMessageDynamicList", "messageReply", "messageContent",
+            "messageReply", "messageMetaData"
+        };
+    }
+
+
+    @JsonProperty("finalWelshDocument")
+    private final Document finalWelshDocument;
 
     /**
      * Confidentiality details.
@@ -491,6 +521,12 @@ public class CaseData implements MappableObject {
     private final WithdrawApplication withDrawApplicationData;
 
     /**
+     * FL401 Upload Documents.
+     */
+    private final List<Document> fl401UploadWitnessDocuments;
+    private final List<Document> fl401UploadSupportDocuments;
+
+    /**
      * Send to Gatekeeper.
      */
     private final List<Element<GatekeeperEmail>> gatekeeper;
@@ -499,5 +535,22 @@ public class CaseData implements MappableObject {
      * FL401 Other Proceedings.
      */
     private final FL401OtherProceedingDetails fl401OtherProceedingDetails;
+
+    /**
+     *  FL401 Statement Of truth and submit.
+     */
+    @JsonProperty("fl401StmtOfTruth")
+    private final StatementOfTruth fl401StmtOfTruth;
+
+    @JsonProperty("viewPDFlinkLabelText")
+    private String viewPdfLinkLabelText;
+
+
+    /**
+     *  FL401 submit status flags.
+     */
+    private String isCourtEmailFound;
+    private String isDocumentGenerated;
+    private String isNotificationSent;
 
 }

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
+import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
 
 import static java.util.Optional.ofNullable;
@@ -26,7 +27,7 @@ public class OtherPeopleInTheCaseMapper {
     public JsonArray map(List<Element<PartyDetails>> otherPeopleInTheCase) {
         Optional<List<Element<PartyDetails>>> otherPeopleInTheCaseElementCheck = ofNullable(otherPeopleInTheCase);
         if (otherPeopleInTheCaseElementCheck.isEmpty()) {
-            return null;
+            return JsonValue.EMPTY_JSON_ARRAY;
         }
         List<PartyDetails> otherPeopleInTheCaseList = otherPeopleInTheCase.stream()
             .map(Element::getValue)
@@ -64,7 +65,7 @@ public class OtherPeopleInTheCaseMapper {
         Optional<List<Element<OtherPersonRelationshipToChild>>> personRelationshipToChildrenElementCheck = ofNullable(
             otherPersonRelationshipToChildren);
         if (personRelationshipToChildrenElementCheck.isEmpty()) {
-            return null;
+            return JsonValue.EMPTY_JSON_ARRAY;
         }
         List<OtherPersonRelationshipToChild> otherPeopleInTheCaseList = otherPersonRelationshipToChildren.stream()
             .map(Element::getValue)

@@ -138,6 +138,26 @@ public class CaseWorkerEmailServiceTest {
     @Test
     public void whenRespondentPresentThenRespondentStringCreated() {
 
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .lastName("respondentLast")
+            .build();
+
+        String respondentNames = "TestLast";
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -174,6 +194,25 @@ public class CaseWorkerEmailServiceTest {
     @Test
     public void whenTypeOfApplicationPresentThenOrdersApplyForWillBeDispalyed() {
 
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .lastName("respondentLast")
+            .build();
+
+        String respondentNames = "TestLast";
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -209,6 +248,25 @@ public class CaseWorkerEmailServiceTest {
     @Test
     public void whenTypeOfApplicationIsReducedNoticeThenOrdersApplyForWillBeDispalyed() {
 
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .lastName("respondentLast")
+            .build();
+
+        String respondentNames = "TestLast";
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -243,6 +301,24 @@ public class CaseWorkerEmailServiceTest {
 
     @Test
     public void sendEmailSuccessfully() {
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .lastName("respondentLast")
+            .build();
+
+        String respondentNames = "TestLast";
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -269,7 +345,7 @@ public class CaseWorkerEmailServiceTest {
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
             .applicantName(applicantNames)
-            .respondentLastName(respondent.getLastName())
+            .respondentLastName("respondentLast")
             .typeOfHearing("Reduced notice")
             .hearingDateRequested("  ")
             .ordersApplyingFor("Specific Issue Order")
@@ -277,7 +353,7 @@ public class CaseWorkerEmailServiceTest {
             .build();
 
         caseWorkerEmailService.sendEmail(caseDetails);
-        assertEquals(caseDetails.getData().get("caseworkerEmailAddress").toString(), "test@test.com");
+        assertEquals("test@test.com", caseDetails.getData().get("caseworkerEmailAddress").toString());
     }
 
     @Test
@@ -485,7 +561,7 @@ public class CaseWorkerEmailServiceTest {
             .build();
 
         caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(caseDetails);
-        assertEquals(caseDetails.getData().get("applicantSolicitorEmailAddress").toString(), "test@test.com");
+        assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
 
     }
 
@@ -577,6 +653,149 @@ public class CaseWorkerEmailServiceTest {
         caseWorkerEmailService.sendEmailToGateKeeper(caseDetails);
 
         assertEquals(emailList, caseData.getGatekeeper());
+    }
+
+    @Test
+    public void testFL401LocalCourtEmailWithoutConfidentialInformation() {
+
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .firstName("testUser")
+            .lastName("last test")
+            .solicitorEmail("testing@courtadmin.com")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(fl401Applicant)
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .build();
+
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        String isConfidential = "No";
+        if (fl401Applicant.getCanYouProvideEmailAddress().equals(YesOrNo.Yes)
+            || (null != fl401Applicant.getIsEmailAddressConfidential()
+            && YesOrNo.Yes.equals(fl401Applicant.getIsEmailAddressConfidential()))
+            || (fl401Applicant.hasConfidentialInfo())) {
+            isConfidential = "Yes";
+        }
+
+        EmailTemplateVars email = CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .issueDate(issueDate.format(dateTimeFormatter))
+            .isConfidential(isConfidential)
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        assertEquals(email, caseWorkerEmailService.buildFl401LocalCourtAdminEmail(caseDetails));
+
+    }
+
+    @Test
+    public void testFL401LocalCourtEmailWithConfidentialInformation() {
+
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .firstName("testUser")
+            .lastName("last test")
+            .solicitorEmail("testing@courtadmin.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.Yes)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(fl401Applicant)
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .build();
+
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        String isConfidential = "No";
+        if (fl401Applicant.getCanYouProvideEmailAddress().equals(YesOrNo.Yes)
+            || (fl401Applicant.getIsEmailAddressConfidential() != null
+            && fl401Applicant.getIsEmailAddressConfidential().equals(YesOrNo.Yes))
+            || (fl401Applicant.hasConfidentialInfo())) {
+            isConfidential = "Yes";
+        }
+        EmailTemplateVars email = CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .issueDate(issueDate.format(dateTimeFormatter))
+            .isConfidential(isConfidential)
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        assertEquals(email, caseWorkerEmailService.buildFl401LocalCourtAdminEmail(caseDetails));
+
+    }
+
+    @Test
+    public void testSendEmailToFl401LocalCourt() {
+
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .firstName("testUser")
+            .lastName("last test")
+            .solicitorEmail("testing@courtadmin.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.Yes)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(fl401Applicant)
+            .courtEmailAddress("testing@localcourt.com")
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .build();
+
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        String isConfidential = "No";
+        if (fl401Applicant.getCanYouProvideEmailAddress().equals(YesOrNo.Yes)
+            || (fl401Applicant.getIsEmailAddressConfidential() != null
+            && fl401Applicant.getIsEmailAddressConfidential().equals(YesOrNo.Yes))
+            || (fl401Applicant.hasConfidentialInfo())) {
+            isConfidential = "Yes";
+        }
+        EmailTemplateVars email = CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .issueDate(issueDate.format(dateTimeFormatter))
+            .isConfidential(isConfidential)
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+
+        assertEquals("testing@localcourt.com", caseData.getCourtEmailAddress());
     }
 }
 

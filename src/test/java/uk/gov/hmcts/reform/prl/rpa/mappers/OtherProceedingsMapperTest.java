@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OtherProceedingsMapperTest {
@@ -65,9 +65,9 @@ public class OtherProceedingsMapperTest {
     }
 
     @Test
-    public void testNullExistingProceedings() {
-        existingProceedings = null;
-        assertNull(otherProceedingsMapper.mapExistingProceedings(existingProceedings));
+    public void testEmptyExistingProceedings() {
+        existingProceedings = Collections.emptyList();;
+        assertTrue(otherProceedingsMapper.mapExistingProceedings(existingProceedings).isEmpty());
 
     }
 }

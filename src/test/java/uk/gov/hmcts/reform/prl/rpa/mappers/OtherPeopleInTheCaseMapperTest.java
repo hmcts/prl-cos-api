@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OtherPeopleInTheCaseMapperTest {
@@ -51,9 +51,9 @@ public class OtherPeopleInTheCaseMapperTest {
 
 
     @Test
-    public void testOtherPeopleMapperNullCheck() {
-        otherPeopleInTheCase = null;
-        assertNull(otherPeopleInTheCaseMapper.map(otherPeopleInTheCase));
+    public void testOtherPeopleMapperEmptyCheck() {
+        otherPeopleInTheCase = Collections.emptyList();
+        assertTrue(otherPeopleInTheCaseMapper.map(otherPeopleInTheCase).isEmpty());
 
     }
 

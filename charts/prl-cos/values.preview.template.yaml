@@ -11,11 +11,16 @@ java:
         - notification-client-api-key
         - test-genericpassword
         - launchDarkly-sdk-key
+        - send-grid-api-key
+        - rpa-notify-to-email
         - AppInsightsInstrumentationKey
+        - southampton-court-email-address
+        - idam-solicitor-username
+        - idam-solicitor-password
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    PAY_CALLBACK_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/service-request
+    PAY_CALLBACK_URL: http://prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/service-request
     FEE_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
     IDAM_CLIENT_ID: prl-cos-api
@@ -34,5 +39,6 @@ java:
     IDAM_S2S_AUTH_MICROSERVICE: prl_cos_api
     PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    PRL_S2S_AUTHORISED_SERVICES: payment_app
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-
+    RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal

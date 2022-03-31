@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -22,6 +23,7 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.OTHER_PEOPLE_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
+@Slf4j
 @Service
 public class OtherPeopleInTheCaseChecker implements EventChecker {
 
@@ -33,7 +35,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
 
         Optional<List<Element<PartyDetails>>> othersToNotify = ofNullable(caseData.getOthersToNotify());
 
-        if (othersToNotify.isPresent() && othersToNotify.get().size() != 0) {
+        if (othersToNotify.isPresent()) {
             List<PartyDetails> others = caseData.getOthersToNotify()
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
@@ -61,11 +63,14 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
 
-            if (others.size() == 0) {
+            if (others.isEmpty()) {
                 return false;
             }
-            taskErrorService.addEventError(OTHER_PEOPLE_IN_THE_CASE, OTHER_PEOPLE_ERROR, OTHER_PEOPLE_ERROR.getError());
-            return others.stream().anyMatch(Objects::nonNull);
+            boolean started = others.stream().anyMatch(Objects::nonNull);
+            if (started) {
+                taskErrorService.addEventError(OTHER_PEOPLE_IN_THE_CASE, OTHER_PEOPLE_ERROR, OTHER_PEOPLE_ERROR.getError());
+                return true;
+            }
         }
         return false;
     }
@@ -88,8 +93,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         }
         YesOrNo currAdd = party.getIsCurrentAddressKnown();
         if (currAdd != null && currAdd.equals(Yes)) {
-            additionalFields = party.getAddress().getAddressLine1() != null;
-            additionalFields = party.getAddress().getPostCode() != null;
+            additionalFields = party.getAddress().getAddressLine1() != null && party.getAddress().getPostCode() != null;
         }
         YesOrNo canProvideEmail = party.getCanYouProvideEmailAddress();
         if (canProvideEmail != null && canProvideEmail.equals(Yes)) {
@@ -100,7 +104,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             additionalFields = party.getPhoneNumber() != null;
         }
 
-        List<Optional> childFields = new ArrayList<>();
+        List<Optional<String>> childFields = new ArrayList<>();
 
         Optional<List<Element<OtherPersonRelationshipToChild>>> otherPersonRelationshipList
                                     = ofNullable(party.getOtherPersonRelationshipToChildren());
@@ -109,9 +113,9 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
             return false;
         }
 
-        otherPersonRelationshipList.get().stream().map(Element::getValue).forEach(everyChild -> {
-            childFields.add(ofNullable(everyChild.getPersonRelationshipToChild()));
-        });
+        otherPersonRelationshipList.get().stream().map(Element::getValue).forEach(everyChild ->
+            childFields.add(ofNullable(everyChild.getPersonRelationshipToChild()))
+        );
 
         boolean baseFields = allNonEmpty(
             party.getFirstName(),

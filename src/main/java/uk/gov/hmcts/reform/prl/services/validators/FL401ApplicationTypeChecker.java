@@ -41,18 +41,26 @@ public class FL401ApplicationTypeChecker implements EventChecker {
         Optional<TypeOfApplicationOrders> ordersOptional = ofNullable(caseData.getTypeOfApplicationOrders());
         Optional<LinkToCA> applicationTypeLinkToCA = ofNullable(caseData.getTypeOfApplicationLinkToCA());
 
-        boolean finished;
+        boolean finished = false;
 
         if (ordersOptional.isPresent() && (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)
             || ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder))) {
 
-            if (applicationTypeLinkToCA.isPresent() && applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
-                YesOrNo.Yes)) {
-                finished = applicationTypeLinkToCA.get().getCaApplicationNumber() != null;
-            } else if (applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
-                YesOrNo.No)) {
-                return true;
+            if (applicationTypeLinkToCA.isPresent()) {
+                if (applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
+                    YesOrNo.Yes)) {
+                    finished = applicationTypeLinkToCA.get().getCaApplicationNumber() != null;
+                } else if (applicationTypeLinkToCA.get().getLinkToCaApplication().equals(
+                    YesOrNo.No)) {
+                    taskErrorService.removeError(FL401_TYPE_OF_APPLICATION_ERROR);
+                    return true;
+                }
             } else {
+                taskErrorService.addEventError(
+                    FL401_TYPE_OF_APPLICATION,
+                    FL401_TYPE_OF_APPLICATION_ERROR,
+                    FL401_TYPE_OF_APPLICATION_ERROR.getError()
+                );
                 return false;
             }
 

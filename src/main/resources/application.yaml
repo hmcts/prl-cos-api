@@ -1,5 +1,5 @@
 server:
-  port: 4044
+    port: 4044
 
 runs-locally: ${RUNS_LOCALLY:true}
 
@@ -79,23 +79,34 @@ uk:
             CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
             RETURNAPPLICATION: 41a7ffcd-a5ec-4377-ba50-59619ad0ac8c
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
+            COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
+            GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
+            DA_SOLICITOR: d65830b7-eb13-46c3-b772-03976a67210d
+            DA_LOCALCOURT: 9d6b311a-a764-45a7-9dd9-cd1d06408214
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
-          email-id: C100applications@justice.gov.uk
+          email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
-
 
 notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
 
+send-grid:
+  api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
+  rpa:
+    email:
+      to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
+      from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
+
 payments:
   api:
     url: ${PAY_URL:}
     callback-url: ${PAY_CALLBACK_URL:}
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
 
 fees-register:
   api:
@@ -110,7 +121,6 @@ fees-register:
       service: private law
 
 # NEW BELOW THIS LINE
-
 
 idam:
   s2s-auth:
@@ -128,7 +138,6 @@ prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
-
 
 
 security:
@@ -154,6 +163,8 @@ auth:
       client:
         baseUrl: http://localhost:4502
 
+
+
 resources:
   images:
     baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
@@ -168,12 +179,9 @@ case_document_am:
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
 
-
-
 courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
-
 
 launchdarkly:
   sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
@@ -181,3 +189,40 @@ launchdarkly:
 rd_professional:
   api:
     url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}
+
+document:
+  templates:
+    c100:
+      c100_final_template: C100-Final-Document.docx
+      c100_final_filename: C100FinalDocument.pdf
+      c100_draft_template: PRL-C100-Draft-Final.docx
+      c100_draft_filename: Draft_C100_application.pdf
+      c100_c8_template: PRL-C8-Final-Changes.docx
+      c100_c8_filename: C8Document.pdf
+      c100_c1a_template: PRL-C1A.docx
+      c100_c1a_filename: C1A_Document.pdf
+      c100_final_welsh_template: PRL-Final-C100-WelshLang.docx
+      c100_final_welsh_filename: C100FinalDocumentWelsh.pdf
+      c100_draft_welsh_template: PRL-Draft-C100-WelshLang.docx
+      c100_draft_welsh_filename: Draft_C100_application_welsh.pdf
+      c100_c8_welsh_template: PRL-C8-WelshLang.docx
+      c100_c8_welsh_filename: C8Document_Welsh.pdf
+      c100_c1a_welsh_template: PRL-C1A-WelshLang.docx
+      c100_c1a_welsh_filename: C1A_Document_Welsh.pdf
+    fl401:
+      fl401_final_template: FL401-Final.docx
+      fl401_final_filename: FL401FinalDocument.pdf
+      fl401_draft_template: FL401-draft.docx
+      fl401_draft_filename: Draft_DA_application
+      fl401_c8_template: PRL-DA-C8.docx
+      fl401_c8_filename: C8_Document.pdf
+      fl401_final_welsh_template: FL401-Final-Welsh.docx
+      fl401_final_welsh_filename: FL401FinalDocumentWelsh.pdf
+      fl401_draft_welsh_template: FL401-draft-Welsh.docx
+      fl401_draft_welsh_filename: Draft_DA_Welsh_application
+      fl401_c8_welsh_template: FL401-c8-welsh.docx
+      fl401_c8_welsh_filename: C8_Document_Welsh.pdf
+
+southampton:
+  court:
+    email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}

@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.EnumMap;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
@@ -17,7 +19,9 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
@@ -27,14 +31,13 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.STATEMENT_OF_TRUTH_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 
+@Getter
 @Service
 public class EventsChecker {
 
@@ -96,28 +99,21 @@ public class EventsChecker {
     RespondentRelationshipChecker respondentRelationshipChecker;
 
     @Autowired
-    private FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
+    FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
 
     @Autowired
-    private FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
+    FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
+
+    @Autowired
+    FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
     @Autowired
     WithoutNoticeOrderChecker withoutNoticeOrderChecker;
 
     @Autowired
-    UploadDocumentChecker uploadDocumentChecker;
-
-    @Autowired
-    StatementTruthSubmitChecker statementTruthSubmitChecker;
-
-
-
-
-    @Autowired
     FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
 
-
-    private EnumMap<Event, EventChecker> eventStatus = new EnumMap<Event, EventChecker>(Event.class);
+    private Map<Event, EventChecker> eventStatus = new EnumMap<>(Event.class);
 
     @PostConstruct
     public void init() {
@@ -145,9 +141,9 @@ public class EventsChecker {
         eventStatus.put(RESPONDENT_BEHAVIOUR, respondentBehaviourChecker);
         eventStatus.put(WITHOUT_NOTICE_ORDER, withoutNoticeOrderChecker);
         eventStatus.put(FL401_APPLICANT_FAMILY_DETAILS, fl401ApplicantFamilyChecker);
-        eventStatus.put(UPLOAD_DOCUMENTS, uploadDocumentChecker);
-        eventStatus.put(STATEMENT_OF_TRUTH_AND_SUBMIT, statementTruthSubmitChecker);
+        eventStatus.put(FL401_UPLOAD_DOCUMENTS, pdfChecker);
         eventStatus.put(FL401_OTHER_PROCEEDINGS, fl401OtherProceedingsChecker);
+        eventStatus.put(FL401_SOT_AND_SUBMIT, fl401StatementOfTruthAndSubmitChecker);
 
     }
 
@@ -163,7 +159,7 @@ public class EventsChecker {
         return eventStatus.get(event).hasMandatoryCompleted(caseData);
     }
 
-    public EnumMap<Event, EventChecker> getEventStatus() {
+    public Map<Event, EventChecker> getEventStatus() {
         return eventStatus;
     }
 }

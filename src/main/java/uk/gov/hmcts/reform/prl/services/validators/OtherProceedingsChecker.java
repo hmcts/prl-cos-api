@@ -48,7 +48,7 @@ public class OtherProceedingsChecker implements EventChecker {
                                                 .collect(Collectors.toList());
 
             //if a collection item is added and then removed the collection exists as length 0
-            if (allProceedings.size() == 0) {
+            if (allProceedings.isEmpty()) {
                 return false;
             }
 

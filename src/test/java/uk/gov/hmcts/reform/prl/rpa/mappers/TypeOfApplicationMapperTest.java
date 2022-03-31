@@ -35,5 +35,9 @@ public class TypeOfApplicationMapperTest {
         assertNotNull(typeOfApplicationMapper.map(caseDataInput));
     }
 
-
+    @Test
+    public void testForNoDataTypeOfApplicationMapper() {
+        CaseData caseDataInput = CaseData.builder().build();
+        assertNotNull(typeOfApplicationMapper.map(caseDataInput));
+    }
 }

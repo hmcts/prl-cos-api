@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
 
 import static java.util.Optional.ofNullable;
@@ -39,7 +40,7 @@ public class OtherProceedingsMapper {
     public JsonArray mapExistingProceedings(List<Element<ProceedingDetails>> existingProceedings) {
         Optional<List<Element<ProceedingDetails>>> existingProceedingsElementCheck = ofNullable(existingProceedings);
         if (existingProceedingsElementCheck.isEmpty()) {
-            return null;
+            return JsonValue.EMPTY_JSON_ARRAY;
         }
         List<ProceedingDetails> otherPeopleInTheCaseList = existingProceedings.stream()
             .map(Element::getValue)

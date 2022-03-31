@@ -9,5 +9,5 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 @Builder
 @Jacksonized
 public class RespondentRelationObjectType {
-    private final ApplicantRelationshipEnum applicantRelationshipEnum;
+    private final ApplicantRelationshipEnum applicantRelationship;
 }

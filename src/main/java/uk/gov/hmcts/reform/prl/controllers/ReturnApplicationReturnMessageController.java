@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
@@ -48,7 +47,7 @@ public class ReturnApplicationReturnMessageController {
     public AboutToStartOrSubmitCallbackResponse returnApplicationReturnMessage(
         @RequestHeader("Authorization") String authorisation,
         @RequestBody CallbackRequest callbackRequest
-    ) throws WorkflowException {
+    ) {
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -67,7 +66,7 @@ public class ReturnApplicationReturnMessageController {
     @PostMapping(path = "/return-application-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to send return application email notification")
     public AboutToStartOrSubmitCallbackResponse returnApplicationEmailNotification(
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        @RequestBody CallbackRequest callbackRequest) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
