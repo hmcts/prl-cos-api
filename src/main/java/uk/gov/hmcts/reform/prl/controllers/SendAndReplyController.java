@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
@@ -50,6 +51,9 @@ public class SendAndReplyController extends AbstractCallbackController {
     @Autowired
     ElementUtils elementUtils;
 
+    @Autowired
+    AllTabServiceImpl allTabService;
+
 
     @PostMapping("/about-to-start")
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization") String authorisation,
@@ -57,6 +61,9 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
         Map<String, Object> caseDataMap = new HashMap<>(sendAndReplyService.setSenderAndGenerateMessageList(caseData, authorisation));
+
+        caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
@@ -78,6 +85,9 @@ public class SendAndReplyController extends AbstractCallbackController {
                 caseDataMap.putAll(sendAndReplyService.populateReplyMessageFields(caseData, authorisation));
             }
         }
+
+        caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .errors(errors)
             .data(caseDataMap)
@@ -135,7 +145,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         if (ofNullable(caseData.getClosedMessages()).isPresent()) {
             caseData.getClosedMessages().sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
         }
-
+        caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
