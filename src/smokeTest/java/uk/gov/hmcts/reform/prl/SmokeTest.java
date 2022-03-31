@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.cosapi;
+package uk.gov.hmcts.reform.prl;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.response.Response;
