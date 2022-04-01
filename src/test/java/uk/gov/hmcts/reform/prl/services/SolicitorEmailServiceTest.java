@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @PropertySource(value = "classpath:application.yaml")
@@ -233,7 +235,41 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForWithdraw() throws NotFoundException {
+    public void testBuildEmailFailureCase() throws NotFoundException {
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .address(Address.builder()
+                         .postCode("SE1 9BA")
+                         .build())
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .courtName("testcourt")
+            .build();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenThrow(NotFoundException.class);
+        assertNull(solicitorEmailService.buildEmail(caseDetails));
+    }
+
+    @Test
+    public void testSendEmailForWithdraw() {
 
         List<PartyDetails> applicantList = new ArrayList<>();
         PartyDetails applicant = PartyDetails.builder()
@@ -276,6 +312,53 @@ public class SolicitorEmailServiceTest {
 
         solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
         assertEquals("test@demo.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+    }
+
+    @Test
+    public void testSendEmailForWithdrawWithEmptyApplicantList() {
+
+        List<PartyDetails> applicantList = new ArrayList<>();
+        PartyDetails applicant = PartyDetails.builder()
+            .build();
+        applicantList.add(applicant);
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@demo.com")
+            .applicants(listOfApplicants)
+            .courtName("testcourt")
+            .build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .email("test@demo.com")
+            .build();
+
+        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
+            applicantList.get(0).getEmail())
+            : userDetails.getEmail();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", email);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
+        verify(emailService).send(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(EmailTemplateVars.class),
+            Mockito.any()
+        );
     }
 
     @Test
