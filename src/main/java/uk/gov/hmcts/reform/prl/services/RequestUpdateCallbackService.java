@@ -117,8 +117,10 @@ public class RequestUpdateCallbackService {
                     .state(State.SUBMITTED_NOT_PAID)
                     .build();
             }
-            caseData = caseData.toBuilder().courtName(closestChildArrangementsCourt != null
-                                               ? closestChildArrangementsCourt.getCourtName() : "").build();
+            if (closestChildArrangementsCourt != null) {
+                caseData.toBuilder().courtName(closestChildArrangementsCourt.getCourtName()).courtId(String.valueOf(
+                    closestChildArrangementsCourt.getCountyLocationCode()));
+            }
         } catch (Exception e) {
             log.info("Error while populating case date in payment request call {}", caseData.getId());
         }
