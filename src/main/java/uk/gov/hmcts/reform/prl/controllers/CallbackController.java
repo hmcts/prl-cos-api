@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -67,6 +66,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -442,9 +447,9 @@ public class CallbackController {
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        List<String> stateList = List.of(State.AWAITING_SUBMISSION_TO_HMCTS.getValue(),"CLOSED",
-                                         State.SUBMITTED_NOT_PAID.getValue(),
-                                         State.SUBMITTED_PAID.getValue(),State.AWAITING_RESUBMISSION_TO_HMCTS.getValue());
+        List<String> stateList = List.of(DRAFT_STATE,"CLOSED",
+                                         PENDING_STATE,
+                                         SUBMITTED_STATE,RETURN_STATE);
         log.info("*** previous state *** {}", previousState);
         log.info("*** Events previous states *** {}", eventsForCase.toString());
         if (previousState.isPresent() && !stateList.contains(previousState.get())) {
@@ -558,12 +563,12 @@ public class CallbackController {
     }
 
     private static boolean getPreviousState(String eachState) {
-        return (!eachState.equalsIgnoreCase(State.CASE_WITHDRAWN.getValue())
-            && (!eachState.equalsIgnoreCase(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()))
-            && (!eachState.equalsIgnoreCase(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()))
-            && (!eachState.equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue()))
-            && (!eachState.equalsIgnoreCase(State.SUBMITTED_PAID.getValue())))
-            || eachState.equalsIgnoreCase(State.CASE_ISSUE.getValue());
+        return (!WITHDRAWN_STATE.equalsIgnoreCase(eachState)
+            && (!DRAFT_STATE.equalsIgnoreCase(eachState))
+            && (!RETURN_STATE.equalsIgnoreCase(eachState))
+            && (!PENDING_STATE.equalsIgnoreCase(eachState))
+            && (!SUBMITTED_STATE.equalsIgnoreCase(eachState)))
+            || ISSUED_STATE.equalsIgnoreCase(eachState);
     }
 
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated) {
