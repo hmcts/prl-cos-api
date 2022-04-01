@@ -2,7 +2,29 @@
   "case_details": {
     "callback_response_status": "string",
     "case_data": {
-      "id": "1647520545879276",
+      "id": "1648728532100635",
+      "chooseSendOrReply": "SEND",
+      "messageObject": {
+        "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
+        "recipientEmail": "fprl_caseworker_solicitor@mailinator.com",
+        "messageSubject": "Testing",
+        "messageUrgency": null
+      },
+      "chooseSendOrReply": "REPLY",
+      "messageReply": {
+        "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
+        "recipientEmail": "fprl_caseworker_solicitor@mailinator.com",
+        "messageSubject": "test",
+        "messageUrgency": null,
+        "isReplying": "Yes"
+      },
+      "messageObject": {
+        "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
+        "recipientEmail": "fprl_caseworker_solicitor@mailinator.com",
+        "messageSubject": "test",
+        "messageUrgency": null,
+        "isReplying": "Yes"
+      },
       "children": [
         {
           "id": "ea726437-e8d0-4b09-8f99-d0979b81296e",

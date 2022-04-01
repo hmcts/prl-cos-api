@@ -6,18 +6,18 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {ReturnApplicationReturnMessageControllerIntegrationTest.class, Application.class})
-
 public class ReturnApplicationReturnMessageControllerIntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
@@ -26,19 +26,9 @@ public class ReturnApplicationReturnMessageControllerIntegrationTest {
     private final String validBody = "requests/C100-case-data.json";
 
     @Test
-    public void whenInvalidRequestFormat_Return400() throws IOException {
+    public void whenReturnApplicationReturnMessageValidRequest() throws Exception {
 
-        HttpPost httpPost = new HttpPost(serviceUrl + "/about-to-start");
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(
-            httpResponse.getStatusLine().getStatusCode(),
-            HttpStatus.SC_BAD_REQUEST);
-    }
-
-    @Test
-    public void whenReturnApplicationReturnMessageValidRequest_Return200() throws Exception {
-
-        HttpPost httpPost = new HttpPost(serviceUrl + "/return-application-return-message");
+        HttpPost httpPost = new HttpPost(serviceUrl + "/return-application-message");
         String requestBody = ResourceLoader.loadJson(validBody);
         httpPost.addHeader("Authorization", "TestAuth");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
@@ -46,15 +36,15 @@ public class ReturnApplicationReturnMessageControllerIntegrationTest {
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(
-            HttpStatus.SC_OK,
+            HttpStatus.SC_NOT_FOUND,
             httpResponse.getStatusLine().getStatusCode());
     }
 
 
     @Test
-    public void whenReturnApplicationNotificationValidRequest_Return200() throws Exception {
+    public void whenReturnApplicationNotificationValidRequest() throws Exception {
 
-        HttpPost httpPost = new HttpPost(serviceUrl + "/return-application-notification");
+        HttpPost httpPost = new HttpPost(serviceUrl + "/return-application-send-notification");
         String requestBody = ResourceLoader.loadJson(validBody);
         httpPost.addHeader("Authorization", "TestAuth");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
@@ -62,7 +52,7 @@ public class ReturnApplicationReturnMessageControllerIntegrationTest {
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(
-            HttpStatus.SC_OK,
+            HttpStatus.SC_NOT_FOUND,
             httpResponse.getStatusLine().getStatusCode());
     }
 }
