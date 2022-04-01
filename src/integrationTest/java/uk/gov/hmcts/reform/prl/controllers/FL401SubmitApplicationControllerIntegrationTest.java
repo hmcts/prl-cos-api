@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
@@ -13,8 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.prl.Application;
-import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
 
@@ -22,13 +21,14 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringBootTest(classes = {Application.class, FL401SubmitApplicationControllerIntegrationTest.class})
+@Slf4j
+@SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class FL401SubmitApplicationControllerIntegrationTest extends IntegrationTest {
+public class FL401SubmitApplicationControllerIntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
-    protected String serviceUrl;
+    protected String baseUrl;
 
     private final String fl401ValidationUrl = "/fl401-submit-application-validation";
 
@@ -40,7 +40,7 @@ public class FL401SubmitApplicationControllerIntegrationTest extends Integration
     @Test
     public void whenFL401ValidationRequestShouldReturn200() throws Exception {
 
-        HttpPost httpPost = new HttpPost("http://localhost:4044/fl401-submit-application-validation");
+        HttpPost httpPost = new HttpPost(baseUrl + "/fl401-submit-application-validation");
         String requestBody = ResourceLoader.loadJson(validBody);
         httpPost.addHeader("Authorization", "TestAuth");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
@@ -56,9 +56,12 @@ public class FL401SubmitApplicationControllerIntegrationTest extends Integration
     @Test
     public void whenFL401SubmitApplicationRequestShouldReturn200() throws Exception {
 
-        HttpPost httpPost = new HttpPost("http://localhost:4044/fl401-generate-document-submit-application");
+        String token = idamTokenGenerator.generateIdamTokenForSolicitor();
+        log.info("Generated Token: {}", token);
+
+        HttpPost httpPost = new HttpPost(baseUrl + "/fl401-generate-document-submit-application");
         String requestBody = ResourceLoader.loadJson(validBody);
-        httpPost.addHeader("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor());
+        httpPost.addHeader("Authorization", token);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
@@ -70,25 +73,25 @@ public class FL401SubmitApplicationControllerIntegrationTest extends Integration
     }
 
     @Test
-    public void whenFL401SubmitApplicationNotificationRequestShouldReturn200() throws Exception {
+    public void whenFL401SubmitApplicationNotificationRequest() throws Exception {
 
-        HttpPost httpPost = new HttpPost("http://localhost:4044/fl401-submit-application-send-notification");
+        HttpPost httpPost = new HttpPost(baseUrl + "/fl401-submit-application-notification");
         String requestBody = ResourceLoader.loadJson(validBody);
-        httpPost.addHeader("Authorization", "TestAuth");
+        httpPost.addHeader("Authorization", "Bearer Testtoken");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse =  HttpClientBuilder.create().build().execute(httpPost);
 
         assertEquals(
-            HttpStatus.SC_OK,
+            HttpStatus.SC_NOT_FOUND,
             httpResponse.getStatusLine().getStatusCode());
     }
 
     @Test
     public void whenFl401InvalidRequestFormat_Return400() throws IOException {
 
-        HttpPost httpPost = new HttpPost("http://localhost:4044/fl401-generate-document-application");
+        HttpPost httpPost = new HttpPost(baseUrl + "/fl401-generate-document-application");
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(
             httpResponse.getStatusLine().getStatusCode(),
