@@ -167,6 +167,9 @@ public class ResubmitApplicationController {
                 caseDataUpdated.put("isNotificationSent", "No");
             }
         }
+        //set the resubmit fields to null so they are blank if multiple resubmissions
+        caseDataUpdated.put("fl401StmtOfTruthResubmit", null);
+        caseDataUpdated.put("fl401ConfidentialityCheckResubmit", null);
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder()
