@@ -75,6 +75,9 @@ public class RequestUpdateCallbackService {
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
             caseData = getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, caseData);
+
+            log.info("Court details: " + caseData.getCourtName() + "  , ID:" + caseData.getCourtId());
+
             allTabService.updateAllTabsIncludingConfTab(caseData);
 
             log.info(
