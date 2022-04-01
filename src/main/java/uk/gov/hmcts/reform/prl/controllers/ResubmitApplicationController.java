@@ -147,6 +147,7 @@ public class ResubmitApplicationController {
         Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
+        eventsForCase.forEach(l -> log.info(l.getStateId()));
 
         if (previousStates.isPresent() && State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
             caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
