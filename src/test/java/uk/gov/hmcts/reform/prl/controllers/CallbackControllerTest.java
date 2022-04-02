@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -122,6 +123,9 @@ public class CallbackControllerTest {
 
     @Mock
     private CaseWorkerEmailService caseWorkerEmailService;
+
+    @Mock
+    private DocumentLanguageService documentLanguageService;
 
     @Mock
     private DocumentGenService documentGenService;
@@ -271,19 +275,11 @@ public class CallbackControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-      
-        callbackController.generateAndStoreDocument(authToken, callbackRequest);
-        verify(dgsService, times(1)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verify(dgsService, times(1)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verifyNoMoreInteractions(dgsService);
+
+        AboutToStartOrSubmitCallbackResponse response = callbackController.generateAndStoreDocument(authToken, callbackRequest);
+
+        assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_FIELD));
+        assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
     }
 
     @Test
@@ -624,7 +620,6 @@ public class CallbackControllerTest {
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8WelshDocument"));
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
-        verifyNoMoreInteractions(dgsService);
         verifyNoMoreInteractions(organisationService);
         verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
     }
