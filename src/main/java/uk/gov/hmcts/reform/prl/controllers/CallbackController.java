@@ -451,36 +451,39 @@ public class CallbackController {
                                          SUBMITTED_STATE,RETURN_STATE);
         log.info("*** previous state *** {}", previousState);
         log.info("*** Events previous states *** {}", eventsForCase.toString());
-        if (previousState.isPresent() && !stateList.contains(previousState.get())) {
-            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
-                Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
-                if (localCourtAdmin.isPresent()) {
-                    Optional<LocalCourtAdminEmail> localCourtAdminEmail = localCourtAdmin.get().stream().map(Element::getValue)
-                        .findFirst();
-                    if (localCourtAdminEmail.isPresent()) {
-                        String email = localCourtAdminEmail.get().getEmail();
-                        caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails,email);
-                    }
-                }
-            } else {
-                solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
-                caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails,caseData.getCourtEmailAddress());
-            }
-        }
-
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
-                // Refreshing the page in the same event. Hence no external event call needed.
-                // Getting the tab fields and add it to the casedetails..
-                Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-                caseDataUpdated.putAll(allTabsFields);
-            } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
+
+            if (previousState.isPresent() && !stateList.contains(previousState.get())) {
+                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                    solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
+                    Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
+                    if (localCourtAdmin.isPresent()) {
+                        Optional<LocalCourtAdminEmail> localCourtAdminEmail = localCourtAdmin.get().stream().map(Element::getValue)
+                            .findFirst();
+                        if (localCourtAdminEmail.isPresent()) {
+                            String email = localCourtAdminEmail.get().getEmail();
+                            caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
+                        }
+                    }
+                } else {
+                    solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
+                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails,
+                                                                                    caseData.getCourtEmailAddress());
+                }
+            } else {
+                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                    solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
+                    // Refreshing the page in the same event. Hence no external event call needed.
+                    // Getting the tab fields and add it to the casedetails..
+                    Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+                    caseDataUpdated.putAll(allTabsFields);
+                } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                    solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
+                }
+                caseDataUpdated.put("state", WITHDRAWN_STATE);
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
