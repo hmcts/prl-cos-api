@@ -556,4 +556,8 @@ public class CaseData implements MappableObject {
     private String isDocumentGenerated;
     private String isNotificationSent;
 
+    /**
+     *  Withdraw request flag.
+     */
+    private String isWithdrawRequestSent;
 }

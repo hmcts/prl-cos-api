@@ -153,8 +153,7 @@ public class FL401SubmitApplicationController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        final LocalDate localDate = LocalDate.now();
-        caseData = caseData.toBuilder().issueDate(localDate).courtName((nearestDomesticAbuseCourt != null)
+        caseData = caseData.toBuilder().courtName((nearestDomesticAbuseCourt != null)
                                                                 ? nearestDomesticAbuseCourt
             .getCourtName() : "").build();
 
@@ -190,7 +189,6 @@ public class FL401SubmitApplicationController {
         }
 
         log.info("Generating the Final document of FL401 for case id " + caseData.getId());
-        log.info("Issue date for the application: {} ", caseData.getIssueDate());
 
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
         caseData = organisationService.getApplicantOrganisationDetailsForFL401(caseData);
@@ -217,7 +215,6 @@ public class FL401SubmitApplicationController {
                                 generateDocumentField(fl401C8WelshFilename,generateDocument(authorisation, fl401C8WelshTemplate, caseData,
                                                                        true)));
         }
-        caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
