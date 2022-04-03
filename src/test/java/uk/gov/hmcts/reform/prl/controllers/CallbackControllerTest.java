@@ -59,6 +59,7 @@ import java.util.Map;
 import javax.json.JsonValue;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
@@ -897,6 +898,20 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .copyFL401CasenameToC100CaseName(authToken, callbackRequest);
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
+    }
+
+    @Test
+    public void testAddCaseNumberSubmitted() throws Exception {
+
+        Map<String, Object> caseData = new HashMap<>();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .addCaseNumberSubmitted(authToken, callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
     }
 
     @Test
