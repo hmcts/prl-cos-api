@@ -824,8 +824,6 @@ public class CallbackControllerTest {
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
         verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToSolicitor(callbackRequest.getCaseDetails(), userDetails);
-        verify(solicitorEmailService, times(1))
             .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
         verify(caseWorkerEmailService, times(1))
             .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(),"test@gmail.com");
@@ -1022,8 +1020,6 @@ public class CallbackControllerTest {
                                                        .data(stringObjectMap).build()).build();
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToFl401Solicitor(callbackRequest.getCaseDetails(), userDetails);
         verify(solicitorEmailService, times(1))
             .sendWithDrawEmailToFl401SolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
         verify(caseWorkerEmailService, times(1))
