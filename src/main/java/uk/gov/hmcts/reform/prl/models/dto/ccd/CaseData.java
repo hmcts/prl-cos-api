@@ -392,7 +392,7 @@ public class CaseData implements MappableObject {
      */
     private final String familymanCaseNumber;
     private final String fl401FamilymanCaseNumber;
-  
+
     /**
      * Manage Documents.
      */
@@ -556,4 +556,8 @@ public class CaseData implements MappableObject {
     private String isDocumentGenerated;
     private String isNotificationSent;
 
+    /**
+     *  Withdraw request flag.
+     */
+    private String isWithdrawRequestSent;
 }
