@@ -59,6 +59,7 @@ import java.util.Map;
 import javax.json.JsonValue;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
@@ -909,5 +910,38 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .copyFL401CasenameToC100CaseName(authToken, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
+    }
+
+    @Test
+    public void testCopyManageDocsOnSubmitWithNullData() {
+
+        Map<String, Object> caseData = new HashMap<>();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .copyManageDocsForTabs(authToken, callbackRequest);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("furtherEvidences"));
+    }
+
+    @Test
+    public void testCopyManageDocsOnSubmit() throws Exception {
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("furtherEvidences","test");
+        caseData.put("correspondence","test");
+        caseData.put("otherDocuments","test");
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .copyManageDocsForTabs(authToken, callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("mainAppDocForTabDisplay"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("correspondenceForTabDisplay"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("otherDocumentsTabDisplay"));
     }
 }
