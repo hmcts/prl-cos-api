@@ -503,7 +503,7 @@ public class CallbackController {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
         caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
-        if (userOrganisation != null && userOrganisation.isPresent()) {
+        if (userOrganisation.isPresent()) {
             log.info("Logged in Org Details ==> " + userOrganisation.get().getName());
             caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
         }

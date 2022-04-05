@@ -886,7 +886,8 @@ public class CallbackControllerTest {
         verify(sendgridService,times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
     }
 
-    public void testCopyFL401CasenameToC100CaseName() throws Exception {
+    @Test
+    public void aboutToSubmitCaseCreationToC100CaseName() throws Exception {
 
         Map<String, Object> caseData = new HashMap<>();
         Organisations org = Organisations.builder().name("testOrg").build();
@@ -907,7 +908,7 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testCopyFL401CasenameToC100ForNullCaseName() throws Exception {
+    public void aboutToSubmitCaseCreationToC100ForNullCaseName() throws Exception {
 
         Map<String, Object> caseData = new HashMap<>();
         Organisations org = Organisations.builder().name("testOrg").build();
