@@ -397,7 +397,7 @@ public class CaseData implements MappableObject {
      * Manage Documents.
      */
     private final DocumentCategoryEnum documentCategory;
-    private final List<Element<FurtherEvidence>> furtherEvidences;
+    private final List<Element<FurtherEvidence>> mainApplicationDocument;
     @JsonProperty("giveDetails")
     private final String giveDetails;
 
