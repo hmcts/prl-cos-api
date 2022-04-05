@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -24,7 +25,10 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
+import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
@@ -921,6 +925,8 @@ public class CallbackControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
+        CaseData caseData1 = CaseData.builder().build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .copyManageDocsForTabs(authToken, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("furtherEvidences"));
@@ -930,14 +936,29 @@ public class CallbackControllerTest {
     public void testCopyManageDocsOnSubmit() throws Exception {
 
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("furtherEvidences","test");
-        caseData.put("correspondence","test");
-        caseData.put("otherDocuments","test");
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
+        CaseData caseData1 = CaseData.builder()
+            .furtherEvidences(List.of(Element.<FurtherEvidence>builder()
+                                          .value(FurtherEvidence.builder()
+                                                     .restrictCheckboxFurtherEvidence(List.of(RestrictToCafcassHmcts.RESTRICTTOGROUP))
+                                                     .build())
+                                          .build()))
+            .correspondence(List.of(Element.<Correspondence>builder()
+                                        .value(Correspondence.builder()
+                                                   .restrictCheckboxCorrespondence(List.of(RestrictToCafcassHmcts.RESTRICTTOGROUP))
+                                                   .build())
+                                        .build()))
+            .otherDocuments(List.of(Element.<OtherDocuments>builder()
+                                        .value(OtherDocuments.builder()
+                                                   .restrictCheckboxOtherDocuments(List.of(RestrictToCafcassHmcts.RESTRICTTOGROUP))
+                                                   .build())
+                                        .build()))
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .copyManageDocsForTabs(authToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("mainAppDocForTabDisplay"));

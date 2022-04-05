@@ -22,6 +22,10 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
+import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -47,8 +51,10 @@ import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkf
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
@@ -60,6 +66,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
+import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.RESTRICTTOGROUP;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -509,15 +516,34 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Element<FurtherEvidence>> furtherEvidences = caseData.getFurtherEvidences();
+        List<Element<Correspondence>> correspondence = caseData.getCorrespondence();
+        List<Element<OtherDocuments>> otherDocuments = caseData.getOtherDocuments();
+        if (furtherEvidences != null) {
+            furtherEvidences = furtherEvidences.stream()
+                    .filter(element -> {
+                        return element.getValue().getRestrictCheckboxFurtherEvidence().contains(RESTRICTTOGROUP);
+                    })
+                .collect(Collectors.toList());
+            caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
+        }
+        if (correspondence != null) {
+            correspondence = correspondence.stream()
+                .filter(element -> {
+                    return element.getValue().getRestrictCheckboxCorrespondence().contains(RESTRICTTOGROUP);
+                })
+                .collect(Collectors.toList());
+            caseDataUpdated.put("correspondenceForTabDisplay", correspondence);
+        }
+        if (otherDocuments != null) {
 
-        if (caseDataUpdated.get("furtherEvidences") != null) {
-            caseDataUpdated.put("mainAppDocForTabDisplay", caseDataUpdated.get("furtherEvidences"));
-        }
-        if (caseDataUpdated.get("correspondence") != null) {
-            caseDataUpdated.put("correspondenceForTabDisplay", caseDataUpdated.get("correspondence"));
-        }
-        if (caseDataUpdated.get("otherDocuments") != null) {
-            caseDataUpdated.put("otherDocumentsTabDisplay", caseDataUpdated.get("otherDocuments"));
+            otherDocuments = otherDocuments.stream()
+                .filter(element -> {
+                    return element.getValue().getRestrictCheckboxOtherDocuments().contains(RESTRICTTOGROUP);
+                })
+                .collect(Collectors.toList());
+            caseDataUpdated.put("otherDocumentsTabDisplay", otherDocuments);
         }
         log.info("*** Check Documents *** {}",caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
