@@ -25,14 +25,10 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
-        new supressions(log4j,springframework,apache tomcat)
+        new supressions(log4j,springframework)
          ]]></notes>
-    <cve>CVE-2021-44832</cve>
-    <cve>CVE-2021-45105</cve>
-    <cve>CVE-2021-45046</cve>
-    <cve>CVE-2021-42550</cve>
     <cve>CVE-2021-22060</cve>
-    <cve>CVE-2022-23181</cve>
+    <cve>CVE-2021-42550</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
