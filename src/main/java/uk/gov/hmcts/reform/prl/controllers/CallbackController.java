@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -481,19 +482,30 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/copy-FL401-case-name-to-C100", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Copy fl401 case name to C100 Case name")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse copyFL401CasenameToC100CaseName(
+    public AboutToStartOrSubmitCallbackResponse aboutToSubmitCaseCreation(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
+        // Updating the case name for FL401
         if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
             caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
+        }
+
+        // Saving the logged-in Solicitor and Org details for the docs..
+        log.info("Fetching the user and Org Details ");
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
+        caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
+        if (userOrganisation != null && userOrganisation.isPresent()) {
+            log.info("Logged in Org Details ==> " + userOrganisation.get().getName());
+            caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
