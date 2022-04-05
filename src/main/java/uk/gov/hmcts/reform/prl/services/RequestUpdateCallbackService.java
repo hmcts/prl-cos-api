@@ -122,7 +122,7 @@ public class RequestUpdateCallbackService {
             }
             if (closestChildArrangementsCourt != null) {
                 caseData.toBuilder().courtName(closestChildArrangementsCourt.getCourtName()).courtId(String.valueOf(
-                    closestChildArrangementsCourt.getCountyLocationCode()));
+                    closestChildArrangementsCourt.getCountyLocationCode())).build();
             }
         } catch (Exception e) {
             log.info("Error while populating case date in payment request call {}", caseData.getId());
