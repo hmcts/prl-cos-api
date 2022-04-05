@@ -392,12 +392,12 @@ public class CaseData implements MappableObject {
      */
     private final String familymanCaseNumber;
     private final String fl401FamilymanCaseNumber;
-  
+
     /**
      * Manage Documents.
      */
     private final DocumentCategoryEnum documentCategory;
-    private final List<Element<FurtherEvidence>> furtherEvidences;
+    private final List<Element<FurtherEvidence>> mainApplicationDocument;
     @JsonProperty("giveDetails")
     private final String giveDetails;
 
