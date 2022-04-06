@@ -553,4 +553,10 @@ public class CaseData implements MappableObject {
     private String isDocumentGenerated;
     private String isNotificationSent;
 
+    /**
+     * Solicitor Details.
+     */
+    private String caseSolicitorName;
+    private String caseSolicitorOrgName;
+
 }
