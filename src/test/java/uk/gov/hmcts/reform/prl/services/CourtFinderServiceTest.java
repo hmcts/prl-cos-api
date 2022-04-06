@@ -321,7 +321,6 @@ public class CourtFinderServiceTest {
         CaseData caseData = CaseData.builder()
             .applicantsFL401(applicant)
             .caseTypeOfApplication("FL401")
-
             .build();
 
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(horshamCourt));
