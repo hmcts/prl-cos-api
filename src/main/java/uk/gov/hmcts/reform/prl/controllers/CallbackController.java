@@ -511,7 +511,7 @@ public class CallbackController {
             Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
             caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
             if (userOrganisation.isPresent()) {
-                log.info("Logged in Org Details ==> " + userOrganisation.get().getName());
+                log.info("Got the Org Details");
                 caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
             }
             log.info("SUCCESSFULLY fetched user and Org Details ");
