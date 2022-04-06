@@ -66,7 +66,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
-import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.RESTRICTTOGROUP;
+import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -523,7 +523,7 @@ public class CallbackController {
         if (furtherEvidences != null) {
             furtherEvidences = furtherEvidences.stream()
                     .filter(element -> {
-                        return element.getValue().getRestrictCheckboxFurtherEvidence().contains(RESTRICTTOGROUP);
+                        return element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup);
                     })
                 .collect(Collectors.toList());
             caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
@@ -531,7 +531,7 @@ public class CallbackController {
         if (correspondence != null) {
             correspondence = correspondence.stream()
                 .filter(element -> {
-                    return element.getValue().getRestrictCheckboxCorrespondence().contains(RESTRICTTOGROUP);
+                    return element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup);
                 })
                 .collect(Collectors.toList());
             caseDataUpdated.put("correspondenceForTabDisplay", correspondence);
@@ -540,7 +540,7 @@ public class CallbackController {
 
             otherDocuments = otherDocuments.stream()
                 .filter(element -> {
-                    return element.getValue().getRestrictCheckboxOtherDocuments().contains(RESTRICTTOGROUP);
+                    return element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup);
                 })
                 .collect(Collectors.toList());
             caseDataUpdated.put("otherDocumentsTabDisplay", otherDocuments);

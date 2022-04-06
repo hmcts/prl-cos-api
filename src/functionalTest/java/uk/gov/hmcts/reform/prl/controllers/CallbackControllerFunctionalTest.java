@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 
 @Slf4j
 @SpringBootTest
@@ -109,4 +110,17 @@ public class CallbackControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Test
+    public void givenRequest_whenEndPointCalled_ResponseContains() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        request
+            .header("Authorization", userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/copy-manage-docs-for-tabs")
+            .then()
+            .body("data.furtherEvidences", nullValue())
+            .assertThat().statusCode(200);
+    }
 }

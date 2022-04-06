@@ -888,6 +888,7 @@ public class CallbackControllerTest {
         verify(sendgridService,times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
     }
 
+    @Test
     public void testCopyFL401CasenameToC100CaseName() throws Exception {
 
         Map<String, Object> caseData = new HashMap<>();
@@ -944,17 +945,17 @@ public class CallbackControllerTest {
         CaseData caseData1 = CaseData.builder()
             .furtherEvidences(List.of(Element.<FurtherEvidence>builder()
                                           .value(FurtherEvidence.builder()
-                                                     .restrictCheckboxFurtherEvidence(List.of(RestrictToCafcassHmcts.RESTRICTTOGROUP))
+                                                     .restrictCheckboxFurtherEvidence(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                      .build())
                                           .build()))
             .correspondence(List.of(Element.<Correspondence>builder()
                                         .value(Correspondence.builder()
-                                                   .restrictCheckboxCorrespondence(List.of(RestrictToCafcassHmcts.RESTRICTTOGROUP))
+                                                   .restrictCheckboxCorrespondence(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                    .build())
                                         .build()))
             .otherDocuments(List.of(Element.<OtherDocuments>builder()
                                         .value(OtherDocuments.builder()
-                                                   .restrictCheckboxOtherDocuments(List.of(RestrictToCafcassHmcts.RESTRICTTOGROUP))
+                                                   .restrictCheckboxOtherDocuments(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                    .build())
                                         .build()))
             .build();
