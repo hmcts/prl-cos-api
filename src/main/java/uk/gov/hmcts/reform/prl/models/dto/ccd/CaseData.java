@@ -403,12 +403,11 @@ public class CaseData implements MappableObject {
 
     private final List<Element<Correspondence>> correspondence;
     private final List<Element<OtherDocuments>> otherDocuments;
-    @JsonIgnore
+
     private final List<Element<FurtherEvidence>> mainAppDocForTabDisplay;
-    @JsonIgnore
     private final List<Element<Correspondence>> correspondenceForTabDisplay;
-    @JsonIgnore
     private final List<Element<OtherDocuments>> otherDocumentsForTabDisplay;
+
     private final List<Element<UserInfo>> userInfo;
 
     /**
