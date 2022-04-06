@@ -380,7 +380,7 @@ public class CallbackControllerTest {
             Mockito.any(CaseDetails.class),
             Mockito.any()
         );
-        verify(organisationService,times(1))
+        verify(organisationService, times(1))
             .getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class));
         verifyNoMoreInteractions(dgsService);
         verifyNoMoreInteractions(organisationService);
@@ -720,9 +720,9 @@ public class CallbackControllerTest {
             Mockito.any(CaseDetails.class),
             Mockito.any()
         );
-        verify(organisationService,times(1))
+        verify(organisationService, times(1))
             .getApplicantOrganisationDetails(caseData);
-        verify(organisationService,times(2))
+        verify(organisationService, times(2))
             .getRespondentOrganisationDetails(caseData);
         verifyNoMoreInteractions(dgsService);
         verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
@@ -795,8 +795,8 @@ public class CallbackControllerTest {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
         CaseData caseData = CaseData.builder()
-                           .withDrawApplicationData(withdrawApplication)
-                           .applicants(applicantList).build();
+            .withDrawApplicationData(withdrawApplication)
+            .applicants(applicantList).build();
         Map<String, Object> stringObjectMap = new HashMap<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -870,8 +870,8 @@ public class CallbackControllerTest {
         CaseData caseData = CaseData.builder()
             .id(1234L)
             .build();
-        Map<String,Object> json = new HashMap<>();
-        json.put("id",1234L);
+        Map<String, Object> json = new HashMap<>();
+        json.put("id", 1234L);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest
             .builder()
@@ -883,15 +883,15 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(json, CaseData.class)).thenReturn(caseData);
         when(c100JsonMapper.map(caseData)).thenReturn(JsonValue.EMPTY_JSON_OBJECT);
         callbackController.resendNotificationtoRpa(authToken, callbackRequest);
-        verify(sendgridService,times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
+        verify(sendgridService, times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
     }
 
     @Test
-    public void aboutToSubmitCaseCreationToC100CaseName() throws Exception {
+    public void aboutToSubmitCaseCreationToC100CaseName() {
 
         Map<String, Object> caseData = new HashMap<>();
         Organisations org = Organisations.builder().name("testOrg").build();
-        caseData.put("applicantOrRespondentCaseName","test");
+        caseData.put("applicantOrRespondentCaseName", "test");
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
@@ -908,7 +908,7 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void aboutToSubmitCaseCreationToC100ForNullCaseName() throws Exception {
+    public void aboutToSubmitCaseCreationToC100ForNullCaseName() {
 
         Map<String, Object> caseData = new HashMap<>();
         Organisations org = Organisations.builder().name("testOrg").build();
@@ -925,5 +925,23 @@ public class CallbackControllerTest {
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
+    }
+
+    @Test
+    public void aboutToSubmitCaseCreationToC100ForNullCaseNameWithException() {
+
+        Map<String, Object> caseData = new HashMap<>();
+        Organisations org = Organisations.builder().name("testOrg").build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(null);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .aboutToSubmitCaseCreation(authToken, callbackRequest);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
     }
 }

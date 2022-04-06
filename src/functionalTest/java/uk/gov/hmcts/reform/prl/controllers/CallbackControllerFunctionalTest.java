@@ -13,6 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 
 @Slf4j
 @SpringBootTest
@@ -90,8 +91,8 @@ public class CallbackControllerFunctionalTest {
             .contentType("application/json")
             .post("/about-to-submit-case-creation")
             .then()
-            //.body("data.applicantCaseName", equalTo("Test Name"))
-            .assertThat().statusCode(500);
+            .body("data.applicantCaseName", equalTo("Test Name"))
+            .assertThat().statusCode(200);
     }
 
     @Test
