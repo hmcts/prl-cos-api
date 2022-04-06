@@ -430,13 +430,10 @@ public class CallbackController {
         List<String> stateList = List.of(DRAFT_STATE,"CLOSED",
                                          PENDING_STATE,
                                          SUBMITTED_STATE,RETURN_STATE);
-        log.info("*** previous state *** {}", previousState);
-        log.info("*** Events previous states *** {}", eventsForCase.toString());
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-
             if (previousState.isPresent() && !stateList.contains(previousState.get())) {
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                     solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
