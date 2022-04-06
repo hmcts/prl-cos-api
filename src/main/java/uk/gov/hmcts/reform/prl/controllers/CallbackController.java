@@ -543,7 +543,7 @@ public class CallbackController {
                     return element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup);
                 })
                 .collect(Collectors.toList());
-            caseDataUpdated.put("otherDocumentsTabDisplay", otherDocuments);
+            caseDataUpdated.put("otherDocumentsForTabDisplay", otherDocuments);
         }
         log.info("*** Check Documents *** {}",caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
