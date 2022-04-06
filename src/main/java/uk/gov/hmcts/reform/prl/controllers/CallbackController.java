@@ -499,15 +499,26 @@ public class CallbackController {
         }
 
         // Saving the logged-in Solicitor and Org details for the docs..
-        log.info("Fetching the user and Org Details ");
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
-        caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
-        if (userOrganisation.isPresent()) {
-            log.info("Logged in Org Details ==> " + userOrganisation.get().getName());
-            caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
-        }
+        caseDataUpdated = getSolicitorDetails(authorisation, caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated) {
+        log.info("Fetching the user and Org Details ");
+        try {
+            UserDetails userDetails = userService.getUserDetails(authorisation);
+            Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
+            caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
+            if (userOrganisation.isPresent()) {
+                log.info("Logged in Org Details ==> " + userOrganisation.get().getName());
+                caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
+            }
+            log.info("SUCCESSFULLY fetched user and Org Details ");
+        } catch (Exception e) {
+            log.error("Error while fetching User or Org details for the logged in user ", e);
+        }
+
+        return caseDataUpdated;
     }
 }
