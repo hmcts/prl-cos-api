@@ -457,7 +457,7 @@ public class CallbackController {
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
 
             if (previousState.isPresent() && !stateList.contains(previousState.get())) {
-                caseData = caseData.toBuilder().isWithdrawRequestSent("Yes").build();
+                caseDataUpdated.put("isWithdrawRequestSent", "Yes");
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                     solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
                     Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
