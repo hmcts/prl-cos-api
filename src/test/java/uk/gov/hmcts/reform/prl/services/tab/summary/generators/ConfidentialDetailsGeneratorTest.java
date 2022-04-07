@@ -160,12 +160,118 @@ public class ConfidentialDetailsGeneratorTest {
     }
 
     @Test
+    public void testIfNoHomeConfidentialDetailsForDA() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName")
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No).build();
+
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("FL401")
+                                                         .applicantsFL401(applicant)
+                                                         .build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .confidentialDetails(ConfidentialDetails.builder()
+                                                                       .isConfidentialDetailsAvailable(
+                                                                           YesOrNo.No.getDisplayedValue()).build())
+                                              .build());
+
+    }
+
+
+
+
+
+    @Test
+    public void testIfApplicantConfidentialDetailsNotAvailableForDA() {
+
+        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder().keepChildrenInfoConfidential(
+            YesOrNo.Yes).build();
+
+        Element<ChildrenLiveAtAddress> wrappedChildren = Element.<ChildrenLiveAtAddress>builder().value(child).build();
+        List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        Home home = Home.builder().children(listOfChildren).build();
+
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("FL401")
+                                                         .home(home)
+                                                         .build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .confidentialDetails(ConfidentialDetails.builder()
+                                                                       .isConfidentialDetailsAvailable(
+                                                                           YesOrNo.Yes.getDisplayedValue()).build())
+                                              .build());
+    }
+
+
+    @Test
+    public void testIfHomeDetailsNotAvailableForDA() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName")
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No).build();
+
+        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder().keepChildrenInfoConfidential(
+            YesOrNo.No).build();
+
+        Element<ChildrenLiveAtAddress> wrappedChildren = Element.<ChildrenLiveAtAddress>builder().value(child).build();
+        List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        Home home = Home.builder().children(listOfChildren).build();
+
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("FL401")
+                                                         .applicantsFL401(applicant).home(home)
+                                                         .build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .confidentialDetails(ConfidentialDetails.builder()
+                                                                       .isConfidentialDetailsAvailable(
+                                                                           YesOrNo.No.getDisplayedValue()).build())
+                                              .build());
+    }
+
+
+    @Test
     public void testIfApplicantHomeConfidentialDetailsForDA() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName")
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No).build();
+
+        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder().keepChildrenInfoConfidential(
+            YesOrNo.Yes).build();
+
+        Element<ChildrenLiveAtAddress> wrappedChildren = Element.<ChildrenLiveAtAddress>builder().value(child).build();
+        List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        Home home = Home.builder().children(listOfChildren).build();
+
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("FL401")
+                                                         .applicantsFL401(applicant).home(home)
+                                                         .build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .confidentialDetails(ConfidentialDetails.builder()
+                                                                       .isConfidentialDetailsAvailable(
+                                                                           YesOrNo.Yes.getDisplayedValue()).build())
+                                              .build());
+
+    }
+
+    @Test
+    public void testIfApplicantEmailConfidentialDetailsForDA() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName")
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.No)
             .isEmailAddressConfidential(YesOrNo.No).build();
 
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder().keepChildrenInfoConfidential(

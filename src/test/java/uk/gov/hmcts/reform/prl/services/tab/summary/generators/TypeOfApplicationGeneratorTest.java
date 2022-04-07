@@ -34,7 +34,24 @@ public class TypeOfApplicationGeneratorTest {
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()
                                               .applicationTypeOrders(ApplicationTypeOrders.builder().applicationTypeOrders(
-                                                      orderLists).build()).build());
+                                                  orderLists).build()).build());
+
+
+    }
+
+
+    @Test
+    public void testIfTypeOfApplicationIsNone() {
+
+        List<FL401OrderTypeEnum> enumList = new ArrayList<>();
+        List<String> typeOfApplicationLists = new ArrayList<>();
+        TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder().orderType(enumList).build();
+
+        CaseSummary caseSummary = generator.generate(CaseData.builder().typeOfApplicationOrders(orders).build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .applicationTypeOrders(ApplicationTypeOrders.builder().applicationTypeOrders(
+                                                  typeOfApplicationLists).build()).build());
 
 
     }

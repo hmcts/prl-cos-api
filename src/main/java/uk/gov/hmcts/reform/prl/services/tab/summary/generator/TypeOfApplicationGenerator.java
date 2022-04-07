@@ -29,9 +29,12 @@ public class TypeOfApplicationGenerator implements FieldGenerator {
 
         List<String> displayedValues = new ArrayList<>();
         Optional<TypeOfApplicationOrders> applicationOrder = ofNullable(caseData.getTypeOfApplicationOrders());
-        if (applicationOrder.isPresent() && !applicationOrder.get().getOrderType().isEmpty()) {
-            displayedValues = applicationOrder.get().getOrderType().stream().map(FL401OrderTypeEnum::getDisplayedValue).collect(
-                Collectors.toList());
+        if (applicationOrder.isPresent()) {
+            Optional<List<FL401OrderTypeEnum>> orderTypeEnums = ofNullable(applicationOrder.get().getOrderType());
+            if (orderTypeEnums.isPresent()) {
+                displayedValues = orderTypeEnums.get().stream().map(FL401OrderTypeEnum::getDisplayedValue).collect(
+                    Collectors.toList());
+            }
         }
         return displayedValues;
     }
