@@ -34,37 +34,33 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
     private String isConfidentialDetailsAvailable(CaseData caseData) {
 
         // Checking the Child details. It is only for C100 applications
-        if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            if (validateChildrensDetails(caseData)) {
-                return YesOrNo.Yes.getDisplayedValue();
-            }
-        }
-        // Applicant Details can be for C100 and FL401 both
-        if (validateApplicantDetails(caseData)) {
+        if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+            && (validateChildrensDetails(caseData) || validateApplicantForCA(caseData))) {
             return YesOrNo.Yes.getDisplayedValue();
         }
-        // Checking the Home details
-        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            return validateHomeConfidentialDetails(caseData);
+
+        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+            && (validateApplicantForDA(caseData) || validateHomeConfidentialDetails(caseData))) {
+            return YesOrNo.Yes.getDisplayedValue();
         }
 
         return YesOrNo.No.getDisplayedValue();
     }
 
-    private String validateHomeConfidentialDetails(CaseData caseData) {
-        Optional<Home>  homeOptional =  ofNullable(caseData.getHome());
+    private boolean validateHomeConfidentialDetails(CaseData caseData) {
+        Optional<Home> homeOptional = ofNullable(caseData.getHome());
         if (homeOptional.isPresent()) {
             Optional<List<Element<ChildrenLiveAtAddress>>> childrenAddress = ofNullable(homeOptional.get().getChildren());
             if (childrenAddress.isPresent()) {
                 List<ChildrenLiveAtAddress> childrenLiveAtAddressList = childrenAddress.get().stream().map(Element::getValue)
-                                            .collect(Collectors.toList());
+                    .collect(Collectors.toList());
                 if (childrenLiveAtAddressList.stream().anyMatch(childAddress -> YesOrNo.Yes.equals(childAddress.getKeepChildrenInfoConfidential()))) {
-                    return YesOrNo.Yes.getDisplayedValue();
+                    return true;
                 }
             }
 
         }
-        return YesOrNo.No.getDisplayedValue();
+        return false;
 
     }
 
@@ -99,39 +95,36 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
         return false;
     }
 
-    private boolean validateApplicantDetails(CaseData caseData) {
-
-        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            Optional<PartyDetails> flApplicants = ofNullable(caseData.getApplicantsFL401());
-            if (flApplicants.isPresent()) {
-                PartyDetails partyDetails =  flApplicants.get();
-                return partyDetails.hasConfidentialInfo() || isEmailAddressAddressConfidentialForFL401(partyDetails);
-            }
+    private boolean validateApplicantForDA(CaseData caseData) {
+        Optional<PartyDetails> flApplicants = ofNullable(caseData.getApplicantsFL401());
+        if (flApplicants.isPresent()) {
+            PartyDetails partyDetails = flApplicants.get();
+            return partyDetails.hasConfidentialInfo() || isEmailAddressAddressConfidentialForDA(partyDetails);
         }
-        if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            // Checking the Applicant Details..
-            Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
-            if (!applicantsWrapped.isEmpty() && !applicantsWrapped.get().isEmpty()) {
-                List<PartyDetails> applicants = applicantsWrapped.get()
-                    .stream()
-                    .map(Element::getValue)
-                    .collect(Collectors.toList());
-
-                for (PartyDetails applicant : applicants) {
-                    if (YesOrNo.Yes.equals(applicant.getIsAddressConfidential())
-                        || YesOrNo.Yes.equals(applicant.getIsPhoneNumberConfidential())
-                        || YesOrNo.Yes.equals(applicant.getIsEmailAddressConfidential())) {
-                        return true;
-                    }
-                }
-            }
-
-        }
-
         return false;
     }
 
-    private boolean isEmailAddressAddressConfidentialForFL401(PartyDetails partyDetails) {
+    private boolean validateApplicantForCA(CaseData caseData) {
+        // Checking the Applicant Details..
+        Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
+        if (!applicantsWrapped.isEmpty() && !applicantsWrapped.get().isEmpty()) {
+            List<PartyDetails> applicants = applicantsWrapped.get()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+
+            for (PartyDetails applicant : applicants) {
+                if (YesOrNo.Yes.equals(applicant.getIsAddressConfidential())
+                    || YesOrNo.Yes.equals(applicant.getIsPhoneNumberConfidential())
+                    || YesOrNo.Yes.equals(applicant.getIsEmailAddressConfidential())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isEmailAddressAddressConfidentialForDA(PartyDetails partyDetails) {
         if (YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())) {
             return YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential());
         }

@@ -17,7 +17,6 @@ public class TypeOfApplicationGenerator implements FieldGenerator {
     @Override
     public CaseSummary generate(CaseData caseData) {
 
-        List<String> typeOfApplicationOrders = getTypeOfApplication(caseData);
         return CaseSummary.builder().applicationTypeOrders(ApplicationTypeOrders.builder()
                                                                .applicationTypeOrders(getTypeOfApplication(caseData)).build()).build();
     }
