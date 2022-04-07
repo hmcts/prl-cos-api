@@ -174,7 +174,7 @@ public class FL401SubmitApplicationController {
 
         if (nearestDomesticAbuseCourt != null) {
             caseDataUpdated.put(COURT_NAME_FIELD,nearestDomesticAbuseCourt.getCourtName());
-            caseDataUpdated.put(COURT_ID_FIELD, nearestDomesticAbuseCourt.getCountyLocationCode());
+            caseDataUpdated.put(COURT_ID_FIELD, String.valueOf(nearestDomesticAbuseCourt.getCountyLocationCode()));
         }
 
         caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, (nearestDomesticAbuseCourt != null
