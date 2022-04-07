@@ -5,6 +5,8 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
@@ -30,13 +32,13 @@ public class ConfidentialDetailsGeneratorTest {
 
         CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("C100")
                                                          .children(listOfChildren)
-                                                             .build());
+                                                         .build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()
                                               .confidentialDetails(ConfidentialDetails.builder()
                                                                        .isConfidentialDetailsAvailable(
                                                                            YesOrNo.Yes.getDisplayedValue()).build())
-                                                               .build());
+                                              .build());
 
     }
 
@@ -135,4 +137,56 @@ public class ConfidentialDetailsGeneratorTest {
                                               .build());
 
     }
+
+    @Test
+    public void testIfApplicantConfidentialDetailsForDA() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName")
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes).build();
+
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("FL401")
+                                                         .applicantsFL401(applicant)
+                                                         .build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .confidentialDetails(ConfidentialDetails.builder()
+                                                                       .isConfidentialDetailsAvailable(
+                                                                           YesOrNo.Yes.getDisplayedValue()).build())
+                                              .build());
+
+    }
+
+    @Test
+    public void testIfApplicantHomeConfidentialDetailsForDA() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName")
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No).build();
+
+        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder().keepChildrenInfoConfidential(
+            YesOrNo.Yes).build();
+
+        Element<ChildrenLiveAtAddress> wrappedChildren = Element.<ChildrenLiveAtAddress>builder().value(child).build();
+        List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        Home home = Home.builder().children(listOfChildren).build();
+
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("FL401")
+                                                         .applicantsFL401(applicant).home(home)
+                                                         .build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .confidentialDetails(ConfidentialDetails.builder()
+                                                                       .isConfidentialDetailsAvailable(
+                                                                           YesOrNo.Yes.getDisplayedValue()).build())
+                                              .build());
+
+    }
+
+
 }
