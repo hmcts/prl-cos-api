@@ -50,7 +50,8 @@ public class CourtFinderService {
                 .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
         }
 
-        if(serviceArea.getCourts() != null && serviceArea.getCourts().size() > 0) {
+        if (serviceArea.getCourts() != null
+            && serviceArea.getCourts().size() > 0) {
             return getCourtDetails(serviceArea.getCourts()
                                        .get(0)
                                        .getCourtId());
