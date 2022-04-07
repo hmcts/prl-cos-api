@@ -28,7 +28,7 @@ public class ConfidentialDetailsGeneratorTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        CaseSummary caseSummary = generator.generate(CaseData.builder()
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("C100")
                                                          .children(listOfChildren)
                                                              .build());
 
@@ -82,7 +82,7 @@ public class ConfidentialDetailsGeneratorTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        CaseSummary caseSummary = generator.generate(CaseData.builder()
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("C100")
                                                          .children(listOfChildren)
                                                          .build());
 
@@ -103,7 +103,7 @@ public class ConfidentialDetailsGeneratorTest {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
-        CaseSummary caseSummary = generator.generate(CaseData.builder()
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("C100")
                                                          .applicants(applicantList)
                                                          .build());
 
@@ -124,7 +124,7 @@ public class ConfidentialDetailsGeneratorTest {
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
-        CaseSummary caseSummary = generator.generate(CaseData.builder()
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("C100")
                                                          .applicants(applicantList)
                                                          .build());
 

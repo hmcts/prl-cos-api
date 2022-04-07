@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherP
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.SpecialArrangements;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.Urgency;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.ApplicationTypeOrders;
 
 import java.util.List;
 
@@ -31,4 +32,5 @@ public class CaseSummary implements MappableObject {
     private final List<Element<OtherProceedings>> otherProceedingsForSummaryTab;
     private final OtherProceedingEmptyTable otherProceedingEmptyTable;
     private final DateOfSubmission dateOfSubmission;
+    private final ApplicationTypeOrders applicationTypeOrders;
 }
