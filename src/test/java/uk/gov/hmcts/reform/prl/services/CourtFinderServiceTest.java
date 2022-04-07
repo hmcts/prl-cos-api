@@ -30,7 +30,10 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 
@@ -200,8 +203,7 @@ public class CourtFinderServiceTest {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
-        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
+        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         CaseData caseData = CaseData.builder()
@@ -217,8 +219,7 @@ public class CourtFinderServiceTest {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
-        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
+        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(inValidApplicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(inValidRespondent).build();
         CaseData caseData = CaseData.builder()
@@ -242,8 +243,7 @@ public class CourtFinderServiceTest {
             .childLiveWith(Collections.singletonList(anotherPerson))
             .personWhoLivesWithChild(Collections.singletonList(wrappedPerson))
             .build();
-        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
+        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
 
@@ -261,8 +261,7 @@ public class CourtFinderServiceTest {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
-        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
+        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
 
@@ -280,8 +279,7 @@ public class CourtFinderServiceTest {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
-        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
+        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();;
         Element<PartyDetails> wrappedApplicant1 = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(applicant2).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
@@ -323,8 +321,7 @@ public class CourtFinderServiceTest {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
-        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();
-        ;
+        Element<Child> wrappedChild = Element.<Child>builder().value(child).build();;
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         CaseData caseData = CaseData.builder()
@@ -366,7 +363,7 @@ public class CourtFinderServiceTest {
     }
 
     @Test
-    public void givenCaseDataWithApplicantPostCode_thenReturnDaCourtNameAndEmailAddress() throws NotFoundException {
+    public void givenCaseDataWithApplicantPostCode_thenReturnDaCourtNameAndEmailAddress()  throws NotFoundException {
         Element<PartyDetails> wrappedApplicant1 = Element.<PartyDetails>builder().value(applicant).build();
 
         List<Element<PartyDetails>> applicants = new ArrayList<>();
@@ -530,10 +527,8 @@ public class CourtFinderServiceTest {
             .courtId("")
             .build();
 
-        Assert.assertTrue(courtFinderService.courtNameAndIdAreBlank(
-            ofNullable(c1.getCourtName()),
-            ofNullable(c1.getCourtName())
-        ));
+        Assert.assertTrue(courtFinderService.courtNameAndIdAreBlank(ofNullable(c1.getCourtName()),
+                                                                    ofNullable(c1.getCourtName())));
 
     }
 
