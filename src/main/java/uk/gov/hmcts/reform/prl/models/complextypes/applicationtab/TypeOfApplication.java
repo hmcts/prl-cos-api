@@ -10,5 +10,4 @@ public class TypeOfApplication {
     private final String ordersApplyingFor;
     private final String typeOfChildArrangementsOrder;
     private final String natureOfOrder;
-
 }
