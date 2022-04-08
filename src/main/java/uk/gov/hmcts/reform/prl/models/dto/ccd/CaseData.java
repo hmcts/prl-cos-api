@@ -563,6 +563,7 @@ public class CaseData implements MappableObject {
     /**
      *  Manage Orders.
      */
+    //upload orders flow
     private ChildArrangementOrdersEnum childArrangementOrders;
     private DomesticAbuseOrdersEnum domesticAbuseOrders;
     private FcOrdersEnum fcOrders;
@@ -572,4 +573,32 @@ public class CaseData implements MappableObject {
     private LocalDate approvalDate;
     private Document appointmentOfGuardian;
     private Document previewOrderDoc;
+
+    /*Commented below as getiing too many parameters error for @AllArgsConstructor
+    * */
+    //create orders flow
+    //private final CafcassEnum cafcassRecipient;
+    //private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
+    //private final HearingTypeEnum hearingType;
+    //private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
+    //private final ManageOrdersOptionsEnum manageOrdersOptions;
+    //private final OrderRecipientsEnum orderRecipients;
+    //private final OtherEnum otherRecipient;
+    //private final OtherOrderRecipientsEnum otherOrderRecipients;
+    //private final SelectTypeOfOrderEnum selectTypeOfOrder;
+    //private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
+
+    private final YesOrNo doesOrderClosesCase;
+    private final YesOrNo isTheOrderByConsent;
+    private final YesOrNo wasTheOrderApprovedAtHearing;
+    private final String judgeOrMagistratesLastName;
+    private final String justiceLegalAdviserFullName;
+    private final String dateOrderMade;
+    private final String recitalsOrPreamble;
+    private final String orderDirections;
+    private final String furtherDirectionsIfRequired;
+    private final List<String> cafcassEmailAddress;
+    private final List<String> otherEmailAddress;
+    private final String childrenList;
+
 }
