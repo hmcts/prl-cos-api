@@ -883,6 +883,7 @@ public class CallbackControllerTest {
         verify(sendgridService,times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
     }
 
+    @Test
     public void testCopyFL401CasenameToC100CaseName() throws Exception {
 
         Map<String, Object> caseData = new HashMap<>();
