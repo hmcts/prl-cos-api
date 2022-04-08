@@ -5,41 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
-import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
-import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.*;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChildDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.InternationalElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.LitigationCapacity;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamExemptions;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCase;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherProceedingsDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Respondent;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.TypeOfApplication;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.WelshLanguageRequirements;
+import uk.gov.hmcts.reform.prl.models.complextypes.*;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.*;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOverview;
@@ -76,28 +47,45 @@ public class ApplicationsTabService implements TabService {
     public Map<String, Object> updateTab(CaseData caseData) {
 
         Map<String, Object> applicationTab = new HashMap<>();
-        applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
-        applicationTab.put("applicantTable", getApplicantsTable(caseData));
-        applicationTab.put("respondentTable", getRespondentsTable(caseData));
-        applicationTab.put("declarationTable", getDeclarationTable(caseData));
-        applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
-        applicationTab.put("allegationsOfHarmOverviewTable", getAllegationsOfHarmOverviewTable(caseData));
-        applicationTab.put("miamTable", getMiamTable(caseData));
-        applicationTab.put("miamExemptionsTable", getMiamExemptionsTable(caseData));
-        applicationTab.put("otherProceedingsTable", getOtherProceedingsTable(caseData));
-        applicationTab.put("otherProceedingsDetailsTable", getOtherProceedingsDetailsTable(caseData));
-        applicationTab.put("internationalElementTable", getInternationalElementTable(caseData));
-        applicationTab.put("attendingTheHearingTable", getAttendingTheHearingTable(caseData));
-        applicationTab.put("litigationCapacityTable", getLitigationCapacityDetails(caseData));
-        applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
-        applicationTab.put("otherPeopleInTheCaseTable", getOtherPeopleInTheCaseTable(caseData));
-        applicationTab.put("allegationsOfHarmOrdersTable", getAllegationsOfHarmOrdersTable(caseData));
-        applicationTab.put("allegationsOfHarmDomesticAbuseTable", getDomesticAbuseTable(caseData));
-        applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
-        applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
-        applicationTab.put("childDetailsTable", getChildDetails(caseData));
-        applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
-
+        if(PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
+            applicationTab.put("applicantTable", getApplicantsTable(caseData));
+            applicationTab.put("respondentTable", getRespondentsTable(caseData));
+            applicationTab.put("declarationTable", getDeclarationTable(caseData));
+            applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
+            applicationTab.put("allegationsOfHarmOverviewTable", getAllegationsOfHarmOverviewTable(caseData));
+            applicationTab.put("miamTable", getMiamTable(caseData));
+            applicationTab.put("miamExemptionsTable", getMiamExemptionsTable(caseData));
+            applicationTab.put("otherProceedingsTable", getOtherProceedingsTable(caseData));
+            applicationTab.put("otherProceedingsDetailsTable", getOtherProceedingsDetailsTable(caseData));
+            applicationTab.put("internationalElementTable", getInternationalElementTable(caseData));
+            applicationTab.put("attendingTheHearingTable", getAttendingTheHearingTable(caseData));
+            applicationTab.put("litigationCapacityTable", getLitigationCapacityDetails(caseData));
+            applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
+            applicationTab.put("otherPeopleInTheCaseTable", getOtherPeopleInTheCaseTable(caseData));
+            applicationTab.put("allegationsOfHarmOrdersTable", getAllegationsOfHarmOrdersTable(caseData));
+            applicationTab.put("allegationsOfHarmDomesticAbuseTable", getDomesticAbuseTable(caseData));
+            applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
+            applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
+            applicationTab.put("childDetailsTable", getChildDetails(caseData));
+            applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
+        } else if(PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())){
+            applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
+            applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));
+            applicationTab.put("fl401ApplicantTable", getFl401ApplicantsTable(caseData));
+            applicationTab.put("fl401SolicitorDetailsTable", getFl401ApplicantsSolictorDetailsTable(caseData));
+            applicationTab.put("fl401RespondentTable", getFl401RespondentTable(caseData));
+            applicationTab.put("applicantFamilyTable", getApplicantsFamilyDetails(caseData));
+            applicationTab.put("respondentBehaviourTable", getFl401RespondentBehaviourTable(caseData));
+            applicationTab.put("relationshipToRespondentTable", getFl401RelationshipToRespondentTable(caseData));
+            applicationTab.put("homeDetailsTable", getHomeDetails(caseData));
+            applicationTab.put("otherProceedingsTable", getFL401OtherProceedingsTable(caseData));
+            applicationTab.put("fl401OtherProceedingsDetailsTable", getFl401OtherProceedingsDetailsTable(caseData));
+            applicationTab.put("internationalElementTable", getInternationalElementTable(caseData));
+            applicationTab.put("attendingTheHearingTable", getAttendingTheHearingTable(caseData));
+            applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
+            applicationTab.put("declarationTable", getDeclarationTable(caseData));
+        }
         return applicationTab;
     }
 
@@ -192,6 +180,10 @@ public class ApplicationsTabService implements TabService {
     public List<Element<Applicant>> getApplicantsTable(CaseData caseData) {
         List<Element<Applicant>> applicants = new ArrayList<>();
         Optional<List<Element<PartyDetails>>> checkApplicants = ofNullable(caseData.getApplicants());
+        if(PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            Element<PartyDetails> fl401Applicant = Element.<PartyDetails>builder().value(caseData.getApplicantsFL401()).build();
+            checkApplicants = Optional.of(List.of(fl401Applicant));
+        }
 
         if (checkApplicants.isEmpty()) {
             Applicant a = Applicant.builder().build();
@@ -224,6 +216,19 @@ public class ApplicationsTabService implements TabService {
             }
         }
         return currentApplicants;
+    }
+
+    public PartyDetails maskFl401ConfidentialDetails(PartyDetails applicantDetails) {
+        if ((YesOrNo.Yes).equals(applicantDetails.getIsPhoneNumberConfidential())) {
+            applicantDetails.setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
+        }
+        if ((YesOrNo.Yes).equals(applicantDetails.getIsEmailAddressConfidential())) {
+            applicantDetails.setEmail(THIS_INFORMATION_IS_CONFIDENTIAL);
+        }
+        if ((YesOrNo.Yes).equals(applicantDetails.getIsAddressConfidential())) {
+            applicantDetails.setAddress(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build());
+        }
+        return applicantDetails;
     }
 
     public List<Element<Respondent>> getRespondentsTable(CaseData caseData) {
@@ -386,9 +391,24 @@ public class ApplicationsTabService implements TabService {
         return Collections.singletonMap("previousOrOngoingProceedings", "");
     }
 
+    public Map<String, Object> getFL401OtherProceedingsTable(CaseData caseData) {
+        if(caseData.getFl401OtherProceedingDetails() != null) {
+            Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding());
+            if (proceedingCheck.isPresent()) {
+                return Collections.singletonMap(
+                    "previousOrOngoingProceedings",
+                    caseData.getPreviousOrOngoingProceedingsForChildren().getDisplayedValue()
+                );
+            }
+        }
+
+        return Collections.singletonMap("previousOrOngoingProceedings", "");
+    }
+
     public List<Element<OtherProceedingsDetails>> getOtherProceedingsDetailsTable(CaseData caseData) {
         Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getPreviousOrOngoingProceedingsForChildren());
         Optional<List<Element<ProceedingDetails>>> proceedingsCheck = ofNullable(caseData.getExistingProceedings());
+
         if (proceedingsCheck.isEmpty() || (proceedingCheck.isPresent() && !proceedingCheck.get().equals(YesNoDontKnow.yes))) {
             OtherProceedingsDetails op = OtherProceedingsDetails.builder().build();
             Element<OtherProceedingsDetails> other = Element.<OtherProceedingsDetails>builder().value(op).build();
@@ -421,6 +441,41 @@ public class ApplicationsTabService implements TabService {
             otherProceedingsDetailsList.add(details);
         }
         return otherProceedingsDetailsList;
+    }
+
+    public List<Element<Fl401OtherProceedingsDetails>> getFl401OtherProceedingsDetailsTable(CaseData caseData) {
+        if(caseData.getFl401OtherProceedingDetails() == null) {
+            return getEmptyFl401OtherProceedings();
+        }
+        Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding());
+        Optional<List<Element<FL401Proceedings>>> proceedingsCheck = ofNullable(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings());
+
+        if (proceedingsCheck.isEmpty() || (proceedingCheck.isPresent() && !proceedingCheck.get().equals(YesNoDontKnow.yes))) {
+            return getEmptyFl401OtherProceedings();
+        }
+        List<FL401Proceedings> proceedings = caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings().stream()
+            .map(Element::getValue).collect(Collectors.toList());
+        List<Element<Fl401OtherProceedingsDetails>> otherProceedingsDetailsList = new ArrayList<>();
+
+        for (FL401Proceedings p : proceedings) {
+            Fl401OtherProceedingsDetails otherProceedingsDetails = Fl401OtherProceedingsDetails.builder()
+                .caseNumber(p.getCaseNumber())
+                .anyOtherDetails(p.getAnyOtherDetails())
+                .typeOfCase(p.getTypeOfCase())
+                .nameOfCourt(p.getNameOfCourt())
+                .build();
+
+            Element<Fl401OtherProceedingsDetails> details = Element.<Fl401OtherProceedingsDetails>builder()
+                .value(otherProceedingsDetails).build();
+            otherProceedingsDetailsList.add(details);
+        }
+        return otherProceedingsDetailsList;
+    }
+
+    private List<Element<Fl401OtherProceedingsDetails>> getEmptyFl401OtherProceedings() {
+        Fl401OtherProceedingsDetails op = Fl401OtherProceedingsDetails.builder().build();
+        Element<Fl401OtherProceedingsDetails> other = Element.<Fl401OtherProceedingsDetails>builder().value(op).build();
+        return Collections.singletonList(other);
     }
 
     public Map<String, Object> getInternationalElementTable(CaseData caseData) {
@@ -631,6 +686,158 @@ public class ApplicationsTabService implements TabService {
             yesNoDontKnow.getDisplayedValue()
         ));
         return childExtraDetails;
+    }
+
+    // FL401 Related Events
+
+    /**
+     *
+     * FL401 Type of Application.
+     */
+    public Map<String, Object> getFL401TypeOfApplicationTable(CaseData caseData) {
+        if(caseData.getTypeOfApplicationOrders() != null) {
+            List<String> ordersApplyingFor = caseData.getTypeOfApplicationOrders().getOrderType().stream()
+                .map(FL401OrderTypeEnum::getDisplayedValue)
+                .collect(Collectors.toList());
+
+            Fl401TypeOfApplication.Fl401TypeOfApplicationBuilder builder = Fl401TypeOfApplication.builder()
+                .ordersApplyingFor(String.join(", ", ordersApplyingFor));
+
+            LinkToCA linkToCA = caseData.getTypeOfApplicationLinkToCA();
+            if(linkToCA != null) {
+                builder
+                    .isLinkedToChildArrangementApplication(linkToCA.getLinkToCaApplication())
+                    .CaCaseNumber(linkToCA.getCaApplicationNumber());
+            }
+            return toMap(builder.build());
+        }
+        return Collections.emptyMap();
+    }
+
+    public Map<String, Object> getWithoutNoticeOrder(CaseData caseData) {
+        if(caseData.getOrderWithoutGivingNoticeToRespondent() != null) {
+            WithoutNoticeOrder.WithoutNoticeOrderBuilder builder = WithoutNoticeOrder.builder();
+            builder.orderWithoutGivingNotice(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice());
+
+            if(caseData.getReasonForOrderWithoutGivingNotice() != null) {
+                ReasonForWithoutNoticeOrder reason = caseData.getReasonForOrderWithoutGivingNotice();
+                List<String> reasonForOrderWithoutNoticeEnum = reason.getReasonForOrderWithoutGivingNotice().stream()
+                    .map(ReasonForOrderWithoutGivingNoticeEnum::getDisplayedValue)
+                    .collect(Collectors.toList());
+                builder.reasonForOrderWithoutGivingNotice(String.join(", ", reasonForOrderWithoutNoticeEnum)).futherDetails(reason.getFutherDetails());
+            }
+            if(caseData.getBailDetails() != null) {
+                RespondentBailConditionDetails bail = caseData.getBailDetails();
+                builder.isRespondentAlreadyInBailCondition(bail.getIsRespondentAlreadyInBailCondition()).bailConditionEndDate(bail.getBailConditionEndDate());
+            }
+            if(caseData.getAnyOtherDtailsForWithoutNoticeOrder() != null) {
+                builder.anyOtherDtailsForWithoutNoticeOrder(caseData.getAnyOtherDtailsForWithoutNoticeOrder().getOtherDetails());
+            }
+            return toMap(builder.build());
+        }
+        return Collections.emptyMap();
+    }
+
+    public Map<String, Object> getFl401ApplicantsTable(CaseData caseData) {
+        if (caseData.getApplicantsFL401() == null) {
+            return Collections.emptyMap();
+        }
+        PartyDetails currentApplicant = caseData.getApplicantsFL401();
+        currentApplicant = maskFl401ConfidentialDetails(currentApplicant);
+        FL401Applicant a = objectMapper.convertValue(currentApplicant, FL401Applicant.class);
+
+        return toMap(a);
+    }
+
+    public Map<String, Object> getFl401ApplicantsSolictorDetailsTable(CaseData caseData) {
+        if (caseData.getApplicantsFL401() == null) {
+            return Collections.emptyMap();
+        }
+        PartyDetails currentApplicant = caseData.getApplicantsFL401();
+        FL401SolicitorDetails a = objectMapper.convertValue(currentApplicant, FL401SolicitorDetails.class);
+
+        return toMap(a);
+    }
+
+    public Map<String, Object> getFl401RespondentTable(CaseData caseData) {
+        if (caseData.getRespondentsFL401() == null) {
+            return Collections.emptyMap();
+        }
+        PartyDetails currentRespondent = caseData.getRespondentsFL401();
+        currentRespondent = maskFl401ConfidentialDetails(currentRespondent);
+        FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
+
+        return toMap(a);
+    }
+
+    public Map<String, Object> getFl401RespondentBehaviourTable(CaseData caseData) {
+        if (caseData.getRespondentBehaviourData() == null) {
+            return Collections.emptyMap();
+        }
+        RespondentBehaviour respondentBehaviour = caseData.getRespondentBehaviourData();
+        RespondentBehaviourTable.RespondentBehaviourTableBuilder rs = RespondentBehaviourTable.builder();
+        List<String> applicantStopFromRespondentDoingEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoing().stream()
+            .map(ApplicantStopFromRespondentDoingEnum::getDisplayedValue)
+            .collect(Collectors.toList());
+
+        List<String> applicantStopFromRespondentDoingToChildEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild().stream()
+            .map(ApplicantStopFromRespondentDoingToChildEnum::getDisplayedValue)
+            .collect(Collectors.toList());
+
+        rs.applicantWantToStopFromRespondentDoing(String.join(", ", applicantStopFromRespondentDoingEnum))
+            .applicantWantToStopFromRespondentDoingToChild(String.join(", ", applicantStopFromRespondentDoingToChildEnum))
+            .otherReasonApplicantWantToStopFromRespondentDoing(respondentBehaviour.getOtherReasonApplicantWantToStopFromRespondentDoing());
+
+        return toMap(rs.build());
+    }
+
+    public Map<String, Object> getFl401RelationshipToRespondentTable(CaseData caseData) {
+        if (caseData.getRespondentRelationObject() == null) {
+            return Collections.emptyMap();
+        }
+        RespondentRelationObjectType resRelObj = caseData.getRespondentRelationObject();
+        RelationshipToRespondent.RelationshipToRespondentBuilder rs = RelationshipToRespondent.builder();
+
+        rs.applicantRelationship(resRelObj.getApplicantRelationship().getDisplayedValue());
+
+        if (caseData.getRespondentRelationDateInfoObject() != null) {
+            RespondentRelationDateInfo resRelInfo = caseData.getRespondentRelationDateInfoObject();
+            if(resRelInfo.getRelationStartAndEndComplexType() != null) {
+                rs.relationshipDateComplexEndDate(resRelInfo.getRelationStartAndEndComplexType().getRelationshipDateComplexStartDate());
+                rs.relationshipDateComplexEndDate(resRelInfo.getRelationStartAndEndComplexType().getRelationshipDateComplexEndDate());
+            }
+            rs.applicantRelationshipDate(resRelInfo.getApplicantRelationshipDate());
+        }
+
+        if(caseData.getRespondentRelationOptions() != null && caseData.getRespondentRelationOptions().getApplicantRelationshipOptions() != null) {
+            rs.applicantRelationshipOptions(caseData.getRespondentRelationOptions().getApplicantRelationshipOptions().getDisplayedValue());
+        }
+
+        return toMap(rs.build());
+    }
+
+    public Map<String, Object> getHomeDetails(CaseData caseData) {
+        if (caseData.getHome() == null) {
+            return Collections.emptyMap();
+        }
+
+        HomeDetails homeDetails = objectMapper.convertValue(caseData.getHome(), HomeDetails.class);
+        return toMap(homeDetails);
+    }
+
+    public Map<String, Object> getApplicantsFamilyDetails(CaseData caseData) {
+        if (caseData.getApplicantFamilyDetails() == null) {
+            return Collections.emptyMap();
+        }
+
+        ApplicantFamily.ApplicantFamilyBuilder builder =  ApplicantFamily.builder()
+            .doesApplicantHaveChildren(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren());
+
+        if (YesOrNo.Yes.equals(caseData.getApplicantFamilyDetails().getDoesApplicantHaveChildren())) {
+            builder.applicantChild(caseData.getApplicantChildDetails());
+        }
+
+        return toMap(builder.build());
     }
 
 }
