@@ -31,6 +31,10 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DomesticAbuseOrdersEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.FcOrdersEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrdersOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -556,4 +560,16 @@ public class CaseData implements MappableObject {
     private String isDocumentGenerated;
     private String isNotificationSent;
 
+    /**
+     *  Manage Orders.
+     */
+    private ChildArrangementOrdersEnum childArrangementOrders;
+    private DomesticAbuseOrdersEnum domesticAbuseOrders;
+    private FcOrdersEnum fcOrders;
+    private OtherOrdersOptionEnum otherOrdersOption;
+    private String nameOfOrder;
+    private YesOrNo isTheOrderUploadedByConsent;
+    private LocalDate approvalDate;
+    private Document appointmentOfGuardian;
+    private Document previewOrderDoc;
 }
