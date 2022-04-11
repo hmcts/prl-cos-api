@@ -530,8 +530,8 @@ public class CaseData implements MappableObject {
     /**
      * FL401 Upload Documents.
      */
-    private final List<Document> fl401UploadWitnessDocuments;
-    private final List<Document> fl401UploadSupportDocuments;
+    private final List<Element<Document>> fl401UploadWitnessDocuments;
+    private final List<Element<Document>> fl401UploadSupportDocuments;
 
     /**
      * Send to Gatekeeper.
@@ -600,5 +600,12 @@ public class CaseData implements MappableObject {
     private final List<String> cafcassEmailAddress;
     private final List<String> otherEmailAddress;
     private final String childrenList;
+
+    /**
+     * Solicitor Details.
+     */
+    private String caseSolicitorName;
+    private String caseSolicitorOrgName;
+
 
 }
