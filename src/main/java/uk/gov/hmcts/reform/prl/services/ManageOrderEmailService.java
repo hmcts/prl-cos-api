@@ -16,8 +16,9 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -91,15 +92,15 @@ public class ManageOrderEmailService {
 
 
     private List<String> getEmailAddress(List<Element<PartyDetails>> partyDetails) {
-        List<String> emails= partyDetails
+        List<String> emails = partyDetails
             .stream()
             .map(Element::getValue).filter(partyDetails1 -> true).map(element -> element.getEmail())
             .collect(Collectors.toList());
 
 
-       emails.removeIf(Objects::isNull);
+        emails.removeIf(Objects::isNull);
 
-       return emails;
+        return emails;
     }
 
 
