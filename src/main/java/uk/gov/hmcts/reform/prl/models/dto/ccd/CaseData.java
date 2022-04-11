@@ -31,7 +31,9 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.*;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -70,7 +72,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
-
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -558,12 +559,15 @@ public class CaseData implements MappableObject {
     private String isDocumentGenerated;
     private String isNotificationSent;
 
+    private ChildArrangementOrdersEnum childArrangementOrders;
+
     /**
      *  Manage Orders.
      */
     //upload orders flow
-    private ChildArrangementOrdersEnum childArrangementOrders;
-   /* private DomesticAbuseOrdersEnum domesticAbuseOrders;
+
+    /*
+    private DomesticAbuseOrdersEnum domesticAbuseOrders;
     private FcOrdersEnum fcOrders;
     private OtherOrdersOptionEnum otherOrdersOption;
     private String nameOfOrder;
@@ -571,6 +575,9 @@ public class CaseData implements MappableObject {
     private LocalDate approvalDate;
     private Document appointmentOfGuardian;
     private Document previewOrderDoc;
+
+    private final ManageOrdersOptionsEnum manageOrdersOptions;
+    private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
 
     /*Commented below as getiing too many parameters error for @AllArgsConstructor
     * */
@@ -586,8 +593,7 @@ public class CaseData implements MappableObject {
     //private final SelectTypeOfOrderEnum selectTypeOfOrder;
     //private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
 
-    private final ManageOrdersOptionsEnum manageOrdersOptions;
-    private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
+
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo isTheOrderByConsent;
     private final YesOrNo wasTheOrderApprovedAtHearing;
