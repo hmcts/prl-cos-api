@@ -8,15 +8,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import javax.ws.rs.core.HttpHeaders;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -27,6 +34,16 @@ public class ManageOrdersController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+
+
+    @Autowired
+    private final UserService userService;
+
+
+
+    @Autowired
+    private ManageOrderEmailService manageOrderEmailService;
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to show preview order in next screen for upload order")
@@ -71,5 +88,25 @@ public class ManageOrdersController {
         return CallbackResponse.builder()
             .data(caseDataInput)
             .build();
+    }
+
+
+
+    @PostMapping(path = "/case-order-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Send Email Notification on Case order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse sendEmailNotificationOnClosingOrder(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+
+        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        manageOrderEmailService.sendEmail(caseDetails);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+
+
     }
 }
