@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 
 @Slf4j
 @Service
