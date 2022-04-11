@@ -515,6 +515,7 @@ public class CaseData implements MappableObject {
      */
     private final List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
     private final List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
+    @JsonIgnore
     private final List<Element<Fl401ChildConfidentialityDetails>> fl401ChildrenConfidentialDetails;
 
 
