@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
@@ -1102,9 +1103,17 @@ public class ApplicationsTabServiceTest {
     @Test
     public void tesGetHomeDetails() {
 
+        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
+            .keepChildrenInfoConfidential(YesOrNo.Yes)
+            .childFullName("child")
+            .childsAge("12")
+            .isRespondentResponsibleForChild(YesOrNo.Yes)
+            .build();
+
         Home home = Home.builder()
             .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
             .doesApplicantHaveHomeRights(No)
+            .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
             .doAnyChildrenLiveAtAddress(No)
             .isPropertyRented(No)
             .isThereMortgageOnProperty(No)
@@ -1231,7 +1240,7 @@ public class ApplicationsTabServiceTest {
                                         "respondentBehaviourTable","relationshipToRespondentTable","otherProceedingsTable","fl401ApplicantTable",
                                         "fl401OtherProceedingsDetailsTable","declarationTable","fl401SolicitorDetailsTable",
             "fl401TypeOfApplicationTable",
-                                        "attendingTheHearingTable","withoutNoticeOrderTable","fl401RespondentTable");
+                                        "attendingTheHearingTable","withoutNoticeOrderTable","fl401RespondentTable","isHomeEntered");
         Map<String, Object> result = applicationsTabService.updateTab(caseData);
         assertTrue(expected.containsAll(result.keySet()));
     }
