@@ -25,6 +25,12 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
+        supress spring web mvc
+         ]]></notes>
+    <cve>CVE-2022-22950</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
         new supressions(log4j,springframework,apache tomcat)
          ]]></notes>
     <cve>CVE-2021-44832</cve>
