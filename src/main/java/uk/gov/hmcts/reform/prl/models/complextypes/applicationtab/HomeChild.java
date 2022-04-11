@@ -11,5 +11,5 @@ public class HomeChild {
     private final YesOrNo keepChildrenInfoConfidential;
     private final String childFullName;
     private final String childsAge;
-    private final YesOrNo isRespondentResponsibleForChild;
+    private final String isRespondentResponsibleForChild;
 }
