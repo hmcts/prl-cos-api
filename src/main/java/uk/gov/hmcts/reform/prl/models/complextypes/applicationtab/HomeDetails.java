@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.complextypes.applicationtab;
 
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -14,13 +15,13 @@ import java.util.List;
 public class HomeDetails {
     private final Address address;
     private final String peopleLivingAtThisAddress;
-    private final YesOrNo everLivedAtTheAddress;
-    private final YesOrNo intendToLiveAtTheAddress;
-    private final String doAnyChildrenLiveAtAddress;
-    private final List<Element<HomeChild>> children;
+    private final String everLivedAtTheAddress;
+    private final String intendToLiveAtTheAddress;
+    private final YesOrNo doAnyChildrenLiveAtAddress;
+    private final List<Element<ChildrenLiveAtAddress>> children;
 
     private final YesOrNo isPropertyAdapted;
-    private final String howIsThePropertyAdapted;
+    private final YesOrNo howIsThePropertyAdapted;
     private final YesOrNo isThereMortgageOnProperty;
     private final String mortgageNamedAfter;
     private final String mortgageNumber;
