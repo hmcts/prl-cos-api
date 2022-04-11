@@ -3,12 +3,10 @@ package uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
-
 @Builder
 @Data
-public class ApplicationTypeOrders {
+public class ApplicationTypeDetails {
 
-    private final List<String> applicationTypeOrders;
+    private final String typesOfApplication;
 
 }
