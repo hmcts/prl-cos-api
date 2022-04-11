@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -84,7 +85,13 @@ public class ManageOrdersController {
             builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + child.getLastName()));
             builder.append("\n");
         }
-        CaseData caseDataInput = CaseData.builder().childrenList(builder.toString()).build();
+
+
+        CaseData caseDataInput = CaseData.builder().childrenList(builder.toString())
+            .selectedOrder(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
+                               ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
+                               : caseData.getChildArrangementOrders().getDisplayedValue())
+                .build();
         return CallbackResponse.builder()
             .data(caseDataInput)
             .build();
@@ -109,4 +116,5 @@ public class ManageOrdersController {
 
 
     }
+
 }
