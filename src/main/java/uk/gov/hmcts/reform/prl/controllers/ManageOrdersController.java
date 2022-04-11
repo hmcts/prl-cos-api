@@ -89,15 +89,15 @@ public class ManageOrdersController {
 
         StringBuilder slectedOrder = new StringBuilder();
         slectedOrder.append(caseData.getApplicantCaseName());
-        slectedOrder.append("\n");
+        slectedOrder.append("\n\n");
         slectedOrder.append(caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE) ?
                                     String.format("Family Man ID: ",caseData.getFl401FamilymanCaseNumber())
                                     : String.format("Family Man ID: ",caseData.getFamilymanCaseNumber()));
-        slectedOrder.append("\n");
+        slectedOrder.append("\n\n");
         slectedOrder.append(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
                                 ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
                                 :caseData.getChildArrangementOrders().getDisplayedValue());
-        slectedOrder.append("\n");
+        slectedOrder.append("\n\n");
         CaseData caseDataInput = CaseData.builder().childrenList(builder.toString())
             .selectedOrder(slectedOrder.toString()).build();
 
