@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 
 import java.util.List;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class HomeDetails {
     private final Address address;
@@ -18,7 +18,7 @@ public class HomeDetails {
     private final String everLivedAtTheAddress;
     private final String intendToLiveAtTheAddress;
     private final YesOrNo doAnyChildrenLiveAtAddress;
-    private final List<Element<ChildrenLiveAtAddress>> children;
+    private final List<Element<HomeChild>> children;
 
     private final YesOrNo isPropertyAdapted;
     private final YesOrNo howIsThePropertyAdapted;
