@@ -231,7 +231,7 @@ public class FL401SubmitApplicationController {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
 
-        allTabService.updateAllTabsIncludingConfTab(caseData);
+        caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
