@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @RestController
 @RequiredArgsConstructor
@@ -86,12 +87,20 @@ public class ManageOrdersController {
             builder.append("\n");
         }
 
-
+        StringBuilder slectedOrder = new StringBuilder();
+        slectedOrder.append(caseData.getApplicantCaseName());
+        slectedOrder.append("\n");
+        slectedOrder.append(caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE) ?
+                                    String.format("Family Man ID: ",caseData.getFl401FamilymanCaseNumber())
+                                    : String.format("Family Man ID: ",caseData.getFamilymanCaseNumber()));
+        slectedOrder.append("\n");
+        slectedOrder.append(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
+                                ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
+                                :caseData.getChildArrangementOrders().getDisplayedValue());
+        slectedOrder.append("\n");
         CaseData caseDataInput = CaseData.builder().childrenList(builder.toString())
-            .selectedOrder(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
-                               ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
-                               : caseData.getChildArrangementOrders().getDisplayedValue())
-                .build();
+            .selectedOrder(slectedOrder.toString()).build();
+
         return CallbackResponse.builder()
             .data(caseDataInput)
             .build();
