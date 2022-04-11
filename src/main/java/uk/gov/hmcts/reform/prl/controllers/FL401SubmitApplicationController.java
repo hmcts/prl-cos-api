@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -114,6 +115,9 @@ public class FL401SubmitApplicationController {
 
     @Autowired
     OrganisationService organisationService;
+
+
+    private final AllTabServiceImpl allTabService;
 
     @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to send FL401 application notification. ")
@@ -226,6 +230,8 @@ public class FL401SubmitApplicationController {
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
+
+        allTabService.updateAllTabsIncludingConfTab(caseData);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
