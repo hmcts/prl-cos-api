@@ -77,7 +77,10 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("applicantFamilyTable", getApplicantsFamilyDetails(caseData));
             applicationTab.put("respondentBehaviourTable", getFl401RespondentBehaviourTable(caseData));
             applicationTab.put("relationshipToRespondentTable", getFl401RelationshipToRespondentTable(caseData));
-            applicationTab.put("homeDetailsTable", getHomeDetails(caseData));
+            Map<String, Object> homeDetails = getHomeDetails(caseData);
+            applicationTab.put("homeDetailsTable", homeDetails);
+            applicationTab.put("isHomeEntered", homeDetails.isEmpty() ? "true" : "false");
+
             applicationTab.put("otherProceedingsTable", getFL401OtherProceedingsTable(caseData));
             applicationTab.put("fl401OtherProceedingsDetailsTable", getFl401OtherProceedingsDetailsTable(caseData));
             applicationTab.put("internationalElementTable", getInternationalElementTable(caseData));
@@ -837,7 +840,6 @@ public class ApplicationsTabService implements TabService {
 
         builder
             .address(home.getAddress())
-            .children(home.getChildren())
             .doAnyChildrenLiveAtAddress(home.getDoAnyChildrenLiveAtAddress())
             .everLivedAtTheAddress(home.getEverLivedAtTheAddress() != null ? home.getEverLivedAtTheAddress().getDisplayedValue() : "")
             .howIsThePropertyAdapted(home.getIsPropertyAdapted())
@@ -849,7 +851,6 @@ public class ApplicationsTabService implements TabService {
             .peopleLivingAtThisAddress(String.join(", ", peopleLivingAtThisAddressEnum))
             .familyHome(String.join(", ", familyHomeEnum))
             .livingSituation(String.join(", ", livingSituationEnum))
-
             .isThereMortgageOnProperty(home.getIsThereMortgageOnProperty());
 
         if(home.getMortgages() != null) {
@@ -878,8 +879,40 @@ public class ApplicationsTabService implements TabService {
                 .landLordNamedAfter(String.join(", ", landlordNamedAft));
                 //.textAreaSomethingElse()
         }
+        HomeDetails homeDetails = builder.build();
+        homeDetails = loadOrMaskHomeChildDetails(homeDetails, home);
+        return toMap(homeDetails);
+    }
 
-        return toMap(builder.build());
+    private HomeDetails loadOrMaskHomeChildDetails(HomeDetails homeDetails, Home home) {
+        List<Element<ChildrenLiveAtAddress>> children = home.getChildren();
+        if(!children.isEmpty()) {
+            List<ChildrenLiveAtAddress> eachChildren = children.stream()
+                .map(Element::getValue).collect(Collectors.toList());
+            List<Element<HomeChild>> childList = new ArrayList<>();
+            for(ChildrenLiveAtAddress eachChild : eachChildren) {
+               HomeChild.HomeChildBuilder builder =  HomeChild.builder()
+                    .childsAge(getMaskTextIfConfIsChoosenAsYes(eachChild.getChildsAge(), eachChild.getKeepChildrenInfoConfidential()))
+                    .childFullName(getMaskTextIfConfIsChoosenAsYes(eachChild.getChildFullName(), eachChild.getKeepChildrenInfoConfidential()));
+
+                builder.isRespondentResponsibleForChild(eachChild.getIsRespondentResponsibleForChild().getDisplayedValue());
+               if(YesOrNo.Yes.equals(eachChild.getKeepChildrenInfoConfidential())) {
+                   builder.isRespondentResponsibleForChild(THIS_INFORMATION_IS_CONFIDENTIAL);
+               }
+                Element<HomeChild> homeChild = Element.<HomeChild>builder()
+                    .value(builder.build()).build();
+               childList.add(homeChild);
+            }
+            homeDetails = homeDetails.toBuilder().children(childList).build();
+        }
+        return homeDetails;
+    }
+
+    private String getMaskTextIfConfIsChoosenAsYes(String value, YesOrNo keepChildrenInfoConfidential) {
+        if(YesOrNo.Yes.equals(keepChildrenInfoConfidential)) {
+            return THIS_INFORMATION_IS_CONFIDENTIAL;
+        }
+        return value;
     }
 
     public Map<String, Object> getApplicantsFamilyDetails(CaseData caseData) {
