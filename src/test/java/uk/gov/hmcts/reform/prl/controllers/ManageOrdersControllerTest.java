@@ -32,7 +32,9 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;

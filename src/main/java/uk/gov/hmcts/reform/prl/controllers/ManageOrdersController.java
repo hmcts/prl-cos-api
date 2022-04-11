@@ -21,10 +21,10 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import javax.ws.rs.core.HttpHeaders;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 

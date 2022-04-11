@@ -56,16 +56,14 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void  givenRequestBody_whenPostRequestToPopulateSendManageOrderEmail() throws Exception{
+    public void givenRequestBody_whenPostRequestToPopulateSendManageOrderEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 
-        request.header("Authorization",userToken)
+        request.header("Authorization", userToken)
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/case-order-email-notification")
             .then().assertThat().statusCode(200);
-
-
     }
 }
