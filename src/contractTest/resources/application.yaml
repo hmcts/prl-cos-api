@@ -91,7 +91,6 @@ uk:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
 
-
 notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
@@ -107,6 +106,7 @@ payments:
   api:
     url: ${PAY_URL:}
     callback-url: ${PAY_CALLBACK_URL:}
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
 
 fees-register:
   api:
@@ -121,7 +121,6 @@ fees-register:
       service: private law
 
 # NEW BELOW THIS LINE
-
 
 idam:
   s2s-auth:
@@ -139,7 +138,6 @@ prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
-
 
 
 security:
@@ -164,6 +162,8 @@ auth:
     service:
       client:
         baseUrl: http://localhost:4502
+
+
 
 resources:
   images:
@@ -220,7 +220,7 @@ document:
       fl401_final_welsh_filename: FL401FinalDocumentWelsh.pdf
       fl401_draft_welsh_template: FL401-draft-Welsh.docx
       fl401_draft_welsh_filename: Draft_DA_Welsh_application
-      fl401_c8_welsh_template: PRL-DA-C8-Welsh.docx
+      fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
 
 southampton:
