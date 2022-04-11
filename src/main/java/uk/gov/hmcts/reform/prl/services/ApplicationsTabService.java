@@ -396,7 +396,7 @@ public class ApplicationsTabService implements TabService {
             if (proceedingCheck.isPresent()) {
                 return Collections.singletonMap(
                     "previousOrOngoingProceedings",
-                    caseData.getPreviousOrOngoingProceedingsForChildren().getDisplayedValue()
+                    caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding().getDisplayedValue()
                 );
             }
         }
@@ -820,8 +820,66 @@ public class ApplicationsTabService implements TabService {
             return Collections.emptyMap();
         }
 
-        HomeDetails homeDetails = objectMapper.convertValue(caseData.getHome(), HomeDetails.class);
-        return toMap(homeDetails);
+        HomeDetails.HomeDetailsBuilder builder = HomeDetails.builder();
+        Home home = caseData.getHome();
+
+        List<String> peopleLivingAtThisAddressEnum = home.getPeopleLivingAtThisAddress().stream()
+            .map(PeopleLivingAtThisAddressEnum::getDisplayedValue)
+            .collect(Collectors.toList());
+
+        List<String> familyHomeEnum = home.getFamilyHome().stream()
+            .map(FamilyHomeEnum::getDisplayedValue)
+            .collect(Collectors.toList());
+
+        List<String> livingSituationEnum = home.getLivingSituation().stream()
+            .map(LivingSituationEnum::getDisplayedValue)
+            .collect(Collectors.toList());
+
+        builder
+            .address(home.getAddress())
+            .children(home.getChildren())
+            .doAnyChildrenLiveAtAddress(home.getDoAnyChildrenLiveAtAddress())
+            .everLivedAtTheAddress(home.getEverLivedAtTheAddress() != null ? home.getEverLivedAtTheAddress().getDisplayedValue() : "")
+            .howIsThePropertyAdapted(home.getIsPropertyAdapted())
+            .furtherInformation(home.getFurtherInformation())
+            .doesApplicantHaveHomeRights(home.getDoesApplicantHaveHomeRights())
+            .intendToLiveAtTheAddress(home.getIntendToLiveAtTheAddress() != null ? home.getIntendToLiveAtTheAddress().getDisplayedValue() : "")
+            .isPropertyAdapted(home.getIsPropertyAdapted())
+            .isPropertyRented(home.getIsPropertyRented())
+            .peopleLivingAtThisAddress(String.join(", ", peopleLivingAtThisAddressEnum))
+            .familyHome(String.join(", ", familyHomeEnum))
+            .livingSituation(String.join(", ", livingSituationEnum))
+
+            .isThereMortgageOnProperty(home.getIsThereMortgageOnProperty());
+
+        if(home.getMortgages() != null) {
+            Mortgage mortgage = home.getMortgages();
+
+            List<String> mortgageNameAft = mortgage.getMortgageNamedAfter().stream()
+                .map(MortgageNamedAfterEnum::getDisplayedValue)
+                .collect(Collectors.toList());
+
+            builder.mortgageAddress(mortgage.getAddress())
+                .mortgageNumber(mortgage.getMortgageNumber())
+                .mortgageNamedAfter(String.join(", ", mortgageNameAft))
+                .mortgageLenderName(mortgage.getMortgageLenderName());
+                //.textAreaSomethingElse()
+        }
+
+        if(home.getLandlords() != null) {
+            Landlord landlord = home.getLandlords();
+
+            List<String> landlordNamedAft = landlord.getMortgageNamedAfterList().stream()
+                .map(MortgageNamedAfterEnum::getDisplayedValue)
+                .collect(Collectors.toList());
+
+            builder.landlordAddress(landlord.getAddress())
+                .landlordName(landlord.getLandlordName())
+                .landLordNamedAfter(String.join(", ", landlordNamedAft));
+                //.textAreaSomethingElse()
+        }
+
+        return toMap(builder.build());
     }
 
     public Map<String, Object> getApplicantsFamilyDetails(CaseData caseData) {
