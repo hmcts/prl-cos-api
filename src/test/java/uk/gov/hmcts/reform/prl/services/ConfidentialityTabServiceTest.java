@@ -233,6 +233,7 @@ public class ConfidentialityTabServiceTest {
     public void testFl401ChildConfidentialDetails() {
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
             .childFullName("Test")
+            .keepChildrenInfoConfidential(YesOrNo.Yes)
             .build();
 
         List<ChildrenLiveAtAddress> listOfChildren = Collections.singletonList(child);
@@ -270,6 +271,7 @@ public class ConfidentialityTabServiceTest {
 
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
             .childFullName("Test")
+            .keepChildrenInfoConfidential(YesOrNo.Yes)
             .build();
 
         Element<ChildrenLiveAtAddress> child1 = Element.<ChildrenLiveAtAddress>builder().value(
