@@ -22,6 +22,8 @@ public class ManageOrdersControllerFunctionalTest {
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
 
+    private static final String VALID_INPUT_JSON = "CallBackRequest.json";
+
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
@@ -51,5 +53,19 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/fetch-child-details")
             .then().assertThat().statusCode(200);
+    }
+
+    @Test
+    public void  givenRequestBody_whenPostRequestToPopulateSendManageOrderEmail() throws Exception{
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+
+        request.header("Authorization",userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/case-order-email-notification")
+            .then().assertThat().statusCode(200);
+
+
     }
 }
