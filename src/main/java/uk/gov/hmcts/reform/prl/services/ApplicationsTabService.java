@@ -107,7 +107,7 @@ public class ApplicationsTabService implements TabService {
     public Map<String, Object> updateTab(CaseData caseData) {
 
         Map<String, Object> applicationTab = new HashMap<>();
-        if(PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
             applicationTab.put("applicantTable", getApplicantsTable(caseData));
             applicationTab.put("respondentTable", getRespondentsTable(caseData));
@@ -129,7 +129,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
             applicationTab.put("childDetailsTable", getChildDetails(caseData));
             applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
-        } else if(PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
             applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));
             applicationTab.put("fl401ApplicantTable", getFl401ApplicantsTable(caseData));
@@ -243,7 +243,7 @@ public class ApplicationsTabService implements TabService {
     public List<Element<Applicant>> getApplicantsTable(CaseData caseData) {
         List<Element<Applicant>> applicants = new ArrayList<>();
         Optional<List<Element<PartyDetails>>> checkApplicants = ofNullable(caseData.getApplicants());
-        if(PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             Element<PartyDetails> fl401Applicant = Element.<PartyDetails>builder().value(caseData.getApplicantsFL401()).build();
             checkApplicants = Optional.of(List.of(fl401Applicant));
         }
@@ -455,7 +455,7 @@ public class ApplicationsTabService implements TabService {
     }
 
     public Map<String, Object> getFL401OtherProceedingsTable(CaseData caseData) {
-        if(caseData.getFl401OtherProceedingDetails() != null) {
+        if (caseData.getFl401OtherProceedingDetails() != null) {
             Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding());
             if (proceedingCheck.isPresent()) {
                 return Collections.singletonMap(
@@ -507,7 +507,7 @@ public class ApplicationsTabService implements TabService {
     }
 
     public List<Element<Fl401OtherProceedingsDetails>> getFl401OtherProceedingsDetailsTable(CaseData caseData) {
-        if(caseData.getFl401OtherProceedingDetails() == null) {
+        if (caseData.getFl401OtherProceedingDetails() == null) {
             return getEmptyFl401OtherProceedings();
         }
         Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding());
@@ -752,13 +752,13 @@ public class ApplicationsTabService implements TabService {
     }
 
     // FL401 Related Events
-
     /**
-     *
+     * *
      * FL401 Type of Application.
      */
+
     public Map<String, Object> getFL401TypeOfApplicationTable(CaseData caseData) {
-        if(caseData.getTypeOfApplicationOrders() != null) {
+        if (caseData.getTypeOfApplicationOrders() != null) {
             List<String> ordersApplyingFor = caseData.getTypeOfApplicationOrders().getOrderType().stream()
                 .map(FL401OrderTypeEnum::getDisplayedValue)
                 .collect(Collectors.toList());
@@ -767,7 +767,7 @@ public class ApplicationsTabService implements TabService {
                 .ordersApplyingFor(String.join(", ", ordersApplyingFor));
 
             LinkToCA linkToCA = caseData.getTypeOfApplicationLinkToCA();
-            if(linkToCA != null) {
+            if (linkToCA != null) {
                 builder
                     .isLinkedToChildArrangementApplication(linkToCA.getLinkToCaApplication())
                     .caCaseNumber(linkToCA.getCaApplicationNumber());
@@ -778,22 +778,24 @@ public class ApplicationsTabService implements TabService {
     }
 
     public Map<String, Object> getWithoutNoticeOrder(CaseData caseData) {
-        if(caseData.getOrderWithoutGivingNoticeToRespondent() != null) {
+        if (caseData.getOrderWithoutGivingNoticeToRespondent() != null) {
             WithoutNoticeOrder.WithoutNoticeOrderBuilder builder = WithoutNoticeOrder.builder();
             builder.orderWithoutGivingNotice(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice());
 
-            if(caseData.getReasonForOrderWithoutGivingNotice() != null) {
+            if (caseData.getReasonForOrderWithoutGivingNotice() != null) {
                 ReasonForWithoutNoticeOrder reason = caseData.getReasonForOrderWithoutGivingNotice();
                 List<String> reasonForOrderWithoutNoticeEnum = reason.getReasonForOrderWithoutGivingNotice().stream()
                     .map(ReasonForOrderWithoutGivingNoticeEnum::getDisplayedValue)
                     .collect(Collectors.toList());
-                builder.reasonForOrderWithoutGivingNotice(String.join(", ", reasonForOrderWithoutNoticeEnum)).futherDetails(reason.getFutherDetails());
+                builder.reasonForOrderWithoutGivingNotice(String.join(", ",
+                    reasonForOrderWithoutNoticeEnum)).futherDetails(reason.getFutherDetails());
             }
-            if(caseData.getBailDetails() != null) {
+            if (caseData.getBailDetails() != null) {
                 RespondentBailConditionDetails bail = caseData.getBailDetails();
-                builder.isRespondentAlreadyInBailCondition(bail.getIsRespondentAlreadyInBailCondition()).bailConditionEndDate(bail.getBailConditionEndDate());
+                builder.isRespondentAlreadyInBailCondition(bail.getIsRespondentAlreadyInBailCondition())
+                        .bailConditionEndDate(bail.getBailConditionEndDate());
             }
-            if(caseData.getAnyOtherDtailsForWithoutNoticeOrder() != null) {
+            if (caseData.getAnyOtherDtailsForWithoutNoticeOrder() != null) {
                 builder.anyOtherDtailsForWithoutNoticeOrder(caseData.getAnyOtherDtailsForWithoutNoticeOrder().getOtherDetails());
             }
             return toMap(builder.build());
@@ -865,14 +867,14 @@ public class ApplicationsTabService implements TabService {
 
         if (caseData.getRespondentRelationDateInfoObject() != null) {
             RespondentRelationDateInfo resRelInfo = caseData.getRespondentRelationDateInfoObject();
-            if(resRelInfo.getRelationStartAndEndComplexType() != null) {
+            if (resRelInfo.getRelationStartAndEndComplexType() != null) {
                 rs.relationshipDateComplexEndDate(resRelInfo.getRelationStartAndEndComplexType().getRelationshipDateComplexStartDate());
                 rs.relationshipDateComplexEndDate(resRelInfo.getRelationStartAndEndComplexType().getRelationshipDateComplexEndDate());
             }
             rs.applicantRelationshipDate(resRelInfo.getApplicantRelationshipDate());
         }
 
-        if(caseData.getRespondentRelationOptions() != null && caseData.getRespondentRelationOptions().getApplicantRelationshipOptions() != null) {
+        if (caseData.getRespondentRelationOptions() != null && caseData.getRespondentRelationOptions().getApplicantRelationshipOptions() != null) {
             rs.applicantRelationshipOptions(caseData.getRespondentRelationOptions().getApplicantRelationshipOptions().getDisplayedValue());
         }
 
@@ -914,7 +916,7 @@ public class ApplicationsTabService implements TabService {
             .livingSituation(String.join(", ", livingSituationEnum))
             .isThereMortgageOnProperty(home.getIsThereMortgageOnProperty());
 
-        if(home.getMortgages() != null) {
+        if (home.getMortgages() != null) {
             Mortgage mortgage = home.getMortgages();
 
             List<String> mortgageNameAft = mortgage.getMortgageNamedAfter().stream()
@@ -925,10 +927,9 @@ public class ApplicationsTabService implements TabService {
                 .mortgageNumber(mortgage.getMortgageNumber())
                 .mortgageNamedAfter(String.join(", ", mortgageNameAft))
                 .mortgageLenderName(mortgage.getMortgageLenderName());
-                //.textAreaSomethingElse()
         }
 
-        if(home.getLandlords() != null) {
+        if (home.getLandlords() != null) {
             Landlord landlord = home.getLandlords();
 
             List<String> landlordNamedAft = landlord.getMortgageNamedAfterList().stream()
@@ -938,7 +939,6 @@ public class ApplicationsTabService implements TabService {
             builder.landlordAddress(landlord.getAddress())
                 .landlordName(landlord.getLandlordName())
                 .landLordNamedAfter(String.join(", ", landlordNamedAft));
-                //.textAreaSomethingElse()
         }
         HomeDetails homeDetails = builder.build();
         homeDetails = loadOrMaskHomeChildDetails(homeDetails, home);
@@ -947,22 +947,21 @@ public class ApplicationsTabService implements TabService {
 
     private HomeDetails loadOrMaskHomeChildDetails(HomeDetails homeDetails, Home home) {
         List<Element<ChildrenLiveAtAddress>> children = home.getChildren();
-        if(!children.isEmpty()) {
+        if (!children.isEmpty()) {
             List<ChildrenLiveAtAddress> eachChildren = children.stream()
                 .map(Element::getValue).collect(Collectors.toList());
             List<Element<HomeChild>> childList = new ArrayList<>();
-            for(ChildrenLiveAtAddress eachChild : eachChildren) {
-               HomeChild.HomeChildBuilder builder =  HomeChild.builder()
+            for (ChildrenLiveAtAddress eachChild : eachChildren) {
+                HomeChild.HomeChildBuilder builder =  HomeChild.builder()
                     .childsAge(getMaskTextIfConfIsChoosenAsYes(eachChild.getChildsAge(), eachChild.getKeepChildrenInfoConfidential()))
                     .childFullName(getMaskTextIfConfIsChoosenAsYes(eachChild.getChildFullName(), eachChild.getKeepChildrenInfoConfidential()));
-
                 builder.isRespondentResponsibleForChild(eachChild.getIsRespondentResponsibleForChild().getDisplayedValue());
-               if(YesOrNo.Yes.equals(eachChild.getKeepChildrenInfoConfidential())) {
-                   builder.isRespondentResponsibleForChild(THIS_INFORMATION_IS_CONFIDENTIAL);
-               }
+                if (YesOrNo.Yes.equals(eachChild.getKeepChildrenInfoConfidential())) {
+                    builder.isRespondentResponsibleForChild(THIS_INFORMATION_IS_CONFIDENTIAL);
+                }
                 Element<HomeChild> homeChild = Element.<HomeChild>builder()
                     .value(builder.build()).build();
-               childList.add(homeChild);
+                childList.add(homeChild);
             }
             homeDetails = homeDetails.toBuilder().children(childList).build();
         }
@@ -970,7 +969,7 @@ public class ApplicationsTabService implements TabService {
     }
 
     private String getMaskTextIfConfIsChoosenAsYes(String value, YesOrNo keepChildrenInfoConfidential) {
-        if(YesOrNo.Yes.equals(keepChildrenInfoConfidential)) {
+        if (YesOrNo.Yes.equals(keepChildrenInfoConfidential)) {
             return THIS_INFORMATION_IS_CONFIDENTIAL;
         }
         return value;
