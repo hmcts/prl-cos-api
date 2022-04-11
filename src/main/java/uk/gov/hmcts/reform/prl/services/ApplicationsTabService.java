@@ -36,7 +36,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATIO
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicationsTabService implements TabService {
 
-
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
@@ -69,7 +68,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
             applicationTab.put("childDetailsTable", getChildDetails(caseData));
             applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
-        } else if(PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())){
+        } else if(PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("fl401TypeOfApplicationTable", getFL401TypeOfApplicationTable(caseData));
             applicationTab.put("withoutNoticeOrderTable", getWithoutNoticeOrder(caseData));
             applicationTab.put("fl401ApplicantTable", getFl401ApplicantsTable(caseData));

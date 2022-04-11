@@ -26,12 +26,4 @@ public class FL401Applicant {
     private final YesOrNo isEmailAddressConfidential;
     private final String phoneNumber;
     private final YesOrNo isPhoneNumberConfidential;
-
-    private final String representativeFirstName;
-    private final String representativeLastName;
-    private final String solicitorEmail;
-    private final String solicitorReference;
-    private final String dxNumber;
-    private final Organisation solicitorOrg;
 }
-
