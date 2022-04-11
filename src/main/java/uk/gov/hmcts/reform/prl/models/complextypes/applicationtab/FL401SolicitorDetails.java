@@ -15,7 +15,7 @@ public class FL401SolicitorDetails {
     private final String representativeFirstName;
     private final String representativeLastName;
     private final String solicitorEmail;
-    private final String solicitorTelephoneNumber;
+    private final String solicitorTelephone;
     private final String solicitorReference;
     private final String dxNumber;
     private final Organisation solicitorOrg;
