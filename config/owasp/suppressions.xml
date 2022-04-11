@@ -35,5 +35,6 @@
       Jackson data binding
   ]]></notes>
     <cve>CVE-2020-36518</cve>
+    <cve>CVE-2022-22950</cve>
   </suppress>
 </suppressions>
