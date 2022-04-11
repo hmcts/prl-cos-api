@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 
 @Slf4j
 @Service
@@ -146,11 +147,13 @@ public class ConfidentialityTabService {
     public List<Element<Fl401ChildConfidentialityDetails>> getFl401ChildrenConfidentialDetails(List<ChildrenLiveAtAddress> children) {
         List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
         for (ChildrenLiveAtAddress child : children) {
-            Element<Fl401ChildConfidentialityDetails> childElement = Element
+            if (child.getKeepChildrenInfoConfidential().equals(YesOrNo.Yes)) {
+                Element<Fl401ChildConfidentialityDetails> childElement = Element
                     .<Fl401ChildConfidentialityDetails>builder()
                     .value(Fl401ChildConfidentialityDetails.builder()
                                .fullName(child.getChildFullName()).build()).build();
-            childrenConfidentialDetails.add(childElement);
+                childrenConfidentialDetails.add(childElement);
+            }
         }
 
         return childrenConfidentialDetails;
