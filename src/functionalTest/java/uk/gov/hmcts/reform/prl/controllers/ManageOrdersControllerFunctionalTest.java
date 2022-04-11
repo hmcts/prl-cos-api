@@ -20,6 +20,7 @@ public class ManageOrdersControllerFunctionalTest {
     private final String userToken = "Bearer testToken";
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
+    private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -38,6 +39,17 @@ public class ManageOrdersControllerFunctionalTest {
             .when()
             .contentType("application/json")
             .post("/populate-preview-order")
+            .then().assertThat().statusCode(200);
+    }
+
+    @Test
+    public void givenRequestBody_whenPostRequestToFetchChildList_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
+        request
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/fetch-child-details")
             .then().assertThat().statusCode(200);
     }
 }

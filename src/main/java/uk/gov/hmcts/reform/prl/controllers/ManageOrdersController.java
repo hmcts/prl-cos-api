@@ -52,7 +52,10 @@ public class ManageOrdersController {
     public CallbackResponse fetchChildDetails(
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
         List<Child> children = caseData.getChildren().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
