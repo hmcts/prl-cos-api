@@ -12,10 +12,12 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.Fl401ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -227,19 +229,17 @@ public class ConfidentialityTabServiceTest {
 
     @Test
     public void testFl401ChildConfidentialDetails() {
-        Child child = Child.builder()
-            .firstName("Test")
-            .lastName("Name")
+        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
+            .childFullName("Test")
             .build();
 
 
-        List<Child> listOfChildren = Collections.singletonList(child);
-        List<Element<ChildConfidentialityDetails>> expectedOutput = List.of(
-            Element.<ChildConfidentialityDetails>builder()
-                .value(ChildConfidentialityDetails
+        List<ChildrenLiveAtAddress> listOfChildren = Collections.singletonList(child);
+        List<Element<Fl401ChildConfidentialityDetails>> expectedOutput = List.of(
+            Element.<Fl401ChildConfidentialityDetails>builder()
+                .value(Fl401ChildConfidentialityDetails
                            .builder()
-                           .firstName("Test")
-                           .lastName("Name")
+                           .fullName("Test")
                            .build()).build()
         );
 

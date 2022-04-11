@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.Fl401ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -54,10 +56,10 @@ public class ConfidentialityTabService {
             applicantsConfidentialDetails = getConfidentialApplicantDetails(
                 fl401Applicant);
 
-            List<Child> children = caseData.getChildren().stream()
+            List<ChildrenLiveAtAddress> children = caseData.getHome().getChildren().stream()
                 .map(Element::getValue)
                 .collect(Collectors.toList());
-            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(children);
+            List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(children);
 
             return Map.of(
                 "applicantsConfidentialDetails",
@@ -141,14 +143,13 @@ public class ConfidentialityTabService {
                        .build()).build();
     }
 
-    public List<Element<ChildConfidentialityDetails>> getFl401ChildrenConfidentialDetails(List<Child> children) {
-        List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
-        for (Child child : children) {
-            Element<ChildConfidentialityDetails> childElement = Element
-                    .<ChildConfidentialityDetails>builder()
-                    .value(ChildConfidentialityDetails.builder()
-                               .firstName(child.getFirstName())
-                               .lastName(child.getLastName()).build()).build();
+    public List<Element<Fl401ChildConfidentialityDetails>> getFl401ChildrenConfidentialDetails(List<ChildrenLiveAtAddress> children) {
+        List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
+        for (ChildrenLiveAtAddress child : children) {
+            Element<Fl401ChildConfidentialityDetails> childElement = Element
+                    .<Fl401ChildConfidentialityDetails>builder()
+                    .value(Fl401ChildConfidentialityDetails.builder()
+                               .fullName(child.getChildFullName()).build()).build();
             childrenConfidentialDetails.add(childElement);
         }
 
