@@ -9,6 +9,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 public class Fl401TypeOfApplication {
     private final String ordersApplyingFor;
     private final YesOrNo isLinkedToChildArrangementApplication;
-    private final String CaCaseNumber;
+    private final String caCaseNumber;
 
 }
