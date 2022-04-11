@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -36,12 +37,10 @@ public class ConfidentialityTabServiceTest {
     @Mock
     ObjectMapper objectMapper;
 
-    @Mock
-    CoreCaseDataService coreCaseDataService;
-
     Address address;
     PartyDetails partyDetails1;
     PartyDetails partyDetails2;
+
 
     @Before
     public void setUp() {
@@ -218,11 +217,36 @@ public class ConfidentialityTabServiceTest {
             partyDetailsFirstRec,
             partyDetailsSecondRec
         );
-        CaseData caseData = CaseData.builder().applicants(listOfPartyDetails).children(listOfChild).build();
+        CaseData caseData = CaseData.builder().applicants(listOfPartyDetails).children(listOfChild).caseTypeOfApplication(C100_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
 
         assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("childrenConfidentialDetails"));
 
     }
+
+    @Test
+    public void testFl401ChildConfidentialDetails() {
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .build();
+
+
+        List<Child> listOfChildren = Collections.singletonList(child);
+        List<Element<ChildConfidentialityDetails>> expectedOutput = List.of(
+            Element.<ChildConfidentialityDetails>builder()
+                .value(ChildConfidentialityDetails
+                           .builder()
+                           .firstName("Test")
+                           .lastName("Name")
+                           .build()).build()
+        );
+
+        assertEquals(
+            expectedOutput,
+            confidentialityTabService.getFl401ChildrenConfidentialDetails(listOfChildren)
+        );
+    }
+
 }

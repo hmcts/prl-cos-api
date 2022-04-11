@@ -19,26 +19,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialityTabService {
 
-    private final CoreCaseDataService coreCaseDataService;
-
-
     public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
 
-        List<PartyDetails> applicants = caseData.getApplicants().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = getConfidentialApplicantDetails(
-            applicants);
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
+        List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
         List<Child> children = caseData.getChildren().stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(children);
+        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+            List<PartyDetails> applicants = caseData.getApplicants().stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            applicantsConfidentialDetails = getConfidentialApplicantDetails(
+                applicants);
+
+            childrenConfidentialDetails = getChildrenConfidentialDetails(children);
+        } else {
+            List<PartyDetails> fl401Applicant = List.of(caseData.getApplicantsFL401());
+            applicantsConfidentialDetails = getConfidentialApplicantDetails(
+                fl401Applicant);
+            childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(children);
+        }
+
 
         return Map.of(
             "applicantsConfidentialDetails",
@@ -120,6 +130,20 @@ public class ConfidentialityTabService {
                        .phoneNumber(phoneSet ? applicant.getPhoneNumber() : null)
                        .email(emailSet ? applicant.getEmail() : null)
                        .build()).build();
+    }
+
+    public List<Element<ChildConfidentialityDetails>> getFl401ChildrenConfidentialDetails(List<Child> children) {
+        List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
+        for (Child child : children) {
+            Element<ChildConfidentialityDetails> childElement = Element
+                    .<ChildConfidentialityDetails>builder()
+                    .value(ChildConfidentialityDetails.builder()
+                               .firstName(child.getFirstName())
+                               .lastName(child.getLastName()).build()).build();
+                childrenConfidentialDetails.add(childElement);
+            }
+
+        return childrenConfidentialDetails;
     }
 
 }
