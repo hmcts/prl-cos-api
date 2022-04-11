@@ -140,8 +140,8 @@ public class ConfidentialityTabService {
                     .value(ChildConfidentialityDetails.builder()
                                .firstName(child.getFirstName())
                                .lastName(child.getLastName()).build()).build();
-                childrenConfidentialDetails.add(childElement);
-            }
+            childrenConfidentialDetails.add(childElement);
+        }
 
         return childrenConfidentialDetails;
     }
