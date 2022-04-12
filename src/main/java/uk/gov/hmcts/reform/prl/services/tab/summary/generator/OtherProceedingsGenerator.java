@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.tab.summary.generator;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
+@Slf4j
 @Component
 public class OtherProceedingsGenerator implements  FieldGenerator {
     @Override
@@ -49,6 +51,9 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
             proceedingCheck = ofNullable(proceedingObject.get().getHasPrevOrOngoingOtherProceeding());
             proceedingsCheck = ofNullable(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings());
         }
+        log.info("INSIDE hasOtherProceedings(), FL401:" + (proceedingsCheck.isPresent() && (proceedingCheck.isEmpty() || proceedingCheck.get()
+            .equals(YesNoDontKnow.yes))));
+
         return proceedingsCheck.isPresent() && (proceedingCheck.isEmpty() || proceedingCheck.get()
             .equals(YesNoDontKnow.yes));
     }
@@ -57,6 +62,8 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
             return getC100OtherProceedingsDetails(caseData);
         }
+        log.info("INSIDE getOtherProceedingsDetails(), FL401:" + getFl401OtherProceedingsDetails(caseData));
+
         return getFl401OtherProceedingsDetails(caseData);
     }
 
@@ -111,7 +118,7 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
 
         for (FL401Proceedings p : proceedings) {
             String typeOfOrder = null != p.getTypeOfCase() ? p.getTypeOfCase() : null;
-
+            log.info(proceedings.toString());
             OtherProceedings otherProceedingsDetails = OtherProceedings.builder()
                 .caseNumber(p.getCaseNumber())
                 .typeOfOrder(typeOfOrder)
