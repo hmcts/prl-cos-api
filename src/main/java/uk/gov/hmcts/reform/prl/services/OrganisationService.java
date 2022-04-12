@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ws.rs.NotFoundException;
+
+import static java.util.Optional.ofNullable;
 
 @Service
 @Slf4j
@@ -142,5 +145,14 @@ public class OrganisationService {
                 .build();
         }
         return caseData;
+    }
+
+    public Optional<Organisations> findUserOrganisation(String authorization) {
+        try {
+            return ofNullable(organisationApi.findUserOrganisation(authorization, authTokenGenerator.generate()));
+        } catch (FeignException.NotFound | FeignException.Forbidden ex) {
+            log.error("Exception while getting org details of the logged in users ", ex);
+            return Optional.empty();
+        }
     }
 }
