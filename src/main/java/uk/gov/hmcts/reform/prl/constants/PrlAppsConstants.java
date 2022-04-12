@@ -61,4 +61,7 @@ public class PrlAppsConstants {
     public static final String ISSUE_EVENT_CODE = "001";
     public static final String ISSUE_EVENT_SEQUENCE = "1";
     public static final String BLANK_STRING = "";
+    public static final String WITHOUT_NOTICE = "Without notice";
+
+    public static final String WITH_NOTICE = "With notice";
 }
