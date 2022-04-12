@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -117,7 +118,7 @@ public class FL401SubmitApplicationController {
     OrganisationService organisationService;
 
     @Autowired
-    private AllTabServiceImpl allTabService;
+    private ConfidentialityTabService confidentialityTabService;
 
     @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to send FL401 application notification. ")
@@ -231,7 +232,7 @@ public class FL401SubmitApplicationController {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
 
-        allTabService.updateAllTabsIncludingConfTab(caseData);
+        caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
