@@ -144,7 +144,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("relationshipToRespondentTable", getFl401RelationshipToRespondentTable(caseData));
             Map<String, Object> homeDetails = getHomeDetails(caseData);
             applicationTab.put("homeDetailsTable", homeDetails);
-            applicationTab.put("isHomeEntered", homeDetails.isEmpty() ? "true" : "false");
+            applicationTab.put("isHomeEntered", !homeDetails.isEmpty() ? "true" : "false");
 
             applicationTab.put("otherProceedingsTable", getFL401OtherProceedingsTable(caseData));
             applicationTab.put("fl401OtherProceedingsDetailsTable", getFl401OtherProceedingsDetailsTable(caseData));
