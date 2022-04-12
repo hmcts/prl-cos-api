@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.ArrayList;
@@ -66,7 +67,11 @@ public class ManageOrdersControllerTest {
     private ManageOrderEmailService manageOrderEmailService;
 
     @Mock
+    private ManageOrderService manageOrderService;
+
+    @Mock
     private UserService userService;
+
 
 
     @Mock
@@ -136,6 +141,20 @@ public class ManageOrdersControllerTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
+        CaseData updatedCaseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .children(listOfChildren)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .fl401FamilymanCaseNumber("12345")
+            .childrenList("Child 1: TestName\n")
+            .selectedOrder(
+                "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
+                    + "enforcement application (C82)\\n\\n")
+            .build();
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -146,8 +165,13 @@ public class ManageOrdersControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
+
         CallbackResponse callbackResponse = manageOrdersController.fetchChildDetails(callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
+        assertEquals(
+            "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
+            callbackResponse.getData().getSelectedOrder());
     }
 
     @Test

@@ -13,22 +13,17 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,6 +36,9 @@ public class ManageOrdersController {
 
     @Autowired
     private final UserService userService;
+
+    @Autowired
+    private ManageOrderService manageOrderService;
 
 
 
@@ -75,36 +73,13 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        List<Child> children = caseData.getChildren().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
-        StringBuilder builder = new StringBuilder();
-
-        for (int i = 0; i < children.size(); i++) {
-            Child child = children.get(i);
-            builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + child.getLastName()));
-            builder.append("\n");
-        }
-
-        StringBuilder slectedOrder = new StringBuilder();
-        slectedOrder.append(caseData.getApplicantCaseName());
-        slectedOrder.append("\n\n");
-        slectedOrder.append(caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)
-                                ? String.format("Family Man ID: ",caseData.getFl401FamilymanCaseNumber())
-                                : String.format("Family Man ID: ",caseData.getFamilymanCaseNumber()));
-        slectedOrder.append("\n\n");
-        slectedOrder.append(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
-                                ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
-                                : caseData.getChildArrangementOrders().getDisplayedValue());
-        slectedOrder.append("\n\n");
-        CaseData caseDataInput = CaseData.builder().childrenList(builder.toString())
-            .selectedOrder(slectedOrder.toString()).build();
+        CaseData caseDataInput = manageOrderService.getUpdatedCaseData(caseData);
 
         return CallbackResponse.builder()
             .data(caseDataInput)
             .build();
     }
+
 
 
 
