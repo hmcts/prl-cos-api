@@ -92,7 +92,7 @@ public class CaseSummaryTabService implements TabService {
 
         summaryTabFields.put("otherProceedingsForSummaryTab", otherProceedingsGenerator.getOtherProceedingsDetails(caseData));
         summaryTabFields.put("otherProceedingEmptyTable", caseSummary.getOtherProceedingEmptyTable());
-
+        log.info(summaryTabFields.toString());
         return summaryTabFields;
     }
 
