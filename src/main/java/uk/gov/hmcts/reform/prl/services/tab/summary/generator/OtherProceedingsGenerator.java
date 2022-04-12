@@ -40,10 +40,15 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
             return proceedingsCheck.isPresent() && (proceedingCheck.isEmpty() || proceedingCheck.get()
                 .equals(YesNoDontKnow.yes));
         }
-        Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getFl401OtherProceedingDetails()
-                                                                 .getHasPrevOrOngoingOtherProceeding());
-        Optional<List<Element<FL401Proceedings>>> proceedingsCheck = ofNullable(caseData.getFl401OtherProceedingDetails()
-                                                                                    .getFl401OtherProceedings());
+
+        Optional<FL401OtherProceedingDetails> proceedingObject = ofNullable(caseData.getFl401OtherProceedingDetails());
+
+        Optional<YesNoDontKnow> proceedingCheck = Optional.empty();
+        Optional<List<Element<FL401Proceedings>>> proceedingsCheck = Optional.empty();
+        if (proceedingObject.isPresent()) {
+            proceedingCheck = ofNullable(proceedingObject.get().getHasPrevOrOngoingOtherProceeding());
+            proceedingsCheck = ofNullable(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings());
+        }
         return proceedingsCheck.isPresent() && (proceedingCheck.isEmpty() || proceedingCheck.get()
             .equals(YesNoDontKnow.yes));
     }
