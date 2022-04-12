@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -84,6 +85,10 @@ public class FL401SubmitApplicationControllerTest {
 
     @Mock
     private UserDetails userDetails;
+
+
+    @Mock
+    ConfidentialityTabService confidentialityTabService;
 
     @Mock
     AllTabServiceImpl allTabsService;
