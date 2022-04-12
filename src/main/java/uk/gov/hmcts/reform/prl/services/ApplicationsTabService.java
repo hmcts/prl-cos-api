@@ -137,7 +137,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("fl401RespondentTable", getFl401RespondentTable(caseData));
             Map<String,Object> applicantFamilyMap = getApplicantsFamilyDetails(caseData);
             applicationTab.put("applicantFamilyTable", applicantFamilyMap);
-            if(applicantFamilyMap.containsKey("applicantChild")) {
+            if (applicantFamilyMap.containsKey("applicantChild")) {
                 applicationTab.put("fl401ChildDetailsTable", applicantFamilyMap.get("applicantChild"));
             }
             applicationTab.put("respondentBehaviourTable", getFl401RespondentBehaviourTable(caseData));
