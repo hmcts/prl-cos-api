@@ -8,5 +8,5 @@ import lombok.Data;
 @Data
 public class Fl401ChildConfidentialityDetails {
     @JsonProperty("fullName")
-    private final String fullName;
+    private String fullName;
 }
