@@ -510,15 +510,6 @@ public class CaseData implements MappableObject {
     @JsonProperty("finalWelshDocument")
     private final Document finalWelshDocument;
 
-    /**
-     * Confidentiality details.
-     */
-    private final List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
-    private final List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
-    @JsonProperty("fl401ChildrenConfidentialDetails")
-    private final List<Element<Fl401ChildConfidentialityDetails>> fl401ChildrenConfidentialDetails;
-
-
     private final Map<String, Object> typeOfApplicationTable;
 
     /**
