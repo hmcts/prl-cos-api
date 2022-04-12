@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
@@ -84,10 +85,14 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
     }
 
     public List<Element<OtherProceedings>> getFl401OtherProceedingsDetails(CaseData caseData) {
-        Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getFl401OtherProceedingDetails()
-                                                                 .getHasPrevOrOngoingOtherProceeding());
-        Optional<List<Element<FL401Proceedings>>> proceedingsCheck = ofNullable(caseData.getFl401OtherProceedingDetails()
-                                                                                    .getFl401OtherProceedings());
+        Optional<FL401OtherProceedingDetails> proceedingObject = ofNullable(caseData.getFl401OtherProceedingDetails());
+
+        Optional<YesNoDontKnow> proceedingCheck = Optional.empty();
+        Optional<List<Element<FL401Proceedings>>> proceedingsCheck = Optional.empty();
+        if (proceedingObject.isPresent()) {
+            proceedingCheck = ofNullable(proceedingObject.get().getHasPrevOrOngoingOtherProceeding());
+            proceedingsCheck = ofNullable(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings());
+        }
 
         if (proceedingsCheck.isEmpty() || (proceedingCheck.isPresent() && !proceedingCheck.get().equals(YesNoDontKnow.yes))) {
             OtherProceedings op = OtherProceedings.builder().build();
