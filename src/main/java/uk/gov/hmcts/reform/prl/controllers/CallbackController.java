@@ -24,8 +24,8 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -574,7 +574,7 @@ public class CallbackController {
             && (!SUBMITTED_STATE.equalsIgnoreCase(eachState)))
             || ISSUED_STATE.equalsIgnoreCase(eachState);
     }
-  
+
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated) {
         log.info("Fetching the user and Org Details ");
         try {
