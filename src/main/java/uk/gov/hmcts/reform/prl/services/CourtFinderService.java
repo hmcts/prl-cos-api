@@ -45,13 +45,19 @@ public class CourtFinderService {
                 .findClosestDomesticAbuseCourtByPostCode(
                     getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));
         } else {
+            log.info("Getting court with postcode: " + getCorrectPartyPostcode(caseData));
             serviceArea = courtFinderApi
                 .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
         }
 
-        return getCourtDetails(serviceArea.getCourts()
-                                   .get(0)
-                                   .getCourtId());
+        if (serviceArea.getCourts() != null
+            && serviceArea.getCourts().size() > 0) {
+            return getCourtDetails(serviceArea.getCourts()
+                                       .get(0)
+                                       .getCourtId());
+        } else {
+            return null;
+        }
     }
 
     public boolean courtsAreTheSame(Court c1, Court c2) {
