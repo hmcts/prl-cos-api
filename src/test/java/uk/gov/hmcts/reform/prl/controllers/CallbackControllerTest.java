@@ -131,9 +131,6 @@ public class CallbackControllerTest {
     private CaseWorkerEmailService caseWorkerEmailService;
 
     @Mock
-    private DocumentLanguageService documentLanguageService;
-
-    @Mock
     private DocumentGenService documentGenService;
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -242,7 +239,7 @@ public class CallbackControllerTest {
 
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
+            .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
