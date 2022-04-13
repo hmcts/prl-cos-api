@@ -163,7 +163,6 @@ public class CaseWorkerEmailServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
             .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.prohibitedStepsOrder))
@@ -925,5 +924,6 @@ public class CaseWorkerEmailServiceTest {
 
         assertEquals("testing@localcourt.com", caseData.getCourtEmailAddress());
     }
+
 }
 
