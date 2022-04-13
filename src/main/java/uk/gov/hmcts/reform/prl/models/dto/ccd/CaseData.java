@@ -561,6 +561,7 @@ public class CaseData implements MappableObject {
      */
     private String isWithdrawRequestSent;
 
+    /**
      * Solicitor Details.
      */
     private String caseSolicitorName;
