@@ -551,6 +551,7 @@ public class CaseWorkerEmailServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicantCaseName("TestCaseName")
             .applicants(listOfApplicants)
             .build();
