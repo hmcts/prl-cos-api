@@ -471,6 +471,7 @@ public class SolicitorEmailServiceTest {
             .data(data)
             .build();
 
+
         String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
 
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);

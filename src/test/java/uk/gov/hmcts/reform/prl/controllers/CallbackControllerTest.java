@@ -848,9 +848,7 @@ public class CallbackControllerTest {
                                                     .build()).build()))
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .withDrawApplicationData(withdrawApplication)
-            .applicants(applicantList)
-            .build();
-
+            .applicants(applicantList).build();
         Map<String, Object> stringObjectMap = new HashMap<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);

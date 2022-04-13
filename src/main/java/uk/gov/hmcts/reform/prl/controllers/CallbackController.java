@@ -24,8 +24,8 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -296,7 +296,9 @@ public class CallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-      
+        List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
+        log.info("** Previous States **");
+        eventsForCase.stream().map(CaseEventDetail::getStateId).forEach(log::info);
         if (documentLanguage.isGenEng()) {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
@@ -433,6 +435,7 @@ public class CallbackController {
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
+
             if (previousState.isPresent() && !stateList.contains(previousState.get())) {
                 caseDataUpdated.put("isWithdrawRequestSent", "Pending");
                 log.info("**** Case is updated as WithdrawRequestSent **** ");
@@ -459,7 +462,7 @@ public class CallbackController {
                     // Getting the tab fields and add it to the casedetails..
                     Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
                     caseDataUpdated.putAll(allTabsFields);
-                } else {
+                } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                     solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
                 }
                 caseDataUpdated.put("state", WITHDRAWN_STATE);
@@ -529,6 +532,7 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+
     @PostMapping(path = "/fl401-add-case-number", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback for add case number submit event")
     @ApiResponses(value = {
@@ -549,8 +553,7 @@ public class CallbackController {
             && (!RETURN_STATE.equalsIgnoreCase(eachState))
             && (!PENDING_STATE.equalsIgnoreCase(eachState))
             && (!SUBMITTED_STATE.equalsIgnoreCase(eachState)))
-            || ISSUED_STATE.equalsIgnoreCase(eachState)
-            || GATEKEEPING_STATE.equalsIgnoreCase(eachState);
+            || ISSUED_STATE.equalsIgnoreCase(eachState);
     }
 
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated) {
@@ -569,5 +572,6 @@ public class CallbackController {
         }
 
         return caseDataUpdated;
+
     }
 }
