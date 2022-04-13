@@ -98,7 +98,7 @@ public class CallbackControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/copy-FL401-case-name-to-C100")
+            .post("/about-to-submit-case-creation")
             .then()
             .body("data.applicantCaseName", equalTo("Test Name"))
             .assertThat().statusCode(200);

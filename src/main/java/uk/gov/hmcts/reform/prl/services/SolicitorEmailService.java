@@ -71,7 +71,7 @@ public class SolicitorEmailService {
                 .caseReference(String.valueOf(caseDetails.getId()))
                 .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
                 .applicantName(applicantNames)
-                .courtName(court.getCourtName())
+                .courtName((court != null) ? court.getCourtName() : "")
                 .courtEmail(courtEmail)
                 .caseLink(manageCaseUrl + "/" + caseDetails.getId())
                 .build();
