@@ -397,7 +397,7 @@ public class CaseData implements MappableObject {
      * Manage Documents.
      */
     private final DocumentCategoryEnum documentCategory;
-    private final List<Element<FurtherEvidence>> furtherEvidences;
+    private final List<Element<FurtherEvidence>> mainApplicationDocument;
     @JsonProperty("giveDetails")
     private final String giveDetails;
 
@@ -557,15 +557,13 @@ public class CaseData implements MappableObject {
     private String isNotificationSent;
 
     /**
-     *  Withdraw request flag.
-     */
-    private String isWithdrawRequestSent;
-
-    /**
      * Solicitor Details.
      */
     private String caseSolicitorName;
     private String caseSolicitorOrgName;
 
-
+    /**
+     *  Withdraw request flag.
+     */
+    private String isWithdrawRequestSent;
 }
