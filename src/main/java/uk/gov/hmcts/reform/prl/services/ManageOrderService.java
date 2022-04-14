@@ -9,7 +9,9 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -19,25 +21,35 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 @RequiredArgsConstructor
 public class ManageOrderService {
 
-    public CaseData getUpdatedCaseData(CaseData caseData) {
+    public Map<String, Object> populateHeader(CaseData caseData) {
+        Map<String, Object> headerMap = new HashMap<>();
+        headerMap.put("manageOrderHeader1", getHeaderInfo(caseData));
+        return headerMap;
+    }
 
+    public CaseData getUpdatedCaseData(CaseData caseData) {
         return CaseData.builder().childrenList(getChildInfoFromCaseData(caseData))
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
     private String getSelectedOrderInfo(CaseData caseData) {
-        StringBuilder slectedOrder = new StringBuilder();
-        slectedOrder.append(caseData.getApplicantCaseName());
-        slectedOrder.append("\n\n");
-        slectedOrder.append(caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)
-                                ? String.format("Family Man ID: ", caseData.getFl401FamilymanCaseNumber())
-                                : String.format("Family Man ID: ", caseData.getFamilymanCaseNumber()));
-        slectedOrder.append("\n\n");
-        slectedOrder.append(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
-                                ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
-                                : caseData.getChildArrangementOrders().getDisplayedValue());
-        slectedOrder.append("\n\n");
-        return slectedOrder.toString();
+        StringBuilder selectedOrder = new StringBuilder();
+        selectedOrder.append(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
+                                 ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
+                                 : caseData.getChildArrangementOrders().getDisplayedValue());
+        selectedOrder.append("\n\n");
+        return selectedOrder.toString();
+    }
+
+    private String getHeaderInfo(CaseData caseData) {
+        StringBuilder headerInfo = new StringBuilder();
+        headerInfo.append("Case Name: " + caseData.getApplicantCaseName());
+        headerInfo.append("\n\n");
+        headerInfo.append(caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)
+                              ? "Family Man ID: " + caseData.getFl401FamilymanCaseNumber()
+                              : "Family Man ID: " + caseData.getFamilymanCaseNumber());
+        headerInfo.append("\n\n");
+        return headerInfo.toString();
     }
 
     private String getChildInfoFromCaseData(CaseData caseData) {

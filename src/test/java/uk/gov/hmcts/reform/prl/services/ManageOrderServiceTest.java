@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -25,7 +26,7 @@ public class ManageOrderServiceTest {
 
 
     @InjectMocks
-    private  ManageOrderService manageOrderService;
+    private ManageOrderService manageOrderService;
 
     @Test
     public void getUpdatedCaseData() {
@@ -57,7 +58,23 @@ public class ManageOrderServiceTest {
         assertEquals("Child 1: TestName\n", caseData1.getChildrenList());
         assertNotNull(caseData1.getSelectedOrder());
 
+    }
 
+    @Test
+    public void testPupulateHeader() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
+        System.out.println(responseMap.get("manageOrderHeader1"));
+
+        assertEquals("Case Name: Test Case 45678\n\n"
+                         + "Family Man ID: familyman12345\n\n", responseMap.get("manageOrderHeader1"));
 
     }
 }
