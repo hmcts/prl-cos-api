@@ -103,6 +103,7 @@ public class ResubmitApplicationController {
                             (closestChildArrangementsCourt != null)
                                 ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched");
 
+        log.info("Court name for return application: === {}===", caseDataUpdated.get(COURT_NAME_FIELD));
         if (previousStates.isPresent()) {
             // For submitted state - No docs will be generated.
             if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
