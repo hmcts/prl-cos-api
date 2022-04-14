@@ -24,7 +24,7 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VAL
 
 public class IdamOidcApiConsumerTest extends IdamConsumerTestBase {
 
-    @Pact(provider = "idamApi_oidc", consumer = "prl_cos_api")
+    @Pact(provider = "idamApi_oidc", consumer = "prl_cos")
     public RequestResponsePact generatePactForUserInfo(PactDslWithProvider builder) throws JSONException {
 
         return builder
@@ -39,7 +39,7 @@ public class IdamOidcApiConsumerTest extends IdamConsumerTestBase {
             .toPact();
     }
 
-    @Pact(provider = "idamApi_oidc", consumer = "prl_cos_api")
+    @Pact(provider = "idamApi_oidc", consumer = "prl_cos")
     public RequestResponsePact generatePactForToken(PactDslWithProvider builder) {
 
         Map<String, String> responseheaders = ImmutableMap.<String, String>builder()
