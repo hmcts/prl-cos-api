@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
@@ -32,16 +33,10 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 
 @Slf4j
 @RestController
@@ -91,7 +86,16 @@ public class ResubmitApplicationController {
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
         Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
             ResubmitApplicationController::getPreviousState).findFirst();
+
+        Court closestChildArrangementsCourt = courtFinderService
+            .getNearestFamilyCourt(caseData);
+
         Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
+
+        caseDataUpdated.put(COURT_NAME_FIELD,
+                            (closestChildArrangementsCourt != null) ?
+                                closestChildArrangementsCourt.getCourtName() : "No Court Fetched");
+
         if (previousStates.isPresent()) {
             // For submitted state - No docs will be generated.
             if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
