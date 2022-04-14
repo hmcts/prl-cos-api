@@ -33,10 +33,17 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 
 @Slf4j
 @RestController
@@ -93,8 +100,8 @@ public class ResubmitApplicationController {
         Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
 
         caseDataUpdated.put(COURT_NAME_FIELD,
-                            (closestChildArrangementsCourt != null) ?
-                                closestChildArrangementsCourt.getCourtName() : "No Court Fetched");
+                            (closestChildArrangementsCourt != null)
+                                ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched");
 
         if (previousStates.isPresent()) {
             // For submitted state - No docs will be generated.

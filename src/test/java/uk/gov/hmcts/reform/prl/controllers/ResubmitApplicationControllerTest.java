@@ -13,10 +13,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -66,6 +68,12 @@ public class ResubmitApplicationControllerTest {
     @Mock
     DocumentGenService documentGenService;
 
+    @Mock
+    private CourtFinderService courtFinderService;
+
+    @Mock
+    private Court court;
+
     private CallbackRequest callbackRequest;
     private CaseDetails caseDetails;
     private CaseData caseData;
@@ -108,6 +116,10 @@ public class ResubmitApplicationControllerTest {
         uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails prlCaseDetailsIssued = uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
             .caseData(caseDataIssued)
             .build();
+
+        court = Court.builder()
+            .courtName("testcourt")
+            .build();
     }
 
     @Test
@@ -120,6 +132,7 @@ public class ResubmitApplicationControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataSubmitted);
         when(caseEventService.findEventsForCase(String.valueOf(caseDataSubmitted.getId()))).thenReturn(caseEvents);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
         assertEquals(State.SUBMITTED_PAID, response.getData().get("state"));
@@ -146,6 +159,7 @@ public class ResubmitApplicationControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
@@ -187,6 +201,7 @@ public class ResubmitApplicationControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataNoAllegations);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
@@ -222,6 +237,7 @@ public class ResubmitApplicationControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
