@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +22,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+import static feign.Request.HttpMethod.GET;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -231,5 +239,37 @@ public class OrganisationServiceTest {
             .build();
         CaseData actualCaseData = organisationService.getApplicantOrganisationDetailsForFL401(caseData);
         assertEquals(actualCaseData,expectedCaseData);
+    }
+
+    @Test
+    public void findUserOrganisationTest() {
+        Organisations organisations = Organisations.builder()
+            .organisationIdentifier("79ZRSOU")
+            .name("Civil - Organisation 2")
+            .build();
+
+        when(organisationApi.findUserOrganisation(authToken,
+                                              serviceAuthToken))
+            .thenReturn(organisations);
+
+        Optional<Organisations> orgData =  organisationService.findUserOrganisation(authToken);
+        assertEquals(orgData.get(),organisations);
+    }
+
+    @Test
+    public void findUserOrganisationNotFoundTest() {
+        when(organisationApi.findUserOrganisation(authToken,
+                                                  serviceAuthToken))
+            .thenThrow(feignException(404, "Not found"));
+
+        Optional<Organisations> orgData =  organisationService.findUserOrganisation(authToken);
+        assertEquals(orgData,Optional.empty());
+    }
+
+    public static FeignException feignException(int status, String message) {
+        return FeignException.errorStatus(message, Response.builder()
+            .status(status)
+            .request(Request.create(GET, EMPTY, Map.of(), new byte[]{}, UTF_8, null))
+            .build());
     }
 }

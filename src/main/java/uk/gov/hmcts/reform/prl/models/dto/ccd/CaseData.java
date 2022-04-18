@@ -527,8 +527,8 @@ public class CaseData implements MappableObject {
     /**
      * FL401 Upload Documents.
      */
-    private final List<Document> fl401UploadWitnessDocuments;
-    private final List<Document> fl401UploadSupportDocuments;
+    private final List<Element<Document>> fl401UploadWitnessDocuments;
+    private final List<Element<Document>> fl401UploadSupportDocuments;
 
     /**
      * Send to Gatekeeper.
@@ -556,7 +556,12 @@ public class CaseData implements MappableObject {
     private String isCourtEmailFound;
     private String isDocumentGenerated;
     private String isNotificationSent;
-
+  
+    /**
+     * Solicitor Details.
+     */
+    private String caseSolicitorName;
+    private String caseSolicitorOrgName;
 
     public CaseData setDateSubmittedDate() {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
