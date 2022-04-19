@@ -40,10 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 
 @Slf4j
 @RestController
@@ -96,12 +93,15 @@ public class ResubmitApplicationController {
 
         Court closestChildArrangementsCourt = courtFinderService
             .getNearestFamilyCourt(caseData);
+        caseData = caseData.toBuilder()
+            .courtName(closestChildArrangementsCourt.getCourtName())
+            .courtId(closestChildArrangementsCourt.getCourtId())
+            .build();
 
         Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
 
-        caseDataUpdated.put(COURT_NAME_FIELD,
-                            (closestChildArrangementsCourt != null)
-                                ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched");
+        caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
+        caseDataUpdated.put(COURT_ID_FIELD, closestChildArrangementsCourt.getCourtId());
 
         log.info("Court name for return application: === {}===", caseDataUpdated.get(COURT_NAME_FIELD));
         if (previousStates.isPresent()) {
