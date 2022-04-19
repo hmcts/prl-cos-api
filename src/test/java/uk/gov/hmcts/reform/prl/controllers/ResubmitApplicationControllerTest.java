@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -41,7 +42,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ResubmitApplicationControllerTest {
 
     @InjectMocks
@@ -84,9 +85,12 @@ public class ResubmitApplicationControllerTest {
 
     @Before
     public void init() throws Exception {
+        MockitoAnnotations.openMocks(this);
         caseData = CaseData.builder()
             .id(12345L)
             .allegationsOfHarmYesNo(Yes)
+            .courtName("testcourt")
+            .courtId("123")
             .build();
         caseDataSubmitted = CaseData.builder()
             .id(12345L)
@@ -119,6 +123,7 @@ public class ResubmitApplicationControllerTest {
 
         court = Court.builder()
             .courtName("testcourt")
+            .courtId("123")
             .build();
     }
 
