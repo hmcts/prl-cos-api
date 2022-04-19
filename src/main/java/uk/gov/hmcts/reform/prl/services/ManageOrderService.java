@@ -21,6 +21,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 @RequiredArgsConstructor
 public class ManageOrderService {
 
+    public static final String FAMILY_MAN_ID = "Family Man ID: ";
+
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
         headerMap.put("manageOrderHeader1", getHeaderInfo(caseData));
@@ -52,11 +54,11 @@ public class ManageOrderService {
 
     private String getFamilyManNumber(CaseData caseData) {
         if (caseData.getFl401FamilymanCaseNumber() == null && caseData.getFamilymanCaseNumber() == null) {
-            return " ";
+            return FAMILY_MAN_ID;
         }
         return caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)
-            ? "Family Man ID: " + caseData.getFl401FamilymanCaseNumber()
-            : "Family Man ID: " + caseData.getFamilymanCaseNumber();
+            ? FAMILY_MAN_ID + caseData.getFl401FamilymanCaseNumber()
+            : FAMILY_MAN_ID + caseData.getFamilymanCaseNumber();
     }
 
     private String getChildInfoFromCaseData(CaseData caseData) {
