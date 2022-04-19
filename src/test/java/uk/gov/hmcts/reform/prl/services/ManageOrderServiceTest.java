@@ -71,7 +71,6 @@ public class ManageOrderServiceTest {
             .build();
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
-        System.out.println(responseMap.get("manageOrderHeader1"));
 
         assertEquals("Case Name: Test Case 45678\n\n"
                          + "Family Man ID: familyman12345\n\n", responseMap.get("manageOrderHeader1"));

@@ -45,11 +45,18 @@ public class ManageOrderService {
         StringBuilder headerInfo = new StringBuilder();
         headerInfo.append("Case Name: " + caseData.getApplicantCaseName());
         headerInfo.append("\n\n");
-        headerInfo.append(caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)
-                              ? "Family Man ID: " + caseData.getFl401FamilymanCaseNumber()
-                              : "Family Man ID: " + caseData.getFamilymanCaseNumber());
+        headerInfo.append(getFamilyManNumber(caseData));
         headerInfo.append("\n\n");
         return headerInfo.toString();
+    }
+
+    private String getFamilyManNumber(CaseData caseData) {
+        if (caseData.getFl401FamilymanCaseNumber() == null && caseData.getFamilymanCaseNumber() == null) {
+            return " ";
+        }
+        return caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)
+            ? "Family Man ID: " + caseData.getFl401FamilymanCaseNumber()
+            : "Family Man ID: " + caseData.getFamilymanCaseNumber();
     }
 
     private String getChildInfoFromCaseData(CaseData caseData) {
