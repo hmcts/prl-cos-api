@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,9 +42,12 @@ public class ManageOrderService {
     }
 
     private String getChildInfoFromCaseData(CaseData caseData) {
-        List<Child> children = caseData.getChildren().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
+        List<Child> children = new ArrayList<>();
+        if (caseData.getChildren() != null) {
+            children = caseData.getChildren().stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+        }
 
         StringBuilder builder = new StringBuilder();
 

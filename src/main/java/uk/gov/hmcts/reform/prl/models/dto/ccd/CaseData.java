@@ -597,6 +597,7 @@ public class CaseData implements MappableObject {
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo isTheOrderByConsent;
     private final YesOrNo wasTheOrderApprovedAtHearing;
+    private final String judgeOrMagistrateTitle;
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
     private final String dateOrderMade;

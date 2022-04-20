@@ -21,9 +21,12 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -72,6 +75,15 @@ public class ManageOrdersControllerTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private  DgsService dgsService;
+
+    @Mock
+    private  DocumentLanguageService documentLanguageService;
+
+    @Mock
+    private GeneratedDocumentInfo generatedDocumentInfo;
+
 
 
     @Mock
@@ -101,7 +113,12 @@ public class ManageOrdersControllerTest {
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
 
         CaseData caseData = CaseData.builder()
-            .previewOrderDoc(Document.builder().build())
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("c21DraftFilename")
+                                 .build())
             .build();
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -111,10 +128,12 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
 
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
-        CallbackResponse callbackResponse = manageOrdersController.populatePreviewOrderWhenOrderUploaded(callbackRequest);
-        assertNotNull(callbackResponse.getData().getPreviewOrderDoc());
+        CallbackResponse callbackResponse = manageOrdersController.populatePreviewOrderWhenOrderUploaded("test token",callbackRequest);
+        assertNotNull(callbackResponse);
     }
 
     @Test

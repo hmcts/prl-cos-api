@@ -60,4 +60,6 @@ public class PrlAppsConstants {
     public static final String CHILD_ARRANGEMENT_CASE = "CHILD ARRANGEMENT CASE";
     public static final String ISSUE_EVENT_CODE = "001";
     public static final String ISSUE_EVENT_SEQUENCE = "1";
+
+    public static final String C42_CREATE_ORDER = "Blank order or directions(C21)";
 }
