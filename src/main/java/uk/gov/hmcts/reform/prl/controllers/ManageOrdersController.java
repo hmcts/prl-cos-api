@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.OrderDetails;
+import uk.gov.hmcts.reform.prl.enums.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
@@ -81,7 +83,7 @@ public class ManageOrdersController {
     }
 
     @PostMapping(path = "/populate-header", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to fetch child details ")
+    @ApiOperation(value = "Callback to populate the header")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Child details are fetched"),
         @ApiResponse(code = 400, message = "Bad Request")})
@@ -110,6 +112,26 @@ public class ManageOrdersController {
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         manageOrderEmailService.sendEmail(caseDetails);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/save-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Save order details")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        OrderDetails.builder().orderType(caseData.getSelectedOrder()).orderDocument(caseData.getPreviewOrderDoc())
+            .otherDetails(OtherOrderDetails.builder().createdBy(caseData.getCreatedDate()).build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
