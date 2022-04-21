@@ -61,5 +61,6 @@ public class PrlAppsConstants {
     public static final String ISSUE_EVENT_CODE = "001";
     public static final String ISSUE_EVENT_SEQUENCE = "1";
 
-    public static final String C42_CREATE_ORDER = "Blank order or directions(C21)";
+    public static final String TEMPLATE = "template";
+    public static final String FILE_NAME = "fileName";
 }

@@ -14,9 +14,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -31,10 +33,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -132,10 +131,53 @@ public class ManageOrdersControllerTest {
             .thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
-        CallbackResponse callbackResponse = manageOrdersController.populatePreviewOrderWhenOrderUploaded("test token",callbackRequest);
+        CallbackResponse callbackResponse = manageOrdersController
+            .populatePreviewOrderWhenOrderUploaded("test token",callbackRequest);
         assertNotNull(callbackResponse);
     }
 
+    @Test
+    public void testManageOrderApplicationEventValidation() throws Exception {
+
+         generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        CaseData expectedCaseData = CaseData.builder()
+            .id(12345L)
+            .appointmentOfGuardian(Document.builder().build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .build();
+
+        Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
+        Map<String, String> dataFieldMap = new HashMap<>();
+        dataFieldMap.put(PrlAppsConstants.TEMPLATE, "templateName");
+        dataFieldMap.put(PrlAppsConstants.FILE_NAME, "fileName");
+        CaseData caseData = CaseData.builder()
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("c21DraftFilename")
+                                 .build())
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(manageOrderService.getOrderTemplateAndFile(Mockito.any())).thenReturn(dataFieldMap);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        CallbackResponse callbackResponse = manageOrdersController.populatePreviewOrderWhenOrderUploaded(authToken,callbackRequest);
+        assertNotNull(callbackResponse);
+    }
     @Test
     public void testFetchChildrenNamesList() {
         Child child = Child.builder()
