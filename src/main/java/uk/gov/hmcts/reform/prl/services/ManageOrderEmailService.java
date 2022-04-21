@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.OrderDetails;
+import uk.gov.hmcts.reform.prl.enums.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -16,10 +19,14 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 
 @Service
@@ -101,6 +108,37 @@ public class ManageOrderEmailService {
         emails.removeIf(Objects::isNull);
 
         return emails;
+    }
+
+    private OrderDetails getCurrentOrderDetails(CaseData caseData){
+        //Preview order doc is added only for testing, preview order needs to be replaced with the generated document
+        OrderDetails.builder().orderType(caseData.getSelectedOrder()).orderDocument(caseData.getPreviewOrderDoc())
+            .otherDetails(OtherOrderDetails.builder()
+                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .orderCreatedDate(LocalDateTime.now())
+                              .orderRecipients(getAllRecipients(caseData)).build());
+        return null;
+    }
+
+    private String getAllRecipients(CaseData caseData) {
+        StringBuilder recipientsList = new StringBuilder();
+        Optional<OrderRecipientsEnum> appResRecipientList = ofNullable(caseData.getOrderRecipients());
+        if (appResRecipientList.isPresent() && caseData.getOrderRecipients().getDisplayedValue().contains("applicantOrApplicantSolicitor")){
+            recipientsList.append(getApplicantSolicitorNames(caseData));
+        }
+    }
+
+    private String getApplicantSolicitorNames(CaseData caseData) {
+        StringBuilder applicantsSolicitorList = new StringBuilder();
+        List<PartyDetails> applicants = caseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+        List<String> applicantSolicitorNames = applicants.stream()
+            .map(party -> party.getRepresentativeLastName() + party.getRepresentativeFirstName() + "(Applicant's Solicitor)")
+            .collect(Collectors.toList());
+        return String.join(", ", applicantSolicitorNames);
     }
 
 
