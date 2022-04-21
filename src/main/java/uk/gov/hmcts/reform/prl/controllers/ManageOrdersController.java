@@ -60,12 +60,6 @@ public class ManageOrdersController {
     @Value("${document.templates.common.prl_c21_filename}")
     protected String c21File;
 
-    @Value("${document.templates.common.prl_c21_draft_template}")
-    protected String c21TDraftTemplate;
-
-    @Value("${document.templates.common.prl_c21_draft_filename}")
-    protected String c21DraftFile;
-
     @Value("${document.templates.common.prl_c21_welsh_template}")
     protected String c21WelshTemplate;
 
@@ -80,10 +74,12 @@ public class ManageOrdersController {
         CaseData caseData1 = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData1);
         CaseData caseData;
-        if (caseData1.getCreateSelectOrderOptions() != null
-            && PrlAppsConstants.C42_CREATE_ORDER.equalsIgnoreCase(
-            caseData1.getCreateSelectOrderOptions().getDisplayedValue())) {
-            caseData = getCaseData(authorisation, caseData1,c21DraftFile,c21TDraftTemplate);
+        if (caseData1.getCreateSelectOrderOptions() != null) {
+            Map<String,String>documentDataFields = manageOrderService
+                .getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
+            caseData = getCaseData(authorisation, caseData1,
+                                   documentDataFields.get(PrlAppsConstants.FILE_NAME),
+                                   documentDataFields.get(PrlAppsConstants.TEMPLATE));
         } else {
             caseData = objectMapper.convertValue(
                 CaseData.builder()
