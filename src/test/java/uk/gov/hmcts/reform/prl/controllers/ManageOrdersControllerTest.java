@@ -140,7 +140,7 @@ public class ManageOrdersControllerTest {
             .thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
-        CallbackResponse callbackResponse = manageOrdersController
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .populatePreviewOrderWhenOrderUploaded("test token",callbackRequest);
         assertNotNull(callbackResponse);
     }
@@ -194,7 +194,8 @@ public class ManageOrdersControllerTest {
 
 
 
-        CallbackResponse callbackResponse = manageOrdersController.populatePreviewOrderWhenOrderUploaded(authToken,callbackRequest);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .populatePreviewOrderWhenOrderUploaded(authToken, callbackRequest);
         assertNotNull(callbackResponse);
     }
 
