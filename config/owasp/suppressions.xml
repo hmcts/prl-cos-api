@@ -54,5 +54,6 @@
       Spring web influx
   ]]></notes>
     <cve>CVE-2022-22965</cve>
+    <cve>CVE-2016-1000027</cve>
   </suppress>
 </suppressions>
