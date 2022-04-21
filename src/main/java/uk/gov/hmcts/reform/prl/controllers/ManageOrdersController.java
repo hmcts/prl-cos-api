@@ -75,7 +75,7 @@ public class ManageOrdersController {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData1);
         CaseData caseData;
         if (caseData1.getCreateSelectOrderOptions() != null) {
-            Map<String,String>documentDataFields = manageOrderService
+            Map<String,String> documentDataFields = manageOrderService
                 .getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
             caseData = getCaseData(authorisation, caseData1,
                                    documentDataFields.get(PrlAppsConstants.FILE_NAME),
