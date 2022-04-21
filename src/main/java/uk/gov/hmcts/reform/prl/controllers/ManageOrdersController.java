@@ -103,17 +103,14 @@ public class ManageOrdersController {
                 templateName
             );
 
-        CaseData caseData = objectMapper.convertValue(
-            CaseData.builder()
-                .previewOrderDoc(Document.builder()
-                                     .documentUrl(generatedDocumentInfo.getUrl())
-                                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                     .documentHash(generatedDocumentInfo.getHashToken())
-                                     .documentFileName(fileName)
-                                     .build()),
-            CaseData.class
-        );
-        return caseData;
+        caseData1 = caseData1.toBuilder()
+             .previewOrderDoc(Document.builder()
+                                  .documentUrl(generatedDocumentInfo.getUrl())
+                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                  .documentHash(generatedDocumentInfo.getHashToken())
+                                  .documentFileName(fileName)
+                                  .build()).build();
+        return caseData1;
     }
 
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
