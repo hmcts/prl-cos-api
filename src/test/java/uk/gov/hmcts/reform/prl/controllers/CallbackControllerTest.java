@@ -705,17 +705,15 @@ public class CallbackControllerTest {
             authToken,
             callbackRequest
         );
-        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
-        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8WelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
-        verify(dgsService, times(3)).generateDocument(
+        verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.any()
         );
-        verify(dgsService, times(3)).generateWelshDocument(
+        verify(dgsService, times(2)).generateWelshDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.any()
