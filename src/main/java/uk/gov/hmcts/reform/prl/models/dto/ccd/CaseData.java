@@ -592,7 +592,7 @@ public class CaseData implements MappableObject {
     //private final HearingTypeEnum hearingType;
     //private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
 
-    private final OrderRecipientsEnum orderRecipients;
+    private final List<OrderRecipientsEnum> orderRecipients;
     //private final OtherEnum otherRecipient;
     //private final OtherOrderRecipientsEnum otherOrderRecipients;
     //private final SelectTypeOfOrderEnum selectTypeOfOrder;
@@ -604,7 +604,8 @@ public class CaseData implements MappableObject {
     private final YesOrNo wasTheOrderApprovedAtHearing;
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
-    private final String dateOrderMade;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate dateOrderMade;
     private final String recitalsOrPreamble;
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
