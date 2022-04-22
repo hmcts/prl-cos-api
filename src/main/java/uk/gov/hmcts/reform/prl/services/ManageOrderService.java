@@ -66,9 +66,9 @@ public class ManageOrderService {
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
-    public Map<String,String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder){
-        Map<String,String> fieldsMap =new HashMap();
-        switch(selectedOrder){
+    public Map<String,String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
+        Map<String,String> fieldsMap = new HashMap();
+        switch (selectedOrder) {
             case blankOrderOrDirections:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
@@ -78,7 +78,7 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, "");
                 break;
             default:
-                  break;
+                break;
         }
         return fieldsMap;
     }
