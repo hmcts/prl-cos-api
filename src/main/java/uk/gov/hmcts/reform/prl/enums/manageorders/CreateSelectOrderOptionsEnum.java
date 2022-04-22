@@ -13,36 +13,42 @@ public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("standardDirectionsOrder")
     standardDirectionsOrder("standardDirectionsOrder", "Standard directions order"),
     @JsonProperty("blankOrderOrDirections")
-    blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions(C21)"),
+    blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)"),
     @JsonProperty("childArrangementsSpecificProhibitedOrder")
     childArrangementsSpecificProhibitedOrder(
         "childArrangementsSpecificProhibitedOrder",
-         "Child arrangements, specific issue or prohibited steps order(C43)"),
-    @JsonProperty("parentalResponsibilities")
-    parentalResponsibilities("parentalResponsibilities", "Parental responsibilities order(C45A)"),
+         "Child arrangements, specific issue or prohibited steps order (C43)"),
+    @JsonProperty("parentalResponsibility")
+    parentalResponsibility("parentalResponsibility", "Parental responsibility order (C45A)"),
     @JsonProperty("specialGuardianShip")
-    specialGuardianShip("specialGuardianShip", "Special guardianship order(C43A)"),
+    specialGuardianShip("specialGuardianShip", "Special guardianship order (C43A)"),
+    @JsonProperty("noticeOfProceedingsParties")
+    noticeOfProceedingsParties("noticeOfProceedingsParties",
+                                  "Notice of proceedings (C6) (Notice to parties)"),
     @JsonProperty("noticeOfProceedingsNonParties")
     noticeOfProceedingsNonParties("noticeOfProceedingsNonParties",
-                                  "Notice of proceedings(C6a)(Notice to non-parties)"),
+                                  "Notice of proceedings (C6a) (Notice to non-parties)"),
+    @JsonProperty("transferOfCaseToAnotherCourt")
+    transferOfCaseToAnotherCourt("transferOfCaseToAnotherCourt",
+                                  "Transfer of case to another court (C49)"),
     @JsonProperty("appointmentOfGuardian")
-    appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian(C47A)"),
+    appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian (C47A)"),
     @JsonProperty("nonMolestation")
-    nonMolestation("nonMolestation", "Non-molestation order(FL404A)"),
+    nonMolestation("nonMolestation", "Non-molestation order (FL404A)"),
     @JsonProperty("occupation")
-    occupation("occupation", "Occupation order(FL404)"),
+    occupation("occupation", "Occupation order (FL404)"),
     @JsonProperty("powerOfArrest")
-    powerOfArrest("powerOfArrest", "Power of arrest(FL406)"),
+    powerOfArrest("powerOfArrest", "Power of arrest (FL406)"),
     @JsonProperty("amendDischargedVaried")
-    amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order(FL404B)"),
+    amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order (FL404B)"),
     @JsonProperty("blank")
-    blank("blank", "Blank order(FL404B)"),
+    blank("blank", "Blank order (FL404B)"),
     @JsonProperty("generalForm")
-    generalForm("generalForm", "General form of undertaking(N117)"),
+    generalForm("generalForm", "General form of undertaking (N117)"),
     @JsonProperty("noticeOfProceedings")
-    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings(FL402)"),
+    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)"),
     @JsonProperty("other")
-    other("other", "Other(upload an order)");
+    other("other", "Other (upload an order)");
 
     private final String id;
     private final String displayedValue;

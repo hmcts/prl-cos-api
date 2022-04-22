@@ -8,6 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.OrderDetails;
+import uk.gov.hmcts.reform.prl.enums.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -16,17 +20,23 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class ManageOrderEmailService {
-
 
     @Autowired
     private EmailService emailService;
@@ -38,6 +48,9 @@ public class ManageOrderEmailService {
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
+
+    @Value("${xui.url}")
+    private String manageCaseUrl;
 
 
     public void sendEmail(CaseDetails caseDetails) {
@@ -59,26 +72,19 @@ public class ManageOrderEmailService {
 
 
     private EmailTemplateVars buildEmail(CaseDetails caseDetails) {
-        try {
-            CaseData caseData = emailService.getCaseData(caseDetails);
-            String applicantNames = String.join(", ", getApplicants(caseData).stream()
-                .map(element -> element.getFirstName() + " " + element.getLastName())
-                .collect(Collectors.toList()));
 
-            Court court = courtLocatorService.getNearestFamilyCourt(caseData);
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        String applicantNames = getApplicants(caseData).stream()
+            .map(element -> element.getFirstName() + " " + element.getLastName())
+            .collect(Collectors.joining(", "));
 
-            return ManageOrderEmail.builder()
-                .caseReference(String.valueOf(caseDetails.getId()))
-                .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-                .applicantName(applicantNames)
-                .courtName(court.getCourtName())
-                .caseLink("/caselink12345")
-                .courtEmail(courtEmail).build();
-
-        } catch (NotFoundException e) {
-            log.info("Cannot send email {}", e.getMessage());
-        }
-        return null;
+        return ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .applicantName(applicantNames)
+            .courtName(caseData.getCourtName())
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
+            .courtEmail(courtEmail).build();
     }
 
 
@@ -92,16 +98,14 @@ public class ManageOrderEmailService {
 
 
     private List<String> getEmailAddress(List<Element<PartyDetails>> partyDetails) {
-        List<String> emails = partyDetails
+        return partyDetails
             .stream()
-            .map(Element::getValue).filter(partyDetails1 -> true).map(element -> element.getEmail())
+            .map(Element::getValue)
+                .filter(a -> a.getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
+            .map(PartyDetails::getEmail)
             .collect(Collectors.toList());
-
-
-        emails.removeIf(Objects::isNull);
-
-        return emails;
     }
+
 
 
 }
