@@ -151,16 +151,15 @@ public class ManageOrderService {
     }
 
     public List<Element<OrderDetails>> addOrderDetailsAndReturnReverseSortedList(CaseData caseData) {
-        OrderDetails orderDetails = getCurrentOrderDetails(caseData);
+        Element<OrderDetails> orderDetails = element(getCurrentOrderDetails(caseData));
         List<Element<OrderDetails>> orderCollection;
 
         if (caseData.getOrderCollection() != null) {
             orderCollection = caseData.getOrderCollection();
-            orderCollection.add(element(orderDetails));
+            orderCollection.add(orderDetails);
         } else {
-            Element<OrderDetails> wrapped = element(orderDetails);
             orderCollection = new ArrayList<>();
-            orderCollection.add(wrapped);
+            orderCollection.add(orderDetails);
         }
         orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
         return orderCollection;
