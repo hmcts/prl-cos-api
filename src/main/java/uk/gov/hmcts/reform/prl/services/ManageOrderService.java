@@ -6,31 +6,26 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderDetails;
 import uk.gov.hmcts.reform.prl.enums.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -128,7 +123,7 @@ public class ManageOrderService {
         return builder.toString();
     }
 
-    private OrderDetails getCurrentOrderDetails(CaseData caseData){
+    private OrderDetails getCurrentOrderDetails(CaseData caseData) {
         //Blank doc is added only for testing, needs to be replaced with the generated document
         return OrderDetails.builder().orderType(caseData.getSelectedOrder()).orderDocument(Document.builder()
                                                                                                .documentUrl("http://dm-store:8080/documents/cb961f7b-47e2-4954-a0e0-ca9a46ed2365")
@@ -147,11 +142,12 @@ public class ManageOrderService {
     private String getAllRecipients(CaseData caseData) {
         StringBuilder recipientsList = new StringBuilder();
         Optional<List<OrderRecipientsEnum>> appResRecipientList = ofNullable(caseData.getOrderRecipients());
-        if (appResRecipientList.isPresent() && caseData.getOrderRecipients().contains(applicantOrApplicantSolicitor)){
+        if (appResRecipientList.isPresent() && caseData.getOrderRecipients().contains(applicantOrApplicantSolicitor)) {
             recipientsList.append(getApplicantSolicitorDetails(caseData));
             recipientsList.append('\n');
         }
-        if (appResRecipientList.isPresent() && caseData.getOrderRecipients().contains(respondentOrRespondentSolicitor)){
+        if (appResRecipientList.isPresent()
+            && caseData.getOrderRecipients().contains(respondentOrRespondentSolicitor)) {
             recipientsList.append(getRespondentSolicitorDetails(caseData));
             recipientsList.append('\n');
         }
