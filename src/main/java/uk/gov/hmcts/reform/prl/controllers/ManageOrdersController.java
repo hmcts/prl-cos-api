@@ -14,13 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -30,8 +26,8 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,10 +40,7 @@ public class ManageOrdersController {
     private final UserService userService;
 
     @Autowired
-    private ManageOrderService manageOrderService;
-
-    @Autowired
-    private final DgsService dgsService;
+    private final ManageOrderService manageOrderService;
 
     @Autowired
     private final DocumentLanguageService documentLanguageService;
@@ -76,11 +69,7 @@ public class ManageOrdersController {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData1);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData1.getCreateSelectOrderOptions() != null) {
-            Map<String,String> documentDataFields = manageOrderService
-                .getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
-            getCaseData(authorisation, caseData1,
-                                   documentDataFields.get(PrlAppsConstants.FILE_NAME),
-                                   documentDataFields.get(PrlAppsConstants.TEMPLATE), caseDataUpdated);
+            manageOrderService.getCaseData(authorisation, caseData1, caseDataUpdated);
         } else {
             caseDataUpdated.put("previewOrderDoc",caseData1.getAppointmentOfGuardian());
         }
@@ -89,29 +78,7 @@ public class ManageOrdersController {
 
     }
 
-    private void getCaseData(String authorisation, CaseData caseData1,String fileName,String templateName,
-                                 Map<String, Object> caseDataUpdated)
-        throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData1).build(),
-                templateName
-            );
 
-        caseData1 = caseData1.toBuilder()
-             .previewOrderDoc(Document.builder()
-                                  .documentUrl(generatedDocumentInfo.getUrl())
-                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                  .documentHash(generatedDocumentInfo.getHashToken())
-                                  .documentFileName(fileName)
-                                  .build()).build();
-        caseDataUpdated.put("isEngDocGen", Yes.toString());
-        caseDataUpdated.put("previewOrderDoc", Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(fileName).build());
-    }
 
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to fetch child details ")
@@ -173,13 +140,14 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest
-    ) {
+    ) throws Exception {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("orderCollection", manageOrderService.addOrderDetailsAndReturnReverseSortedList(caseData));
+        caseDataUpdated.put("orderCollection", manageOrderService
+            .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
