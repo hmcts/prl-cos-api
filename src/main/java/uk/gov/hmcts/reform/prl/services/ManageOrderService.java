@@ -50,6 +50,12 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c21_draft_filename}")
     protected String c21DraftFile;
 
+    @Value("${document.templates.common.C43A_draft_template}")
+    protected String C43ADraftTemplate;
+
+    @Value("${document.templates.common.C43A_draft_filename}")
+    protected String C43ADraftFilename;
+
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
 
@@ -76,6 +82,10 @@ public class ManageOrderService {
             case standardDirectionsOrder:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE,"");
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, "");
+                break;
+            case specialGuardianShip:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, C43ADraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, C43ADraftFilename);
                 break;
             default:
                 break;
