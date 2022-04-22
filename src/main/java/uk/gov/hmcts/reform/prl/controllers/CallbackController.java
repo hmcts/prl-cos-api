@@ -307,9 +307,9 @@ public class CallbackController {
         if (documentLanguage.isGenEng()) {
 
             if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
-                && caseData.getApplicantsConfidentialDetails().size() > 0
+                && !caseData.getApplicantsConfidentialDetails().isEmpty()
                 || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-                && caseData.getChildrenConfidentialDetails().size() > 0) {
+                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
 
                 GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                     authorisation,
@@ -357,9 +357,9 @@ public class CallbackController {
         if (documentLanguage.isGenWelsh()) {
 
             if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
-                && caseData.getApplicantsConfidentialDetails().size() > 0
+                && !caseData.getApplicantsConfidentialDetails().isEmpty()
                 || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-                && caseData.getChildrenConfidentialDetails().size() > 0) {
+                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
 
                 GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
                     authorisation,
