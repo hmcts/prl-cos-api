@@ -305,17 +305,25 @@ public class CallbackController {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         if (documentLanguage.isGenEng()) {
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                c100C8Template
-            );
 
-            caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(c100C8Filename).build());
+            if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+                && caseData.getApplicantsConfidentialDetails().size() > 0
+                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
+                && caseData.getChildrenConfidentialDetails().size() > 0) {
+
+                GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+                    authorisation,
+                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                    c100C8Template
+                );
+
+                caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedDocumentInfo.getHashToken())
+                    .documentFileName(c100C8Filename).build());
+
+            }
 
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
@@ -347,17 +355,23 @@ public class CallbackController {
         }
 
         if (documentLanguage.isGenWelsh()) {
-            GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                c100C8WelshTemplate
-            );
-            caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, Document.builder()
-                .documentUrl(generatedC8WelshDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedC8WelshDocumentInfo.getBinaryUrl())
-                .documentHash(generatedC8WelshDocumentInfo.getHashToken())
-                .documentFileName(c100C8WelshFilename).build());
 
+            if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+                && caseData.getApplicantsConfidentialDetails().size() > 0
+                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
+                && caseData.getChildrenConfidentialDetails().size() > 0) {
+
+                GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
+                    authorisation,
+                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                    c100C8WelshTemplate
+                );
+                caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, Document.builder()
+                    .documentUrl(generatedC8WelshDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedC8WelshDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedC8WelshDocumentInfo.getHashToken())
+                    .documentFileName(c100C8WelshFilename).build());
+            }
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
