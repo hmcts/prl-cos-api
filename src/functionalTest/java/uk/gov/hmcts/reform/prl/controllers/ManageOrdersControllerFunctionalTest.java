@@ -56,6 +56,17 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
+    public void givenRequestBody_whenPostRequestToFetchHeader_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
+        request
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/populate-header")
+            .then().assertThat().statusCode(200);
+    }
+
+    @Test
     public void givenRequestBody_whenPostRequestToPopulateSendManageOrderEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 

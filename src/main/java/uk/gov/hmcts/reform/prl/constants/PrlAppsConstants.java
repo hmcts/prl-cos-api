@@ -63,4 +63,8 @@ public class PrlAppsConstants {
 
     public static final String TEMPLATE = "template";
     public static final String FILE_NAME = "fileName";
+
+    public static final String URL_STRING = "/";
+
+
 }
