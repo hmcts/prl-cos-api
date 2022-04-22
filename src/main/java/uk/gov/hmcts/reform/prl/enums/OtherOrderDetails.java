@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 public class OtherOrderDetails {
 
     private final String createdBy;
-    private final LocalDateTime orderCreatedDate;
+    private final String orderCreatedDate;
     private final LocalDateTime orderAmendedDate;
-    private final LocalDateTime orderMadeDate;
+    private final String orderMadeDate;
     private final String orderRecipients;
 }
