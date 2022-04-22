@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Organisations;
@@ -300,6 +301,7 @@ public class CallbackController {
         sendgridService.sendEmail(c100JsonMapper.map(caseData));
 
         caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
+        caseData = caseData.toBuilder().state(State.CASE_ISSUE).build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
