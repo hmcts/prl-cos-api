@@ -55,10 +55,10 @@ public class ManageOrderService {
     protected String c21File;
 
     @Value("${document.templates.common.C43A_draft_template}")
-    protected String C43ADraftTemplate;
+    protected String c43ADraftTemplate;
 
     @Value("${document.templates.common.C43A_draft_filename}")
-    protected String C43ADraftFilename;
+    protected String c43ADraftFilename;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
@@ -92,8 +92,8 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, "");
                 break;
             case specialGuardianShip:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE, C43ADraftTemplate);
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, C43ADraftFilename);
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c43ADraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c43ADraftFilename);
                 break;
             default:
                 break;
