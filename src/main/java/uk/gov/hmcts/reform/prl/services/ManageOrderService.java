@@ -183,10 +183,6 @@ public class ManageOrderService {
                                       "d MMMM yyyy",
                                       Locale.UK
                                   )))
-                                  .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
-                                      "d MMMM yyyy",
-                                      Locale.UK
-                                  )))
                                   .orderRecipients(getAllRecipients(caseData)).build())
                 .dateCreated(dateTime.now())
                 .build();
