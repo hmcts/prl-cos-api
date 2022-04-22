@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -147,24 +146,6 @@ public class CallbackController {
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
 
-    /**
-     * It's just an example - to be removed when there are real tasks sending emails.
-     */
-
-    @PostMapping(path = "/send-email", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to send email")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public ResponseEntity<uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse> sendEmail(
-        @RequestBody @ApiParam("CaseData") CallbackRequest request
-    ) throws WorkflowException {
-        return ok(
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
-                .data(exampleService.executeExampleWorkflow(request.getCaseDetails()))
-                .build()
-        );
-    }
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -307,9 +288,9 @@ public class CallbackController {
         if (documentLanguage.isGenEng()) {
 
             if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
-                && caseData.getApplicantsConfidentialDetails().size() > 0
+                && !caseData.getApplicantsConfidentialDetails().isEmpty()
                 || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-                && caseData.getChildrenConfidentialDetails().size() > 0) {
+                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
 
                 GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                     authorisation,
@@ -357,9 +338,9 @@ public class CallbackController {
         if (documentLanguage.isGenWelsh()) {
 
             if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
-                && caseData.getApplicantsConfidentialDetails().size() > 0
+                && !caseData.getApplicantsConfidentialDetails().isEmpty()
                 || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-                && caseData.getChildrenConfidentialDetails().size() > 0) {
+                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
 
                 GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
                     authorisation,
