@@ -35,7 +35,11 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -136,7 +140,7 @@ public class ManageOrdersControllerTest {
             .thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
-        CallbackResponse callbackResponse = manageOrdersController
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .populatePreviewOrderWhenOrderUploaded("test token",callbackRequest);
         assertNotNull(callbackResponse);
     }
@@ -167,16 +171,15 @@ public class ManageOrdersControllerTest {
                                        .documentFileName("c21DraftFilename")
                                        .build())
             .build();
-
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
         Map<String, String> dataFieldMap = new HashMap<>();
         dataFieldMap.put(PrlAppsConstants.TEMPLATE, "templateName");
         dataFieldMap.put(PrlAppsConstants.FILE_NAME, "fileName");
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(manageOrderService.getOrderTemplateAndFile(Mockito.any())).thenReturn(dataFieldMap);
@@ -189,9 +192,10 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
 
-        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
-        CallbackResponse callbackResponse = manageOrdersController.populatePreviewOrderWhenOrderUploaded(authToken,callbackRequest);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .populatePreviewOrderWhenOrderUploaded(authToken, callbackRequest);
         assertNotNull(callbackResponse);
     }
 

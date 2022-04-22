@@ -37,6 +37,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RestController
@@ -75,34 +76,28 @@ public class ManageOrdersController {
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to show preview order in next screen for upload order")
-    public CallbackResponse populatePreviewOrderWhenOrderUploaded(
+    public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData1 = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData1);
-        CaseData caseData;
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData1.getCreateSelectOrderOptions() != null) {
-            Map<String,String>documentDataFields = manageOrderService
+            Map<String,String> documentDataFields = manageOrderService
                 .getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
-            caseData = getCaseData(authorisation, caseData1,
+            getCaseData(authorisation, caseData1,
                                    documentDataFields.get(PrlAppsConstants.FILE_NAME),
-                                   documentDataFields.get(PrlAppsConstants.TEMPLATE));
+                                   documentDataFields.get(PrlAppsConstants.TEMPLATE), caseDataUpdated);
         } else {
-            caseData = objectMapper.convertValue(
-                CaseData.builder()
-                    .previewOrderDoc(caseData1.getAppointmentOfGuardian())
-                    .build(),
-                CaseData.class
-            );
+            caseDataUpdated.put("previewOrderDoc",caseData1.getAppointmentOfGuardian());
         }
 
-        return CallbackResponse.builder()
-            .data(caseData)
-            .build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
 
-    private CaseData getCaseData(String authorisation, CaseData caseData1,String fileName,String templateName)
+    private void getCaseData(String authorisation, CaseData caseData1,String fileName,String templateName,
+                                 Map<String, Object> caseDataUpdated)
         throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
@@ -110,17 +105,19 @@ public class ManageOrdersController {
                 templateName
             );
 
-        CaseData caseData = objectMapper.convertValue(
-            CaseData.builder()
-                .previewOrderDoc(Document.builder()
-                                     .documentUrl(generatedDocumentInfo.getUrl())
-                                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                     .documentHash(generatedDocumentInfo.getHashToken())
-                                     .documentFileName(fileName)
-                                     .build()),
-            CaseData.class
-        );
-        return caseData;
+        caseData1 = caseData1.toBuilder()
+             .previewOrderDoc(Document.builder()
+                                  .documentUrl(generatedDocumentInfo.getUrl())
+                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                  .documentHash(generatedDocumentInfo.getHashToken())
+                                  .documentFileName(fileName)
+                                  .build()).build();
+        caseDataUpdated.put("isEngDocGen", Yes.toString());
+        caseDataUpdated.put("previewOrderDoc", Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(fileName).build());
     }
 
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
