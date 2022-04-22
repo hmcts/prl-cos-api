@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
-
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @RestController
@@ -40,7 +39,7 @@ public class ManageOrdersController {
     private final UserService userService;
 
     @Autowired
-    private final ManageOrderService manageOrderService;
+    private  ManageOrderService manageOrderService;
 
     @Autowired
     private final DocumentLanguageService documentLanguageService;
