@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
@@ -177,6 +178,13 @@ public class CaseData implements MappableObject {
     private final List<Element<PartyDetails>> applicants;
     @JsonProperty("applicantsFL401")
     private final PartyDetails applicantsFL401;
+
+    /**
+     * caseNote Details
+     */
+    private final List<Element<CaseNoteDetails>> caseNotes;
+    @JsonProperty("caseNoteDetails")
+    private final CaseNoteDetails caseNoteDetails;
 
     /**
      * Child details.

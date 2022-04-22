@@ -25,8 +25,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChildDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.CaseNotes;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;
@@ -78,6 +80,7 @@ public class ApplicationsTabService implements TabService {
         Map<String, Object> applicationTab = new HashMap<>();
         applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
         applicationTab.put("applicantTable", getApplicantsTable(caseData));
+        //applicationTab.put("addCaseNoteTable", getAddCaseNotesTable(caseData));
         applicationTab.put("respondentTable", getRespondentsTable(caseData));
         applicationTab.put("declarationTable", getDeclarationTable(caseData));
         applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
@@ -209,6 +212,28 @@ public class ApplicationsTabService implements TabService {
             applicants.add(app);
         }
         return applicants;
+    }
+
+    public List<Element<CaseNotes>> getAddCaseNotesTable(CaseData caseData) {
+        List<Element<CaseNotes>> caseNotes = new ArrayList<>();
+        Optional<List<Element<CaseNoteDetails>>> checkCaseNotes = ofNullable(caseData.getCaseNotes());
+
+        if (checkCaseNotes.isEmpty()) {
+            CaseNotes a = CaseNotes.builder().build();
+            Element<CaseNotes> app = Element.<CaseNotes>builder().value(a).build();
+            caseNotes.add(app);
+            return caseNotes;
+        }
+        List<CaseNoteDetails> currentCaseNotes = caseData.getCaseNotes().stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        for (CaseNoteDetails caseNote : currentCaseNotes) {
+            CaseNotes a = objectMapper.convertValue(caseNote, CaseNotes.class);
+            Element<CaseNotes> app = Element.<CaseNotes>builder().value(a).build();
+            caseNotes.add(app);
+        }
+        return caseNotes;
     }
 
     public List<PartyDetails> maskConfidentialDetails(List<PartyDetails> currentApplicants) {
