@@ -49,7 +49,7 @@ public class ManageOrderService {
     protected String c21DraftFile;
 
     @Value("${document.templates.common.prl_c21_template}")
-    protected String c21TTemplate;
+    protected String c21Template;
 
     @Value("${document.templates.common.prl_c21_filename}")
     protected String c21File;
@@ -84,7 +84,7 @@ public class ManageOrderService {
             case blankOrderOrDirections:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
-                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21TTemplate);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
                 break;
             case standardDirectionsOrder:
@@ -147,26 +147,51 @@ public class ManageOrderService {
     }
 
     private OrderDetails getCurrentOrderDetails(String authorisation, CaseData caseData)
-    throws Exception{
-        Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-            fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
-        );
-        return OrderDetails.builder().orderType(caseData.getSelectedOrder())
-            .orderDocument(Document.builder()
-                               .documentUrl(generatedDocumentInfo.getUrl())
-                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                               .documentHash(generatedDocumentInfo.getHashToken())
-                               .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
-            .otherDetails(OtherOrderDetails.builder()
-                              .createdBy(caseData.getJudgeOrMagistratesLastName())
-                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)))
-                              .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)))
-                              .orderRecipients(getAllRecipients(caseData)).build())
-            .dateCreated(dateTime.now())
-            .build();
+        throws Exception {
+        if (caseData.getCreateSelectOrderOptions() != null) {
+            Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
+            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+                authorisation,
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
+            );
+            return OrderDetails.builder().orderType(caseData.getSelectedOrder())
+                .orderDocument(Document.builder()
+                                   .documentUrl(generatedDocumentInfo.getUrl())
+                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                   .documentHash(generatedDocumentInfo.getHashToken())
+                                   .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
+                .otherDetails(OtherOrderDetails.builder()
+                                  .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                  .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
+                                      "d MMMM yyyy",
+                                      Locale.UK
+                                  )))
+                                  .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
+                                      "d MMMM yyyy",
+                                      Locale.UK
+                                  )))
+                                  .orderRecipients(getAllRecipients(caseData)).build())
+                .dateCreated(dateTime.now())
+                .build();
+        } else {
+            return OrderDetails.builder().orderType(caseData.getSelectedOrder())
+                .orderDocument(caseData.getAppointmentOfGuardian())
+                .otherDetails(OtherOrderDetails.builder()
+                                  .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                  .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
+                                      "d MMMM yyyy",
+                                      Locale.UK
+                                  )))
+                                  .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
+                                      "d MMMM yyyy",
+                                      Locale.UK
+                                  )))
+                                  .orderRecipients(getAllRecipients(caseData)).build())
+                .dateCreated(dateTime.now())
+                .build();
+        }
+
     }
 
     private String getAllRecipients(CaseData caseData) {
@@ -209,7 +234,7 @@ public class ManageOrderService {
     }
 
     public List<Element<OrderDetails>> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
-    throws Exception{
+        throws Exception {
         Element<OrderDetails> orderDetails = element(getCurrentOrderDetails(authorisation, caseData));
         List<Element<OrderDetails>> orderCollection;
 
