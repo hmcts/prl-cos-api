@@ -273,7 +273,8 @@ public class FL401SubmitApplicationController {
     private boolean getChildrenConfidentiality(CaseData caseData, Optional<TypeOfApplicationOrders> typeOfApplicationOrders) {
         boolean childrenConfidentiality = false;
 
-        if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
+        if (typeOfApplicationOrders.isPresent() && typeOfApplicationOrders.get().getOrderType().contains(
+            FL401OrderTypeEnum.occupationOrder)
             && Objects.nonNull(caseData.getHome())
             && (YesOrNo.Yes).equals(caseData.getHome().getDoAnyChildrenLiveAtAddress())) {
             List<ChildrenLiveAtAddress> childrenLiveAtAddresses = caseData.getHome().getChildren().stream().map(Element::getValue).collect(
