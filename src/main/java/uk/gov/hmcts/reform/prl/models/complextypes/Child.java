@@ -41,7 +41,7 @@ public class Child {
     private final String parentalResponsibilityDetails;
 
     public boolean hasConfidentialInfo() {
-        return this.isChildAddressConfidential.equals(YesOrNo.Yes);
+        return YesOrNo.Yes.equals(this.isChildAddressConfidential);
     }
 
 }
