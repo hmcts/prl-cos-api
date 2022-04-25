@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -31,6 +32,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPOINTED_GUARDIAN_FULL_NAME;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RestController
@@ -67,6 +69,12 @@ public class ManageOrdersController {
     @Value("${document.templates.common.prl_c21_welsh_filename}")
     protected String c21WelshFile;
 
+    @Value("${document.templates.common.C43A_draft_template}")
+    protected String c43ADraftTemplate;
+
+    @Value("${document.templates.common.C43A_draft_filename}")
+    protected String c43ADraftFilename;
+
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to show preview order in next screen for upload order")
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
@@ -78,9 +86,11 @@ public class ManageOrdersController {
         if (caseData1.getCreateSelectOrderOptions() != null) {
             Map<String,String> documentDataFields = manageOrderService
                 .getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
-            getCaseData(authorisation, caseData1,
-                                   documentDataFields.get(PrlAppsConstants.FILE_NAME),
-                                   documentDataFields.get(PrlAppsConstants.TEMPLATE), caseDataUpdated);
+            if (!documentDataFields.isEmpty()) {
+                getCaseData(authorisation, caseData1,
+                            documentDataFields.get(PrlAppsConstants.FILE_NAME),
+                            documentDataFields.get(PrlAppsConstants.TEMPLATE), caseDataUpdated);
+            }
         } else {
             caseDataUpdated.put("previewOrderDoc",caseData1.getAppointmentOfGuardian());
         }
@@ -180,6 +190,21 @@ public class ManageOrdersController {
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("orderCollection", manageOrderService.addOrderDetailsAndReturnReverseSortedList(caseData));
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/show-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to show preview order in next screen for special guardianship create order")
+    public AboutToStartOrSubmitCallbackResponse showPreviewOrderWhenOrderCreated(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        CaseData caseData1 = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (caseData1.getCreateSelectOrderOptions() != null
+            && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData1.getCreateSelectOrderOptions())) {
+            caseData1.setAppointedGuardianFullName(caseDataUpdated.get(APPOINTED_GUARDIAN_FULL_NAME).toString());
+            getCaseData(authorisation, caseData1, c43ADraftFilename, c43ADraftTemplate, caseDataUpdated);
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

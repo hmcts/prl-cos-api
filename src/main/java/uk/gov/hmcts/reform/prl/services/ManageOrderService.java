@@ -45,12 +45,6 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c21_draft_filename}")
     protected String c21DraftFile;
 
-    @Value("${document.templates.common.C43A_draft_template}")
-    protected String c43ADraftTemplate;
-
-    @Value("${document.templates.common.C43A_draft_filename}")
-    protected String c43ADraftFilename;
-
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
 
@@ -64,6 +58,7 @@ public class ManageOrderService {
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
         return CaseData.builder().childrenList(getChildInfoFromCaseData(caseData))
+            .childrenList1(getChildInfoFromCaseData(caseData))
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
@@ -77,10 +72,6 @@ public class ManageOrderService {
             case standardDirectionsOrder:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE,"");
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, "");
-                break;
-            case specialGuardianShip:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE, c43ADraftTemplate);
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, c43ADraftFilename);
                 break;
             default:
                 break;
