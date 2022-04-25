@@ -121,7 +121,7 @@ public class RequestUpdateCallbackService {
                     .build();
             }
             if (closestChildArrangementsCourt != null) {
-                caseData.toBuilder().courtName(closestChildArrangementsCourt.getCourtName()).courtId(String.valueOf(
+                caseData = caseData.toBuilder().courtName(closestChildArrangementsCourt.getCourtName()).courtId(String.valueOf(
                     closestChildArrangementsCourt.getCountyLocationCode())).build();
             }
         } catch (Exception e) {
