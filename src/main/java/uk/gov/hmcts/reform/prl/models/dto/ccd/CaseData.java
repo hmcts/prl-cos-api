@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
@@ -50,7 +51,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
@@ -182,9 +182,11 @@ public class CaseData implements MappableObject {
     /**
      * caseNote Details
      */
-    private final List<Element<CaseNoteDetails>> caseNotes;
-    @JsonProperty("caseNoteDetails")
-    private final CaseNoteDetails caseNoteDetails;
+    private List<Element<CaseNoteDetails>> caseNotes;
+    //@JsonProperty("caseNoteDetails")
+    //private final CaseNoteDetails caseNoteDetails;
+    private final String subject;
+    private final String caseNote;
 
     /**
      * Child details.
