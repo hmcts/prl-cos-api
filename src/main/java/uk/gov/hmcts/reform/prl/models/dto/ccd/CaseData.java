@@ -613,8 +613,8 @@ public class CaseData implements MappableObject {
     private final List<String> cafcassEmailAddress;
     private final List<String> otherEmailAddress;
     private final String childrenList;
-    private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
-    private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
+    //private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
+    //private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
 
     /**
      * Solicitor Details.
