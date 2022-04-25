@@ -66,5 +66,7 @@ public class PrlAppsConstants {
 
     public static final String URL_STRING = "/";
 
+    public static final String APPOINTED_GUARDIAN_FULL_NAME = "appointedGuardianFullName";
+
 
 }
