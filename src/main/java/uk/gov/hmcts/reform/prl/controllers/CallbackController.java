@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
+import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -139,6 +140,7 @@ public class CallbackController {
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
+    private final AddCaseNoteService addCaseNoteService;
 
     public static final String PRL_FL401_DRAFT_TEMPLATE = "FL401-draft.docx";
 
@@ -518,28 +520,33 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        CaseNoteDetails caseNoteDetails = caseData.getCaseNoteDetails();
-        log.info("caseNoteDetails========>"+caseNoteDetails);
-
-        List<Element<CaseNoteDetails>> caseNotes = caseData.getCaseNotes();
-
-        if(caseNotes == null){
-            caseNotes = new ArrayList<Element<CaseNoteDetails>>();
-        }
-
-        log.info("caseNotes========>"+caseNotes);
-
-        Element<CaseNoteDetails> wrappedCaseNotes = Element.<CaseNoteDetails>builder().value(caseNoteDetails).build();
-        //List<Element<CaseNoteDetails>> caseNotesList = Collections.singletonList(wrappedApplicant);
-        caseNotes.add(wrappedCaseNotes);
-
-        caseDataUpdated.put("caseNotes",caseNotes);
+        caseDataUpdated.put("caseNotes", addCaseNoteService.addCaseNoteDetails(caseData));
+        addCaseNoteService.clearFields(caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+    @PostMapping(path = "/populate-header-case-note", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to populate the header add case note")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback to populate the header add case note Processed."),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse populateHeader(
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(addCaseNoteService.populateHeader(caseData))
+            .build();
+    }
+
 
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated) {
         log.info("Fetching the user and Org Details ");
