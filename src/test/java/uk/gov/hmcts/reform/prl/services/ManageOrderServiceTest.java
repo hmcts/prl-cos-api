@@ -8,8 +8,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +63,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPupulateHeader() {
+    public void testPopulateHeader() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -74,6 +76,26 @@ public class ManageOrderServiceTest {
 
         assertEquals("Case Name: Test Case 45678\n\n"
                          + "Family Man ID: familyman12345\n\n", responseMap.get("manageOrderHeader1"));
+
+    }
+
+
+    @Test
+    public void givenEmptyOrderList_thenNewOrderShouldBeAddedAndListReturned() {
+
+
+        PartyDetails applicant = PartyDetails.builder()
+            .email("app@email.com")
+            .solicitorEmail()
+            .build()
+
+        CaseData caseData = CaseData.builder()
+            .selectedOrder("Selected order")
+            .judgeOrMagistratesLastName("Test last name")
+            .dateOrderMade(LocalDate.of(2022, 01, 01))
+            .applicants()
+
+            .build()
 
     }
 }
