@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -22,6 +23,7 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageOrderServiceTest {
@@ -82,20 +84,23 @@ public class ManageOrderServiceTest {
 
     @Test
     public void givenEmptyOrderList_thenNewOrderShouldBeAddedAndListReturned() {
-
-
         PartyDetails applicant = PartyDetails.builder()
             .email("app@email.com")
-            .solicitorEmail()
-            .build()
+            .solicitorOrg(Organisation.builder().organisationName("Test App Org Name").build())
+            .build();
+
+        PartyDetails respondent = PartyDetails.builder()
+            .email("rep@email.com")
+            .solicitorOrg(Organisation.builder().organisationName("Test Res Org Name").build())
+            .build();
 
         CaseData caseData = CaseData.builder()
             .selectedOrder("Selected order")
             .judgeOrMagistratesLastName("Test last name")
             .dateOrderMade(LocalDate.of(2022, 01, 01))
-            .applicants()
-
-            .build()
+            .applicants(List.of(element(applicant)))
+            .respondents(List.of(element(respondent)))
+            .build();
 
     }
 }
