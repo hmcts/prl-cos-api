@@ -15,6 +15,7 @@ import java.util.List;
 public class ManageOrders {
     private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
     private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
-    private final YesOrNo doesOrderClosesCase;
+    private final List<String> cafcassEmailAddress;
+    private final List<String> otherEmailAddress;
 
 }
