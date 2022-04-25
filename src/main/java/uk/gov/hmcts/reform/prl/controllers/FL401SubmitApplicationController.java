@@ -18,13 +18,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
-import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -75,8 +72,6 @@ public class FL401SubmitApplicationController {
     @Autowired
     OrganisationService organisationService;
 
-    @Autowired
-    DgsService dgsService;
 
     @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to send FL401 application notification. ")
@@ -188,45 +183,6 @@ public class FL401SubmitApplicationController {
         return CallbackResponse.builder()
             .data(caseData)
             .build();
-    }
-
-    private Document generateDocumentField(String fileName,GeneratedDocumentInfo generatedDocumentInfo) {
-        if (null == generatedDocumentInfo) {
-            return null;
-        }
-        return Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(fileName).build();
-    }
-
-    private GeneratedDocumentInfo generateDocument(String authorisation, String template, CaseData caseData,
-                                                   boolean isWelsh)
-        throws Exception {
-        log.info("Generating the {} document for case id {} ", template, caseData.getId());
-        GeneratedDocumentInfo generatedDocumentInfo = null;
-        if (isWelsh) {
-            generatedDocumentInfo = dgsService.generateWelshDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                template
-            );
-        } else {
-            generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                template
-            );
-        }
-        if (null != generatedDocumentInfo) {
-            caseData = caseData.toBuilder().isDocumentGenerated("Yes").build();
-        } else {
-            caseData = caseData.toBuilder().isDocumentGenerated("No").build();
-        }
-
-        log.info("Generated the {} document for case id {} ", template, caseData.getId());
-        return generatedDocumentInfo;
     }
 
 }
