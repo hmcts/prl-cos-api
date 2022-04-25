@@ -66,6 +66,12 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c43_draft_filename}")
     protected String c43DraftFile;
 
+    @Value("${document.templates.common.prl_c43_template}")
+    protected String c43Template;
+
+    @Value("${document.templates.common.prl_c43_filename}")
+    protected String c43File;
+
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
     @Autowired
@@ -100,6 +106,8 @@ public class ManageOrderService {
             case childArrangementsSpecificProhibitedOrder:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c43DraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c43DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c43Template);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c43File);
                 break;
             case specialGuardianShip:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c43ADraftTemplate);
@@ -158,7 +166,7 @@ public class ManageOrderService {
 
     private OrderDetails getCurrentOrderDetails(String authorisation, CaseData caseData)
         throws Exception {
-        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+        if (caseData.getCreateSelectOrderOptions() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
