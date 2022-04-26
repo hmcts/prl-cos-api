@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.format.DateTimeFormatter;
@@ -87,10 +88,6 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
                 break;
-            case standardDirectionsOrder:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE,"");
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, "");
-                break;
             case specialGuardianShip:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c43ADraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c43ADraftFilename);
@@ -123,7 +120,7 @@ public class ManageOrderService {
         if (caseData.getFl401FamilymanCaseNumber() == null && caseData.getFamilymanCaseNumber() == null) {
             return FAMILY_MAN_ID;
         }
-        return caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)
+        return FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             ? FAMILY_MAN_ID + caseData.getFl401FamilymanCaseNumber()
             : FAMILY_MAN_ID + caseData.getFamilymanCaseNumber();
     }
@@ -152,7 +149,7 @@ public class ManageOrderService {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                CaseDetails.builder().caseData(caseData).build(),
                 fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
             );
             return OrderDetails.builder().orderType(caseData.getSelectedOrder())
