@@ -24,6 +24,8 @@ import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
@@ -160,6 +162,105 @@ public class CallbackController {
 
         // Generate All Docs and set to casedataupdated.
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
+        if (documentLanguage.isGenEng()) {
+
+            if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+                && !caseData.getApplicantsConfidentialDetails().isEmpty()
+                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
+                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
+
+                GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+                    authorisation,
+                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                    c100C8Template
+                );
+
+                caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedDocumentInfo.getHashToken())
+                    .documentFileName(c100C8Filename).build());
+
+            }
+
+            caseData = organisationService.getApplicantOrganisationDetails(caseData);
+            caseData = organisationService.getRespondentOrganisationDetails(caseData);
+
+            if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
+                GeneratedDocumentInfo generatedC1ADocumentInfo = dgsService.generateDocument(
+                    authorisation,
+                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                    c100C1aTemplate
+                );
+                caseDataUpdated.put(DOCUMENT_FIELD_C1A, Document.builder()
+                    .documentUrl(generatedC1ADocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedC1ADocumentInfo.getBinaryUrl())
+                    .documentHash(generatedC1ADocumentInfo.getHashToken())
+                    .documentFileName(c100C1aFilename).build());
+            }
+
+            GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
+                authorisation,
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                c100FinalTemplate
+            );
+
+            caseDataUpdated.put(DOCUMENT_FIELD_FINAL, Document.builder()
+                .documentUrl(generatedDocumentInfoFinal.getUrl())
+                .documentBinaryUrl(generatedDocumentInfoFinal.getBinaryUrl())
+                .documentHash(generatedDocumentInfoFinal.getHashToken())
+                .documentFileName(c100FinalFilename).build());
+        }
+
+        if (documentLanguage.isGenWelsh()) {
+
+            if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+                && !caseData.getApplicantsConfidentialDetails().isEmpty()
+                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
+                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
+
+                GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
+                    authorisation,
+                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                    c100C8WelshTemplate
+                );
+                caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, Document.builder()
+                    .documentUrl(generatedC8WelshDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedC8WelshDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedC8WelshDocumentInfo.getHashToken())
+                    .documentFileName(c100C8WelshFilename).build());
+            }
+            caseData = organisationService.getApplicantOrganisationDetails(caseData);
+            caseData = organisationService.getRespondentOrganisationDetails(caseData);
+
+            if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
+                GeneratedDocumentInfo generatedC1AWelshDocumentInfo = dgsService.generateWelshDocument(
+                    authorisation,
+                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                    c100C1aWelshTemplate
+                );
+                caseDataUpdated.put(DOCUMENT_FIELD_C1A_WELSH, Document.builder()
+                    .documentUrl(generatedC1AWelshDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedC1AWelshDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedC1AWelshDocumentInfo.getHashToken())
+                    .documentFileName(c100C1aWelshFilename).build());
+            }
+
+            GeneratedDocumentInfo generatedFinalWelshDocumentInfo = dgsService.generateWelshDocument(
+                authorisation,
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                c100FinalWelshTemplate
+            );
+
+            caseDataUpdated.put(DOCUMENT_FIELD_FINAL_WELSH, Document.builder()
+                .documentUrl(generatedFinalWelshDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedFinalWelshDocumentInfo.getBinaryUrl())
+                .documentHash(generatedFinalWelshDocumentInfo.getHashToken())
+                .documentFileName(c100FinalWelshFilename).build());
+        }
 
         // Refreshing the page in the same event. Hence no external event call needed.
         // Getting the tab fields and add it to the casedetails..

@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CourtDetailsPilotEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -161,6 +162,7 @@ public class FL401SubmitApplicationControllerTest {
             .dateSubmitted(String.valueOf("22-02-2022"))
             .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)
+            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -216,6 +218,7 @@ public class FL401SubmitApplicationControllerTest {
             .applicantsFL401(applicant)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -308,6 +311,7 @@ public class FL401SubmitApplicationControllerTest {
                                .build())
             .applicantsFL401(applicant)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -402,6 +406,7 @@ public class FL401SubmitApplicationControllerTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)
+            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -495,6 +500,7 @@ public class FL401SubmitApplicationControllerTest {
             .applicantsFL401(applicant)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -565,6 +571,7 @@ public class FL401SubmitApplicationControllerTest {
             .applicantsFL401(fl401Applicant)
             .courtEmailAddress("localcourt@test.com")
             .isNotificationSent("Yes")
+            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
             .build();
 
         LocalDate issueDate = LocalDate.now();
