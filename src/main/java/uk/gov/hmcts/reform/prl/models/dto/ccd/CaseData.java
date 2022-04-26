@@ -557,22 +557,17 @@ public class CaseData implements MappableObject {
     private String isCourtEmailFound;
     private String isDocumentGenerated;
     private String isNotificationSent;
-  
+
     /**
      * Solicitor Details.
      */
     private String caseSolicitorName;
     private String caseSolicitorOrgName;
 
-
-
     /**
      * FL401 Court details for Pilot.
      */
-
     private final CourtDetailsPilotEnum submitCountyCourtSelection;
-
-
 
     public CaseData setDateSubmittedDate() {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
