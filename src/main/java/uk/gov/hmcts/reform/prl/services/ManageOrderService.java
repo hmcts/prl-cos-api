@@ -11,12 +11,10 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Order;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -96,7 +94,7 @@ public class ManageOrderService {
         return builder.toString();
     }
 
-    private OrderDetails getCurrentOrderDetails(CaseData caseData){
+    private OrderDetails getCurrentOrderDetails(CaseData caseData) {
         //Blank doc is added only for testing, needs to be replaced with the generated document
         return OrderDetails.builder().orderType(caseData.getSelectedOrder()).orderDocument(Document.builder()
                                                                                                .documentUrl("http://dm-store:8080/documents/cb961f7b-47e2-4954-a0e0-ca9a46ed2365")
@@ -115,11 +113,11 @@ public class ManageOrderService {
     private String getAllRecipients(CaseData caseData) {
         StringBuilder recipientsList = new StringBuilder();
         Optional<List<OrderRecipientsEnum>> appResRecipientList = ofNullable(caseData.getOrderRecipients());
-        if (appResRecipientList.isPresent() && caseData.getOrderRecipients().contains(applicantOrApplicantSolicitor)){
+        if (appResRecipientList.isPresent() && caseData.getOrderRecipients().contains(applicantOrApplicantSolicitor)) {
             recipientsList.append(getApplicantSolicitorDetails(caseData));
             recipientsList.append('\n');
         }
-        if (appResRecipientList.isPresent() && caseData.getOrderRecipients().contains(respondentOrRespondentSolicitor)){
+        if (appResRecipientList.isPresent() && caseData.getOrderRecipients().contains(respondentOrRespondentSolicitor)) {
             recipientsList.append(getRespondentSolicitorDetails(caseData));
             recipientsList.append('\n');
         }
