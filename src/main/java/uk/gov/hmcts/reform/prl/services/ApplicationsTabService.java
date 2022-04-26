@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChildDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.CaseNotes;
@@ -212,28 +211,6 @@ public class ApplicationsTabService implements TabService {
             applicants.add(app);
         }
         return applicants;
-    }
-
-    public List<Element<CaseNotes>> getAddCaseNotesTable(CaseData caseData) {
-        List<Element<CaseNotes>> caseNotes = new ArrayList<>();
-        Optional<List<Element<CaseNoteDetails>>> checkCaseNotes = ofNullable(caseData.getCaseNotes());
-
-        if (checkCaseNotes.isEmpty()) {
-            CaseNotes a = CaseNotes.builder().build();
-            Element<CaseNotes> app = Element.<CaseNotes>builder().value(a).build();
-            caseNotes.add(app);
-            return caseNotes;
-        }
-        List<CaseNoteDetails> currentCaseNotes = caseData.getCaseNotes().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
-        for (CaseNoteDetails caseNote : currentCaseNotes) {
-            CaseNotes a = objectMapper.convertValue(caseNote, CaseNotes.class);
-            Element<CaseNotes> app = Element.<CaseNotes>builder().value(a).build();
-            caseNotes.add(app);
-        }
-        return caseNotes;
     }
 
     public List<PartyDetails> maskConfidentialDetails(List<PartyDetails> currentApplicants) {

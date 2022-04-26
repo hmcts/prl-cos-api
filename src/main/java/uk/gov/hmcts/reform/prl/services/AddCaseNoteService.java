@@ -2,9 +2,12 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,50 +22,53 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class AddCaseNoteService {
 
-    public List<Element<CaseNoteDetails>> addCaseNoteDetails(CaseData caseData) {
-        Element<CaseNoteDetails> caseNoteDetails = null;
-        CaseNoteDetails currentOrderDetails = getCurrentOrderDetails(caseData);
-        if(currentOrderDetails != null){
-            caseNoteDetails = element(currentOrderDetails);
+    public static final String ADD_CASE_NOTE_HEADER_1_TEXT = "addCaseNoteHeader1Text";
+    public static final String SUBJECT = "subject";
+    public static final String CASE_NOTE = "caseNote";
+    public static final String CASE_NAME = "Case Name: ";
+
+    public List<Element<CaseNoteDetails>> addCaseNoteDetails(CaseData caseData,  UserDetails userDetails) {
+        List<Element<CaseNoteDetails>> caseNotesCollection = null;
+
+        CaseNoteDetails currentCaseNoteDetails = getCurrentCaseNoteDetails(caseData, userDetails);
+        if(currentCaseNoteDetails != null){
+            Element<CaseNoteDetails>  caseNoteDetails = element(currentCaseNoteDetails);
+            if (caseData.getCaseNotes() != null) {
+                caseNotesCollection = caseData.getCaseNotes();
+                caseNotesCollection.add(caseNoteDetails);
+            } else {
+                caseNotesCollection = new ArrayList<>();
+                caseNotesCollection.add(caseNoteDetails);
+            }
         }
 
-        List<Element<CaseNoteDetails>> caseNotesCollection;
-
-        if (caseData.getCaseNotes() != null) {
-            caseNotesCollection = caseData.getCaseNotes();
-            caseNotesCollection.add(caseNoteDetails);
-        } else {
-            caseNotesCollection = new ArrayList<>();
-            caseNotesCollection.add(caseNoteDetails);
-            //caseData.setCaseNotes(caseNotesCollection);
-        }
         return caseNotesCollection;
     }
 
-    private CaseNoteDetails getCurrentOrderDetails(CaseData caseData){
-        String subject = caseData.getSubject();
-        String caseNote = caseData.getCaseNote();
-        if(subject == null && caseNote == null){
-            return null;
-        }
-        return CaseNoteDetails.builder().subject(subject).caseNote(caseNote).build();
+    private CaseNoteDetails getCurrentCaseNoteDetails(CaseData caseData, UserDetails userDetails){
+
+        return CaseNoteDetails.builder()
+            .subject(caseData.getSubject())
+            .caseNote(caseData.getCaseNote())
+            .user(userDetails.getFullName())
+            .dateAdded(LocalDate.now().toString())
+            .build();
     }
 
     public void clearFields(Map<String, Object> caseDataUpdated) {
-        caseDataUpdated.put("subject", null);
-        caseDataUpdated.put("caseNote", null);
+        caseDataUpdated.put(SUBJECT, null);
+        caseDataUpdated.put(CASE_NOTE, null);
     }
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
-        headerMap.put("addCaseNoteHeader1Text", getHeaderInfo(caseData));
+        headerMap.put(ADD_CASE_NOTE_HEADER_1_TEXT, getHeaderInfo(caseData));
         return headerMap;
     }
 
     private String getHeaderInfo(CaseData caseData) {
         StringBuilder headerInfo = new StringBuilder();
-        headerInfo.append("Case Name: " + caseData.getApplicantCaseName());
-        headerInfo.append("\n\n");
+        headerInfo.append(CASE_NAME + caseData.getApplicantCaseName());
         return headerInfo.toString();
     }
 }
