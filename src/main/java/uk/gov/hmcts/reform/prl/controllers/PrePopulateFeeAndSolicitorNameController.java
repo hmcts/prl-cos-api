@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
@@ -45,6 +47,9 @@ public class PrePopulateFeeAndSolicitorNameController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    CourtFinderService courtLocatorService;
 
     @Autowired
     SubmitAndPayChecker submitAndPayChecker;
@@ -108,6 +113,9 @@ public class PrePopulateFeeAndSolicitorNameController {
             caseDataForOrgDetails = organisationService.getApplicantOrganisationDetails(caseDataForOrgDetails);
             caseDataForOrgDetails = organisationService.getRespondentOrganisationDetails(caseDataForOrgDetails);
 
+            Court closestChildArrangementsCourt = courtLocatorService
+                .getNearestFamilyCourt(callbackRequest.getCaseDetails()
+                                           .getCaseData());
             UserDetails userDetails = userService.getUserDetails(authorisation);
             caseData = CaseData.builder()
                 .solicitorName(userDetails.getFullName())
@@ -115,6 +123,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .applicantSolicitorEmailAddress(userDetails.getEmail())
                 .caseworkerEmailAddress(southamptonCourtEmailAddress)
                 .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
+                .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                 .build();
 
             caseData = buildGeneratedDocumentCaseData(authorisation, callbackRequest, caseData, caseDataForOrgDetails);
