@@ -19,16 +19,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.*;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.CaseNotes;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -53,8 +49,8 @@ import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkf
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;

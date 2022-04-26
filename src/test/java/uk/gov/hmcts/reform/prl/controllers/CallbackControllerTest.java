@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
+import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -69,6 +70,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -127,6 +129,9 @@ public class CallbackControllerTest {
 
     @Mock
     private CaseWorkerEmailService caseWorkerEmailService;
+
+    @Mock
+    private AddCaseNoteService addCaseNoteService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -943,5 +948,64 @@ public class CallbackControllerTest {
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
+    }
+
+    @Test
+    public void testSubmitCaseNote() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .subject("newsubject")
+            .caseNote("newcasenote")
+            .build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("forename1")
+            .surname("surname1")
+            .id("userid1234")
+            .email("test@gmail.com")
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .data(stringObjectMap).build()).build();
+
+        callbackController.submitCaseNote(authToken, callbackRequest);
+
+        verify(addCaseNoteService, times(1))
+            .addCaseNoteDetails(caseData,userDetails);
+
+    }
+
+    @Test
+    public void testPopulateHeaderCaseNote() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .subject("newsubject")
+            .caseNote("newcasenote")
+            .build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("forename1")
+            .surname("surname1")
+            .id("userid1234")
+            .email("test@gmail.com")
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .data(stringObjectMap).build()).build();
+
+        callbackController.populateHeader(callbackRequest);
+
+        verify(addCaseNoteService, times(1))
+            .populateHeader(caseData);
     }
 }
