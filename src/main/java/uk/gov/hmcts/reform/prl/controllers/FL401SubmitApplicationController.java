@@ -210,15 +210,19 @@ public class FL401SubmitApplicationController {
 
         if (documentLanguage.isGenEng()) {
 
+
+            caseDataUpdated.put("isEngDocGen", Yes.toString());
+            caseDataUpdated.put(
+                FINAL_DOCUMENT_FIELD,
+                generateDocumentField(
+                    fl401FinalFilename,
+                    generateDocument(authorisation, fl401FinalTemplate, caseData,
+                                     false
+                    )
+                )
+            );
+
             if (isApplicantorChildDetailsorConfidential(caseData)) {
-                caseDataUpdated.put("isEngDocGen", Yes.toString());
-                caseDataUpdated.put(
-                    FINAL_DOCUMENT_FIELD,
-                    generateDocumentField(fl401FinalFilename,
-                                          generateDocument(authorisation, fl401FinalTemplate, caseData,
-                                                           false
-                                          ))
-                );
                 caseDataUpdated.put(
                     DOCUMENT_FIELD_C8,
                     generateDocumentField(fl401C8Filename, generateDocument(authorisation, fl401C8Template, caseData,
@@ -230,21 +234,27 @@ public class FL401SubmitApplicationController {
 
         if (documentLanguage.isGenWelsh()) {
 
+
+            caseDataUpdated.put("isWelshDocGen", Yes.toString());
+            caseDataUpdated.put(
+                DOCUMENT_FIELD_FINAL_WELSH,
+                generateDocumentField(
+                    fl401FinalWelshFilename,
+                    generateDocument(authorisation, fl401FinalWelshTemplate,
+                                     caseData, true
+                    )
+                )
+            );
+
             if (isApplicantorChildDetailsorConfidential(caseData)) {
-                caseDataUpdated.put("isWelshDocGen", Yes.toString());
-                caseDataUpdated.put(
-                    DOCUMENT_FIELD_FINAL_WELSH,
-                    generateDocumentField(fl401FinalWelshFilename,
-                                          generateDocument(authorisation, fl401FinalWelshTemplate,
-                                                           caseData, true
-                                          ))
-                );
                 caseDataUpdated.put(
                     DOCUMENT_FIELD_C8_WELSH,
-                    generateDocumentField(fl401C8WelshFilename,
-                                          generateDocument(authorisation, fl401C8WelshTemplate, caseData,
-                                                           true
-                                          ))
+                    generateDocumentField(
+                        fl401C8WelshFilename,
+                        generateDocument(authorisation, fl401C8WelshTemplate, caseData,
+                                         true
+                        )
+                    )
                 );
             }
         }
