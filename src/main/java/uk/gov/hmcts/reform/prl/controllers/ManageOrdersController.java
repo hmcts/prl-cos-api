@@ -47,25 +47,15 @@ public class ManageOrdersController {
     @Autowired
     private ManageOrderEmailService manageOrderEmailService;
 
-    @Value("${document.templates.common.prl_c21_template}")
-    protected String c21Template;
-
-    @Value("${document.templates.common.prl_c21_filename}")
-    protected String c21File;
-
-    @Value("${document.templates.common.prl_c21_welsh_template}")
-    protected String c21WelshTemplate;
 
     @Value("${document.templates.common.prl_c21_welsh_filename}")
     protected String c21WelshFile;
-
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to show preview order in next screen for upload order")
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData1 = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData1);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData1.getCreateSelectOrderOptions() != null) {
             manageOrderService.getCaseData(authorisation, caseData1, caseDataUpdated);
