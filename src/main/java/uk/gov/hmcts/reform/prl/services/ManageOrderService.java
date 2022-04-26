@@ -241,15 +241,23 @@ public class ManageOrderService {
     }
 
     private String getRespondentSolicitorDetails(CaseData caseData) {
-        List<PartyDetails> respondents = caseData
-            .getRespondents()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        List<String> respondentSolicitorNames = respondents.stream()
-            .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Respondent's Solicitor)")
-            .collect(Collectors.toList());
-        return String.join("\n", respondentSolicitorNames);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> respondents = caseData
+                .getRespondents()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            List<String> respondentSolicitorNames = respondents.stream()
+                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Respondent's Solicitor)")
+                .collect(Collectors.toList());
+            return String.join("\n", respondentSolicitorNames);
+        } else {
+            PartyDetails respondentFl401 = caseData.getRespondentsFL401();
+            String respondentSolicitorName = respondentFl401.getRepresentativeFirstName()
+                + " "
+                + respondentFl401.getRepresentativeLastName();
+            return  respondentSolicitorName;
+        }
     }
 
     public List<Element<OrderDetails>> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
