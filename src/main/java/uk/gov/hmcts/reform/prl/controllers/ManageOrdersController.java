@@ -14,14 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -32,8 +28,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPOINTED_GUARDIAN_FULL_NAME;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,10 +41,7 @@ public class ManageOrdersController {
     private final UserService userService;
 
     @Autowired
-    private ManageOrderService manageOrderService;
-
-    @Autowired
-    private final DgsService dgsService;
+    private  ManageOrderService manageOrderService;
 
     @Autowired
     private final DocumentLanguageService documentLanguageService;
@@ -83,14 +75,13 @@ public class ManageOrdersController {
         CaseData caseData1 = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData1);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData1.getCreateSelectOrderOptions() != null) {
-            Map<String,String> documentDataFields = manageOrderService
-                .getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
-            if (!documentDataFields.isEmpty()) {
-                getCaseData(authorisation, caseData1,
-                            documentDataFields.get(PrlAppsConstants.FILE_NAME),
-                            documentDataFields.get(PrlAppsConstants.TEMPLATE), caseDataUpdated);
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseData1.getCaseTypeOfApplication())) {
+            if (caseData1.getCreateSelectOrderOptions().equals(CreateSelectOrderOptionsEnum.generalForm)) {
+                caseData1 = manageOrderService.getN117FormCaseData(caseData1);
             }
+        }
+        if (caseData1.getCreateSelectOrderOptions() != null) {
+            manageOrderService.getCaseData(authorisation, caseData1, caseDataUpdated);
         } else {
             caseDataUpdated.put("previewOrderDoc",caseData1.getAppointmentOfGuardian());
         }
@@ -99,29 +90,7 @@ public class ManageOrdersController {
 
     }
 
-    private void getCaseData(String authorisation, CaseData caseData1,String fileName,String templateName,
-                                 Map<String, Object> caseDataUpdated)
-        throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData1).build(),
-                templateName
-            );
 
-        caseData1 = caseData1.toBuilder()
-             .previewOrderDoc(Document.builder()
-                                  .documentUrl(generatedDocumentInfo.getUrl())
-                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                  .documentHash(generatedDocumentInfo.getHashToken())
-                                  .documentFileName(fileName)
-                                  .build()).build();
-        caseDataUpdated.put("isEngDocGen", Yes.toString());
-        caseDataUpdated.put("previewOrderDoc", Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(fileName).build());
-    }
 
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to fetch child details ")
@@ -183,28 +152,14 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest
-    ) {
+    ) throws Exception {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("orderCollection", manageOrderService.addOrderDetailsAndReturnReverseSortedList(caseData));
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    @PostMapping(path = "/show-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to show preview order in next screen for special guardianship create order")
-    public AboutToStartOrSubmitCallbackResponse showPreviewOrderWhenOrderCreated(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-        CaseData caseData1 = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData1.getCreateSelectOrderOptions() != null
-            && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData1.getCreateSelectOrderOptions())) {
-            caseData1.setAppointedGuardianFullName(caseDataUpdated.get(APPOINTED_GUARDIAN_FULL_NAME).toString());
-            getCaseData(authorisation, caseData1, c43ADraftFilename, c43ADraftTemplate, caseDataUpdated);
-        }
+        caseDataUpdated.put("orderCollection", manageOrderService
+            .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
