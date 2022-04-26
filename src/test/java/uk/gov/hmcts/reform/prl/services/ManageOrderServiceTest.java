@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -92,7 +91,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromCaseData() throws Exception{
+    public void testPopulatePreviewOrderFromCaseData() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")

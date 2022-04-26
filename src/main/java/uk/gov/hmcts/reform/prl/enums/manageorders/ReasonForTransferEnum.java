@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
-import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 
@@ -24,8 +23,8 @@ public enum ReasonForTransferEnum {
     @JsonProperty("transferReason5")
     transferReason5("transferReason5", "There are proceedings concerning the child in another jurisdiction or there are international law issues."),
     @JsonProperty("transferReason6")
-    transferReason6("transferReason6", "There is a real possibility that enforcement proceedings may be necessary and the method" +
-        " of enforcement or the likely penalty is beyond the powers of a magistrates court."),
+    transferReason6("transferReason6", "There is a real possibility that enforcement proceedings may be necessary and the method"
+        + " of enforcement or the likely penalty is beyond the powers of a magistrates court."),
     @JsonProperty("transferReason7")
     transferReason7("transferReason7", "There is another good reason for the proceedings to be transferred.");
 
