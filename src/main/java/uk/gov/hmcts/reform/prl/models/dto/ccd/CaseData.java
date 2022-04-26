@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityStatementDisclaimerEnum;
 import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
+import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
@@ -400,6 +401,7 @@ public class CaseData implements MappableObject {
      * Add case number.
      */
     private final String familymanCaseNumber;
+    private final String fl401FamilymanCaseNumber;
 
     /**
      * Manage Documents.
@@ -418,6 +420,7 @@ public class CaseData implements MappableObject {
      * Return Application.
      */
     private final List<RejectReasonEnum> rejectReason;
+    private final List<FL401RejectReasonEnum> fl401RejectReason;
     private final String returnMessage;
 
     /**
