@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -148,24 +147,6 @@ public class CallbackController {
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
 
-    /**
-     * It's just an example - to be removed when there are real tasks sending emails.
-     */
-
-    @PostMapping(path = "/send-email", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to send email")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public ResponseEntity<uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse> sendEmail(
-        @RequestBody @ApiParam("CaseData") CallbackRequest request
-    ) throws WorkflowException {
-        return ok(
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
-                .data(exampleService.executeExampleWorkflow(request.getCaseDetails()))
-                .build()
-        );
-    }
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -307,17 +288,25 @@ public class CallbackController {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         if (documentLanguage.isGenEng()) {
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                c100C8Template
-            );
 
-            caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(c100C8Filename).build());
+            if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+                && !caseData.getApplicantsConfidentialDetails().isEmpty()
+                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
+                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
+
+                GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+                    authorisation,
+                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                    c100C8Template
+                );
+
+                caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedDocumentInfo.getHashToken())
+                    .documentFileName(c100C8Filename).build());
+
+            }
 
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
@@ -349,17 +338,23 @@ public class CallbackController {
         }
 
         if (documentLanguage.isGenWelsh()) {
-            GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                c100C8WelshTemplate
-            );
-            caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, Document.builder()
-                .documentUrl(generatedC8WelshDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedC8WelshDocumentInfo.getBinaryUrl())
-                .documentHash(generatedC8WelshDocumentInfo.getHashToken())
-                .documentFileName(c100C8WelshFilename).build());
 
+            if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+                && !caseData.getApplicantsConfidentialDetails().isEmpty()
+                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
+                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
+
+                GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
+                    authorisation,
+                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                    c100C8WelshTemplate
+                );
+                caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, Document.builder()
+                    .documentUrl(generatedC8WelshDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedC8WelshDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedC8WelshDocumentInfo.getHashToken())
+                    .documentFileName(c100C8WelshFilename).build());
+            }
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
