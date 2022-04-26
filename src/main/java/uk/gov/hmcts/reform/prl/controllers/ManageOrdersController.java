@@ -198,12 +198,12 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse showPreviewOrderWhenOrderCreated(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        CaseData caseData1 = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData1.getCreateSelectOrderOptions() != null
-            && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData1.getCreateSelectOrderOptions())) {
-            caseData1.setAppointedGuardianFullName(caseDataUpdated.get(APPOINTED_GUARDIAN_FULL_NAME).toString());
-            getCaseData(authorisation, caseData1, c43ADraftFilename, c43ADraftTemplate, caseDataUpdated);
+        if (caseData.getCreateSelectOrderOptions() != null
+            && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
+            caseData.getManageOrders().setAppointedGuardianFullName(caseDataUpdated.get(APPOINTED_GUARDIAN_FULL_NAME).toString());
+            getCaseData(authorisation, caseData, c43ADraftFilename, c43ADraftTemplate, caseDataUpdated);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
