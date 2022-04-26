@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
@@ -102,6 +103,9 @@ public class CallbackControllerTest {
 
     @Mock
     private WorkflowResult workflowResult;
+
+    @Mock
+    private DgsService dgsService;
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
@@ -1148,7 +1152,7 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testCopyFL401CasenameToC100CaseName() throws Exception {
+    public void aboutToSubmitCaseCreationToC100CaseName() {
 
         Map<String, Object> caseData = new HashMap<>();
         Organisations org = Organisations.builder().name("testOrg").build();
