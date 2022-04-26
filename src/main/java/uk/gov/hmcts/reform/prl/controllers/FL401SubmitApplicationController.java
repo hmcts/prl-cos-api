@@ -127,12 +127,18 @@ public class FL401SubmitApplicationController {
         List<String> errorList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         boolean mandatoryEventStatus = fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData);
+
+        caseData = caseData.toBuilder()
+            .solicitorName(userService.getUserDetails(authorisation).getFullName())
+            .build();
+
         if (!mandatoryEventStatus) {
             errorList.add(
                 "Statement of truth and submit is not allowed for this case unless you finish all the mandatory events");
         }
         return CallbackResponse.builder()
             .errors(errorList)
+            .data(caseData)
             .build();
     }
 
