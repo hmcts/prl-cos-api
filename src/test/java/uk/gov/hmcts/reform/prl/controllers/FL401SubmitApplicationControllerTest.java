@@ -391,12 +391,12 @@ public class FL401SubmitApplicationControllerTest {
             .thenReturn(caseData);
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
-        verify(dgsService, times(0)).generateDocument(
+        verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             Mockito.any()
         );
-        verify(dgsService, times(0)).generateWelshDocument(
+        verify(dgsService, times(1)).generateWelshDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             Mockito.any()
