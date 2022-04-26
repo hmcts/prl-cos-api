@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChildD
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.CaseNotes;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;

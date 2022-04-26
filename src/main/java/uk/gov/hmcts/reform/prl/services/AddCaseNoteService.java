@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.prl.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
@@ -31,7 +31,7 @@ public class AddCaseNoteService {
         List<Element<CaseNoteDetails>> caseNotesCollection = null;
 
         CaseNoteDetails currentCaseNoteDetails = getCurrentCaseNoteDetails(caseData, userDetails);
-        if(currentCaseNoteDetails != null){
+        if (currentCaseNoteDetails != null) {
             Element<CaseNoteDetails>  caseNoteDetails = element(currentCaseNoteDetails);
             if (caseData.getCaseNotes() != null) {
                 caseNotesCollection = caseData.getCaseNotes();
@@ -45,8 +45,7 @@ public class AddCaseNoteService {
         return caseNotesCollection;
     }
 
-    private CaseNoteDetails getCurrentCaseNoteDetails(CaseData caseData, UserDetails userDetails){
-
+    private CaseNoteDetails getCurrentCaseNoteDetails(CaseData caseData, UserDetails userDetails) {
         return CaseNoteDetails.builder()
             .subject(caseData.getSubject())
             .caseNote(caseData.getCaseNote())

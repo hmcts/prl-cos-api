@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityStatementDisclaimerEnum;
@@ -31,7 +32,6 @@ import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
-import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
@@ -180,7 +180,7 @@ public class CaseData implements MappableObject {
     private final PartyDetails applicantsFL401;
 
     /**
-     * caseNote Details
+     * caseNotes details.
      */
     private List<Element<CaseNoteDetails>> caseNotes;
     //@JsonProperty("caseNoteDetails")
