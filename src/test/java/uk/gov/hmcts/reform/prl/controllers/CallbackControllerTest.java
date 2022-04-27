@@ -516,7 +516,6 @@ public class CallbackControllerTest {
     }
 
     @Test
-    @Ignore
     public void testIssueAndSendLocalCourt() throws Exception {
         Address address = Address.builder()
             .addressLine1("address")
@@ -599,27 +598,15 @@ public class CallbackControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
-        verify(dgsService, times(2)).generateDocument(
+        verify(documentGenService, times(1)).generateDocuments(
             Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            Mockito.any(CaseData.class)
         );
-        verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verify(organisationService, times(1))
-            .getApplicantOrganisationDetails(caseData);
-        verify(organisationService, times(2))
-            .getRespondentOrganisationDetails(caseData);
-        verifyNoMoreInteractions(dgsService);
         verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
         //verifyNoMoreInteractions(organisationService);
     }
 
     @Test
-    @Ignore
     public void testIssueAndSendLocalCourtWithC8() throws Exception {
         Address address = Address.builder()
             .addressLine1("address")
@@ -749,6 +736,12 @@ public class CallbackControllerTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+            Map.of("c8Document", "document",
+                   "c1ADocument", "document",
+                   "c1AWelshDocument", "document",
+                   "finalWelshDocument", "document")
+        );
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.issueAndSendToLocalCourt(
             authToken,
@@ -795,7 +788,6 @@ public class CallbackControllerTest {
     }
 
     @Test
-    @Ignore
     public void testIssueAndSendLocalCourtWithC8EmptyList() throws Exception {
         Address address = Address.builder()
             .addressLine1("address")
@@ -925,6 +917,11 @@ public class CallbackControllerTest {
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+            Map.of("c1ADocument", "document",
+                   "c1AWelshDocument", "document",
+                   "finalWelshDocument", "document")
+        );
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.issueAndSendToLocalCourt(
             authToken,
@@ -933,23 +930,8 @@ public class CallbackControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1AWelshDocument"));
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
-        verify(dgsService, times(2)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
-        );
-        verify(organisationService, times(1))
-            .getApplicantOrganisationDetails(caseData);
-        verify(organisationService, times(2))
-            .getRespondentOrganisationDetails(caseData);
-        verifyNoMoreInteractions(dgsService);
+
         verify(caseWorkerEmailService).sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
-        //verifyNoMoreInteractions(organisationService);
     }
 
 
