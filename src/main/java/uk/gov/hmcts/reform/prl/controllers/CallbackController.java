@@ -158,6 +158,7 @@ public class CallbackController {
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
 
+
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
     @ApiResponses(value = {
@@ -299,17 +300,25 @@ public class CallbackController {
         log.info("** Previous States **");
         eventsForCase.stream().map(CaseEventDetail::getStateId).forEach(log::info);
         if (documentLanguage.isGenEng()) {
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                c100C8Template
-            );
 
-            caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(c100C8Filename).build());
+            if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+                && !caseData.getApplicantsConfidentialDetails().isEmpty()
+                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
+                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
+
+                GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+                    authorisation,
+                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                    c100C8Template
+                );
+
+                caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedDocumentInfo.getHashToken())
+                    .documentFileName(c100C8Filename).build());
+
+            }
 
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
@@ -341,17 +350,23 @@ public class CallbackController {
         }
 
         if (documentLanguage.isGenWelsh()) {
-            GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                c100C8WelshTemplate
-            );
-            caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, Document.builder()
-                .documentUrl(generatedC8WelshDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedC8WelshDocumentInfo.getBinaryUrl())
-                .documentHash(generatedC8WelshDocumentInfo.getHashToken())
-                .documentFileName(c100C8WelshFilename).build());
 
+            if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+                && !caseData.getApplicantsConfidentialDetails().isEmpty()
+                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
+                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
+
+                GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
+                    authorisation,
+                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                    c100C8WelshTemplate
+                );
+                caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, Document.builder()
+                    .documentUrl(generatedC8WelshDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedC8WelshDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedC8WelshDocumentInfo.getHashToken())
+                    .documentFileName(c100C8WelshFilename).build());
+            }
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
