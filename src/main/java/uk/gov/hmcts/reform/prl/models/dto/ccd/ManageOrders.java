@@ -15,6 +15,5 @@ public class ManageOrders {
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
     private final String childrenList1;
-    private String appointedGuardianFullName;
 
 }
