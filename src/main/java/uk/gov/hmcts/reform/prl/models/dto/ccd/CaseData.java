@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
@@ -614,6 +615,8 @@ public class CaseData implements MappableObject {
 
     @JsonUnwrapped
     private ManageOrders manageOrders;
+
+    private List<Element<AppointedGuardianFullName>> appointedGuardianName;
 
     /**
      * Solicitor Details.

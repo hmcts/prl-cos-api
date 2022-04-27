@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.OrderDetails;
 import uk.gov.hmcts.reform.prl.enums.OtherOrderDetails;
@@ -12,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -48,8 +52,10 @@ public class ManageOrderService {
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
-
     private final Time dateTime;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -193,6 +199,41 @@ public class ManageOrderService {
         }
         orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
         return orderCollection;
+    }
+
+    public void updateCaseDataWithAppointedGuardianNames(CaseDetails caseDetails,
+                                                    List<Element<AppointedGuardianFullName>> guardianNamesList) {
+        CaseData mappedCaseData = getMappedCaseData(caseDetails);
+        List<AppointedGuardianFullName> appointedGuardianFullNameList = mappedCaseData
+            .getAppointedGuardianName()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> nameList = appointedGuardianFullNameList.stream()
+            .map(AppointedGuardianFullName::getGuardianFullName)
+            .collect(Collectors.toList());
+
+        nameList.forEach(name -> {
+            AppointedGuardianFullName appointedGuardianFullName
+                = AppointedGuardianFullName
+                .builder()
+                .guardianFullName(name)
+                .build();
+            Element<AppointedGuardianFullName> wrappedName
+                = Element.<AppointedGuardianFullName>builder()
+                .value(appointedGuardianFullName)
+                .build();
+            guardianNamesList.add(wrappedName);
+        });
+    }
+
+    protected CaseData getMappedCaseData(CaseDetails caseDetails) {
+        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            .toBuilder()
+            .id(caseDetails.getId())
+            .build();
+
     }
 
 }
