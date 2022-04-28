@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -22,8 +21,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -36,7 +33,6 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RestController
 @RequiredArgsConstructor
@@ -49,10 +45,7 @@ public class ManageOrdersController {
     private final UserService userService;
 
     @Autowired
-    private ManageOrderService manageOrderService;
-
-    @Autowired
-    private final DgsService dgsService;
+    private  ManageOrderService manageOrderService;
 
     @Autowired
     private final DocumentLanguageService documentLanguageService;
@@ -60,17 +53,6 @@ public class ManageOrdersController {
     @Autowired
     private ManageOrderEmailService manageOrderEmailService;
 
-    @Value("${document.templates.common.prl_c21_template}")
-    protected String c21Template;
-
-    @Value("${document.templates.common.prl_c21_filename}")
-    protected String c21File;
-
-    @Value("${document.templates.common.prl_c21_welsh_template}")
-    protected String c21WelshTemplate;
-
-    @Value("${document.templates.common.prl_c21_welsh_filename}")
-    protected String c21WelshFile;
 
     @Value("${document.templates.common.C43A_draft_template}")
     protected String c43ADraftTemplate;
@@ -83,8 +65,8 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
+
         CaseData caseData1 = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData1);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData1.getCreateSelectOrderOptions() != null) {
             Map<String,String> documentDataFields = manageOrderService
@@ -94,6 +76,7 @@ public class ManageOrdersController {
                             documentDataFields.get(PrlAppsConstants.FILE_NAME),
                             documentDataFields.get(PrlAppsConstants.TEMPLATE), caseDataUpdated);
             }
+            manageOrderService.getCaseData(authorisation, caseData1, caseDataUpdated);
         } else {
             caseDataUpdated.put("previewOrderDoc",caseData1.getAppointmentOfGuardian());
         }
@@ -102,29 +85,7 @@ public class ManageOrdersController {
 
     }
 
-    private void getCaseData(String authorisation, CaseData caseData1,String fileName,String templateName,
-                                 Map<String, Object> caseDataUpdated)
-        throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData1).build(),
-                templateName
-            );
 
-        caseData1 = caseData1.toBuilder()
-             .previewOrderDoc(Document.builder()
-                                  .documentUrl(generatedDocumentInfo.getUrl())
-                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                  .documentHash(generatedDocumentInfo.getHashToken())
-                                  .documentFileName(fileName)
-                                  .build()).build();
-        caseDataUpdated.put("isEngDocGen", Yes.toString());
-        caseDataUpdated.put("previewOrderDoc", Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(fileName).build());
-    }
 
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to fetch child details ")
@@ -186,13 +147,14 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest
-    ) {
+    ) throws Exception {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("orderCollection", manageOrderService.addOrderDetailsAndReturnReverseSortedList(caseData));
+        caseDataUpdated.put("orderCollection", manageOrderService
+            .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
