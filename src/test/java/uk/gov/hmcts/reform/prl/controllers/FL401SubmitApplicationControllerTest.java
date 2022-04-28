@@ -595,7 +595,7 @@ public class FL401SubmitApplicationControllerTest {
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .typeOfApplicationOrders(orders)
+            .typeOfApplicationOrders(null)
             .typeOfApplicationLinkToCA(linkToCA)
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
