@@ -208,9 +208,19 @@ public class FL401SubmitApplicationController {
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
+        generateRelevantPDFs(authorisation, caseData, caseDataUpdated, documentLanguage);
+        caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
+
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
+            .build();
+    }
+
+    private void generateRelevantPDFs(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated, DocumentLanguage documentLanguage) throws Exception {
         if (documentLanguage.isGenEng()) {
-
-
             caseDataUpdated.put("isEngDocGen", Yes.toString());
             caseDataUpdated.put(
                 FINAL_DOCUMENT_FIELD,
@@ -222,7 +232,7 @@ public class FL401SubmitApplicationController {
                 )
             );
 
-            if (isApplicantorChildDetailsorConfidential(caseData)) {
+            if (isApplicantOrChildDetailsConfidential(caseData)) {
                 caseDataUpdated.put(
                     DOCUMENT_FIELD_C8,
                     generateDocumentField(fl401C8Filename, generateDocument(authorisation, fl401C8Template, caseData,
@@ -233,8 +243,6 @@ public class FL401SubmitApplicationController {
         }
 
         if (documentLanguage.isGenWelsh()) {
-
-
             caseDataUpdated.put("isWelshDocGen", Yes.toString());
             caseDataUpdated.put(
                 DOCUMENT_FIELD_FINAL_WELSH,
@@ -246,7 +254,7 @@ public class FL401SubmitApplicationController {
                 )
             );
 
-            if (isApplicantorChildDetailsorConfidential(caseData)) {
+            if (isApplicantOrChildDetailsConfidential(caseData)) {
                 caseDataUpdated.put(
                     DOCUMENT_FIELD_C8_WELSH,
                     generateDocumentField(
@@ -258,40 +266,31 @@ public class FL401SubmitApplicationController {
                 );
             }
         }
-        caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
-
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
-
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated)
-            .build();
     }
 
-    private boolean isApplicantorChildDetailsorConfidential(CaseData caseData) {
-
+    private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
         PartyDetails partyDetails = caseData.getApplicantsFL401();
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
 
-        return getApplicantConfidentiality(partyDetails) || getChildrenConfidentiality(
+        return isApplicantDetailsConfidential(partyDetails) || isChildrenDetailsConfidentiality(
             caseData,
             typeOfApplicationOrders
         );
 
     }
 
-    private boolean getChildrenConfidentiality(CaseData caseData, Optional<TypeOfApplicationOrders> typeOfApplicationOrders) {
+    private boolean isChildrenDetailsConfidentiality(CaseData caseData, Optional<TypeOfApplicationOrders> typeOfApplicationOrders) {
         boolean childrenConfidentiality = false;
 
         if (typeOfApplicationOrders.isPresent() && typeOfApplicationOrders.get().getOrderType().contains(
             FL401OrderTypeEnum.occupationOrder)
             && Objects.nonNull(caseData.getHome())
-            && (YesOrNo.Yes).equals(caseData.getHome().getDoAnyChildrenLiveAtAddress())) {
+            && YesOrNo.Yes.equals(caseData.getHome().getDoAnyChildrenLiveAtAddress())) {
             List<ChildrenLiveAtAddress> childrenLiveAtAddresses = caseData.getHome().getChildren().stream().map(Element::getValue).collect(
                 Collectors.toList());
 
             for (ChildrenLiveAtAddress address : childrenLiveAtAddresses) {
-                if ((YesOrNo.Yes).equals(address.getKeepChildrenInfoConfidential())) {
+                if (YesOrNo.Yes.equals(address.getKeepChildrenInfoConfidential())) {
                     childrenConfidentiality = true;
                 }
 
@@ -300,19 +299,19 @@ public class FL401SubmitApplicationController {
         return childrenConfidentiality;
     }
 
-    private boolean getApplicantConfidentiality(PartyDetails applicant) {
+    private boolean isApplicantDetailsConfidential(PartyDetails applicant) {
 
-        boolean isAnyOfApplicantConfidential = false;
+        boolean isApplicantInformationConfidential = false;
         if ((YesOrNo.Yes).equals(applicant.getIsAddressConfidential())) {
-            isAnyOfApplicantConfidential = true;
+            isApplicantInformationConfidential = true;
         }
         if ((YesOrNo.Yes).equals(applicant.getIsEmailAddressConfidential())) {
-            isAnyOfApplicantConfidential = true;
+            isApplicantInformationConfidential = true;
         }
         if ((YesOrNo.Yes).equals(applicant.getIsPhoneNumberConfidential())) {
-            isAnyOfApplicantConfidential = true;
+            isApplicantInformationConfidential = true;
         }
-        return isAnyOfApplicantConfidential;
+        return isApplicantInformationConfidential;
     }
 
     @PostMapping(path = "/fl401-submit-application-send-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
