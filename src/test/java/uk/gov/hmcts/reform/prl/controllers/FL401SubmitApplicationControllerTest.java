@@ -262,6 +262,13 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
         verify(dgsService, times(2)).generateDocument(
@@ -366,6 +373,13 @@ public class FL401SubmitApplicationControllerTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
         verify(dgsService, times(2)).generateDocument(
@@ -474,6 +488,13 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
         verify(dgsService, times(2)).generateDocument(
@@ -574,6 +595,13 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
         verify(dgsService, times(2)).generateDocument(
