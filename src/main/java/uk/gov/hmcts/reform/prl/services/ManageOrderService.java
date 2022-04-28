@@ -260,7 +260,7 @@ public class ManageOrderService {
         log.info("=====Respondent full name: {} {}=====",fl401Respondent.getFirstName(),fl401Respondent.getLastName());
         ManageOrders manageOrders = null;
 
-        manageOrders = manageOrders.toBuilder()
+        manageOrders = ManageOrders.builder()
             .manageOrdersCourtName(caseData.getCourtName())
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .manageOrdersApplicant(fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName())
