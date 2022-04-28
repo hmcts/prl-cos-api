@@ -179,11 +179,11 @@ public class ManageOrderService {
                 .otherDetails(OtherOrderDetails.builder()
                                   .createdBy(caseData.getJudgeOrMagistratesLastName())
                                   .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                      "d MMMM yyyy",
+                                      PrlAppsConstants.D_MMMM_YYYY,
                                       Locale.UK
                                   )))
                                   .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
-                                      "d MMMM yyyy",
+                                      PrlAppsConstants.D_MMMM_YYYY,
                                       Locale.UK
                                   )))
                                   .orderRecipients(getAllRecipients(caseData)).build())
@@ -195,7 +195,7 @@ public class ManageOrderService {
                 .otherDetails(OtherOrderDetails.builder()
                                   .createdBy(caseData.getJudgeOrMagistratesLastName())
                                   .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                      "d MMMM yyyy",
+                                      PrlAppsConstants.D_MMMM_YYYY,
                                       Locale.UK
                                   )))
                                   .orderRecipients(getAllRecipients(caseData)).build())
