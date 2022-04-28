@@ -258,17 +258,15 @@ public class ManageOrderService {
         log.info("=====Applicant full name: {} {}=====",fl401Applicant.getFirstName(),fl401Applicant.getLastName());
         log.info("#####Applicant representative: {} {}#####",fl401Applicant.getRepresentativeFirstName(),fl401Applicant.getRepresentativeLastName());
         log.info("=====Respondent full name: {} {}=====",fl401Respondent.getFirstName(),fl401Respondent.getLastName());
-        ManageOrders manageOrders = null;
-
-        manageOrders = ManageOrders.builder()
+        ManageOrders manageOrders = ManageOrders.builder()
             .manageOrdersCourtName(caseData.getCourtName())
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .manageOrdersApplicant(fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName())
             .manageOrdersApplicantReference(fl401Applicant.getRepresentativeFirstName() + " "
                                                 + fl401Applicant.getRepresentativeLastName())
             .manageOrdersRespondent(fl401Respondent.getFirstName() + " " + fl401Respondent.getLastName())
-            //.manageOrdersRespondentReference(fl401Respondent.getRepresentativeFirstName() + " "
-            // + fl401Respondent.getRepresentativeLastName())
+            .manageOrdersRespondentReference(fl401Respondent.getRepresentativeFirstName() + " "
+                + fl401Respondent.getRepresentativeLastName())
             .manageOrdersRespondentDob((null != fl401Respondent.getDateOfBirth()) ? fl401Respondent.getDateOfBirth() : null)
             .build();
 
