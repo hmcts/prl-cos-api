@@ -2,12 +2,17 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -50,6 +55,26 @@ public class AddCaseNoteServiceTest {
 
         assertEquals(null, caseDataUpdated.get("subject"));
         assertEquals(null, caseDataUpdated.get("caseNote"));
+    }
+
+    @Test
+    public void testaddCaseNotes() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case Header Text")
+            .subject("testSubject1")
+            .caseNote("testCaseNote1")
+            .build();
+
+        UserDetails userDetails = UserDetails.builder().forename("forename").surname("surname").build();
+
+        List<Element<CaseNoteDetails>> result = addCaseNoteService.addCaseNoteDetails(caseData, userDetails);
+
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals("testSubject1", result.get(0).getValue().getSubject());
+        Assertions.assertEquals("testCaseNote1", result.get(0).getValue().getCaseNote());
+        Assertions.assertEquals("forename surname", result.get(0).getValue().getUser());
     }
 
 }
