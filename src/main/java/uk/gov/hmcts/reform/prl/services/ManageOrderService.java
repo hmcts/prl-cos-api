@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -232,9 +231,9 @@ public class ManageOrderService {
                             Map<String, Object> caseDataUpdated)
         throws Exception {
 
-        Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
+        //Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
 
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+        /* GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData1).build(),
             fieldsMap.get(PrlAppsConstants.TEMPLATE)
@@ -245,11 +244,10 @@ public class ManageOrderService {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build()); */
     }
 
     public CaseData getN117FormCaseData(CaseData caseData) {
-        ManageOrders manageOrders = null;
         PartyDetails fl401Applicant = caseData
             .getApplicantsFL401();
         PartyDetails fl401Respondent = caseData
@@ -260,6 +258,7 @@ public class ManageOrderService {
         log.info("=====Applicant full name: {} {}=====",fl401Applicant.getFirstName(),fl401Applicant.getLastName());
         log.info("#####Applicant representative: {} {}#####",fl401Applicant.getRepresentativeFirstName(),fl401Applicant.getRepresentativeLastName());
         log.info("=====Respondent full name: {} {}=====",fl401Respondent.getFirstName(),fl401Respondent.getLastName());
+        ManageOrders manageOrders = null;
 
         manageOrders = manageOrders.toBuilder()
             .manageOrdersCourtName(caseData.getCourtName())
@@ -269,8 +268,8 @@ public class ManageOrderService {
                                                 + fl401Applicant.getRepresentativeLastName())
             .manageOrdersRespondent(fl401Respondent.getFirstName() + " " + fl401Respondent.getLastName())
             //.manageOrdersRespondentReference(fl401Respondent.getRepresentativeFirstName() + " "
-                                                // + fl401Respondent.getRepresentativeLastName())
-            .manageOrdersRespondentDob((null != fl401Respondent.getDateOfBirth()) ? fl401Respondent.getDateOfBirth():null)
+            // + fl401Respondent.getRepresentativeLastName())
+            .manageOrdersRespondentDob((null != fl401Respondent.getDateOfBirth()) ? fl401Respondent.getDateOfBirth() : null)
             .build();
 
         caseData = caseData.toBuilder().manageOrders(manageOrders).build();
