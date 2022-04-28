@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.services;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -12,6 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -51,6 +54,9 @@ public class ManageOrderServiceTest {
 
     @Mock
     private Time dateTime;
+
+    @Mock
+    ObjectMapper objectMapper;
 
     @Test
     public void getUpdatedCaseData() {
@@ -224,6 +230,33 @@ public class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+
+    }
+
+    @Ignore
+    @Test
+    public void testUpdateCaseDataWithAppointedGuardianNames() {
+
+        List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
+        AppointedGuardianFullName appointedGuardianFullName = AppointedGuardianFullName.builder()
+            .guardianFullName("Full Name")
+            .build();
+
+        Element<AppointedGuardianFullName> wrappedName = Element.<AppointedGuardianFullName>builder().value(appointedGuardianFullName).build();
+        List<Element<AppointedGuardianFullName>> caseDataNameList = Collections.singletonList(wrappedName);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .appointedGuardianName(caseDataNameList)
+            .build();
+
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails =
+            uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        manageOrderService.updateCaseDataWithAppointedGuardianNames(caseDetails, namesList);
+        assertEquals(caseDataNameList.get(0).getValue().getGuardianFullName(), "Full Name");
 
     }
 }
