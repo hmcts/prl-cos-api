@@ -255,6 +255,12 @@ public class ManageOrderService {
         PartyDetails fl401Respondent = caseData
             .getRespondentsFL401();
 
+        log.info("----Courtname: {}---",caseData.getCourtName());
+        log.info("*****CCD Reference number: {}***",caseData.getId());
+        log.info("=====Applicant full name: {} {}=====",fl401Applicant.getFirstName(),fl401Applicant.getLastName());
+        log.info("#####Applicant representative: {} {}#####",fl401Applicant.getRepresentativeFirstName(),fl401Applicant.getRepresentativeLastName());
+        log.info("=====Respondent full name: {} {}=====",fl401Respondent.getFirstName(),fl401Respondent.getLastName());
+
         manageOrders = manageOrders.toBuilder()
             .manageOrdersCourtName(caseData.getCourtName())
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
@@ -262,9 +268,9 @@ public class ManageOrderService {
             .manageOrdersApplicantReference(fl401Applicant.getRepresentativeFirstName() + " "
                                                 + fl401Applicant.getRepresentativeLastName())
             .manageOrdersRespondent(fl401Respondent.getFirstName() + " " + fl401Respondent.getLastName())
-            .manageOrdersRespondentReference(fl401Respondent.getRepresentativeFirstName() + " "
-                                                 + fl401Respondent.getRepresentativeLastName())
-            .manageOrdersRespondentDob(fl401Respondent.getDateOfBirth())
+            //.manageOrdersRespondentReference(fl401Respondent.getRepresentativeFirstName() + " "
+                                                // + fl401Respondent.getRepresentativeLastName())
+            .manageOrdersRespondentDob((null != fl401Respondent.getDateOfBirth()) ? fl401Respondent.getDateOfBirth():null)
             .build();
 
         caseData = caseData.toBuilder().manageOrders(manageOrders).build();
