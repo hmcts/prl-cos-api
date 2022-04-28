@@ -128,17 +128,12 @@ public class FL401SubmitApplicationController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         boolean mandatoryEventStatus = fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData);
 
-        caseData = caseData.toBuilder()
-            .solicitorName(userService.getUserDetails(authorisation).getFullName())
-            .build();
-
         if (!mandatoryEventStatus) {
             errorList.add(
                 "Statement of truth and submit is not allowed for this case unless you finish all the mandatory events");
         }
         return CallbackResponse.builder()
             .errors(errorList)
-            .data(caseData)
             .build();
     }
 
@@ -159,6 +154,10 @@ public class FL401SubmitApplicationController {
             : "No Court Name Fetched"));
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        caseData = caseData.toBuilder()
+            .solicitorName(userService.getUserDetails(authorisation).getFullName())
+            .build();
 
         final LocalDate localDate = LocalDate.now();
         caseData = caseData.toBuilder().issueDate(localDate).courtName((nearestDomesticAbuseCourt != null)
