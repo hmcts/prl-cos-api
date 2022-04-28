@@ -6,9 +6,11 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,7 @@ public class AddCaseNoteService {
     public static final String SUBJECT = "subject";
     public static final String CASE_NOTE = "caseNote";
     public static final String CASE_NAME = "Case Name: ";
+    private final Time dateTime;
 
     public List<Element<CaseNoteDetails>> addCaseNoteDetails(CaseData caseData,  UserDetails userDetails) {
         List<Element<CaseNoteDetails>> caseNotesCollection = null;
@@ -40,8 +43,8 @@ public class AddCaseNoteService {
                 caseNotesCollection = new ArrayList<>();
                 caseNotesCollection.add(caseNoteDetails);
             }
+            caseNotesCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
         }
-
         return caseNotesCollection;
     }
 
@@ -51,6 +54,7 @@ public class AddCaseNoteService {
             .caseNote(caseData.getCaseNote())
             .user(userDetails.getFullName())
             .dateAdded(LocalDate.now().toString())
+            .dateCreated(dateTime.now())
             .build();
     }
 

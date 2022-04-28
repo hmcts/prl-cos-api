@@ -501,44 +501,6 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/submit-case-note", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Copy fl401 case name to C100 Case name")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse submitCaseNote(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("caseNotes", addCaseNoteService.addCaseNoteDetails(caseData, userDetails));
-        addCaseNoteService.clearFields(caseDataUpdated);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    @PostMapping(path = "/populate-header-case-note", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to populate the header add case note")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback to populate the header add case note Processed."),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse populateHeader(
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(addCaseNoteService.populateHeader(caseData))
-            .build();
-    }
-
-
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated) {
         log.info("Fetching the user and Org Details ");
         try {
