@@ -8,17 +8,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.OrderDetails;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.format.DateTimeFormatter;
@@ -32,6 +33,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
@@ -163,11 +165,11 @@ public class ManageOrderService {
 
     private OrderDetails getCurrentOrderDetails(String authorisation, CaseData caseData)
         throws Exception {
-        if (caseData.getCreateSelectOrderOptions() != null) {
+        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
-                CaseDetails.builder().caseData(caseData).build(),
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
                 fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
             );
             return OrderDetails.builder().orderType(caseData.getSelectedOrder())
@@ -221,27 +223,43 @@ public class ManageOrderService {
     }
 
     private String getApplicantSolicitorDetails(CaseData caseData) {
-        List<PartyDetails> applicants = caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        List<String> applicantSolicitorNames = applicants.stream()
-            .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Applicant's Solicitor)")
-            .collect(Collectors.toList());
-        return String.join("\n", applicantSolicitorNames);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> applicants = caseData
+                .getApplicants()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            List<String> applicantSolicitorNames  = applicants.stream()
+                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Applicant's Solicitor)")
+                .collect(Collectors.toList());
+            return String.join("\n", applicantSolicitorNames);
+        } else {
+            PartyDetails applicantFl401 = caseData.getApplicantsFL401();
+            String applicantSolicitorName = applicantFl401.getRepresentativeFirstName()
+                + " "
+                + applicantFl401.getRepresentativeLastName();
+            return  applicantSolicitorName;
+        }
     }
 
     private String getRespondentSolicitorDetails(CaseData caseData) {
-        List<PartyDetails> respondents = caseData
-            .getRespondents()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        List<String> respondentSolicitorNames = respondents.stream()
-            .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Respondent's Solicitor)")
-            .collect(Collectors.toList());
-        return String.join("\n", respondentSolicitorNames);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> respondents = caseData
+                .getRespondents()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            List<String> respondentSolicitorNames = respondents.stream()
+                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Respondent's Solicitor)")
+                .collect(Collectors.toList());
+            return String.join("\n", respondentSolicitorNames);
+        } else {
+            PartyDetails respondentFl401 = caseData.getRespondentsFL401();
+            String respondentSolicitorName = respondentFl401.getRepresentativeFirstName()
+                + " "
+                + respondentFl401.getRepresentativeLastName();
+            return  respondentSolicitorName;
+        }
     }
 
     public List<Element<OrderDetails>> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
@@ -266,6 +284,12 @@ public class ManageOrderService {
 
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
 
+        ManageOrders manageOrders = ManageOrders.builder()
+            .manageOrdersMultiSelectListForC43(getOrderTitle(caseData1.getOrdersApplyingFor()))
+            .build();
+
+        caseData1 = caseData1.toBuilder().manageOrders(manageOrders).build();
+
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData1).build(),
@@ -278,6 +302,22 @@ public class ManageOrderService {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+    }
+
+    public String getOrderTitle(List<OrderTypeEnum> orders) {
+
+        switch (orders.size()) {
+            case 1:
+                return  String.format("%s ", orders.get(0).getDisplayedValue());
+            case 2:
+                return String.format("%s and %s ", orders.get(0).getDisplayedValue(),
+                                     orders.get(1).getDisplayedValue());
+            default:
+                return String.format("%s, %s and %s ",
+                                     orders.get(0).getDisplayedValue(),
+                                     orders.get(1).getDisplayedValue(),
+                                     orders.get(2).getDisplayedValue());
+        }
     }
 
 }
