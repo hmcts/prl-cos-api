@@ -15,7 +15,7 @@ public enum CaseTransferOptionsEnum {
     @JsonProperty("countyCourt")
     countyCourt("countyCourt", "County court"),
     @JsonProperty("familyProceedingCourt")
-    familyProceedingCourt("familyProceedingCourt", "Family proceeding court");
+    familyProceedingCourt("familyProceedingCourt", "Family proceedings court");
 
     private final String id;
     private final String displayedValue;
