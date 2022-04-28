@@ -89,7 +89,6 @@ public class ManageOrderService {
 
     private final Time dateTime;
 
-    @Autowired
     private ObjectMapper objectMapper;
 
     public Map<String, Object> populateHeader(CaseData caseData) {
@@ -277,7 +276,7 @@ public class ManageOrderService {
 
     public void updateCaseDataWithAppointedGuardianNames(uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails,
                                                     List<Element<AppointedGuardianFullName>> guardianNamesList) {
-        CaseData mappedCaseData = getMappedCaseData(caseDetails);
+        CaseData mappedCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
         List<AppointedGuardianFullName> appointedGuardianFullNameList = mappedCaseData
             .getAppointedGuardianName()
             .stream()
@@ -300,13 +299,6 @@ public class ManageOrderService {
                 .build();
             guardianNamesList.add(wrappedName);
         });
-    }
-
-    protected CaseData getMappedCaseData(uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails) {
-        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-            .toBuilder()
-            .id(caseDetails.getId())
-            .build();
     }
 
     public void getCaseData(String authorisation, CaseData caseData1, Map<String, Object> caseDataUpdated) throws Exception {
