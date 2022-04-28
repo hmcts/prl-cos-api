@@ -186,7 +186,7 @@ public class FL401SubmitApplicationController {
             && courtEmailAddress.isPresent()) ? courtEmailAddress.get().getAddress() :
             Objects.requireNonNull(nearestDomesticAbuseCourt).getCourtEmailAddresses().get(0).getAddress());
 
-        if (Objects.nonNull(typeOfApplicationOrders) || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
+        if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
             && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
             caseData = caseData.toBuilder().build();
         } else  if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
