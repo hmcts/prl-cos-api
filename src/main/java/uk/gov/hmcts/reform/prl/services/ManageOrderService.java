@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.OrderDetails;
 import uk.gov.hmcts.reform.prl.enums.OtherOrderDetails;
@@ -21,8 +20,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.format.DateTimeFormatter;
@@ -67,6 +66,12 @@ public class ManageOrderService {
     @Value("${document.templates.common.C43A_draft_filename}")
     protected String c43ADraftFilename;
 
+    @Value("${document.templates.common.C43A_final_template}")
+    protected String c43AFinalTemplate;
+
+    @Value("${document.templates.common.C43A_final_filename}")
+    protected String c43AFinalFilename;
+
     @Value("${document.templates.common.prl_c43_draft_template}")
     protected String c43DraftTemplate;
 
@@ -78,8 +83,6 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_c43_filename}")
     protected String c43File;
-
-    public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
     @Autowired
     private final DgsService dgsService;
@@ -97,7 +100,7 @@ public class ManageOrderService {
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
         return CaseData.builder().childrenList(getChildInfoFromCaseData(caseData))
-            .manageOrders(ManageOrders.builder().childrenList1(getChildInfoFromCaseData(caseData)).build())
+            .manageOrders(ManageOrders.builder().childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
@@ -115,6 +118,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c43DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c43Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c43File);
+                break;
+            case specialGuardianShip:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c43ADraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c43ADraftFilename);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c43AFinalTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c43AFinalFilename);
                 break;
             default:
                 break;
@@ -266,7 +275,7 @@ public class ManageOrderService {
         return orderCollection;
     }
 
-    public void updateCaseDataWithAppointedGuardianNames(CaseDetails caseDetails,
+    public void updateCaseDataWithAppointedGuardianNames(uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails,
                                                     List<Element<AppointedGuardianFullName>> guardianNamesList) {
         CaseData mappedCaseData = getMappedCaseData(caseDetails);
         List<AppointedGuardianFullName> appointedGuardianFullNameList = mappedCaseData
@@ -293,15 +302,14 @@ public class ManageOrderService {
         });
     }
 
-    protected CaseData getMappedCaseData(CaseDetails caseDetails) {
+    protected CaseData getMappedCaseData(uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails) {
         return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
             .id(caseDetails.getId())
             .build();
+    }
 
-    public void getCaseData(String authorisation, CaseData caseData1,
-                             Map<String, Object> caseDataUpdated)
-        throws Exception {
+    public void getCaseData(String authorisation, CaseData caseData1, Map<String, Object> caseDataUpdated) throws Exception {
 
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
 

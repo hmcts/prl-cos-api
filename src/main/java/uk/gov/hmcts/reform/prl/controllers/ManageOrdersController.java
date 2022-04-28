@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -13,12 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -69,13 +67,6 @@ public class ManageOrdersController {
         CaseData caseData1 = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData1.getCreateSelectOrderOptions() != null) {
-            Map<String,String> documentDataFields = manageOrderService
-                .getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
-            if (!documentDataFields.isEmpty()) {
-                getCaseData(authorisation, caseData1,
-                            documentDataFields.get(PrlAppsConstants.FILE_NAME),
-                            documentDataFields.get(PrlAppsConstants.TEMPLATE), caseDataUpdated);
-            }
             manageOrderService.getCaseData(authorisation, caseData1, caseDataUpdated);
         } else {
             caseDataUpdated.put("previewOrderDoc",caseData1.getAppointmentOfGuardian());
@@ -159,7 +150,7 @@ public class ManageOrdersController {
     }
 
     @PostMapping(path = "/show-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to show preview order in next screen for special guardianship create order")
+    @ApiOperation(value = "Callback to show preview order for special guardianship create order")
     public AboutToStartOrSubmitCallbackResponse showPreviewOrderWhenOrderCreated(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
@@ -170,7 +161,7 @@ public class ManageOrdersController {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
-            getCaseData(authorisation, caseData, c43ADraftFilename, c43ADraftTemplate, caseDataUpdated);
+            manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
