@@ -96,14 +96,14 @@ public class ResubmitApplicationController {
         if (closestChildArrangementsCourt != null) {
             caseData = caseData.toBuilder()
                 .courtName(closestChildArrangementsCourt.getCourtName())
-                .courtId(closestChildArrangementsCourt.getCourtId())
+                .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
                 .build();
         }
 
         Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
         if (closestChildArrangementsCourt != null) {
             caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
-            caseDataUpdated.put(COURT_ID_FIELD, closestChildArrangementsCourt.getCourtId());
+            caseDataUpdated.put(COURT_ID_FIELD, String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
         }
 
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));

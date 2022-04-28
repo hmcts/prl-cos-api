@@ -123,7 +123,7 @@ public class ResubmitApplicationControllerTest {
 
         court = Court.builder()
             .courtName("testcourt")
-            .courtId("123")
+            .countyLocationCode(123)
             .build();
     }
 
@@ -204,14 +204,16 @@ public class ResubmitApplicationControllerTest {
             .isGenEng(false)
             .build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
-        when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
-        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataNoAllegations);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataNoAllegations);
+        when(caseEventService.findEventsForCase(String.valueOf(caseDataNoAllegations.getId()))).thenReturn(caseEvents);
+        when(courtFinderService.getNearestFamilyCourt(caseDataNoAllegations)).thenReturn(court);
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(caseDataNoAllegations);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(caseDataNoAllegations);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test", DOCUMENT_FIELD_FINAL_WELSH, "test"
             ));
+
+
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
 
