@@ -598,7 +598,6 @@ public class CaseData implements MappableObject {
     //private final SelectTypeOfOrderEnum selectTypeOfOrder;
     //private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
 
-
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo isTheOrderByConsent;
     private final YesOrNo wasTheOrderApprovedAtHearing;
