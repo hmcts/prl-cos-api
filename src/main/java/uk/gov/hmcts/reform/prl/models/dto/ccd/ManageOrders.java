@@ -14,6 +14,6 @@ public class ManageOrders {
     private final String recitalsOrPreamble;
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
-    private final String childrenList1;
+    private final String childListForSpecialGuardianship;
 
 }
