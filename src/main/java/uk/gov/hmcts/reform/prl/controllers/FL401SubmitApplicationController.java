@@ -186,7 +186,7 @@ public class FL401SubmitApplicationController {
             && courtEmailAddress.isPresent()) ? courtEmailAddress.get().getAddress() :
             Objects.requireNonNull(nearestDomesticAbuseCourt).getCourtEmailAddresses().get(0).getAddress());
 
-        if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
+        if (Objects.nonNull(typeOfApplicationOrders) || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
             && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
             caseData = caseData.toBuilder().build();
         } else  if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
@@ -208,7 +208,7 @@ public class FL401SubmitApplicationController {
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
-        generateRelevantPDFs(authorisation, caseData, caseDataUpdated, documentLanguage);
+        generateRelevantPdfs(authorisation, caseData, caseDataUpdated, documentLanguage);
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
@@ -219,7 +219,9 @@ public class FL401SubmitApplicationController {
             .build();
     }
 
-    private void generateRelevantPDFs(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated, DocumentLanguage documentLanguage) throws Exception {
+    private void generateRelevantPdfs(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                      CaseData caseData, Map<String, Object> caseDataUpdated,
+                                      DocumentLanguage documentLanguage) throws Exception {
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
             caseDataUpdated.put(
