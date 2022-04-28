@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -54,7 +55,7 @@ public class AddCaseNoteService {
             .caseNote(caseData.getCaseNote())
             .user(userDetails.getFullName())
             .dateAdded(LocalDate.now().toString())
-            .dateCreated(dateTime.now())
+            .dateCreated(LocalDateTime.now())
             .build();
     }
 
