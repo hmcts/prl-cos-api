@@ -78,7 +78,6 @@ public class ApplicationsTabService implements TabService {
         Map<String, Object> applicationTab = new HashMap<>();
         applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
         applicationTab.put("applicantTable", getApplicantsTable(caseData));
-        //applicationTab.put("addCaseNoteTable", getAddCaseNotesTable(caseData));
         applicationTab.put("respondentTable", getRespondentsTable(caseData));
         applicationTab.put("declarationTable", getDeclarationTable(caseData));
         applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
