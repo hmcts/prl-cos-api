@@ -19,8 +19,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.format.DateTimeFormatter;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -51,6 +54,35 @@ public class ManageOrderService {
     protected String c21DraftFile;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
+
+    @Value("${document.templates.common.prl_c21_template}")
+    protected String c21Template;
+
+    @Value("${document.templates.common.prl_c21_filename}")
+    protected String c21File;
+
+    @Value("${document.templates.common.C43A_draft_template}")
+    protected String c43ADraftTemplate;
+
+    @Value("${document.templates.common.C43A_draft_filename}")
+    protected String c43ADraftFilename;
+
+    @Value("${document.templates.common.prl_c43_draft_template}")
+    protected String c43DraftTemplate;
+
+    @Value("${document.templates.common.prl_c43_draft_filename}")
+    protected String c43DraftFile;
+
+    @Value("${document.templates.common.prl_c43_template}")
+    protected String c43Template;
+
+    @Value("${document.templates.common.prl_c43_filename}")
+    protected String c43File;
+
+    public static final String FAMILY_MAN_ID = "Family Man ID: ";
+
+    @Autowired
+    private final DgsService dgsService;
 
     private final Time dateTime;
 
@@ -69,16 +101,20 @@ public class ManageOrderService {
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
-    public Map<String,String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
+    private Map<String,String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
         Map<String,String> fieldsMap = new HashMap();
         switch (selectedOrder) {
             case blankOrderOrDirections:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
                 break;
-            case standardDirectionsOrder:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE,"");
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, "");
+            case childArrangementsSpecificProhibitedOrder:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c43DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c43DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c43Template);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c43File);
                 break;
             default:
                 break;
@@ -108,7 +144,7 @@ public class ManageOrderService {
         if (caseData.getFl401FamilymanCaseNumber() == null && caseData.getFamilymanCaseNumber() == null) {
             return FAMILY_MAN_ID;
         }
-        return caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)
+        return FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             ? FAMILY_MAN_ID + caseData.getFl401FamilymanCaseNumber()
             : FAMILY_MAN_ID + caseData.getFamilymanCaseNumber();
     }
@@ -131,20 +167,48 @@ public class ManageOrderService {
         return builder.toString();
     }
 
-    private OrderDetails getCurrentOrderDetails(CaseData caseData) {
-        //Blank doc is added only for testing, needs to be replaced with the generated document
-        return OrderDetails.builder().orderType(caseData.getSelectedOrder()).orderDocument(Document.builder()
-                                                                                               .documentUrl("http://dm-store:8080/documents/cb961f7b-47e2-4954-a0e0-ca9a46ed2365")
-                                                                                               .documentBinaryUrl("http://dm-store:8080/documents/cb961f7b-47e2-4954-a0e0-ca9a46ed2365/binary")
-                                                                                               .documentFileName("blank-test-pdf.pdf")
-                                                                                               .build())
-            .otherDetails(OtherOrderDetails.builder()
-                              .createdBy(caseData.getJudgeOrMagistratesLastName())
-                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)))
-                              .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)))
-                              .orderRecipients(getAllRecipients(caseData)).build())
-            .dateCreated(dateTime.now())
-            .build();
+    private OrderDetails getCurrentOrderDetails(String authorisation, CaseData caseData)
+        throws Exception {
+        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+            Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
+            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
+            );
+            return OrderDetails.builder().orderType(caseData.getSelectedOrder())
+                .orderDocument(Document.builder()
+                                   .documentUrl(generatedDocumentInfo.getUrl())
+                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                   .documentHash(generatedDocumentInfo.getHashToken())
+                                   .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
+                .otherDetails(OtherOrderDetails.builder()
+                                  .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                  .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
+                                      PrlAppsConstants.D_MMMM_YYYY,
+                                      Locale.UK
+                                  )))
+                                  .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
+                                      PrlAppsConstants.D_MMMM_YYYY,
+                                      Locale.UK
+                                  )))
+                                  .orderRecipients(getAllRecipients(caseData)).build())
+                .dateCreated(dateTime.now())
+                .build();
+        } else {
+            return OrderDetails.builder().orderType(caseData.getSelectedOrder())
+                .orderDocument(caseData.getAppointmentOfGuardian())
+                .otherDetails(OtherOrderDetails.builder()
+                                  .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                  .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
+                                      PrlAppsConstants.D_MMMM_YYYY,
+                                      Locale.UK
+                                  )))
+                                  .orderRecipients(getAllRecipients(caseData)).build())
+                .dateCreated(dateTime.now())
+                .build();
+        }
+
     }
 
     private String getAllRecipients(CaseData caseData) {
@@ -186,8 +250,9 @@ public class ManageOrderService {
         return String.join("\n", respondentSolicitorNames);
     }
 
-    public List<Element<OrderDetails>> addOrderDetailsAndReturnReverseSortedList(CaseData caseData) {
-        Element<OrderDetails> orderDetails = element(getCurrentOrderDetails(caseData));
+    public List<Element<OrderDetails>> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
+        throws Exception {
+        Element<OrderDetails> orderDetails = element(getCurrentOrderDetails(authorisation, caseData));
         List<Element<OrderDetails>> orderCollection;
 
         if (caseData.getOrderCollection() != null) {
@@ -234,6 +299,24 @@ public class ManageOrderService {
             .id(caseDetails.getId())
             .build();
 
+    public void getCaseData(String authorisation, CaseData caseData1,
+                             Map<String, Object> caseDataUpdated)
+        throws Exception {
+
+        Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
+
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData1).build(),
+            fieldsMap.get(PrlAppsConstants.TEMPLATE)
+        );
+
+        caseDataUpdated.put("isEngDocGen", Yes.toString());
+        caseDataUpdated.put("previewOrderDoc", Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
     }
 
 }

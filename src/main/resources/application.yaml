@@ -234,6 +234,11 @@ document:
       C43A_draft_filename: C43ADraftCreateOrder.pdf
       C43A_final_template: PRL-ORDER-C43A-FINAL.docx
       C43A_final_filename: C43AFinalCreateOrder.pdf
+      prl_c43_template: PRL-ORDER-C43-FINAL.docx
+      prl_c43_filename: C43CreateOrder.pdf
+      prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
+      prl_c43_draft_filename: C43CreateOrderDraft.pdf
+
 
 southampton:
   court:
