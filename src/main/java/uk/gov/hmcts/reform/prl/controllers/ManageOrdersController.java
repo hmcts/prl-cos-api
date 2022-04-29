@@ -27,6 +27,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @RestController
 @RequiredArgsConstructor
@@ -98,7 +99,9 @@ public class ManageOrdersController {
             CaseData.class
         );
         CaseData caseDataInput = manageOrderService.getUpdatedCaseData(caseData);
-        caseDataInput = caseDataInput.toBuilder().manageOrders(manageOrderService.getN117FormData(caseData)).build();
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseDataInput = caseDataInput.toBuilder().manageOrders(manageOrderService.getN117FormData(caseData)).build();
+        }
 
         return CallbackResponse.builder()
             .data(caseDataInput)

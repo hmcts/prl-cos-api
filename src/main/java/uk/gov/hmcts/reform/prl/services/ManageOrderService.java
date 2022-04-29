@@ -50,6 +50,42 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c21_draft_filename}")
     protected String c21DraftFile;
 
+    @Value("${document.templates.common.prl_c21_template}")
+    protected String c21Template;
+
+    @Value("${document.templates.common.prl_c21_filename}")
+    protected String c21File;
+
+    @Value("${document.templates.common.C43A_draft_template}")
+    protected String c43ADraftTemplate;
+
+    @Value("${document.templates.common.C43A_draft_filename}")
+    protected String c43ADraftFilename;
+
+    @Value("${document.templates.common.prl_c43_draft_template}")
+    protected String c43DraftTemplate;
+
+    @Value("${document.templates.common.prl_c43_draft_filename}")
+    protected String c43DraftFile;
+
+    @Value("${document.templates.common.prl_c43_template}")
+    protected String c43Template;
+
+    @Value("${document.templates.common.prl_c43_filename}")
+    protected String c43File;
+
+    @Value("${document.templates.common.prl_c47a_draft_template}")
+    protected String c47aDraftTemplate;
+
+    @Value("${document.templates.common.prl_c47a_draft_filename}")
+    protected String c47aDraftFile;
+
+    @Value("${document.templates.common.prl_c47a_template}")
+    protected String c47aTemplate;
+
+    @Value("${document.templates.common.prl_c47a_filename}")
+    protected String c47aFile;
+
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
     @Autowired
@@ -74,8 +110,30 @@ public class ManageOrderService {
             case blankOrderOrDirections:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
                 break;
             case standardDirectionsOrder:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE,"");
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, "");
+                break;
+            case childArrangementsSpecificProhibitedOrder:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c43DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c43DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c43Template);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c43File);
+                break;
+            case specialGuardianShip:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c43ADraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c43ADraftFilename);
+                break;
+            case appointmentOfGuardian:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c47aDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c47aDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
+                break;
+            case generalForm:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE,"");
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, "");
                 break;
