@@ -306,7 +306,7 @@ public class ManageOrderService {
                              Map<String, Object> caseDataUpdated)
         throws Exception {
 
-        Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
+        /* Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
 
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
@@ -319,7 +319,7 @@ public class ManageOrderService {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());*/
     }
 
     public ManageOrders getN117FormData(CaseData caseData) {
