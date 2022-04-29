@@ -257,7 +257,7 @@ public class ManageOrderService {
             PartyDetails applicantFl401 = caseData.getApplicantsFL401();
             String applicantSolicitorName = applicantFl401.getRepresentativeFirstName()
                 + " "
-                + applicantFl401.getRepresentativeLastName();
+                + applicantFl401.getRepresentativeLastName() + " (Applicant's Solicitor)";
             return  applicantSolicitorName;
         }
     }
@@ -275,10 +275,9 @@ public class ManageOrderService {
             return String.join("\n", respondentSolicitorNames);
         } else {
             PartyDetails respondentFl401 = caseData.getRespondentsFL401();
-            String respondentSolicitorName = respondentFl401.getRepresentativeFirstName()
+            return respondentFl401.getRepresentativeFirstName()
                 + " "
                 + respondentFl401.getRepresentativeLastName();
-            return  respondentSolicitorName;
         }
     }
 
