@@ -32,7 +32,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -130,7 +132,7 @@ public class ManageOrderService {
 
     private OrderDetails getCurrentOrderDetails(String authorisation, CaseData caseData)
         throws Exception {
-        if (caseData.getCreateSelectOrderOptions() != null) {
+        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
@@ -188,27 +190,42 @@ public class ManageOrderService {
     }
 
     private String getApplicantSolicitorDetails(CaseData caseData) {
-        List<PartyDetails> applicants = caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        List<String> applicantSolicitorNames = applicants.stream()
-            .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Applicant's Solicitor)")
-            .collect(Collectors.toList());
-        return String.join("\n", applicantSolicitorNames);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> applicants = caseData
+                .getApplicants()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            List<String> applicantSolicitorNames  = applicants.stream()
+                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Applicant's Solicitor)")
+                .collect(Collectors.toList());
+            return String.join("\n", applicantSolicitorNames);
+        } else {
+            PartyDetails applicantFl401 = caseData.getApplicantsFL401();
+            String applicantSolicitorName = applicantFl401.getRepresentativeFirstName()
+                + " "
+                + applicantFl401.getRepresentativeLastName();
+            return  applicantSolicitorName;
+        }
     }
 
     private String getRespondentSolicitorDetails(CaseData caseData) {
-        List<PartyDetails> respondents = caseData
-            .getRespondents()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        List<String> respondentSolicitorNames = respondents.stream()
-            .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Respondent's Solicitor)")
-            .collect(Collectors.toList());
-        return String.join("\n", respondentSolicitorNames);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> respondents = caseData
+                .getRespondents()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            List<String> respondentSolicitorNames = respondents.stream()
+                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Respondent's Solicitor)")
+                .collect(Collectors.toList());
+            return String.join("\n", respondentSolicitorNames);
+        } else {
+            PartyDetails respondentFl401 = caseData.getRespondentsFL401();
+            return respondentFl401.getRepresentativeFirstName()
+                + " "
+                + respondentFl401.getRepresentativeLastName();
+        }
     }
 
     public List<Element<OrderDetails>> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
@@ -228,12 +245,12 @@ public class ManageOrderService {
     }
 
     public void getCaseData(String authorisation, CaseData caseData1,
-                            Map<String, Object> caseDataUpdated)
+                             Map<String, Object> caseDataUpdated)
         throws Exception {
 
-        //Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
+        Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
 
-        /* GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData1).build(),
             fieldsMap.get(PrlAppsConstants.TEMPLATE)
@@ -244,35 +261,30 @@ public class ManageOrderService {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build()); */
+            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
     }
 
-    public CaseData getN117FormCaseData(CaseData caseData) {
-        PartyDetails fl401Applicant = caseData
-            .getApplicantsFL401();
-        PartyDetails fl401Respondent = caseData
-            .getRespondentsFL401();
+    public ManageOrders getN117FormData(CaseData caseData) {
 
-        log.info("----Courtname: {}---",caseData.getCourtName());
-        log.info("*****CCD Reference number: {}***",caseData.getId());
-        log.info("=====Applicant full name: {} {}=====",fl401Applicant.getFirstName(),fl401Applicant.getLastName());
-        log.info("#####Applicant representative: {} {}#####",fl401Applicant.getRepresentativeFirstName(),fl401Applicant.getRepresentativeLastName());
-        log.info("=====Respondent full name: {} {}=====",fl401Respondent.getFirstName(),fl401Respondent.getLastName());
-        ManageOrders manageOrders = ManageOrders.builder()
-            .manageOrdersCourtName(caseData.getCourtName())
+        ManageOrders orderData = ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
-            .manageOrdersApplicant(fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName())
-            .manageOrdersApplicantReference(fl401Applicant.getRepresentativeFirstName() + " "
-                                                + fl401Applicant.getRepresentativeLastName())
-            .manageOrdersRespondent(fl401Respondent.getFirstName() + " " + fl401Respondent.getLastName())
-            .manageOrdersRespondentReference(fl401Respondent.getRepresentativeFirstName() + " "
-                + fl401Respondent.getRepresentativeLastName())
-            .manageOrdersRespondentDob((null != fl401Respondent.getDateOfBirth()) ? fl401Respondent.getDateOfBirth() : null)
+            .manageOrdersCourtName(caseData.getCourtName())
+            .manageOrdersApplicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
+                                               caseData.getApplicantsFL401().getLastName()))
+            .manageOrdersRespondent(String.format("%s %s", caseData.getRespondentsFL401().getFirstName(),
+                                                caseData.getRespondentsFL401().getLastName()))
+            .manageOrdersApplicantReference(String.format("%s %s", caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                                                          caseData.getApplicantsFL401().getRepresentativeLastName()))
             .build();
 
-        caseData = caseData.toBuilder().manageOrders(manageOrders).build();
-
-        return caseData;
+        if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+            orderData = orderData.toBuilder().manageOrdersRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+        }
+        if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+            orderData = orderData.toBuilder().manageOrdersRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+        }
+        return orderData;
     }
+
 
 }
