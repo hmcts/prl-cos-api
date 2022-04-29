@@ -72,6 +72,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -616,9 +617,13 @@ public class CaseData implements MappableObject {
     //private final List<String> otherEmailAddress;
     private final String childrenList;
 
-    @JsonUnwrapped
-    @Builder.Default
-    private final ManageOrders manageOrders = ManageOrders.builder().build();
+//    @JsonUnwrapped
+//    @Builder.Default
+//    private final ManageOrders manageOrders = ManageOrders.builder().build();
+
+    private final FL404b fl404bCustomFields;
+
+
     /**
      * Solicitor Details.
      */
