@@ -35,7 +35,7 @@ public class AddCaseNoteServiceTest {
             .build();
 
         Map<String, Object> responseMap = addCaseNoteService.populateHeader(caseData);
-        assertEquals("Case Name: Test Case Header Text", responseMap.get("addCaseNoteHeader1Text"));
+        assertEquals("Case Name: Test Case Header Text", responseMap.get("addCaseNoteHeaderCaseNameText"));
     }
 
     @Test
