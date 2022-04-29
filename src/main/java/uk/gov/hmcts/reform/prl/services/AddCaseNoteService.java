@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class AddCaseNoteService {
 
-    public static final String ADD_CASE_NOTE_HEADER_1_TEXT = "addCaseNoteHeader1Text";
+    public static final String ADD_CASE_NOTE_HEADER_1_TEXT = "addCaseNoteHeaderCaseNameText";
     public static final String SUBJECT = "subject";
     public static final String CASE_NOTE = "caseNote";
     public static final String CASE_NAME = "Case Name: ";
