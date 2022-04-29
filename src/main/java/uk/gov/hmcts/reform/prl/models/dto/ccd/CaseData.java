@@ -610,8 +610,8 @@ public class CaseData implements MappableObject {
     private final String recitalsOrPreamble;
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
-    private final List<String> cafcassEmailAddress;
-    private final List<String> otherEmailAddress;
+    private final List<Element<String>> cafcassEmailAddress;
+    private final List<Element<String>> otherEmailAddress;
     private final String childrenList;
 
     /**
