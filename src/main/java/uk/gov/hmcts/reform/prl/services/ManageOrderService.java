@@ -89,7 +89,7 @@ public class ManageOrderService {
 
     private final Time dateTime;
 
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();

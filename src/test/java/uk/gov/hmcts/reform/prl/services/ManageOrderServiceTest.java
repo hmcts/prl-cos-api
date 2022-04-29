@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -56,7 +55,7 @@ public class ManageOrderServiceTest {
     private Time dateTime;
 
     @Mock
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Test
     public void getUpdatedCaseData() {
@@ -233,7 +232,6 @@ public class ManageOrderServiceTest {
 
     }
 
-    @Ignore
     @Test
     public void testUpdateCaseDataWithAppointedGuardianNames() {
 
