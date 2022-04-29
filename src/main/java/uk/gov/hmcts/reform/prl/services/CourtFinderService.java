@@ -54,7 +54,7 @@ public class CourtFinderService {
             && serviceArea.getCourts().size() > 0) {
             return getCourtDetails(serviceArea.getCourts()
                                        .get(0)
-                                       .getCourtId());
+                                       .getCourtSlug());
         } else {
             return null;
         }
@@ -66,7 +66,7 @@ public class CourtFinderService {
         }
 
         return c1.getCourtName().equals(c2.getCourtName())
-            && c1.getCourtId().equals(c2.getCourtId());
+            && c1.getCountyLocationCode() == c2.getCountyLocationCode();
     }
 
     public Court getCourtDetails(String courtSlug) {
@@ -104,7 +104,7 @@ public class CourtFinderService {
 
     public CaseData setCourtNameAndId(CaseData caseData, Court court) {
         caseData.setCourtName(court.getCourtName());
-        caseData.setCourtId(court.getCourtId());
+        caseData.setCourtId(String.valueOf(court.getCountyLocationCode()));
         return caseData;
     }
 
