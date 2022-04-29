@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
 
-
 @Service
 @Slf4j
 @RequiredArgsConstructor

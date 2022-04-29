@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -15,6 +16,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -32,34 +35,49 @@ public class ManageOrdersController {
     @Autowired
     private ObjectMapper objectMapper;
 
-
-
     @Autowired
     private final UserService userService;
 
     @Autowired
-    private ManageOrderService manageOrderService;
+    private  ManageOrderService manageOrderService;
 
-
+    @Autowired
+    private final DocumentLanguageService documentLanguageService;
 
     @Autowired
     private ManageOrderEmailService manageOrderEmailService;
 
+    @Value("${document.templates.common.prl_c21_template}")
+    protected String c21Template;
+
+    @Value("${document.templates.common.prl_c21_filename}")
+    protected String c21File;
+
+    @Value("${document.templates.common.prl_c21_welsh_template}")
+    protected String c21WelshTemplate;
+
+    @Value("${document.templates.common.prl_c21_welsh_filename}")
+    protected String c21WelshFile;
+
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to show preview order in next screen for upload order")
-    public CallbackResponse populatePreviewOrderWhenOrderUploaded(
-        @RequestBody CallbackRequest callbackRequest) {
+    public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData1 = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        CaseData caseData = objectMapper.convertValue(
-            CaseData.builder()
-                .previewOrderDoc(caseData1.getAppointmentOfGuardian())
-                .build(),
-            CaseData.class
-        );
-        return CallbackResponse.builder()
-            .data(caseData)
-            .build();
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData1);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (caseData1.getCreateSelectOrderOptions() != null) {
+            manageOrderService.getCaseData(authorisation, caseData1, caseDataUpdated);
+        } else {
+            caseDataUpdated.put("previewOrderDoc",caseData1.getAppointmentOfGuardian());
+        }
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+
     }
+
+
 
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to fetch child details ")
@@ -121,13 +139,14 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest
-    ) {
+    ) throws Exception {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("orderCollection", manageOrderService.addOrderDetailsAndReturnReverseSortedList(caseData));
+        caseDataUpdated.put("orderCollection", manageOrderService
+            .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

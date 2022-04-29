@@ -95,7 +95,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void givenEmptyOrderList_thenNewOrderShouldBeAddedAndListReturned() {
+    public void givenEmptyOrderList_thenNewOrderShouldBeAddedAndListReturned() throws Exception {
         PartyDetails applicant = PartyDetails.builder()
             .email("app@email.com")
             .solicitorOrg(Organisation.builder().organisationName("Test App Org Name").build())
@@ -117,7 +117,7 @@ public class ManageOrderServiceTest {
 
         when(time.now()).thenReturn(LocalDateTime.now());
 
-        List<Element<OrderDetails>> actual = manageOrderService.addOrderDetailsAndReturnReverseSortedList(caseData);
+        List<Element<OrderDetails>> actual = manageOrderService.addOrderDetailsAndReturnReverseSortedList("auth", caseData);
 
         assertEquals(1, actual.size());
         assertTrue(actual.stream().map(Element::getValue).allMatch(order -> order.getOrderType().equals("Selected order")));
@@ -125,7 +125,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void givenOrderListPresent_thenNewOrderShouldBeAddedAndListReturnedInCorrectOrder() {
+    public void givenOrderListPresent_thenNewOrderShouldBeAddedAndListReturnedInCorrectOrder() throws Exception {
         PartyDetails applicant = PartyDetails.builder()
             .email("app@email.com")
             .solicitorOrg(Organisation.builder().organisationName("Test App Org Name").build())
@@ -159,7 +159,7 @@ public class ManageOrderServiceTest {
 
         when(time.now()).thenReturn(fixedDateTime);
 
-        List<Element<OrderDetails>> actual = manageOrderService.addOrderDetailsAndReturnReverseSortedList(caseData);
+        List<Element<OrderDetails>> actual = manageOrderService.addOrderDetailsAndReturnReverseSortedList("auth", caseData);
 
         //check that item added to list
         assertEquals(2, actual.size());

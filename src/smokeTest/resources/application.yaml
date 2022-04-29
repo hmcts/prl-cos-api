@@ -222,6 +222,25 @@ document:
       fl401_draft_welsh_filename: Draft_DA_Welsh_application
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
+    common:
+      prl_c21_template: PRL-ORDER-C21-COMMON.docx
+      prl_c21_filename: C21CreateOrder.pdf
+      prl_c21_welsh_template: PRL-ORDER-C21-WELSH-COMMON.docx
+      prl_c21_welsh_filename: C21WelshCreateOrder.pdf
+      prl_c21_draft_template: PRL-ORDER-C21-DRAFT-COMMON.docx
+      prl_c21_draft_filename: C21CreateOrderDraft.pdf
+      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
+      C43A_draft_filename: C43ADraftCreateOrder.pdf
+      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
+      C43A_final_filename: C43AFinalCreateOrder.pdf
+      prl_c43_template: PRL-ORDER-C43-FINAL.docx
+      prl_c43_filename: C43CreateOrder.pdf
+      prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
+      prl_c43_draft_filename: C43CreateOrderDraft.pdf
+      prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
+      prl_c47a_filename: C47ACreateOrder.pdf
+      prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
+      prl_c47a_draft_filename: C47ACreateOrderDraft.pdf
 
 southampton:
   court:
