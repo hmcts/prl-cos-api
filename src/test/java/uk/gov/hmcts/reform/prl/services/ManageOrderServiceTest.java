@@ -107,6 +107,7 @@ public class ManageOrderServiceTest {
             .build();
 
         CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
             .selectedOrder("Selected order")
             .judgeOrMagistratesLastName("Test last name")
             .dateOrderMade(LocalDate.of(2022, 01, 01))
@@ -146,6 +147,7 @@ public class ManageOrderServiceTest {
         orderList.add(order);
 
         CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
             .selectedOrder("Selected order")
             .judgeOrMagistratesLastName("Test last name")
             .dateOrderMade(LocalDate.of(2022, 01, 01))
