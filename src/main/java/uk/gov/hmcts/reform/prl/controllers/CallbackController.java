@@ -287,11 +287,7 @@ public class CallbackController {
 
         if (documentLanguage.isGenEng()) {
 
-            if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
-                && !caseData.getApplicantsConfidentialDetails().isEmpty()
-                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
-
+            if (flagGenerateDocument(caseData)) {
                 GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                     authorisation,
                     uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
@@ -337,10 +333,7 @@ public class CallbackController {
 
         if (documentLanguage.isGenWelsh()) {
 
-            if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
-                && !caseData.getApplicantsConfidentialDetails().isEmpty()
-                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
+            if (flagGenerateDocument(caseData)) {
 
                 GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
                     authorisation,
@@ -396,6 +389,13 @@ public class CallbackController {
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private boolean flagGenerateDocument(CaseData caseData) {
+        return ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+            && !caseData.getApplicantsConfidentialDetails().isEmpty()
+            || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
+            && !caseData.getChildrenConfidentialDetails().isEmpty();
     }
 
 
@@ -494,7 +494,7 @@ public class CallbackController {
         }
 
         // Saving the logged-in Solicitor and Org details for the docs..
-        caseDataUpdated = getSolicitorDetails(authorisation, caseDataUpdated);
+        getSolicitorDetails(authorisation, caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

@@ -51,7 +51,7 @@ public class CourtFinderService {
         }
 
         if (serviceArea.getCourts() != null
-            && serviceArea.getCourts().size() > 0) {
+            && !serviceArea.getCourts().isEmpty()) {
             return getCourtDetails(serviceArea.getCourts()
                                        .get(0)
                                        .getCourtId());
