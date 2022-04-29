@@ -79,7 +79,7 @@ public class ManageOrdersController {
 
 
 
-    @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/fetch-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to fetch child details ")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Child details are fetched"),
@@ -91,10 +91,11 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        CaseData caseDataInput = manageOrderService.getUpdatedCaseData(caseData);
+        caseData = manageOrderService.getUpdatedCaseData(caseData);
+        caseData = manageOrderService.populateCustomOrderFields(caseData);
 
         return CallbackResponse.builder()
-            .data(caseDataInput)
+            .data(caseData)
             .build();
     }
 
