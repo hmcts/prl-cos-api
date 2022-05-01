@@ -52,12 +52,12 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        CaseData caseData1 = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData1.getCreateSelectOrderOptions() != null) {
-            manageOrderService.getCaseData(authorisation, caseData1, caseDataUpdated);
+        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
         } else {
-            caseDataUpdated.put("previewOrderDoc",caseData1.getAppointmentOfGuardian());
+            caseDataUpdated.put("previewOrderDoc",caseData.getAppointmentOfGuardian());
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();

@@ -260,15 +260,15 @@ public class ManageOrderService {
         return orderCollection;
     }
 
-    public void getCaseData(String authorisation, CaseData caseData1,
+    public Map<String, Object> getCaseData(String authorisation, CaseData caseData,
                              Map<String, Object> caseDataUpdated)
         throws Exception {
 
-        Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
+        Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
 
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData1).build(),
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             fieldsMap.get(PrlAppsConstants.TEMPLATE)
         );
 
@@ -278,6 +278,7 @@ public class ManageOrderService {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+        return caseDataUpdated;
     }
 
 }
