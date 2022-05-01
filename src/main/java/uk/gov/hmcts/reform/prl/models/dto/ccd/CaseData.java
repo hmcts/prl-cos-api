@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
@@ -602,7 +603,7 @@ public class CaseData implements MappableObject {
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo isTheOrderByConsent;
     private final YesOrNo wasTheOrderApprovedAtHearing;
-    private final String judgeOrMagistrateTitle;
+    private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -610,7 +611,9 @@ public class CaseData implements MappableObject {
     private final String recitalsOrPreamble;
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
+    @JsonProperty("cafcassEmailAddress")
     private final List<Element<String>> cafcassEmailAddress;
+    @JsonProperty("otherEmailAddress")
     private final List<Element<String>> otherEmailAddress;
     private final String childrenList;
 
