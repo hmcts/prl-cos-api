@@ -308,7 +308,7 @@ public class ManageOrderService {
 
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
 
-        if(!fieldsMap.isEmpty()) {
+        if (!fieldsMap.isEmpty()) {
 
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
