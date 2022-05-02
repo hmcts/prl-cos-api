@@ -347,4 +347,15 @@ public class ManageOrderService {
     }
 
 
+    public ManageOrders getFL402FormData(CaseData caseData) {
+
+        return ManageOrders.builder()
+            .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
+            .manageOrdersFl402CourtName(caseData.getCourtName())
+            .manageOrdersFl402Applicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
+                                                 caseData.getApplicantsFL401().getLastName()))
+            .manageOrdersFl402ApplicantRef(String.format("%s %s", caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                                                          caseData.getApplicantsFL401().getRepresentativeLastName()))
+            .build();
+    }
 }
