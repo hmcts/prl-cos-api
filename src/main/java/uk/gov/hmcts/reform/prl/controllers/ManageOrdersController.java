@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -99,8 +100,12 @@ public class ManageOrdersController {
             CaseData.class
         );
         CaseData caseDataInput = manageOrderService.getUpdatedCaseData(caseData);
-        if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && caseData.getCreateSelectOrderOptions().equals(CreateSelectOrderOptionsEnum.generalForm)) {
             caseDataInput = caseDataInput.toBuilder().manageOrders(manageOrderService.getN117FormData(caseData)).build();
+        } else  if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && caseData.getCreateSelectOrderOptions().equals(CreateSelectOrderOptionsEnum.noticeOfProceedings)) {
+            caseDataInput = caseDataInput.toBuilder().manageOrders(manageOrderService.getFL402FormData(caseData)).build();
         }
 
         return CallbackResponse.builder()

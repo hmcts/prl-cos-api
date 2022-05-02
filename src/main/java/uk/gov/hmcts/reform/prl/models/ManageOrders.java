@@ -24,6 +24,7 @@ public class ManageOrders {
     private final List<String> cafcassEmailAddress;
     private final List<String> otherEmailAddress;
 
+    //N117
     private final String manageOrdersCourtName;
     @JsonIgnore
     private final Address manageOrdersCourtAddress;
@@ -49,5 +50,20 @@ public class ManageOrders {
     private final String underTakingExpiryTime;
     private final YesOrNo underTakingFormSign;
 
+    //FL402
+    private final String manageOrdersFl402CourtName;
+    @JsonIgnore
+    private final Address manageOrdersFl402CourtAddress;
+    private final String manageOrdersFl402CaseNo;
+    private final String manageOrdersFl402Applicant;
+    private final String manageOrdersFl402ApplicantRef;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate manageOrdersDateOfhearing;
+    private final String dateOfHearingTime;
+    private final String dateOfHearingTimeEstimate;
+    private final String fl402HearingCourtname;
+
+    @JsonIgnore
+    private final Address fl402HearingCourtAddress;
 
 }
