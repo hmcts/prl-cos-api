@@ -308,21 +308,20 @@ public class ManageOrderService {
 
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
 
-        if (!fieldsMap.isEmpty()) {
 
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData1).build(),
-                fieldsMap.get(PrlAppsConstants.TEMPLATE)
-            );
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData1).build(),
+            fieldsMap.get(PrlAppsConstants.TEMPLATE)
+        );
 
-            caseDataUpdated.put("isEngDocGen", Yes.toString());
-            caseDataUpdated.put("previewOrderDoc", Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
-        }
+        caseDataUpdated.put("isEngDocGen", Yes.toString());
+        caseDataUpdated.put("previewOrderDoc", Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+
     }
 
     public ManageOrders getN117FormData(CaseData caseData) {
