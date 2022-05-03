@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -14,16 +13,10 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-
-import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -76,33 +69,6 @@ public class FL401SubmitApplicationControllerFT {
             .andReturn();
 
     }
-
-//    @Test
-//    public void givenFl401Case_whenPostRequestMade_then200ResponseAndFinalDocsCreated() throws Exception {
-//        String requestBody = ResourceLoader.loadJson(FL401_GENERATE_DOC_SUBMIT);
-//
-//        Court court = Court.builder()
-//            .courtName("name")
-//            .countyLocationCode(123)
-//            .build();
-//
-//        Optional<CourtEmailAddress> courtEmailAddress = Optional.of(CourtEmailAddress.builder()
-//            .address("test@test.com")
-//            .build());
-//
-//        when(courtFinderService.getEmailAddress(court)).thenReturn(courtEmailAddress);
-//        when(courtFinderService.getCourtDetails(any(String.class))).thenReturn(court);
-//
-//        mockMvc.perform(post("/fl401-generate-document-submit-application")
-//                            .contentType(MediaType.APPLICATION_JSON)
-//                            .header("Authorization", "auth")
-//                            .content(requestBody)
-//                            .accept(MediaType.APPLICATION_JSON))
-//            .andExpect(status().isOk())
-////            .andExpect(jsonPath("errors").isNotEmpty())
-//            .andReturn();
-//
-//    }
 
     @Test
     public void givenFl401Case_whenPostRequestMade_then200ResponseAndNotificationFlagSet() throws Exception {
