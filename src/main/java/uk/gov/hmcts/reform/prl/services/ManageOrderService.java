@@ -284,12 +284,6 @@ public class ManageOrderService {
 
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
 
-        ManageOrders manageOrders = ManageOrders.builder()
-            .manageOrdersMultiSelectListForC43(getOrderTitle(caseData1.getOrdersApplyingFor()))
-            .build();
-
-        caseData1 = caseData1.toBuilder().manageOrders(manageOrders).build();
-
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData1).build(),

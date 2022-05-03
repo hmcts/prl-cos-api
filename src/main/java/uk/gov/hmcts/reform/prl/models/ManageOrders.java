@@ -21,6 +21,5 @@ public class ManageOrders {
     private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
     private final List<String> cafcassEmailAddress;
     private final List<String> otherEmailAddress;
-    private final String manageOrdersMultiSelectListForC43;
 
 }
