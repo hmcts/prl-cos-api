@@ -139,7 +139,7 @@ public class ManageOrderService {
         if (caseData.getFl401FamilymanCaseNumber() == null && caseData.getFamilymanCaseNumber() == null) {
             return FAMILY_MAN_ID;
         }
-        return caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)
+        return FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             ? FAMILY_MAN_ID + caseData.getFl401FamilymanCaseNumber()
             : FAMILY_MAN_ID + caseData.getFamilymanCaseNumber();
     }
