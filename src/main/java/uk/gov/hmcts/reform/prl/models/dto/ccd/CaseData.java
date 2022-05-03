@@ -610,17 +610,16 @@ public class CaseData implements MappableObject {
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
-    @JsonProperty("cafcassEmailAddress")
-    private final List<Element<String>> cafcassEmailAddress;
-    @JsonProperty("otherEmailAddress")
-    private final List<Element<String>> otherEmailAddress;
+
+    private List<Element<AppointedGuardianFullName>> appointedGuardianName;
+    private final String recitalsOrPreamble;
+    private final String orderDirections;
+    private final String furtherDirectionsIfRequired;
     private final String childrenList;
 
     @JsonUnwrapped
-    private ManageOrders manageOrders;
-
-    private List<Element<AppointedGuardianFullName>> appointedGuardianName;
-
+    private final ManageOrders manageOrders;
+  
     /**
      * Solicitor Details.
      */
