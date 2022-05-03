@@ -321,29 +321,29 @@ public class ManageOrderServiceTest {
     @Test
     public void testPopulateFinalOrderFromCaseDataFL401ForMultipleOrders() throws Exception {
 
-            generatedDocumentInfo = GeneratedDocumentInfo.builder()
-                .url("TestUrl")
-                .binaryUrl("binaryUrl")
-                .hashToken("testHashToken")
-                .build();
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
 
-            CaseData caseData = CaseData.builder()
-                .id(12345L)
-                .caseTypeOfApplication("FL401")
-                .applicantCaseName("Test Case 45678")
-                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-                .fl401FamilymanCaseNumber("familyman12345")
-                .orderCollection(new ArrayList<>())
-                .dateOrderMade(LocalDate.now())
-                .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-                .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(new ArrayList<>())
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
 
-            when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-                .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
 
-            when(dateTime.now()).thenReturn(LocalDateTime.now());
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-            assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
 
     }
 }
