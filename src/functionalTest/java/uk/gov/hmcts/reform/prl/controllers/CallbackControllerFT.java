@@ -27,8 +27,10 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.Assert.assertTrue;
@@ -69,6 +71,9 @@ public class CallbackControllerFT {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private AllTabServiceImpl allTabService;
 
     private static final String MIAM_VALIDATION_REQUEST_ERROR = "requests/call-back-controller-miam-request-error.json";
     private static final String MIAM_VALIDATION_REQUEST_NO_ERROR = "requests/call-back-controller-miam-request-no-error.json";
@@ -190,6 +195,16 @@ public class CallbackControllerFT {
         UserDetails userDetails = UserDetails.builder().forename("test").build();
 
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
+
+        Map<String, Object> caseDataMap = Map.of(
+            "welshLanguageRequirementsTable", "value",
+            "otherProceedingsDetailsTable", "value",
+            "allegationsOfHarmDomesticAbuseTable", "value",
+            "summaryTabForOrderAppliedFor", "value",
+            "miamTable", "value"
+        );
+
+        when(allTabService.getAllTabsFields(any(CaseData.class))).thenReturn(caseDataMap);
 
         MvcResult res = mockMvc.perform(post("/case-withdrawn-email-notification")
                                           .contentType(MediaType.APPLICATION_JSON)
