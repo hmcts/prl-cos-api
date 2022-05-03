@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
@@ -138,7 +139,7 @@ public class ManageOrderService {
         if (caseData.getFl401FamilymanCaseNumber() == null && caseData.getFamilymanCaseNumber() == null) {
             return FAMILY_MAN_ID;
         }
-        return FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+        return caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)
             ? FAMILY_MAN_ID + caseData.getFl401FamilymanCaseNumber()
             : FAMILY_MAN_ID + caseData.getFamilymanCaseNumber();
     }
@@ -221,27 +222,43 @@ public class ManageOrderService {
     }
 
     private String getApplicantSolicitorDetails(CaseData caseData) {
-        List<PartyDetails> applicants = caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        List<String> applicantSolicitorNames = applicants.stream()
-            .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Applicant's Solicitor)")
-            .collect(Collectors.toList());
-        return String.join("\n", applicantSolicitorNames);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> applicants = caseData
+                .getApplicants()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            List<String> applicantSolicitorNames  = applicants.stream()
+                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Applicant's Solicitor)")
+                .collect(Collectors.toList());
+            return String.join("\n", applicantSolicitorNames);
+        } else {
+            PartyDetails applicantFl401 = caseData.getApplicantsFL401();
+            String applicantSolicitorName = applicantFl401.getRepresentativeFirstName()
+                + " "
+                + applicantFl401.getRepresentativeLastName();
+            return  applicantSolicitorName;
+        }
     }
 
     private String getRespondentSolicitorDetails(CaseData caseData) {
-        List<PartyDetails> respondents = caseData
-            .getRespondents()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        List<String> respondentSolicitorNames = respondents.stream()
-            .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Respondent's Solicitor)")
-            .collect(Collectors.toList());
-        return String.join("\n", respondentSolicitorNames);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> respondents = caseData
+                .getRespondents()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            List<String> respondentSolicitorNames = respondents.stream()
+                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Respondent's Solicitor)")
+                .collect(Collectors.toList());
+            return String.join("\n", respondentSolicitorNames);
+        } else {
+            PartyDetails respondentFl401 = caseData.getRespondentsFL401();
+            String respondentSolicitorName = respondentFl401.getRepresentativeFirstName()
+                + " "
+                + respondentFl401.getRepresentativeLastName();
+            return  respondentSolicitorName;
+        }
     }
 
     public List<Element<OrderDetails>> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)

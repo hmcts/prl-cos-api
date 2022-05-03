@@ -70,7 +70,7 @@ public class ManageOrderServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .caseTypeOfApplication("FL401")
+            .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
@@ -151,7 +151,7 @@ public class ManageOrderServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .caseTypeOfApplication("FL401")
+            .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
