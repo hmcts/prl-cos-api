@@ -31,11 +31,10 @@ public enum MiamUrgencyReasonChecklistEnum {
                                                +
                                                "dispute before a court in England and Wales."),
     @JsonProperty("miamUrgencyReasonChecklistEnum_Value_6")
-    MIAMUrgencyReasonChecklistEnum_Value_6("There is a risk of unlawful removal of a child from the United Kingdom,"
-                                               +
-                                               "or a risk of unlawful retention of a child who is currently outside England and Wales"),
+    miamUrgencyReasonChecklistEnum_Value_6("There is a risk of unlawful removal of a child from the United Kingdom,"
+                                               + "or a risk of unlawful retention of a child who is currently outside England and Wales"),
     @JsonProperty("miamUrgencyReasonChecklistEnum_Value_7")
-    MIAMUrgencyReasonChecklistEnum_Value_7("There is a risk of harm to a child");
+    miamUrgencyReasonChecklistEnum_Value_7("There is a risk of harm to a child");
 
     private final String displayedValue;
 

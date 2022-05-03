@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import javassist.NotFoundException;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.ws.rs.NotFoundException;
+
+import static java.util.Optional.ofNullable;
 
 @Service
 @Slf4j
@@ -31,7 +34,7 @@ public class OrganisationService {
     private final SystemUserService systemUserService;
     private List<Element<PartyDetails>> applicantsWithOrganisationDetails = new ArrayList<>();
 
-    public CaseData getApplicantOrganisationDetails(CaseData caseData)  {
+    public CaseData getApplicantOrganisationDetails(CaseData caseData) {
         if (Optional.ofNullable(caseData.getApplicants()).isPresent()) {
             String userToken = systemUserService.getSysUserToken();
             List<Element<PartyDetails>> applicants = caseData.getApplicants()
@@ -47,7 +50,7 @@ public class OrganisationService {
         return caseData;
     }
 
-    public CaseData getRespondentOrganisationDetails(CaseData caseData) throws NotFoundException {
+    public CaseData getRespondentOrganisationDetails(CaseData caseData) {
 
         if (Optional.ofNullable(caseData.getRespondents()).isPresent()) {
             String userToken = systemUserService.getSysUserToken();
@@ -72,31 +75,84 @@ public class OrganisationService {
 
             String organisationID = respondent.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
-                organisations = getOrganisationDetaiils(userToken, organisationID);
-                respondent = respondent.toBuilder()
-                    .organisations(organisations)
-                    .build();
+                try {
+                    organisations = getOrganisationDetaiils(userToken, organisationID);
+                    respondent = respondent.toBuilder()
+                        .organisations(organisations)
+                        .build();
+                } catch (NotFoundException e) {
+                    log.info(
+                        "OrganisationsAPi return 404, organisation not present for {} {} ",
+                        organisationID,
+                        e.getMessage()
+                    );
+                } catch (Exception e) {
+                    log.info(
+                        "Error while fetching org details for orgid {} {} ",
+                        organisationID,
+                        e.getMessage()
+                    );
+                }
             }
         }
         return respondent;
     }
 
     public Organisations getOrganisationDetaiils(String userToken, String organisationID) {
+        log.info("Fetching organisation details for organisation id: {}", organisationID);
+
         return organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
     }
 
     private PartyDetails getApplicantWithOrg(PartyDetails applicant, String userToken) {
 
         if (null != applicant && applicant.getSolicitorOrg() != null) {
+
             String organisationID = applicant.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
-                organisations = getOrganisationDetaiils(userToken, organisationID);
+                try {
+                    organisations = getOrganisationDetaiils(userToken, organisationID);
 
-                applicant = applicant.toBuilder()
-                    .organisations(organisations)
-                    .build();
+                    applicant = applicant.toBuilder()
+                        .organisations(organisations)
+                        .build();
+                } catch (NotFoundException e) {
+                    log.info(
+                        "OrganisationsAPi return 404, organisation not present for {} {} ",
+                        organisationID,
+                        e.getMessage()
+                    );
+                } catch (Exception e) {
+                    log.info(
+                        "Error while fetching org details for orgid {} {} ",
+                        organisationID,
+                        e.getMessage()
+                    );
+                }
             }
+
         }
+
         return applicant;
+    }
+
+    public CaseData getApplicantOrganisationDetailsForFL401(CaseData caseData)  {
+        if (Optional.ofNullable(caseData.getApplicantsFL401()).isPresent()) {
+            String userToken = systemUserService.getSysUserToken();
+            PartyDetails applicantWithOrg = getApplicantWithOrg(caseData.getApplicantsFL401(), userToken);
+            caseData = caseData.toBuilder()
+                .applicantsFL401(applicantWithOrg)
+                .build();
+        }
+        return caseData;
+    }
+
+    public Optional<Organisations> findUserOrganisation(String authorization) {
+        try {
+            return ofNullable(organisationApi.findUserOrganisation(authorization, authTokenGenerator.generate()));
+        } catch (FeignException.NotFound | FeignException.Forbidden ex) {
+            log.error("Exception while getting org details of the logged in users ", ex);
+            return Optional.empty();
+        }
     }
 }

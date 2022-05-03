@@ -14,7 +14,7 @@ public class DateOfSubmissionGenerator implements FieldGenerator {
             caseData.getDateSubmitted(),
             CommonUtils.DATE_OF_SUBMISSION_FORMAT
         );
-        String dateWithoutDash = dateString.replaceAll("-", " ");
+        String dateWithoutDash = dateString.replace("-", " ");
         return CaseSummary.builder().dateOfSubmission(DateOfSubmission.builder()
                                                           .dateOfSubmission(dateWithoutDash
                                                               )

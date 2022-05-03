@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
 
 import static java.util.Optional.ofNullable;
@@ -43,7 +44,7 @@ public class SolicitorsMapper {
                 .add("AddressLine3", contactInformation.getAddressLine3())
                 .build();
         }
-        return null;
+        return JsonValue.EMPTY_JSON_OBJECT;
     }
 
     public JsonArray mapSolicitorList(Map<String, PartyDetails> solicitorMap) {
@@ -53,7 +54,6 @@ public class SolicitorsMapper {
     }
 
     public JsonObject callOrgSearchFormSolicitorMap(String id, PartyDetails party) {
-        log.info("Fetching the organisation details for org {}", party.getSolicitorOrg());
         if (party.getSolicitorOrg() != null && party.getSolicitorOrg().getOrganisationID() != null) {
             Organisations org = organisationService.getOrganisationDetaiils(
                 systemUserService.getSysUserToken(),
@@ -104,7 +104,7 @@ public class SolicitorsMapper {
             && !org.getContactInformation().isEmpty()) {
             return mapSolicitorAddress(org.getContactInformation().get(0));
         } else {
-            return null;
+            return JsonValue.EMPTY_JSON_OBJECT;
         }
     }
 

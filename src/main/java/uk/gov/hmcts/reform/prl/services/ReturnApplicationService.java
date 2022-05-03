@@ -22,7 +22,7 @@ public class ReturnApplicationService {
 
     public String getLegalFullName(CaseData caseData) {
 
-        String legalName = "[Legal representative name]";
+        String legalName;
 
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
@@ -61,7 +61,7 @@ public class ReturnApplicationService {
 
         returnMsgStr
             .append("Case name: " + caseData.getApplicantCaseName() + "\n")
-            .append("Reference code: " + String.valueOf(caseData.getId()) + "\n\n")
+            .append("Reference code: " + caseData.getId() + "\n\n")
             .append("Dear " + getLegalFullName(caseData) + ",\n\n")
             .append("Thank you for your application."
                         + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n");

@@ -36,12 +36,28 @@ public class PrlAppsConstants {
     public static final String YES_SMALL = "yes";
     public static final String NO_SMALL = "no";
 
+    public static final String DOCUMENT_FIELD_C1A = "c1ADocument";
+    public static final String DOCUMENT_FIELD_C8 = "c8Document";
+    public static final String DOCUMENT_FIELD_FINAL = "finalDocument";
+    public static final String COURT_NAME_FIELD = "courtName";
+    public static final String COURT_ID_FIELD = "courtId";
+    public static final String COURT_EMAIL_ADDRESS_FIELD = "courtEmailAddress";
+    public static final String FINAL_DOCUMENT_FIELD = "finalDocument";
+    public static final String ISSUE_DATE_FIELD = "issueDate";
+    public static final String DATE_SUBMITTED_FIELD = "dateSubmitted";
+
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
 
+    public static final String SEARCH_RESULTS_POSTCODE_POSTCODE_SERVICE_AREA = "search/results?postcode={postcode}&serviceArea=";
+    public static final String CHILD_ARRANGEMENTS_POSTCODE_URL = SEARCH_RESULTS_POSTCODE_POSTCODE_SERVICE_AREA + "childcare-arrangements";
+    public static final String COURT_DETAILS_URL = "courts/{court-slug}";
+    public static final String DOMESTIC_ABUSE_POSTCODE_URL = SEARCH_RESULTS_POSTCODE_POSTCODE_SERVICE_AREA + "domestic-abuse";
+
+    public static final String DOCUMENT_FIELD_C1A_WELSH = "c1AWelshDocument";
+    public static final String DOCUMENT_FIELD_C8_WELSH = "c8WelshDocument";
+    public static final String DOCUMENT_FIELD_FINAL_WELSH = "finalWelshDocument";
 
     public static final String CHILD_ARRANGEMENT_CASE = "CHILD ARRANGEMENT CASE";
     public static final String ISSUE_EVENT_CODE = "001";
     public static final String ISSUE_EVENT_SEQUENCE = "1";
-
-
 }

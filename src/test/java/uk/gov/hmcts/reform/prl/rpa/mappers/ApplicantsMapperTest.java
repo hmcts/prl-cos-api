@@ -21,7 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.json.JsonObject;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicantsMapperTest {
@@ -77,7 +78,13 @@ public class ApplicantsMapperTest {
     @Test
     public void testIfApplicantsNull() {
         applicants = null;
-        assertNull(applicantsMapper.map(applicants, applicantSolicitorMap));
+        assertEquals(Collections.emptyList(),applicantsMapper.map(applicants, applicantSolicitorMap));
+    }
+
+    @Test
+    public void testIfApplicantsIsEmpty() {
+        applicants = Collections.emptyList();
+        assertTrue(applicantsMapper.map(applicants, applicantSolicitorMap).isEmpty());
     }
 
 }

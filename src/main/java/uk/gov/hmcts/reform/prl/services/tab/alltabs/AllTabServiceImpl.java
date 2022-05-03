@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
@@ -34,6 +35,9 @@ public class AllTabServiceImpl implements AllTabsService {
     @Qualifier("caseSummaryTab")
     CaseSummaryTabService caseSummaryTabService;
 
+    @Autowired
+    ConfidentialityTabService confidentialityTabService;
+
     @Override
     public void updateAllTabs(CaseData caseData) {
         Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
@@ -43,8 +47,15 @@ public class AllTabServiceImpl implements AllTabsService {
         if (caseData.getCourtName() != null) {
             combinedFieldsMap.put("courtName", caseData.getCourtName());
         }
+        if (caseData.getCourtId() != null) {
+            combinedFieldsMap.put("courtId", caseData.getCourtId());
+        }
 
         // Calling event to refresh the page.
+        refreshCcdUsingEvent(caseData, combinedFieldsMap);
+    }
+
+    private void refreshCcdUsingEvent(CaseData caseData, Map<String, Object> combinedFieldsMap) {
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -52,6 +63,25 @@ public class AllTabServiceImpl implements AllTabsService {
             "internal-update-all-tabs",
             combinedFieldsMap
         );
+    }
+
+    public void updateAllTabsIncludingConfTab(CaseData caseData) {
+        Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
+        Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
+        combinedFieldsMap.putAll(confidentialDetails);
+
+        if (caseData.getDateSubmitted() != null) {
+            combinedFieldsMap.put("dateSubmitted", caseData.getDateSubmitted());
+        }
+        if (caseData.getCourtName() != null) {
+            combinedFieldsMap.put("courtName", caseData.getCourtName());
+        }
+        if (caseData.getCourtId() != null) {
+            combinedFieldsMap.put("courtId", caseData.getCourtId());
+        }
+
+        // Calling event to refresh the page.
+        refreshCcdUsingEvent(caseData, combinedFieldsMap);
     }
 
     private Map<String, Object> getCombinedMap(CaseData caseData) {

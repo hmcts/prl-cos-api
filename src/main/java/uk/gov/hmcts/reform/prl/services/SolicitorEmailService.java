@@ -64,13 +64,13 @@ public class SolicitorEmailService {
             String applicantNames = String.join(", ", applicantNamesList);
 
             Court court = null;
-            court = courtLocatorService.getClosestChildArrangementsCourt(caseData);
+            court = courtLocatorService.getNearestFamilyCourt(caseData);
 
-            return   SolicitorEmail.builder()
+            return SolicitorEmail.builder()
                 .caseReference(String.valueOf(caseDetails.getId()))
                 .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
                 .applicantName(applicantNames)
-                .courtName(court.getCourtName())
+                .courtName((court != null) ? court.getCourtName() : "")
                 .courtEmail(courtEmail)
                 .caseLink(manageCaseUrl + "/" + caseDetails.getId())
                 .build();
@@ -82,25 +82,10 @@ public class SolicitorEmailService {
 
 
     public void sendEmail(CaseDetails caseDetails) {
-        log.info("Sending the email to solicitor for caseId {}", caseDetails.getId()
-        );
-
+        log.info("Sending the email to solicitor for caseId {}", caseDetails.getId());
+        String applicantSolicitorEmailAddress = caseDetails.getData().get("applicantSolicitorEmailAddress").toString();
         emailService.send(
-            "yogendra.upasani@hmcts.net",
-            EmailTemplateNames.SOLICITOR,
-            buildEmail(caseDetails),
-            LanguagePreference.english
-        );
-
-    }
-
-    /*
-     * Todo TO be removed once done with fee and pay bypass
-     * */
-    public void sendEmailBypss(CaseDetails caseDetails, String authorisation) {
-        log.info("inside send email bypass");
-        emailService.send(
-            "yogendra.upasani@hmcts.net",
+            applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR,
             buildEmail(caseDetails),
             LanguagePreference.english
@@ -131,7 +116,8 @@ public class SolicitorEmailService {
             .collect(Collectors.toList());
 
         solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
-            && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(0)
+            && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(
+            0)
             : userDetails.getEmail();
 
         emailService.send(
@@ -141,5 +127,47 @@ public class SolicitorEmailService {
             LanguagePreference.english
         );
 
+    }
+
+    public void sendEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails) {
+
+        log.info("trying to send email for Solicitor FL401 {} ====:", caseDetails.getId());
+
+        String solicitorEmail = "";
+
+        PartyDetails fl401Applicant = emailService.getCaseData(caseDetails)
+            .getApplicantsFL401();
+
+        String applicantSolicitorEmail = fl401Applicant.getSolicitorEmail();
+        solicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
+
+        emailService.send(
+            solicitorEmail,
+            EmailTemplateNames.DA_SOLICITOR,
+            buildFl401SolicitorEmail(caseDetails),
+            LanguagePreference.english
+        );
+
+    }
+
+    public EmailTemplateVars buildFl401SolicitorEmail(CaseDetails caseDetails) {
+
+        log.info("trying to build email for Solicitor FL401 {} ------:", caseDetails.getId());
+
+        CaseData caseData = emailService.getCaseData(caseDetails);
+
+        PartyDetails fl401Applicant = caseData
+            .getApplicantsFL401();
+
+        String applicantFullName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
+
+        return SolicitorEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .applicantName(applicantFullName)
+            .courtName(caseData.getCourtName())
+            .courtEmail(caseData.getCourtEmailAddress())
+            .caseLink(manageCaseUrl + "/" + caseData.getId())
+            .build();
     }
 }

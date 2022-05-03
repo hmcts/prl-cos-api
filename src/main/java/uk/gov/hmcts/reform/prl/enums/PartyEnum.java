@@ -15,7 +15,7 @@ public enum PartyEnum {
     @JsonProperty("respondent")
     respondent("Respondent"),
     @JsonProperty("other")
-    other("Someone else");
+    other("Other people in the case");
 
     private final String displayedValue;
 

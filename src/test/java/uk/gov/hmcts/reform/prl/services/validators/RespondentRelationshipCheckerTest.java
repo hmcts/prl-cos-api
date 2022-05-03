@@ -44,7 +44,7 @@ public class RespondentRelationshipCheckerTest {
     public void whenSomeRelationshipDataPresentThenIsStartedReturnsTrue() {
         CaseData caseData = CaseData.builder()
             .respondentRelationObject(RespondentRelationObjectType.builder()
-                                              .applicantRelationshipEnum(ApplicantRelationshipEnum.noneOfTheAbove)
+                                              .applicantRelationship(ApplicantRelationshipEnum.noneOfTheAbove)
                                               .build())
             .build();
         assertTrue(respondentRelationshipChecker.isStarted(caseData));
@@ -62,7 +62,7 @@ public class RespondentRelationshipCheckerTest {
     public void whenSomeRealtionshipDataPresentThenIsFinishedReturnsFalse() {
         CaseData caseData = CaseData.builder()
             .respondentRelationObject(RespondentRelationObjectType.builder()
-                                              .applicantRelationshipEnum(ApplicantRelationshipEnum.noneOfTheAbove)
+                                              .applicantRelationship(ApplicantRelationshipEnum.noneOfTheAbove)
                                               .build())
             .build();
 
@@ -75,10 +75,10 @@ public class RespondentRelationshipCheckerTest {
 
         CaseData caseData = CaseData.builder()
             .respondentRelationObject(RespondentRelationObjectType.builder()
-                                              .applicantRelationshipEnum(ApplicantRelationshipEnum.noneOfTheAbove)
+                                              .applicantRelationship(ApplicantRelationshipEnum.noneOfTheAbove)
                                               .build())
             .respondentRelationOptions(RespondentRelationOptionsInfo.builder()
-                                               .applicantRelationshipOptionsEnum(ApplicantRelationshipOptionsEnum.aunt)
+                                               .applicantRelationshipOptions(ApplicantRelationshipOptionsEnum.aunt)
                                                .build())
             .build();
         assertTrue(respondentRelationshipChecker.isFinished(caseData));
@@ -89,7 +89,7 @@ public class RespondentRelationshipCheckerTest {
 
         CaseData caseData = CaseData.builder()
             .respondentRelationObject(RespondentRelationObjectType.builder()
-                                              .applicantRelationshipEnum(ApplicantRelationshipEnum.formerlyEngagedOrProposed)
+                                              .applicantRelationship(ApplicantRelationshipEnum.formerlyEngagedOrProposed)
                                               .build())
             .build();
         assertTrue(respondentRelationshipChecker.isFinished(caseData));

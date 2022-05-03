@@ -23,7 +23,7 @@ public class UrgencyGenerator implements FieldGenerator {
             YesOrNo.Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing()) ? "without notice" : "",
             YesOrNo.Yes.equals(caseData.getDoYouRequireAHearingWithReducedNotice()) ? "reduced notice" : "" };
 
-        List<String> modifiableList = new ArrayList<String>(Arrays.asList(listOfValues));
+        List<String> modifiableList = new ArrayList<>(Arrays.asList(listOfValues));
         modifiableList.removeAll(Arrays.asList("", null));
         return String.join(", ", modifiableList);
     }

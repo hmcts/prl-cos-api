@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.SendAndReplyNotificationEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
-import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyEventData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -80,7 +79,6 @@ public class SendAndReplyServiceTest {
     Element<Message> message2Element;
     List<Element<Message>> messages;
     List<Element<Message>> messagesWithOneAdded;
-    SendAndReplyEventData eventData;
     MessageMetaData metaData;
     DynamicList dynamicList;
     CaseData caseData;
@@ -138,12 +136,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         dynamicList =  ElementUtils.asDynamicList(messages, null, Message::getLabelForDynamicList);
-        eventData = SendAndReplyEventData.builder()
-            .messageMetaData(metaData)
-            .messageReply(message1)
-            .messageContent("This is the message body")
-            .replyMessageDynamicList(dynamicList)
-            .build();
+
 
         message1Element = element(message1);
         message2Element = element(message2);
@@ -154,13 +147,19 @@ public class SendAndReplyServiceTest {
             .applicantCaseName("Test name")
             .openMessages(messages)
             .closedMessages(messages)
-            .sendAndReplyEventData(eventData)
+            .messageMetaData(metaData)
+            .messageReply(message1)
+            .messageContent("This is the message body")
+            .replyMessageDynamicList(dynamicList)
             .build();
 
         messagesWithOneAdded = Arrays.asList(element(message1), element(message2), element(message3));
         caseDataWithAddedMessage = CaseData.builder()
             .openMessages(messagesWithOneAdded)
-            .sendAndReplyEventData(eventData)
+            .messageMetaData(metaData)
+            .messageReply(message1)
+            .messageContent("This is the message body")
+            .replyMessageDynamicList(dynamicList)
             .build();
     }
 
@@ -182,11 +181,8 @@ public class SendAndReplyServiceTest {
         MessageMetaData preFillMetaData = MessageMetaData.builder()
             .senderEmail("sender@email.com")
             .build();
-        SendAndReplyEventData preFillEventData = SendAndReplyEventData.builder()
-            .messageMetaData(preFillMetaData)
-            .build();
         CaseData caseDataWithPreFill = CaseData.builder()
-            .sendAndReplyEventData(preFillEventData)
+            .messageMetaData(preFillMetaData)
             .build();
         assertTrue(sendAndReplyService.setSenderAndGenerateMessageList(caseData, auth).containsKey("messageObject"));
         assertEquals(sendAndReplyService.setSenderAndGenerateMessageList(caseDataWithPreFill, auth).get("messageObject"), preFillMetaData);
@@ -227,7 +223,6 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testThatNewSendMessageGeneratesMessageObject() {
-        when(objectMapper.convertValue(caseData, SendAndReplyEventData.class)).thenReturn(eventData);
         when(time.now()).thenReturn(dateTime);
         Message builtMessage = Message.builder()
             .status(OPEN)
@@ -237,7 +232,7 @@ public class SendAndReplyServiceTest {
             .messageSubject(metaData.getMessageSubject())
             .messageHistory("sender@email.com - This is the message body")
             .messageUrgency(ofNullable(metaData.getMessageUrgency()).orElse(""))
-            .latestMessage(eventData.getMessageContent())
+            .latestMessage(caseData.getMessageContent())
             .updatedTime(dateTime)
             .build();
 

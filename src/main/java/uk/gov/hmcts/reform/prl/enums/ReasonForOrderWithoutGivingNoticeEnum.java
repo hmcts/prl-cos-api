@@ -11,7 +11,7 @@ public enum ReasonForOrderWithoutGivingNoticeEnum {
 
     harmToApplicantOrChild("There is risk of significant harm to the applicant or a relevant child, "
                                + "attributable to conduct of the respondent, if the order is not made immediately"),
-    deferringApplicationIfNotImmediate("It is likely that the applicant will be deferred or prevented "
+    deferringApplicationIfNotImmediate("It is likely that the applicant will be deterred or prevented "
                                            + "from pursuing the application if order is not made immediately"),
     prejudiced("The applicant believes that the respondent is aware of the proceedings but "
                    + "is deliberately evading service and that the applicant or a relevant child "

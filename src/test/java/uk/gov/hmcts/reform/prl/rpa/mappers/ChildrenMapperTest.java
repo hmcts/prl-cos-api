@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChildrenMapperTest {
@@ -63,9 +63,9 @@ public class ChildrenMapperTest {
     }
 
     @Test
-    public void testChildrenMapperWithNullValues() {
-        children = null;
-        assertNull(childrenMapper.map(children));
+    public void testChildrenMapperWithEmptyValues() {
+        children = Collections.emptyList();
+        assertTrue(childrenMapper.map(children).isEmpty());
 
     }
 

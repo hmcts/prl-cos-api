@@ -31,5 +31,7 @@ public class Court {
     private boolean inPerson;
     @JsonProperty("access_scheme")
     private boolean accessScheme;
+    @JsonProperty("emails")
+    private List<CourtEmailAddress> courtEmailAddresses;
 
 }

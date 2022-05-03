@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RespondentsMapperTest {
@@ -71,9 +71,9 @@ public class RespondentsMapperTest {
     }
 
     @Test
-    public void testRespondentsMapperNullCheck() {
-        respondents = null;
-        assertNull(respondentsMapper.map(respondents, respondentSolicitorMap));
+    public void testRespondentsMapperEmptyCheck() {
+        respondents = Collections.emptyList();;
+        assertTrue(respondentsMapper.map(respondents, respondentSolicitorMap).isEmpty());
     }
 
     @Test

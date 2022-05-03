@@ -11,11 +11,11 @@ import lombok.RequiredArgsConstructor;
 public enum AbductionChildPassportPossessionEnum {
 
     @JsonProperty("mother")
-    MOTHER("mother", "Mother"),
+    mother("mother", "Mother"),
     @JsonProperty("father")
-    FATHER("father", "Father"),
+    father("father", "Father"),
     @JsonProperty("other")
-    OTHER("other", "Other");
+    other("other", "Other");
 
     private final String id;
     private final String displayedValue;
