@@ -495,7 +495,7 @@ public class CallbackControllerTest {
             .build();
 
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+        orderList.add(FL401OrderTypeEnum.occupationOrder);
 
         TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder()
             .orderType(orderList)
@@ -1110,7 +1110,20 @@ public class CallbackControllerTest {
             .withDrawApplicationReason("Test data")
             .build();
 
-        PartyDetails applicant = PartyDetails.builder().solicitorEmail("test@gmail.com").build();
+        sendEmail("test@gmail.com", withdrawApplication, 1);
+    }
+
+    @Test
+    public void testSendCaseWithdrawNotificationNo() throws Exception {
+        WithdrawApplication withdrawApplication = WithdrawApplication.builder()
+            .withDrawApplication(YesOrNo.No)
+            .withDrawApplicationReason("Test data No")
+            .build();
+        sendEmail("test@gmail.com", withdrawApplication, 0);
+    }
+
+    private void sendEmail(String solicitorEmail, WithdrawApplication withdrawApplication, int timesCalled) {
+        PartyDetails applicant = PartyDetails.builder().solicitorEmail(solicitorEmail).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
         CaseData caseData = CaseData.builder()
@@ -1127,7 +1140,7 @@ public class CallbackControllerTest {
                                                        .data(stringObjectMap).build()).build();
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
+        verify(solicitorEmailService, times(timesCalled))
             .sendEmailToSolicitor(callbackRequest.getCaseDetails(), userDetails);
     }
 
