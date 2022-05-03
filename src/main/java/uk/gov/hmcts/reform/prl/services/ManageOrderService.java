@@ -301,7 +301,6 @@ public class ManageOrderService {
         });
     }
 
-    public void getCaseData(String authorisation, CaseData caseData1, Map<String, Object> caseDataUpdated) throws Exception {
     public Map<String, Object> getCaseData(String authorisation, CaseData caseData,
                              Map<String, Object> caseDataUpdated)
         throws Exception {
