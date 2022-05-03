@@ -14,8 +14,11 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ManageOrders {
 
-    private final List<String> cafcassEmailAddress;
-    private final List<String> otherEmailAddress;
+    @JsonProperty("cafcassEmailAddress")
+    private final List<Element<String>> cafcassEmailAddress;
+    @JsonProperty("otherEmailAddress")
+    private final List<Element<String>> otherEmailAddress;
+
     @JsonProperty("cafcassOfficeDetails")
     private String cafcassOfficeDetails;
 
