@@ -22,4 +22,7 @@ public class ManageOrders {
     @JsonProperty("cafcassOfficeDetails")
     private String cafcassOfficeDetails;
 
+    @JsonProperty("parentName")
+    private String parentName;
+
 }

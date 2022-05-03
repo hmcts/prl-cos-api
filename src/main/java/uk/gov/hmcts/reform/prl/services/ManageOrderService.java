@@ -85,6 +85,19 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c47a_filename}")
     protected String c47aFile;
 
+    @Value("${document.templates.common.prl_c47a_draft_template}")
+    protected String c45aDraftTemplate;
+
+    @Value("${document.templates.common.prl_c47a_draft_filename}")
+    protected String c45aDraftFile;
+
+    @Value("${document.templates.common.prl_c47a_template}")
+    protected String c45aTemplate;
+
+    @Value("${document.templates.common.prl_c47a_filename}")
+    protected String c45aFile;
+
+
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
     @Autowired
@@ -131,6 +144,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c47aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
+                break;
+            case parentalResponsibility:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c45aDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c45aDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c45aTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c45aFile);
                 break;
             default:
                 break;
