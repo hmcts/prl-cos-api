@@ -494,7 +494,7 @@ public class CallbackController {
         }
 
         // Saving the logged-in Solicitor and Org details for the docs..
-        getSolicitorDetails(authorisation, caseDataUpdated);
+        caseDataUpdated = getSolicitorDetails(authorisation, caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
