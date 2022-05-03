@@ -83,6 +83,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RunWith(MockitoJUnitRunner.Silent.class)
 @PropertySource(value = "classpath:application.yaml")
 public class CallbackControllerTest {
+    public static final String SOLICITOR_EMAIL = "unknown@test.com";
     @Mock
     private ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
 
@@ -1110,7 +1111,7 @@ public class CallbackControllerTest {
             .withDrawApplicationReason("Test data")
             .build();
 
-        sendEmail("test@gmail.com", withdrawApplication, 1);
+        sendEmail(SOLICITOR_EMAIL, withdrawApplication, 1);
     }
 
     @Test
@@ -1119,7 +1120,7 @@ public class CallbackControllerTest {
             .withDrawApplication(YesOrNo.No)
             .withDrawApplicationReason("Test data No")
             .build();
-        sendEmail("test@gmail.com", withdrawApplication, 0);
+        sendEmail(SOLICITOR_EMAIL, withdrawApplication, 0);
     }
 
     private void sendEmail(String solicitorEmail, WithdrawApplication withdrawApplication, int timesCalled) {

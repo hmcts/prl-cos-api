@@ -287,7 +287,7 @@ public class CallbackController {
 
         if (documentLanguage.isGenEng()) {
 
-            if (flagGenerateDocument(caseData)) {
+            if (isConfidentialInfoPresent(caseData)) {
                 GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                     authorisation,
                     uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
@@ -333,7 +333,7 @@ public class CallbackController {
 
         if (documentLanguage.isGenWelsh()) {
 
-            if (flagGenerateDocument(caseData)) {
+            if (isConfidentialInfoPresent(caseData)) {
 
                 GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
                     authorisation,
@@ -391,7 +391,7 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    private boolean flagGenerateDocument(CaseData caseData) {
+    private boolean isConfidentialInfoPresent(CaseData caseData) {
         return ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
             && !caseData.getApplicantsConfidentialDetails().isEmpty()
             || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
