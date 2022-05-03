@@ -32,8 +32,8 @@ public enum ApplicantRelationshipOptionsEnum {
     aunt("aunt", "Aunt"),
     @JsonProperty("nephew")
     nephew("nephew", "Nephew"),
-    @JsonProperty("neice")
-    neice("neice", "Neice"),
+    @JsonProperty("niece")
+    niece("niece", "Niece"),
     @JsonProperty("cousin")
     cousin("cousin", "Cousin"),
     @JsonProperty("other")
