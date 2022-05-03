@@ -22,9 +22,13 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
+import java.util.stream.IntStream;
 import javax.ws.rs.core.HttpHeaders;
 
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.joining;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @RestController
 @RequiredArgsConstructor
@@ -97,8 +101,27 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        Map<String,Object> caseDataWithHeader = manageOrderService.populateHeader(caseData);
+//        caseDataWithHeader.put("childDetailsManageOrder",ElementUtils.asDynamicList(
+//            caseData.getChildren(),
+//            null,
+//            Child::getLabelForDynamicList
+//        ));
+//        Object childList = caseData.getChildren().stream()
+//            .map(Element::getValue)
+//            .map((child)->{
+//                return child.getFirstName() + " " + child.getLastName();
+//            })
+//            .collect(Collectors.toList());
+//
+//        caseDataWithHeader.put("childDetailsManageOrder",childList);
+
+        caseDataWithHeader.put("childOption",IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
+            .mapToObj(Integer::toString)
+            .collect(joining()));
+
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(manageOrderService.populateHeader(caseData))
+            .data(caseDataWithHeader)
             .build();
     }
 
