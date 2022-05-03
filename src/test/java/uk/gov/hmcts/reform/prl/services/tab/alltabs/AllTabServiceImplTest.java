@@ -57,6 +57,9 @@ public class AllTabServiceImplTest {
     public void setUp() {
         when(applicationsTabService.updateTab(CASE_DATA)).thenReturn(applicaionFieldsMap);
         when(caseSummaryTabService.updateTab(CASE_DATA)).thenReturn(summaryTabFields);
+        when(CASE_DATA.getDateSubmitted()).thenReturn("2022-02-02");
+        when(CASE_DATA.getCourtName()).thenReturn("TEST COURT");
+        when(CASE_DATA.getCourtId()).thenReturn("COURT_!");
         doNothing().when(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
     }
 
