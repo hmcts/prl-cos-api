@@ -15,11 +15,15 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ManageOrders {
+
+    @JsonProperty("cafcassEmailAddress")
+    private final List<Element<String>> cafcassEmailAddress;
+    @JsonProperty("otherEmailAddress")
+    private final List<Element<String>> otherEmailAddress;
+
     @JsonProperty("childArrangementsOrdersToIssue")
     private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
     @JsonProperty("selectChildArrangementsOrder")
     private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
-    private final List<String> cafcassEmailAddress;
-    private final List<String> otherEmailAddress;
 
 }
