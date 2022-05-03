@@ -102,19 +102,19 @@ public class ManageOrdersController {
             CaseData.class
         );
         Map<String,Object> caseDataWithHeader = manageOrderService.populateHeader(caseData);
-//        caseDataWithHeader.put("childDetailsManageOrder",ElementUtils.asDynamicList(
-//            caseData.getChildren(),
-//            null,
-//            Child::getLabelForDynamicList
-//        ));
-//        Object childList = caseData.getChildren().stream()
-//            .map(Element::getValue)
-//            .map((child)->{
-//                return child.getFirstName() + " " + child.getLastName();
-//            })
-//            .collect(Collectors.toList());
-//
-//        caseDataWithHeader.put("childDetailsManageOrder",childList);
+        //        caseDataWithHeader.put("childDetailsManageOrder",ElementUtils.asDynamicList(
+        //            caseData.getChildren(),
+        //            null,
+        //            Child::getLabelForDynamicList
+        //        ));
+        //        Object childList = caseData.getChildren().stream()
+        //            .map(Element::getValue)
+        //            .map((child)->{
+        //                return child.getFirstName() + " " + child.getLastName();
+        //            })
+        //            .collect(Collectors.toList());
+        //
+        //        caseDataWithHeader.put("childDetailsManageOrder",childList);
 
         caseDataWithHeader.put("childOption",IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
             .mapToObj(Integer::toString)
