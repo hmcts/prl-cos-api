@@ -11,31 +11,27 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
+import uk.gov.hmcts.reform.prl.services.UserService;
 
-import java.sql.SQLOutput;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -71,14 +67,18 @@ public class CallbackControllerFT {
     @MockBean
     private SendgridService sendgridService;
 
-
-
     @MockBean
-    private AllTabServiceImpl allTabService;
+    private UserService userService;
 
     private static final String MIAM_VALIDATION_REQUEST_ERROR = "requests/call-back-controller-miam-request-error.json";
     private static final String MIAM_VALIDATION_REQUEST_NO_ERROR = "requests/call-back-controller-miam-request-no-error.json";
     private static final String C100_GENERATE_DRAFT_DOC = "requests/call-back-controller-generate-save-doc.json";
+    private static final String C100_ISSUE_AND_SEND = "requests/call-back-controller-issue-and-send-to-local-court.json";
+    private static final String C100_UPDATE_APPLICATION = "requests/call-back-controller-update-application.json";
+    private static final String C100_WITHDRAW_APPLICATION = "requests/call-back-controller-withdraw-application.json";
+    private static final String C100_SEND_TO_GATEKEEPER = "requests/call-back-controller-send-to-gatekeeper.json";
+    private static final String C100_RESEND_RPA = "requests/call-back-controller-resend-rpa.json";
+    private static final String FL401_ABOUT_TO_SUBMIT_CREATION = "requests/call-back-controller-about-to-submit-case-creation.json";
 
     @Before
     public void setUp() {
@@ -142,15 +142,13 @@ public class CallbackControllerFT {
     }
 
     @Test
-    public void givenC100WelshCase_whenPostRequestToIssueAndSend_then200ResponseAndFinalDocsSaved() throws Exception {
-        String requestBody = ResourceLoader.loadJson(C100_GENERATE_DRAFT_DOC);
+    public void givenC100Case_whenPostRequestToIssueAndSend_then200ResponseAndFinalDocsSaved() throws Exception {
+        String requestBody = ResourceLoader.loadJson(C100_ISSUE_AND_SEND);
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
             .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
             .allegationsOfHarmYesNo(YesOrNo.Yes)
-            .welshLanguageRequirement(YesOrNo.Yes)
-            .welshLanguageRequirementApplication(LanguagePreference.welsh)
             .build();
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
@@ -159,45 +157,109 @@ public class CallbackControllerFT {
         when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(caseData);
         when(dgsService.generateDocument(any(String.class), any(CaseDetails.class), any(String.class))).thenReturn(generatedDocumentInfo);
 
-        MvcResult m = mockMvc.perform(post("/issue-and-send-to-local-court")
+        mockMvc.perform(post("/issue-and-send-to-local-court")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-//            .andExpect(jsonPath("data.draftOrderDoc.document_filename").value("Draft_C100_application.pdf"))
-//            .andExpect(jsonPath("data.isWelshDocGen").value("Yes"))
+            .andExpect(jsonPath("data.finalDocument.document_filename").value("C100FinalDocument.pdf"))
+            .andExpect(jsonPath("data.c1ADocument.document_filename").value("C1A_Document.pdf"))
             .andReturn();
 
-        System.out.println(m.getResponse().getContentAsString());
     }
 
+    @Test
+    public void givenC100Case_whenCaseUpdateEndpoint_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(C100_UPDATE_APPLICATION);
 
+        mockMvc.perform(post("/update-application")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
 
+    }
 
-//    @Test
-//    public void givenReturnedFromIssuedState_shouldReturnIssuedState() throws Exception {
-//        String requestBody = ResourceLoader.loadJson(RESUBMIT_REQUEST);
-//
-//        List<CaseEventDetail> caseEvents = List.of(
-//            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-//            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-//            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-//            CaseEventDetail.builder().stateId(State.CASE_ISSUE.getValue()).build(),
-//            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
-//        );
-//
-//        when(caseEventService.findEventsForCase(any(String.class))).thenReturn(caseEvents);
-//
-//        mockMvc.perform(post("/resubmit-application")
-//                            .contentType(MediaType.APPLICATION_JSON)
-//                            .header("Authorization", "auth")
-//                            .content(requestBody)
-//                            .accept(MediaType.APPLICATION_JSON))
-//            .andExpect(status().isOk())
-//            .andExpect(jsonPath("data.state").value(State.CASE_ISSUE.getValue()))
-//            .andReturn();
-//
-//    }
+    @Test
+    public void givenC100Case_whenCaseWithdrawnEndpoint_then200ResponseAndDataContainsUpdatedTabData() throws Exception {
+        String requestBody = ResourceLoader.loadJson(C100_WITHDRAW_APPLICATION);
+
+        UserDetails userDetails = UserDetails.builder().forename("test").build();
+
+        when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
+
+        MvcResult res = mockMvc.perform(post("/case-withdrawn-email-notification")
+                                          .contentType(MediaType.APPLICATION_JSON)
+                                          .header("Authorization", "auth")
+                                          .content(requestBody)
+                                          .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String json = res.getResponse().getContentAsString();
+
+        assertTrue(json.contains("welshLanguageRequirementsTable"));
+        assertTrue(json.contains("otherProceedingsDetailsTable"));
+        assertTrue(json.contains("allegationsOfHarmDomesticAbuseTable"));
+        assertTrue(json.contains("summaryTabForOrderAppliedFor"));
+        assertTrue(json.contains("miamTable"));
+
+    }
+
+    @Test
+    public void givenC100Case_whenSendToGateKeeperEndpoint_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(C100_SEND_TO_GATEKEEPER);
+
+        mockMvc.perform(post("/send-to-gatekeeper")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    }
+
+    @Test
+    public void givenC100Case_whenRpaResent_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
+
+        mockMvc.perform(post("/resend-rpa")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    }
+
+    @Test
+    public void givenFl401Case_whenAboutToSubmitCaseCreation_then200ResponseAndApplicantNameUpdated() throws Exception {
+        String requestBody = ResourceLoader.loadJson(FL401_ABOUT_TO_SUBMIT_CREATION);
+
+        UserDetails userDetails = UserDetails.builder().forename("test").build();
+
+        when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
+
+        Optional<Organisations> organisation = Optional.of(Organisations.builder().name("testName").build());
+
+        when(organisationService.findUserOrganisation(any(String.class))).thenReturn(organisation);
+
+        mockMvc.perform(post("/about-to-submit-case-creation")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("data.applicantCaseName").value("thisIsATestName"))
+            .andExpect(jsonPath("data.caseSolicitorName").value("test"))
+            .andExpect(jsonPath("data.caseSolicitorOrgName").value("testName"))
+            .andReturn();
+
+    }
 
 }
