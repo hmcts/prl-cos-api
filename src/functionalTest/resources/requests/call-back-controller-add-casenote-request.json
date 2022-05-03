@@ -5,7 +5,8 @@
       "applicantCaseName": "addCaseNoteCaseName",
       "subject": null,
       "caseNote": null
-    },
+      },
+    "caseNotes": null,
     "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",
     "id": 0,
@@ -14,26 +15,15 @@
     "locked_by_user_id": 0,
     "security_classification": "PRIVATE",
     "security_level": 0,
-    "caseNotes": [
-      {
-        "id": "c5b36c14-7401-4a6f-95ff-b6ad92e103b2",
-        "value": {
-          "user": "User Test",
-          "subject": "subject1",
-          "caseNote": "caseNote1",
-          "dateAdded": "2022-04-28",
-          "dateCreated": "2022-04-28T11:46:48.061749"
-        }
-      }
-    ],
     "state": "string"
   },
   "case_details_before": {
     "callback_response_status": "string",
     "case_data": {"subject": "subject1","caseNote": "caseNote1"},
     "case_type_id": "string",
+    "caseNotes": null,
     "created_date": "2022-03-15T15:02:33.880Z",
-    "id": "c5b36c14-7401-4a6f-95ff-b6ad92e103b2",
+    "id": 0,
     "jurisdiction": "string",
     "last_modified": "2022-03-15T15:02:33.880Z",
     "locked_by_user_id": 0,

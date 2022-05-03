@@ -39,7 +39,7 @@ public class AddCaseNoteControllerFunctionalTest {
     public void givenaddCaseNoteDetails_whenPostRequestToAddCaseNoteController_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
-            .header("Authorization", userToken)
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -55,6 +55,7 @@ public class AddCaseNoteControllerFunctionalTest {
             .when()
             .contentType("application/json")
             .post("/populate-header-case-note")
-            .then().assertThat().statusCode(200);
+            .then()
+            .assertThat().statusCode(200);
     }
 }
