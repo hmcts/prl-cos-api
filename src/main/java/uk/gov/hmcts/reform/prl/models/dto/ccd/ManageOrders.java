@@ -20,5 +20,6 @@ public class ManageOrders {
     private final List<Element<String>> cafcassEmailAddress;
     @JsonProperty("otherEmailAddress")
     private final List<Element<String>> otherEmailAddres;
+    @JsonProperty("isCaseWithdrawn")
     private final YesOrNo isCaseWithdrawn;
 }
