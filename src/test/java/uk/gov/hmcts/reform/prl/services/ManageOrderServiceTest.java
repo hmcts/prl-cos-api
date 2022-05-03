@@ -236,6 +236,7 @@ public class ManageOrderServiceTest {
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
 
     }
+
     @Test
     public void testPopulateFinalOrderFromCaseDataFL401() throws Exception {
 
