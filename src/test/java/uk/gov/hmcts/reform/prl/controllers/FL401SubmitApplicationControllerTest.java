@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -179,6 +180,55 @@ public class FL401SubmitApplicationControllerTest {
         when(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         fl401SubmitApplicationController.fl401SubmitApplicationValidation(authToken, callbackRequest);
         verify(fl401StatementOfTruthAndSubmitChecker, times(1)).hasMandatoryCompleted(caseData);
+    }
+
+    @Test
+    public void testSubmitApplicationEventValidationMandatoryNotDone() throws Exception {
+
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        String applicantNames = "TestFirst TestLast";
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(fl401Applicant)
+            .courtEmailAddress("localcourt@test.com")
+            .dateSubmitted(String.valueOf("22-02-2022"))
+            .welshLanguageRequirementApplication(LanguagePreference.english)
+            .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        CallbackResponse callbackResponse = CallbackResponse.builder()
+            .data(caseData)
+            .errors(Collections.singletonList("test"))
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
+        CallbackResponse callbackResponseTest = fl401SubmitApplicationController.fl401SubmitApplicationValidation(
+            authToken,
+            callbackRequest
+        );
+        verify(fl401StatementOfTruthAndSubmitChecker, times(1)).hasMandatoryCompleted(caseData);
+        Assertions.assertEquals(1, callbackResponseTest.getErrors().size());
+        Assertions.assertEquals("Statement of truth and submit is not allowed for this case unless "
+                                    + "you finish all the mandatory events", callbackResponseTest.getErrors().get(0));
+
     }
 
     @Test
