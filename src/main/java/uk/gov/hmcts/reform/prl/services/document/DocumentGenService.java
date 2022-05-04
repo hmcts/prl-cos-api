@@ -180,10 +180,10 @@ public class DocumentGenService {
         if (documentLanguage.isGenWelsh()) {
             updatedCaseData.put("isWelshDocGen", Yes.toString());
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                &&  ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
-                && !caseData.getApplicantsConfidentialDetails().isEmpty()
-                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
+                &&  (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+                && !caseData.getApplicantsConfidentialDetails().isEmpty())
+                || (ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
+                && !caseData.getChildrenConfidentialDetails().isEmpty())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                 && isApplicantOrChildDetailsConfidential(caseData)) {
