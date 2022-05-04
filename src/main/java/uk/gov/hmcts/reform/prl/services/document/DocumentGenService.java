@@ -271,31 +271,49 @@ public class DocumentGenService {
 
         switch (docGenFor) {
             case C8_HINT:
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-                    fileName = !isWelsh ? c100C8Filename : c100C8WelshFilename;
-                } else {
-                    fileName = !isWelsh ? fl401C8Filename : fl401C8WelshFilename;
-                }
+                fileName = findC8Filename(isWelsh, caseTypeOfApp);
                 break;
             case C1A_HINT:
                 fileName =  !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
                 break;
             case FINAL_HINT:
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-                    fileName = !isWelsh ? c100FinalFilename : c100FinalWelshFilename;
-                } else {
-                    fileName = !isWelsh ? fl401FinalFilename : fl401FinalWelshFilename;
-                }
+                fileName = findFinalFilename(isWelsh, caseTypeOfApp);
                 break;
             case DRAFT_HINT:
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-                    fileName = !isWelsh ? c100DraftFilename : c100DraftWelshFilename;
-                } else {
-                    fileName = !isWelsh ? fl401DraftFilename : fl401DraftWelshFileName;
-                }
+                fileName = findDraftFilename(isWelsh, caseTypeOfApp);
                 break;
             default:
                 fileName = "";
+        }
+        return fileName;
+    }
+
+    private String findDraftFilename(boolean isWelsh, String caseTypeOfApp) {
+        String fileName;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            fileName = !isWelsh ? c100DraftFilename : c100DraftWelshFilename;
+        } else {
+            fileName = !isWelsh ? fl401DraftFilename : fl401DraftWelshFileName;
+        }
+        return fileName;
+    }
+
+    private String findFinalFilename(boolean isWelsh, String caseTypeOfApp) {
+        String fileName;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            fileName = !isWelsh ? c100FinalFilename : c100FinalWelshFilename;
+        } else {
+            fileName = !isWelsh ? fl401FinalFilename : fl401FinalWelshFilename;
+        }
+        return fileName;
+    }
+
+    private String findC8Filename(boolean isWelsh, String caseTypeOfApp) {
+        String fileName;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            fileName = !isWelsh ? c100C8Filename : c100C8WelshFilename;
+        } else {
+            fileName = !isWelsh ? fl401C8Filename : fl401C8WelshFilename;
         }
         return fileName;
     }
@@ -306,31 +324,49 @@ public class DocumentGenService {
 
         switch (docGenFor) {
             case C8_HINT:
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-                    template = !isWelsh ? c100C8Template : c100C8WelshTemplate;
-                } else {
-                    template = !isWelsh ? fl401C8Template : fl401C8WelshTemplate;
-                }
+                template = findC8Template(isWelsh, caseTypeOfApp);
                 break;
             case C1A_HINT:
                 template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
                 break;
             case FINAL_HINT:
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-                    template = !isWelsh ? c100FinalTemplate : c100FinalWelshTemplate;
-                } else {
-                    template = !isWelsh ? fl401FinalTemplate : fl401FinalWelshTemplate;
-                }
+                template = findFinalTemplate(isWelsh, caseTypeOfApp);
                 break;
             case DRAFT_HINT:
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-                    template = !isWelsh ? c100DraftTemplate : c100DraftWelshTemplate;
-                } else {
-                    template = !isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate;
-                }
+                template = findDraftTemplate(isWelsh, caseTypeOfApp);
                 break;
             default:
                 template = "";
+        }
+        return template;
+    }
+
+    private String findDraftTemplate(boolean isWelsh, String caseTypeOfApp) {
+        String template;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            template = !isWelsh ? c100DraftTemplate : c100DraftWelshTemplate;
+        } else {
+            template = !isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate;
+        }
+        return template;
+    }
+
+    private String findFinalTemplate(boolean isWelsh, String caseTypeOfApp) {
+        String template;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            template = !isWelsh ? c100FinalTemplate : c100FinalWelshTemplate;
+        } else {
+            template = !isWelsh ? fl401FinalTemplate : fl401FinalWelshTemplate;
+        }
+        return template;
+    }
+
+    private String findC8Template(boolean isWelsh, String caseTypeOfApp) {
+        String template;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            template = !isWelsh ? c100C8Template : c100C8WelshTemplate;
+        } else {
+            template = !isWelsh ? fl401C8Template : fl401C8WelshTemplate;
         }
         return template;
     }

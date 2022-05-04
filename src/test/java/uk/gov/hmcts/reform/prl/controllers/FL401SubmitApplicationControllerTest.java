@@ -343,6 +343,7 @@ public class FL401SubmitApplicationControllerTest {
                                .build())
             .applicantsFL401(applicant)
             .home(homefull)
+            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
@@ -359,6 +360,8 @@ public class FL401SubmitApplicationControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
+            .thenReturn(stringObjectMap);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
@@ -380,22 +383,12 @@ public class FL401SubmitApplicationControllerTest {
         )))
             .thenReturn(court);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
-            .thenReturn(caseData);
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
-        verify(dgsService, times(1)).generateDocument(
+        verify(documentGenService, times(1)).generateDocuments(
             Mockito.anyString(),
-            any(CaseDetails.class),
-            Mockito.any()
+            any(CaseData.class)
         );
-        verify(dgsService, times(1)).generateWelshDocument(
-            Mockito.anyString(),
-            any(CaseDetails.class),
-            Mockito.any()
-        );
-        verifyNoMoreInteractions(dgsService);
 
     }
 
@@ -471,6 +464,7 @@ public class FL401SubmitApplicationControllerTest {
                                .build())
             .applicantsFL401(applicant)
             .home(homefull)
+            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
@@ -580,6 +574,7 @@ public class FL401SubmitApplicationControllerTest {
                                .build())
             .applicantsFL401(applicant)
             .home(homefull)
+            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
@@ -685,6 +680,7 @@ public class FL401SubmitApplicationControllerTest {
                                .build())
             .applicantsFL401(applicant)
             .home(null)
+            .submitCountyCourtSelection(CourtDetailsPilotEnum.exeterCountyCourt)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
