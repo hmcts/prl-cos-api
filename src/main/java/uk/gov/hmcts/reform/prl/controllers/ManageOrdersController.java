@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -49,36 +48,19 @@ public class ManageOrdersController {
     @Autowired
     private ManageOrderEmailService manageOrderEmailService;
 
-    @Value("${document.templates.common.prl_c21_template}")
-    protected String c21Template;
-
-    @Value("${document.templates.common.prl_c21_filename}")
-    protected String c21File;
-
-    @Value("${document.templates.common.prl_c21_welsh_template}")
-    protected String c21WelshTemplate;
-
-    @Value("${document.templates.common.prl_c21_welsh_filename}")
-    protected String c21WelshFile;
-
-    @Value("${document.templates.common.C43A_draft_template}")
-    protected String c43ADraftTemplate;
-
-    @Value("${document.templates.common.C43A_draft_filename}")
-    protected String c43ADraftFilename;
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to show preview order in next screen for upload order")
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        CaseData caseData1 = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData1);
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData1.getCreateSelectOrderOptions() != null) {
-            manageOrderService.getCaseData(authorisation, caseData1, caseDataUpdated);
+        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
         } else {
-            caseDataUpdated.put("previewOrderDoc",caseData1.getAppointmentOfGuardian());
+            caseDataUpdated.put("previewOrderDoc",caseData.getAppointmentOfGuardian());
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -162,6 +144,9 @@ public class ManageOrdersController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("orderCollection", manageOrderService
             .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
+        caseDataUpdated.remove("previewOrderDoc");
+        caseDataUpdated.remove("dateOrderMade");
+        caseDataUpdated.remove("createSelectOrderOptions");
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
