@@ -106,8 +106,6 @@ public class FL401SubmitApplicationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         final LocalDate localDate = LocalDate.now();
