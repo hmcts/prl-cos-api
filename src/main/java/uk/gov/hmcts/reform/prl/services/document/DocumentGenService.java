@@ -161,11 +161,7 @@ public class DocumentGenService {
 
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put("isEngDocGen", Yes.toString());
-            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                &&  ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
-                && !caseData.getApplicantsConfidentialDetails().isEmpty()
-                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
+            if (isConfidentialInformationPresentForC100(caseData)) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                     && isApplicantOrChildDetailsConfidential(caseData)) {
@@ -179,11 +175,7 @@ public class DocumentGenService {
         }
         if (documentLanguage.isGenWelsh()) {
             updatedCaseData.put("isWelshDocGen", Yes.toString());
-            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                &&  (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
-                && !caseData.getApplicantsConfidentialDetails().isEmpty())
-                || (ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-                && !caseData.getChildrenConfidentialDetails().isEmpty())) {
+            if (isConfidentialInformationPresentForC100(caseData)) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                 && isApplicantOrChildDetailsConfidential(caseData)) {
@@ -198,6 +190,14 @@ public class DocumentGenService {
         }
 
         return updatedCaseData;
+    }
+
+    private boolean isConfidentialInformationPresentForC100(CaseData caseData) {
+        return C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            &&  ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+            && !caseData.getApplicantsConfidentialDetails().isEmpty()
+            || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
+            && !caseData.getChildrenConfidentialDetails().isEmpty();
     }
 
     public Map<String, Object> generateDraftDocuments(String authorisation, CaseData caseData) throws Exception {
