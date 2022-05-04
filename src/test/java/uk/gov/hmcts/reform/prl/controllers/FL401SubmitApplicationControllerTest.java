@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -255,7 +256,8 @@ public class FL401SubmitApplicationControllerTest {
         Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
             CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
         Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(fl401DocsMap);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+            fl401DocsMap);
         when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
             objectMapper
@@ -358,8 +360,6 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -488,8 +488,6 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -510,23 +508,7 @@ public class FL401SubmitApplicationControllerTest {
         )))
             .thenReturn(court);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
-            .thenReturn(caseData);
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
-
-        verify(dgsService, times(2)).generateDocument(
-            Mockito.anyString(),
-            any(CaseDetails.class),
-            Mockito.any()
-        );
-        verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
-            any(CaseDetails.class),
-            Mockito.any()
-        );
-        verifyNoMoreInteractions(dgsService);
-
     }
 
 
@@ -537,7 +519,6 @@ public class FL401SubmitApplicationControllerTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-
 
 
         orders = TypeOfApplicationOrders.builder()
@@ -616,8 +597,8 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
+        when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
+            .thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -638,23 +619,12 @@ public class FL401SubmitApplicationControllerTest {
         )))
             .thenReturn(court);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
-            .thenReturn(caseData);
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
-        verify(dgsService, times(2)).generateDocument(
+        verify(documentGenService, times(1)).generateDocuments(
             Mockito.anyString(),
-            any(CaseDetails.class),
-            Mockito.any()
+            any(CaseData.class)
         );
-        verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
-            any(CaseDetails.class),
-            Mockito.any()
-        );
-        verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
@@ -703,7 +673,6 @@ public class FL401SubmitApplicationControllerTest {
             .build();
 
 
-
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
@@ -733,8 +702,8 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
+        when(documentGenService.generateDocuments(Mockito.anyString(), any(CaseData.class)))
+            .thenReturn(stringObjectMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -754,23 +723,12 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
-            .thenReturn(caseData);
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
-        verify(dgsService, times(2)).generateDocument(
+        verify(documentGenService, times(1)).generateDocuments(
             Mockito.anyString(),
-            any(CaseDetails.class),
-            Mockito.any()
+            any(CaseData.class)
         );
-        verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
-            any(CaseDetails.class),
-            Mockito.any()
-        );
-        verifyNoMoreInteractions(dgsService);
 
     }
 
@@ -858,7 +816,8 @@ public class FL401SubmitApplicationControllerTest {
         )))
             .thenReturn(court);
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(fl401DocsMap);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+            fl401DocsMap);
         AboutToStartOrSubmitCallbackResponse response = fl401SubmitApplicationController
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
@@ -934,7 +893,8 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(fl401DocsMap);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+            fl401DocsMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -1028,7 +988,8 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(fl401DocsMap);
+        when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+            fl401DocsMap);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
