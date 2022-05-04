@@ -9,6 +9,16 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.*;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -17,9 +27,11 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,6 +47,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -58,6 +71,7 @@ public class DocumentGenServiceTest {
 
     CaseData c100CaseData;
     CaseData fl401CaseData;
+    PartyDetails partyDetails;
 
     @Before
     public void setUp() {
@@ -67,13 +81,64 @@ public class DocumentGenServiceTest {
             .hashToken("testHashToken")
             .build();
 
+        PartyDetails partyDetailsWithOrganisations = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .isAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .build();
+
+        Element<PartyDetails> applicants = Element.<PartyDetails>builder().value(partyDetailsWithOrganisations).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(applicants);
+
+        ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails.builder()
+            .phoneNumber("1234567890")
+            .firstName("UserFirst")
+            .lastName("UserLast")
+            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .email("test@confidential.com")
+            .build();
+
+        Element<ApplicantConfidentialityDetails> applicantConfidential = Element.<ApplicantConfidentialityDetails>builder()
+            .value(applicantConfidentialityDetails).build();
+        List<Element<ApplicantConfidentialityDetails>> applicantConfidentialList = Collections.singletonList(applicantConfidential);
+
+        OtherPersonConfidentialityDetails OtherPersonConfidentialityDetails = uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails.builder()
+            .isPersonIdentityConfidential(Yes)
+            .firstName("test1")
+            .lastName("last1")
+            .relationshipToChildDetails("uncle")
+            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .build();
+
+        Element<OtherPersonConfidentialityDetails> otherPerson = Element.<OtherPersonConfidentialityDetails>builder()
+            .value(OtherPersonConfidentialityDetails).build();
+        List<Element<OtherPersonConfidentialityDetails>> otherPersonList = Collections.singletonList(otherPerson);
+
+
+        ChildConfidentialityDetails childConfidentialityDetails = ChildConfidentialityDetails.builder()
+            .firstName("ChildFirst")
+            .lastName("ChildLast")
+            .otherPerson(otherPersonList)
+            .build();
+
+        Element<ChildConfidentialityDetails> childConfidential = Element.<ChildConfidentialityDetails>builder()
+            .value(childConfidentialityDetails).build();
+        List<Element<ChildConfidentialityDetails>> childConfidentialList = Collections.singletonList(childConfidential);
+
+
         c100CaseData = CaseData.builder()
+            .id(123456789123L)
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationsOfHarmYesNo(Yes)
+            .applicants(listOfApplicants)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .allegationsOfHarmYesNo(No)
+            .applicantsConfidentialDetails(applicantConfidentialList)
+            .childrenConfidentialDetails(childConfidentialList)
             .build();
 
         fl401CaseData = CaseData.builder()
@@ -81,12 +146,14 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(partyDetails)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
     }
 
     @Test
     public void generateDocsForC100Test() throws Exception {
+
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any());
@@ -98,17 +165,17 @@ public class DocumentGenServiceTest {
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_WELSH));
+        assertFalse(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A));
+        assertFalse(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A));
 
-        verify(dgsService, times(3)).generateDocument(
+        verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.any()
         );
-        verify(dgsService, times(3)).generateWelshDocument(
+        verify(dgsService, times(2)).generateWelshDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.any()
