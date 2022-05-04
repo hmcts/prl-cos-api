@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.format.DateTimeFormatter;
@@ -165,7 +166,7 @@ public class ManageOrderService {
         if (caseData.getFl401FamilymanCaseNumber() == null && caseData.getFamilymanCaseNumber() == null) {
             return FAMILY_MAN_ID;
         }
-        return caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)
+        return FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             ? FAMILY_MAN_ID + caseData.getFl401FamilymanCaseNumber()
             : FAMILY_MAN_ID + caseData.getFamilymanCaseNumber();
     }
@@ -194,7 +195,7 @@ public class ManageOrderService {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                CaseDetails.builder().caseData(caseData).build(),
                 fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
             );
             return OrderDetails.builder().orderType(caseData.getSelectedOrder())
@@ -206,11 +207,11 @@ public class ManageOrderService {
                 .otherDetails(OtherOrderDetails.builder()
                                   .createdBy(caseData.getJudgeOrMagistratesLastName())
                                   .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                      "d MMMM yyyy",
+                                      PrlAppsConstants.D_MMMM_YYYY,
                                       Locale.UK
                                   )))
                                   .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
-                                      "d MMMM yyyy",
+                                      PrlAppsConstants.D_MMMM_YYYY,
                                       Locale.UK
                                   )))
                                   .orderRecipients(getAllRecipients(caseData)).build())
@@ -222,7 +223,7 @@ public class ManageOrderService {
                 .otherDetails(OtherOrderDetails.builder()
                                   .createdBy(caseData.getJudgeOrMagistratesLastName())
                                   .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                      "d MMMM yyyy",
+                                      PrlAppsConstants.D_MMMM_YYYY,
                                       Locale.UK
                                   )))
                                   .orderRecipients(getAllRecipients(caseData)).build())
@@ -302,16 +303,15 @@ public class ManageOrderService {
         return orderCollection;
     }
 
-    public void getCaseData(String authorisation, CaseData caseData1,
+    public Map<String, Object> getCaseData(String authorisation, CaseData caseData,
                              Map<String, Object> caseDataUpdated)
         throws Exception {
 
-        Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData1.getCreateSelectOrderOptions());
-
+        Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
 
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData1).build(),
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             fieldsMap.get(PrlAppsConstants.TEMPLATE)
         );
 
@@ -321,7 +321,7 @@ public class ManageOrderService {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
-
+        return caseDataUpdated;
     }
 
     public ManageOrders getN117FormData(CaseData caseData) {
