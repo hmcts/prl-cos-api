@@ -85,7 +85,7 @@ public class ChildChecker implements EventChecker {
 
     private boolean validateMandatoryFieldsCompleted(Child child) {
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(child.getFirstName()));
         fields.add(ofNullable(child.getLastName()));
         fields.add(ofNullable(child.getDateOfBirth()));
@@ -126,7 +126,7 @@ public class ChildChecker implements EventChecker {
     }
 
     private boolean validateAdditionalFieldsCompleted(CaseData caseData) {
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
 
         Optional<YesNoDontKnow> childLocalAuth = ofNullable(caseData.getChildrenKnownToLocalAuthority());
         fields.add(childLocalAuth);
@@ -141,7 +141,7 @@ public class ChildChecker implements EventChecker {
 
     private boolean validateAnyFieldStarted(Child c) {
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(c.getFirstName()));
         fields.add(ofNullable(c.getLastName()));
         fields.add(ofNullable(c.getDateOfBirth()));

@@ -45,13 +45,19 @@ public class CourtFinderService {
                 .findClosestDomesticAbuseCourtByPostCode(
                     getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));
         } else {
+            log.info("Getting court with postcode: " + getCorrectPartyPostcode(caseData));
             serviceArea = courtFinderApi
                 .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
         }
 
-        return getCourtDetails(serviceArea.getCourts()
-                                   .get(0)
-                                   .getCourtId());
+        if (serviceArea.getCourts() != null
+            && serviceArea.getCourts().size() > 0) {
+            return getCourtDetails(serviceArea.getCourts()
+                                       .get(0)
+                                       .getCourtSlug());
+        } else {
+            return null;
+        }
     }
 
     public boolean courtsAreTheSame(Court c1, Court c2) {
@@ -60,7 +66,7 @@ public class CourtFinderService {
         }
 
         return c1.getCourtName().equals(c2.getCourtName())
-            && c1.getCourtId().equals(c2.getCourtId());
+            && c1.getCountyLocationCode() == c2.getCountyLocationCode();
     }
 
     public Court getCourtDetails(String courtSlug) {
@@ -98,7 +104,7 @@ public class CourtFinderService {
 
     public CaseData setCourtNameAndId(CaseData caseData, Court court) {
         caseData.setCourtName(court.getCourtName());
-        caseData.setCourtId(court.getCourtId());
+        caseData.setCourtId(String.valueOf(court.getCountyLocationCode()));
         return caseData;
     }
 
