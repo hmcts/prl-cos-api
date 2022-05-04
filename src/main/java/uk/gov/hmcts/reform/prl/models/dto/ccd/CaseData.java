@@ -618,7 +618,8 @@ public class CaseData implements MappableObject {
     private final String childrenList;
 
     @JsonUnwrapped
-    private final ManageOrders manageOrders;
+    @Builder.Default
+    private final ManageOrders manageOrders = ManageOrders.builder().build();
     /**
      * Solicitor Details.
      */

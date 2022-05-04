@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.OrderDetails;
-import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
@@ -295,22 +294,6 @@ public class ManageOrderService {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
-    }
-
-    public String getOrderTitle(List<OrderTypeEnum> orders) {
-
-        switch (orders.size()) {
-            case 1:
-                return  String.format("%s ", orders.get(0).getDisplayedValue());
-            case 2:
-                return String.format("%s and %s ", orders.get(0).getDisplayedValue(),
-                                     orders.get(1).getDisplayedValue());
-            default:
-                return String.format("%s, %s and %s ",
-                                     orders.get(0).getDisplayedValue(),
-                                     orders.get(1).getDisplayedValue(),
-                                     orders.get(2).getDisplayedValue());
-        }
     }
 
 }
