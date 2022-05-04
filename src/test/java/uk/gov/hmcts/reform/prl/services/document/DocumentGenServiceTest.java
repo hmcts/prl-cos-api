@@ -8,10 +8,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.*;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
@@ -67,6 +70,7 @@ public class DocumentGenServiceTest {
     public static final String authToken = "Bearer TestAuthToken";
 
     CaseData c100CaseData;
+    CaseData c100CaseDataC1A;
     CaseData fl401CaseData;
     PartyDetails partyDetails;
 
@@ -139,6 +143,41 @@ public class DocumentGenServiceTest {
             .childrenConfidentialDetails(childConfidentialList)
             .build();
 
+        c100CaseDataC1A = CaseData.builder()
+            .id(123456789123L)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .allegationsOfHarmYesNo(Yes)
+            .applicants(listOfApplicants)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .allegationsOfHarmYesNo(Yes)
+            .applicantsConfidentialDetails(applicantConfidentialList)
+            .childrenConfidentialDetails(childConfidentialList)
+            .build();
+
+        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
+            .keepChildrenInfoConfidential(YesOrNo.No)
+            .childFullName("child")
+            .childsAge("12")
+            .isRespondentResponsibleForChild(YesOrNo.Yes)
+            .build();
+
+        Home homefull = Home.builder()
+            .address(Address.builder().addressLine1("123").build())
+            .everLivedAtTheAddress(YesNoBothEnum.yesApplicant)
+            .doesApplicantHaveHomeRights(YesOrNo.No)
+            .doAnyChildrenLiveAtAddress(YesOrNo.Yes)
+            .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build()))
+            .isPropertyRented(YesOrNo.No)
+            .isThereMortgageOnProperty(YesOrNo.No)
+            .isPropertyAdapted(YesOrNo.No)
+            .peopleLivingAtThisAddress(List.of(PeopleLivingAtThisAddressEnum.applicant))
+            .familyHome(List.of(FamilyHomeEnum.payForRepairs))
+            .livingSituation(List.of(LivingSituationEnum.awayFromHome))
+            .build();
+
         fl401CaseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
@@ -146,6 +185,7 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetailsWithOrganisations)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .home(homefull)
             .build();
     }
 
@@ -230,6 +270,38 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verify(dgsService, times(1)).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verifyNoMoreInteractions(dgsService);
+    }
+
+    @Test
+    public void generateDocsForC100TestWithC1A() throws Exception {
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any());
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any());
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseDataC1A);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseDataC1A);
+
+        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataC1A);
+
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A));
+
+        verify(dgsService, times(3)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(3)).generateWelshDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.any()
