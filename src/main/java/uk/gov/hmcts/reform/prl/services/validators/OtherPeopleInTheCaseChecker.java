@@ -40,6 +40,10 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
 
+            if (others.isEmpty()) {
+                return false;
+            }
+
             boolean allFieldsCompleted = true;
 
             for (PartyDetails party : others) {
