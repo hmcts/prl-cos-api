@@ -309,7 +309,7 @@ public class CallbackController {
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
-            if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
+            if (caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
                 GeneratedDocumentInfo generatedC1ADocumentInfo = dgsService.generateDocument(
                     authorisation,
                     uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
@@ -356,7 +356,7 @@ public class CallbackController {
             caseData = organisationService.getApplicantOrganisationDetails(caseData);
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
 
-            if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
+            if (caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
                 GeneratedDocumentInfo generatedC1AWelshDocumentInfo = dgsService.generateWelshDocument(
                     authorisation,
                     uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),

@@ -456,10 +456,10 @@ public class ApplicationsTabService implements TabService {
         Optional<YesOrNo> nonMolYesNo = ofNullable(allegationsOfHarmOrders.getOrdersNonMolestation());
         if (nonMolYesNo.isPresent() && nonMolYesNo.get().equals(YesOrNo.Yes)) {
             Order nonMolOrder = Order.builder()
-                .dateIssued(caseData.getOrdersNonMolestationDateIssued())
-                .endDate(caseData.getOrdersNonMolestationEndDate())
-                .orderCurrent(caseData.getOrdersNonMolestationCurrent())
-                .courtName(caseData.getOrdersNonMolestationCourtName())
+                .dateIssued(caseData.getAllegationOfHarm().getOrdersNonMolestationDateIssued())
+                .endDate(caseData.getAllegationOfHarm().getOrdersNonMolestationEndDate())
+                .orderCurrent(caseData.getAllegationOfHarm().getOrdersNonMolestationCurrent())
+                .courtName(caseData.getAllegationOfHarm().getOrdersNonMolestationCourtName())
                 .build();
             allegationsOfHarmOrders.setNonMolestationOrder(nonMolOrder);
         }
@@ -467,10 +467,10 @@ public class ApplicationsTabService implements TabService {
         Optional<YesOrNo> occYesNo = ofNullable(allegationsOfHarmOrders.getOrdersOccupation());
         if (occYesNo.isPresent() && occYesNo.get().equals(YesOrNo.Yes)) {
             Order occOrder = Order.builder()
-                .dateIssued(caseData.getOrdersOccupationDateIssued())
-                .endDate(caseData.getOrdersOccupationEndDate())
-                .orderCurrent(caseData.getOrdersOccupationCurrent())
-                .courtName(caseData.getOrdersOccupationCourtName())
+                .dateIssued(caseData.getAllegationOfHarm().getOrdersOccupationDateIssued())
+                .endDate(caseData.getAllegationOfHarm().getOrdersOccupationEndDate())
+                .orderCurrent(caseData.getAllegationOfHarm().getOrdersOccupationCurrent())
+                .courtName(caseData.getAllegationOfHarm().getOrdersOccupationCourtName())
                 .build();
             allegationsOfHarmOrders.setOccupationOrder(occOrder);
         }
@@ -478,10 +478,10 @@ public class ApplicationsTabService implements TabService {
         Optional<YesOrNo> forcedYesNo = ofNullable(allegationsOfHarmOrders.getOrdersForcedMarriageProtection());
         if (forcedYesNo.isPresent() && forcedYesNo.get().equals(YesOrNo.Yes)) {
             Order forOrder = Order.builder()
-                .dateIssued(caseData.getOrdersForcedMarriageProtectionDateIssued())
-                .endDate(caseData.getOrdersForcedMarriageProtectionEndDate())
-                .orderCurrent(caseData.getOrdersForcedMarriageProtectionCurrent())
-                .courtName(caseData.getOrdersForcedMarriageProtectionCourtName())
+                .dateIssued(caseData.getAllegationOfHarm().getOrdersForcedMarriageProtectionDateIssued())
+                .endDate(caseData.getAllegationOfHarm().getOrdersForcedMarriageProtectionEndDate())
+                .orderCurrent(caseData.getAllegationOfHarm().getOrdersForcedMarriageProtectionCurrent())
+                .courtName(caseData.getAllegationOfHarm().getOrdersForcedMarriageProtectionCourtName())
                 .build();
             allegationsOfHarmOrders.setForcedMarriageProtectionOrder(forOrder);
         }
@@ -489,10 +489,10 @@ public class ApplicationsTabService implements TabService {
         Optional<YesOrNo> resYesNo = ofNullable(allegationsOfHarmOrders.getOrdersRestraining());
         if (resYesNo.isPresent() && resYesNo.get().equals(YesOrNo.Yes)) {
             Order resOrder = Order.builder()
-                .dateIssued(caseData.getOrdersRestrainingDateIssued())
-                .endDate(caseData.getOrdersRestrainingEndDate())
-                .orderCurrent(caseData.getOrdersRestrainingCurrent())
-                .courtName(caseData.getOrdersRestrainingCourtName())
+                .dateIssued(caseData.getAllegationOfHarm().getOrdersRestrainingDateIssued())
+                .endDate(caseData.getAllegationOfHarm().getOrdersRestrainingEndDate())
+                .orderCurrent(caseData.getAllegationOfHarm().getOrdersRestrainingCurrent())
+                .courtName(caseData.getAllegationOfHarm().getOrdersRestrainingCourtName())
                 .build();
             allegationsOfHarmOrders.setRestrainingOrder(resOrder);
         }
@@ -500,10 +500,10 @@ public class ApplicationsTabService implements TabService {
         Optional<YesOrNo> othYesNo = ofNullable(allegationsOfHarmOrders.getOrdersOtherInjunctive());
         if (othYesNo.isPresent() && othYesNo.get().equals(YesOrNo.Yes)) {
             Order othOrder = Order.builder()
-                .dateIssued(caseData.getOrdersOtherInjunctiveDateIssued())
-                .endDate(caseData.getOrdersOtherInjunctiveEndDate())
-                .orderCurrent(caseData.getOrdersOtherInjunctiveCurrent())
-                .courtName(caseData.getOrdersOtherInjunctiveCourtName())
+                .dateIssued(caseData.getAllegationOfHarm().getOrdersOtherInjunctiveDateIssued())
+                .endDate(caseData.getAllegationOfHarm().getOrdersOtherInjunctiveEndDate())
+                .orderCurrent(caseData.getAllegationOfHarm().getOrdersOtherInjunctiveCurrent())
+                .courtName(caseData.getAllegationOfHarm().getOrdersOtherInjunctiveCourtName())
                 .build();
             allegationsOfHarmOrders.setOtherInjunctiveOrder(othOrder);
         }
@@ -511,10 +511,10 @@ public class ApplicationsTabService implements TabService {
         Optional<YesOrNo> undYesNo = ofNullable(allegationsOfHarmOrders.getOrdersUndertakingInPlace());
         if (undYesNo.isPresent() && undYesNo.get().equals(YesOrNo.Yes)) {
             Order undOrder = Order.builder()
-                .dateIssued(caseData.getOrdersUndertakingInPlaceDateIssued())
-                .endDate(caseData.getOrdersUndertakingInPlaceEndDate())
-                .orderCurrent(caseData.getOrdersUndertakingInPlaceCurrent())
-                .courtName(caseData.getOrdersUndertakingInPlaceCourtName())
+                .dateIssued(caseData.getAllegationOfHarm().getOrdersUndertakingInPlaceDateIssued())
+                .endDate(caseData.getAllegationOfHarm().getOrdersUndertakingInPlaceEndDate())
+                .orderCurrent(caseData.getAllegationOfHarm().getOrdersUndertakingInPlaceCurrent())
+                .courtName(caseData.getAllegationOfHarm().getOrdersUndertakingInPlaceCourtName())
                 .build();
             allegationsOfHarmOrders.setUndertakingInPlaceOrder(undOrder);
         }
@@ -524,42 +524,42 @@ public class ApplicationsTabService implements TabService {
 
     public Map<String, Object> getDomesticAbuseTable(CaseData caseData) {
 
-        Optional<List<ApplicantOrChildren>> physVictm = ofNullable(caseData.getPhysicalAbuseVictim());
+        Optional<List<ApplicantOrChildren>> physVictm = ofNullable(caseData.getAllegationOfHarm().getPhysicalAbuseVictim());
         String physVictimString = "";
         if (physVictm.isPresent()) {
-            physVictimString = caseData.getPhysicalAbuseVictim().stream()
+            physVictimString = caseData.getAllegationOfHarm().getPhysicalAbuseVictim().stream()
                 .map(ApplicantOrChildren::getDisplayedValue)
                 .collect(Collectors.joining(", "));
         }
 
-        Optional<List<ApplicantOrChildren>> emoVictim = ofNullable(caseData.getEmotionalAbuseVictim());
+        Optional<List<ApplicantOrChildren>> emoVictim = ofNullable(caseData.getAllegationOfHarm().getEmotionalAbuseVictim());
         String emoVictimString = "";
         if (emoVictim.isPresent()) {
-            emoVictimString = caseData.getEmotionalAbuseVictim().stream()
+            emoVictimString = caseData.getAllegationOfHarm().getEmotionalAbuseVictim().stream()
                 .map(ApplicantOrChildren::getDisplayedValue)
                 .collect(Collectors.joining(", "));
         }
 
-        Optional<List<ApplicantOrChildren>> psyVictim = ofNullable(caseData.getPsychologicalAbuseVictim());
+        Optional<List<ApplicantOrChildren>> psyVictim = ofNullable(caseData.getAllegationOfHarm().getPsychologicalAbuseVictim());
         String psyVictimString = "";
         if (psyVictim.isPresent()) {
-            psyVictimString = caseData.getPhysicalAbuseVictim().stream()
+            psyVictimString = caseData.getAllegationOfHarm().getPhysicalAbuseVictim().stream()
                 .map(ApplicantOrChildren::getDisplayedValue)
                 .collect(Collectors.joining(", "));
         }
 
-        Optional<List<ApplicantOrChildren>> sexVictim = ofNullable(caseData.getSexualAbuseVictim());
+        Optional<List<ApplicantOrChildren>> sexVictim = ofNullable(caseData.getAllegationOfHarm().getSexualAbuseVictim());
         String sexVictimString = "";
         if (sexVictim.isPresent()) {
-            sexVictimString = caseData.getSexualAbuseVictim().stream()
+            sexVictimString = caseData.getAllegationOfHarm().getSexualAbuseVictim().stream()
                 .map(ApplicantOrChildren::getDisplayedValue)
                 .collect(Collectors.joining(", "));
         }
 
-        Optional<List<ApplicantOrChildren>> finVictim = ofNullable(caseData.getFinancialAbuseVictim());
+        Optional<List<ApplicantOrChildren>> finVictim = ofNullable(caseData.getAllegationOfHarm().getFinancialAbuseVictim());
         String finVictimString = "";
         if (finVictim.isPresent()) {
-            finVictimString = caseData.getPhysicalAbuseVictim().stream()
+            finVictimString = caseData.getAllegationOfHarm().getPhysicalAbuseVictim().stream()
                 .map(ApplicantOrChildren::getDisplayedValue)
                 .collect(Collectors.joining(", "));
         }
