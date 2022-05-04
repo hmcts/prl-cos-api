@@ -70,7 +70,7 @@ public class SolicitorEmailService {
                 .caseReference(String.valueOf(caseDetails.getId()))
                 .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
                 .applicantName(applicantNames)
-                .courtName(court.getCourtName())
+                .courtName((court != null) ? court.getCourtName() : "")
                 .courtEmail(courtEmail)
                 .caseLink(manageCaseUrl + "/" + caseDetails.getId())
                 .build();
@@ -102,7 +102,7 @@ public class SolicitorEmailService {
             .build();
     }
 
-    public void sendEmailToSolicitor(CaseDetails caseDetails, UserDetails userDetails) {
+    public void sendWithDrawEmailToSolicitor(CaseDetails caseDetails, UserDetails userDetails) {
         String solicitorEmail = "";
         CaseData caseData = emailService.getCaseData(caseDetails);
         List<PartyDetails> applicants = caseData
@@ -135,10 +135,10 @@ public class SolicitorEmailService {
 
         String solicitorEmail = "";
 
-        PartyDetails fl401Applicant = emailService.getCaseData(caseDetails)
-            .getApplicantsFL401();
+        String applicantSolicitorEmail = emailService.getCaseData(caseDetails)
+            .getApplicantsFL401()
+            .getSolicitorEmail();
 
-        String applicantSolicitorEmail = fl401Applicant.getSolicitorEmail();
         solicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
 
         emailService.send(
@@ -169,5 +169,22 @@ public class SolicitorEmailService {
             .courtEmail(caseData.getCourtEmailAddress())
             .caseLink(manageCaseUrl + "/" + caseData.getId())
             .build();
+    }
+
+    public void sendWithDrawEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails) {
+        String fl401SolicitorEmail = "";
+
+        String applicantSolicitorEmail = emailService.getCaseData(caseDetails)
+            .getApplicantsFL401()
+            .getSolicitorEmail();
+
+        fl401SolicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
+
+        emailService.send(
+            fl401SolicitorEmail,
+            EmailTemplateNames.WITHDRAW,
+            buildCaseWithdrawEmail(caseDetails),
+            LanguagePreference.english
+        );
     }
 }

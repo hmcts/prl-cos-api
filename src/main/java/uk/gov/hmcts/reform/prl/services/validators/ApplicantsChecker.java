@@ -128,7 +128,7 @@ public class ApplicantsChecker implements EventChecker {
     }
 
     private boolean mandatoryApplicantFieldsAreCompleted(PartyDetails applicant, String caseTypeOfApplication) {
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(applicant.getFirstName()));
         fields.add(ofNullable(applicant.getLastName()));
         fields.add(ofNullable(applicant.getDateOfBirth()));
@@ -174,7 +174,7 @@ public class ApplicantsChecker implements EventChecker {
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
     }
 
-    private boolean addSolicitorAddressFields(PartyDetails applicant, List<Optional> fields) {
+    private boolean addSolicitorAddressFields(PartyDetails applicant, List<Optional<?>> fields) {
         Optional<Organisation> solicitorOrg = ofNullable(applicant.getSolicitorOrg());
         if (solicitorOrg.isPresent() && (solicitorOrg.get().getOrganisationID() != null)) {
             fields.add(solicitorOrg);

@@ -9,9 +9,13 @@ import lombok.Value;
 @Builder(toBuilder = true)
 public class Document {
 
+    @JsonProperty("document_url")
     String documentUrl;
+    @JsonProperty("document_binary_url")
     String documentBinaryUrl;
+    @JsonProperty("document_filename")
     String documentFileName;
+    @JsonProperty("document_hash")
     String documentHash;
 
     @JsonCreator

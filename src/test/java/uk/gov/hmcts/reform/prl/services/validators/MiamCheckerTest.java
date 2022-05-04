@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.models.documents.MiamDocument;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -70,7 +70,7 @@ public class MiamCheckerTest {
             .mediatorRegistrationNumber("123456")
             .familyMediatorServiceName("Test Name")
             .soleTraderName("Trade Sole")
-            .miamCertificationDocumentUpload(MiamDocument.builder().build())
+            .miamCertificationDocumentUpload(Document.builder().build().builder().build())
             .build();
 
         assertTrue(miamChecker.isFinished(caseData));
@@ -85,7 +85,7 @@ public class MiamCheckerTest {
             .mediatorRegistrationNumber1("123456")
             .familyMediatorServiceName1("Test Name")
             .soleTraderName1("Trade Sole")
-            .miamCertificationDocumentUpload1(MiamDocument.builder().build())
+            .miamCertificationDocumentUpload1(Document.builder().build())
             .build();
 
         assertTrue(miamChecker.isFinished(caseData));
