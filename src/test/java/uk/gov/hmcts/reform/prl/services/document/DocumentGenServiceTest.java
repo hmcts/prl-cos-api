@@ -9,16 +9,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.*;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -31,7 +27,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -103,7 +100,8 @@ public class DocumentGenServiceTest {
             .value(applicantConfidentialityDetails).build();
         List<Element<ApplicantConfidentialityDetails>> applicantConfidentialList = Collections.singletonList(applicantConfidential);
 
-        OtherPersonConfidentialityDetails OtherPersonConfidentialityDetails = uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails.builder()
+        OtherPersonConfidentialityDetails otherPersonConfidentialityDetails = uk.gov.hmcts.reform.prl.models.complextypes.confidentiality
+            .OtherPersonConfidentialityDetails.builder()
             .isPersonIdentityConfidential(Yes)
             .firstName("test1")
             .lastName("last1")
@@ -112,7 +110,7 @@ public class DocumentGenServiceTest {
             .build();
 
         Element<OtherPersonConfidentialityDetails> otherPerson = Element.<OtherPersonConfidentialityDetails>builder()
-            .value(OtherPersonConfidentialityDetails).build();
+            .value(otherPersonConfidentialityDetails).build();
         List<Element<OtherPersonConfidentialityDetails>> otherPersonList = Collections.singletonList(otherPerson);
 
 
@@ -146,7 +144,7 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(FL401_CASE_TYPE)
-            .applicantsFL401(partyDetails)
+            .applicantsFL401(partyDetailsWithOrganisations)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
     }
