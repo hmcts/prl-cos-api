@@ -375,10 +375,9 @@ public class DocumentGenService {
         PartyDetails partyDetails = caseData.getApplicantsFL401();
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
 
-        return isApplicantDetailsConfidential(partyDetails) || isChildrenDetailsConfidentiality(
-            caseData,
-            typeOfApplicationOrders
-        );
+        boolean isChildrenConfidential = isChildrenDetailsConfidentiality(caseData, typeOfApplicationOrders);
+
+        return isApplicantDetailsConfidential(partyDetails) || isChildrenConfidential;
 
     }
 
