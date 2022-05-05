@@ -83,6 +83,7 @@ public class DocumentGenServiceTest {
     CaseData c100CaseData;
     CaseData c100CaseDataC1A;
     CaseData fl401CaseData;
+    CaseData fl401CaseData1;
     PartyDetails partyDetails;
 
     @Before
@@ -169,6 +170,8 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationsOfHarmYesNo(Yes)
             .applicants(listOfApplicants)
+            .isEngDocGen("Yes")
+            .isWelshDocGen("Yes")
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
@@ -183,6 +186,8 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationsOfHarmYesNo(Yes)
             .applicants(listOfApplicants)
+            .isEngDocGen("Yes")
+            .isWelshDocGen("Yes")
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .allegationsOfHarmYesNo(Yes)
             .applicantsConfidentialDetails(applicantConfidentialList)
@@ -225,6 +230,7 @@ public class DocumentGenServiceTest {
             .build();
 
         fl401CaseData = CaseData.builder()
+            .id(1234567L)
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .typeOfApplicationOrders(orders)
@@ -232,6 +238,22 @@ public class DocumentGenServiceTest {
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetailsWithOrganisations)
+            .isEngDocGen("Yes")
+            .isWelshDocGen("Yes")
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .home(homefull)
+            .build();
+
+        fl401CaseData1 = CaseData.builder()
+            .id(1234567L)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .isEngDocGen("Yes")
+            .isWelshDocGen("Yes")
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .home(homefull)
             .build();
@@ -350,6 +372,7 @@ public class DocumentGenServiceTest {
         verifyNoMoreInteractions(dgsService);
     }
 
+
     @Test
     public void generateDocsForC100TestWithC1A() throws Exception {
 
@@ -410,6 +433,43 @@ public class DocumentGenServiceTest {
             fl401CaseData);
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData);
+
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
+
+        verify(dgsService, times(2)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(2)).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verifyNoMoreInteractions(dgsService);
+    }
+
+    @Test
+    public void generateDocsForFL401TestWithChildConfidentialInfo() throws Exception {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
+            fl401CaseData);
+
+        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData1);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
