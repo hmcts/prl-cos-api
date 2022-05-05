@@ -512,21 +512,6 @@ public class CourtFinderServiceTest {
     }
 
 
-
-
-    @Test
-    public void returnTrueWhenCourtDetailsAreBlank() {
-        Court c1 = Court.builder()
-            .courtName("")
-            .courtSlug("")
-            .build();
-
-        Assert.assertTrue(courtFinderService.courtNameAndIdAreBlank(ofNullable(c1.getCourtName()),
-                                                                    ofNullable(c1.getCourtName())));
-
-    }
-
-
     @Test(expected = NotFoundException.class)
     public void whenNoChildDetailsPresentThrowNotFoundException() throws NotFoundException {
         CaseData caseData = CaseData.builder()
