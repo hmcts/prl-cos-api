@@ -14,7 +14,7 @@ public class Court {
     @JsonProperty("name")
     private String courtName;
     @JsonProperty("slug")
-    private String courtId;
+    private String courtSlug;
     private boolean open;
     @JsonProperty("county_location_code")
     private long countyLocationCode;
