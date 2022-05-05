@@ -116,8 +116,9 @@ public class CourtFinderServiceTest {
 
         londonCourt = Court.builder()
             .courtName("Central Family Court")
-            .courtId("central-family-court")
+            .courtSlug("central-family-court")
             .areasOfLaw(Collections.singletonList(AreaOfLaw.builder().build()))
+            .countyLocationCode(111)
             .gbs("TESTGBS")
             .dxNumber(Collections.singletonList("160010 Kingsway 7"))
             .inPerson(true)
@@ -127,8 +128,9 @@ public class CourtFinderServiceTest {
 
         newcastleCourt = Court.builder()
             .courtName("Newcastle Civil & Family Courts and Tribunals Centre")
-            .courtId("newcastle-civil-family-courts-and-tribunals-centre")
+            .courtSlug("newcastle-civil-family-courts-and-tribunals-centre")
             .dxNumber(Collections.singletonList("336901 Newcastle upon Tyne 55"))
+            .countyLocationCode(222)
             .inPerson(true)
             .accessScheme(true)
             .address(Collections.singletonList(CourtAddress.builder().build()))
@@ -141,8 +143,9 @@ public class CourtFinderServiceTest {
 
         horshamCourt = Court.builder()
             .courtName("Horsham County Court and Family Court")
-            .courtId("horsham-county-court-and-family-court")
+            .courtSlug("horsham-county-court-and-family-court")
             .courtEmailAddresses(Collections.singletonList(courtEmailAddress))
+            .countyLocationCode(333)
             .dxNumber(Collections.singletonList("The Law Courts"))
             .inPerson(true)
             .accessScheme(true)
@@ -151,8 +154,9 @@ public class CourtFinderServiceTest {
 
         westLondonCourt = Court.builder()
             .courtName("West London Family Court")
-            .courtId("west-london-family-court")
+            .courtSlug("west-london-family-court")
             .dxNumber(Collections.singletonList("310601 Feltham 4"))
+            .countyLocationCode(444)
             .inPerson(true)
             .accessScheme(true)
             .address(Collections.singletonList(CourtAddress.builder().build()))
@@ -299,12 +303,12 @@ public class CourtFinderServiceTest {
     @Test
     public void givenValidCourtSlug_thenReturnsCourtDetails() {
         Court basicCourt = Court.builder()
-            .courtId("central-family-court")
+            .courtSlug("central-family-court")
             .build();
-        String courtSlug = basicCourt.getCourtId();
+        String courtSlug = basicCourt.getCourtSlug();
         Court completeCourt = Court.builder()
             .courtName("Central Family Court")
-            .courtId("central-family-court")
+            .courtSlug("central-family-court")
             .areasOfLaw(Collections.singletonList(AreaOfLaw.builder().build()))
             .gbs("TESTGBS")
             .dxNumber(Collections.singletonList("160010 Kingsway 7"))
@@ -354,7 +358,7 @@ public class CourtFinderServiceTest {
             .applicants(Collections.singletonList(wrappedApplicant1))
             .caseTypeOfApplication("C100")
             .courtName("Newcastle Civil & Family Courts and Tribunals Centre")
-            .courtId("newcastle-civil-family-courts-and-tribunals-centre")
+            .courtId("222")
             .build();
 
         assertEquals(courtFinderService.setCourtNameAndId(caseData, newcastleCourt), updatedCaseData);
@@ -496,7 +500,7 @@ public class CourtFinderServiceTest {
     public void givenIdenticalCourts_whenComparing_returnsTrue() {
         Court c1 = Court.builder()
             .courtName("Central Family Court")
-            .courtId("central-family-court")
+            .courtSlug("central-family-court")
             .areasOfLaw(Collections.singletonList(AreaOfLaw.builder().build()))
             .gbs("TESTGBS")
             .dxNumber(Collections.singletonList("160010 Kingsway 7"))
@@ -506,7 +510,7 @@ public class CourtFinderServiceTest {
             .build();
         Court c2 = Court.builder()
             .courtName("Central Family Court")
-            .courtId("central-family-court")
+            .courtSlug("central-family-court")
             .areasOfLaw(Collections.singletonList(AreaOfLaw.builder().build()))
             .gbs("TESTGBS")
             .dxNumber(Collections.singletonList("160010 Kingsway 7"))
@@ -524,7 +528,7 @@ public class CourtFinderServiceTest {
     public void returnTrueWhenCourtDetailsAreBlank() {
         Court c1 = Court.builder()
             .courtName("")
-            .courtId("")
+            .courtSlug("")
             .build();
 
         Assert.assertTrue(courtFinderService.courtNameAndIdAreBlank(ofNullable(c1.getCourtName()),
@@ -536,7 +540,7 @@ public class CourtFinderServiceTest {
     public void returnFalseIfObjectNull() {
         Court c1 = Court.builder()
             .courtName("")
-            .courtId("")
+            .courtSlug("")
             .build();
 
         Court c2 = null;
