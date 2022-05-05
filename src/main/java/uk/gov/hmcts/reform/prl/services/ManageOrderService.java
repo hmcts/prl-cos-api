@@ -36,6 +36,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.amendDischargedVaried;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -321,11 +322,18 @@ public class ManageOrderService {
     }
 
     public CaseData populateCustomOrderFields(CaseData caseData) {
-        return caseData.toBuilder().fl404bCustomFields(getFl404bFields(caseData)).build();
+        CreateSelectOrderOptionsEnum order = caseData.getCreateSelectOrderOptions();
+
+        switch (order) {
+            case amendDischargedVaried:
+            case blank:
+                return getFl404bFields(caseData);
+            default:
+                return caseData;
+        }
     }
 
-    public FL404b getFl404bFields(CaseData caseData) {
-
+    private CaseData getFl404bFields(CaseData caseData) {
         FL404b orderData = FL404b.builder()
             .fl404bCaseNumber(String.valueOf(caseData.getId()))
             .fl404bCourtName(caseData.getCourtName())
@@ -341,7 +349,9 @@ public class ManageOrderService {
         if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
             orderData = orderData.toBuilder().fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
-        return orderData;
+        return caseData.toBuilder().manageOrders(ManageOrders.builder()
+                                                     .fl404bCustomFields(orderData).build()).build();
+
     }
 
 }
