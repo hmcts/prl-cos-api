@@ -192,12 +192,12 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
-    private boolean isConfidentialInformationPresentForC100(CaseData caseData) {
-        return C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            &&  ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+    public boolean isConfidentialInformationPresentForC100(CaseData caseData) {
+        return (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
+            &&  (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
             && !caseData.getApplicantsConfidentialDetails().isEmpty()
             || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-            && !caseData.getChildrenConfidentialDetails().isEmpty();
+            && !caseData.getChildrenConfidentialDetails().isEmpty());
     }
 
     public Map<String, Object> generateDraftDocuments(String authorisation, CaseData caseData) throws Exception {
