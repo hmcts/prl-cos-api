@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -68,8 +69,6 @@ public class ManageOrdersController {
 
     }
 
-
-
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to fetch child details ")
     @ApiResponses(value = {
@@ -83,7 +82,11 @@ public class ManageOrdersController {
             CaseData.class
         );
         CaseData caseDataInput = manageOrderService.getUpdatedCaseData(caseData);
-
+        caseDataInput = caseDataInput.toBuilder()
+            .manageOrders(ManageOrders.builder().childOption(IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
+                                                                 .mapToObj(Integer::toString)
+                                                                 .collect(joining())).build())
+            .build();
         return CallbackResponse.builder()
             .data(caseDataInput)
             .build();
@@ -101,27 +104,8 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        Map<String,Object> caseDataWithHeader = manageOrderService.populateHeader(caseData);
-        //        caseDataWithHeader.put("childDetailsManageOrder",ElementUtils.asDynamicList(
-        //            caseData.getChildren(),
-        //            null,
-        //            Child::getLabelForDynamicList
-        //        ));
-        //        Object childList = caseData.getChildren().stream()
-        //            .map(Element::getValue)
-        //            .map((child)->{
-        //                return child.getFirstName() + " " + child.getLastName();
-        //            })
-        //            .collect(Collectors.toList());
-        //
-        //        caseDataWithHeader.put("childDetailsManageOrder",childList);
-
-        caseDataWithHeader.put("childOption",IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
-            .mapToObj(Integer::toString)
-            .collect(joining()));
-
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataWithHeader)
+            .data(manageOrderService.populateHeader(caseData))
             .build();
     }
 
@@ -162,5 +146,4 @@ public class ManageOrdersController {
         caseDataUpdated.remove("createSelectOrderOptions");
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
 }
