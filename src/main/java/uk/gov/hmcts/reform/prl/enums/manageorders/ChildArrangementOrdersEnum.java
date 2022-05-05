@@ -15,6 +15,8 @@ public enum ChildArrangementOrdersEnum {
     standardDirectionsOrder("standardDirectionsOrder", "Standard directions order"),
     @JsonProperty("blankOrderOrDirections")
     blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)"),
+    @JsonProperty("blankOrderOrDirectionsWithdraw")
+    blankOrderOrDirectionsWithdraw("blankOrderOrDirectionsWithdraw", "Blank order or directions (C21)"),
     @JsonProperty("caSpecificProhibitedOrder")
     caSpecificProhibitedOrder("caSpecificProhibitedOrder", "Child arrangements, specific issue or prohibited steps order (C43)"),
     @JsonProperty("parentalResponsibilityOrder")
