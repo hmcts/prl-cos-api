@@ -60,6 +60,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentGenServiceTest {
@@ -83,6 +84,7 @@ public class DocumentGenServiceTest {
     CaseData c100CaseData;
     CaseData c100CaseDataC1A;
     CaseData fl401CaseData;
+    CaseData fl401CaseDataApplicantConfidential;
     PartyDetails partyDetails;
 
     @Before
@@ -107,12 +109,9 @@ public class DocumentGenServiceTest {
             .build();
 
 
-        PartyDetails partyDetailsWithOrganisations = PartyDetails.builder()
+        PartyDetails partyDetailsWithOrganisationsNoConfidential = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
-            .isAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .isEmailAddressConfidential(Yes)
             .solicitorOrg(Organisation.builder()
                               .organisationID("79ZRSOU")
                               .organisationName("Civil - Organisation 2")
@@ -120,8 +119,21 @@ public class DocumentGenServiceTest {
             .organisations(organisations)
             .build();
 
-        Element<PartyDetails> applicants = Element.<PartyDetails>builder().value(partyDetailsWithOrganisations).build();
+        Element<PartyDetails> applicants = Element.<PartyDetails>builder().value(partyDetailsWithOrganisationsNoConfidential).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(applicants);
+
+        PartyDetails partyDetailsWithOrganisationsWithConfidential = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .isPhoneNumberConfidential(Yes)
+            .isAddressConfidential(Yes)
+            .isEmailAddressConfidential(Yes)
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("TESTING")
+                              .organisationName("Civil - Organisation 2")
+                              .build())
+            .organisations(organisations)
+            .build();
 
         ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails.builder()
             .phoneNumber("1234567890")
@@ -231,7 +243,31 @@ public class DocumentGenServiceTest {
             .typeOfApplicationLinkToCA(linkToCA)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(FL401_CASE_TYPE)
-            .applicantsFL401(partyDetailsWithOrganisations)
+            .applicantsFL401(partyDetailsWithOrganisationsNoConfidential)
+            .home(Home.builder()
+                      .children(List.of(element(ChildrenLiveAtAddress.builder()
+                                            .keepChildrenInfoConfidential(Yes)
+                                            .childFullName("test")
+                                            .build())))
+                      .build())
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .home(homefull)
+            .build();
+
+        fl401CaseDataApplicantConfidential = CaseData.builder()
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(partyDetailsWithOrganisationsWithConfidential)
+            .home(Home.builder()
+                      .children(List.of(element(ChildrenLiveAtAddress.builder()
+                                                    .keepChildrenInfoConfidential(Yes)
+                                                    .childFullName("test")
+                                                    .build())))
+                      .build())
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .home(homefull)
             .build();
@@ -393,7 +429,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocsForFL401Test() throws Exception {
+    public void generateDocsForFL401TestChildConfidential() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -428,6 +464,90 @@ public class DocumentGenServiceTest {
         );
         verifyNoMoreInteractions(dgsService);
     }
+
+    @Test
+    public void generateDocsForFL401TestApplicantConfidential() throws Exception {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
+            fl401CaseDataApplicantConfidential);
+
+        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseDataApplicantConfidential);
+
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
+
+        verify(dgsService, times(2)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(2)).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verifyNoMoreInteractions(dgsService);
+    }
+
+
+    @Test
+    public void givenC100Case_whenApplicantAndChildConfidentialDetailsPresent_ReturnTrue() {
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
+            .childrenConfidentialDetails(List.of(element(ChildConfidentialityDetails.builder().build())))
+            .build();
+
+        assertTrue(documentGenService.isConfidentialInformationPresentForC100(caseData));
+
+    }
+
+    @Test
+    public void whenFL401Case_ReturnFalse() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
+            .childrenConfidentialDetails(List.of(element(ChildConfidentialityDetails.builder().build())))
+            .build();
+
+
+        assertFalse(documentGenService.isConfidentialInformationPresentForC100(caseData));
+
+    }
+
+    @Test
+    public void givenC100Case_whenApplicantAndChildConfidentialDetailsPresentButEmptyList_ReturnFalse() {
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicantsConfidentialDetails(Collections.emptyList())
+            .childrenConfidentialDetails(Collections.emptyList())
+            .build();
+
+        assertFalse(documentGenService.isConfidentialInformationPresentForC100(caseData));
+
+    }
+
+
+
+
+
+
+
 }
 
 
