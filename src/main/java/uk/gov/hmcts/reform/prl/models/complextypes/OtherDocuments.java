@@ -17,6 +17,6 @@ public class OtherDocuments {
     @JsonProperty("notes")
     private final String notes;
     private final Document documentOther;
-    private final DocTypeOtherDocumentsEnum docTypeOtherDocumentsEnum;
+    private final DocTypeOtherDocumentsEnum documentTypeOther;
     private final List<RestrictToCafcassHmcts> restrictCheckboxOtherDocuments;
 }
