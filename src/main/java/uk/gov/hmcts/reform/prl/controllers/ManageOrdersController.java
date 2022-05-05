@@ -80,7 +80,7 @@ public class ManageOrdersController {
 
 
     @PostMapping(path = "/fetch-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to fetch child details ")
+    @ApiOperation(value = "Callback to fetch case data and custom order fields")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Child details are fetched"),
         @ApiResponse(code = 400, message = "Bad Request")})
