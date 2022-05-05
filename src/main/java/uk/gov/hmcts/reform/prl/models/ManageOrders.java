@@ -20,5 +20,4 @@ public class ManageOrders {
     private final FL404b fl404bCustomFields;
 
 
-
 }
