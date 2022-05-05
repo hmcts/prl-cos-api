@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -68,6 +69,19 @@ public class OtherPeopleInTheCaseCheckerTest {
             .build();
 
         assertTrue(otherPeopleInTheCaseChecker.isStarted(caseData));
+    }
+
+    @Test
+    public void whenNoRelevantCaseDataThenIsStartedReturnsFalse() {
+        PartyDetails other = null;
+        Element<PartyDetails> wrappedOther = Element.<PartyDetails>builder().value(other).build();
+        List<Element<PartyDetails>> otherList = Collections.singletonList(wrappedOther);
+
+        CaseData caseData = CaseData.builder()
+            .othersToNotify(otherList)
+            .build();
+
+        assertFalse(otherPeopleInTheCaseChecker.isStarted(caseData));
     }
 
     @Test
