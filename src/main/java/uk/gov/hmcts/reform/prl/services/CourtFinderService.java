@@ -107,13 +107,6 @@ public class CourtFinderService {
         return partyDetails.getAddress().getPostCode();
     }
 
-    public boolean courtNameAndIdAreBlank(Optional<String> courtName, Optional<String> courtId) {
-        return courtName.isPresent()
-            && courtId.isPresent()
-            && courtName.get().isBlank()
-            && courtId.get().isBlank();
-    }
-
     public OtherPersonWhoLivesWithChild getFirstOtherPerson(Child c) {
         return c.getPersonWhoLivesWithChild()
             .stream()
