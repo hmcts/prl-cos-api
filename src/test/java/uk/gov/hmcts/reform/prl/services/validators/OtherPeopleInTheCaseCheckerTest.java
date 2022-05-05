@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OtherPeopleInTheCaseCheckerTest {
@@ -106,6 +107,65 @@ public class OtherPeopleInTheCaseCheckerTest {
     }
 
     @Test
+    public void whenCompletePartyDetailsThenValidationReturnsTrue() {
+
+        OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
+            .personRelationshipToChild("Test relationship")
+            .build();
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("firstName")
+            .lastName("lastName")
+            .gender(Gender.male)
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .dateOfBirth(LocalDate.of(1989, 10, 20))
+            .isPlaceOfBirthKnown(YesOrNo.Yes)
+            .placeOfBirth("London")
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .address(Address.builder()
+                         .addressLine1("add1")
+                         .postCode("postcode")
+                         .build())
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("email@email.com")
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .phoneNumber("02086656656")
+            .otherPersonRelationshipToChildren(List.of(element(personRelationshipToChild)))
+            .build();
+
+        assertTrue(otherPeopleInTheCaseChecker.validateMandatoryPartyDetailsForOtherPerson(partyDetails));
+
+    }
+
+    @Test
+    public void whenCompletePartyDetailsButMissingOtherPersonRelationshipThenValidationReturnsFalse() {
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("firstName")
+            .lastName("lastName")
+            .gender(Gender.male)
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .dateOfBirth(LocalDate.of(1989, 10, 20))
+            .isPlaceOfBirthKnown(YesOrNo.Yes)
+            .placeOfBirth("London")
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .address(Address.builder()
+                         .addressLine1("add1")
+                         .postCode("postcode")
+                         .build())
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("email@email.com")
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .phoneNumber("02086656656")
+            .build();
+
+        assertFalse(otherPeopleInTheCaseChecker.validateMandatoryPartyDetailsForOtherPerson(partyDetails));
+
+    }
+
+
+
+    @Test
     public void whenOtherPeopleInTheCasePresentExceptPlaceOfBirth() {
 
         OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
@@ -181,5 +241,54 @@ public class OtherPeopleInTheCaseCheckerTest {
 
         assertFalse(otherPeopleInTheCaseChecker.isFinished(caseData));
     }
+
+
+    @Test
+    public void ifEmptyListOfPartyDetailsThenFinishedReturnsFalse() {
+
+        CaseData caseData = CaseData.builder()
+            .othersToNotify(Collections.emptyList())
+            .build();
+
+        assertFalse(otherPeopleInTheCaseChecker.isFinished(caseData));
+    }
+
+    @Test
+    public void whenCompletePartyDetailsThenFinishedReturnsTrue() {
+
+        OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
+            .personRelationshipToChild("Test relationship")
+            .build();
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("firstName")
+            .lastName("lastName")
+            .gender(Gender.male)
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .dateOfBirth(LocalDate.of(1989, 10, 20))
+            .isPlaceOfBirthKnown(YesOrNo.Yes)
+            .placeOfBirth("London")
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .address(Address.builder()
+                         .addressLine1("add1")
+                         .postCode("postcode")
+                         .build())
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("email@email.com")
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .phoneNumber("02086656656")
+            .otherPersonRelationshipToChildren(List.of(element(personRelationshipToChild)))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .othersToNotify(List.of(element(partyDetails)))
+            .build();
+
+        assertTrue(otherPeopleInTheCaseChecker.isFinished(caseData));
+
+    }
+
+
+
 
 }
