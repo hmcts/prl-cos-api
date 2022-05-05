@@ -8,17 +8,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
-import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
-import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
-import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
-import uk.gov.hmcts.reform.prl.models.complextypes.Home;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.enums.*;
+import uk.gov.hmcts.reform.prl.models.*;
+import uk.gov.hmcts.reform.prl.models.complextypes.*;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
@@ -30,6 +22,7 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -86,11 +79,31 @@ public class DocumentGenServiceTest {
             .hashToken("testHashToken")
             .build();
 
+        List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
+                                                                                        .addressLine1("29, SEATON DRIVE")
+                                                                                        .addressLine2("test line")
+                                                                                        .townCity("NORTHAMPTON")
+                                                                                        .postCode("NN3 9SS")
+                                                                                        .build());
+
+        Organisations organisations = Organisations.builder()
+            .organisationIdentifier("79ZRSOU")
+            .name("Civil - Organisation 2")
+            .contactInformation(contactInformationList)
+            .build();
+
+
         PartyDetails partyDetailsWithOrganisations = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
             .isAddressConfidential(Yes)
             .isPhoneNumberConfidential(Yes)
+            .isEmailAddressConfidential(Yes)
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("79ZRSOU")
+                              .organisationName("Civil - Organisation 2")
+                              .build())
+            .organisations(organisations)
             .build();
 
         Element<PartyDetails> applicants = Element.<PartyDetails>builder().value(partyDetailsWithOrganisations).build();
@@ -106,7 +119,8 @@ public class DocumentGenServiceTest {
 
         Element<ApplicantConfidentialityDetails> applicantConfidential = Element.<ApplicantConfidentialityDetails>builder()
             .value(applicantConfidentialityDetails).build();
-        List<Element<ApplicantConfidentialityDetails>> applicantConfidentialList = Collections.singletonList(applicantConfidential);
+        List<Element<ApplicantConfidentialityDetails>> applicantConfidentialList = Collections.singletonList(
+            applicantConfidential);
 
         OtherPersonConfidentialityDetails otherPersonConfidentialityDetails = uk.gov.hmcts.reform.prl.models.complextypes.confidentiality
             .OtherPersonConfidentialityDetails.builder()
@@ -162,7 +176,7 @@ public class DocumentGenServiceTest {
             .build();
 
         ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
-            .keepChildrenInfoConfidential(YesOrNo.No)
+            .keepChildrenInfoConfidential(Yes)
             .childFullName("child")
             .childsAge("12")
             .isRespondentResponsibleForChild(YesOrNo.Yes)
@@ -182,9 +196,25 @@ public class DocumentGenServiceTest {
             .livingSituation(List.of(LivingSituationEnum.awayFromHome))
             .build();
 
+
+        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+
+        orderList.add(FL401OrderTypeEnum.occupationOrder);
+
+        TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder()
+            .orderType(orderList)
+            .build();
+
+        LinkToCA linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.Yes)
+            .caApplicationNumber("123")
+            .build();
+
         fl401CaseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetailsWithOrganisations)
@@ -198,8 +228,16 @@ public class DocumentGenServiceTest {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any());
-        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any());
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
 
@@ -226,12 +264,21 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void generateDocsForFL401Test() throws Exception {
+    public void generateDocsForFL401TestWithOrganisation() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any());
-        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any());
-        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(fl401CaseData);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
+            fl401CaseData);
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData);
 
@@ -258,8 +305,16 @@ public class DocumentGenServiceTest {
     public void generateDraftDocsForC100Test() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any());
-        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any());
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
 
@@ -286,10 +341,20 @@ public class DocumentGenServiceTest {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any());
-        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any());
-        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseDataC1A);
-        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseDataC1A);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
+            c100CaseDataC1A);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
+            c100CaseDataC1A);
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataC1A);
 
@@ -313,6 +378,43 @@ public class DocumentGenServiceTest {
         verifyNoMoreInteractions(dgsService);
     }
 
+    @Test
+    public void generateDocsForFL401Test() throws Exception {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
+            fl401CaseData);
+
+        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData);
+
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
+
+        verify(dgsService, times(2)).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verify(dgsService, times(2)).generateWelshDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+        verifyNoMoreInteractions(dgsService);
+    }
 }
+
 
 

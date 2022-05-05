@@ -320,7 +320,7 @@ public class SolicitorEmailServiceTest {
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
 
         solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
-        assertEquals("test@demo.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+        assertEquals("test@demo.com", userDetails.getEmail());
     }
 
     @Test
