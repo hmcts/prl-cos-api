@@ -71,6 +71,19 @@ public class OtherPeopleInTheCaseCheckerTest {
     }
 
     @Test
+    public void whenNoRelevantCaseDataThenIsStartedReturnsFalse() {
+        PartyDetails other = null;
+        Element<PartyDetails> wrappedOther = Element.<PartyDetails>builder().value(other).build();
+        List<Element<PartyDetails>> otherList = Collections.singletonList(wrappedOther);
+
+        CaseData caseData = CaseData.builder()
+            .othersToNotify(otherList)
+            .build();
+
+        assertFalse(otherPeopleInTheCaseChecker.isStarted(caseData));
+    }
+
+    @Test
     public void whenIncompleteCaseDataValidateMandatoryFieldsForOtherReturnsFalse() {
 
         OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
