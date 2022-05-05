@@ -31,11 +31,10 @@ import static java.util.Optional.ofNullable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(SpringRunner.class)
 public class CourtFinderServiceTest {
@@ -216,6 +215,23 @@ public class CourtFinderServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(westLondonCourt));
+    }
+
+    @Test
+    public void givenInvalidPostCode_NoServiceAreaReturned() throws NotFoundException {
+
+        Child child = Child.builder()
+            .childLiveWith(Collections.emptyList())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .children(Collections.singletonList(element(child)))
+            .applicants(List.of(element(PartyDetails.builder().address(Address.builder()
+                                                                           .postCode("INVALID")
+                                                                           .build()).build())))
+            .build();
+
+        assertNull(courtFinderService.getNearestFamilyCourt(caseData));
     }
 
     @Test
@@ -496,32 +512,6 @@ public class CourtFinderServiceTest {
     }
 
 
-    @Test
-    public void givenIdenticalCourts_whenComparing_returnsTrue() {
-        Court c1 = Court.builder()
-            .courtName("Central Family Court")
-            .courtSlug("central-family-court")
-            .areasOfLaw(Collections.singletonList(AreaOfLaw.builder().build()))
-            .gbs("TESTGBS")
-            .dxNumber(Collections.singletonList("160010 Kingsway 7"))
-            .inPerson(true)
-            .accessScheme(true)
-            .address(Collections.singletonList(CourtAddress.builder().build()))
-            .build();
-        Court c2 = Court.builder()
-            .courtName("Central Family Court")
-            .courtSlug("central-family-court")
-            .areasOfLaw(Collections.singletonList(AreaOfLaw.builder().build()))
-            .gbs("TESTGBS")
-            .dxNumber(Collections.singletonList("160010 Kingsway 7"))
-            .inPerson(true)
-            .accessScheme(true)
-            .address(Collections.singletonList(CourtAddress.builder().build()))
-            .build();
-
-        assertTrue(courtFinderService.courtsAreTheSame(c1, c2));
-        Assert.assertTrue(courtFinderService.courtsAreTheSame(c1, c2));
-    }
 
 
     @Test
@@ -536,15 +526,14 @@ public class CourtFinderServiceTest {
 
     }
 
-    @Test
-    public void returnFalseIfObjectNull() {
-        Court c1 = Court.builder()
-            .courtName("")
-            .courtSlug("")
+
+    @Test(expected = NotFoundException.class)
+    public void whenNoChildDetailsPresentThrowNotFoundException() throws NotFoundException {
+        CaseData caseData = CaseData.builder()
+            .children(Collections.emptyList())
             .build();
 
-        Court c2 = null;
-        assertFalse(courtFinderService.courtsAreTheSame(c1, c2));
-        Assert.assertFalse(courtFinderService.courtsAreTheSame(c1, c2));
+        courtFinderService.getCorrectPartyPostcode(caseData);
     }
+
 }
