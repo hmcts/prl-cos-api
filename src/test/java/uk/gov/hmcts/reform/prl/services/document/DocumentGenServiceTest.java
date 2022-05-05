@@ -33,13 +33,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfiden
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -129,19 +129,6 @@ public class DocumentGenServiceTest {
 
         Element<PartyDetails> applicants = Element.<PartyDetails>builder().value(partyDetailsWithOrganisationsNoConfidential).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(applicants);
-
-        PartyDetails partyDetailsWithOrganisationsWithConfidential = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .isPhoneNumberConfidential(Yes)
-            .isAddressConfidential(Yes)
-            .isEmailAddressConfidential(Yes)
-            .solicitorOrg(Organisation.builder()
-                              .organisationID("TESTING")
-                              .organisationName("Civil - Organisation 2")
-                              .build())
-            .organisations(organisations)
-            .build();
 
         ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails.builder()
             .phoneNumber("1234567890")
@@ -260,6 +247,19 @@ public class DocumentGenServiceTest {
                       .build())
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .home(homefull)
+            .build();
+
+        PartyDetails partyDetailsWithOrganisationsWithConfidential = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .isPhoneNumberConfidential(Yes)
+            .isAddressConfidential(Yes)
+            .isEmailAddressConfidential(Yes)
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("TESTING")
+                              .organisationName("Civil - Organisation 2")
+                              .build())
+            .organisations(organisations)
             .build();
 
         fl401CaseDataApplicantConfidential = CaseData.builder()
