@@ -50,23 +50,14 @@ public class CourtFinderService {
                 .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
         }
 
-        if (serviceArea.getCourts() != null
-            && serviceArea.getCourts().size() > 0) {
+        if (serviceArea != null
+            && !serviceArea.getCourts().isEmpty()) {
             return getCourtDetails(serviceArea.getCourts()
                                        .get(0)
                                        .getCourtSlug());
         } else {
             return null;
         }
-    }
-
-    public boolean courtsAreTheSame(Court c1, Court c2) {
-        if (c1 == null || c2 == null) {
-            return false;
-        }
-
-        return c1.getCourtName().equals(c2.getCourtName())
-            && c1.getCountyLocationCode() == c2.getCountyLocationCode();
     }
 
     public Court getCourtDetails(String courtSlug) {
