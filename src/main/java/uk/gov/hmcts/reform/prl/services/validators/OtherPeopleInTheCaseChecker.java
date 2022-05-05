@@ -67,10 +67,6 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
 
-            if (others.isEmpty()) {
-                taskErrorService.removeError(OTHER_PEOPLE_ERROR);
-                return false;
-            }
             boolean started = others.stream().anyMatch(Objects::nonNull);
             if (started) {
                 taskErrorService.addEventError(OTHER_PEOPLE_IN_THE_CASE, OTHER_PEOPLE_ERROR, OTHER_PEOPLE_ERROR.getError());
