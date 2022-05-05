@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -29,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -79,9 +77,6 @@ public class ManageOrdersControllerTest {
 
     @Mock
     private UserService userService;
-
-    @Mock
-    private  DgsService dgsService;
 
     @Mock
     private  DocumentLanguageService documentLanguageService;
@@ -136,8 +131,6 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
 
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
@@ -145,7 +138,7 @@ public class ManageOrdersControllerTest {
         assertNotNull(callbackResponse);
     }
 
-    @Ignore
+
     @Test
     public void testManageOrderApplicationEventValidation() throws Exception {
 
@@ -180,8 +173,6 @@ public class ManageOrdersControllerTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -220,6 +211,65 @@ public class ManageOrdersControllerTest {
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm)
+            .build();
+
+        CaseData updatedCaseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .children(listOfChildren)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .fl401FamilymanCaseNumber("12345")
+            .childrenList("Child 1: TestName\n")
+            .selectedOrder(
+                "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
+                    + "enforcement application (C82)\\n\\n")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
+
+        CallbackResponse callbackResponse = manageOrdersController.fetchChildDetails(callbackRequest);
+        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
+        assertEquals(
+            "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
+            callbackResponse.getData().getSelectedOrder());
+    }
+
+    @Test
+    public void testFetchChildrenNamesListForNoticeOfProceedings() {
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .children(listOfChildren)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
