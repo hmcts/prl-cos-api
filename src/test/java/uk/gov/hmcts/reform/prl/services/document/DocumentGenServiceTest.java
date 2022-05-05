@@ -238,7 +238,6 @@ public class DocumentGenServiceTest {
             .build();
 
         fl401CaseData = CaseData.builder()
-            .id(1234567L)
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .typeOfApplicationOrders(orders)
