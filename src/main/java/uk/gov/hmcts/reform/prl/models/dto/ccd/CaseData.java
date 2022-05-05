@@ -617,7 +617,6 @@ public class CaseData implements MappableObject {
     private final String childrenList;
 
 
-
     @JsonUnwrapped
     private ManageOrders manageOrders;
 
