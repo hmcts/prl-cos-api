@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.manageorders.CaseTransferOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ReasonForTransferEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.util.List;
 
@@ -16,9 +16,13 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ManageOrders {
 
-    private final List<String> cafcassEmailAddress;
-    private final List<String> otherEmailAddress;
-    private CaseTransferOptionsEnum caseTransferOptions;
-    @JsonProperty("reasonsForTransfer")
-    private List<ReasonForTransferEnum> reasonForTransfer;
+    @JsonProperty("cafcassEmailAddress")
+    private final List<Element<String>> cafcassEmailAddress;
+    @JsonProperty("otherEmailAddress")
+    private final List<Element<String>> otherEmailAddres;
+    @JsonProperty("isCaseWithdrawn")
+    private final YesOrNo isCaseWithdrawn;
+    private final String recitalsOrPreamble;
+    private final String orderDirections;
+    private final String furtherDirectionsIfRequired;
 }
