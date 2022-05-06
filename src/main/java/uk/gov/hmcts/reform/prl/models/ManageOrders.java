@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -49,6 +48,9 @@ public class ManageOrders {
     private final LocalDate underTakingDateExpiry;
     private final String underTakingExpiryTime;
     private final YesOrNo underTakingFormSign;
+    private final String recitalsOrPreamble;
+    private final String orderDirections;
+    private final String furtherDirectionsIfRequired;
 
 
 }
