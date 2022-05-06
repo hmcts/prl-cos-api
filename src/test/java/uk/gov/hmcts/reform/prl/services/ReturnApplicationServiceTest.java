@@ -180,7 +180,8 @@ public class ReturnApplicationServiceTest {
 
         assertEquals(returnMsgStr.toString(),returnApplicationService.getReturnMessage(caseDataFl401,userDetails));
     }
-  
+
+    @Test
     public void testGetReturnMessageForTaskList() {
         StringBuilder returnMsgStr = new StringBuilder();
         returnMsgStr.append("                            \n\n");
@@ -199,6 +200,7 @@ public class ReturnApplicationServiceTest {
 
 
         assertEquals(returnMsgStr.toString(), returnApplicationService.getReturnMessageForTaskList(casedata));
+
     }
 
 

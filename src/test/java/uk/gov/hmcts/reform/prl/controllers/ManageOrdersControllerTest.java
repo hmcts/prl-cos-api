@@ -191,6 +191,54 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
+    public void testManageOrderFL404bApplicationEventValidation() throws Exception {
+
+        CaseData expectedCaseData = CaseData.builder()
+            .id(12345L)
+            .appointmentOfGuardian(Document.builder().build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("fl404bDraftFilename")
+                                 .build())
+            .appointmentOfGuardian(Document.builder()
+                                       .documentUrl(generatedDocumentInfo.getUrl())
+                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                       .documentHash(generatedDocumentInfo.getHashToken())
+                                       .documentFileName("fl404bDraftFilename")
+                                       .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
+        Map<String, String> dataFieldMap = new HashMap<>();
+        dataFieldMap.put(PrlAppsConstants.TEMPLATE, "templateName");
+        dataFieldMap.put(PrlAppsConstants.FILE_NAME, "fileName");
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .populatePreviewOrderWhenOrderUploaded(authToken, callbackRequest);
+        assertNotNull(callbackResponse);
+    }
+
+    @Test
     public void testFetchChildrenNamesList() {
         Child child = Child.builder()
             .firstName("Test")
