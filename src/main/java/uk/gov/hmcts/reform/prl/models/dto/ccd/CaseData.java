@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -39,7 +38,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
-import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
@@ -141,23 +139,6 @@ public class CaseData implements MappableObject {
     private final List<Document> contactOrderDocumentsUploaded;
     private final List<Document> c8FormDocumentsUploaded;
     private final List<Document> otherDocumentsUploaded;
-
-    /**
-     * People in the case.
-     */
-
-    private final Address childrenAddress;
-    private final YesNoDontKnow isChildrenKnownToAuthority;
-    private final String childAndLocalAuthority;
-    private final YesNoDontKnow isChildrenUnderChildProtection;
-    private final YesNoDontKnow isChildrenWithSameParents;
-    private final String parentsAndTheirChildren;
-    private final String parentalResponsibilities;
-    private final WhoChildrenLiveWith whoChildrenLiveWith;
-    private final String childAddressAndAdultsLivingWith;
-    private final YesOrNo isExistingProceedings;
-    private final String childrenInProceeding;
-    private final List<Element<Child>> otherChildren;
 
 
     /**
