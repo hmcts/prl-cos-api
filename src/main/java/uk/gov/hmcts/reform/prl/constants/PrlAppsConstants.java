@@ -40,12 +40,16 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_FIELD_C1A = "c1ADocument";
     public static final String DOCUMENT_FIELD_C8 = "c8Document";
     public static final String DOCUMENT_FIELD_FINAL = "finalDocument";
+    public static final String DRAFT_DOCUMENT_FIELD = "draftOrderDoc";
+    public static final String DRAFT_DOCUMENT_WELSH_FIELD = "draftOrderDocWelsh";
     public static final String COURT_NAME_FIELD = "courtName";
     public static final String COURT_ID_FIELD = "courtId";
     public static final String COURT_EMAIL_ADDRESS_FIELD = "courtEmailAddress";
     public static final String FINAL_DOCUMENT_FIELD = "finalDocument";
     public static final String ISSUE_DATE_FIELD = "issueDate";
     public static final String DATE_SUBMITTED_FIELD = "dateSubmitted";
+    public static final String DATE_AND_TIME_SUBMITTED_FIELD = "dateAndTimeSubmitted";
+    public static final String STATE_FIELD = "state";
 
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
 
@@ -69,4 +73,8 @@ public class PrlAppsConstants {
     public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
     public static final String ISSUED_STATE = State.CASE_ISSUE.getValue();
     public static final String GATEKEEPING_STATE = State.GATEKEEPING.getValue();
+    public static final String C8_HINT = "C8";
+    public static final String C1A_HINT = "C1A";
+    public static final String FINAL_HINT = "FINAL";
+    public static final String DRAFT_HINT = "DRAFT";
 }
