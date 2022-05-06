@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
@@ -552,6 +553,8 @@ public class CaseData implements MappableObject {
 
     @JsonProperty("viewPDFlinkLabelText")
     private String viewPdfLinkLabelText;
+
+    private List<Element<CaseInvite>> caseInvite;
 
 
     /**
