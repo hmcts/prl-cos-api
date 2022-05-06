@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import org.junit.Test;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
@@ -149,6 +150,7 @@ public class TaskListRendererTest {
             .build();
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .typeOfApplicationOrders(orders)
             .typeOfApplicationLinkToCA(linkToCA)
             .build();
@@ -163,6 +165,7 @@ public class TaskListRendererTest {
     public void shouldRenderTaskList() throws IOException {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         List<String> lines = new ArrayList<>();
 
@@ -186,6 +189,7 @@ public class TaskListRendererTest {
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
 
         List<String> lines = new ArrayList<>();
