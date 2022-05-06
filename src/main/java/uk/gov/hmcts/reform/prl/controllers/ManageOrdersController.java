@@ -84,7 +84,7 @@ public class ManageOrdersController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Child details are fetched"),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public CallbackResponse fetchChildDetails(
+    public CallbackResponse fetchOrderDetails(
         @RequestBody CallbackRequest callbackRequest
     ) {
         CaseData caseData = objectMapper.convertValue(
