@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ChildSelectorEnum;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ManageOrders {
@@ -21,6 +21,8 @@ public class ManageOrders {
     private final List<Element<String>> otherEmailAddress;
     @JsonProperty("childOption")
     private final String childOption;
+    @JsonProperty("childrenList")
+    private final String childrenList;
     @JsonProperty("childSelectorOption1")
     private final List<ChildSelectorEnum> childSelectorOption1;
     @JsonProperty("childSelectorOption2")

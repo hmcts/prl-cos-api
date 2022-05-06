@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -221,7 +222,7 @@ public class ManageOrdersControllerTest {
             .children(listOfChildren)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .fl401FamilymanCaseNumber("12345")
-            .childrenList("Child 1: TestName\n")
+            .manageOrders(ManageOrders.builder().childrenList("Child 1: TestName\n").build())
             .selectedOrder(
                 "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
                     + "enforcement application (C82)\\n\\n")
@@ -240,7 +241,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
 
         CallbackResponse callbackResponse = manageOrdersController.fetchChildDetails(callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
+        assertEquals("Child 1: TestName\n", callbackResponse.getData().getManageOrders().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
             callbackResponse.getData().getSelectedOrder());

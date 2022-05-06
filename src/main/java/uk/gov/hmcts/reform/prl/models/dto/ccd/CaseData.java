@@ -621,7 +621,6 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final ManageOrders manageOrders = ManageOrders.builder().build();
-    private final String childrenList;
 
     /**
      * Solicitor Details.
@@ -629,7 +628,7 @@ public class CaseData implements MappableObject {
     private String caseSolicitorName;
     private String caseSolicitorOrgName;
     private String selectedOrder;
-  
+
     /**
      * FL401 Court details for Pilot.
      */

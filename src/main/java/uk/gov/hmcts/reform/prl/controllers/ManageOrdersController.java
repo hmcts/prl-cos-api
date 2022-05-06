@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -83,9 +82,10 @@ public class ManageOrdersController {
         );
         CaseData caseDataInput = manageOrderService.getUpdatedCaseData(caseData);
         caseDataInput = caseDataInput.toBuilder()
-            .manageOrders(ManageOrders.builder().childOption(IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
-                                                                 .mapToObj(Integer::toString)
-                                                                 .collect(joining())).build())
+            .manageOrders(caseDataInput.getManageOrders().toBuilder()
+                              .childOption(IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
+                                                                                     .mapToObj(Integer::toString)
+                                                                                     .collect(joining())).build())
             .build();
         return CallbackResponse.builder()
             .data(caseDataInput)
