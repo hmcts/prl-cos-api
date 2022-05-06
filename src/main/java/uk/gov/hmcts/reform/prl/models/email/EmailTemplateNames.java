@@ -11,5 +11,6 @@ public enum EmailTemplateNames {
     GATEKEEPER,
     GATEKEEPER_FL401,
     DA_SOLICITOR,
-    DA_LOCALCOURT
+    DA_LOCALCOURT,
+    CASE_INVITE
 }
