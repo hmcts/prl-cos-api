@@ -29,7 +29,6 @@ public class TaskListController extends AbstractCallbackController {
     public void handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                 @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation) {
 
-
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         publishEvent(new CaseDataChanged(caseData));
         tabService.updateAllTabs(caseData);
