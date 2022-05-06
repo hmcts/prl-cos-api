@@ -5,18 +5,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 
-import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Jacksonized
 public class ManageOrders {
 
-    private final List<String> cafcassEmailAddress;
-    private final List<String> otherEmailAddress;
-    @JsonProperty("cafcassOfficeDetails")
-    private String cafcassOfficeDetails;
+    @JsonProperty("fl404bCustomFields")
+    private final FL404b fl404bCustomFields;
+
 
 }
