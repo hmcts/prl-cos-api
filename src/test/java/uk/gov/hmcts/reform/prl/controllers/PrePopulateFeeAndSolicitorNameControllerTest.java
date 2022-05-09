@@ -185,6 +185,30 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     }
 
     @Test
+    public void testUserDetailsForSolicitorName_FeeException() throws Exception {
+        when(submitAndPayChecker.hasMandatoryCompleted(Mockito.any(CaseData.class))).thenReturn(true);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+
+        when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
+            .thenReturn(court);
+
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenThrow(new Exception());
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest));
+
+    }
+
+    @Test
     public void testWhenControllerCalledOneInvokeToDgsService() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -315,6 +339,97 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
                                                          .documentHash(generatedDocumentInfo.getHashToken())
                                                          .documentFileName("Draft_c100_application.pdf").build())
                 .courtName(court1.getCourtName())
+                .build(),
+            CaseData.class
+        );
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
+            .thenReturn(caseData1);
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest));
+    }
+
+    @Test
+    public void testCourtDetailsWithoutCourtName() throws Exception {
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .address(Address.builder()
+                         .postCode("SE1 9BA")
+                         .build())
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseDataForCourt = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .children(listOfChildren)
+            .courtName("testcourt")
+            .build();
+
+        CaseDetails caseDetails1 = CaseDetails.builder()
+            .caseData(caseDataForCourt)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails1)
+            .build();
+
+        when(submitAndPayChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+        when(courtFinderService.getNearestFamilyCourt(callbackRequest.getCaseDetails().getCaseData()))
+            .thenReturn(null);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .build();
+
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        ;
+
+        CaseData caseData1 = objectMapper.convertValue(
+            CaseData.builder()
+                .solicitorName(userDetails.getFullName())
+                .applicantSolicitorEmailAddress("test@gmail.com")
+                .caseworkerEmailAddress("prl_caseworker_solicitor@mailinator.com")
+                .feeAmount(feeResponse.getAmount().toString())
+                .submitAndPayDownloadApplicationLink(Document.builder()
+                                                         .documentUrl(generatedDocumentInfo.getUrl())
+                                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                         .documentHash(generatedDocumentInfo.getHashToken())
+                                                         .documentFileName("Draft_c100_application.pdf").build())
+                .courtName("No Court Fetched")
                 .build(),
             CaseData.class
         );
