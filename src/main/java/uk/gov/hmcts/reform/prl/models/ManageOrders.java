@@ -20,7 +20,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder(toBuilder = true)
 public class ManageOrders {
-    @JsonProperty("")
+    @JsonProperty("cafcassEmailAddress")
     private final List<String> cafcassEmailAddress;
     private final List<String> otherEmailAddress;
 
@@ -65,5 +65,11 @@ public class ManageOrders {
 
     @JsonIgnore
     private final Address fl402HearingCourtAddress;
+    @JsonProperty("recitalsOrPreamble")
+    private final String recitalsOrPreamble;
+    @JsonProperty("orderDirections")
+    private final String orderDirections;
+    @JsonProperty("furtherDirectionsIfRequired")
+    private final String furtherDirectionsIfRequired;
 
 }
