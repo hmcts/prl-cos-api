@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -152,19 +153,33 @@ public class ManageOrderService {
     }
 
     private String getChildInfoFromCaseData(CaseData caseData) {
-        List<Child> children = new ArrayList<>();
-        if (caseData.getChildren() != null) {
-            children = caseData.getChildren().stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-        }
 
         StringBuilder builder = new StringBuilder();
-
-        for (int i = 0; i < children.size(); i++) {
-            Child child = children.get(i);
-            builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + child.getLastName()));
-            builder.append("\n");
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<Child> children = new ArrayList<>();
+            if (caseData.getChildren() != null) {
+                children = caseData.getChildren().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+            }
+            for (int i = 0; i < children.size(); i++) {
+                Child child = children.get(i);
+                builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + child.getLastName()));
+                builder.append("\n");
+            }
+        } else {
+            Optional<List<Element<ChildrenLiveAtAddress>>> childrenLiveAtAddress = ofNullable(caseData.getHome().getChildren());
+            if (childrenLiveAtAddress.isPresent()) {
+                List<ChildrenLiveAtAddress> children = new ArrayList<>();
+                children = childrenLiveAtAddress.get().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                for (int i = 0; i < children.size(); i++) {
+                    ChildrenLiveAtAddress child = children.get(i);
+                    builder.append(String.format("Child %d: %s", i + 1, child.getChildFullName()));
+                    builder.append("\n");
+                }
+            }
         }
         return builder.toString();
     }
