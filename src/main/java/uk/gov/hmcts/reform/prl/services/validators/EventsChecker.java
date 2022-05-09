@@ -31,6 +31,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
@@ -113,6 +114,9 @@ public class EventsChecker {
     @Autowired
     FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
 
+    @Autowired
+    SubmitChecker submitChecker;
+
     private Map<Event, EventChecker> eventStatus = new EnumMap<>(Event.class);
 
     @PostConstruct
@@ -133,6 +137,7 @@ public class EventsChecker {
         eventStatus.put(WELSH_LANGUAGE_REQUIREMENTS, welshLanguageRequirementsChecker);
         eventStatus.put(VIEW_PDF_DOCUMENT, pdfChecker);
         eventStatus.put(SUBMIT_AND_PAY, submitAndPayChecker);
+        eventStatus.put(SUBMIT, submitChecker);
 
         eventStatus.put(FL401_CASE_NAME, caseNameChecker);
         eventStatus.put(FL401_HOME, homeChecker);
