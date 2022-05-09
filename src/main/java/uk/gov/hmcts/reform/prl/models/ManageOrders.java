@@ -19,10 +19,12 @@ public class ManageOrders {
     private final List<Element<String>> cafcassEmailAddress;
     @JsonProperty("otherEmailAddress")
     private final List<Element<String>> otherEmailAddress;
-    @JsonProperty("childOption")
-    private final String childOption;
-    @JsonProperty("childrenList")
-    private final String childrenList;
+    @JsonProperty("recitalsOrPreamble")
+    private final String recitalsOrPreamble;
+    @JsonProperty("orderDirections")
+    private final String orderDirections;
+    @JsonProperty("furtherDirectionsIfRequired")
+    private final String furtherDirectionsIfRequired;
     @JsonProperty("childSelectorOption1")
     private final List<ChildSelectorEnum> childSelectorOption1;
     @JsonProperty("childSelectorOption2")

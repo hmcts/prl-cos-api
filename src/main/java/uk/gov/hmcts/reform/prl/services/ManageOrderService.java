@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -90,7 +89,7 @@ public class ManageOrderService {
     }
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
-        return CaseData.builder().manageOrders(ManageOrders.builder().childrenList(getChildInfoFromCaseData(caseData)).build())
+        return CaseData.builder().childrenList(getChildInfoFromCaseData(caseData))
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
