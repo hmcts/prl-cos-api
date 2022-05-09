@@ -7,9 +7,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 public interface CaseInviteService {
 
-    public CaseInvite generateRespondentCaseInvite(Element<PartyDetails> partyDetails);
-
-    public void sendCaseInvite(CaseInvite caseInvite, PartyDetails partyDetails, CaseData caseData);
+    public CaseData generateAndSendRespondentCaseInvite(CaseData caseData);
 
 
 }
