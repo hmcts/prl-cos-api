@@ -170,8 +170,7 @@ public class ManageOrderService {
         } else {
             Optional<List<Element<ChildrenLiveAtAddress>>> childrenLiveAtAddress = ofNullable(caseData.getHome().getChildren());
             if (childrenLiveAtAddress.isPresent()) {
-                List<ChildrenLiveAtAddress> children = new ArrayList<>();
-                children = childrenLiveAtAddress.get().stream()
+                List<ChildrenLiveAtAddress> children = childrenLiveAtAddress.get().stream()
                     .map(Element::getValue)
                     .collect(Collectors.toList());
                 for (int i = 0; i < children.size(); i++) {
