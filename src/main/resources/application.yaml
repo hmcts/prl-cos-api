@@ -241,10 +241,10 @@ document:
       prl_c47a_filename: C47ACreateOrder.pdf
       prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
       prl_c47a_draft_filename: C47ACreateOrderDraft.pdf
-      prl_fl404b_final_template: PRL-ORDER-FL404b-DRAFT-COMMON.docx
-      prl_fl404b_final_filename: FL404bCreateOrderDraft.pdf
-      prl_fl404b_draft_template: PRL-ORDER-FL404b-FINAL-COMMON.docx
-      prl_fl404b_draft_filename: FL404bCreateOrder.pdf
+      prl_fl404b_final_template: PRL-ORDER-FL404b-FINAL-COMMON.docx
+      prl_fl404b_final_filename: FL404bCreateOrder.pdf
+      prl_fl404b_draft_template: PRL-ORDER-FL404b-DRAFT-COMMON.docx
+      prl_fl404b_draft_filename: FL404bCreateOrderDraft.pdf
 
 southampton:
   court:
