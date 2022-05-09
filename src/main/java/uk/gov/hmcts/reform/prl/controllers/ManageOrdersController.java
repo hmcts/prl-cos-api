@@ -104,8 +104,7 @@ public class ManageOrdersController {
             }
         }
         caseDataInput = caseDataInput.toBuilder()
-            .manageOrders(caseDataInput.getManageOrders().toBuilder()
-                              .childOption(childOption).build())
+            .childOption(childOption)
             .build();
         return CallbackResponse.builder()
             .data(caseDataInput)
