@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -21,7 +25,9 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import javax.ws.rs.core.HttpHeaders;
 
@@ -81,11 +87,25 @@ public class ManageOrdersController {
             CaseData.class
         );
         CaseData caseDataInput = manageOrderService.getUpdatedCaseData(caseData);
+        String childOption = null;
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            childOption = IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
+                .mapToObj(Integer::toString)
+                .collect(joining());
+        } else {
+            Optional<Home> home = Optional.ofNullable(caseData.getHome());
+            if (home.isPresent()) {
+                Optional<List<Element<ChildrenLiveAtAddress>>> childrenLiveAtAddress = Optional.ofNullable(home.get().getChildren());
+                if (childrenLiveAtAddress.isPresent()) {
+                    childOption = IntStream.range(0, defaultIfNull(childrenLiveAtAddress.get(), emptyList()).size())
+                        .mapToObj(Integer::toString)
+                        .collect(joining());
+                }
+            }
+        }
         caseDataInput = caseDataInput.toBuilder()
             .manageOrders(caseDataInput.getManageOrders().toBuilder()
-                              .childOption(IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
-                                                                                     .mapToObj(Integer::toString)
-                                                                                     .collect(joining())).build())
+                              .childOption(childOption).build())
             .build();
         return CallbackResponse.builder()
             .data(caseDataInput)
