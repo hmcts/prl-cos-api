@@ -237,6 +237,11 @@ document:
       prl_c45a_filename: C45ACreateOrder.pdf
       prl_c45a_draft_template: PRL-ORDER-C45A-DRAFT-COMMON.docx
       prl_c45a_draft_filename: C45ACreateOrderDraft.pdf
+      prl_c43_template: PRL-ORDER-C43-FINAL.docx
+      prl_c43_filename: C43CreateOrder.pdf
+      prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
+      prl_c43_draft_filename: C43CreateOrderDraft.pdf
+
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}

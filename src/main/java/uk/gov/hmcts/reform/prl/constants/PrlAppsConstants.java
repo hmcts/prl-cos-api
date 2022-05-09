@@ -68,6 +68,7 @@ public class PrlAppsConstants {
     public static final String GENERATE_FILE_NAME = "generateFileName";
 
     public static final String URL_STRING = "/";
+    public static final String D_MMMM_YYYY = "d MMMM yyyy";
 
 
 }
