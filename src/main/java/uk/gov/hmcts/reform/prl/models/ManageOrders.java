@@ -25,4 +25,8 @@ public class ManageOrders {
     @JsonProperty("parentName")
     private String parentName;
 
+    @JsonProperty("magistrateLastName")
+    private final List<Element<String>> magistrateLastName;
+
+
 }
