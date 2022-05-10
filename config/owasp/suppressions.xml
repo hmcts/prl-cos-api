@@ -61,14 +61,6 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
-      Spring web influx
-  ]]></notes>
-    <cve>CVE-2022-22965</cve>
-    <cve>CVE-2022-22968</cve>
-    <cve>CVE-2016-1000027</cve>
-  </suppress>
-  <suppress>
-    <notes><![CDATA[
         Jackson data binding
         ]]></notes>
     <cve>CVE-2020-36518</cve>
@@ -78,5 +70,13 @@
       Spring web influx
   ]]></notes>
     <cve>CVE-2022-22965</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      Spring web influx
+  ]]></notes>
+    <cve>CVE-2022-22965</cve>
+    <cve>CVE-2016-1000027</cve>
+    <cve>CVE-2022-22968</cve>
   </suppress>
 </suppressions>
