@@ -24,7 +24,10 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
+import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -48,6 +51,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
@@ -61,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
+import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -323,7 +328,7 @@ public class CallbackController {
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
+  
     @PostMapping(path = "/fl401-add-case-number", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback for add case number submit event")
     @ApiResponses(value = {
@@ -347,6 +352,48 @@ public class CallbackController {
             || ISSUED_STATE.equalsIgnoreCase(eachState)
             || GATEKEEPING_STATE.equalsIgnoreCase(eachState);
     }
+  
+  @PostMapping(path = "/copy-manage-docs-for-tabs", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Copy fl401 case name to C100 Case name")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse copyManageDocsForTabs(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Element<FurtherEvidence>> furtherEvidences = caseData.getFurtherEvidences();
+        List<Element<Correspondence>> correspondence = caseData.getCorrespondence();
+        List<Element<OtherDocuments>> otherDocuments = caseData.getOtherDocuments();
+        if (furtherEvidences != null) {
+            furtherEvidences = furtherEvidences.stream()
+                    .filter(element -> {
+                        return element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup);
+                    })
+                .collect(Collectors.toList());
+            caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
+        }
+        if (correspondence != null) {
+            correspondence = correspondence.stream()
+                .filter(element -> {
+                    return element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup);
+                })
+                .collect(Collectors.toList());
+            caseDataUpdated.put("correspondenceForTabDisplay", correspondence);
+        }
+        if (otherDocuments != null) {
+
+            otherDocuments = otherDocuments.stream()
+                .filter(element -> {
+                    return element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup);
+                })
+                .collect(Collectors.toList());
+            caseDataUpdated.put("otherDocumentsForTabDisplay", otherDocuments);
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
 
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated) {
         log.info("Fetching the user and Org Details ");
@@ -366,3 +413,5 @@ public class CallbackController {
         return caseDataUpdated;
     }
 }
+  
+
