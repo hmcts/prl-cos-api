@@ -177,14 +177,6 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    private boolean isConfidentialInfoPresent(CaseData caseData) {
-        return ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
-            && !caseData.getApplicantsConfidentialDetails().isEmpty()
-            || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-            && !caseData.getChildrenConfidentialDetails().isEmpty();
-    }
-
-
     @PostMapping(path = "/update-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to refresh the tabs")
     public void updateApplication(
