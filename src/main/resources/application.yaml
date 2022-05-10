@@ -243,9 +243,9 @@ document:
       prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
       prl_c47a_draft_filename: C47ACreateOrderDraft.pdf
       prl_c45a_template: PRL-ORDER-C45A-FINAL-COMMON.docx
-      prl_c45a_filename: C45ACreateOrder.pdf
+      prl_c45a_filename: ParentalResponsibilityOrderFinal.pdf
       prl_c45a_draft_template: PRL-ORDER-C45A-DRAFT-COMMON.docx
-      prl_c45a_draft_filename: C45ACreateOrderDraft.pdf
+      prl_c45a_draft_filename: ParentalResponsibilityOrderDraft.pdf
 
 
 southampton:
