@@ -14,6 +14,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
+import java.time.LocalDate;
+
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
@@ -133,15 +135,28 @@ public class CallbackControllerFunctionalTest {
     
     @Test
     public void givenRequestWithC100ApplicantDetails_whenEndPointCalled_ResponseContainsTypeOfApplication() throws Exception {
-        String requestBody = ResourceLoader.loadJson(C100_APPLICANT_DETAILS);
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("Authorization", userToken)
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/case-withdrawn-email-notification")
             .then()
-            .body("data.caseTypeOfApplication", equalTo("C100"))
+            .assertThat().statusCode(500);
+    }
+
+    @Test
+    public void givenRequestWithCaseNumberAdded_ResponseContainsIssueDate() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        request
+            .header("Authorization", userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/fl401-add-case-number")
+            .then()
+            .body("data.issueDate", equalTo(LocalDate.now().toString()))
             .assertThat().statusCode(200);
     }
 
