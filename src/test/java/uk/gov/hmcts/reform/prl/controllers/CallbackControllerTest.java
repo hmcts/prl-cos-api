@@ -136,9 +136,6 @@ public class CallbackControllerTest {
     C100JsonMapper c100JsonMapper;
 
     @Mock
-    DgsService dgsService;
-
-    @Mock
     private OrganisationService organisationService;
 
     @Mock
@@ -667,7 +664,7 @@ public class CallbackControllerTest {
             .allegationsOfHarmDomesticAbuseYesNo(Yes)
             .allegationsOfHarmChildAbuseYesNo(Yes)
             .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
+            .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
             .childrenConfidentialDetails(List.of(element(ChildConfidentialityDetails.builder().build())))
@@ -848,7 +845,7 @@ public class CallbackControllerTest {
             .allegationsOfHarmDomesticAbuseYesNo(Yes)
             .allegationsOfHarmChildAbuseYesNo(Yes)
             .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
+            .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .applicantsConfidentialDetails(Collections.emptyList())
             .childrenConfidentialDetails(Collections.emptyList())
@@ -1251,7 +1248,7 @@ public class CallbackControllerTest {
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("correspondenceForTabDisplay"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("otherDocumentsForTabDisplay"));
     }
-  
+
     @Test
     public void testSendCaseWithdrawNotificationForFL401() throws Exception {
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()

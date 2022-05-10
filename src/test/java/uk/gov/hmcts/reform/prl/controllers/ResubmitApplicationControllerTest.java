@@ -76,6 +76,7 @@ public class ResubmitApplicationControllerTest {
     @Mock
     UserService userService;
 
+    @Mock
     private CourtFinderService courtFinderService;
 
     @Mock
