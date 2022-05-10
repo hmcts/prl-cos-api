@@ -706,6 +706,34 @@ public class CaseWorkerEmailServiceTest {
     }
 
     @Test
+    public void testSendEmailToGateKeeperFl401() {
+
+        GatekeeperEmail gatekeeperEmail = GatekeeperEmail.builder()
+            .email("test@demo.com")
+            .build();
+
+        Element<GatekeeperEmail> wrappedEmail = Element.<GatekeeperEmail>builder().value(gatekeeperEmail).build();
+        List<Element<GatekeeperEmail>> emailList = Collections.singletonList(wrappedEmail);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("TestCaseName")
+            .gatekeeper(emailList)
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .build();
+
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        caseWorkerEmailService.sendEmailToGateKeeper(caseDetails);
+
+        assertEquals(emailList, caseData.getGatekeeper());
+    }
+
+    @Test
     public void testFL401LocalCourtEmailWithoutConfidentialInformation() {
 
         PartyDetails fl401Applicant = PartyDetails.builder()

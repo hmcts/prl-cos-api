@@ -594,7 +594,7 @@ public class ApplicationsTabService implements TabService {
         Optional<List<Element<PartyDetails>>> otherPeopleCheck = ofNullable(caseData.getOthersToNotify());
         List<Element<OtherPersonInTheCase>> otherPersonsInTheCase = new ArrayList<>();
 
-        if (otherPeopleCheck.isEmpty()) {
+        if (otherPeopleCheck.isEmpty() || otherPeopleCheck.get().isEmpty()) {
             OtherPersonInTheCase op = OtherPersonInTheCase.builder().build();
             Element<OtherPersonInTheCase> other = Element.<OtherPersonInTheCase>builder().value(op).build();
             otherPersonsInTheCase.add(other);

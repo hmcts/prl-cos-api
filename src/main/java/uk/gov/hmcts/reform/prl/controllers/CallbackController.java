@@ -21,6 +21,11 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
+import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -40,14 +45,17 @@ import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkf
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -257,21 +265,85 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/copy-FL401-case-name-to-C100", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Copy fl401 case name to C100 Case name")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse copyFL401CasenameToC100CaseName(
+    public AboutToStartOrSubmitCallbackResponse aboutToSubmitCaseCreation(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
+        // Updating the case name for FL401
         if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
             caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
         }
 
+        // Saving the logged-in Solicitor and Org details for the docs..
+        caseDataUpdated = getSolicitorDetails(authorisation, caseDataUpdated);
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/copy-manage-docs-for-tabs", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Copy fl401 case name to C100 Case name")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse copyManageDocsForTabs(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Element<FurtherEvidence>> furtherEvidences = caseData.getFurtherEvidences();
+        List<Element<Correspondence>> correspondence = caseData.getCorrespondence();
+        List<Element<OtherDocuments>> otherDocuments = caseData.getOtherDocuments();
+        if (furtherEvidences != null) {
+            furtherEvidences = furtherEvidences.stream()
+                    .filter(element -> {
+                        return element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup);
+                    })
+                .collect(Collectors.toList());
+            caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
+        }
+        if (correspondence != null) {
+            correspondence = correspondence.stream()
+                .filter(element -> {
+                    return element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup);
+                })
+                .collect(Collectors.toList());
+            caseDataUpdated.put("correspondenceForTabDisplay", correspondence);
+        }
+        if (otherDocuments != null) {
+
+            otherDocuments = otherDocuments.stream()
+                .filter(element -> {
+                    return element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup);
+                })
+                .collect(Collectors.toList());
+            caseDataUpdated.put("otherDocumentsForTabDisplay", otherDocuments);
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated) {
+        log.info("Fetching the user and Org Details ");
+        try {
+            UserDetails userDetails = userService.getUserDetails(authorisation);
+            Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
+            caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
+            if (userOrganisation.isPresent()) {
+                log.info("Got the Org Details");
+                caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
+            }
+            log.info("SUCCESSFULLY fetched user and Org Details ");
+        } catch (Exception e) {
+            log.error("Error while fetching User or Org details for the logged in user ", e);
+        }
+
+        return caseDataUpdated;
     }
 }

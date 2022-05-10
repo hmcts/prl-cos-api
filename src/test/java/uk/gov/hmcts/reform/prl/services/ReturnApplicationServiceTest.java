@@ -86,7 +86,6 @@ public class ReturnApplicationServiceTest {
         casedata = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .fl401RejectReason(Collections.singletonList(witnessStatementNotProvided))
-
             .build();
 
         assertFalse(returnApplicationService.noRejectReasonSelected(casedata));
@@ -160,6 +159,28 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
+    public void testGetFl401ReturnMessage() {
+        StringBuilder returnMsgStr = new StringBuilder();
+
+        returnMsgStr
+            .append("Case name: TestCase\n")
+            .append("Reference code: 123\n\n")
+            .append("Dear " + returnApplicationService.getLegalFullName(caseDataFl401) + ",\n\n")
+            .append("Thank you for your application."
+                        + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n");
+
+        for (FL401RejectReasonEnum reasonEnum : caseDataFl401.getFl401RejectReason()) {
+            returnMsgStr.append(reasonEnum.getReturnMsgText());
+        }
+
+        returnMsgStr.append("Please resolve these issues and resubmit your application.\n\n")
+            .append("Kind regards,\n")
+            .append(userDetails.getFullName());
+
+
+        assertEquals(returnMsgStr.toString(),returnApplicationService.getReturnMessage(caseDataFl401,userDetails));
+    }
+  
     public void testGetReturnMessageForTaskList() {
         StringBuilder returnMsgStr = new StringBuilder();
         returnMsgStr.append("                            \n\n");

@@ -18,9 +18,9 @@ public enum FL401RejectReasonEnum {
         + "\n\nPlease upload the correct version of the document and it contains all the relevant details.\n\n\n"),
     @JsonProperty("witnessStatementNotProvided")
     witnessStatementNotProvided("witnessStatementNotProvided","Witness statement not provided","Witness statement not provided\n\n"
-        + "Your application is being returned because the Witness statement not provided."
+        + "Your application is being returned because the witness statement not provided."
         + "\n\nNext steps\n\n"
-        + "Please provide the Witness statement \n\n\n"),
+        + "Please provide the witness statement \n\n\n"),
     @JsonProperty("confidentalDetailListed")
     confidentalDetailListed("confidentalDetailListed","Confidential detail listed","Confidential detail listed\n\n"
         + "Your application has been returned because you have listed "

@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
@@ -40,6 +41,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
@@ -89,10 +92,26 @@ public class ResubmitApplicationController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
+        Court closestChildArrangementsCourt = courtFinderService
+            .getNearestFamilyCourt(caseData);
+        if (closestChildArrangementsCourt != null) {
+            caseData = caseData.toBuilder()
+                .courtName(closestChildArrangementsCourt.getCourtName())
+                .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
+                .build();
+        }
+
+        Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
+        if (closestChildArrangementsCourt != null) {
+            caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
+            caseDataUpdated.put(COURT_ID_FIELD, String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
+        }
+
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
         Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
             ResubmitApplicationController::getPreviousState).findFirst();
-        Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
+
+        log.info("Court name for return application: === {}===", caseDataUpdated.get(COURT_NAME_FIELD));
         if (previousStates.isPresent()) {
             // For submitted state - No docs will be generated.
             if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
