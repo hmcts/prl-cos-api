@@ -15,8 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
-import uk.gov.hmcts.reform.prl.models.complextypes.Home;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -93,14 +92,11 @@ public class ManageOrdersController {
                 .mapToObj(Integer::toString)
                 .collect(joining());
         } else {
-            Optional<Home> home = Optional.ofNullable(caseData.getHome());
-            if (home.isPresent()) {
-                Optional<List<Element<ChildrenLiveAtAddress>>> childrenLiveAtAddress = Optional.ofNullable(home.get().getChildren());
-                if (childrenLiveAtAddress.isPresent()) {
-                    childOption = IntStream.range(0, defaultIfNull(childrenLiveAtAddress.get(), emptyList()).size())
-                        .mapToObj(Integer::toString)
-                        .collect(joining());
-                }
+            Optional<List<Element<ApplicantChild>>> applicantChildDetails = Optional.ofNullable(caseData.getApplicantChildDetails());
+            if (applicantChildDetails.isPresent()) {
+                childOption = IntStream.range(0, defaultIfNull(applicantChildDetails.get(), emptyList()).size())
+                    .mapToObj(Integer::toString)
+                    .collect(joining());
             }
         }
         caseDataInput = caseDataInput.toBuilder()
@@ -137,7 +133,6 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         manageOrderEmailService.sendEmail(caseDetails);

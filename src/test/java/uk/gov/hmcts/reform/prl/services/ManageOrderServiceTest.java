@@ -12,9 +12,8 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
-import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -88,21 +87,19 @@ public class ManageOrderServiceTest {
 
     @Test
     public void getUpdatedCaseDataDaTest() {
-
-        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
-            .childFullName("TestName")
-            .childsAge("21")
+        ApplicantChild child = ApplicantChild.builder()
+            .fullName("TestName")
             .build();
 
-        Element<ChildrenLiveAtAddress> wrappedChildren = Element.<ChildrenLiveAtAddress>builder().value(child).build();
-        List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(wrappedChildren);
+        Element<ApplicantChild> wrappedChildren = Element.<ApplicantChild>builder().value(child).build();
+        List<Element<ApplicantChild>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
-            .home(Home.builder().children(listOfChildren).build())
+            .applicantChildDetails(listOfChildren)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
@@ -110,7 +107,6 @@ public class ManageOrderServiceTest {
 
         assertEquals("Child 1: TestName\n", caseData1.getChildrenList());
         assertNotNull(caseData1.getSelectedOrder());
-
     }
 
     @Test
