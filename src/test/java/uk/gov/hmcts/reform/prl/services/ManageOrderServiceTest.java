@@ -7,7 +7,10 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Collections;
@@ -46,7 +49,7 @@ public class ManageOrderServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .caseTypeOfApplication("FL401")
+            .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
@@ -61,7 +64,44 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPupulateHeader() {
+    public void getUpdatedCaseDataFl401() {
+
+        ApplicantChild child = ApplicantChild.builder()
+            .fullName("Test Child Name")
+            .build();
+
+        Element<ApplicantChild> wrappedChildren = Element.<ApplicantChild>builder().value(child).build();
+        List<Element<ApplicantChild>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        ChildrenLiveAtAddress homeChild = ChildrenLiveAtAddress.builder()
+            .childFullName("Test Child Name")
+            .build();
+
+        Element<ChildrenLiveAtAddress> wrappedHomeChildren = Element.<ChildrenLiveAtAddress>builder().value(homeChild).build();
+        List<Element<ChildrenLiveAtAddress>> listOfHomeChildren = Collections.singletonList(wrappedHomeChildren);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .applicantChildDetails(listOfChildren)
+            .home(Home.builder()
+                      .children(listOfHomeChildren)
+                      .build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
+
+        assertEquals("Child 1: Test Child Name\nChild 1: Test Child Name\n", caseData1.getChildrenList());
+        assertNotNull(caseData1.getSelectedOrder());
+
+    }
+
+
+    @Test
+    public void testPopulateHeader() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
