@@ -1032,7 +1032,7 @@ public class CallbackControllerTest {
                                                        .data(stringObjectMap).build()).build();
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
+        verify(solicitorEmailService, times(timesCalled))
             .sendWithDrawEmailToSolicitor(callbackRequest.getCaseDetails(), userDetails);
     }
 
