@@ -13,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+
 import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.contains;
@@ -143,7 +144,7 @@ public class CallbackControllerFunctionalTest {
             .body("data.issueDate", equalTo(LocalDate.now().toString()))
             .assertThat().statusCode(200);
     }
-  
+
     @Test
     public void givenRequestWithFL401ApplicantDetails_whenEndPointCalled_ResponseContainsTypeOfApplication() throws Exception {
         String requestBody = ResourceLoader.loadJson(FL401_APPLICANT_DETAILS);
