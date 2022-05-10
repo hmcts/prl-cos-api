@@ -64,6 +64,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
@@ -253,19 +255,15 @@ public class FL401SubmitApplicationControllerTest {
                              .build())
             .build();
 
-        Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
-            CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
-        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
-        when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetails(),
-            objectMapper
-        )))
-            .thenReturn(court);
         AboutToStartOrSubmitCallbackResponse response = fl401SubmitApplicationController
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
+        System.out.println(response.getData());
+
+        assertTrue(response.getData().containsKey(COURT_EMAIL_ADDRESS_FIELD));
+        assertTrue(response.getData().containsKey(COURT_NAME_FIELD));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
