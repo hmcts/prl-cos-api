@@ -416,6 +416,10 @@ public class CaseData implements MappableObject {
     private final List<Element<Correspondence>> correspondence;
     private final List<Element<OtherDocuments>> otherDocuments;
 
+    private final List<Element<FurtherEvidence>> mainAppDocForTabDisplay;
+    private final List<Element<Correspondence>> correspondenceForTabDisplay;
+    private final List<Element<OtherDocuments>> otherDocumentsForTabDisplay;
+
     private final List<Element<UserInfo>> userInfo;
 
     /**

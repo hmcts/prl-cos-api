@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -25,7 +26,10 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
+import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
@@ -1196,6 +1200,56 @@ public class CallbackControllerTest {
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
     }
 
+    @Test
+    public void testCopyManageDocsOnSubmitWithNullData() {
+
+        Map<String, Object> caseData = new HashMap<>();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        CaseData caseData1 = CaseData.builder().build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .copyManageDocsForTabs(authToken, callbackRequest);
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("furtherEvidences"));
+    }
+
+    @Test
+    public void testCopyManageDocsOnSubmit() throws Exception {
+
+        Map<String, Object> caseData = new HashMap<>();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        CaseData caseData1 = CaseData.builder()
+            .furtherEvidences(List.of(Element.<FurtherEvidence>builder()
+                                          .value(FurtherEvidence.builder()
+                                                     .restrictCheckboxFurtherEvidence(List.of(RestrictToCafcassHmcts.restrictToGroup))
+                                                     .build())
+                                          .build()))
+            .correspondence(List.of(Element.<Correspondence>builder()
+                                        .value(Correspondence.builder()
+                                                   .restrictCheckboxCorrespondence(List.of(RestrictToCafcassHmcts.restrictToGroup))
+                                                   .build())
+                                        .build()))
+            .otherDocuments(List.of(Element.<OtherDocuments>builder()
+                                        .value(OtherDocuments.builder()
+                                                   .restrictCheckboxOtherDocuments(List.of(RestrictToCafcassHmcts.restrictToGroup))
+                                                   .build())
+                                        .build()))
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .copyManageDocsForTabs(authToken, callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("mainAppDocForTabDisplay"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("correspondenceForTabDisplay"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("otherDocumentsForTabDisplay"));
+    }
+  
     @Test
     public void testSendCaseWithdrawNotificationForFL401() throws Exception {
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
