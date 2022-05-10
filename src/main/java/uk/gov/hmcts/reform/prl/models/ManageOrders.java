@@ -50,6 +50,7 @@ public class ManageOrders {
     private final String underTakingExpiryTime;
     private final YesOrNo underTakingFormSign;
 
+    private final YesOrNo isTheOrderByConsent;
     private final String recitalsOrPreamble;
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
