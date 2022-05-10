@@ -50,23 +50,14 @@ public class CourtFinderService {
                 .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
         }
 
-        if (serviceArea.getCourts() != null
+        if (serviceArea != null
             && !serviceArea.getCourts().isEmpty()) {
             return getCourtDetails(serviceArea.getCourts()
                                        .get(0)
-                                       .getCourtId());
+                                       .getCourtSlug());
         } else {
             return null;
         }
-    }
-
-    public boolean courtsAreTheSame(Court c1, Court c2) {
-        if (c1 == null || c2 == null) {
-            return false;
-        }
-
-        return c1.getCourtName().equals(c2.getCourtName())
-            && c1.getCourtId().equals(c2.getCourtId());
     }
 
     public Court getCourtDetails(String courtSlug) {
@@ -104,7 +95,7 @@ public class CourtFinderService {
 
     public CaseData setCourtNameAndId(CaseData caseData, Court court) {
         caseData.setCourtName(court.getCourtName());
-        caseData.setCourtId(court.getCourtId());
+        caseData.setCourtId(String.valueOf(court.getCountyLocationCode()));
         return caseData;
     }
 
@@ -114,13 +105,6 @@ public class CourtFinderService {
 
     private String getPostcodeFromWrappedParty(PartyDetails partyDetails) {
         return partyDetails.getAddress().getPostCode();
-    }
-
-    public boolean courtNameAndIdAreBlank(Optional<String> courtName, Optional<String> courtId) {
-        return courtName.isPresent()
-            && courtId.isPresent()
-            && courtName.get().isBlank()
-            && courtId.get().isBlank();
     }
 
     public OtherPersonWhoLivesWithChild getFirstOtherPerson(Child c) {
