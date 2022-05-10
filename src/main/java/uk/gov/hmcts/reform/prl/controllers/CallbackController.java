@@ -27,8 +27,6 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
@@ -55,12 +53,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_STATE;
@@ -69,7 +61,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
-
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -225,13 +216,14 @@ public class CallbackController {
 
         Optional<String> previousState = eventsForCase.stream().map(CaseEventDetail::getStateId)
             .filter(
-            CallbackController::getPreviousState).findFirst();
+                CallbackController::getPreviousState).findFirst();
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        List<String> stateList = List.of(DRAFT_STATE,"CLOSED",
+        List<String> stateList = List.of(DRAFT_STATE, "CLOSED",
                                          PENDING_STATE,
-                                         SUBMITTED_STATE,RETURN_STATE);
+                                         SUBMITTED_STATE, RETURN_STATE
+        );
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -250,8 +242,10 @@ public class CallbackController {
                     }
                 } else {
                     solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
-                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails,
-                                                                                    caseData.getCourtEmailAddress());
+                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(
+                        caseDetails,
+                        caseData.getCourtEmailAddress()
+                    );
                 }
             } else {
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -261,7 +255,7 @@ public class CallbackController {
                     Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
                     caseDataUpdated.putAll(allTabsFields);
                 } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                  solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
+                    solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
                 }
                 caseDataUpdated.put("state", WITHDRAWN_STATE);
             }
@@ -340,7 +334,7 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("issueDate",LocalDate.now());
+        caseDataUpdated.put("issueDate", LocalDate.now());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

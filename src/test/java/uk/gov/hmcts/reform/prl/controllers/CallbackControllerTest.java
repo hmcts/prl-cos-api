@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -76,7 +77,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
@@ -84,7 +84,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
-
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -195,7 +194,7 @@ public class CallbackControllerTest {
     public void testConfirmMiamApplicationOrExemption() throws WorkflowException {
         CaseDetails caseDetails = CaseDetailsProvider.full();
 
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.builder().build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
 
         when(applicationConsiderationTimetableValidationWorkflow.run(callbackRequest))
@@ -212,7 +211,7 @@ public class CallbackControllerTest {
     public void testvalidateApplicationConsiderationTimetable() throws WorkflowException {
         CaseDetails caseDetails = CaseDetailsProvider.full();
 
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.builder().build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
 
         when(validateMiamApplicationOrExemptionWorkflow.run(callbackRequest))
@@ -289,7 +288,7 @@ public class CallbackControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -364,7 +363,7 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(documentGenService.generateDraftDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(fl401DraftMap);
 
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -437,7 +436,7 @@ public class CallbackControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -510,7 +509,7 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(documentGenService.generateDraftDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(fl401DraftMap);
 
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -589,7 +588,7 @@ public class CallbackControllerTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
@@ -728,7 +727,7 @@ public class CallbackControllerTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
@@ -774,7 +773,7 @@ public class CallbackControllerTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(false).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
@@ -909,7 +908,7 @@ public class CallbackControllerTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
@@ -990,7 +989,7 @@ public class CallbackControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
         doNothing().when(allTabsService).updateAllTabs(any(CaseData.class));
@@ -1028,7 +1027,7 @@ public class CallbackControllerTest {
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(caseEventService.findEventsForCase("1"))
             .thenReturn(List.of(CaseEventDetail.builder().stateId(ISSUED_STATE).build()));
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .state(ISSUED_STATE)
                                                        .data(stringObjectMap).build()).build();
@@ -1041,7 +1040,7 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testSendCaseWithdrawNotificationNotInCaseISsuedState() throws Exception {
+    public void testSendCaseWithdrawNotificationNotInCaseIssuedState() throws Exception {
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
             .withDrawApplication(YesOrNo.Yes)
             .withDrawApplicationReason("Test data")
@@ -1067,32 +1066,12 @@ public class CallbackControllerTest {
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(caseEventService.findEventsForCase("1"))
             .thenReturn(List.of(CaseEventDetail.builder().stateId(SUBMITTED_STATE).build()));
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .state(SUBMITTED_STATE)
                                                        .data(stringObjectMap).build()).build();
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
-    }
-
-    @Test
-    public void testSendCaseWithdrawNotificationWithNoValue() throws Exception {
-        WithdrawApplication withdrawApplication = WithdrawApplication.builder()
-            .withDrawApplication(YesOrNo.No)
-            .withDrawApplicationReason("Test data")
-            .build();
-        CaseData caseData = CaseData.builder()
-            .localCourtAdmin(List.of(Element.<LocalCourtAdminEmail>builder()
-                                         .value(LocalCourtAdminEmail
-                                                    .builder().email("test@gmail.com")
-                                                    .build()).build()))
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .withDrawApplicationData(withdrawApplication)
-            .build();
-            .sendWithDrawEmailToSolicitor(callbackRequest.getCaseDetails(), userDetails);
-      
-      verify(solicitorEmailService, times(1))
     }
 
     @Test
@@ -1106,7 +1085,7 @@ public class CallbackControllerTest {
         Map<String, Object> stringObjectMap = new HashMap<>();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
 
@@ -1130,13 +1109,12 @@ public class CallbackControllerTest {
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(caseEventService.findEventsForCase("1"))
             .thenReturn(List.of(CaseEventDetail.builder().stateId(SUBMITTED_STATE).build()));
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .state(SUBMITTED_STATE)
 
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .data(stringObjectMap).build()).build();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+                    .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .data(stringObjectMap).build())
+                    .build();
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
         verifyNoMoreInteractions(solicitorEmailService);
@@ -1186,7 +1164,7 @@ public class CallbackControllerTest {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
 
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
 
@@ -1202,7 +1180,7 @@ public class CallbackControllerTest {
             .build();
         Map<String, Object> json = new HashMap<>();
         json.put("id", 1234L);
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd
             .client.model.CallbackRequest
             .builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -1225,7 +1203,7 @@ public class CallbackControllerTest {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
@@ -1245,7 +1223,7 @@ public class CallbackControllerTest {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
@@ -1261,7 +1239,7 @@ public class CallbackControllerTest {
     public void testAddCaseNumberSubmitted() throws Exception {
 
         Map<String, Object> caseData = new HashMap<>();
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
@@ -1277,7 +1255,7 @@ public class CallbackControllerTest {
         Map<String, Object> caseData = new HashMap<>();
         Organisations org = Organisations.builder().name("testOrg").build();
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(null);
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
@@ -1327,7 +1305,7 @@ public class CallbackControllerTest {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(caseEventService.findEventsForCase("1"))
             .thenReturn(List.of(CaseEventDetail.builder().stateId(ISSUED_STATE).build()));
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .state(ISSUED_STATE)
                                                        .data(stringObjectMap).build()).build();
@@ -1366,11 +1344,8 @@ public class CallbackControllerTest {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(caseEventService.findEventsForCase("1"))
             .thenReturn(List.of(CaseEventDetail.builder().stateId(SUBMITTED_STATE).build()));
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .state(SUBMITTED_STATE)
 
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
 
