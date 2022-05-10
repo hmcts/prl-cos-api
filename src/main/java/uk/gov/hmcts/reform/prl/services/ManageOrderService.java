@@ -13,8 +13,8 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -167,14 +167,14 @@ public class ManageOrderService {
                 builder.append("\n");
             }
         } else {
-            Optional<List<Element<ChildrenLiveAtAddress>>> childrenLiveAtAddress = ofNullable(caseData.getHome().getChildren());
-            if (childrenLiveAtAddress.isPresent()) {
-                List<ChildrenLiveAtAddress> children = childrenLiveAtAddress.get().stream()
+            Optional<List<Element<ApplicantChild>>> applicantChildDetails = ofNullable(caseData.getApplicantChildDetails());
+            if (applicantChildDetails.isPresent()) {
+                List<ApplicantChild> children = applicantChildDetails.get().stream()
                     .map(Element::getValue)
                     .collect(Collectors.toList());
                 for (int i = 0; i < children.size(); i++) {
-                    ChildrenLiveAtAddress child = children.get(i);
-                    builder.append(String.format("Child %d: %s", i + 1, child.getChildFullName()));
+                    ApplicantChild child = children.get(i);
+                    builder.append(String.format("Child %d: %s", i + 1, child.getFullName()));
                     builder.append("\n");
                 }
             }
