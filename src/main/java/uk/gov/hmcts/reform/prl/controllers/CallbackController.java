@@ -328,7 +328,7 @@ public class CallbackController {
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-  
+
     @PostMapping(path = "/fl401-add-case-number", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback for add case number submit event")
     @ApiResponses(value = {
@@ -352,8 +352,8 @@ public class CallbackController {
             || ISSUED_STATE.equalsIgnoreCase(eachState)
             || GATEKEEPING_STATE.equalsIgnoreCase(eachState);
     }
-  
-  @PostMapping(path = "/copy-manage-docs-for-tabs", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+
+    @PostMapping(path = "/copy-manage-docs-for-tabs", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Copy fl401 case name to C100 Case name")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
@@ -413,5 +413,5 @@ public class CallbackController {
         return caseDataUpdated;
     }
 }
-  
+
 
