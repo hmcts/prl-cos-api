@@ -43,7 +43,7 @@ public class ReturnApplicationService {
                 legalName = caseData.getSolicitorName();
             }
 
-        } else {
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
             String legalFirstName = fl401Applicant.getRepresentativeFirstName();
@@ -82,8 +82,7 @@ public class ReturnApplicationService {
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
             }
-
-        } else {
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
             }
@@ -105,9 +104,17 @@ public class ReturnApplicationService {
 
         returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
 
-        for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
-            returnMsgStr.append(reasonEnum.getDisplayedValue());
-            returnMsgStr.append("\n\n");
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
+                returnMsgStr.append(reasonEnum.getDisplayedValue());
+                returnMsgStr.append("\n\n");
+            }
+
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
+                returnMsgStr.append(reasonEnum.getDisplayedValue());
+                returnMsgStr.append("\n\n");
+            }
         }
 
         returnMsgStr.append("Resolve these concerns and resend your application."
