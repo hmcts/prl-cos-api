@@ -229,22 +229,16 @@ public class CallbackController {
                                          PENDING_STATE,
                                          SUBMITTED_STATE, RETURN_STATE
         );
+
+        boolean previousStateInList = previousState.filter(stateList::contains).isPresent();
+
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            if (previousState.isPresent() && !stateList.contains(previousState.get())) {
+            if (!previousStateInList) {
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                    solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
-                    Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
-                    if (localCourtAdmin.isPresent()) {
-                        Optional<LocalCourtAdminEmail> localCourtAdminEmail = localCourtAdmin.get().stream().map(Element::getValue)
-                            .findFirst();
-                        if (localCourtAdminEmail.isPresent()) {
-                            String email = localCourtAdminEmail.get().getEmail();
-                            caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
-                        }
-                    }
+                    sendC100CaseWithDrawEmails(caseData, caseDetails, userDetails);
                 } else {
                     solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
                     caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(
@@ -267,6 +261,18 @@ public class CallbackController {
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+    public void sendC100CaseWithDrawEmails(CaseData caseData, CaseDetails caseDetails, UserDetails userDetails) {
+        Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
+        if (localCourtAdmin.isPresent()
+        && localCourtAdmin.get().stream().map(Element::getValue).findFirst().isPresent()) {
+            String email = localCourtAdmin.get().stream().map(Element::getValue).findFirst().get().getEmail();
+            caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
+        }
+        solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
+
+    }
+
 
     @PostMapping(path = "/send-to-gatekeeper", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Send Email Notification on Send to gatekeeper ")
