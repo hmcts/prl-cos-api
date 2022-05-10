@@ -145,7 +145,6 @@ public class PrePopulateFeeAndSolicitorNameController {
         CaseData caseDataForOrgDetails)
         throws Exception {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
-
         if (documentLanguage.isGenEng()) {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
