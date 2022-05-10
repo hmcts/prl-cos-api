@@ -1076,6 +1076,8 @@ public class CallbackControllerTest {
                                                        .data(stringObjectMap).build()).build();
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
+        verify(solicitorEmailService, times(1))
+            .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
     }
 
     @Test
@@ -1320,7 +1322,7 @@ public class CallbackControllerTest {
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("correspondenceForTabDisplay"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("otherDocumentsForTabDisplay"));
     }
-  
+
     @Test
     public void testSendCaseWithdrawNotificationForFL401() throws Exception {
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
@@ -1387,6 +1389,7 @@ public class CallbackControllerTest {
         Map<String, Object> data = new HashMap<>();
 
         CaseData caseData = CaseData.builder()
+            .id(1L)
             .courtEmailAddress("test@gmail.com")
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .withDrawApplicationData(withdrawApplication)
@@ -1396,8 +1399,8 @@ public class CallbackControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(caseEventService.findEventsForCase("1"))
-            .thenReturn(List.of(CaseEventDetail.builder().stateId(SUBMITTED_STATE).build()));
+        when(caseEventService.findEventsForCase(any(String.class)))
+            .thenReturn(List.of(CaseEventDetail.builder().stateId("CLOSED").build()));
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
@@ -1408,6 +1411,7 @@ public class CallbackControllerTest {
             .sendWithDrawEmailToFl401Solicitor(callbackRequest.getCaseDetails(), userDetails);
         verifyNoMoreInteractions(caseWorkerEmailService);
     }
+
 }
 
 
