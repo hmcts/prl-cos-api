@@ -21,9 +21,9 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class ManageOrders {
     @JsonProperty("cafcassEmailAddress")
-    private final List<String> cafcassEmailAddress;
+    private final List<Element<String>> cafcassEmailAddress;
     @JsonProperty("otherEmailAddress")
-    private final List<String> otherEmailAddress;
+    private final List<Element<String>> otherEmailAddress;
 
     private final String manageOrdersCourtName;
     @JsonIgnore
