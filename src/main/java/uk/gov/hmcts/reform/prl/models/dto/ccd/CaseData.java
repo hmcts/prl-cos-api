@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
@@ -613,20 +614,16 @@ public class CaseData implements MappableObject {
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo isTheOrderByConsent;
     private final YesOrNo wasTheOrderApprovedAtHearing;
-    private final String judgeOrMagistrateTitle;
-    private final String judgeOrMagistratesLastName;
-    private final String justiceLegalAdviserFullName;
+    private final JudgeOrMagistrateTitleEnum judgeOrMagistratesLastName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
-    private final String recitalsOrPreamble;
-    private final String orderDirections;
-    private final String furtherDirectionsIfRequired;
     //private final List<String> cafcassEmailAddress;
     //private final List<String> otherEmailAddress;
     private final String childrenList;
 
     @JsonUnwrapped
-    private final ManageOrders manageOrders;
+    @Builder.Default
+    private final ManageOrders manageOrders = ManageOrders.builder().build();
     /**
      * Solicitor Details.
      */
