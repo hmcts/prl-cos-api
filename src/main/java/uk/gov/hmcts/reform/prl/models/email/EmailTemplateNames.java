@@ -9,6 +9,7 @@ public enum EmailTemplateNames {
     SEND_AND_REPLY_NOTIFICATION,
     COURTADMIN,
     GATEKEEPER,
+    GATEKEEPER_FL401,
     DA_SOLICITOR,
     DA_LOCALCOURT
 }

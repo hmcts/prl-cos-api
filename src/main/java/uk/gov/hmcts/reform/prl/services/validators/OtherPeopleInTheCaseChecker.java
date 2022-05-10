@@ -40,6 +40,10 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
 
+            if (others.isEmpty()) {
+                return false;
+            }
+
             boolean allFieldsCompleted = true;
 
             for (PartyDetails party : others) {
@@ -63,15 +67,13 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
                 .stream().map(Element::getValue)
                 .collect(Collectors.toList());
 
-            if (others.isEmpty()) {
-                return false;
-            }
             boolean started = others.stream().anyMatch(Objects::nonNull);
             if (started) {
                 taskErrorService.addEventError(OTHER_PEOPLE_IN_THE_CASE, OTHER_PEOPLE_ERROR, OTHER_PEOPLE_ERROR.getError());
                 return true;
             }
         }
+        taskErrorService.removeError(OTHER_PEOPLE_ERROR);
         return false;
     }
 

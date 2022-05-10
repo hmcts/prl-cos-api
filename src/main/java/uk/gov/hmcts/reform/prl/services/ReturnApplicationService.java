@@ -82,10 +82,8 @@ public class ReturnApplicationService {
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
             }
-
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
-
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
             }
         }

@@ -42,6 +42,7 @@ public class PrlAppsConstants {
     public static final String DRAFT_DOCUMENT_FIELD = "draftOrderDoc";
     public static final String DRAFT_DOCUMENT_WELSH_FIELD = "draftOrderDocWelsh";
     public static final String COURT_NAME_FIELD = "courtName";
+    public static final String COURT_ID_FIELD = "courtId";
     public static final String COURT_EMAIL_ADDRESS_FIELD = "courtEmailAddress";
     public static final String FINAL_DOCUMENT_FIELD = "finalDocument";
     public static final String ISSUE_DATE_FIELD = "issueDate";

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityStatementDisclaimerEnum;
+import uk.gov.hmcts.reform.prl.enums.CourtDetailsPilotEnum;
 import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -395,6 +396,7 @@ public class CaseData implements MappableObject {
      * Add case number.
      */
     private final String familymanCaseNumber;
+    private final String fl401FamilymanCaseNumber;
 
     /**
      * Manage Documents.
@@ -406,6 +408,10 @@ public class CaseData implements MappableObject {
 
     private final List<Element<Correspondence>> correspondence;
     private final List<Element<OtherDocuments>> otherDocuments;
+
+    private final List<Element<FurtherEvidence>> mainAppDocForTabDisplay;
+    private final List<Element<Correspondence>> correspondenceForTabDisplay;
+    private final List<Element<OtherDocuments>> otherDocumentsForTabDisplay;
 
     private final List<Element<UserInfo>> userInfo;
 
@@ -529,8 +535,8 @@ public class CaseData implements MappableObject {
     /**
      * FL401 Upload Documents.
      */
-    private final List<Document> fl401UploadWitnessDocuments;
-    private final List<Document> fl401UploadSupportDocuments;
+    private final List<Element<Document>> fl401UploadWitnessDocuments;
+    private final List<Element<Document>> fl401UploadSupportDocuments;
 
     /**
      * Send to Gatekeeper.
@@ -559,6 +565,16 @@ public class CaseData implements MappableObject {
     private String isDocumentGenerated;
     private String isNotificationSent;
 
+    /**
+     * Solicitor Details.
+     */
+    private String caseSolicitorName;
+    private String caseSolicitorOrgName;
+
+    /**
+     * FL401 Court details for Pilot.
+     */
+    private final CourtDetailsPilotEnum submitCountyCourtSelection;
 
     public CaseData setDateSubmittedDate() {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
@@ -577,4 +593,5 @@ public class CaseData implements MappableObject {
 
         return this;
     }
+
 }

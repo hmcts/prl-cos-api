@@ -18,8 +18,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
@@ -32,6 +30,9 @@ import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmi
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
@@ -73,6 +75,7 @@ public class FL401SubmitApplicationController {
     @Autowired
     OrganisationService organisationService;
 
+
     @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to send FL401 application notification. ")
     @ApiResponses(value = {
@@ -103,41 +106,26 @@ public class FL401SubmitApplicationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        Court nearestDomesticAbuseCourt = courtFinderService
-            .getNearestFamilyCourt(CaseUtils.getCaseData(caseDetails, objectMapper));
-        log.info("Retrieved court Name ==> {}", (null != nearestDomesticAbuseCourt ? nearestDomesticAbuseCourt.getCourtName()
-            : "No Court Name Fetched"));
-
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         final LocalDate localDate = LocalDate.now();
-        caseData = caseData.toBuilder().issueDate(localDate).courtName((nearestDomesticAbuseCourt != null)
-                                                                ? nearestDomesticAbuseCourt
-            .getCourtName() : "").build();
 
-        Optional<CourtEmailAddress> courtEmailAddress = courtFinderService
-            .getEmailAddress(nearestDomesticAbuseCourt);
+        String courtName = caseData.getSubmitCountyCourtSelection().getCourtName();
+
+        caseData = caseData.toBuilder().issueDate(localDate).courtName(courtName).build();
+        caseData = caseData.toBuilder().isCourtEmailFound("Yes").build();
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        if (courtEmailAddress.isPresent()) {
-            caseData = caseData.toBuilder().isCourtEmailFound("Yes").build();
-            caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD,  courtEmailAddress.get().getAddress());
-        } else {
-            caseData = caseData.toBuilder().isCourtEmailFound("No").build();
-            if (ofNullable(caseData.getCourtEmailAddress()).isPresent()) {
-                caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD,  caseData.getCourtEmailAddress());
-            } else {
-                caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD,  " ");
-            }
-        }
-        caseDataUpdated.put(COURT_NAME_FIELD, nearestDomesticAbuseCourt != null
-            ? nearestDomesticAbuseCourt.getCourtName() : "");
+        caseDataUpdated.put(COURT_NAME_FIELD, courtName);
+
+        String courtCode = caseData.getSubmitCountyCourtSelection().getCourtCode();
+        caseDataUpdated.put(COURT_ID_FIELD, courtCode);
+
+        String courtEmail = caseData.getSubmitCountyCourtSelection().getCourtEmail();
+        caseDataUpdated.put(COURT_EMAIL_ADDRESS_FIELD, courtEmail);
 
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
-
         if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
             && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
             caseData = caseData.toBuilder().build();
@@ -158,7 +146,8 @@ public class FL401SubmitApplicationController {
 
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
-        caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
@@ -197,4 +186,5 @@ public class FL401SubmitApplicationController {
             .data(caseData)
             .build();
     }
+
 }
