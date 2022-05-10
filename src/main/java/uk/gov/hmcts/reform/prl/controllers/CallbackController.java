@@ -266,7 +266,8 @@ public class CallbackController {
         Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
         if (localCourtAdmin.isPresent()
             && localCourtAdmin.get().stream().map(Element::getValue).findFirst().isPresent()) {
-            String email = localCourtAdmin.get().stream().map(Element::getValue).findFirst().get().getEmail();
+            LocalCourtAdminEmail emailObject = localCourtAdmin.get().stream().map(Element::getValue).findFirst().get();
+            String email = emailObject.getEmail();
             caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
         }
         solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
