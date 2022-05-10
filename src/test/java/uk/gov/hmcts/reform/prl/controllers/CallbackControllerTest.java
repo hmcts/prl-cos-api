@@ -89,7 +89,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
@@ -137,6 +136,9 @@ public class CallbackControllerTest {
     SendgridService sendgridService;
 
     @Mock
+    DocumentLanguageService documentLanguageService;
+
+    @Mock
     C100JsonMapper c100JsonMapper;
 
     @Mock
@@ -147,9 +149,6 @@ public class CallbackControllerTest {
 
     @Mock
     private CaseWorkerEmailService caseWorkerEmailService;
-
-    @Mock
-    private DocumentLanguageService documentLanguageService;
 
     @Mock
     private DocumentGenService documentGenService;
@@ -260,7 +259,7 @@ public class CallbackControllerTest {
 
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
+            .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
@@ -674,7 +673,7 @@ public class CallbackControllerTest {
             .allegationsOfHarmDomesticAbuseYesNo(Yes)
             .allegationsOfHarmChildAbuseYesNo(Yes)
             .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
+            .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
             .childrenConfidentialDetails(List.of(element(ChildConfidentialityDetails.builder().build())))
@@ -855,7 +854,7 @@ public class CallbackControllerTest {
             .allegationsOfHarmDomesticAbuseYesNo(Yes)
             .allegationsOfHarmChildAbuseYesNo(Yes)
             .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
+            .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .applicantsConfidentialDetails(Collections.emptyList())
             .childrenConfidentialDetails(Collections.emptyList())
