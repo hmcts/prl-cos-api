@@ -33,6 +33,12 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
+        supress spring web mvc
+         ]]></notes>
+    <cve>CVE-2022-22950</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
         new supressions(log4j,springframework,apache tomcat)
          ]]></notes>
     <cve>CVE-2021-44832</cve>
@@ -65,5 +71,13 @@
       Spring web influx
   ]]></notes>
     <cve>CVE-2022-22965</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      Spring web influx
+  ]]></notes>
+    <cve>CVE-2022-22965</cve>
+    <cve>CVE-2016-1000027</cve>
+    <cve>CVE-2022-22968</cve>
   </suppress>
 </suppressions>

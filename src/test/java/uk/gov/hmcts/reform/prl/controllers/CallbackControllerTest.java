@@ -1200,7 +1200,7 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void aboutToSubmitCaseCreationToC100CaseName() {
+    public void testCopyFL401CasenameToC100CaseName() throws Exception {
 
         Map<String, Object> caseData = new HashMap<>();
         Organisations org = Organisations.builder().name("testOrg").build();
