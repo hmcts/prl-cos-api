@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
@@ -161,6 +162,8 @@ public class ApplicationsTabServiceTest {
             .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.childArrangementsOrder))
             .typeOfChildArrangementsOrder(ChildArrangementOrderTypeEnum.spendTimeWithOrder)
             .natureOfOrder("Test nature of order")
+            .applicationPermissionRequired(PermissionRequiredEnum.yes)
+            .applicationPermissionRequiredReason("Some xyz reason")
             // hearing urgency
             .isCaseUrgent(YesOrNo.Yes)
             .caseUrgencyTimeAndReason("Test String")
@@ -257,7 +260,7 @@ public class ApplicationsTabServiceTest {
 
     @Test
     public void testGetGenerators() {
-        assertEquals(Collections.emptyList(), applicationsTabService.getGenerators());
+        assertEquals(Collections.emptyList(), applicationsTabService.getGenerators(caseDataWithParties));
     }
 
 
@@ -511,11 +514,15 @@ public class ApplicationsTabServiceTest {
             .ordersApplyingFor("Child Arrangements Order")
             .typeOfChildArrangementsOrder("Spend time with order")
             .natureOfOrder("Test nature of order")
+            .applicationPermissionRequired("Yes")
+            .applicationPermissionRequiredReason("Some xyz reason")
             .build();
         Map<String, Object> typeOfApplicationMap = Map.of(
             "ordersApplyingFor", "Child Arrangements Order",
             "typeOfChildArrangementsOrder", "Spend time with order",
-            "natureOfOrder", "Test nature of order"
+            "natureOfOrder", "Test nature of order",
+            "applicationPermissionRequired", "Yes",
+            "applicationPermissionRequiredReason", "Some xyz reason"
         );
 
         when(objectMapper.convertValue(typeOfApplication, Map.class)).thenReturn(typeOfApplicationMap);

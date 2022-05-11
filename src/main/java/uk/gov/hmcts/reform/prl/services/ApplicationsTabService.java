@@ -102,7 +102,7 @@ public class ApplicationsTabService implements TabService {
     }
 
     @Override
-    public List<FieldGenerator> getGenerators() {
+    public List<FieldGenerator> getGenerators(CaseData caseData) {
         return Collections.emptyList();
     }
 
@@ -287,6 +287,8 @@ public class ApplicationsTabService implements TabService {
         TypeOfApplication typeOfApplication = TypeOfApplication.builder()
             .ordersApplyingFor(String.join(", ", ordersApplyingFor))
             .typeOfChildArrangementsOrder(typeOfChildArrangementsOrder)
+            .applicationPermissionRequired(caseData.getApplicationPermissionRequired().getDisplayedValue())
+            .applicationPermissionRequiredReason(caseData.getApplicationPermissionRequiredReason())
             .natureOfOrder(natureOfOrder)
             .build();
 
@@ -592,7 +594,7 @@ public class ApplicationsTabService implements TabService {
         Optional<List<Element<PartyDetails>>> otherPeopleCheck = ofNullable(caseData.getOthersToNotify());
         List<Element<OtherPersonInTheCase>> otherPersonsInTheCase = new ArrayList<>();
 
-        if (otherPeopleCheck.isEmpty()) {
+        if (otherPeopleCheck.isEmpty() || otherPeopleCheck.get().isEmpty()) {
             OtherPersonInTheCase op = OtherPersonInTheCase.builder().build();
             Element<OtherPersonInTheCase> other = Element.<OtherPersonInTheCase>builder().value(op).build();
             otherPersonsInTheCase.add(other);
