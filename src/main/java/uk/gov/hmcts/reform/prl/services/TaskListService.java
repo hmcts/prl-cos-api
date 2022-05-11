@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_RESUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
@@ -40,6 +41,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
@@ -97,7 +99,8 @@ public class TaskListService {
             LITIGATION_CAPACITY,
             WELSH_LANGUAGE_REQUIREMENTS,
             VIEW_PDF_DOCUMENT,
-            SUBMIT_AND_PAY
+            SUBMIT_AND_PAY,
+            SUBMIT
         ));
 
     }
@@ -119,7 +122,8 @@ public class TaskListService {
             WELSH_LANGUAGE_REQUIREMENTS,
             FL401_UPLOAD_DOCUMENTS,
             VIEW_PDF_DOCUMENT,
-            FL401_SOT_AND_SUBMIT
+            FL401_SOT_AND_SUBMIT,
+            FL401_RESUBMIT
         ));
 
         if (ordersOptional.isEmpty() || (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)

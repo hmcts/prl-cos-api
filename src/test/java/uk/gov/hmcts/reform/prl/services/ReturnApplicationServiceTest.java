@@ -181,5 +181,64 @@ public class ReturnApplicationServiceTest {
         assertEquals(returnMsgStr.toString(),returnApplicationService.getReturnMessage(caseDataFl401,userDetails));
     }
 
+    public void testGetReturnMessageForTaskList() {
+        StringBuilder returnMsgStr = new StringBuilder();
+        returnMsgStr.append("                            \n\n");
+        returnMsgStr.append("<div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!"
+                                + "</span><strong class='govuk-warning-text__text'>Application has been returned</strong></div>" + "\n\n");
+
+        returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
+
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(casedata.getCaseTypeOfApplication())) {
+            for (RejectReasonEnum reasonEnum : casedata.getRejectReason()) {
+                returnMsgStr.append(reasonEnum.getDisplayedValue());
+                returnMsgStr.append("\n\n");
+            }
+
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(casedata.getCaseTypeOfApplication())) {
+            for (FL401RejectReasonEnum reasonEnum : casedata.getFl401RejectReason()) {
+                returnMsgStr.append(reasonEnum.getDisplayedValue());
+                returnMsgStr.append("\n\n");
+            }
+        }
+
+        returnMsgStr.append("Resolve these concerns and resend your application."
+                                + "You have been emailed the full details of your application return.");
+
+
+        assertEquals(returnMsgStr.toString(), returnApplicationService.getReturnMessageForTaskList(casedata));
+
+    }
+
+    @Test
+    public void testGetReturnMessageForTaskListfl401() {
+        StringBuilder returnMsgStr = new StringBuilder();
+        returnMsgStr.append("                            \n\n");
+        returnMsgStr.append("<div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!"
+                                + "</span><strong class='govuk-warning-text__text'>Application has been returned</strong></div>" + "\n\n");
+
+        returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
+
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseDataFl401.getCaseTypeOfApplication())) {
+            for (RejectReasonEnum reasonEnum : caseDataFl401.getRejectReason()) {
+                returnMsgStr.append(reasonEnum.getDisplayedValue());
+                returnMsgStr.append("\n\n");
+            }
+
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseDataFl401.getCaseTypeOfApplication())) {
+            for (FL401RejectReasonEnum reasonEnum : caseDataFl401.getFl401RejectReason()) {
+                returnMsgStr.append(reasonEnum.getDisplayedValue());
+                returnMsgStr.append("\n\n");
+            }
+        }
+
+        returnMsgStr.append("Resolve these concerns and resend your application."
+                                + "You have been emailed the full details of your application return.");
+
+
+        assertEquals(returnMsgStr.toString(), returnApplicationService.getReturnMessageForTaskList(caseDataFl401));
+
+    }
+
 
 }
