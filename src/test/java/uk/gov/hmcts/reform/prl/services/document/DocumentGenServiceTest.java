@@ -345,6 +345,28 @@ public class DocumentGenServiceTest {
 
 
     @Test
+    public void testGenerateDraftDocumentEng() throws Exception {
+        CaseData caseData = CaseData.builder().build();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
+
+        Map<String, Object> docMap = documentGenService.generateDraftDocuments(authToken, caseData);
+        assertTrue(docMap.containsKey(DRAFT_DOCUMENT_FIELD));
+
+    }
+
+    @Test
+    public void testGenerateDraftDocumentWelsh() throws Exception {
+        CaseData caseData = CaseData.builder().build();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
+
+        Map<String, Object> docMap = documentGenService.generateDraftDocuments(authToken, caseData);
+        assertTrue(docMap.containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
+
+    }
+
+    @Test
     public void generateDraftDocsForC100Test() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);

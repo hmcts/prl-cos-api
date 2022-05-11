@@ -32,6 +32,9 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -402,12 +405,16 @@ public class CaseData implements MappableObject {
      * Manage Documents.
      */
     private final DocumentCategoryEnum documentCategory;
-    private final List<Element<FurtherEvidence>> furtherEvidences;
+    private final List<Element<FurtherEvidence>> mainApplicationDocument;
     @JsonProperty("giveDetails")
     private final String giveDetails;
 
     private final List<Element<Correspondence>> correspondence;
     private final List<Element<OtherDocuments>> otherDocuments;
+
+    private final List<Element<FurtherEvidence>> mainAppDocForTabDisplay;
+    private final List<Element<Correspondence>> correspondenceForTabDisplay;
+    private final List<Element<OtherDocuments>> otherDocumentsForTabDisplay;
 
     private final List<Element<UserInfo>> userInfo;
 
@@ -560,11 +567,61 @@ public class CaseData implements MappableObject {
     private String isDocumentGenerated;
     private String isNotificationSent;
 
+    private ChildArrangementOrdersEnum childArrangementOrders;
+
+    /**
+     *  Manage Orders.
+     */
+    //upload orders flow
+
+    /*
+    private DomesticAbuseOrdersEnum domesticAbuseOrders;
+    private FcOrdersEnum fcOrders;
+    private OtherOrdersOptionEnum otherOrdersOption;
+    private String nameOfOrder;
+    private YesOrNo isTheOrderUploadedByConsent;*/
+    private LocalDate approvalDate;
+    private Document appointmentOfGuardian;
+    private Document previewOrderDoc;
+
+    private final ManageOrdersOptionsEnum manageOrdersOptions;
+    private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
+
+    /*Commented below as getiing too many parameters error for @AllArgsConstructor
+    * */
+    //create orders flow
+    //private final CafcassEnum cafcassRecipient;
+
+    //private final HearingTypeEnum hearingType;
+    //private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
+
+    //private final OrderRecipientsEnum orderRecipients;
+    //private final OtherEnum otherRecipient;
+    //private final OtherOrderRecipientsEnum otherOrderRecipients;
+    //private final SelectTypeOfOrderEnum selectTypeOfOrder;
+    //private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
+
+
+    private final YesOrNo doesOrderClosesCase;
+    private final YesOrNo isTheOrderByConsent;
+    private final YesOrNo wasTheOrderApprovedAtHearing;
+    private final String judgeOrMagistratesLastName;
+    private final String justiceLegalAdviserFullName;
+    private final String dateOrderMade;
+    private final String recitalsOrPreamble;
+    private final String orderDirections;
+    private final String furtherDirectionsIfRequired;
+    private final List<String> cafcassEmailAddress;
+    private final List<String> otherEmailAddress;
+    private final String childrenList;
+
     /**
      * Solicitor Details.
      */
     private String caseSolicitorName;
     private String caseSolicitorOrgName;
+    private String selectedOrder;
+
 
     /**
      * FL401 Court details for Pilot.
@@ -589,4 +646,8 @@ public class CaseData implements MappableObject {
         return this;
     }
 
+    /**
+     *  Withdraw request flag.
+     */
+    private String isWithdrawRequestSent;
 }
