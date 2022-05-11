@@ -409,7 +409,7 @@ public class CaseData implements MappableObject {
      * Manage Documents.
      */
     private final DocumentCategoryEnum documentCategory;
-    private final List<Element<FurtherEvidence>> mainApplicationDocument;
+    private final List<Element<FurtherEvidence>> furtherEvidences;
     @JsonProperty("giveDetails")
     private final String giveDetails;
 
@@ -612,7 +612,6 @@ public class CaseData implements MappableObject {
 
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo wasTheOrderApprovedAtHearing;
-    private final String judgeOrMagistrateTitle;
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

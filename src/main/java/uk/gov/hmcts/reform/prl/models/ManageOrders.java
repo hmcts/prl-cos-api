@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 
 import java.time.LocalDate;
@@ -54,4 +55,5 @@ public class ManageOrders {
     private final String recitalsOrPreamble;
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
+    private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
 }

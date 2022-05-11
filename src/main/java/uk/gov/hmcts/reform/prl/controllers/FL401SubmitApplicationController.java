@@ -25,8 +25,8 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -57,6 +57,9 @@ public class FL401SubmitApplicationController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AllTabServiceImpl allTabService;
 
     @Autowired
     private SolicitorEmailService solicitorEmailService;
