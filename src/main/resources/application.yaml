@@ -19,27 +19,6 @@ spring:
     import: "optional:configtree:/mnt/secrets/"
   application:
     name: Prl cos api
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
-#    username: ${DB_USER_NAME}
-#    password: ${DB_PASSWORD}
-#    properties:
-#      charSet: UTF-8
-#    hikari:
-#      minimumIdle: 2
-#      maximumPoolSize: 10
-#      idleTimeout: 10000
-#      poolName: {to-be-defined}HikariCP
-#      maxLifetime: 7200000
-#      connectionTimeout: 30000
-#  jpa:
-#    properties:
-#      hibernate:
-#        jdbc:
-#          lob:
-#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
-#            non_contextual_creation: true
 
 azure:
   application-insights:
@@ -61,10 +40,10 @@ pba:
 
 feature-toggle:
   toggle:
-    example: ${FEATURE_EXAMPLE:false}
+    example: false
 
 xui:
-  url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
+  url: http://localhost:3000
 
 uk:
   gov:
@@ -81,7 +60,6 @@ uk:
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
             COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
             GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
-            GATEKEEPER_FL401: c078de4d-9177-4e0d-ab9f-5adcf27a6ee5
             DA_SOLICITOR: d65830b7-eb13-46c3-b772-03976a67210d
             DA_LOCALCOURT: 9d6b311a-a764-45a7-9dd9-cd1d06408214
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
@@ -127,18 +105,18 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+    totp-secret: GT2V6PLQ34XGPTPM
   api:
-    url: https://idam-api.aat.platform.hmcts.net
+    url: http://localhost:5000
   client:
     id: prl-cos-api
-    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    redirect_uri: http://localhost:3000/oauth2/callback
+    secret: W7supXKMJgcEWKBS
 
 prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+    username: prl_local_sysupdate@mailinator.com
+    password: Password12
 
 
 security:
@@ -146,14 +124,14 @@ security:
     client:
       provider:
         oidc:
-          issuer-uri: ${idam.web.url}/o
+          issuer-uri: http://locahost:5000/o
       registration:
         oidc:
           client-id: internal
           client-secret: internal
 core_case_data:
   api:
-    url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
+    url: http://localhost:4452
 
 auth:
   idam:
@@ -241,11 +219,13 @@ document:
       prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
       prl_c47a_filename: C47ACreateOrder.pdf
       prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
-      prl_c47a_draft_filename: C47ACreateOrderDraft.pdf
+      prl_c47_draft_filename: C47CreateOrderDraft.pdf
       prl_c45a_template: PRL-ORDER-C45A-FINAL-COMMON.docx
       prl_c45a_filename: C45ACreateOrder.pdf
       prl_c45a_draft_template: PRL-ORDER-C45A-DRAFT-COMMON.docx
       prl_c45a_draft_filename: C45ACreateOrderDraft.pdf
+
+
 
 
 southampton:
