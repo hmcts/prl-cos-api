@@ -57,6 +57,12 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_STATE;
@@ -72,7 +78,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RestController
 @RequiredArgsConstructor
 public class CallbackController {
-
     private final CaseEventService caseEventService;
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
@@ -236,15 +241,24 @@ public class CallbackController {
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            if (!previousStateInList) {
+            if (previousState.isPresent() && !stateList.contains(previousState.get())) {
+                caseDataUpdated.put("isWithdrawRequestSent", "Pending");
+                log.info("**** Case is updated as WithdrawRequestSent **** ");
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                    sendC100CaseWithDrawEmails(caseData, caseDetails, userDetails);
+                    solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
+                    Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
+                    if (localCourtAdmin.isPresent()) {
+                        Optional<LocalCourtAdminEmail> localCourtAdminEmail = localCourtAdmin.get().stream().map(Element::getValue)
+                            .findFirst();
+                        if (localCourtAdminEmail.isPresent()) {
+                            String email = localCourtAdminEmail.get().getEmail();
+                            caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
+                        }
+                    }
                 } else {
                     solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
-                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(
-                        caseDetails,
-                        caseData.getCourtEmailAddress()
-                    );
+                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails,
+                                                                                    caseData.getCourtEmailAddress());
                 }
             } else {
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -415,6 +429,7 @@ public class CallbackController {
         }
 
         return caseDataUpdated;
+
     }
 }
 
