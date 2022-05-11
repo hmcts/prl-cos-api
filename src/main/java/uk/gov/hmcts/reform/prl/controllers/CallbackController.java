@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,27 +24,25 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
+import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
-import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
-import uk.gov.hmcts.reform.prl.services.DgsService;
-import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
@@ -54,6 +51,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
@@ -66,78 +64,20 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
+import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 public class CallbackController {
-
-    @Value("${document.templates.c100.c100_final_template}")
-    protected String c100FinalTemplate;
-
-    @Value("${document.templates.c100.c100_final_filename}")
-    protected String c100FinalFilename;
-
-    @Value("${document.templates.c100.c100_draft_template}")
-    protected String c100DraftTemplate;
-
-    @Value("${document.templates.c100.c100_draft_filename}")
-    protected String c100DraftFilename;
-
-    @Value("${document.templates.c100.c100_c8_template}")
-    protected String c100C8Template;
-
-    @Value("${document.templates.c100.c100_c8_filename}")
-    protected String c100C8Filename;
-
-    @Value("${document.templates.c100.c100_c1a_template}")
-    protected String c100C1aTemplate;
-
-    @Value("${document.templates.c100.c100_c1a_filename}")
-    protected String c100C1aFilename;
-
-    @Value("${document.templates.c100.c100_final_welsh_template}")
-    protected String c100FinalWelshTemplate;
-
-    @Value("${document.templates.c100.c100_final_welsh_filename}")
-    protected String c100FinalWelshFilename;
-
-    @Value("${document.templates.c100.c100_draft_welsh_template}")
-    protected String c100DraftWelshTemplate;
-
-    @Value("${document.templates.c100.c100_draft_welsh_filename}")
-    protected String c100DraftWelshFilename;
-
-    @Value("${document.templates.c100.c100_c8_welsh_template}")
-    protected String c100C8WelshTemplate;
-
-    @Value("${document.templates.c100.c100_c8_welsh_filename}")
-    protected String c100C8WelshFilename;
-
-    @Value("${document.templates.c100.c100_c1a_welsh_template}")
-    protected String c100C1aWelshTemplate;
-
-    @Value("${document.templates.c100.c100_c1a_welsh_filename}")
-    protected String c100C1aWelshFilename;
-
-    @Value("${document.templates.fl401.fl401_draft_filename}")
-    protected String fl401DraftFilename;
-
-    @Value("${document.templates.fl401.fl401_draft_template}")
-    protected String fl401DraftTemplate;
-
-    @Value("${document.templates.fl401.fl401_draft_welsh_template}")
-    protected String fl401DraftWelshTemplate;
-
-    @Value("${document.templates.fl401.fl401_draft_welsh_filename}")
-    protected String fl401DraftWelshFileName;
-
     private final CaseEventService caseEventService;
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
@@ -146,18 +86,13 @@ public class CallbackController {
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
 
-    public static final String PRL_FL401_DRAFT_TEMPLATE = "FL401-draft.docx";
-
-    private final DgsService dgsService;
     private final ObjectMapper objectMapper;
     private final AllTabServiceImpl allTabsService;
     private final UserService userService;
-    private final DocumentLanguageService documentLanguageService;
-
+    private final DocumentGenService documentGenService;
 
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
-
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -202,65 +137,16 @@ public class CallbackController {
     ) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
 
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = organisationService.getApplicantOrganisationDetails(caseData);
-            caseData = organisationService.getRespondentOrganisationDetails(caseData);
-        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = organisationService.getApplicantOrganisationDetailsForFL401(caseData);
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = buildTypeOfApplicationCaseData(caseData);
         }
 
         Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
 
-        buildGeneratedDocumentCaseData(authorisation, caseData, caseDataUpdated);
+        // Generate draft documents and set to casedataupdated..
+        caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    private void buildGeneratedDocumentCaseData(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        CaseData caseData, Map<String, Object> caseDataUpdated)
-        throws Exception {
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-
-        if (documentLanguage.isGenEng()) {
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? c100DraftTemplate
-                    : fl401DraftTemplate
-            );
-
-            caseDataUpdated.put("isEngDocGen", Yes.toString());
-            caseDataUpdated.put("draftOrderDoc", Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                                      ? c100DraftFilename : fl401DraftFilename
-                    + CommonUtils.formatCurrentDate("ddMMM").toLowerCase()
-                    + ".pdf").build());
-        }
-
-        if (documentLanguage.isGenWelsh()) {
-            GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                    ? c100DraftWelshTemplate
-                    : fl401DraftWelshTemplate
-            );
-
-            caseDataUpdated.put("isWelshDocGen", Yes.toString());
-            caseDataUpdated.put("draftOrderDocWelsh", Document.builder()
-                .documentUrl(generatedWelshDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedWelshDocumentInfo.getBinaryUrl())
-                .documentHash(generatedWelshDocumentInfo.getHashToken())
-                .documentFileName(PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                                      ? c100DraftWelshFilename : fl401DraftWelshFileName
-                    + CommonUtils.formatCurrentDate("ddMMM").toLowerCase()
-                    + ".pdf").build());
-        }
     }
 
     private CaseData buildTypeOfApplicationCaseData(CaseData caseData) {
@@ -288,113 +174,15 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        requireNonNull(caseData);
-        sendgridService.sendEmail(c100JsonMapper.map(caseData));
-
+        if (YesOrNo.No.equals(caseData.getConsentOrder())) {
+            requireNonNull(caseData);
+            sendgridService.sendEmail(c100JsonMapper.map(caseData));
+        }
         caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
-        log.info("** Previous States **");
-        eventsForCase.stream().map(CaseEventDetail::getStateId).forEach(log::info);
-        if (documentLanguage.isGenEng()) {
-
-            if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
-                && !caseData.getApplicantsConfidentialDetails().isEmpty()
-                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
-
-                GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-                    authorisation,
-                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                    c100C8Template
-                );
-
-                caseDataUpdated.put(DOCUMENT_FIELD_C8, Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName(c100C8Filename).build());
-
-            }
-
-            caseData = organisationService.getApplicantOrganisationDetails(caseData);
-            caseData = organisationService.getRespondentOrganisationDetails(caseData);
-
-            if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
-                GeneratedDocumentInfo generatedC1ADocumentInfo = dgsService.generateDocument(
-                    authorisation,
-                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                    c100C1aTemplate
-                );
-                caseDataUpdated.put(DOCUMENT_FIELD_C1A, Document.builder()
-                    .documentUrl(generatedC1ADocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedC1ADocumentInfo.getBinaryUrl())
-                    .documentHash(generatedC1ADocumentInfo.getHashToken())
-                    .documentFileName(c100C1aFilename).build());
-            }
-
-            GeneratedDocumentInfo generatedDocumentInfoFinal = dgsService.generateDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                c100FinalTemplate
-            );
-
-            caseDataUpdated.put(DOCUMENT_FIELD_FINAL, Document.builder()
-                .documentUrl(generatedDocumentInfoFinal.getUrl())
-                .documentBinaryUrl(generatedDocumentInfoFinal.getBinaryUrl())
-                .documentHash(generatedDocumentInfoFinal.getHashToken())
-                .documentFileName(c100FinalFilename).build());
-        }
-
-        if (documentLanguage.isGenWelsh()) {
-
-            if (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
-                && !caseData.getApplicantsConfidentialDetails().isEmpty()
-                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-                && !caseData.getChildrenConfidentialDetails().isEmpty()) {
-
-                GeneratedDocumentInfo generatedC8WelshDocumentInfo = dgsService.generateWelshDocument(
-                    authorisation,
-                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                    c100C8WelshTemplate
-                );
-                caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, Document.builder()
-                    .documentUrl(generatedC8WelshDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedC8WelshDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedC8WelshDocumentInfo.getHashToken())
-                    .documentFileName(c100C8WelshFilename).build());
-            }
-            caseData = organisationService.getApplicantOrganisationDetails(caseData);
-            caseData = organisationService.getRespondentOrganisationDetails(caseData);
-
-            if (caseData.getAllegationsOfHarmYesNo().equals(YesOrNo.Yes)) {
-                GeneratedDocumentInfo generatedC1AWelshDocumentInfo = dgsService.generateWelshDocument(
-                    authorisation,
-                    uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                    c100C1aWelshTemplate
-                );
-                caseDataUpdated.put(DOCUMENT_FIELD_C1A_WELSH, Document.builder()
-                    .documentUrl(generatedC1AWelshDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedC1AWelshDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedC1AWelshDocumentInfo.getHashToken())
-                    .documentFileName(c100C1aWelshFilename).build());
-            }
-
-            GeneratedDocumentInfo generatedFinalWelshDocumentInfo = dgsService.generateWelshDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                c100FinalWelshTemplate
-            );
-
-            caseDataUpdated.put(DOCUMENT_FIELD_FINAL_WELSH, Document.builder()
-                .documentUrl(generatedFinalWelshDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedFinalWelshDocumentInfo.getBinaryUrl())
-                .documentHash(generatedFinalWelshDocumentInfo.getHashToken())
-                .documentFileName(c100FinalWelshFilename).build());
-        }
+        // Generate All Docs and set to casedataupdated.
+        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
 
         // Refreshing the page in the same event. Hence no external event call needed.
         // Getting the tab fields and add it to the casedetails..
@@ -438,18 +226,21 @@ public class CallbackController {
 
         Optional<String> previousState = eventsForCase.stream().map(CaseEventDetail::getStateId)
             .filter(
-            CallbackController::getPreviousState).findFirst();
+                CallbackController::getPreviousState).findFirst();
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        List<String> stateList = List.of(DRAFT_STATE,"CLOSED",
+        List<String> stateList = List.of(DRAFT_STATE, "CLOSED",
                                          PENDING_STATE,
-                                         SUBMITTED_STATE,RETURN_STATE);
+                                         SUBMITTED_STATE, RETURN_STATE
+        );
+
+        boolean previousStateInList = previousState.filter(stateList::contains).isPresent();
+
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-
             if (previousState.isPresent() && !stateList.contains(previousState.get())) {
                 caseDataUpdated.put("isWithdrawRequestSent", "Pending");
                 log.info("**** Case is updated as WithdrawRequestSent **** ");
@@ -484,6 +275,16 @@ public class CallbackController {
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+    public void sendC100CaseWithDrawEmails(CaseData caseData, CaseDetails caseDetails, UserDetails userDetails) {
+        Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
+        if (localCourtAdmin.isPresent()) {
+            String email = localCourtAdmin.get().get(0).getValue().getEmail();
+            caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
+        }
+        solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
+    }
+
 
     @PostMapping(path = "/send-to-gatekeeper", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Send Email Notification on Send to gatekeeper ")
@@ -546,7 +347,6 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-
     @PostMapping(path = "/fl401-add-case-number", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback for add case number submit event")
     @ApiResponses(value = {
@@ -557,7 +357,7 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("issueDate",LocalDate.now());
+        caseDataUpdated.put("issueDate", LocalDate.now());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -567,7 +367,50 @@ public class CallbackController {
             && (!RETURN_STATE.equalsIgnoreCase(eachState))
             && (!PENDING_STATE.equalsIgnoreCase(eachState))
             && (!SUBMITTED_STATE.equalsIgnoreCase(eachState)))
-            || ISSUED_STATE.equalsIgnoreCase(eachState);
+            || ISSUED_STATE.equalsIgnoreCase(eachState)
+            || GATEKEEPING_STATE.equalsIgnoreCase(eachState);
+    }
+
+    @PostMapping(path = "/copy-manage-docs-for-tabs", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Copy fl401 case name to C100 Case name")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse copyManageDocsForTabs(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Element<FurtherEvidence>> furtherEvidences = caseData.getFurtherEvidences();
+        List<Element<Correspondence>> correspondence = caseData.getCorrespondence();
+        List<Element<OtherDocuments>> otherDocuments = caseData.getOtherDocuments();
+        if (furtherEvidences != null) {
+            furtherEvidences = furtherEvidences.stream()
+                    .filter(element -> {
+                        return element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup);
+                    })
+                .collect(Collectors.toList());
+            caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
+        }
+        if (correspondence != null) {
+            correspondence = correspondence.stream()
+                .filter(element -> {
+                    return element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup);
+                })
+                .collect(Collectors.toList());
+            caseDataUpdated.put("correspondenceForTabDisplay", correspondence);
+        }
+        if (otherDocuments != null) {
+
+            otherDocuments = otherDocuments.stream()
+                .filter(element -> {
+                    return element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup);
+                })
+                .collect(Collectors.toList());
+            caseDataUpdated.put("otherDocumentsForTabDisplay", otherDocuments);
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated) {
@@ -589,3 +432,5 @@ public class CallbackController {
 
     }
 }
+
+
