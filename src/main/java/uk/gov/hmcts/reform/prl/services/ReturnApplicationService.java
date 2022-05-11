@@ -42,7 +42,6 @@ public class ReturnApplicationService {
             } else {
                 legalName = caseData.getSolicitorName();
             }
-
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
