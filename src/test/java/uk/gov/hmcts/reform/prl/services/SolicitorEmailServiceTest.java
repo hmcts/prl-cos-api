@@ -394,7 +394,7 @@ public class SolicitorEmailServiceTest {
 
         solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
 
-      assertEquals("testing@solicitor.com", caseData.getCourtEmailAddress());
+        assertEquals("testing@solicitor.com", caseData.getCourtEmailAddress());
     }
 
     @Test

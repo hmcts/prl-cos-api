@@ -226,8 +226,13 @@ public class CaseData implements MappableObject {
     private final String soleTraderName1;
     private final Document miamCertificationDocumentUpload1;
 
+    /**
+     * Allegations of harm.
+     */
+
     @JsonUnwrapped
     private final AllegationOfHarm allegationOfHarm;
+
     /**
      * Other people in the case.
      */
@@ -327,7 +332,7 @@ public class CaseData implements MappableObject {
      * Manage Documents.
      */
     private final DocumentCategoryEnum documentCategory;
-    private final List<Element<FurtherEvidence>> furtherEvidences;
+    private final List<Element<FurtherEvidence>> mainApplicationDocument;
     @JsonProperty("giveDetails")
     private final String giveDetails;
 
@@ -448,6 +453,7 @@ public class CaseData implements MappableObject {
      */
     private final List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
     private final List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
+
 
     private final Map<String, Object> typeOfApplicationTable;
 
