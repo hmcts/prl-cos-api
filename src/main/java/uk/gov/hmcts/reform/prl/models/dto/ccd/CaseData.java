@@ -527,7 +527,6 @@ public class CaseData implements MappableObject {
     private final List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
     private final List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
 
-
     private final Map<String, Object> typeOfApplicationTable;
 
     /**

@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -94,6 +95,10 @@ public class FL401SubmitApplicationControllerTest {
 
     @Mock
     private UserDetails userDetails;
+
+
+    @Mock
+    ConfidentialityTabService confidentialityTabService;
 
     @Mock
     AllTabServiceImpl allTabsService;
@@ -501,8 +506,6 @@ public class FL401SubmitApplicationControllerTest {
             .thenReturn(court);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
-
-
     }
 
 
