@@ -159,17 +159,4 @@ public class CallbackControllerFunctionalTest {
             .body("data.issueDate", equalTo(LocalDate.now().toString()))
             .assertThat().statusCode(200);
     }
-
-    @Test
-    public void givenRequestWithFL401ApplicantDetails_whenEndPointCalled_ResponseContainsTypeOfApplication() throws Exception {
-        String requestBody = ResourceLoader.loadJson(FL401_APPLICANT_DETAILS);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/case-withdrawn-email-notification")
-            .then()
-            .assertThat().statusCode(200);
-    }
 }
