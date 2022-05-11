@@ -1049,7 +1049,7 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testSendCaseWithdrawNotificationNotInCaseISsuedState() throws Exception {
+    public void testSendCaseWithdrawNotificationNotInCaseIssuedState() throws Exception {
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
             .withDrawApplication(YesOrNo.Yes)
             .withDrawApplicationReason("Test data")
@@ -1079,7 +1079,7 @@ public class CallbackControllerTest {
                                                        .data(stringObjectMap).build()).build();
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
+        verify(solicitorEmailService, times(0))
             .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
     }
 

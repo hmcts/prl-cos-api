@@ -708,6 +708,7 @@ public class SolicitorEmailServiceTest {
 
         Map<String, Object> data = new HashMap<>();
         data.put("applicantSolicitorEmailAddress", fl401Applicant.getSolicitorEmail());
+        data.put("issueDate", "12/12/1212");
         CaseDetails caseDetails = CaseDetails.builder()
             .id(caseData.getId())
             .data(data)
