@@ -90,6 +90,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c47a_filename}")
     protected String c47aFile;
 
+    @Value("${document.templates.common.prl_fl402_draft_template}")
+    protected String fl402DraftTemplate;
+
+    @Value("${document.templates.common.prl_fl402_draft_filename}")
+    protected String fl402DraftFile;
+
+    @Value("${document.templates.common.prl_fl402_final_template}")
+    protected String fl402FinalTemplate;
+
+    @Value("${document.templates.common.prl_fl402_final_filename}")
+    protected String fl402FinalFile;
+
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
     @Autowired
@@ -136,6 +148,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c47aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
+                break;
+            case noticeOfProceedings:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, fl402DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, fl402DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl402FinalTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl402FinalFile);
                 break;
             case generalForm:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE,"");
