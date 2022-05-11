@@ -924,6 +924,5 @@ public class CaseWorkerEmailServiceTest {
 
         assertEquals("testing@localcourt.com", caseData.getCourtEmailAddress());
     }
-
 }
 
