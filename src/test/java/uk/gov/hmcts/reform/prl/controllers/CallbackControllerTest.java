@@ -1030,7 +1030,7 @@ public class CallbackControllerTest {
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(caseEventService.findEventsForCase("1"))
             .thenReturn(List.of(CaseEventDetail.builder().stateId(ISSUED_STATE).build()));
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .state(ISSUED_STATE)
                                                        .data(stringObjectMap).build()).build();
@@ -1043,7 +1043,7 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testSendCaseWithdrawNotificationNotInCaseIssuedState() throws Exception {
+    public void testSendCaseWithdrawNotificationNotInCaseISsuedState() throws Exception {
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
             .withDrawApplication(YesOrNo.Yes)
             .withDrawApplicationReason("Test data")
@@ -1059,9 +1059,7 @@ public class CallbackControllerTest {
                                                     .build()).build()))
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .withDrawApplicationData(withdrawApplication)
-            .applicants(applicantList)
-            .build();
-
+            .applicants(applicantList).build();
         Map<String, Object> stringObjectMap = new HashMap<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -1398,6 +1396,8 @@ public class CallbackControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(caseEventService.findEventsForCase("1"))
+            .thenReturn(List.of(CaseEventDetail.builder().stateId(SUBMITTED_STATE).build()));
         when(caseEventService.findEventsForCase(any(String.class)))
             .thenReturn(List.of(CaseEventDetail.builder().stateId("CLOSED").build()));
 
