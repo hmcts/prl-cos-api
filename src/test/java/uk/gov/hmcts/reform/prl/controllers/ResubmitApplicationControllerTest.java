@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -87,29 +88,33 @@ public class ResubmitApplicationControllerTest {
     private CaseData caseData;
     private CaseData caseDataSubmitted;
     private CaseData caseDataIssued;
+    private AllegationOfHarm allegationOfHarm;
     private static final String auth = "auth";
 
 
     @Before
     public void init() throws Exception {
         MockitoAnnotations.openMocks(this);
+
+        allegationOfHarm = AllegationOfHarm.builder()
+            .allegationsOfHarmYesNo(Yes).build();
         caseData = CaseData.builder()
             .id(12345L)
             .courtEmailAddress("test@email.com")
-            .allegationsOfHarmYesNo(Yes)
+            .allegationOfHarm(allegationOfHarm)
             .courtName("testcourt")
             .courtId("123")
             .build();
         caseDataSubmitted = CaseData.builder()
             .id(12345L)
             .state(State.SUBMITTED_PAID)
-            .allegationsOfHarmYesNo(Yes)
+            .allegationOfHarm(allegationOfHarm)
             .build();
 
         caseDataIssued = CaseData.builder()
             .id(12345L)
             .state(State.CASE_ISSUE)
-            .allegationsOfHarmYesNo(Yes)
+            .allegationOfHarm(allegationOfHarm)
             .build();
 
         caseDetails = CaseDetails.builder()
@@ -193,10 +198,13 @@ public class ResubmitApplicationControllerTest {
 
     @Test
     public void givenNoAllegationsOfHarmAndWelsh_whenLastEventWasIssued_thenIssuedPathFollowedAndCorrectDocsGenerated() throws Exception {
+        AllegationOfHarm allegationOfHarmNo = AllegationOfHarm.builder()
+            .allegationsOfHarmYesNo(No).build();
+
         CaseData caseDataNoAllegations = CaseData.builder()
             .id(12345L)
             .state(State.CASE_ISSUE)
-            .allegationsOfHarmYesNo(No)
+            .allegationOfHarm(allegationOfHarmNo)
             .build();
 
         List<CaseEventDetail> caseEvents = List.of(
@@ -215,15 +223,19 @@ public class ResubmitApplicationControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataNoAllegations);
         when(caseEventService.findEventsForCase(String.valueOf(caseDataNoAllegations.getId()))).thenReturn(caseEvents);
         when(courtFinderService.getNearestFamilyCourt(caseDataNoAllegations)).thenReturn(court);
-        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(caseDataNoAllegations);
-        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(caseDataNoAllegations);
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
+            caseDataNoAllegations);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
+            caseDataNoAllegations);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test", DOCUMENT_FIELD_FINAL_WELSH, "test"
             ));
 
 
-
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(
+            auth,
+            callbackRequest
+        );
 
         assertEquals(State.CASE_ISSUE, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
