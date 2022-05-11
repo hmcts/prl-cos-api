@@ -256,7 +256,7 @@ public class ApplicationsTabServiceTest {
 
     @Test
     public void testGetGenerators() {
-        assertEquals(Collections.emptyList(), applicationsTabService.getGenerators());
+        assertEquals(Collections.emptyList(), applicationsTabService.getGenerators(caseDataWithParties));
     }
 
 
