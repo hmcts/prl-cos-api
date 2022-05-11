@@ -72,9 +72,11 @@ public class PrlAppsConstants {
     public static final String GENERATE_FILE_NAME = "generateFileName";
 
     public static final String URL_STRING = "/";
+    public static final String D_MMMM_YYYY = "d MMMM yyyy";
 
     public static final String C8_HINT = "C8";
     public static final String C1A_HINT = "C1A";
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
+
 }

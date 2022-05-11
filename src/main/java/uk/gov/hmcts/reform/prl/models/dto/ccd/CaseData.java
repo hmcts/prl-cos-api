@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
@@ -573,7 +574,7 @@ public class CaseData implements MappableObject {
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
 
     /*Commented below as getiing too many parameters error for @AllArgsConstructor
-    * */
+     * */
     //create orders flow
     //private final CafcassEnum cafcassRecipient;
 
@@ -590,7 +591,7 @@ public class CaseData implements MappableObject {
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo isTheOrderByConsent;
     private final YesOrNo wasTheOrderApprovedAtHearing;
-    private final String judgeOrMagistrateTitle;
+    private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
