@@ -132,7 +132,7 @@ public class CallbackControllerFunctionalTest {
             .body("data.furtherEvidences", nullValue())
             .assertThat().statusCode(200);
     }
-    
+
     @Test
     public void givenRequestWithC100ApplicantDetails_whenEndPointCalled_ResponseContainsTypeOfApplication() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
@@ -170,7 +170,6 @@ public class CallbackControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-withdrawn-email-notification")
             .then()
-            .body("data.caseTypeOfApplication", equalTo("FL401"))
             .assertThat().statusCode(200);
     }
 }
