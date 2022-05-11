@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfiden
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -64,7 +65,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -91,6 +91,7 @@ public class DocumentGenServiceTest {
     CaseData fl401CaseData;
     CaseData fl401CaseData1;
     PartyDetails partyDetails;
+    AllegationOfHarm allegationOfHarmYes;
     private TypeOfApplicationOrders orders;
     private LinkToCA linkToCA;
 
@@ -169,6 +170,8 @@ public class DocumentGenServiceTest {
             .value(childConfidentialityDetails).build();
         List<Element<ChildConfidentialityDetails>> childConfidentialList = Collections.singletonList(childConfidential);
 
+        allegationOfHarmYes = AllegationOfHarm.builder()
+            .allegationsOfHarmYesNo(Yes).build();
 
         c100CaseData = CaseData.builder()
             .id(123456789123L)
@@ -176,12 +179,11 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .allegationsOfHarmYesNo(Yes)
+            .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .isEngDocGen("Yes")
             .isWelshDocGen("Yes")
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -192,12 +194,11 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .allegationsOfHarmYesNo(Yes)
+            .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .isEngDocGen("Yes")
             .isWelshDocGen("Yes")
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .allegationsOfHarmYesNo(Yes)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -795,7 +796,6 @@ public class DocumentGenServiceTest {
             .childsAge("12")
             .isRespondentResponsibleForChild(YesOrNo.Yes)
             .build();
-
 
 
         CaseData caseData = CaseData.builder()

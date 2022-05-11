@@ -585,7 +585,7 @@ public class CallbackControllerTest {
                                   .allegationsOfHarmChildAbuseYesNo(Yes)
                                   .build())
             .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
+            .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .id(123L)
             .build();
@@ -1302,7 +1302,7 @@ public class CallbackControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
         CaseData caseData1 = CaseData.builder()
-            .furtherEvidences(List.of(Element.<FurtherEvidence>builder()
+            .mainApplicationDocument(List.of(Element.<FurtherEvidence>builder()
                                           .value(FurtherEvidence.builder()
                                                      .restrictCheckboxFurtherEvidence(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                      .build())
