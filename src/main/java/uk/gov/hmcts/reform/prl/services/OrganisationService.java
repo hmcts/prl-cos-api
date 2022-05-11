@@ -70,7 +70,7 @@ public class OrganisationService {
 
     private PartyDetails getRespondentWithOrg(PartyDetails respondent, String userToken) {
 
-        if (respondent.getDoTheyHaveLegalRepresentation().equals(YesNoDontKnow.yes)
+        if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())
             && respondent.getSolicitorOrg() != null) {
 
             String organisationID = respondent.getSolicitorOrg().getOrganisationID();
