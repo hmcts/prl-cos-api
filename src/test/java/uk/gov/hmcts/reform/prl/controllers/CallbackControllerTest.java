@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -579,13 +580,14 @@ public class CallbackControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
-            .allegationsOfHarmYesNo(YesOrNo.Yes)
-            .allegationsOfHarmChildAbductionYesNo(YesOrNo.Yes)
-            .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
-            .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
-            .welshLanguageRequirement(YesOrNo.Yes)
+            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes)
+                                  .allegationsOfHarmChildAbductionYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes)
+                                  .build())
+            .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(LanguagePreference.english)
-            .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)
+            .languageRequirementApplicationNeedWelsh(Yes)
             .id(123L)
             .build();
 
@@ -669,10 +671,12 @@ public class CallbackControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
-            .allegationsOfHarmYesNo(Yes)
-            .allegationsOfHarmChildAbductionYesNo(Yes)
-            .allegationsOfHarmDomesticAbuseYesNo(Yes)
-            .allegationsOfHarmChildAbuseYesNo(Yes)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(Yes)
+                                  .allegationsOfHarmChildAbductionYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes)
+                                  .build())
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -850,10 +854,12 @@ public class CallbackControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
-            .allegationsOfHarmYesNo(Yes)
-            .allegationsOfHarmChildAbductionYesNo(Yes)
-            .allegationsOfHarmDomesticAbuseYesNo(Yes)
-            .allegationsOfHarmChildAbuseYesNo(Yes)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(Yes)
+                                  .allegationsOfHarmChildAbductionYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes)
+                                  .build())
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -1045,7 +1051,7 @@ public class CallbackControllerTest {
 
     @Ignore
     @Test
-    public void testSendCaseWithdrawNotificationNotInCaseISsuedState() throws Exception {
+    public void testSendCaseWithdrawNotificationNotInCaseIssuedState() throws Exception {
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
             .withDrawApplication(YesOrNo.Yes)
             .withDrawApplicationReason("Test data")
@@ -1075,7 +1081,7 @@ public class CallbackControllerTest {
                                                        .data(stringObjectMap).build()).build();
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
+        verify(solicitorEmailService, times(0))
             .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
     }
 
@@ -1298,7 +1304,7 @@ public class CallbackControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
         CaseData caseData1 = CaseData.builder()
-            .furtherEvidences(List.of(Element.<FurtherEvidence>builder()
+            .mainApplicationDocument(List.of(Element.<FurtherEvidence>builder()
                                           .value(FurtherEvidence.builder()
                                                      .restrictCheckboxFurtherEvidence(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                      .build())
