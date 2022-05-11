@@ -31,6 +31,9 @@ import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmi
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -106,8 +109,6 @@ public class FL401SubmitApplicationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         final LocalDate localDate = LocalDate.now();
@@ -148,7 +149,8 @@ public class FL401SubmitApplicationController {
 
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
-        caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
 
         caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
