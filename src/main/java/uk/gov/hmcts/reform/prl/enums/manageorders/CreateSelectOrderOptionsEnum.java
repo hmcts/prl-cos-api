@@ -14,6 +14,8 @@ public enum CreateSelectOrderOptionsEnum {
     standardDirectionsOrder("standardDirectionsOrder", "Standard directions order"),
     @JsonProperty("blankOrderOrDirections")
     blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)"),
+    @JsonProperty("blankOrderOrDirectionsWithdraw")
+    blankOrderOrDirectionsWithdraw("blankOrderOrDirectionsWithdraw", "Blank order or directions (C21)"),
     @JsonProperty("childArrangementsSpecificProhibitedOrder")
     childArrangementsSpecificProhibitedOrder(
         "childArrangementsSpecificProhibitedOrder",

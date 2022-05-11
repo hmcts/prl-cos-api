@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.format.DateTimeFormatter;
@@ -192,7 +193,7 @@ public class ManageOrderService {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                CaseDetails.builder().caseData(caseData).build(),
                 fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
             );
             return OrderDetails.builder().orderType(caseData.getSelectedOrder())
@@ -204,11 +205,11 @@ public class ManageOrderService {
                 .otherDetails(OtherOrderDetails.builder()
                                   .createdBy(caseData.getJudgeOrMagistratesLastName())
                                   .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                      "d MMMM yyyy",
+                                      PrlAppsConstants.D_MMMM_YYYY,
                                       Locale.UK
                                   )))
                                   .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
-                                      "d MMMM yyyy",
+                                      PrlAppsConstants.D_MMMM_YYYY,
                                       Locale.UK
                                   )))
                                   .orderRecipients(getAllRecipients(caseData)).build())
@@ -220,7 +221,7 @@ public class ManageOrderService {
                 .otherDetails(OtherOrderDetails.builder()
                                   .createdBy(caseData.getJudgeOrMagistratesLastName())
                                   .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                      "d MMMM yyyy",
+                                      PrlAppsConstants.D_MMMM_YYYY,
                                       Locale.UK
                                   )))
                                   .orderRecipients(getAllRecipients(caseData)).build())
