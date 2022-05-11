@@ -7,19 +7,27 @@ import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+
+import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 public class CallbackControllerFunctionalTest {
+
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
 
     private final String userToken = "Bearer testToken";
 
@@ -28,6 +36,8 @@ public class CallbackControllerFunctionalTest {
     private static final String MIAM_VALIDATION_REQUEST_NO_ERROR = "requests/call-back-controller-miam-request-no-error.json";
     private static final String APPLICANT_CASE_NAME_REQUEST = "requests/call-back-controller-applicant-case-name.json";
     private static final String APPLICATION_TIMETABLE_REQUEST = "requests/call-back-controller-validate-application-timeframe-error.json";
+    private static final String C100_APPLICANT_DETAILS = "requests/call-back-controller-C100-case-data.json";
+    private static final String FL401_APPLICANT_DETAILS = "requests/call-back-controller-fl401-case-data.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -109,4 +119,58 @@ public class CallbackControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Test
+    public void givenRequest_whenEndPointCalled_ResponseContains() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        request
+            .header("Authorization", userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/copy-manage-docs-for-tabs")
+            .then()
+            .body("data.furtherEvidences", nullValue())
+            .assertThat().statusCode(200);
+    }
+    
+    @Test
+    public void givenRequestWithC100ApplicantDetails_whenEndPointCalled_ResponseContainsTypeOfApplication() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        request
+            .header("Authorization", userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/case-withdrawn-email-notification")
+            .then()
+            .assertThat().statusCode(500);
+    }
+
+    @Test
+    public void givenRequestWithCaseNumberAdded_ResponseContainsIssueDate() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        request
+            .header("Authorization", userToken)
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/fl401-add-case-number")
+            .then()
+            .body("data.issueDate", equalTo(LocalDate.now().toString()))
+            .assertThat().statusCode(200);
+    }
+
+    @Test
+    public void givenRequestWithFL401ApplicantDetails_whenEndPointCalled_ResponseContainsTypeOfApplication() throws Exception {
+        String requestBody = ResourceLoader.loadJson(FL401_APPLICANT_DETAILS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/case-withdrawn-email-notification")
+            .then()
+            .body("data.caseTypeOfApplication", equalTo("FL401"))
+            .assertThat().statusCode(200);
+    }
 }
