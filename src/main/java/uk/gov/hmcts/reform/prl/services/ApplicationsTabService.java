@@ -102,7 +102,7 @@ public class ApplicationsTabService implements TabService {
     }
 
     @Override
-    public List<FieldGenerator> getGenerators() {
+    public List<FieldGenerator> getGenerators(CaseData caseData) {
         return Collections.emptyList();
     }
 
