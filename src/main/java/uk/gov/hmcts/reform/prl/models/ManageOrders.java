@@ -18,11 +18,14 @@ public class ManageOrders {
     private final List<Element<String>> cafcassEmailAddress;
     @JsonProperty("otherEmailAddress")
     private final List<Element<String>> otherEmailAddress;
-
     @JsonProperty("cafcassOfficeDetails")
     private String cafcassOfficeDetails;
-
     @JsonProperty("parentName")
     private String parentName;
-
+    @JsonProperty("recitalsOrPreamble")
+    private final String recitalsOrPreamble;
+    @JsonProperty("orderDirections")
+    private final String orderDirections;
+    @JsonProperty("furtherDirectionsIfRequired")
+    private final String furtherDirectionsIfRequired;
 }
