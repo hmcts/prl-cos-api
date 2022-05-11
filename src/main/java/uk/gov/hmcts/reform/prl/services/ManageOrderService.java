@@ -77,8 +77,8 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c47a_draft_template}")
     protected String c47aDraftTemplate;
 
-  //  @Value("${document.templates.common.prl_c47a_draft_filename}")
-  //  protected String c47aDraftFile;
+    @Value("${document.templates.common.prl_c47a_draft_filename}")
+    protected String c47aDraftFile;
 
     @Value("${document.templates.common.prl_c47a_template}")
     protected String c47aTemplate;
@@ -144,7 +144,7 @@ public class ManageOrderService {
                 break;
             case appointmentOfGuardian:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c47aDraftTemplate);
-               // fieldsMap.put(PrlAppsConstants.FILE_NAME, c47aDraftFile);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c47aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
                 break;
