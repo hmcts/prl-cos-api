@@ -4,7 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -14,8 +19,13 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
@@ -151,7 +161,12 @@ public class DocumentGenService {
 
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put("isEngDocGen", Yes.toString());
-            updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
+            if (isConfidentialInformationPresentForC100(caseData)) {
+                updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                    && isApplicantOrChildDetailsConfidential(caseData)) {
+                updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
+            }
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                 && YesOrNo.Yes.equals(caseData.getAllegationsOfHarmYesNo())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
@@ -160,7 +175,12 @@ public class DocumentGenService {
         }
         if (documentLanguage.isGenWelsh()) {
             updatedCaseData.put("isWelshDocGen", Yes.toString());
-            updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
+            if (isConfidentialInformationPresentForC100(caseData)) {
+                updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                && isApplicantOrChildDetailsConfidential(caseData)) {
+                updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
+            }
 
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                 && YesOrNo.Yes.equals(caseData.getAllegationsOfHarmYesNo())) {
@@ -170,6 +190,14 @@ public class DocumentGenService {
         }
 
         return updatedCaseData;
+    }
+
+    private boolean isConfidentialInformationPresentForC100(CaseData caseData) {
+        return C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            &&  ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+            && !caseData.getApplicantsConfidentialDetails().isEmpty()
+            || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
+            && !caseData.getChildrenConfidentialDetails().isEmpty();
     }
 
     public Map<String, Object> generateDraftDocuments(String authorisation, CaseData caseData) throws Exception {
@@ -243,31 +271,49 @@ public class DocumentGenService {
 
         switch (docGenFor) {
             case C8_HINT:
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-                    fileName = !isWelsh ? c100C8Filename : c100C8WelshFilename;
-                } else {
-                    fileName = !isWelsh ? fl401C8Filename : fl401C8WelshFilename;
-                }
+                fileName = findC8Filename(isWelsh, caseTypeOfApp);
                 break;
             case C1A_HINT:
                 fileName =  !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
                 break;
             case FINAL_HINT:
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-                    fileName = !isWelsh ? c100FinalFilename : c100FinalWelshFilename;
-                } else {
-                    fileName = !isWelsh ? fl401FinalFilename : fl401FinalWelshFilename;
-                }
+                fileName = findFinalFilename(isWelsh, caseTypeOfApp);
                 break;
             case DRAFT_HINT:
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-                    fileName = !isWelsh ? c100DraftFilename : c100DraftWelshFilename;
-                } else {
-                    fileName = !isWelsh ? fl401DraftFilename : fl401DraftWelshFileName;
-                }
+                fileName = findDraftFilename(isWelsh, caseTypeOfApp);
                 break;
             default:
                 fileName = "";
+        }
+        return fileName;
+    }
+
+    private String findDraftFilename(boolean isWelsh, String caseTypeOfApp) {
+        String fileName;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            fileName = !isWelsh ? c100DraftFilename : c100DraftWelshFilename;
+        } else {
+            fileName = !isWelsh ? fl401DraftFilename : fl401DraftWelshFileName;
+        }
+        return fileName;
+    }
+
+    private String findFinalFilename(boolean isWelsh, String caseTypeOfApp) {
+        String fileName;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            fileName = !isWelsh ? c100FinalFilename : c100FinalWelshFilename;
+        } else {
+            fileName = !isWelsh ? fl401FinalFilename : fl401FinalWelshFilename;
+        }
+        return fileName;
+    }
+
+    private String findC8Filename(boolean isWelsh, String caseTypeOfApp) {
+        String fileName;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            fileName = !isWelsh ? c100C8Filename : c100C8WelshFilename;
+        } else {
+            fileName = !isWelsh ? fl401C8Filename : fl401C8WelshFilename;
         }
         return fileName;
     }
@@ -278,32 +324,95 @@ public class DocumentGenService {
 
         switch (docGenFor) {
             case C8_HINT:
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-                    template = !isWelsh ? c100C8Template : c100C8WelshTemplate;
-                } else {
-                    template = !isWelsh ? fl401C8Template : fl401C8WelshTemplate;
-                }
+                template = findC8Template(isWelsh, caseTypeOfApp);
                 break;
             case C1A_HINT:
                 template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
                 break;
             case FINAL_HINT:
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-                    template = !isWelsh ? c100FinalTemplate : c100FinalWelshTemplate;
-                } else {
-                    template = !isWelsh ? fl401FinalTemplate : fl401FinalWelshTemplate;
-                }
+                template = findFinalTemplate(isWelsh, caseTypeOfApp);
                 break;
             case DRAFT_HINT:
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-                    template = !isWelsh ? c100DraftTemplate : c100DraftWelshTemplate;
-                } else {
-                    template = !isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate;
-                }
+                template = findDraftTemplate(isWelsh, caseTypeOfApp);
                 break;
             default:
                 template = "";
         }
         return template;
+    }
+
+    private String findDraftTemplate(boolean isWelsh, String caseTypeOfApp) {
+        String template;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            template = !isWelsh ? c100DraftTemplate : c100DraftWelshTemplate;
+        } else {
+            template = !isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate;
+        }
+        return template;
+    }
+
+    private String findFinalTemplate(boolean isWelsh, String caseTypeOfApp) {
+        String template;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            template = !isWelsh ? c100FinalTemplate : c100FinalWelshTemplate;
+        } else {
+            template = !isWelsh ? fl401FinalTemplate : fl401FinalWelshTemplate;
+        }
+        return template;
+    }
+
+    private String findC8Template(boolean isWelsh, String caseTypeOfApp) {
+        String template;
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
+            template = !isWelsh ? c100C8Template : c100C8WelshTemplate;
+        } else {
+            template = !isWelsh ? fl401C8Template : fl401C8WelshTemplate;
+        }
+        return template;
+    }
+
+    private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
+        PartyDetails partyDetails = caseData.getApplicantsFL401();
+        Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
+
+        boolean isChildrenConfidential = isChildrenDetailsConfidentiality(caseData, typeOfApplicationOrders);
+
+        return isApplicantDetailsConfidential(partyDetails) || isChildrenConfidential;
+
+    }
+
+    private boolean isChildrenDetailsConfidentiality(CaseData caseData, Optional<TypeOfApplicationOrders> typeOfApplicationOrders) {
+        boolean childrenConfidentiality = false;
+
+        if (typeOfApplicationOrders.isPresent() && typeOfApplicationOrders.get().getOrderType().contains(
+            FL401OrderTypeEnum.occupationOrder)
+            && Objects.nonNull(caseData.getHome())
+            && YesOrNo.Yes.equals(caseData.getHome().getDoAnyChildrenLiveAtAddress())) {
+            List<ChildrenLiveAtAddress> childrenLiveAtAddresses = caseData.getHome().getChildren().stream().map(Element::getValue).collect(
+                Collectors.toList());
+
+            for (ChildrenLiveAtAddress address : childrenLiveAtAddresses) {
+                if (YesOrNo.Yes.equals(address.getKeepChildrenInfoConfidential())) {
+                    childrenConfidentiality = true;
+                }
+
+            }
+        }
+        return childrenConfidentiality;
+    }
+
+    private boolean isApplicantDetailsConfidential(PartyDetails applicant) {
+
+        boolean isApplicantInformationConfidential = false;
+        if ((YesOrNo.Yes).equals(applicant.getIsAddressConfidential())) {
+            isApplicantInformationConfidential = true;
+        }
+        if ((YesOrNo.Yes).equals(applicant.getIsEmailAddressConfidential())) {
+            isApplicantInformationConfidential = true;
+        }
+        if ((YesOrNo.Yes).equals(applicant.getIsPhoneNumberConfidential())) {
+            isApplicantInformationConfidential = true;
+        }
+        return isApplicantInformationConfidential;
     }
 }

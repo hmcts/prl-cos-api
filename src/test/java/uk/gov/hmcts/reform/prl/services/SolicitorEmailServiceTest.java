@@ -33,7 +33,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -320,7 +322,7 @@ public class SolicitorEmailServiceTest {
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
 
         solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
-        assertEquals("test@demo.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+        assertEquals("test@demo.com", userDetails.getEmail());
     }
 
     @Test
@@ -508,6 +510,22 @@ public class SolicitorEmailServiceTest {
         solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
 
         assertEquals("testing@solicitor.com", email);
+    }
+
+    @Test
+    public void  catchNotFoundExceptionFromCourtFinderService() throws NotFoundException {
+        CaseData caseData = CaseData.builder()
+            .applicants(List.of(element(
+                PartyDetails.builder().firstName("test").lastName("test").build()
+            )))
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().data(Collections.emptyMap()).build();
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenThrow(NotFoundException.class);
+
+        assertNull(solicitorEmailService.buildEmail(caseDetails));
+
     }
 
 }

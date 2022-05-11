@@ -23,6 +23,7 @@
     <cve>CVE-2021-22118</cve>
     <cve>CVE-2021-22096</cve>
     <cve>CVE-2022-22950</cve>
+    <cve>CVE-2022-22968</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -53,5 +54,11 @@
     <cve>CVE-2022-22968</cve>
     <cve>CVE-2016-1000027</cve>
     <cve>CVE-2022-22968</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+        Jackson data binding
+        ]]></notes>
+    <cve>CVE-2020-36518</cve>
   </suppress>
 </suppressions>
