@@ -28,6 +28,8 @@ public class ManageOrders {
     private final String orderDirections;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
-    @JsonProperty("magistrateLastName")
-    private final List<Element<String>> magistrateLastName;
+    @JsonProperty("judgeOrMagistratesLastName")
+    private final String judgeOrMagistratesLastName;
+    @JsonProperty("justiceLegalAdviserFullName")
+    private final String justiceLegalAdviserFullName;
 }
