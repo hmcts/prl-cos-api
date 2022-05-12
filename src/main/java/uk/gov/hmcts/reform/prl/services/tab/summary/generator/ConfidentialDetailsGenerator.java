@@ -4,6 +4,8 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
@@ -15,6 +17,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Component
 public class ConfidentialDetailsGenerator implements FieldGenerator {
@@ -28,15 +32,36 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
     }
 
     private String isConfidentialDetailsAvailable(CaseData caseData) {
-        // Checking the Child details..
-        if (validateChildrensDetails(caseData)) {
+
+        // Checking the Child details. It is only for C100 applications
+        if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+            && (validateChildrensDetails(caseData) || validateApplicantForCA(caseData))) {
             return YesOrNo.Yes.getDisplayedValue();
         }
-        if (validateApplicantDetails(caseData)) {
+
+        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+            && (validateApplicantForDA(caseData) || validateHomeConfidentialDetails(caseData))) {
             return YesOrNo.Yes.getDisplayedValue();
         }
 
         return YesOrNo.No.getDisplayedValue();
+    }
+
+    private boolean validateHomeConfidentialDetails(CaseData caseData) {
+        Optional<Home> homeOptional = ofNullable(caseData.getHome());
+        if (homeOptional.isPresent()) {
+            Optional<List<Element<ChildrenLiveAtAddress>>> childrenAddress = ofNullable(homeOptional.get().getChildren());
+            if (childrenAddress.isPresent()) {
+                List<ChildrenLiveAtAddress> childrenLiveAtAddressList = childrenAddress.get().stream().map(Element::getValue)
+                    .collect(Collectors.toList());
+                if (childrenLiveAtAddressList.stream().anyMatch(childAddress -> YesOrNo.Yes.equals(childAddress.getKeepChildrenInfoConfidential()))) {
+                    return true;
+                }
+            }
+
+        }
+        return false;
+
     }
 
     private boolean validateChildrensDetails(CaseData caseData) {
@@ -70,7 +95,16 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
         return false;
     }
 
-    private boolean validateApplicantDetails(CaseData caseData) {
+    private boolean validateApplicantForDA(CaseData caseData) {
+        Optional<PartyDetails> flApplicants = ofNullable(caseData.getApplicantsFL401());
+        if (flApplicants.isPresent()) {
+            PartyDetails partyDetails = flApplicants.get();
+            return partyDetails.hasConfidentialInfo() || isEmailAddressAddressConfidentialForDA(partyDetails);
+        }
+        return false;
+    }
+
+    private boolean validateApplicantForCA(CaseData caseData) {
         // Checking the Applicant Details..
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
         if (!applicantsWrapped.isEmpty() && !applicantsWrapped.get().isEmpty()) {
@@ -86,6 +120,13 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
                     return true;
                 }
             }
+        }
+        return false;
+    }
+
+    private boolean isEmailAddressAddressConfidentialForDA(PartyDetails partyDetails) {
+        if (YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())) {
+            return YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential());
         }
         return false;
     }

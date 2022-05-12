@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -578,13 +579,14 @@ public class CallbackControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
-            .allegationsOfHarmYesNo(YesOrNo.Yes)
-            .allegationsOfHarmChildAbductionYesNo(YesOrNo.Yes)
-            .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
-            .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
-            .welshLanguageRequirement(YesOrNo.Yes)
+            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes)
+                                  .allegationsOfHarmChildAbductionYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes)
+                                  .build())
+            .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(LanguagePreference.english)
-            .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)
+            .languageRequirementApplicationNeedWelsh(Yes)
             .id(123L)
             .build();
 
@@ -668,10 +670,12 @@ public class CallbackControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
-            .allegationsOfHarmYesNo(Yes)
-            .allegationsOfHarmChildAbductionYesNo(Yes)
-            .allegationsOfHarmDomesticAbuseYesNo(Yes)
-            .allegationsOfHarmChildAbuseYesNo(Yes)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(Yes)
+                                  .allegationsOfHarmChildAbductionYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes)
+                                  .build())
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -849,10 +853,12 @@ public class CallbackControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
-            .allegationsOfHarmYesNo(Yes)
-            .allegationsOfHarmChildAbductionYesNo(Yes)
-            .allegationsOfHarmDomesticAbuseYesNo(Yes)
-            .allegationsOfHarmChildAbuseYesNo(Yes)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(Yes)
+                                  .allegationsOfHarmChildAbductionYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes)
+                                  .build())
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -1030,7 +1036,7 @@ public class CallbackControllerTest {
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
         when(caseEventService.findEventsForCase("1"))
             .thenReturn(List.of(CaseEventDetail.builder().stateId(ISSUED_STATE).build()));
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .state(ISSUED_STATE)
                                                        .data(stringObjectMap).build()).build();
@@ -1059,9 +1065,7 @@ public class CallbackControllerTest {
                                                     .build()).build()))
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .withDrawApplicationData(withdrawApplication)
-            .applicants(applicantList)
-            .build();
-
+            .applicants(applicantList).build();
         Map<String, Object> stringObjectMap = new HashMap<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -1075,7 +1079,7 @@ public class CallbackControllerTest {
                                                        .data(stringObjectMap).build()).build();
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
+        verify(solicitorEmailService, times(0))
             .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
     }
 
@@ -1298,7 +1302,7 @@ public class CallbackControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
         CaseData caseData1 = CaseData.builder()
-            .furtherEvidences(List.of(Element.<FurtherEvidence>builder()
+            .mainApplicationDocument(List.of(Element.<FurtherEvidence>builder()
                                           .value(FurtherEvidence.builder()
                                                      .restrictCheckboxFurtherEvidence(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                      .build())
@@ -1398,6 +1402,8 @@ public class CallbackControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(caseEventService.findEventsForCase("1"))
+            .thenReturn(List.of(CaseEventDetail.builder().stateId(SUBMITTED_STATE).build()));
         when(caseEventService.findEventsForCase(any(String.class)))
             .thenReturn(List.of(CaseEventDetail.builder().stateId("CLOSED").build()));
 

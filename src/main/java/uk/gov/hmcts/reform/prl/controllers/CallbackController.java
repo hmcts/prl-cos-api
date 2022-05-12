@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -72,7 +73,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RestController
 @RequiredArgsConstructor
 public class CallbackController {
-
     private final CaseEventService caseEventService;
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
@@ -174,6 +174,7 @@ public class CallbackController {
             sendgridService.sendEmail(c100JsonMapper.map(caseData));
         }
         caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
+        caseData = caseData.toBuilder().state(State.CASE_ISSUE).build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         // Generate All Docs and set to casedataupdated.
@@ -236,15 +237,24 @@ public class CallbackController {
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            if (!previousStateInList) {
+            if (previousState.isPresent() && !stateList.contains(previousState.get())) {
+                caseDataUpdated.put("isWithdrawRequestSent", "Pending");
+                log.info("**** Case is updated as WithdrawRequestSent **** ");
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                    sendC100CaseWithDrawEmails(caseData, caseDetails, userDetails);
+                    solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
+                    Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
+                    if (localCourtAdmin.isPresent()) {
+                        Optional<LocalCourtAdminEmail> localCourtAdminEmail = localCourtAdmin.get().stream().map(Element::getValue)
+                            .findFirst();
+                        if (localCourtAdminEmail.isPresent()) {
+                            String email = localCourtAdminEmail.get().getEmail();
+                            caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
+                        }
+                    }
                 } else {
                     solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
-                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(
-                        caseDetails,
-                        caseData.getCourtEmailAddress()
-                    );
+                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails,
+                                                                                    caseData.getCourtEmailAddress());
                 }
             } else {
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -368,7 +378,7 @@ public class CallbackController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<Element<FurtherEvidence>> furtherEvidences = caseData.getFurtherEvidences();
+        List<Element<FurtherEvidence>> furtherEvidences = caseData.getMainApplicationDocument();
         List<Element<Correspondence>> correspondence = caseData.getCorrespondence();
         List<Element<OtherDocuments>> otherDocuments = caseData.getOtherDocuments();
         if (furtherEvidences != null) {
@@ -415,6 +425,7 @@ public class CallbackController {
         }
 
         return caseDataUpdated;
+
     }
 }
 
