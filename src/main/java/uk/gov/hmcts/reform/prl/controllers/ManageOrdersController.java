@@ -56,7 +56,9 @@ public class ManageOrdersController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+        if (caseData.getCreateSelectOrderOptions() != null
+            && !caseData.getCreateSelectOrderOptions().equals(CreateSelectOrderOptionsEnum.generalForm)
+            && caseData.getDateOrderMade() != null) {
             caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
         } else {
             caseDataUpdated.put("previewOrderDoc",caseData.getAppointmentOfGuardian());
