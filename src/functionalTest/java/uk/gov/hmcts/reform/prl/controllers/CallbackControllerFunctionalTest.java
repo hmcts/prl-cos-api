@@ -172,4 +172,5 @@ public class CallbackControllerFunctionalTest {
             .then()
             .assertThat().statusCode(200);
     }
+
 }

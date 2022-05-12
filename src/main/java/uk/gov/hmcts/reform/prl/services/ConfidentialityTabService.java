@@ -32,7 +32,7 @@ public class ConfidentialityTabService {
 
         List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
 
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<PartyDetails> applicants = caseData.getApplicants().stream()
                 .map(Element::getValue)
                 .collect(Collectors.toList());
