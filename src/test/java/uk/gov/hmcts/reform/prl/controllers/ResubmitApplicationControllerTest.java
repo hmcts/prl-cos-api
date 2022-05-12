@@ -13,8 +13,10 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -22,6 +24,7 @@ import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -33,12 +36,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -70,6 +75,9 @@ public class ResubmitApplicationControllerTest {
     DocumentGenService documentGenService;
 
     @Mock
+    UserService userService;
+
+    @Mock
     private CourtFinderService courtFinderService;
 
     @Mock
@@ -80,28 +88,33 @@ public class ResubmitApplicationControllerTest {
     private CaseData caseData;
     private CaseData caseDataSubmitted;
     private CaseData caseDataIssued;
+    private AllegationOfHarm allegationOfHarm;
     private static final String auth = "auth";
 
 
     @Before
     public void init() throws Exception {
         MockitoAnnotations.openMocks(this);
+
+        allegationOfHarm = AllegationOfHarm.builder()
+            .allegationsOfHarmYesNo(Yes).build();
         caseData = CaseData.builder()
             .id(12345L)
-            .allegationsOfHarmYesNo(Yes)
+            .courtEmailAddress("test@email.com")
+            .allegationOfHarm(allegationOfHarm)
             .courtName("testcourt")
             .courtId("123")
             .build();
         caseDataSubmitted = CaseData.builder()
             .id(12345L)
             .state(State.SUBMITTED_PAID)
-            .allegationsOfHarmYesNo(Yes)
+            .allegationOfHarm(allegationOfHarm)
             .build();
 
         caseDataIssued = CaseData.builder()
             .id(12345L)
             .state(State.CASE_ISSUE)
-            .allegationsOfHarmYesNo(Yes)
+            .allegationOfHarm(allegationOfHarm)
             .build();
 
         caseDetails = CaseDetails.builder()
@@ -185,10 +198,13 @@ public class ResubmitApplicationControllerTest {
 
     @Test
     public void givenNoAllegationsOfHarmAndWelsh_whenLastEventWasIssued_thenIssuedPathFollowedAndCorrectDocsGenerated() throws Exception {
+        AllegationOfHarm allegationOfHarmNo = AllegationOfHarm.builder()
+            .allegationsOfHarmYesNo(No).build();
+
         CaseData caseDataNoAllegations = CaseData.builder()
             .id(12345L)
             .state(State.CASE_ISSUE)
-            .allegationsOfHarmYesNo(No)
+            .allegationOfHarm(allegationOfHarmNo)
             .build();
 
         List<CaseEventDetail> caseEvents = List.of(
@@ -207,15 +223,19 @@ public class ResubmitApplicationControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataNoAllegations);
         when(caseEventService.findEventsForCase(String.valueOf(caseDataNoAllegations.getId()))).thenReturn(caseEvents);
         when(courtFinderService.getNearestFamilyCourt(caseDataNoAllegations)).thenReturn(court);
-        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(caseDataNoAllegations);
-        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(caseDataNoAllegations);
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
+            caseDataNoAllegations);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
+            caseDataNoAllegations);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test", DOCUMENT_FIELD_FINAL_WELSH, "test"
             ));
 
 
-
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(
+            auth,
+            callbackRequest
+        );
 
         assertEquals(State.CASE_ISSUE, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
@@ -263,5 +283,34 @@ public class ResubmitApplicationControllerTest {
         verify(allTabService).getAllTabsFields(caseDataIssued);
 
     }
+
+    @Test
+    public void testResubmitForFl401() throws Exception {
+        List<CaseEventDetail> caseEvents = List.of(
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.SUBMITTED_PAID.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
+        );
+
+        UserDetails userDetails = UserDetails.builder().build();
+
+        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController
+            .fl401resubmitApplication(auth, callbackRequest);
+
+        verify(solicitorEmailService).sendEmailToFl401Solicitor(caseDetails, userDetails);
+        verify(caseWorkerEmailService).sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+        assertTrue(response.getData().containsKey("isNotificationSent"));
+        assertTrue(response.getData().containsKey(STATE_FIELD));
+        assertTrue(response.getData().containsKey(DATE_AND_TIME_SUBMITTED_FIELD));
+
+    }
+
+
 
 }

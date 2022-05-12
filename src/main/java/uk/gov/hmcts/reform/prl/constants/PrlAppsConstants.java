@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.constants;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.State;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PrlAppsConstants {
@@ -64,7 +65,18 @@ public class PrlAppsConstants {
     public static final String CHILD_ARRANGEMENT_CASE = "CHILD ARRANGEMENT CASE";
     public static final String ISSUE_EVENT_CODE = "001";
     public static final String ISSUE_EVENT_SEQUENCE = "1";
+    public static final String BLANK_STRING = "";
+    public static final String WITHOUT_NOTICE = "Without notice";
 
+    public static final String WITH_NOTICE = "With notice";
+
+    public static final String DRAFT_STATE = State.AWAITING_SUBMISSION_TO_HMCTS.getValue();
+    public static final String RETURN_STATE = State.AWAITING_RESUBMISSION_TO_HMCTS.getValue();
+    public static final String WITHDRAWN_STATE = State.CASE_WITHDRAWN.getValue();
+    public static final String SUBMITTED_STATE = State.SUBMITTED_PAID.getValue();
+    public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
+    public static final String ISSUED_STATE = State.CASE_ISSUE.getValue();
+    public static final String GATEKEEPING_STATE = State.GATEKEEPING.getValue();
     public static final String TEMPLATE = "template";
     public static final String FILE_NAME = "fileName";
 
