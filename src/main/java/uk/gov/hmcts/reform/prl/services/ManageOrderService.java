@@ -117,7 +117,7 @@ public class ManageOrderService {
     }
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
-        return CaseData.builder().childrenList(getChildInfoFromCaseData(caseData))
+        return caseData.toBuilder().childrenList(getChildInfoFromCaseData(caseData))
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 

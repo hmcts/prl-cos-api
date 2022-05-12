@@ -83,10 +83,7 @@ public class ManageOrderServiceTest {
             .build();
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
-
-        //assertEquals("Child 1: TestName\n", caseData1.getChildrenList());
         assertNotNull(caseData1.getSelectedOrder());
-
     }
 
     @Test
