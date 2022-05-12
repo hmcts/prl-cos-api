@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.Fl401ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -19,34 +21,53 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialityTabService {
 
-    private final CoreCaseDataService coreCaseDataService;
-
-
     public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
 
-        List<PartyDetails> applicants = caseData.getApplicants().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = getConfidentialApplicantDetails(
-            applicants);
-        List<Child> children = caseData.getChildren().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
 
-        List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(children);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> applicants = caseData.getApplicants().stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            applicantsConfidentialDetails = getConfidentialApplicantDetails(
+                applicants);
 
-        return Map.of(
-            "applicantsConfidentialDetails",
-            applicantsConfidentialDetails,
-            "childrenConfidentialDetails",
-            childrenConfidentialDetails
-        );
+            List<Child> children = caseData.getChildren().stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(children);
 
+            return Map.of(
+                "applicantsConfidentialDetails",
+                applicantsConfidentialDetails,
+                "childrenConfidentialDetails",
+                childrenConfidentialDetails
+            );
+
+        } else {
+            List<PartyDetails> fl401Applicant = List.of(caseData.getApplicantsFL401());
+            applicantsConfidentialDetails = getConfidentialApplicantDetails(
+                fl401Applicant);
+
+            List<ChildrenLiveAtAddress> children = caseData.getHome().getChildren().stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(children);
+
+            return Map.of(
+                "applicantsConfidentialDetails",
+                applicantsConfidentialDetails,
+                "fl401ChildrenConfidentialDetails",
+                childrenConfidentialDetails
+            );
+        }
     }
 
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetails(List<Child> children) {
@@ -120,6 +141,21 @@ public class ConfidentialityTabService {
                        .phoneNumber(phoneSet ? applicant.getPhoneNumber() : null)
                        .email(emailSet ? applicant.getEmail() : null)
                        .build()).build();
+    }
+
+    public List<Element<Fl401ChildConfidentialityDetails>> getFl401ChildrenConfidentialDetails(List<ChildrenLiveAtAddress> children) {
+        List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
+        for (ChildrenLiveAtAddress child : children) {
+            if (child.getKeepChildrenInfoConfidential().equals(YesOrNo.Yes)) {
+                Element<Fl401ChildConfidentialityDetails> childElement = Element
+                    .<Fl401ChildConfidentialityDetails>builder()
+                    .value(Fl401ChildConfidentialityDetails.builder()
+                               .fullName(child.getChildFullName()).build()).build();
+                childrenConfidentialDetails.add(childElement);
+            }
+        }
+
+        return childrenConfidentialDetails;
     }
 
 }

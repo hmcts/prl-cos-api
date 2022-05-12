@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 
 import java.time.LocalDate;
@@ -20,9 +21,9 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class ManageOrders {
     @JsonProperty("cafcassEmailAddress")
-    private final List<String> cafcassEmailAddress;
+    private final List<Element<String>> cafcassEmailAddress;
     @JsonProperty("otherEmailAddress")
-    private final List<String> otherEmailAddress;
+    private final List<Element<String>> otherEmailAddress;
 
     private final String manageOrdersCourtName;
     @JsonProperty("manageOrdersCourtAddress")
@@ -48,8 +49,10 @@ public class ManageOrders {
     private final LocalDate underTakingDateExpiry;
     private final String underTakingExpiryTime;
     private final YesOrNo underTakingFormSign;
+
+    private final YesOrNo isTheOrderByConsent;
     private final String recitalsOrPreamble;
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
-
+    private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
 }
