@@ -28,8 +28,5 @@ public class ManageOrders {
     private final String orderDirections;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
-    @JsonProperty("judgeOrMagistratesLastName")
-    private final String judgeOrMagistratesLastName;
-    @JsonProperty("justiceLegalAdviserFullName")
-    private final String justiceLegalAdviserFullName;
+
 }
