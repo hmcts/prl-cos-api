@@ -6,8 +6,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrderWithWithoutNoticeEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentMustNotListEnum;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Data
@@ -25,5 +32,33 @@ public class ManageOrders {
     private final String recitalsOrPreamble;
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
+    private final String courtNameInput;
+    private final Address courtAddressInput;
+    private final String caseNumberInput;
+    private final String applicantNameInput;
+    private final String applicantRefInput;
+    private final String respondentRefInput;
+    private final String respondentNameInput;
+    private final LocalDate respondentDOBInput;
+    private final Address respondentAddress;
+    private final YesOrNo orderPropertyYesNo;
+    private final Address orderPropertyAddress;
+    private final RespondentMustNotListEnum respondentMustNotList;
+    private final LocalDate dateOrderMadeInput;
+    private final LocalDate dateOrderEndsInput;
+    private final String timeOrderEndsInput;
+    private final LocalDate dateNextHearingInput;
+    private final String timeNextHearingInput;
+    private final String hearingTimeEstimateInput;
+    private final String courtNameHearingInput;
+    private final Address courtAddressHearingInput;
+    private final String costOfApplication;
+    private final OrderWithWithoutNoticeEnum orderWithWithoutNotice;
+    private final String addMoreDetails;
+    private final String addSchoolName;
+
+
+
+
 
 }
