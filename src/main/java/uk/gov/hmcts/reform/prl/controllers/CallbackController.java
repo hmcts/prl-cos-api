@@ -378,7 +378,7 @@ public class CallbackController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<Element<FurtherEvidence>> furtherEvidences = caseData.getMainApplicationDocument();
+        List<Element<FurtherEvidence>> furtherEvidences = caseData.getFurtherEvidences();
         List<Element<Correspondence>> correspondence = caseData.getCorrespondence();
         List<Element<OtherDocuments>> otherDocuments = caseData.getOtherDocuments();
         if (furtherEvidences != null) {
