@@ -1302,7 +1302,7 @@ public class CallbackControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
         CaseData caseData1 = CaseData.builder()
-            .mainApplicationDocument(List.of(Element.<FurtherEvidence>builder()
+            .furtherEvidences(List.of(Element.<FurtherEvidence>builder()
                                           .value(FurtherEvidence.builder()
                                                      .restrictCheckboxFurtherEvidence(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                      .build())
