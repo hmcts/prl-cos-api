@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -66,10 +67,7 @@ public class RequestUpdateCallbackService {
         );
 
         if (!Objects.isNull(caseDetails.getId())) {
-            CaseData caseData = objectMapper.convertValue(
-                caseDetails.getData(),
-                CaseData.class
-            );
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             log.info(
                 "Refreshing tab based on the payment response for caseid {} ",
                 serviceRequestUpdateDto.getCcdCaseNumber()
@@ -165,8 +163,7 @@ public class RequestUpdateCallbackService {
     }
 
     private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
-        return objectMapper.convertValue(
-            CaseData.builder()
+            return CaseData.builder()
                 .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
                 .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
                                                          .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
@@ -180,9 +177,8 @@ public class RequestUpdateCallbackService {
                                                                       .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
                                                                       .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
                                                                       .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
-                                                                      .build()).build()).build(),
-            CaseData.class
-        );
+                                                                      .build()).build()).build();
+
 
     }
 
