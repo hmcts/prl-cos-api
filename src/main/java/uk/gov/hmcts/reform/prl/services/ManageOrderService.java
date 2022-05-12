@@ -163,7 +163,7 @@ public class ManageOrderService {
             }
             for (int i = 0; i < children.size(); i++) {
                 Child child = children.get(i);
-                builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + child.getLastName()));
+                builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + " " + child.getLastName()));
                 builder.append("\n");
             }
         } else {
