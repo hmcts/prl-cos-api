@@ -163,24 +163,22 @@ public class RequestUpdateCallbackService {
     }
 
     private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
-            return CaseData.builder()
-                .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
-                .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
-                                                         .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
-                                                         .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
-                                                         .serviceRequestAmount(serviceRequestUpdateDto.getServiceRequestAmount())
-                                                         .serviceRequestStatus(serviceRequestUpdateDto.getServiceRequestStatus())
-                                                         .callBackUpdateTimestamp(LocalDateTime.now())
-                                                         .payment(CcdPayment.builder().paymentAmount(
-                                                             serviceRequestUpdateDto.getPayment().getPaymentAmount())
-                                                                      .paymentReference(serviceRequestUpdateDto.getPayment().getPaymentReference())
-                                                                      .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
-                                                                      .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
-                                                                      .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
-                                                                      .build()).build()).build();
+        return CaseData.builder()
+            .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
+            .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
+                                                     .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
+                                                     .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
+                                                     .serviceRequestAmount(serviceRequestUpdateDto.getServiceRequestAmount())
+                                                     .serviceRequestStatus(serviceRequestUpdateDto.getServiceRequestStatus())
+                                                     .callBackUpdateTimestamp(LocalDateTime.now())
+                                                     .payment(CcdPayment.builder().paymentAmount(
+                                                         serviceRequestUpdateDto.getPayment().getPaymentAmount())
+                                                                  .paymentReference(serviceRequestUpdateDto.getPayment().getPaymentReference())
+                                                                  .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
+                                                                  .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
+                                                                  .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
+                                                                  .build()).build()).build();
 
 
     }
-
-
 }
