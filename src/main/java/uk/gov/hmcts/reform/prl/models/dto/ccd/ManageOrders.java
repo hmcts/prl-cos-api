@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -39,14 +40,18 @@ public class ManageOrders {
     private final String applicantRefInput;
     private final String respondentRefInput;
     private final String respondentNameInput;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate respondentDOBInput;
     private final Address respondentAddress;
     private final YesOrNo orderPropertyYesNo;
     private final Address orderPropertyAddress;
     private final RespondentMustNotListEnum respondentMustNotList;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMadeInput;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderEndsInput;
     private final String timeOrderEndsInput;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateNextHearingInput;
     private final String timeNextHearingInput;
     private final String hearingTimeEstimateInput;
