@@ -150,7 +150,7 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
                 break;
-            case blank:
+            case amendDischargedVaried:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404bDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404bDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404bTemplate);
