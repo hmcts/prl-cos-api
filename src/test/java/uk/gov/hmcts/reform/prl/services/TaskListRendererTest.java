@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import org.junit.Test;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
@@ -29,6 +30,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.FL401_RESUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_SOT_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
@@ -114,6 +116,24 @@ public class TaskListRendererTest {
         Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build()
     );
 
+    private final List<Task> fl401TasksResubmit = List.of(
+        Task.builder().event(FL401_CASE_NAME).state(NOT_STARTED).build(),
+        Task.builder().event(WITHOUT_NOTICE_ORDER).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_TYPE_OF_APPLICATION).state(NOT_STARTED).build(),
+        Task.builder().event(RELATIONSHIP_TO_RESPONDENT).state(NOT_STARTED).build(),
+        Task.builder().event(APPLICANT_DETAILS).state(NOT_STARTED).build(),
+        Task.builder().event(RESPONDENT_DETAILS).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_APPLICANT_FAMILY_DETAILS).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_OTHER_PROCEEDINGS).state(NOT_STARTED).build(),
+        Task.builder().event(ATTENDING_THE_HEARING).state(NOT_STARTED).build(),
+        Task.builder().event(WELSH_LANGUAGE_REQUIREMENTS).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_UPLOAD_DOCUMENTS).state(NOT_STARTED).build(),
+        Task.builder().event(VIEW_PDF_DOCUMENT).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_RESUBMIT).state(NOT_STARTED).build(),
+        Task.builder().event(FL401_HOME).state(NOT_STARTED).build(),
+        Task.builder().event(RESPONDENT_BEHAVIOUR).state(NOT_STARTED).build()
+    );
+
     private final List<EventValidationErrors> fl401Errors = List.of(
         EventValidationErrors.builder().event(WITHOUT_NOTICE_ORDER)
             .errors(Collections.singletonList(WITHOUT_NOTICE_ORDER_ERROR.toString())).build(),
@@ -149,6 +169,7 @@ public class TaskListRendererTest {
             .build();
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .typeOfApplicationOrders(orders)
             .typeOfApplicationLinkToCA(linkToCA)
             .build();
@@ -163,6 +184,7 @@ public class TaskListRendererTest {
     public void shouldRenderTaskList() throws IOException {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
         List<String> lines = new ArrayList<>();
 
@@ -186,6 +208,7 @@ public class TaskListRendererTest {
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
 
         List<String> lines = new ArrayList<>();
@@ -233,11 +256,49 @@ public class TaskListRendererTest {
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .typeOfApplicationOrders(orders)
             .typeOfApplicationLinkToCA(linkToCA)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
 
         String expectedTaskList = String.join("\n", lines);
         String actualTaskList = taskListRenderer.render(fl401Tasks, fl401Errors, false, caseData);
 
         assertNotEquals(expectedTaskList, actualTaskList);
+    }
+
+    @Test
+    public void shouldRenderFl401TaskWithResubmit() throws IOException {
+
+        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-resubmit.md"));
+
+        List<String> lines = new ArrayList<>();
+
+        String line = taskListMarkDown.readLine();
+        while (line != null) {
+            lines.add(line);
+            line = taskListMarkDown.readLine();
+        }
+
+        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+
+        orders = TypeOfApplicationOrders.builder()
+            .orderType(orderList)
+            .build();
+
+        linkToCA = LinkToCA.builder()
+            .linkToCaApplication(YesOrNo.Yes)
+            .caApplicationNumber("123")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .state(State.AWAITING_RESUBMISSION_TO_HMCTS)
+            .build();
+
+        String expectedTaskList = String.join("\n", lines);
+        String actualTaskList = taskListRenderer.render(fl401TasksResubmit, fl401Errors, false, caseData);
+
+        assertEquals(expectedTaskList, actualTaskList);
     }
 }
