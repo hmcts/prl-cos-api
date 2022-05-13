@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.Fl401ChildConfidentialityDetails;
@@ -31,6 +33,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConfidentialityTabServiceTest {
@@ -236,7 +239,7 @@ public class ConfidentialityTabServiceTest {
             .keepChildrenInfoConfidential(YesOrNo.Yes)
             .build();
 
-        List<ChildrenLiveAtAddress> listOfChildren = Collections.singletonList(child);
+        List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(element(child));
         List<Element<Fl401ChildConfidentialityDetails>> expectedOutput = List.of(
             Element.<Fl401ChildConfidentialityDetails>builder()
                 .value(Fl401ChildConfidentialityDetails
@@ -245,9 +248,20 @@ public class ConfidentialityTabServiceTest {
                            .build()).build()
         );
 
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
+                                         .orderType(List.of(FL401OrderTypeEnum.occupationOrder))
+                                         .build())
+            .home(Home.builder()
+                      .children(listOfChildren)
+                      .build())
+            .build();
+
+
         assertEquals(
             expectedOutput,
-            confidentialityTabService.getFl401ChildrenConfidentialDetails(listOfChildren)
+            confidentialityTabService.getFl401ChildrenConfidentialDetails(caseData)
         );
     }
 
@@ -285,7 +299,13 @@ public class ConfidentialityTabServiceTest {
             .children(listOfChild)
             .build();
 
-        CaseData caseData = CaseData.builder().applicantsFL401(partyDetails1).home(home).caseTypeOfApplication(FL401_CASE_TYPE).build();
+        CaseData caseData = CaseData.builder()
+            .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
+                                         .orderType(List.of(FL401OrderTypeEnum.occupationOrder))
+                                         .build())
+            .applicantsFL401(partyDetails1)
+            .home(home)
+            .caseTypeOfApplication(FL401_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
 
         assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
