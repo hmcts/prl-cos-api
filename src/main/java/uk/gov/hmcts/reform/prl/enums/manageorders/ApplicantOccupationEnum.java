@@ -19,8 +19,8 @@ public enum ApplicantOccupationEnum {
     @JsonProperty("rightsToEnterAddress")
     rightsToEnterAddress("rightsToEnterAddress", "has the right to enter into and occupy the address"),
 
-    @JsonProperty("Other1")
-    Other1("Other1", "other");
+    @JsonProperty("other1")
+    other1("other1", "Other");
 
     private final String id;
     private final String displayedValue;

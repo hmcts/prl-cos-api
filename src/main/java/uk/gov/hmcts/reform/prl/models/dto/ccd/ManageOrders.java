@@ -67,6 +67,7 @@ public class ManageOrders {
     private final YesOrNo powerOfArrest4;
     private final String instructionRelating;
     private final YesOrNo powerOfArrest5;
+    private final YesOrNo powerOfArrest6;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade1;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
