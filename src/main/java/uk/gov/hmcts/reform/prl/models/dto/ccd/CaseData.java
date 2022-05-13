@@ -495,14 +495,6 @@ public class CaseData implements MappableObject {
     /**
      *  Manage Orders.
      */
-    //upload orders flow
-
-    /*
-    private DomesticAbuseOrdersEnum domesticAbuseOrders;
-    private FcOrdersEnum fcOrders;
-    private OtherOrdersOptionEnum otherOrdersOption;
-    private String nameOfOrder;
-    private YesOrNo isTheOrderUploadedByConsent;*/
 
     private final List<Element<OrderDetails>> orderCollection;
 
@@ -512,20 +504,7 @@ public class CaseData implements MappableObject {
 
     private final ManageOrdersOptionsEnum manageOrdersOptions;
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
-
-    /*Commented below as getiing too many parameters error for @AllArgsConstructor
-    * */
-    //create orders flow
-    //private final CafcassEnum cafcassRecipient;
-
-    //private final HearingTypeEnum hearingType;
-    //private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
-
     private final List<OrderRecipientsEnum> orderRecipients;
-    //private final OtherEnum otherRecipient;
-    //private final OtherOrderRecipientsEnum otherOrderRecipients;
-    //private final SelectTypeOfOrderEnum selectTypeOfOrder;
-    //private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
 
 
     private final YesOrNo doesOrderClosesCase;
@@ -552,6 +531,7 @@ public class CaseData implements MappableObject {
     private String caseSolicitorName;
     private String caseSolicitorOrgName;
     private String selectedOrder;
+
 
 
     /**
