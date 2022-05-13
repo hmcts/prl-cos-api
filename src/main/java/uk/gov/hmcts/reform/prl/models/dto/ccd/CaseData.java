@@ -54,9 +54,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.GatekeeperEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
-import uk.gov.hmcts.reform.prl.models.complextypes.LastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
+import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -606,7 +606,6 @@ public class CaseData implements MappableObject {
     //private final SelectTypeOfOrderEnum selectTypeOfOrder;
     //private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
 
-
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo isTheOrderByConsent;
     private final YesOrNo wasTheOrderApprovedAtHearing;
@@ -617,7 +616,7 @@ public class CaseData implements MappableObject {
     private final LocalDate dateOrderMade;
     private final String childrenList;
     @JsonProperty("magistrateLastName")
-    private final List<Element<LastName>> magistrateLastName;
+    private final List<Element<MagistrateLastName>> magistrateLastName;
 
     @JsonUnwrapped
     @Builder.Default
