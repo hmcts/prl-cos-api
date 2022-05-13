@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -215,10 +216,11 @@ public class C100IssueCaseControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
-            .allegationsOfHarmYesNo(Yes)
-            .allegationsOfHarmChildAbductionYesNo(Yes)
-            .allegationsOfHarmDomesticAbuseYesNo(Yes)
-            .allegationsOfHarmChildAbuseYesNo(Yes)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes)
+                                  .build())
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -397,10 +399,11 @@ public class C100IssueCaseControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
-            .allegationsOfHarmYesNo(YesOrNo.Yes)
-            .allegationsOfHarmChildAbductionYesNo(YesOrNo.Yes)
-            .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
-            .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes)
+                                  .build())
             .welshLanguageRequirement(YesOrNo.Yes)
             .welshLanguageRequirementApplication(LanguagePreference.english)
             .languageRequirementApplicationNeedWelsh(YesOrNo.Yes)
@@ -487,10 +490,11 @@ public class C100IssueCaseControllerTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
-            .allegationsOfHarmYesNo(Yes)
-            .allegationsOfHarmChildAbductionYesNo(Yes)
-            .allegationsOfHarmDomesticAbuseYesNo(Yes)
-            .allegationsOfHarmChildAbuseYesNo(Yes)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes)
+                                  .build())
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
