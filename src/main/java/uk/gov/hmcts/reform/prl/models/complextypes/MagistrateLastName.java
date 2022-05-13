@@ -10,11 +10,11 @@ import lombok.extern.jackson.Jacksonized;
 @Builder
 @Jacksonized
 public class MagistrateLastName {
-    @JsonProperty("magistrateLastName")
-    private final String magistrateLastName;
+    @JsonProperty("magistrateLastName.lastName")
+    private final String lastName;
 
     @JsonCreator
-    public MagistrateLastName(String magistrateLastName) {
-        this.magistrateLastName = magistrateLastName;
+    public MagistrateLastName(String lastName) {
+        this.lastName = lastName;
     }
 }
