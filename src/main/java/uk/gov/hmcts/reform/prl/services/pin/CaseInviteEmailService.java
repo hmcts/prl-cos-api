@@ -23,7 +23,7 @@ public class CaseInviteEmailService {
         return new CaseInviteEmail(caseInvite, String.valueOf(caseData.getId()), partyDetails);
     }
 
-    public void sendEmail(String address, EmailTemplateVars email ) {
+    public void sendEmail(String address, EmailTemplateVars email) {
         log.info("Sending case invite PIN");
         emailService.send(
             address,

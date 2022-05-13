@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.ArrayList;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -29,15 +30,20 @@ public class FL401CaseInviteService implements CaseInviteService {
         caseInviteEmailService.sendCaseInviteEmail(caseInvite, partyDetails, caseData);
     }
 
+    @Override
     public CaseData generateAndSendRespondentCaseInvite(CaseData caseData) {
         PartyDetails respondent = caseData.getRespondentsFL401();
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvite() != null ? caseData.getCaseInvite() : new ArrayList<>();
 
-        if (Yes.equals(respondent.getCanYouProvideEmailAddress())) {
+        if (!respondentHasLegalRepresentation(respondent) && Yes.equals(respondent.getCanYouProvideEmailAddress())) {
             CaseInvite caseInvite = generateRespondentCaseInvite(respondent);
             caseInvites.add(element(caseInvite));
             sendCaseInvite(caseInvite, respondent, caseData);
         }
         return caseData.toBuilder().caseInvite(caseInvites).build();
+    }
+
+    public boolean respondentHasLegalRepresentation(PartyDetails partyDetails) {
+        return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
     }
 }

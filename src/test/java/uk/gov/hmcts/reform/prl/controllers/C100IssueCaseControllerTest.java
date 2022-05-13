@@ -68,7 +68,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class IssueCaseControllerTest {
+public class C100IssueCaseControllerTest {
 
     @Mock
     private ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
@@ -77,7 +77,7 @@ public class IssueCaseControllerTest {
     private ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
 
     @InjectMocks
-    private IssueCaseController issueCaseController;
+    private C100IssueCaseController c100IssueCaseController;
 
     @Mock
     private UserService userService;
@@ -301,7 +301,7 @@ public class IssueCaseControllerTest {
                    "finalWelshDocument", "document")
         );
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = issueCaseController.issueAndSendToLocalCourt(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = c100IssueCaseController.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
         );
@@ -332,7 +332,7 @@ public class IssueCaseControllerTest {
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = issueCaseController.issueAndSendToLocalCourt(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = c100IssueCaseController.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
         );
@@ -421,7 +421,7 @@ public class IssueCaseControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(c100DocsMap);
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = issueCaseController.issueAndSendToLocalCourt(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = c100IssueCaseController.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
         );
@@ -572,7 +572,7 @@ public class IssueCaseControllerTest {
                    "finalWelshDocument", "document")
         );
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = issueCaseController.issueAndSendToLocalCourt(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = c100IssueCaseController.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
         );
