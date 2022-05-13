@@ -12,10 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentMustNotListEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 
-import java.sql.Date;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 @Data
@@ -41,7 +38,7 @@ public class ManageOrders {
     private final String respondentRefInput;
     private final String respondentNameInput;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate respondentDOBInput;
+    private final LocalDate respondentDobInput;
     private final Address respondentAddress;
     private final YesOrNo orderPropertyYesNo;
     private final Address orderPropertyAddress;
