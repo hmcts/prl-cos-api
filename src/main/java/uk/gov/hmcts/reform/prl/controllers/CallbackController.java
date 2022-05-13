@@ -144,39 +144,6 @@ public class CallbackController {
         return caseData;
     }
 
-    @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to Issue and send to local court")
-    public AboutToStartOrSubmitCallbackResponse issueAndSendToLocalCourt(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
-
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (YesOrNo.No.equals(caseData.getConsentOrder())) {
-            requireNonNull(caseData);
-            sendgridService.sendEmail(c100JsonMapper.map(caseData));
-        }
-        caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        // Generate All Docs and set to casedataupdated.
-        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
-
-        // Refreshing the page in the same event. Hence no external event call needed.
-        // Getting the tab fields and add it to the casedetails..
-        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-
-        caseDataUpdated.putAll(allTabsFields);
-        caseDataUpdated.put("issueDate", caseData.getIssueDate());
-
-        try {
-            caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            log.info("Email notification could not be sent due to following {}", ex.getMessage());
-        }
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
 
     @PostMapping(path = "/update-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to refresh the tabs")
