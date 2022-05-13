@@ -60,6 +60,8 @@ public class ManageOrders {
     private final LocalDate respondentDay1;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate respondentDay2;
+    private String respondentStartTime;
+    private String respondentEndTime;
     private final YesOrNo powerOfArrest2;
     private final String whenTheyLeave;
     private final YesOrNo powerOfArrest3;
@@ -70,14 +72,17 @@ public class ManageOrders {
     private final YesOrNo powerOfArrest6;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade1;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private final LocalDateTime dateOrderEnds;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private final LocalDateTime datePlaceHearing;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate dateOrderEnds;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate datePlaceHearing;
+    private String datePlaceHearingTime;
+    private String dateOrderEndsTime;
     private final String courtName2;
     private final Address ukPostcode2;
     private final String applicantCost;
     private final String orderNotice;
+    private final String hearingTimeEstimate;
 
 
 }
