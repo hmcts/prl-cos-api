@@ -19,7 +19,9 @@ public class CaseInvite {
     private LocalDate expiryDate;
 
     @Builder()
-    public CaseInvite() {}
+    public CaseInvite() {
+
+    }
 
     public CaseInvite(String caseInviteEmail, String accessCode, String invitedUserId, UUID partyId) {
         this.accessCode = accessCode;

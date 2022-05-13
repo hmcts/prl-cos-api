@@ -40,7 +40,6 @@ import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValida
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 
