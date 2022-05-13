@@ -54,6 +54,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.GatekeeperEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.LastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
@@ -616,7 +617,7 @@ public class CaseData implements MappableObject {
     private final LocalDate dateOrderMade;
     private final String childrenList;
     @JsonProperty("magistrateLastName")
-    private final List<Element<String>> magistrateLastName;
+    private final List<Element<LastName>> magistrateLastName;
 
     @JsonUnwrapped
     @Builder.Default
