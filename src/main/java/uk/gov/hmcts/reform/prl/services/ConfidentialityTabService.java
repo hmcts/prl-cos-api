@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.Fl401ChildConfidentialityDetails;
@@ -21,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum.occupationOrder;
 
 @Slf4j
 @Service
@@ -55,6 +60,8 @@ public class ConfidentialityTabService {
             List<PartyDetails> fl401Applicant = List.of(caseData.getApplicantsFL401());
             applicantsConfidentialDetails = getConfidentialApplicantDetails(
                 fl401Applicant);
+
+
 
             List<ChildrenLiveAtAddress> children = caseData.getHome().getChildren().stream()
                 .map(Element::getValue)
@@ -143,18 +150,20 @@ public class ConfidentialityTabService {
                        .build()).build();
     }
 
-    public List<Element<Fl401ChildConfidentialityDetails>> getFl401ChildrenConfidentialDetails(List<ChildrenLiveAtAddress> children) {
+    public List<Element<Fl401ChildConfidentialityDetails>> getFl401ChildrenConfidentialDetails(CaseData caseData, List<ChildrenLiveAtAddress> children) {
         List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
-        for (ChildrenLiveAtAddress child : children) {
-            if (child.getKeepChildrenInfoConfidential().equals(YesOrNo.Yes)) {
-                Element<Fl401ChildConfidentialityDetails> childElement = Element
-                    .<Fl401ChildConfidentialityDetails>builder()
-                    .value(Fl401ChildConfidentialityDetails.builder()
-                               .fullName(child.getChildFullName()).build()).build();
-                childrenConfidentialDetails.add(childElement);
-            }
+        if (caseData.getTypeOfApplicationOrders().getOrderType().contains(occupationOrder)
+        && ofNullable(caseData.getHome().getChildren()).isPresent()) {
+                for (ChildrenLiveAtAddress child : children) {
+                    if (child.getKeepChildrenInfoConfidential().equals(YesOrNo.Yes)) {
+                        Element<Fl401ChildConfidentialityDetails> childElement = Element
+                            .<Fl401ChildConfidentialityDetails>builder()
+                            .value(Fl401ChildConfidentialityDetails.builder()
+                                       .fullName(child.getChildFullName()).build()).build();
+                        childrenConfidentialDetails.add(childElement);
+                    }
+                }
         }
-
         return childrenConfidentialDetails;
     }
 
