@@ -130,7 +130,7 @@ public class ConfidentialityTabService {
     }
 
     private Element<ApplicantConfidentialityDetails> getApplicantConfidentialityElement(boolean addressSet,
-              boolean emailSet, boolean phoneSet, PartyDetails applicant) {
+                                                                                        boolean emailSet, boolean phoneSet, PartyDetails applicant) {
 
         return Element
             .<ApplicantConfidentialityDetails>builder()
@@ -162,3 +162,4 @@ public class ConfidentialityTabService {
     }
 
 }
+
