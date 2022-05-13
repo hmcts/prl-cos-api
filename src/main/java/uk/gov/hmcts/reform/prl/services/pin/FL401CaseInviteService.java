@@ -33,14 +33,14 @@ public class FL401CaseInviteService implements CaseInviteService {
     @Override
     public CaseData generateAndSendRespondentCaseInvite(CaseData caseData) {
         PartyDetails respondent = caseData.getRespondentsFL401();
-        List<Element<CaseInvite>> caseInvites = caseData.getCaseInvite() != null ? caseData.getCaseInvite() : new ArrayList<>();
+        List<Element<CaseInvite>> caseInvites = caseData.getRespondentCaseInvites() != null ? caseData.getRespondentCaseInvites() : new ArrayList<>();
 
         if (!respondentHasLegalRepresentation(respondent) && Yes.equals(respondent.getCanYouProvideEmailAddress())) {
             CaseInvite caseInvite = generateRespondentCaseInvite(respondent);
             caseInvites.add(element(caseInvite));
             sendCaseInvite(caseInvite, respondent, caseData);
         }
-        return caseData.toBuilder().caseInvite(caseInvites).build();
+        return caseData.toBuilder().respondentCaseInvites(caseInvites).build();
     }
 
     public boolean respondentHasLegalRepresentation(PartyDetails partyDetails) {
