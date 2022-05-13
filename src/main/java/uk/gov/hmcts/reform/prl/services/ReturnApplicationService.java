@@ -42,8 +42,7 @@ public class ReturnApplicationService {
             } else {
                 legalName = caseData.getSolicitorName();
             }
-
-        } else {
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
             String legalFirstName = fl401Applicant.getRepresentativeFirstName();
@@ -82,8 +81,7 @@ public class ReturnApplicationService {
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
             }
-
-        } else {
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
             }
@@ -92,6 +90,34 @@ public class ReturnApplicationService {
         returnMsgStr.append("Please resolve these issues and resubmit your application.\n\n")
             .append("Kind regards,\n")
             .append(userDetails.getFullName());
+
+        return returnMsgStr.toString();
+
+    }
+
+    public String getReturnMessageForTaskList(CaseData caseData) {
+        StringBuilder returnMsgStr = new StringBuilder();
+        returnMsgStr.append("                            \n\n");
+        returnMsgStr.append("<div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!"
+                                + "</span><strong class='govuk-warning-text__text'>Application has been returned</strong></div>" + "\n\n");
+
+        returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
+
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
+                returnMsgStr.append(reasonEnum.getDisplayedValue());
+                returnMsgStr.append("\n\n");
+            }
+
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
+                returnMsgStr.append(reasonEnum.getDisplayedValue());
+                returnMsgStr.append("\n\n");
+            }
+        }
+
+        returnMsgStr.append("Resolve these concerns and resend your application."
+                                + "You have been emailed the full details of your application return.");
 
         return returnMsgStr.toString();
 

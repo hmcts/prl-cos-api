@@ -16,11 +16,13 @@ public class AllegationOfHarmGeneratorTest {
     @Test
     public void testGenerate() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
-                                                         .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
-                                                    .allegationsOfHarmChildAbductionYesNo(YesOrNo.Yes)
-                                                    .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
-                                                         .allegationsOfHarmOtherConcernsYesNo(YesOrNo.Yes)
-                                                         .allegationsOfHarmSubstanceAbuseYesNo(YesOrNo.Yes)
+                                                         .allegationOfHarm(uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm.builder()
+                                                                               .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
+                                                                               .allegationsOfHarmChildAbductionYesNo(YesOrNo.Yes)
+                                                                               .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
+                                                                               .allegationsOfHarmOtherConcernsYesNo(YesOrNo.Yes)
+                                                                               .allegationsOfHarmSubstanceAbuseYesNo(YesOrNo.Yes)
+                                                                               .build())
                                                              .build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()
@@ -35,8 +37,10 @@ public class AllegationOfHarmGeneratorTest {
 
     @Test
     public void testNoTypeOfHarm() {
-        CaseSummary caseSummary = generator.generate(CaseData.builder()
-                                                         .build());
+        CaseSummary caseSummary = generator
+            .generate(CaseData.builder()
+                          .allegationOfHarm(uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm
+                                                .builder().build()).build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()
                                               .allegationOfHarm(AllegationOfHarm.builder()

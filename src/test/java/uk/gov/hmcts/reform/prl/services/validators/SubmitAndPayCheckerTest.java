@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
@@ -315,7 +316,9 @@ public class SubmitAndPayCheckerTest {
             .familyMediatorServiceName("Test Name")
             .soleTraderName("Trade Sole")
             .miamCertificationDocumentUpload(Document.builder().build())
-            .allegationsOfHarmYesNo(No)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(No).build())
+
             .build();
 
         when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
@@ -448,7 +451,8 @@ public class SubmitAndPayCheckerTest {
             .familyMediatorServiceName("Test Name")
             .soleTraderName("Trade Sole")
             .miamCertificationDocumentUpload(Document.builder().build())
-            .allegationsOfHarmYesNo(No)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(No).build())
             .build();
 
         when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
