@@ -876,5 +876,54 @@ public class CaseWorkerEmailServiceTest {
         assertEquals("testing@localcourt.com", caseData.getCourtEmailAddress());
     }
 
+    @Test
+    public void testSendEmailToFl401LocalCourtWhenWithdrawnAfterIssued() {
+
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .firstName("testUser")
+            .lastName("last test")
+            .solicitorEmail("testing@courtadmin.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.Yes)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .issueDate(LocalDate.now())
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(fl401Applicant)
+            .courtEmailAddress("testing@localcourt.com")
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .build();
+
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        String isConfidential = "No";
+        if (fl401Applicant.getCanYouProvideEmailAddress().equals(YesOrNo.Yes)
+            || (fl401Applicant.getIsEmailAddressConfidential() != null
+            && fl401Applicant.getIsEmailAddressConfidential().equals(YesOrNo.Yes))
+            || (fl401Applicant.hasConfidentialInfo())) {
+            isConfidential = "Yes";
+        }
+        EmailTemplateVars email = CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .issueDate(issueDate.format(dateTimeFormatter))
+            .isConfidential(isConfidential)
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+            .build();
+
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
+
+        assertEquals("testing@localcourt.com", caseData.getCourtEmailAddress());
+    }
 }
 
