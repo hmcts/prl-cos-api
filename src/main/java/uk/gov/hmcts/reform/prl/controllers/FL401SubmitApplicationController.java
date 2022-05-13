@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -77,7 +79,7 @@ public class FL401SubmitApplicationController {
     OrganisationService organisationService;
 
     @Autowired
-    private ConfidentialityTabService confidentialityTabService;
+    private AllTabServiceImpl allTabService;
 
     @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to send FL401 application notification. ")
@@ -142,6 +144,7 @@ public class FL401SubmitApplicationController {
                 .build();
         }
         caseData = caseData.setDateSubmittedDate();
+        caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
         log.info("Generating the Final document of FL401 for case id " + caseData.getId());
         log.info("Issue date for the application: {} ", caseData.getIssueDate());
 
@@ -152,7 +155,7 @@ public class FL401SubmitApplicationController {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
 
-        caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
+        allTabService.updateAllTabsIncludingConfTab(caseData);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
