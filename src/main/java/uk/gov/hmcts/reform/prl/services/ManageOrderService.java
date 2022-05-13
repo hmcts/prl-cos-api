@@ -125,6 +125,7 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c43DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c43Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c43File);
+                break;
             case transferOfCaseToAnotherCourt:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c49TDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c49DraftFile);
