@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
@@ -29,6 +30,9 @@ public class CaseInviteController {
 
     @Autowired
     FL401CaseInviteService fl401CaseInviteService;
+
+    @Autowired
+    LaunchDarklyClient launchDarklyClient;
 
     @PostMapping("/about-to-submit")
     public CallbackResponse generateCaseInvites(@RequestBody CallbackRequest callbackRequest) {
