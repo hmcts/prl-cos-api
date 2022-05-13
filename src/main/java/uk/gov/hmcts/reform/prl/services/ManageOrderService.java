@@ -15,10 +15,10 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
@@ -35,11 +35,11 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 
 @Service
 @Slf4j
