@@ -9,46 +9,18 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum JudgeOrMagistrateTitleEnum {
-    @JsonProperty("herHonourJudge")
-    herHonourJudge("herHonourJudge", "Her Honour Judge"),
+public enum ApplicantOccupationEnum {
+    @JsonProperty("occupyAsHome")
+    occupyAsHome("occupyAsHome", "Is entitled to occupy the address as their home"),
 
-    @JsonProperty("hisHonourJudge")
-    hisHonourJudge("hisHonourJudge", "His Honour Judge"),
+    @JsonProperty("rightsInAddress")
+    rightsInAddress("rightsInAddress", "has home rights in the address"),
 
-    @JsonProperty("circuitJudge")
-    circuitJudge("circuitJudge", "Circuit Judge"),
+    @JsonProperty("rightsToEnterAddress")
+    rightsToEnterAddress("rightsToEnterAddress", "has the right to enter into and occupy the address"),
 
-    @JsonProperty("deputyCircuitJudge")
-    deputyCircuitJudge("deputyCircuitJudge", "Deputy Circuit Judge"),
-
-    @JsonProperty("recorder")
-    recorder("recorder", "Recorder"),
-
-    @JsonProperty("districtJudge")
-    districtJudge("districtJudge", "District Judge"),
-
-    @JsonProperty("deputyDistrictJudge")
-    deputyDistrictJudge("deputyDistrictJudge", "Deputy District Judge"),
-
-    @JsonProperty("districtJudgeMagistratesCourt")
-    districtJudgeMagistratesCourt("districtJudgeMagistratesCourt",
-                                  "District Judge Magistrates Court"),
-
-    @JsonProperty("magistrate")
-    magistrate("magistrate", "Magistrate (JP)"),
-
-    @JsonProperty("justicesLegalAdviser")
-    justicesLegalAdviser("justicesLegalAdviser", "Justices' Legal Adviser"),
-
-    @JsonProperty("justicesClerk")
-    justicesClerk("justicesClerk", "Justices' Clerk"),
-
-    @JsonProperty("theHonourableMrsJustice")
-    theHonourableMrsJustice("theHonourableMrsJustice", "The Honourable Mrs Justice"),
-
-    @JsonProperty("theHonourableMrJustice")
-    theHonourableMrJustice("theHonourableMrJustice", "The Honourable Mr Justice");
+    @JsonProperty("Other1")
+    Other1("Other1", "other");
 
     private final String id;
     private final String displayedValue;
@@ -59,7 +31,7 @@ public enum JudgeOrMagistrateTitleEnum {
     }
 
     @JsonCreator
-    public static JudgeOrMagistrateTitleEnum getValue(String key) {
-        return JudgeOrMagistrateTitleEnum.valueOf(key);
+    public static ApplicantOccupationEnum getValue(String key) {
+        return ApplicantOccupationEnum.valueOf(key);
     }
 }
