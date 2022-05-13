@@ -57,7 +57,8 @@ public class C100CaseInviteServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
 
-        List<Element<PartyDetails>> respondentsWithEmailsNoRepresentation = List.of(element(respondentOneWithEmail), element(respondentTwoWithEmail));
+        List<Element<PartyDetails>> respondentsWithEmailsNoRepresentation = List.of(element(respondentOneWithEmail),
+                                                                                    element(respondentTwoWithEmail));
 
         caseDataWithRespondentsAndEmailsNoRepresentation = CaseData.builder()
             .caseTypeOfApplication("C100")
@@ -71,7 +72,8 @@ public class C100CaseInviteServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
-        List<Element<PartyDetails>> respondentsWithEmailsOneNoRepresentation = List.of(element(respondentOneWithEmail), element(respondentTwoWithEmailAndRepresentation));
+        List<Element<PartyDetails>> respondentsWithEmailsOneNoRepresentation = List.of(element(respondentOneWithEmail),
+                                                                                       element(respondentTwoWithEmailAndRepresentation));
 
 
         caseDataWithRespondentsAndEmailsOnePartyNoRepresentation = CaseData.builder()
@@ -92,7 +94,8 @@ public class C100CaseInviteServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
 
-        List<Element<PartyDetails>> respondentsNoEmailsNoRepresentation = List.of(element(respondentOneNoEmail), element(respondentTwoNoEmail));
+        List<Element<PartyDetails>> respondentsNoEmailsNoRepresentation = List.of(element(respondentOneNoEmail),
+                                                                                  element(respondentTwoNoEmail));
 
         getCaseDataWithRespondentsNoEmails = CaseData.builder()
             .caseTypeOfApplication("C100")
@@ -114,7 +117,8 @@ public class C100CaseInviteServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
-        List<Element<PartyDetails>> respondentsWithEmailsAndRepresentation = List.of(element(respondentOneWithEmailAndRepresentation), element(secondRespondentWithEmailAndRepresentation));
+        List<Element<PartyDetails>> respondentsWithEmailsAndRepresentation = List.of(element(respondentOneWithEmailAndRepresentation),
+                                                                                     element(secondRespondentWithEmailAndRepresentation));
 
         caseDataWithRespondentsAllWithRepresentation = CaseData.builder()
             .caseTypeOfApplication("C100")
@@ -130,38 +134,46 @@ public class C100CaseInviteServiceTest {
 
     @Test
     public void givenRespondentsWithNoRepresentation_whenCaseInvitesGenerated_thenSentToAllRespondentsAndStoredInCaseData() {
-        CaseData actualCaseData = c100CaseInviteService.generateAndSendRespondentCaseInvite(caseDataWithRespondentsAndEmailsNoRepresentation);
+        CaseData actualCaseData = c100CaseInviteService
+            .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAndEmailsNoRepresentation);
 
         //case invite for both respondents
         assertEquals(2, actualCaseData.getRespondentCaseInvites().size());
-        assertEquals("respondentOne@email.com", actualCaseData.getRespondentCaseInvites().get(0).getValue().getCaseInviteEmail());
-        assertEquals("respondentTwo@email.com", actualCaseData.getRespondentCaseInvites().get(1).getValue().getCaseInviteEmail());
+        assertEquals("respondentOne@email.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
+            .getCaseInviteEmail());
+        assertEquals("respondentTwo@email.com", actualCaseData.getRespondentCaseInvites().get(1).getValue()
+            .getCaseInviteEmail());
     }
 
     @Test
     public void givenRespondentWithRepresentation_whenCaseInvitesGenerated_thenSentToOnlyThoseWithoutRepresentation() {
-        CaseData actualCaseData = c100CaseInviteService.generateAndSendRespondentCaseInvite(caseDataWithRespondentsAndEmailsOnePartyNoRepresentation);
+        CaseData actualCaseData = c100CaseInviteService
+            .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAndEmailsOnePartyNoRepresentation);
 
         //two respondents but only one should have a case invite generated
         assertEquals(1, actualCaseData.getRespondentCaseInvites().size());
-        assertEquals("respondentOne@email.com", actualCaseData.getRespondentCaseInvites().get(0).getValue().getCaseInviteEmail());
+        assertEquals("respondentOne@email.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
+            .getCaseInviteEmail());
     }
 
     @Test
     public void givenMultipleRespondentsWithNoEmail_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
-        CaseData actualCaseData = c100CaseInviteService.generateAndSendRespondentCaseInvite(getCaseDataWithRespondentsNoEmails);
+        CaseData actualCaseData = c100CaseInviteService
+            .generateAndSendRespondentCaseInvite(getCaseDataWithRespondentsNoEmails);
         assertTrue(actualCaseData.getRespondentCaseInvites().isEmpty());
     }
 
     @Test
     public void givenMultipleRespondentsWithEmailAndRepresentation_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
-        CaseData actualCaseData = c100CaseInviteService.generateAndSendRespondentCaseInvite(caseDataWithRespondentsAllWithRepresentation);
+        CaseData actualCaseData = c100CaseInviteService
+            .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAllWithRepresentation);
         assertTrue(actualCaseData.getRespondentCaseInvites().isEmpty());
     }
 
     @Test
     public void givenNoRespondents_whenCaseInvitesGenerated_thenNoInvitesGenerated() {
-        CaseData actualCaseData = c100CaseInviteService.generateAndSendRespondentCaseInvite(caseDataWithRespondentsAllWithRepresentation);
+        CaseData actualCaseData = c100CaseInviteService
+            .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAllWithRepresentation);
         assertTrue(actualCaseData.getRespondentCaseInvites().isEmpty());
     }
 
