@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 
@@ -25,5 +27,10 @@ public class ManageOrders {
     private final String recitalsOrPreamble;
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
+
+    @JsonProperty("childArrangementsOrdersToIssue")
+    private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
+    @JsonProperty("selectChildArrangementsOrder")
+    private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
 
 }
