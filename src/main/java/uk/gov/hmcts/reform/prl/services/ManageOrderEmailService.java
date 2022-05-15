@@ -9,22 +9,18 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
-import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
 @Service
 @Slf4j
@@ -106,7 +102,7 @@ public class ManageOrderEmailService {
 
     public void sendEmailToCafcass(CaseDetails caseDetails) {
 
-       CaseData caseData = emailService.getCaseData(caseDetails);
+        CaseData caseData = emailService.getCaseData(caseDetails);
 
         ManageOrders manageOrders  = caseData.getManageOrders();
 
