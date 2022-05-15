@@ -124,11 +124,9 @@ public class ManageOrderEmailService {
         CaseData caseData = emailService.getCaseData(caseDetails);
 
         String typeOfHearing = "";
-        String isCaseUrgent = NO;
 
         if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
             typeOfHearing = URGENT_CASE;
-            isCaseUrgent = YES;
         }
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
