@@ -537,7 +537,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/validators/EventsChecker.java',
   '**src/main/java/uk/gov/hmcts/reform/prl/enums/manageorders/*',
   '**src/main/java/uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
-  '**src/main/java/uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java',
+  '**src/main/java/uk/gov/hmcts/reform/prl/services/ManageOrderEmailService.java',
+  '**src/main/java/uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java'
 
 ]
 
