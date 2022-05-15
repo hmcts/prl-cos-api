@@ -88,6 +88,7 @@ uk:
             WITHDRAW_AFTER_ISSUED_SOLICITOR: ba39a8e6-c553-457e-b526-3c241cd207f6
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
+            CAFCASS: b77818d7-7756-4d83-8ecd-e2b54f512cf2
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:

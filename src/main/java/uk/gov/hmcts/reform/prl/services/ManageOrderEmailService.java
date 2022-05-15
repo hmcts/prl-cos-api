@@ -9,12 +9,17 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,16 +34,20 @@ public class ManageOrderEmailService {
     @Autowired
     private EmailService emailService;
 
-
     @Autowired
     private CourtFinderService courtLocatorService;
-
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
+
+    private static final String URL_STRING = "/";
+    private static final String URGENT_CASE = "Urgent ";
+    private static final String YES = "Yes";
+    private static final String NO = "No";
+    private static final String DATE_FORMAT = "dd-MM-yyyy";
 
 
     public void sendEmail(CaseDetails caseDetails) {
@@ -95,5 +104,48 @@ public class ManageOrderEmailService {
     }
 
 
+    public void sendEmailToCafcass(CaseDetails caseDetails) {
+
+       CaseData caseData = emailService.getCaseData(caseDetails);
+
+        ManageOrders manageOrders  = caseData.getManageOrders();
+
+        List<String> cafcassEmails = manageOrders.getCafcassEmailAddress()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        cafcassEmails.forEach(email ->   emailService.send(
+            email,
+            EmailTemplateNames.CAFCASS,
+            buildCafcassEmail(caseDetails),
+            LanguagePreference.english
+        ));
+    }
+
+    private EmailTemplateVars buildCafcassEmail(CaseDetails caseDetails) {
+
+        CaseData caseData = emailService.getCaseData(caseDetails);
+
+        String typeOfHearing = "";
+        String isCaseUrgent = NO;
+
+        if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
+            typeOfHearing = URGENT_CASE;
+            isCaseUrgent = YES;
+        }
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+
+        return ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseUrgency(typeOfHearing)
+            .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
+            .orderLink(caseData.getPreviewOrderDoc().getDocumentUrl())
+            .build();
+
+    }
 
 }
