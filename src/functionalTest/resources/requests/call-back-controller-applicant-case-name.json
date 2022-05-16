@@ -4,7 +4,6 @@
     "case_data": {
       "applicantOrRespondentCaseName": "Test Name",
       "caseTypeOfApplication": "C100"
-
     },
     "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",

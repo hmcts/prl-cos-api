@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -23,11 +26,12 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,17 +52,6 @@ public class ManageOrdersController {
     @Autowired
     private ManageOrderEmailService manageOrderEmailService;
 
-    @Value("${document.templates.common.prl_c21_template}")
-    protected String c21Template;
-
-    @Value("${document.templates.common.prl_c21_filename}")
-    protected String c21File;
-
-    @Value("${document.templates.common.prl_c21_welsh_template}")
-    protected String c21WelshTemplate;
-
-    @Value("${document.templates.common.prl_c21_welsh_filename}")
-    protected String c21WelshFile;
 
     @Value("${document.templates.common.C43A_draft_template}")
     protected String c43ADraftTemplate;
@@ -71,13 +64,13 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        CaseData caseData1 = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData1);
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData1.getCreateSelectOrderOptions() != null) {
-            manageOrderService.getCaseData(authorisation, caseData1, caseDataUpdated);
+        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
         } else {
-            caseDataUpdated.put("previewOrderDoc",caseData1.getAppointmentOfGuardian());
+            caseDataUpdated.put("previewOrderDoc",caseData.getAppointmentOfGuardian());
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -157,6 +150,26 @@ public class ManageOrdersController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("orderCollection", manageOrderService
             .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
+        caseDataUpdated.remove("previewOrderDoc");
+        caseDataUpdated.remove("dateOrderMade");
+        caseDataUpdated.remove("createSelectOrderOptions");
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/show-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to show preview order for special guardianship create order")
+    public AboutToStartOrSubmitCallbackResponse showPreviewOrderWhenOrderCreated(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (caseData.getCreateSelectOrderOptions() != null
+            && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
+            List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
+            manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
+            caseData.setAppointedGuardianName(namesList);
+            manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

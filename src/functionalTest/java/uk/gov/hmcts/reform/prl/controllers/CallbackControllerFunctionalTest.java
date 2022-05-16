@@ -132,7 +132,7 @@ public class CallbackControllerFunctionalTest {
             .body("data.furtherEvidences", nullValue())
             .assertThat().statusCode(200);
     }
-    
+
     @Test
     public void givenRequestWithC100ApplicantDetails_whenEndPointCalled_ResponseContainsTypeOfApplication() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
@@ -157,20 +157,6 @@ public class CallbackControllerFunctionalTest {
             .post("/fl401-add-case-number")
             .then()
             .body("data.issueDate", equalTo(LocalDate.now().toString()))
-            .assertThat().statusCode(200);
-    }
-
-    @Test
-    public void givenRequestWithFL401ApplicantDetails_whenEndPointCalled_ResponseContainsTypeOfApplication() throws Exception {
-        String requestBody = ResourceLoader.loadJson(FL401_APPLICANT_DETAILS);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/case-withdrawn-email-notification")
-            .then()
-            .body("data.caseTypeOfApplication", equalTo("FL401"))
             .assertThat().statusCode(200);
     }
 }
