@@ -47,7 +47,7 @@ public class ManageOrderServiceTest {
     private ManageOrderService manageOrderService;
 
     @Mock
-    private  DgsService dgsService;
+    private DgsService dgsService;
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
