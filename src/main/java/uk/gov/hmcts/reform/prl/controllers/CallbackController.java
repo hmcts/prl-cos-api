@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -160,40 +159,6 @@ public class CallbackController {
                 .build();
         }
         return caseData;
-    }
-
-    @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to Issue and send to local court")
-    public AboutToStartOrSubmitCallbackResponse issueAndSendToLocalCourt(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
-
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (YesOrNo.No.equals(caseData.getConsentOrder())) {
-            requireNonNull(caseData);
-            sendgridService.sendEmail(c100JsonMapper.map(caseData));
-        }
-        caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
-        caseData = caseData.toBuilder().state(State.CASE_ISSUE).build();
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        // Generate All Docs and set to casedataupdated.
-        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
-
-        // Refreshing the page in the same event. Hence no external event call needed.
-        // Getting the tab fields and add it to the casedetails..
-        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-
-        caseDataUpdated.putAll(allTabsFields);
-        caseDataUpdated.put("issueDate", caseData.getIssueDate());
-
-        try {
-            caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            log.info("Email notification could not be sent due to following {}", ex.getMessage());
-        }
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
 
