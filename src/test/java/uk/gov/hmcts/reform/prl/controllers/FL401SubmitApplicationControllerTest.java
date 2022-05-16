@@ -182,6 +182,21 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
+
+        CallbackResponse callbackResponse = CallbackResponse.builder()
+            .data(caseData)
+            .errors(Collections.singletonList("test"))
+            .build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("last")
+            .build();
+
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -190,13 +205,6 @@ public class FL401SubmitApplicationControllerTest {
                              .build())
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(caseData)
-            .errors(Collections.singletonList("test"))
-            .build();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         fl401SubmitApplicationController.fl401SubmitApplicationValidation(authToken, callbackRequest);
         verify(fl401StatementOfTruthAndSubmitChecker, times(1)).hasMandatoryCompleted(caseData);
     }
@@ -504,6 +512,13 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
     }
@@ -814,6 +829,15 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
+        fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
@@ -914,6 +938,14 @@ public class FL401SubmitApplicationControllerTest {
         )))
             .thenReturn(court);
 
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
+        fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
+
         AboutToStartOrSubmitCallbackResponse response = fl401SubmitApplicationController
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
@@ -1008,6 +1040,13 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         AboutToStartOrSubmitCallbackResponse response = fl401SubmitApplicationController
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
