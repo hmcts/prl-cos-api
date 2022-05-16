@@ -100,8 +100,6 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c47a_filename}")
     protected String c47aFile;
 
-    public static final String FAMILY_MAN_ID = "Family Man ID: ";
-
     @Autowired
     private final DgsService dgsService;
 

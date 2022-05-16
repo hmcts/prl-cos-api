@@ -396,7 +396,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testSubmitAmanageorderCafacassEmailNotification() throws Exception {
+    public void testSubmitManageOrderCafacassEmailNotification() throws Exception {
 
 
         applicant = PartyDetails.builder()
