@@ -161,7 +161,6 @@ public class CallbackController {
         return caseData;
     }
 
-
     @PostMapping(path = "/update-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to refresh the tabs")
     public void updateApplication(
