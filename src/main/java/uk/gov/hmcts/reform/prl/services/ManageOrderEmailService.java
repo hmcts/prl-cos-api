@@ -41,8 +41,6 @@ public class ManageOrderEmailService {
 
     private static final String URL_STRING = "/";
     private static final String URGENT_CASE = "Urgent ";
-    private static final String YES = "Yes";
-    private static final String NO = "No";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
 
 
@@ -113,6 +111,8 @@ public class ManageOrderEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
+        log.info("Cafcass email id {}", cafcassEmails);
+
         cafcassEmails.forEach(email ->   emailService.send(
             email,
             EmailTemplateNames.CAFCASS,
@@ -129,12 +129,15 @@ public class ManageOrderEmailService {
 
         String typeOfHearing = "";
 
+        log.info("-----Case urgency: {} =---",caseData.getIsCaseUrgent());
         if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
             typeOfHearing = URGENT_CASE;
         }
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
+        log.info("----- Case issue date: {} -----", caseData.getIssueDate());
+        log.info("===== Case Document URL: {} ====", caseData.getPreviewOrderDoc().getDocumentUrl());
         return ManageOrderEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
