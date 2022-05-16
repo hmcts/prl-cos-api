@@ -13,7 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ManageOrders {
-
+    @JsonProperty("childListForSpecialGuardianship")
+    private final String childListForSpecialGuardianship;
     @JsonProperty("cafcassEmailAddress")
     private final List<Element<String>> cafcassEmailAddress;
     @JsonProperty("otherEmailAddress")
