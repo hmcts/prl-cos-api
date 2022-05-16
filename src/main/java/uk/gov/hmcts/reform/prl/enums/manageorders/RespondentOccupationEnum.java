@@ -23,7 +23,8 @@ public enum RespondentOccupationEnum {
     attemptToEnterAddress("attemptToEnterAddress", "having left,must not return to,enter or attempt to enter the address"),
 
     @JsonProperty("obstructHarassOrInterfere")
-    obstructHarassOrInterfere("obstructHarassOrInterfere", "must not obstruct,harass,or interfere with the applicant's peaceful occupation of the address"),
+    obstructHarassOrInterfere("obstructHarassOrInterfere",
+                              "must not obstruct,harass,or interfere with the applicant's peaceful occupation of the address"),
 
     @JsonProperty("other2")
     other2("other2", "Other");
