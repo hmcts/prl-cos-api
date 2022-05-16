@@ -3,8 +3,8 @@
     "callback_response_status": "string",
     "case_data": {
       "applicantAttendedMiam": "No",
-      "claimingExemptionMiam": "No"
-
+      "claimingExemptionMiam": "No",
+      "caseTypeOfApplication": "C100"
     },
     "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",
