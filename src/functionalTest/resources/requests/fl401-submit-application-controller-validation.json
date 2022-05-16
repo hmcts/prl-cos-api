@@ -3,7 +3,7 @@
     "callback_response_status": "string",
     "case_data": {
       "caseTypeOfApplication": "FL401",
-      "applicantOrRespondentCaseName": "Test Name"
+      "applicantOrRespondentCaseName": "thisIsATestName"
 
     },
     "case_type_id": "string",
