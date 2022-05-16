@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+
 
 @Service
 @Slf4j
@@ -116,35 +118,34 @@ public class ManageOrderEmailService {
         cafcassEmails.forEach(email ->   emailService.send(
             email,
             EmailTemplateNames.CAFCASS,
-            buildCafcassEmail(caseDetails),
+            buildCafcassEmail(caseData),
             LanguagePreference.english
         ));
 
         log.info("An email has been sent to cafcass");
     }
 
-    private EmailTemplateVars buildCafcassEmail(CaseDetails caseDetails) {
-
-        CaseData caseData = emailService.getCaseData(caseDetails);
+    public EmailTemplateVars buildCafcassEmail(CaseData caseData) {
 
         String typeOfHearing = " ";
 
         log.info("-----Case urgency: {} =---",caseData.getIsCaseUrgent());
-        if (null != caseData.getIsCaseUrgent() || YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
+        if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
             typeOfHearing = URGENT_CASE;
         }
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
         log.info("----- Case issue date: {} -----", caseData.getIssueDate());
-        log.info("===== Case Document URL: {} ====", caseData.getPreviewOrderDoc().getDocumentUrl());
+        log.info("===== Case Document URL: {} ====", caseData.getPreviewOrderDoc().getDocumentBinaryUrl());
         return ManageOrderEmail.builder()
-            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .caseUrgency(typeOfHearing)
             .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
-            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentUrl())
+            .familyManNumber(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                 ? caseData.getFamilymanCaseNumber() : caseData.getFl401FamilymanCaseNumber())
+            .orderLink(caseData.getPreviewOrderDoc().getDocumentBinaryUrl())
             .build();
 
     }

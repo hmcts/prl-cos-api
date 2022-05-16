@@ -117,6 +117,7 @@ public class ManageOrdersController {
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         manageOrderEmailService.sendEmail(caseDetails);
+        manageOrderEmailService.sendEmailToCafcass(caseDetails);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -142,32 +143,5 @@ public class ManageOrdersController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/manage-orders-send-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to send FL401 application notification. ")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Application Submitted."),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public CallbackResponse fl401SendApplicationNotification(@RequestHeader("Authorization")
-                                                                 String authorisation,
-                                                             @RequestBody CallbackRequest callbackRequest) {
-
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        try {
-
-            manageOrderEmailService.sendEmailToCafcass(caseDetails);
-
-        } catch (Exception e) {
-            log.error("Notification could not be sent due to {} ", e.getMessage());
-            caseData = caseData.toBuilder()
-                .isNotificationSent("No")
-                .build();
-        }
-
-        return CallbackResponse.builder()
-            .data(caseData)
-            .build();
-    }
 
 }
