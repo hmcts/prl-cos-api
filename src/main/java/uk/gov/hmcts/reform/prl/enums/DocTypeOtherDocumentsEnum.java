@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,17 +13,26 @@ import lombok.RequiredArgsConstructor;
 public enum DocTypeOtherDocumentsEnum {
 
     @JsonProperty("applicantStatement")
-    APPLICANTSTATEMENT("applicantStatement", "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot"),
+    applicantStatement("applicantStatement", "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot"),
     @JsonProperty("cafcassReports")
-    CAFCASS("cafcassReports", "Cafcass reports"),
+    cafcassReports("cafcassReports", "Cafcass reports"),
     @JsonProperty("expertReports")
-    EXPERT("expertReports", "Expert reports"),
+    expertReports("expertReports", "Expert reports"),
     @JsonProperty("respondentReports")
-    RESPONDENT("respondentReports", "Respondent reports"),
+    respondentReports("respondentReports", "Respondent reports"),
     @JsonProperty("otherReports")
-    OTHER("otherReports", "Other reports");
+    otherReports("otherReports", "Other reports");
 
     private final String id;
     private final String displayedValue;
 
+    @JsonValue
+    public String getDisplayedValue() {
+        return displayedValue;
+    }
+
+    @JsonCreator
+    public static DocTypeOtherDocumentsEnum getValue(String key) {
+        return DocTypeOtherDocumentsEnum.valueOf(key);
+    }
 }
