@@ -113,6 +113,13 @@ public class ManageOrderEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
+        List<String> otherEmails = manageOrders.getOtherEmailAddres()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        cafcassEmails.addAll(otherEmails);
+
         log.info("Cafcass email id {}", cafcassEmails);
 
         cafcassEmails.forEach(email ->   emailService.send(
