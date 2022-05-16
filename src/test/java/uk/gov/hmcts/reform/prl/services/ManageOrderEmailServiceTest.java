@@ -318,7 +318,7 @@ public class ManageOrderEmailServiceTest {
             .caseUrgency(typeOfHearing)
             .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
             .familyManNumber(caseData.getFamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentBinaryUrl())
+            .orderLink(caseData.getPreviewOrderDoc().getDocumentUrl())
             .build();
 
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
@@ -433,7 +433,7 @@ public class ManageOrderEmailServiceTest {
             .caseUrgency(typeOfHearing)
             .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
             .familyManNumber(caseData.getFamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentBinaryUrl())
+            .orderLink(caseData.getPreviewOrderDoc().getDocumentUrl())
             .build();
 
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
@@ -554,7 +554,7 @@ public class ManageOrderEmailServiceTest {
             .caseUrgency(typeOfHearing)
             .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
             .familyManNumber(caseData.getFamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentBinaryUrl())
+            .orderLink(caseData.getPreviewOrderDoc().getDocumentUrl())
             .build();
 
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
