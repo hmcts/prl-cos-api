@@ -2,8 +2,11 @@
   "case_details": {
     "callback_response_status": "string",
     "case_data": {
-      "caseTypeOfApplication": "FL401",
-      "applicantOrRespondentCaseName": "Test Name"
+      "caseTypeOfApplication": "C100",
+      "withDrawApplicationData": {
+        "withDrawApplication": "Yes",
+        "withDrawApplicationReason": "test data"
+      }
 
     },
     "case_type_id": "string",
