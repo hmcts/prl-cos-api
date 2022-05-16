@@ -22,6 +22,8 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ManageOrders {
 
+    private final String childListForSpecialGuardianship;
+
     @JsonProperty("cafcassEmailAddress")
     private final List<Element<String>> cafcassEmailAddress;
     @JsonProperty("otherEmailAddress")
@@ -31,8 +33,6 @@ public class ManageOrders {
     private final String recitalsOrPreamble;
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
-
-
     private final String courtName1;
     private final Address courtAddress;
     private final String caseNumber;
