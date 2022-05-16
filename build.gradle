@@ -11,12 +11,12 @@ plugins {
   id 'application'
   id 'checkstyle'
   id 'com.github.ben-manes.versions' version '0.42.0'
-  id 'info.solidsoft.pitest' version '1.7.0'
+  id 'info.solidsoft.pitest' version '1.7.4'
   id 'io.spring.dependency-management' version '1.0.11.RELEASE'
   id 'jacoco'
   id 'org.owasp.dependencycheck' version '6.2.2'
   id 'org.sonarqube' version '3.3'
-  id 'org.springframework.boot' version '2.6.2'
+  id 'org.springframework.boot' version '2.6.7'
   id 'au.com.dius.pact' version '4.2.6'
 }
 
@@ -128,7 +128,7 @@ allprojects {
       }
 
       // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
-      dependencySet(group: 'io.netty', version: '4.1.74.Final') {
+      dependencySet(group: 'io.netty', version: '4.1.75.Final') {
         entry 'netty-buffer'
         entry 'netty-codec'
         entry 'netty-codec-http'
@@ -247,12 +247,12 @@ dependencyCheck {
 
 dependencies {
 
-  implementation 'org.testng:testng:7.1.0'
-  implementation 'org.testng:testng:7.1.0'
-  implementation 'org.testng:testng:7.1.0'
-  implementation 'org.testng:testng:7.1.0'
-  implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
-  implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+  implementation 'org.testng:testng:7.5'
+  implementation 'org.testng:testng:7.5'
+  implementation 'org.testng:testng:7.5'
+  implementation 'org.testng:testng:7.5'
+  implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+  implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
   compileOnly("org.projectlombok:lombok:${versions.lombok}")
   testCompileOnly("org.projectlombok:lombok:${versions.lombok}")
@@ -271,7 +271,7 @@ dependencies {
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.0'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
   implementation group: 'org.apache.commons', name: 'commons-math3', version: versions.commonsMath3
-  implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.16'
+  implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.19'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
@@ -298,7 +298,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
 
   compile group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '2.2.0'
-  compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '5.7.1'
+  compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '5.8.1'
   compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   compile group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   compile group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.6'
