@@ -22,19 +22,20 @@ public class AllegationOfHarmGenerator implements FieldGenerator {
 
     private String getTypeOfHarm(CaseData caseData) {
         List<String> typeOfHarm = new ArrayList<>();
-        if (YesOrNo.Yes.equals(caseData.getAllegationsOfHarmDomesticAbuseYesNo())) {
+        uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm allegationOfHarm = caseData.getAllegationOfHarm();
+        if (YesOrNo.Yes.equals(allegationOfHarm.getAllegationsOfHarmDomesticAbuseYesNo())) {
             typeOfHarm.add("Domestic abuse");
         }
-        if (YesOrNo.Yes.equals(caseData.getAllegationsOfHarmChildAbductionYesNo())) {
+        if (YesOrNo.Yes.equals(allegationOfHarm.getAllegationsOfHarmChildAbductionYesNo())) {
             typeOfHarm.add("Child abduction");
         }
-        if (YesOrNo.Yes.equals(caseData.getAllegationsOfHarmChildAbuseYesNo())) {
+        if (YesOrNo.Yes.equals(allegationOfHarm.getAllegationsOfHarmChildAbuseYesNo())) {
             typeOfHarm.add("Child abuse");
         }
-        if (YesOrNo.Yes.equals(caseData.getAllegationsOfHarmSubstanceAbuseYesNo())) {
+        if (YesOrNo.Yes.equals(allegationOfHarm.getAllegationsOfHarmSubstanceAbuseYesNo())) {
             typeOfHarm.add("Drugs, alcohol or substance abuse");
         }
-        if (YesOrNo.Yes.equals(caseData.getAllegationsOfHarmOtherConcernsYesNo())) {
+        if (YesOrNo.Yes.equals(allegationOfHarm.getAllegationsOfHarmOtherConcernsYesNo())) {
             typeOfHarm.add("Safety or welfare concerns");
         }
 
