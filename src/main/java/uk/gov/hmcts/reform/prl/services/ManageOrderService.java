@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
@@ -68,6 +67,12 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.C43A_draft_filename}")
     protected String c43ADraftFilename;
+
+    @Value("${document.templates.common.C43A_final_template}")
+    protected String c43AFinalTemplate;
+
+    @Value("${document.templates.common.C43A_final_filename}")
+    protected String c43AFinalFilename;
 
     @Value("${document.templates.common.prl_c43_draft_template}")
     protected String c43DraftTemplate;
@@ -389,7 +394,7 @@ public class ManageOrderService {
 
     public ManageOrders getN117FormData(CaseData caseData) {
 
-        ManageOrders orderData = CcdPayment.ManageOrders.builder()
+        ManageOrders orderData = ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .manageOrdersCourtName(caseData.getCourtName())
             .manageOrdersApplicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
