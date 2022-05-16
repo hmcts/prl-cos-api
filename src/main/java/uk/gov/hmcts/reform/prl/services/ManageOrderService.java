@@ -14,8 +14,10 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -41,6 +43,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 
 @Service
 @Slf4j
@@ -165,19 +168,45 @@ public class ManageOrderService {
     }
 
     private String getChildInfoFromCaseData(CaseData caseData) {
-        List<Child> children = new ArrayList<>();
-        if (caseData.getChildren() != null) {
-            children = caseData.getChildren().stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-        }
 
         StringBuilder builder = new StringBuilder();
 
-        for (int i = 0; i < children.size(); i++) {
-            Child child = children.get(i);
-            builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + child.getLastName()));
-            builder.append("\n");
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<Child> children = caseData.getChildren().stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+
+            for (int i = 0; i < children.size(); i++) {
+                Child child = children.get(i);
+                builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + child.getLastName()));
+                builder.append("\n");
+            }
+
+        } else {
+            builder.append(getFl401ChildrenString(caseData));
+        }
+        return builder.toString();
+    }
+
+    private String getFl401ChildrenString(CaseData caseData) {
+        StringBuilder builder = new StringBuilder();
+        if (ofNullable(caseData.getApplicantChildDetails()).isPresent()) {
+            List<ApplicantChild> children = unwrapElements(caseData.getApplicantChildDetails());
+            for (int i = 0; i < children.size(); i++) {
+                ApplicantChild child = children.get(i);
+                builder.append(String.format("Child %d: %s", i + 1, child.getFullName()));
+                builder.append("\n");
+            }
+        }
+        if (ofNullable(caseData.getHome()).isPresent() && ofNullable(caseData.getHome().getChildren()).isPresent()) {
+            List<ChildrenLiveAtAddress> childrenInHome = caseData.getHome().getChildren().stream()
+                .map(Element::getValue).collect(Collectors.toList());
+
+            for (int i = 0; i < childrenInHome.size(); i++) {
+                ChildrenLiveAtAddress child = childrenInHome.get(i);
+                builder.append(String.format("Child %d: %s", i + 1, child.getChildFullName()));
+                builder.append("\n");
+            }
         }
         return builder.toString();
     }
