@@ -77,6 +77,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c43_filename}")
     protected String c43File;
 
+    @Value("${document.templates.common.prl_fl404a_draft_template}")
+    protected String fl404aDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl404a_draft_filename}")
+    protected String fl404aDraftFile;
+
+    @Value("${document.templates.common.prl_fl404a_final_template}")
+    protected String fl404aFinalTemplate;
+
+    @Value("${document.templates.common.prl_fl404a_final_filename}")
+    protected String fl404aFinalFile;
+
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
     @Autowired
@@ -119,6 +131,12 @@ public class ManageOrderService {
             case specialGuardianShip:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c43ADraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c43ADraftFilename);
+                break;
+            case nonMolestation:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404aDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404aDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404aFinalTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404aFinalFile);
                 break;
             default:
                 break;
