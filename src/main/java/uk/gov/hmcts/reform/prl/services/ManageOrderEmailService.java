@@ -102,6 +102,8 @@ public class ManageOrderEmailService {
 
     public void sendEmailToCafcass(CaseDetails caseDetails) {
 
+        log.info("We are about to send an email to cafcass");
+
         CaseData caseData = emailService.getCaseData(caseDetails);
 
         ManageOrders manageOrders  = caseData.getManageOrders();
@@ -117,6 +119,8 @@ public class ManageOrderEmailService {
             buildCafcassEmail(caseDetails),
             LanguagePreference.english
         ));
+
+        log.info("An email has been sent to cafcass");
     }
 
     private EmailTemplateVars buildCafcassEmail(CaseDetails caseDetails) {

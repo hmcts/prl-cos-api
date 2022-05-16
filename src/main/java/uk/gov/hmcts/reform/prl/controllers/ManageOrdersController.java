@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +27,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class ManageOrdersController {
@@ -138,6 +140,34 @@ public class ManageOrdersController {
         caseDataUpdated.remove("dateOrderMade");
         caseDataUpdated.remove("createSelectOrderOptions");
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/manage-orders-send-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to send FL401 application notification. ")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Application Submitted."),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public CallbackResponse fl401SendApplicationNotification(@RequestHeader("Authorization")
+                                                                 String authorisation,
+                                                             @RequestBody CallbackRequest callbackRequest) {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        try {
+
+            manageOrderEmailService.sendEmailToCafcass(caseDetails);
+
+        } catch (Exception e) {
+            log.error("Notification could not be sent due to {} ", e.getMessage());
+            caseData = caseData.toBuilder()
+                .isNotificationSent("No")
+                .build();
+        }
+
+        return CallbackResponse.builder()
+            .data(caseData)
+            .build();
     }
 
 }
