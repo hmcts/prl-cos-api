@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.ApplicationTypeDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.ConfidentialDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
@@ -31,4 +32,6 @@ public class CaseSummary implements MappableObject {
     private final List<Element<OtherProceedings>> otherProceedingsForSummaryTab;
     private final OtherProceedingEmptyTable otherProceedingEmptyTable;
     private final DateOfSubmission dateOfSubmission;
+    private final ApplicationTypeDetails applicationTypeDetails;
+
 }
