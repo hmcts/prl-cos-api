@@ -59,6 +59,7 @@
     <cve>CVE-2022-22965</cve>
     <cve>CVE-2022-22968</cve>
     <cve>CVE-2016-1000027</cve>
+    <cve>CVE-2022-22968</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -66,6 +67,23 @@
   ]]></notes>
     <cve>CVE-2022-22965</cve>
     <cve>CVE-2016-1000027</cve>
+    <cve>CVE-2022-22968</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      Spring web influx
+  ]]></notes>
+    <cve>CVE-2022-22965</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      Spring web influx
+  ]]></notes>
+    <cve>CVE-2022-22965</cve>
+    <cve>CVE-2016-1000027</cve>
+    <cve>CVE-2022-22968</cve>
+  </suppress>
+  <suppress>
     <cve>CVE-2022-22968</cve>
   </suppress>
 </suppressions>
