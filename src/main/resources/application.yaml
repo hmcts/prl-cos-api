@@ -244,7 +244,10 @@ document:
       prl_fl404_filename: occupation_order_FL404_final.pdf
       prl_fl404_draft_template: PRL-ORDERS-FL404-DRAFT.docx
       prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
-
+      prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
+      prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
+      prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
+      prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
 
 southampton:
   court:
