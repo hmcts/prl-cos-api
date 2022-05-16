@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +27,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class ManageOrdersController {
@@ -53,6 +55,7 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("*** Magistrate details : {}",caseData.getMagistrateLastName());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
