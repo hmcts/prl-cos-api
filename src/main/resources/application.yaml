@@ -84,6 +84,8 @@ uk:
             GATEKEEPER_FL401: c078de4d-9177-4e0d-ab9f-5adcf27a6ee5
             DA_SOLICITOR: d65830b7-eb13-46c3-b772-03976a67210d
             DA_LOCALCOURT: 9d6b311a-a764-45a7-9dd9-cd1d06408214
+            WITHDRAW_AFTER_ISSUED_LOCAL_COURT: 233e4bfa-d9ec-42c2-a06a-d8cce9abd238
+            WITHDRAW_AFTER_ISSUED_SOLICITOR: ba39a8e6-c553-457e-b526-3c241cd207f6
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
           welsh:
@@ -242,7 +244,6 @@ document:
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
       prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
-
 
 southampton:
   court:

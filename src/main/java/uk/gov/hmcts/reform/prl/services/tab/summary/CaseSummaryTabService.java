@@ -19,12 +19,15 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.FieldGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OrderAppliedForGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OtherProceedingsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.SpecialArrangementsGenerator;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.TypeOfApplicationGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.UrgencyGenerator;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 
 @Slf4j
@@ -63,9 +66,13 @@ public class CaseSummaryTabService implements TabService {
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    TypeOfApplicationGenerator typeOfApplicationGenerator;
+
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {
-        Map<String, Object> summaryTabFields = getGenerators().stream()
+
+        Map<String, Object> summaryTabFields = getGenerators(caseData).stream()
             .map(generator -> generator.generate(caseData))
             .flatMap(summary -> objectMapper.convertValue(
                     summary,
@@ -85,12 +92,20 @@ public class CaseSummaryTabService implements TabService {
 
         summaryTabFields.put("otherProceedingsForSummaryTab", otherProceedingsGenerator.getOtherProceedingsDetails(caseData));
         summaryTabFields.put("otherProceedingEmptyTable", caseSummary.getOtherProceedingEmptyTable());
-
+        log.info(summaryTabFields.toString());
         return summaryTabFields;
     }
 
     @Override
-    public List<FieldGenerator> getGenerators() {
+    public List<FieldGenerator> getGenerators(CaseData caseData) {
+
+        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+
+            return List.of(allocatedJudgeDetailsGenerator,
+                           caseStatusGenerator, confidentialDetailsGenerator,urgencyGenerator,typeOfApplicationGenerator,
+                           specialArrangementsGenerator,dateOfSubmissionGenerator);
+
+        }
         return List.of(allocatedJudgeDetailsGenerator,
                        caseStatusGenerator, confidentialDetailsGenerator,
                        orderAppliedForGenerator,

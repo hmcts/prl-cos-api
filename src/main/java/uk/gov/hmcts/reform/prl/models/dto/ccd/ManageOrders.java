@@ -22,4 +22,7 @@ public class ManageOrders {
     private final List<Element<String>> otherEmailAddres;
     @JsonProperty("isCaseWithdrawn")
     private final YesOrNo isCaseWithdrawn;
+    private final String recitalsOrPreamble;
+    private final String orderDirections;
+    private final String furtherDirectionsIfRequired;
 }
