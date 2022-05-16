@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
@@ -21,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.format.DateTimeFormatter;
@@ -353,9 +353,9 @@ public class ManageOrderService {
 
     }
 
-    public ManageOrders getN117FormData(CaseData caseData) {
+    public CcdPayment.ManageOrders getN117FormData(CaseData caseData) {
 
-        ManageOrders orderData = ManageOrders.builder()
+        CcdPayment.ManageOrders orderData = CcdPayment.ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .manageOrdersCourtName(caseData.getCourtName())
             .manageOrdersApplicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
