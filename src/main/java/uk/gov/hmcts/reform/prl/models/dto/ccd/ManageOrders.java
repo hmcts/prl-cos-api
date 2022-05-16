@@ -5,13 +5,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ManageOrders {
@@ -28,9 +30,19 @@ public class ManageOrders {
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
 
-    //@JsonProperty("childArrangementsOrdersToIssue")
-    //private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
-    //@JsonProperty("selectChildArrangementsOrder")
-    //private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
+    /**
+     * C47A.
+     */
+    @JsonProperty("cafcassOfficeDetails")
+    private String cafcassOfficeDetails;
+
+    /**
+     * C43.
+     */
+
+    @JsonProperty("childArrangementsOrdersToIssue")
+    private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
+    @JsonProperty("selectChildArrangementsOrder")
+    private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
 
 }
