@@ -318,7 +318,7 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
-            .sendEmail(callbackRequest.getCaseDetails());
+            .sendEmailToCafcass(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -488,6 +488,6 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
-            .sendEmail(callbackRequest.getCaseDetails());
+            .sendEmailToCafcass(callbackRequest.getCaseDetails());
     }
 }
