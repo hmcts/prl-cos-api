@@ -154,11 +154,7 @@ public class CallbackControllerFT {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
             .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
-            .allegationOfHarm(AllegationOfHarm.builder()
-                                  .allegationsOfHarmYesNo(Yes)
-                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
-                                  .allegationsOfHarmChildAbuseYesNo(Yes)
-                                  .build())
+            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
             .build();
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
