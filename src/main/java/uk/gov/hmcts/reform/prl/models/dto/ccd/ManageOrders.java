@@ -28,9 +28,9 @@ public class ManageOrders {
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
 
-    @JsonProperty("childArrangementsOrdersToIssue")
-    private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
-    @JsonProperty("selectChildArrangementsOrder")
-    private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
+    //@JsonProperty("childArrangementsOrdersToIssue")
+    //private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
+    //@JsonProperty("selectChildArrangementsOrder")
+    //private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
 
 }
