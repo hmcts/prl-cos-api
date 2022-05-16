@@ -11,6 +11,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
+import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityStatementDisclaimerEnum;
@@ -24,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderDetails;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
@@ -33,14 +37,19 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
@@ -185,6 +194,15 @@ public class CaseData implements MappableObject {
     private final List<Element<PartyDetails>> applicants;
     @JsonProperty("applicantsFL401")
     private final PartyDetails applicantsFL401;
+
+    /**
+     * caseNotes details.
+     */
+    private List<Element<CaseNoteDetails>> caseNotes;
+    //@JsonProperty("caseNoteDetails")
+    //private final CaseNoteDetails caseNoteDetails;
+    private final String subject;
+    private final String caseNote;
 
     /**
      * Child details.
@@ -502,6 +520,9 @@ public class CaseData implements MappableObject {
     private OtherOrdersOptionEnum otherOrdersOption;
     private String nameOfOrder;
     private YesOrNo isTheOrderUploadedByConsent;*/
+
+    private final List<Element<OrderDetails>> orderCollection;
+
     private LocalDate approvalDate;
     private Document appointmentOfGuardian;
     private Document previewOrderDoc;
@@ -517,7 +538,7 @@ public class CaseData implements MappableObject {
     //private final HearingTypeEnum hearingType;
     //private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
 
-    //private final OrderRecipientsEnum orderRecipients;
+    private final List<OrderRecipientsEnum> orderRecipients;
     //private final OtherEnum otherRecipient;
     //private final OtherOrderRecipientsEnum otherOrderRecipients;
     //private final SelectTypeOfOrderEnum selectTypeOfOrder;
@@ -527,16 +548,25 @@ public class CaseData implements MappableObject {
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo isTheOrderByConsent;
     private final YesOrNo wasTheOrderApprovedAtHearing;
+    private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
-    private final String dateOrderMade;
-    private final String recitalsOrPreamble;
-    private final String orderDirections;
-    private final String furtherDirectionsIfRequired;
-    private final List<String> cafcassEmailAddress;
-    private final List<String> otherEmailAddress;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate dateOrderMade;
+
+    private List<Element<AppointedGuardianFullName>> appointedGuardianName;
+    //private final List<String> cafcassEmailAddress;
+    //private final List<String> otherEmailAddress;
     private final String childrenList;
 
+    @JsonUnwrapped
+    @Builder.Default
+    private final ManageOrders manageOrders = ManageOrders.builder().build();
+    private final String childrenList;
+
+    @JsonUnwrapped
+    private final ManageOrders manageOrders;
+  
     /**
      * Solicitor Details.
      */

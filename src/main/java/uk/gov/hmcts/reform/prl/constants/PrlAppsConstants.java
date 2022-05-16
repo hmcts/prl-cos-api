@@ -68,6 +68,16 @@ public class PrlAppsConstants {
     public static final String BLANK_STRING = "";
     public static final String WITHOUT_NOTICE = "Without notice";
 
+    public static final String TEMPLATE = "template";
+    public static final String FILE_NAME = "fileName";
+
+    public static final String FINAL_TEMPLATE_NAME = "finalTemplateName";
+    public static final String GENERATE_FILE_NAME = "generateFileName";
+
+    public static final String URL_STRING = "/";
+    public static final String D_MMMM_YYYY = "d MMMM yyyy";
+
+    public static final String APPOINTED_GUARDIAN_FULL_NAME = "appointedGuardianName";
     public static final String WITH_NOTICE = "With notice";
 
     public static final String DRAFT_STATE = State.AWAITING_SUBMISSION_TO_HMCTS.getValue();
@@ -81,4 +91,5 @@ public class PrlAppsConstants {
     public static final String C1A_HINT = "C1A";
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
+
 }
