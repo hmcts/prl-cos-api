@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -32,6 +31,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @RestController
 @RequiredArgsConstructor

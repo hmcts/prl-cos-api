@@ -11,8 +11,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
-import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
@@ -37,19 +35,16 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
-import uk.gov.hmcts.reform.prl.models.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
-import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
@@ -552,7 +547,6 @@ public class CaseData implements MappableObject {
 
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo wasTheOrderApprovedAtHearing;
-    private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
