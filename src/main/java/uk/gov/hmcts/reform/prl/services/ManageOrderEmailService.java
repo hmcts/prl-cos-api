@@ -144,7 +144,7 @@ public class ManageOrderEmailService {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
         log.info("----- Case issue date: {} -----", caseData.getIssueDate());
-        log.info("===== Case Document URL: {} ====", caseData.getPreviewOrderDoc().getDocumentBinaryUrl());
+        log.info("===== Case Document URL: {} ====", caseData.getPreviewOrderDoc().getDocumentUrl());
         return ManageOrderEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
@@ -152,7 +152,7 @@ public class ManageOrderEmailService {
             .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
             .familyManNumber(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                                  ? caseData.getFamilymanCaseNumber() : caseData.getFl401FamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentBinaryUrl())
+            .orderLink(caseData.getPreviewOrderDoc().getDocumentUrl())
             .build();
 
     }
