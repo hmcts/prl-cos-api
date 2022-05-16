@@ -127,7 +127,7 @@ public class ManageOrderEmailService {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
 
-        String typeOfHearing = "";
+        String typeOfHearing = " ";
 
         log.info("-----Case urgency: {} =---",caseData.getIsCaseUrgent());
         if (null != caseData.getIsCaseUrgent() || YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
