@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderDetails;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
@@ -36,7 +37,9 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -511,6 +514,9 @@ public class CaseData implements MappableObject {
     private OtherOrdersOptionEnum otherOrdersOption;
     private String nameOfOrder;
     private YesOrNo isTheOrderUploadedByConsent;*/
+
+    private final List<Element<OrderDetails>> orderCollection;
+
     private LocalDate approvalDate;
     private Document appointmentOfGuardian;
     private Document previewOrderDoc;
@@ -526,7 +532,7 @@ public class CaseData implements MappableObject {
     //private final HearingTypeEnum hearingType;
     //private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
 
-    //private final OrderRecipientsEnum orderRecipients;
+    private final List<OrderRecipientsEnum> orderRecipients;
     //private final OtherEnum otherRecipient;
     //private final OtherOrderRecipientsEnum otherOrderRecipients;
     //private final SelectTypeOfOrderEnum selectTypeOfOrder;
@@ -536,16 +542,15 @@ public class CaseData implements MappableObject {
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo isTheOrderByConsent;
     private final YesOrNo wasTheOrderApprovedAtHearing;
+    private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
-    private final String dateOrderMade;
-    private final String recitalsOrPreamble;
-    private final String orderDirections;
-    private final String furtherDirectionsIfRequired;
-    private final List<String> cafcassEmailAddress;
-    private final List<String> otherEmailAddress;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate dateOrderMade;
     private final String childrenList;
 
+    @JsonUnwrapped
+    private final ManageOrders manageOrders;
     /**
      * Solicitor Details.
      */
