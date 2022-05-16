@@ -126,7 +126,6 @@ public class ManageOrdersController {
 
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        manageOrderEmailService.sendEmail(caseDetails);
         manageOrderEmailService.sendEmailToCafcass(caseDetails);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
