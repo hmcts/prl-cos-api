@@ -1,12 +1,10 @@
-package uk.gov.hmcts.reform.prl.models.dto.ccd;
+package uk.gov.hmcts.reform.prl.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.util.List;
 
@@ -16,15 +14,16 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ManageOrders {
 
-    private final String childListForSpecialGuardianship;
-
     @JsonProperty("cafcassEmailAddress")
     private final List<Element<String>> cafcassEmailAddress;
     @JsonProperty("otherEmailAddress")
-    private final List<Element<String>> otherEmailAddres;
-    @JsonProperty("isCaseWithdrawn")
-    private final YesOrNo isCaseWithdrawn;
+    private final List<Element<String>> otherEmailAddress;
+    @JsonProperty("cafcassOfficeDetails")
+    private String cafcassOfficeDetails;
+    @JsonProperty("recitalsOrPreamble")
     private final String recitalsOrPreamble;
+    @JsonProperty("orderDirections")
     private final String orderDirections;
+    @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
 }

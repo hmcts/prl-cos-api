@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
@@ -551,6 +552,13 @@ public class CaseData implements MappableObject {
     private final LocalDate dateOrderMade;
 
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
+    //private final List<String> cafcassEmailAddress;
+    //private final List<String> otherEmailAddress;
+    private final String childrenList;
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final ManageOrders manageOrders = ManageOrders.builder().build();
     private final String childrenList;
 
     @JsonUnwrapped
