@@ -9,7 +9,7 @@ import java.util.Map;
 public interface TabService {
     public Map<String, Object> updateTab(CaseData caseData);
 
-    public List<FieldGenerator> getGenerators();
+    public List<FieldGenerator> getGenerators(CaseData caseData);
 
     public void calEventToRefreshUI();
 }
