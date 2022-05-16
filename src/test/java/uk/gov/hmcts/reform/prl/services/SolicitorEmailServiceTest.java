@@ -34,8 +34,8 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -235,7 +235,41 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailForWithdraw() throws NotFoundException {
+    public void testBuildEmailFailureCase() throws NotFoundException {
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .address(Address.builder()
+                         .postCode("SE1 9BA")
+                         .build())
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .courtName("testcourt")
+            .build();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenThrow(NotFoundException.class);
+        assertNull(solicitorEmailService.buildEmail(caseDetails));
+    }
+
+    @Test
+    public void testSendEmailForWithdraw() {
 
         List<PartyDetails> applicantList = new ArrayList<>();
         PartyDetails applicant = PartyDetails.builder()
@@ -281,6 +315,53 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
+    public void testSendEmailForWithdrawWithEmptyApplicantList() {
+
+        List<PartyDetails> applicantList = new ArrayList<>();
+        PartyDetails applicant = PartyDetails.builder()
+            .build();
+        applicantList.add(applicant);
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@demo.com")
+            .applicants(listOfApplicants)
+            .courtName("testcourt")
+            .build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .email("test@demo.com")
+            .build();
+
+        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
+            applicantList.get(0).getEmail())
+            : userDetails.getEmail();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", email);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
+        verify(emailService).send(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(EmailTemplateVars.class),
+            Mockito.any()
+        );
+    }
+
+    @Test
     public void testSendEmailForWithdrawWhenApplicantSolicitorEmailNotPresent() throws NotFoundException {
 
         List<PartyDetails> applicantList = new ArrayList<>();
@@ -322,7 +403,7 @@ public class SolicitorEmailServiceTest {
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
 
         solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
-        assertEquals("test@demo.com", userDetails.getEmail());
+        assertEquals("test@demo.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
     @Test
@@ -513,20 +594,172 @@ public class SolicitorEmailServiceTest {
     }
 
     @Test
-    public void  catchNotFoundExceptionFromCourtFinderService() throws NotFoundException {
-        CaseData caseData = CaseData.builder()
-            .applicants(List.of(element(
-                PartyDetails.builder().firstName("test").lastName("test").build()
-            )))
+    public void testSendEmailForWithdrawAfterIssued() throws NotFoundException {
+
+        List<PartyDetails> applicantList = new ArrayList<>();
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .solicitorEmail("test@demo.com")
             .build();
-        CaseDetails caseDetails = CaseDetails.builder().data(Collections.emptyMap()).build();
+
+        applicantList.add(applicant);
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@demo.com")
+            .applicants(listOfApplicants)
+            .courtName("testcourt")
+            .build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .email("test@demo.com")
+            .build();
+
+        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
+            applicantList.get(0).getEmail())
+            : userDetails.getEmail();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", email);
+        data.put("issueDate", "12/12/1212");
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(courtFinderService.getNearestFamilyCourt(caseData)).thenThrow(NotFoundException.class);
 
-        assertNull(solicitorEmailService.buildEmail(caseDetails));
-
+        solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
+        assertEquals("test@demo.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
+    @Test
+    public void testSendEmailForWithdrawAfterIssuedWithEmptySolicitorEmail() throws NotFoundException {
+
+        List<PartyDetails> applicantList = new ArrayList<>();
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .solicitorEmail("")
+            .build();
+
+        applicantList.add(applicant);
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@demo.com")
+            .applicants(listOfApplicants)
+            .courtName("testcourt")
+            .build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .email("test@demo.com")
+            .build();
+
+        String email = (!applicantList.isEmpty() && applicantList.get(0).getEmail() != null) ? String.valueOf(
+            applicantList.get(0).getEmail())
+            : userDetails.getEmail();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", email);
+        data.put("issueDate", "12/12/1212");
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
+        assertEquals("test@demo.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+    }
+
+    @Test
+    public void testSendWithdrawEmailToFl401SolicitorAfterIssued() {
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .firstName("testUser")
+            .lastName("last test")
+            .build();
+        String applicantFullName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .email("testing@solicitor.com")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(fl401Applicant)
+            .build();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", fl401Applicant.getSolicitorEmail());
+        data.put("issueDate", "12/12/1212");
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+
+        String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
+
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
+
+        assertEquals("testing@solicitor.com", email);
+    }
+
+    @Test
+    public void testSendWithdrawEmailToFl401SolicitorAfterIssuedWithoutEmail() {
+
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .firstName("testUser")
+            .lastName("last test")
+            .build();
+
+        String applicantFullName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .email("testing@solicitor.com")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantsFL401(fl401Applicant)
+            .courtEmailAddress("testing@solicitor.com")
+            .build();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", fl401Applicant.getSolicitorEmail());
+        data.put("issueDate", "12/12/1212");
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+
+        String email = fl401Applicant.getSolicitorEmail() != null ? fl401Applicant.getSolicitorEmail() : userDetails.getEmail();
+
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+
+        solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
+
+        assertEquals("testing@solicitor.com", email);
+    }
 }
 
