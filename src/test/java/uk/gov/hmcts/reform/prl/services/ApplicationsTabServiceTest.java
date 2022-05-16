@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
+import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
 import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
@@ -81,6 +82,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOverview;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.ChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.DomesticAbuseVictim;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
@@ -198,14 +200,17 @@ public class ApplicationsTabServiceTest {
             .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.childArrangementsOrder))
             .typeOfChildArrangementsOrder(ChildArrangementOrderTypeEnum.spendTimeWithOrder)
             .natureOfOrder("Test nature of order")
+            .applicationPermissionRequired(PermissionRequiredEnum.yes)
+            .applicationPermissionRequiredReason("Some xyz reason")
             // hearing urgency
             .isCaseUrgent(YesOrNo.Yes)
             .caseUrgencyTimeAndReason("Test String")
             .doYouRequireAHearingWithReducedNotice(YesOrNo.No)
             //allegations of harm overview
-            .allegationsOfHarmYesNo(YesOrNo.Yes)
-            .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
-            .allegationsOfHarmChildAbductionYesNo(YesOrNo.Yes)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(YesOrNo.Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(YesOrNo.Yes)
+                                  .allegationsOfHarmChildAbductionYesNo(YesOrNo.Yes).build())
             //miam
             .applicantAttendedMiam(YesOrNo.Yes)
             .claimingExemptionMiam(YesOrNo.No)
@@ -234,47 +239,49 @@ public class ApplicationsTabServiceTest {
             .litigationCapacityFactors("Test")
             .litigationCapacityOtherFactors(YesOrNo.Yes)
             //allegations of harm
-            .ordersNonMolestation(YesOrNo.Yes)
-            .ordersNonMolestationCurrent(YesOrNo.Yes)
-            .ordersNonMolestationDateIssued(LocalDate.of(1990, 8, 1))
-            .ordersNonMolestationEndDate(LocalDate.of(1991, 8, 1))
-            .ordersNonMolestationCourtName("Court name")
-            .ordersOccupation(YesOrNo.Yes)
-            .ordersOccupationCurrent(YesOrNo.Yes)
-            .ordersOccupationDateIssued(LocalDate.of(1990, 8, 1))
-            .ordersOccupationEndDate(LocalDate.of(1991, 8, 1))
-            .ordersOccupationCourtName("Court name")
-            .ordersForcedMarriageProtection(YesOrNo.Yes)
-            .ordersForcedMarriageProtectionCurrent(YesOrNo.Yes)
-            .ordersForcedMarriageProtectionDateIssued(LocalDate.of(1990, 8, 1))
-            .ordersForcedMarriageProtectionEndDate(LocalDate.of(1991, 8, 1))
-            .ordersForcedMarriageProtectionCourtName("Court name")
-            .ordersRestraining(YesOrNo.Yes)
-            .ordersRestrainingCurrent(YesOrNo.Yes)
-            .ordersRestrainingDateIssued(LocalDate.of(1990, 8, 1))
-            .ordersRestrainingEndDate(LocalDate.of(1991, 8, 1))
-            .ordersRestrainingCourtName("Court name")
-            .ordersOtherInjunctive(YesOrNo.Yes)
-            .ordersOtherInjunctiveCurrent(YesOrNo.Yes)
-            .ordersOtherInjunctiveDateIssued(LocalDate.of(1990, 8, 1))
-            .ordersOtherInjunctiveEndDate(LocalDate.of(1991, 8, 1))
-            .ordersOtherInjunctiveCourtName("Court name")
-            .ordersUndertakingInPlace(YesOrNo.Yes)
-            .ordersUndertakingInPlaceCurrent(YesOrNo.Yes)
-            .ordersUndertakingInPlaceDateIssued(LocalDate.of(1990, 8, 1))
-            .ordersUndertakingInPlaceEndDate(LocalDate.of(1991, 8, 1))
-            .ordersUndertakingInPlaceCourtName("Court name")
-            .physicalAbuseVictim(Collections.singletonList(ApplicantOrChildren.children))
-            .emotionalAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
-            .psychologicalAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
-            .sexualAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
-            .financialAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
-            .previousAbductionThreats(YesOrNo.Yes)
-            .previousAbductionThreatsDetails("Details")
-            .abductionPreviousPoliceInvolvement(YesOrNo.No)
-            .allegationsOfHarmOtherConcerns(YesOrNo.Yes)
-            .allegationsOfHarmOtherConcernsDetails("Test String")
-            .agreeChildUnsupervisedTime(YesOrNo.No)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .ordersNonMolestation(YesOrNo.Yes)
+                                  .ordersNonMolestationCurrent(YesOrNo.Yes)
+                                  .ordersNonMolestationDateIssued(LocalDate.of(1990, 8, 1))
+                                  .ordersNonMolestationEndDate(LocalDate.of(1991, 8, 1))
+                                  .ordersNonMolestationCourtName("Court name")
+                                  .ordersOccupation(YesOrNo.Yes)
+                                  .ordersOccupationCurrent(YesOrNo.Yes)
+                                  .ordersOccupationDateIssued(LocalDate.of(1990, 8, 1))
+                                  .ordersOccupationEndDate(LocalDate.of(1991, 8, 1))
+                                  .ordersOccupationCourtName("Court name")
+                                  .ordersForcedMarriageProtection(YesOrNo.Yes)
+                                  .ordersForcedMarriageProtectionCurrent(YesOrNo.Yes)
+                                  .ordersForcedMarriageProtectionDateIssued(LocalDate.of(1990, 8, 1))
+                                  .ordersForcedMarriageProtectionEndDate(LocalDate.of(1991, 8, 1))
+                                  .ordersForcedMarriageProtectionCourtName("Court name")
+                                  .ordersRestraining(YesOrNo.Yes)
+                                  .ordersRestrainingCurrent(YesOrNo.Yes)
+                                  .ordersRestrainingDateIssued(LocalDate.of(1990, 8, 1))
+                                  .ordersRestrainingEndDate(LocalDate.of(1991, 8, 1))
+                                  .ordersRestrainingCourtName("Court name")
+                                  .ordersOtherInjunctive(YesOrNo.Yes)
+                                  .ordersOtherInjunctiveCurrent(YesOrNo.Yes)
+                                  .ordersOtherInjunctiveDateIssued(LocalDate.of(1990, 8, 1))
+                                  .ordersOtherInjunctiveEndDate(LocalDate.of(1991, 8, 1))
+                                  .ordersOtherInjunctiveCourtName("Court name")
+                                  .ordersUndertakingInPlace(YesOrNo.Yes)
+                                  .ordersUndertakingInPlaceCurrent(YesOrNo.Yes)
+                                  .ordersUndertakingInPlaceDateIssued(LocalDate.of(1990, 8, 1))
+                                  .ordersUndertakingInPlaceEndDate(LocalDate.of(1991, 8, 1))
+                                  .ordersUndertakingInPlaceCourtName("Court name")
+                                  .physicalAbuseVictim(Collections.singletonList(ApplicantOrChildren.children))
+                                  .emotionalAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
+                                  .psychologicalAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
+                                  .sexualAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
+                                  .financialAbuseVictim((Collections.singletonList(ApplicantOrChildren.children)))
+                                  .previousAbductionThreats(YesOrNo.Yes)
+                                  .previousAbductionThreatsDetails("Details")
+                                  .abductionPreviousPoliceInvolvement(YesOrNo.No)
+                                  .allegationsOfHarmOtherConcerns(YesOrNo.Yes)
+                                  .allegationsOfHarmOtherConcernsDetails("Test String")
+                                  .agreeChildUnsupervisedTime(YesOrNo.No).build())
+
             //welsh language requirements
             .welshLanguageRequirement(YesOrNo.Yes)
             .languageRequirementApplicationNeedWelsh(YesOrNo.No)
@@ -291,7 +298,7 @@ public class ApplicationsTabServiceTest {
 
     @Test
     public void testGetGenerators() {
-        assertEquals(Collections.emptyList(), applicationsTabService.getGenerators());
+        assertEquals(Collections.emptyList(), applicationsTabService.getGenerators(caseDataWithParties));
     }
 
 
@@ -572,11 +579,15 @@ public class ApplicationsTabServiceTest {
             .ordersApplyingFor("Child Arrangements Order")
             .typeOfChildArrangementsOrder("Spend time with order")
             .natureOfOrder("Test nature of order")
+            .applicationPermissionRequired("Yes")
+            .applicationPermissionRequiredReason("Some xyz reason")
             .build();
         Map<String, Object> typeOfApplicationMap = Map.of(
             "ordersApplyingFor", "Child Arrangements Order",
             "typeOfChildArrangementsOrder", "Spend time with order",
-            "natureOfOrder", "Test nature of order"
+            "natureOfOrder", "Test nature of order",
+            "applicationPermissionRequired", "Yes",
+            "applicationPermissionRequiredReason", "Some xyz reason"
         );
 
         when(objectMapper.convertValue(typeOfApplication, Map.class)).thenReturn(typeOfApplicationMap);
@@ -787,8 +798,9 @@ public class ApplicationsTabServiceTest {
                                      .build())
             .build();
         CaseData orderCaseData = CaseData.builder()
-            .ordersNonMolestation(YesOrNo.Yes)
-            .ordersNonMolestationCourtName("non mol test")
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .ordersNonMolestation(YesOrNo.Yes)
+                                  .ordersNonMolestationCourtName("non mol test").build())
             .build();
         Map<String, Object> orderMap = Map.of(
             "ordersNonMolestation", "Yes",
