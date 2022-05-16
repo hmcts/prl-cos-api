@@ -130,7 +130,7 @@ public class ManageOrderEmailService {
         String typeOfHearing = "";
 
         log.info("-----Case urgency: {} =---",caseData.getIsCaseUrgent());
-        if (null!= caseData.getIsCaseUrgent() || YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
+        if (null != caseData.getIsCaseUrgent() || YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
             typeOfHearing = URGENT_CASE;
         }
 
