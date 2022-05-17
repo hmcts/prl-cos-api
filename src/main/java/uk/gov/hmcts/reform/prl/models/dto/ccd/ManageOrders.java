@@ -61,4 +61,23 @@ public class ManageOrders {
 
     private final YesOrNo isTheOrderByConsent;
     private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
+
+    //FL406
+    private final String courtNameFl406;
+    private final Address ukPostcodeFl406;
+    private final String caseNumberFl406;
+    private final String applicantNameFl406;
+    private final String applicantReferenceFl406;
+    private final String respondentReferenceFl406;
+    private final String respondentNameFl406;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate respondentDataOfBirthFl406;
+    private final String whichChildrenFl406;
+    private final String powerOfArrestParaFl406;
+    private final YesOrNo riskOfSignificantHarmFl406;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate dateOrderMadeFl406;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate dateOrderEndsFl406;
+    private String dateOrderEndsTimeFl406;
 }
