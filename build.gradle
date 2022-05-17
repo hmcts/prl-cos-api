@@ -530,12 +530,13 @@ project.tasks['sonarqube'].dependsOn jacocoTestReport
 def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/models/**/*',
   '**uk/gov/hmcts/reform/prl/enums/**/*',
-  '**uk/gov/hmcts/reform/prl/models/**/*',
-  '**uk/gov/hmcts/reform/prl/enums/**/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/SslVerificationDisabler.*',
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/utils/ElementUtils.java',
+  '**src/main/java/uk/gov/hmcts/reform/prl/enums/manageorders/*',
+  '**src/main/java/uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
+  '**src/main/java/uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java',
   '**uk/gov/hmcts/reform/prl/services/validators/EventsChecker.java',
   '**uk/gov/hmcts/reform/prl/services/pin/*',
   '**uk/gov/hmcts/reform/prl/controllers/ServeCaseController.java'
