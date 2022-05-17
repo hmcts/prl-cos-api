@@ -137,6 +137,42 @@ public class ManageOrders {
     @JsonProperty("applicantList")
     private final String applicantList;
 
+    /**
+     * Applicant Solicitor.
+     */
+
     @JsonProperty("applicantSolicitorList")
     private final String applicantSolicitorList;
+
+    @JsonProperty("applicantSolicitorOption1")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption1;
+    @JsonProperty("applicantSolicitorOption2")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption2;
+    @JsonProperty("applicantSolicitorOption3")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption3;
+    @JsonProperty("applicantSolicitorOption4")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption4;
+    @JsonProperty("applicantSolicitorOption5")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption5;
+    @JsonProperty("applicantSolicitorOption6")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption6;
+    @JsonProperty("applicantSolicitorOption7")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption7;
+    @JsonProperty("applicantSolicitorOption8")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption8;
+    @JsonProperty("applicantSolicitorOption9")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption9;
+    @JsonProperty("applicantSolicitorOption10")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption10;
+    @JsonProperty("applicantSolicitorOption11")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption11;
+    @JsonProperty("applicantSolicitorOption12")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption12;
+    @JsonProperty("applicantSolicitorOption13")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption13;
+    @JsonProperty("applicantSolicitorOption14")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption14;
+    @JsonProperty("applicantSolicitorOption15")
+    private final List<ApplicantSelectorEnum> applicantSolicitorOption15;
+
 }
