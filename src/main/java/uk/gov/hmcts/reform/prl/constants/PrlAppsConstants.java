@@ -75,6 +75,9 @@ public class PrlAppsConstants {
     public static final String GENERATE_FILE_NAME = "generateFileName";
 
     public static final String URL_STRING = "/";
+    public static final String D_MMMM_YYYY = "d MMMM yyyy";
+
+    public static final String APPOINTED_GUARDIAN_FULL_NAME = "appointedGuardianName";
     public static final String WITH_NOTICE = "With notice";
 
     public static final String DRAFT_STATE = State.AWAITING_SUBMISSION_TO_HMCTS.getValue();
