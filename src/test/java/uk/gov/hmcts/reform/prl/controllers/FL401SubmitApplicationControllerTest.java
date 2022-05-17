@@ -452,6 +452,13 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
@@ -691,6 +698,13 @@ public class FL401SubmitApplicationControllerTest {
         )))
             .thenReturn(court);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
         verify(documentGenService, times(1)).generateDocuments(
