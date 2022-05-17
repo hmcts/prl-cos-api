@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -24,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.format.DateTimeFormatter;
@@ -391,5 +391,28 @@ public class ManageOrderService {
             .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
         return caseDataUpdated;
     }
+
+    public ManageOrders getN117FormData(CaseData caseData) {
+
+        ManageOrders orderData = ManageOrders.builder()
+            .manageOrdersCaseNo(String.valueOf(caseData.getId()))
+            .manageOrdersCourtName(caseData.getCourtName())
+            .manageOrdersApplicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
+                                                 caseData.getApplicantsFL401().getLastName()))
+            .manageOrdersRespondent(String.format("%s %s", caseData.getRespondentsFL401().getFirstName(),
+                                                  caseData.getRespondentsFL401().getLastName()))
+            .manageOrdersApplicantReference(String.format("%s %s", caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                                                          caseData.getApplicantsFL401().getRepresentativeLastName()))
+            .build();
+
+        if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+            orderData = orderData.toBuilder().manageOrdersRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+        }
+        if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+            orderData = orderData.toBuilder().manageOrdersRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+        }
+        return orderData;
+    }
+
 
 }
