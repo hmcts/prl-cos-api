@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantSelectorEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ChildSelectorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -61,4 +63,80 @@ public class ManageOrders {
 
     private final YesOrNo isTheOrderByConsent;
     private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
+
+    /**
+     * child list.
+     */
+
+    @JsonProperty("childSelectorOption1")
+    private final List<ChildSelectorEnum> childSelectorOption1;
+    @JsonProperty("childSelectorOption2")
+    private final List<ChildSelectorEnum> childSelectorOption2;
+    @JsonProperty("childSelectorOption3")
+    private final List<ChildSelectorEnum> childSelectorOption3;
+    @JsonProperty("childSelectorOption4")
+    private final List<ChildSelectorEnum> childSelectorOption4;
+    @JsonProperty("childSelectorOption5")
+    private final List<ChildSelectorEnum> childSelectorOption5;
+    @JsonProperty("childSelectorOption6")
+    private final List<ChildSelectorEnum> childSelectorOption6;
+    @JsonProperty("childSelectorOption7")
+    private final List<ChildSelectorEnum> childSelectorOption7;
+    @JsonProperty("childSelectorOption8")
+    private final List<ChildSelectorEnum> childSelectorOption8;
+    @JsonProperty("childSelectorOption9")
+    private final List<ChildSelectorEnum> childSelectorOption9;
+    @JsonProperty("childSelectorOption10")
+    private final List<ChildSelectorEnum> childSelectorOption10;
+    @JsonProperty("childSelectorOption11")
+    private final List<ChildSelectorEnum> childSelectorOption11;
+    @JsonProperty("childSelectorOption12")
+    private final List<ChildSelectorEnum> childSelectorOption12;
+    @JsonProperty("childSelectorOption13")
+    private final List<ChildSelectorEnum> childSelectorOption13;
+    @JsonProperty("childSelectorOption14")
+    private final List<ChildSelectorEnum> childSelectorOption14;
+    @JsonProperty("childSelectorOption15")
+    private final List<ChildSelectorEnum> childSelectorOption15;
+
+    /**
+     * Applicant.
+     */
+
+    @JsonProperty("applicantSelectorOption1")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption1;
+    @JsonProperty("applicantSelectorOption2")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption2;
+    @JsonProperty("applicantSelectorOption3")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption3;
+    @JsonProperty("applicantSelectorOption4")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption4;
+    @JsonProperty("applicantSelectorOption5")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption5;
+    @JsonProperty("applicantSelectorOption6")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption6;
+    @JsonProperty("applicantSelectorOption7")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption7;
+    @JsonProperty("applicantSelectorOption8")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption8;
+    @JsonProperty("applicantSelectorOption9")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption9;
+    @JsonProperty("applicantSelectorOption10")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption10;
+    @JsonProperty("applicantSelectorOption11")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption11;
+    @JsonProperty("applicantSelectorOption12")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption12;
+    @JsonProperty("applicantSelectorOption13")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption13;
+    @JsonProperty("applicantSelectorOption14")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption14;
+    @JsonProperty("applicantSelectorOption15")
+    private final List<ApplicantSelectorEnum> applicantSelectorOption15;
+
+    @JsonProperty("applicantList")
+    private final String applicantList;
+
+    @JsonProperty("applicantSolicitorList")
+    private final String applicantSolicitorList;
 }

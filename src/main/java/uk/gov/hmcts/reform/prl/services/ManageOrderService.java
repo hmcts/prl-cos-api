@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -43,7 +42,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 
 @Service
 @Slf4j
@@ -115,7 +113,9 @@ public class ManageOrderService {
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
         return CaseData.builder().childrenList(getChildInfoFromCaseData(caseData))
-            .manageOrders(ManageOrders.builder().childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
+            .manageOrders(ManageOrders.builder()
+                              .applicantList(getApplicantDetails(caseData))
+                              .childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
@@ -215,6 +215,54 @@ public class ManageOrderService {
         return builder.toString();
     }
 
+
+    private String getApplicantDetails(CaseData caseData) {
+        StringBuilder builder = new StringBuilder();
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> partyDetails = new ArrayList<>();
+            if (caseData.getApplicants() != null) {
+                partyDetails = caseData.getApplicants().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+            }
+            for (int i = 0; i < partyDetails.size(); i++) {
+                PartyDetails applicant = partyDetails.get(i);
+                builder.append(String.format("Applicant %d: %s", i + 1, applicant.getFirstName() + " " + applicant.getLastName()));
+                builder.append("\n");
+            }
+        } else {
+
+            PartyDetails applicantFl401 = caseData.getApplicantsFL401();
+            builder.append(String.format("Applicant %s",  applicantFl401.getFirstName() + " " + applicantFl401.getLastName()));
+            builder.append("\n");
+        }
+
+        return builder.toString();
+    }
+
+    private String getRespondentDetails(CaseData caseData) {
+        StringBuilder builder = new StringBuilder();
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> partyDetails = new ArrayList<>();
+            if (caseData.getApplicants() != null) {
+                partyDetails = caseData.getRespondents().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+            }
+            for (int i = 0; i < partyDetails.size(); i++) {
+                PartyDetails respondent = partyDetails.get(i);
+                builder.append(String.format("Respondent %d: %s", i + 1, respondent.getFirstName() + " " + respondent.getLastName()));
+                builder.append("\n");
+            }
+        } else {
+            PartyDetails respondentFL401 = caseData.getRespondentsFL401();
+            builder.append(String.format("Respondent %s",  respondentFL401.getFirstName() + " " + respondentFL401.getLastName()));
+            builder.append("\n");
+        }
+
+        return builder.toString();
+    }
+
     private OrderDetails getCurrentOrderDetails(String authorisation, CaseData caseData)
         throws Exception {
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
@@ -287,10 +335,9 @@ public class ManageOrderService {
             return String.join("\n", applicantSolicitorNames);
         } else {
             PartyDetails applicantFl401 = caseData.getApplicantsFL401();
-            String applicantSolicitorName = applicantFl401.getRepresentativeFirstName()
+            return applicantFl401.getRepresentativeFirstName()
                 + " "
                 + applicantFl401.getRepresentativeLastName();
-            return  applicantSolicitorName;
         }
     }
 
@@ -307,10 +354,9 @@ public class ManageOrderService {
             return String.join("\n", respondentSolicitorNames);
         } else {
             PartyDetails respondentFl401 = caseData.getRespondentsFL401();
-            String respondentSolicitorName = respondentFl401.getRepresentativeFirstName()
+            return respondentFl401.getRepresentativeFirstName()
                 + " "
                 + respondentFl401.getRepresentativeLastName();
-            return  respondentSolicitorName;
         }
     }
 

@@ -15,10 +15,9 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -38,8 +37,9 @@ import javax.ws.rs.core.HttpHeaders;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -117,6 +117,40 @@ public class ManageOrdersController {
         }
         caseDataInput = caseDataInput.toBuilder()
             .childOption(childOption)
+            .build();
+        return CallbackResponse.builder()
+            .data(caseDataInput)
+            .build();
+    }
+
+    @PostMapping(path = "/fetch-applicant-respondent-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to fetch Applicant and respondent details and their solicitors ")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Child details are fetched"),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public CallbackResponse fetchApplicantAndRespondentDetails(
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        CaseData caseDataInput = manageOrderService.getUpdatedCaseData(caseData);
+        String applicantOption = null;
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            applicantOption = IntStream.range(0, defaultIfNull(caseData.getApplicants(), emptyList()).size())
+                .mapToObj(Integer::toString)
+                .collect(joining());
+        } else {
+            Optional<List<Element<ApplicantChild>>> applicantChildDetails = Optional.ofNullable(caseData.getApplicantChildDetails());
+            if (applicantChildDetails.isPresent()) {
+                applicantOption = IntStream.range(0, defaultIfNull(applicantChildDetails.get(), emptyList()).size())
+                    .mapToObj(Integer::toString)
+                    .collect(joining());
+            }
+        }
+        caseDataInput = caseDataInput.toBuilder()
+            .childOption(applicantOption)
             .build();
         return CallbackResponse.builder()
             .data(caseDataInput)
