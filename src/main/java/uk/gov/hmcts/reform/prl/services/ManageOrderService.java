@@ -186,44 +186,30 @@ public class ManageOrderService {
     }
 
     private String getChildInfoFromCaseData(CaseData caseData) {
-
         StringBuilder builder = new StringBuilder();
-
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            List<Child> children = caseData.getChildren().stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-
+            List<Child> children = new ArrayList<>();
+            if (caseData.getChildren() != null) {
+                children = caseData.getChildren().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+            }
             for (int i = 0; i < children.size(); i++) {
                 Child child = children.get(i);
-                builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + child.getLastName()));
+                builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + " " + child.getLastName()));
                 builder.append("\n");
             }
-
         } else {
-            builder.append(getFl401ChildrenString(caseData));
-        }
-        return builder.toString();
-    }
-
-    private String getFl401ChildrenString(CaseData caseData) {
-        StringBuilder builder = new StringBuilder();
-        if (ofNullable(caseData.getApplicantChildDetails()).isPresent()) {
-            List<ApplicantChild> children = unwrapElements(caseData.getApplicantChildDetails());
-            for (int i = 0; i < children.size(); i++) {
-                ApplicantChild child = children.get(i);
-                builder.append(String.format("Child %d: %s", i + 1, child.getFullName()));
-                builder.append("\n");
-            }
-        }
-        if (ofNullable(caseData.getHome()).isPresent() && ofNullable(caseData.getHome().getChildren()).isPresent()) {
-            List<ChildrenLiveAtAddress> childrenInHome = caseData.getHome().getChildren().stream()
-                .map(Element::getValue).collect(Collectors.toList());
-
-            for (int i = 0; i < childrenInHome.size(); i++) {
-                ChildrenLiveAtAddress child = childrenInHome.get(i);
-                builder.append(String.format("Child %d: %s", i + 1, child.getChildFullName()));
-                builder.append("\n");
+            Optional<List<Element<ApplicantChild>>> applicantChildDetails = ofNullable(caseData.getApplicantChildDetails());
+            if (applicantChildDetails.isPresent()) {
+                List<ApplicantChild> children = applicantChildDetails.get().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                for (int i = 0; i < children.size(); i++) {
+                    ApplicantChild child = children.get(i);
+                    builder.append(String.format("Child %d: %s", i + 1, child.getFullName()));
+                    builder.append("\n");
+                }
             }
         }
         return builder.toString();
