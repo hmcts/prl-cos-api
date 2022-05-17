@@ -238,8 +238,13 @@ public class CaseData implements MappableObject {
     private final String soleTraderName1;
     private final Document miamCertificationDocumentUpload1;
 
+    /**
+     * Allegations of harm.
+     */
+
     @JsonUnwrapped
     private final AllegationOfHarm allegationOfHarm;
+
     /**
      * Other people in the case.
      */
