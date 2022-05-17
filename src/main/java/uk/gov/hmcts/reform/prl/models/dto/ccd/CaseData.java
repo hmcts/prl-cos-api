@@ -238,8 +238,13 @@ public class CaseData implements MappableObject {
     private final String soleTraderName1;
     private final Document miamCertificationDocumentUpload1;
 
+    /**
+     * Allegations of harm.
+     */
+
     @JsonUnwrapped
     private final AllegationOfHarm allegationOfHarm;
+
     /**
      * Other people in the case.
      */
@@ -556,7 +561,9 @@ public class CaseData implements MappableObject {
     private final String childrenList;
 
     @JsonUnwrapped
-    private final ManageOrders manageOrders;
+    @Builder.Default
+    private final ManageOrders manageOrders = ManageOrders.builder().build();
+
 
     /**
      * Solicitor Details.
