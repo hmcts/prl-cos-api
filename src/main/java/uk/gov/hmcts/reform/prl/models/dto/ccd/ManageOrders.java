@@ -31,15 +31,8 @@ public class ManageOrders {
     private final String furtherDirectionsIfRequired;
 
     /**
-     * C47A.
-     */
-    @JsonProperty("cafcassOfficeDetails")
-    private String cafcassOfficeDetails;
-
-    /**
      * C43.
      */
-
     @JsonProperty("childArrangementsOrdersToIssue")
     private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
     @JsonProperty("selectChildArrangementsOrder")
