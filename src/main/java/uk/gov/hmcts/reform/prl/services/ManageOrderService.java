@@ -56,8 +56,6 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c21_draft_filename}")
     protected String c21DraftFile;
 
-    public static final String FAMILY_MAN_ID = "Family Man ID: ";
-
     @Value("${document.templates.common.prl_c21_template}")
     protected String c21Template;
 
