@@ -128,7 +128,7 @@ allprojects {
       }
 
       // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
-      dependencySet(group: 'io.netty', version: '4.1.75.Final') {
+      dependencySet(group: 'io.netty', version: '4.1.74.Final') {
         entry 'netty-buffer'
         entry 'netty-codec'
         entry 'netty-codec-http'
@@ -247,12 +247,12 @@ dependencyCheck {
 
 dependencies {
 
-  implementation 'org.testng:testng:7.5'
-  implementation 'org.testng:testng:7.5'
-  implementation 'org.testng:testng:7.5'
-  implementation 'org.testng:testng:7.5'
-  implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
-  implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+  implementation 'org.testng:testng:7.1.0'
+  implementation 'org.testng:testng:7.1.0'
+  implementation 'org.testng:testng:7.1.0'
+  implementation 'org.testng:testng:7.1.0'
+  implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+  implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
   compileOnly("org.projectlombok:lombok:${versions.lombok}")
   testCompileOnly("org.projectlombok:lombok:${versions.lombok}")
@@ -271,7 +271,7 @@ dependencies {
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.0'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
   implementation group: 'org.apache.commons', name: 'commons-math3', version: versions.commonsMath3
-  implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.19'
+  implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.16'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
@@ -530,6 +530,8 @@ project.tasks['sonarqube'].dependsOn jacocoTestReport
 def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/models/**/*',
   '**uk/gov/hmcts/reform/prl/enums/**/*',
+  '**uk/gov/hmcts/reform/prl/models/**/*',\
+  '**uk/gov/hmcts/reform/prl/enums/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/SslVerificationDisabler.*',
   '**uk/gov/hmcts/reform/prl/Application.*',
@@ -539,7 +541,8 @@ def sonarExclusions = [
   '**src/main/java/uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java',
   '**uk/gov/hmcts/reform/prl/services/validators/EventsChecker.java',
   '**uk/gov/hmcts/reform/prl/services/pin/*',
-  '**uk/gov/hmcts/reform/prl/controllers/ServeCaseController.java'
+  '**uk/gov/hmcts/reform/prl/controllers/ServeCaseController.java',
+  '**uk/gov/hmcts/reform/prl/services/validators/EventsChecker.java'
 ]
 
 sonarqube {
