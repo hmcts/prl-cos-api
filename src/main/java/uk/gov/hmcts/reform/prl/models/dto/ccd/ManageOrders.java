@@ -42,7 +42,8 @@ public class ManageOrders {
     private final Address respondentAddress;
     private final YesOrNo orderPropertyYesNo;
     private final Address orderPropertyAddress;
-    private final RespondentMustNotListEnum respondentMustNotList;
+    @JsonProperty("respondentMustNotList")
+    private final List<RespondentMustNotListEnum> respondentMustNotList;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMadeInput;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

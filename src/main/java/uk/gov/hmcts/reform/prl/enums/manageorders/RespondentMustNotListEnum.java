@@ -21,8 +21,8 @@ public enum RespondentMustNotListEnum {
                                 "Must not intimidate, harass or pester the applicant, and must not "
                                     + "instruct, encourage or in any way suggest that any other person should do so"),
 
-    @JsonProperty("notContact")
-    notContact("notContact",
+    @JsonProperty("notContactApplicant")
+    notContact("notContactApplicant",
                "Must not telephone, text, email or otherwise contact or attempt to contact the applicant"),
 
     @JsonProperty("notDamageApplicantProperty")
