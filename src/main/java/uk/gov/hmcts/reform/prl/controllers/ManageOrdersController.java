@@ -76,7 +76,7 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.put("previewOrderDoc",caseData.getAppointmentOfGuardian());
         }
-        allTabsService.updateAllTabs(caseData);
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
@@ -154,6 +154,7 @@ public class ManageOrdersController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("orderCollection", manageOrderService
             .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
+        allTabsService.updateAllTabs(caseData);
         caseDataUpdated.remove("previewOrderDoc");
         caseDataUpdated.remove("dateOrderMade");
         caseDataUpdated.remove("createSelectOrderOptions");
