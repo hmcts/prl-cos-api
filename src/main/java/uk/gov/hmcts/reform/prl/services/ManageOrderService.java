@@ -377,9 +377,6 @@ public class ManageOrderService {
 
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
 
-        log.info("Judge or magistrate Title: ---{}---", caseData.getJudgeOrMagistrateTitle());
-        log.info("Is the order by consent: ---{}---", caseData.getIsTheOrderByConsent());
-
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
