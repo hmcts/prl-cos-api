@@ -243,6 +243,10 @@ document:
       prl_c49_draft_filename: C49ADraftCreateOrder.pdf
       prl_c49_template: PRL-ORDER-C49-COMMON.docx
       prl_c49_filename: C49FinalCreateOrder.pdf
+      prl_c45a_template: PRL-ORDERS-C45A-FINAL.docx
+      prl_c45a_filename: C45ACreateOrder.pdf
+      prl_c45a_draft_template: PRL-ORDERS-C45A-DRAFT.docx
+      prl_c45a_draft_filename: C45ACreateOrderDraft.pdf
 
 southampton:
   court:

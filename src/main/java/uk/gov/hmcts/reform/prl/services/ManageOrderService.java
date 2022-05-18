@@ -65,6 +65,12 @@ public class ManageOrderService {
     @Value("${document.templates.common.C43A_draft_filename}")
     protected String c43ADraftFilename;
 
+    @Value("${document.templates.common.C43A_final_template}")
+    protected String c43AFinalTemplate;
+
+    @Value("${document.templates.common.C43A_final_filename}")
+    protected String c43AFinalFilename;
+
     @Value("${document.templates.common.prl_c43_draft_template}")
     protected String c43DraftTemplate;
 
@@ -76,6 +82,18 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_c43_filename}")
     protected String c43File;
+
+    @Value("${document.templates.common.prl_c47a_draft_template}")
+    protected String c45aDraftTemplate;
+
+    @Value("${document.templates.common.prl_c47a_draft_filename}")
+    protected String c45aDraftFile;
+
+    @Value("${document.templates.common.prl_c47a_template}")
+    protected String c45aTemplate;
+
+    @Value("${document.templates.common.prl_c47a_filename}")
+    protected String c45aFile;
 
     @Value("${document.templates.common.prl_c47a_draft_template}")
     protected String c47aDraftTemplate;
@@ -143,6 +161,8 @@ public class ManageOrderService {
             case specialGuardianShip:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c43ADraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c43ADraftFilename);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c43AFinalTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c43AFinalFilename);
                 break;
             case appointmentOfGuardian:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c47aDraftTemplate);
@@ -150,6 +170,13 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
                 break;
+            case parentalResponsibility:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c45aDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c45aDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c45aTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c45aFile);
+                break;
+
             case transferOfCaseToAnotherCourt:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c49TDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c49DraftFile);
