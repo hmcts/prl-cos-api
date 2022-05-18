@@ -555,15 +555,31 @@ public class CaseData implements MappableObject {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
 
+    @JsonProperty("childOption")
+    private final String childOption;
+
+    @JsonProperty("applicantOption")
+    private final String applicantOption;
+
+    @JsonProperty("applicantSolicitorOption")
+    private final String applicantSolicitorOption;
+
+    @JsonProperty("respondentOption")
+    private final String respondentOption;
+
+    @JsonProperty("respondentSolicitorOption")
+    private final String respondentSolicitorOption;
+
+    @JsonProperty("childrenList")
+    private final String childrenList;
+
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
     //private final List<String> cafcassEmailAddress;
     //private final List<String> otherEmailAddress;
-    private final String childrenList;
 
     @JsonUnwrapped
     @Builder.Default
     private final ManageOrders manageOrders = ManageOrders.builder().build();
-
 
     /**
      * Solicitor Details.
