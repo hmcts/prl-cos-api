@@ -226,6 +226,34 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void testPopulatePreviewOrderFromParentalResponsibility() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.parentalResponsibility)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        manageOrderService.getCaseData("test token", caseData, caseDataUpdated);
+
+        assertNotNull(caseDataUpdated.get("previewOrderDoc"));
+    }
+
+    @Test
     public void testPopulatePreviewOrderFromTransferOfCase() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
