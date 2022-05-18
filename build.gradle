@@ -60,7 +60,8 @@ def versions = [
   springCloud                  : '3.0.3',
   tomcat                       : '9.0.58',
   unirest                      : '1.4.9',
-  ccdCaseDocumentAmClient      : '1.7.3'
+  ccdCaseDocumentAmClient      : '1.7.3',
+  pdfbox                       : '2.0.24'
 ]
 
 allprojects {
@@ -296,7 +297,9 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
   implementation group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '3.0.3'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
+  implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
+  compile group: 'uk.gov.hmcts.reform', name: 'document-management-client', version: '7.0.0'
   compile group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '2.2.0'
   compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '5.7.1'
   compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
@@ -357,6 +360,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
 
+  testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '4.5.1'
   testImplementation group: 'io.rest-assured', name: 'json-path', version: '4.5.1'
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: '4.5.1'
@@ -385,6 +389,7 @@ dependencies {
   integrationTestImplementation group: 'org.skyscreamer', name: 'jsonassert', version: versions.jsonAssert
   integrationTestImplementation group: 'org.springframework', name: 'spring-context-support'
   integrationTestImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+  integrationTestImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   integrationTestImplementation(group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign')
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'

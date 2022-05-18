@@ -243,3 +243,6 @@ document:
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
+
+document_management:
+  url: xxx
