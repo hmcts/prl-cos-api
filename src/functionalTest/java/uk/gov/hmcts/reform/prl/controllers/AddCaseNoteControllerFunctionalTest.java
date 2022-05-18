@@ -6,20 +6,26 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+
 
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class FL401SubmitApplicationControllerFunctionalTest {
+public class AddCaseNoteControllerFunctionalTest {
 
     private final String userToken = "Bearer testToken";
 
-    private static final String VALID_REQUEST_BODY = "controller/valid-request-body.json";
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
+
+    private static final String VALID_REQUEST_BODY = "requests/call-back-controller-add-casenote-request.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -29,41 +35,27 @@ public class FL401SubmitApplicationControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-
     @Test
-    public void givenNoRequestBodyReturn400FromSubmitApplication() throws Exception {
+    public void givenaddCaseNoteDetails_whenPostRequestToAddCaseNoteController_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
-            .header("Authorization", userToken)
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/fl401-submit-application-validation")
-            .then()
-            .assertThat().statusCode(400);
+            .post("/submit-case-note")
+            .then().assertThat().statusCode(200);
     }
 
     @Test
-    public void givenNoRequestBodyReturn400FromGenerateDocument() throws Exception {
+    public void givenRequestBody_whenPostRequestToFetchHeader_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
-            .header("Authorization", userToken)
+            .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/fl401-generate-document-submit-application")
+            .post("/populate-header-case-note")
             .then()
-            .assertThat().statusCode(400);
+            .assertThat().statusCode(200);
     }
-
-    @Test
-    public void givenNoRequestBodyReturn400FromSubmitAndSendNotification() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        request
-            .header("Authorization", userToken)
-            .when()
-            .contentType("application/json")
-            .post("/fl401-submit-application-send-notification")
-            .then()
-            .assertThat().statusCode(400);
-    }
-
 }

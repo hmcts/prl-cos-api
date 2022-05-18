@@ -19,6 +19,27 @@ spring:
     import: "optional:configtree:/mnt/secrets/"
   application:
     name: Prl cos api
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
+#    username: ${DB_USER_NAME}
+#    password: ${DB_PASSWORD}
+#    properties:
+#      charSet: UTF-8
+#    hikari:
+#      minimumIdle: 2
+#      maximumPoolSize: 10
+#      idleTimeout: 10000
+#      poolName: {to-be-defined}HikariCP
+#      maxLifetime: 7200000
+#      connectionTimeout: 30000
+#  jpa:
+#    properties:
+#      hibernate:
+#        jdbc:
+#          lob:
+#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
+#            non_contextual_creation: true
 
 azure:
   application-insights:
@@ -40,10 +61,10 @@ pba:
 
 feature-toggle:
   toggle:
-    example: false
+    example: ${FEATURE_EXAMPLE:false}
 
 xui:
-  url: http://localhost:3000
+  url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
 uk:
   gov:
@@ -60,8 +81,11 @@ uk:
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
             COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
             GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
+            GATEKEEPER_FL401: c078de4d-9177-4e0d-ab9f-5adcf27a6ee5
             DA_SOLICITOR: d65830b7-eb13-46c3-b772-03976a67210d
             DA_LOCALCOURT: 9d6b311a-a764-45a7-9dd9-cd1d06408214
+            WITHDRAW_AFTER_ISSUED_LOCAL_COURT: 233e4bfa-d9ec-42c2-a06a-d8cce9abd238
+            WITHDRAW_AFTER_ISSUED_SOLICITOR: ba39a8e6-c553-457e-b526-3c241cd207f6
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
           welsh:
@@ -105,18 +129,18 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: GT2V6PLQ34XGPTPM
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
-    url: http://localhost:5000
+    url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
-    redirect_uri: http://localhost:3000/oauth2/callback
-    secret: W7supXKMJgcEWKBS
+    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
+    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
 
 prl:
   system-update:
-    username: prl_local_sysupdate@mailinator.com
-    password: Password12
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
 
 
 security:
@@ -124,14 +148,14 @@ security:
     client:
       provider:
         oidc:
-          issuer-uri: http://locahost:5000/o
+          issuer-uri: ${idam.web.url}/o
       registration:
         oidc:
           client-id: internal
           client-secret: internal
 core_case_data:
   api:
-    url: http://localhost:4452
+    url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
 
 auth:
   idam:
@@ -156,15 +180,14 @@ case_document_am:
   url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
 
 prl-dgs-api:
-  url: http://localhost:4007
-  #url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
+  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
 
 courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
 launchdarkly:
-  sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
+  sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
 
 rd_professional:
   api:
@@ -221,6 +244,10 @@ document:
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
       prl_fl404a_draft_template: PRL-ORDERS-FL404A-NM-DRAFT.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
+      prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
+      prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
+      prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
+      prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
 
 southampton:
   court:
