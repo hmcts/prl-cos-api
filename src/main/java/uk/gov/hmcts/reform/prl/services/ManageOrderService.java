@@ -68,6 +68,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.C43A_draft_filename}")
     protected String c43ADraftFilename;
 
+    @Value("${document.templates.common.prl_c49_draft_template}")
+    protected String c49TDraftTemplate;
+
+    @Value("${document.templates.common.prl_c49_draft_filename}")
+    protected String c49DraftFile;
+
+    @Value("${document.templates.common.prl_c49_template}")
+    protected String c49Template;
+
+    @Value("${document.templates.common.prl_c49_filename}")
+    protected String c49File;
+
     @Value("${document.templates.common.C43A_final_template}")
     protected String c43AFinalTemplate;
 
@@ -127,6 +139,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
+                break;
+            case transferOfCaseToAnotherCourt:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c49TDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c49DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c49Template);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c49File);
                 break;
             case blankOrderOrDirectionsWithdraw:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);

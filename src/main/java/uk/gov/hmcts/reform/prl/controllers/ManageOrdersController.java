@@ -59,6 +59,7 @@ public class ManageOrdersController {
     @Value("${document.templates.common.C43A_draft_filename}")
     protected String c43ADraftFilename;
 
+
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to show preview order in next screen for upload order")
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
@@ -150,9 +151,6 @@ public class ManageOrdersController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("orderCollection", manageOrderService
             .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
-        caseDataUpdated.remove("previewOrderDoc");
-        caseDataUpdated.remove("dateOrderMade");
-        caseDataUpdated.remove("createSelectOrderOptions");
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
