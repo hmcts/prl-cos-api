@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -60,8 +59,6 @@ public class ManageOrdersController {
     @Value("${document.templates.common.C43A_draft_filename}")
     protected String c43ADraftFilename;
 
-
-    private final AllTabServiceImpl allTabsService;
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to show preview order in next screen for upload order")
@@ -154,7 +151,6 @@ public class ManageOrdersController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("orderCollection", manageOrderService
             .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
-        allTabsService.updateAllTabs(caseData);
         caseDataUpdated.remove("previewOrderDoc");
         caseDataUpdated.remove("dateOrderMade");
         caseDataUpdated.remove("createSelectOrderOptions");

@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,8 +88,6 @@ public class ManageOrdersControllerTest {
     @Mock
     private UserDetails userDetails;
 
-    @Mock
-    private  AllTabServiceImpl allTabsService;
 
     PartyDetails applicant;
 
