@@ -564,6 +564,12 @@ public class CaseData implements MappableObject {
     @JsonProperty("applicantSolicitorOption")
     private final String applicantSolicitorOption;
 
+    @JsonProperty("respondentOption")
+    private final String respondentOption;
+
+    @JsonProperty("applicantSolicitorOption")
+    private final String respondentSolicitorOption;
+
     @JsonProperty("childrenList")
     private final String childrenList;
 

@@ -115,6 +115,9 @@ public class ManageOrderService {
         return CaseData.builder().childrenList(getChildInfoFromCaseData(caseData))
             .manageOrders(ManageOrders.builder()
                               .applicantList(getApplicantDetails(caseData))
+                              .applicantSolicitorList(getApplicantSolicitorDetails(caseData))
+                              .respondentList(getRespondentDetails(caseData))
+                              .respondentSolicitorList(getRespondentSolicitorDetails(caseData))
                               .childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }

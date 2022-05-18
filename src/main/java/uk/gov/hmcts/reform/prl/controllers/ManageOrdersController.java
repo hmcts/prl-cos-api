@@ -137,8 +137,20 @@ public class ManageOrdersController {
         );
         CaseData caseDataInput = manageOrderService.getUpdatedCaseData(caseData);
         String applicantOption = null;
+        String applicantSolicitorOption = null;
+        String respondentOption = null;
+        String respondentSolicitorOption = null;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicantOption = IntStream.range(0, defaultIfNull(caseData.getApplicants(), emptyList()).size())
+                .mapToObj(Integer::toString)
+                .collect(joining());
+            applicantSolicitorOption = IntStream.range(0, defaultIfNull(caseData.getApplicants(), emptyList()).size())
+                .mapToObj(Integer::toString)
+                .collect(joining());
+            respondentOption = IntStream.range(0, defaultIfNull(caseData.getRespondents(), emptyList()).size())
+                .mapToObj(Integer::toString)
+                .collect(joining());
+            respondentSolicitorOption = IntStream.range(0, defaultIfNull(caseData.getRespondents(), emptyList()).size())
                 .mapToObj(Integer::toString)
                 .collect(joining());
         } else {
@@ -151,6 +163,9 @@ public class ManageOrdersController {
         }
         caseDataInput = caseDataInput.toBuilder()
             .applicantOption(applicantOption)
+            .applicantSolicitorOption(applicantSolicitorOption)
+            .respondentOption(respondentOption)
+            .respondentSolicitorOption(respondentSolicitorOption)
             .build();
         return CallbackResponse.builder()
             .data(caseDataInput)
