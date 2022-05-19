@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
@@ -531,33 +530,16 @@ public class CaseData implements MappableObject {
     private final ManageOrdersOptionsEnum manageOrdersOptions;
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
 
-    /*Commented below as getiing too many parameters error for @AllArgsConstructor
-    * */
-    //create orders flow
-    //private final CafcassEnum cafcassRecipient;
-
-    //private final HearingTypeEnum hearingType;
-    //private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
-
     private final List<OrderRecipientsEnum> orderRecipients;
-    //private final OtherEnum otherRecipient;
-    //private final OtherOrderRecipientsEnum otherOrderRecipients;
-    //private final SelectTypeOfOrderEnum selectTypeOfOrder;
-    //private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
-
 
     private final YesOrNo doesOrderClosesCase;
-    private final YesOrNo isTheOrderByConsent;
     private final YesOrNo wasTheOrderApprovedAtHearing;
-    private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
 
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
-    //private final List<String> cafcassEmailAddress;
-    //private final List<String> otherEmailAddress;
     private final String childrenList;
 
     @JsonUnwrapped
