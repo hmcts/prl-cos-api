@@ -237,6 +237,10 @@ document:
       prl_c43_filename: C43CreateOrder.pdf
       prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
       prl_c43_draft_filename: C43CreateOrderDraft.pdf
+      prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
+      prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
+      prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
+      prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
 
 southampton:
   court:
