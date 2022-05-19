@@ -245,4 +245,4 @@ southampton:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
 
 document_management:
-  url: xxx
+  url: ${CCD_CASE_DOCS_AM_API:}
