@@ -496,7 +496,7 @@ public class ManageOrderEmailServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassEmailAddress(listOfCafcassEmail)
-            .otherEmailAddres(listOfOtherEmail)
+            .otherEmailAddress(listOfOtherEmail)
             .build();
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -562,6 +562,6 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
         assertEquals(listOfCafcassEmail, caseData.getManageOrders().getCafcassEmailAddress());
-        assertEquals(listOfOtherEmail, caseData.getManageOrders().getOtherEmailAddres());
+        assertEquals(listOfOtherEmail, caseData.getManageOrders().getOtherEmailAddress());
     }
 }

@@ -111,7 +111,7 @@ public class ManageOrderEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        List<String> otherEmails = manageOrders.getOtherEmailAddres()
+        List<String> otherEmails = manageOrders.getOtherEmailAddress()
             .stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
