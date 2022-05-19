@@ -244,4 +244,4 @@ southampton:
 
 
 document_management:
-  url: ${CCD_CASE_DOCS_AM_API:}
+  url: ${CCD_CASE_DOCS_AM_API:xxxx}
