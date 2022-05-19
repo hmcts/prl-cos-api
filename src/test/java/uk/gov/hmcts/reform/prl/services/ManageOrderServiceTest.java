@@ -96,7 +96,7 @@ public class ManageOrderServiceTest {
     public void getUpdatedCaseDataFl401() {
 
         ApplicantChild child = ApplicantChild.builder()
-            .fullName("Test Child Name")
+            .fullName("TestName")
             .build();
 
         Element<ApplicantChild> wrappedChildren = Element.<ApplicantChild>builder().value(child).build();
