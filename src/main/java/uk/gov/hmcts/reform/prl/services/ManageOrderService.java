@@ -56,8 +56,6 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c21_draft_filename}")
     protected String c21DraftFile;
 
-    public static final String FAMILY_MAN_ID = "Family Man ID: ";
-
     @Value("${document.templates.common.prl_c21_template}")
     protected String c21Template;
 
@@ -379,5 +377,28 @@ public class ManageOrderService {
             .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
         return caseDataUpdated;
     }
+
+    public ManageOrders getN117FormData(CaseData caseData) {
+
+        ManageOrders orderData = ManageOrders.builder()
+            .manageOrdersCaseNo(String.valueOf(caseData.getId()))
+            .manageOrdersCourtName(caseData.getCourtName())
+            .manageOrdersApplicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
+                                                 caseData.getApplicantsFL401().getLastName()))
+            .manageOrdersRespondent(String.format("%s %s", caseData.getRespondentsFL401().getFirstName(),
+                                                  caseData.getRespondentsFL401().getLastName()))
+            .manageOrdersApplicantReference(String.format("%s %s", caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                                                          caseData.getApplicantsFL401().getRepresentativeLastName()))
+            .build();
+
+        if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+            orderData = orderData.toBuilder().manageOrdersRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+        }
+        if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+            orderData = orderData.toBuilder().manageOrdersRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+        }
+        return orderData;
+    }
+
 
 }
