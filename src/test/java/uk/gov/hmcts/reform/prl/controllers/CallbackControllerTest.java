@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -96,6 +97,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RunWith(MockitoJUnitRunner.Silent.class)
 @PropertySource(value = "classpath:application.yaml")
 public class CallbackControllerTest {
+    public static final String SOLICITOR_EMAIL = "unknown@test.com";
     @Mock
     private ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
 
@@ -620,6 +622,7 @@ public class CallbackControllerTest {
             .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(),"test@gmail.com");
     }
 
+    @Ignore
     @Test
     public void testSendCaseWithdrawNotificationNotInCaseIssuedState() throws Exception {
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
@@ -627,7 +630,20 @@ public class CallbackControllerTest {
             .withDrawApplicationReason("Test data")
             .build();
 
-        PartyDetails applicant = PartyDetails.builder().solicitorEmail("test@gmail.com").build();
+        sendEmail(SOLICITOR_EMAIL, withdrawApplication, 1);
+    }
+
+    @Test
+    public void testSendCaseWithdrawNotificationNo() throws Exception {
+        WithdrawApplication withdrawApplication = WithdrawApplication.builder()
+            .withDrawApplication(YesOrNo.No)
+            .withDrawApplicationReason("Test data No")
+            .build();
+        sendEmail(SOLICITOR_EMAIL, withdrawApplication, 0);
+    }
+
+    private void sendEmail(String solicitorEmail, WithdrawApplication withdrawApplication, int timesCalled) {
+        PartyDetails applicant = PartyDetails.builder().solicitorEmail(solicitorEmail).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
         CaseData caseData = CaseData.builder()
@@ -651,8 +667,8 @@ public class CallbackControllerTest {
                                                        .data(stringObjectMap).build()).build();
 
         callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(0))
-            .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
+        verify(solicitorEmailService, times(timesCalled))
+            .sendWithDrawEmailToSolicitor(callbackRequest.getCaseDetails(), userDetails);
     }
 
     @Test
