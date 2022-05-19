@@ -100,9 +100,7 @@ public class ManageOrderEmailService {
     }
 
 
-    public void sendEmailToCafcass(CaseDetails caseDetails) {
-
-        log.info("We are about to send an email to cafcass");
+    public void sendEmailToCafcassAndOtherParties(CaseDetails caseDetails) {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
 
@@ -120,31 +118,25 @@ public class ManageOrderEmailService {
 
         cafcassEmails.addAll(otherEmails);
 
-        log.info("Cafcass email id {}", cafcassEmails);
-
         cafcassEmails.forEach(email ->   emailService.send(
             email,
             EmailTemplateNames.CAFCASS,
-            buildCafcassEmail(caseData),
+            buildEmailToCafcassAndOtherParties(caseData),
             LanguagePreference.english
         ));
 
-        log.info("An email has been sent to cafcass");
     }
 
-    public EmailTemplateVars buildCafcassEmail(CaseData caseData) {
+    public EmailTemplateVars buildEmailToCafcassAndOtherParties(CaseData caseData) {
 
         String typeOfHearing = " ";
 
-        log.info("-----Case urgency: {} =---",caseData.getIsCaseUrgent());
         if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
             typeOfHearing = URGENT_CASE;
         }
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
-        log.info("----- Case issue date: {} -----", caseData.getIssueDate());
-        log.info("===== Case Document URL: {} ====", caseData.getPreviewOrderDoc().getDocumentUrl());
         return ManageOrderEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())

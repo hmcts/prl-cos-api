@@ -324,7 +324,7 @@ public class ManageOrderEmailServiceTest {
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
-        assertEquals(email, manageOrderEmailService.buildCafcassEmail(caseData));
+        assertEquals(email, manageOrderEmailService.buildEmailToCafcassAndOtherParties(caseData));
     }
 
     @Test
@@ -439,7 +439,7 @@ public class ManageOrderEmailServiceTest {
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
-        assertEquals(email, manageOrderEmailService.buildCafcassEmail(caseData));
+        assertEquals(email, manageOrderEmailService.buildEmailToCafcassAndOtherParties(caseData));
     }
 
     @Test
@@ -560,7 +560,7 @@ public class ManageOrderEmailServiceTest {
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
-        manageOrderEmailService.sendEmailToCafcass(caseDetails);
+        manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
         assertEquals(listOfCafcassEmail, caseData.getManageOrders().getCafcassEmailAddress());
         assertEquals(listOfOtherEmail, caseData.getManageOrders().getOtherEmailAddres());
     }

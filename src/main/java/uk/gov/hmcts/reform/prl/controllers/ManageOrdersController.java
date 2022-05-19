@@ -130,7 +130,7 @@ public class ManageOrdersController {
 
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        manageOrderEmailService.sendEmailToCafcass(caseDetails);
+        manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
