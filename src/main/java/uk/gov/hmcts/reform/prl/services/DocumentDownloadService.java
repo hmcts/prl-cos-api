@@ -10,12 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.document.DocumentDownloadClientApi;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.exception.EmptyFileException;
 
-import java.net.URI;
 import java.util.Optional;
 
 import static java.lang.String.join;
@@ -26,7 +25,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DocumentDownloadService {
     private final AuthTokenGenerator authTokenGenerator;
-    private final DocumentDownloadClientApi documentDownloadClient;
+    private final CaseDocumentClient caseDocumentClient;
     private final IdamClient idamClient;
 
     public byte[] downloadDocument(final String documentUrlString, String authorisation) {
@@ -38,11 +37,9 @@ public class DocumentDownloadService {
         log.info("Download document {} by user {} with roles {}", documentUrlString, userInfo.getUid(), userRoles);
 
         ResponseEntity<Resource> documentDownloadResponse =
-            documentDownloadClient.downloadBinary(authorisation,
+            caseDocumentClient.getDocumentBinary(authorisation,
                                                   authTokenGenerator.generate(),
-                                                  userRoles,
-                                                  userInfo.getUid(),
-                                                  URI.create(documentUrlString).getPath());
+                                                  documentUrlString);
 
         if (isNotEmpty(documentDownloadResponse) && HttpStatus.OK == documentDownloadResponse.getStatusCode()) {
             return Optional.of(documentDownloadResponse)

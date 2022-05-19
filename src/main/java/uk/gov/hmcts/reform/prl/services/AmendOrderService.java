@@ -3,13 +3,14 @@ package uk.gov.hmcts.reform.prl.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.document.domain.Document;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,7 +29,7 @@ public class AmendOrderService {
     private final  UploadDocumentService uploadService;
     private final Time time;
 
-    public Map<String, Object> updateOrder(CaseData caseData, String authorisation) {
+    public Map<String, Object> updateOrder(CaseData caseData, String authorisation) throws IOException {
         ManageOrders eventData = caseData.getManageOrders();
 
         byte[] stampedBinaries = stamper.amendDocument(eventData.getManageOrdersDocumentToAmend(), authorisation);
