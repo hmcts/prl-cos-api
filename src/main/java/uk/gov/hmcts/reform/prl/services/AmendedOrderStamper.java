@@ -10,7 +10,11 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.util.Matrix;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
@@ -37,10 +41,11 @@ public class AmendedOrderStamper {
     private static final float FONT_SIZE = 16f;
     private static final String FONT_LOCATION = "fonts/arial_bold.ttf";
 
-    private final DocumentDownloadService downloadService;
+    private final CaseDocumentClient caseDocumentClient;
+    private final AuthTokenGenerator authTokenGenerator;
     private final Time time;
 
-    public byte[] amendDocument(Document original, String authorisation) {
+    public byte[] amendDocument(Document original, String authorisation) throws IOException {
         if (!hasExtension(original, PDF)) {
             throw new UnsupportedOperationException(
                 "Can only amend documents that are pdf, requested document was of type: "
@@ -48,14 +53,23 @@ public class AmendedOrderStamper {
             );
         }
 
-        byte[] documentContents = downloadService.downloadDocument(original.getDocumentBinaryUrl(), authorisation);
+        ResponseEntity<Resource> downloadedDocument = caseDocumentClient.getDocumentBinary(authorisation,
+                                                                                           authTokenGenerator.generate(),
+                                                                                           original.getDocumentBinaryUrl());
 
         try {
-            return amendDocument(documentContents);
-        } catch (IOException e) {
-            log.error("Could not add amendment text to {}", original, e);
-            throw new UncheckedIOException(e);
+            byte[] documentContents = downloadedDocument.getBody().getInputStream().readAllBytes();
+            try {
+                return amendDocument(documentContents);
+            } catch (IOException e) {
+                log.error("Could not add amendment text to {}", original, e);
+                throw new UncheckedIOException(e);
+            }
+        } catch (NullPointerException np) {
+            log.error("Could not get document body from response {}", original, np);
+            throw new IOException(np);
         }
+
     }
 
     private byte[] amendDocument(byte[] binaries) throws IOException {
