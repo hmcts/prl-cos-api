@@ -539,8 +539,13 @@ public class CaseData implements MappableObject {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
 
-    private List<Element<AppointedGuardianFullName>> appointedGuardianName;
+    @JsonProperty("childOption")
+    private final String childOption;
+
+    @JsonProperty("childrenList")
     private final String childrenList;
+
+    private List<Element<AppointedGuardianFullName>> appointedGuardianName;
 
     @JsonUnwrapped
     @Builder.Default
@@ -553,7 +558,6 @@ public class CaseData implements MappableObject {
     private String caseSolicitorName;
     private String caseSolicitorOrgName;
     private String selectedOrder;
-
 
     /**
      * FL401 Court details for Pilot.

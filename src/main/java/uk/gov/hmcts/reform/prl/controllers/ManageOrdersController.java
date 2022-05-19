@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -29,11 +31,16 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.IntStream;
 import javax.ws.rs.core.HttpHeaders;
 
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.joining;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @RestController
 @RequiredArgsConstructor
@@ -82,8 +89,6 @@ public class ManageOrdersController {
 
     }
 
-
-
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to fetch child details ")
     @ApiResponses(value = {
@@ -97,10 +102,22 @@ public class ManageOrdersController {
             CaseData.class
         );
         CaseData caseDataInput = manageOrderService.getUpdatedCaseData(caseData);
-        if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseDataInput = caseDataInput.toBuilder().manageOrders(manageOrderService.getN117FormData(caseData)).build();
+        String childOption = null;
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            childOption = IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
+                .mapToObj(Integer::toString)
+                .collect(joining());
+        } else {
+            Optional<List<Element<ApplicantChild>>> applicantChildDetails = Optional.ofNullable(caseData.getApplicantChildDetails());
+            if (applicantChildDetails.isPresent()) {
+                childOption = IntStream.range(0, defaultIfNull(applicantChildDetails.get(), emptyList()).size())
+                    .mapToObj(Integer::toString)
+                    .collect(joining());
+            }
         }
-
+        caseDataInput = caseDataInput.toBuilder()
+            .childOption(childOption)
+            .build();
         return CallbackResponse.builder()
             .data(caseDataInput)
             .build();
@@ -132,7 +149,6 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         manageOrderEmailService.sendEmail(caseDetails);
@@ -182,6 +198,7 @@ public class ManageOrdersController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+
     @PostMapping(path = "/amend-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to show preview order for special guardianship create order")
     public AboutToStartOrSubmitCallbackResponse populateOrderToAmendDownloadLink(
@@ -196,5 +213,6 @@ public class ManageOrdersController {
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
 
 }
