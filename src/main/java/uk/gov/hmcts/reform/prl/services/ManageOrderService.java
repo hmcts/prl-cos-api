@@ -98,6 +98,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c47a_filename}")
     protected String c47aFile;
 
+    @Value("${document.templates.common.prl_n117_draft_template}")
+    protected String n117DraftTemplate;
+
+    @Value("${document.templates.common.prl_n117_draft_filename}")
+    protected String n117DraftFile;
+
+    @Value("${document.templates.common.prl_n117_template}")
+    protected String n117Template;
+
+    @Value("${document.templates.common.prl_n117_filename}")
+    protected String n117File;
+
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
     private final DgsService dgsService;
@@ -148,6 +160,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c47aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
+                break;
+            case generalForm:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE,n117DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, n117DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME,n117Template);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, n117File);
                 break;
             default:
                 break;
