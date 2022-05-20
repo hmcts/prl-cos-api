@@ -14,6 +14,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum.noNotRequired;
+import static uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum.noNowSought;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -43,6 +44,19 @@ public class ApplicationTypeCheckerTest {
             .natureOfOrder("Test")
             .consentOrder(Yes)
             .applicationPermissionRequired(noNotRequired)
+            .applicationDetails("Test details")
+            .build();
+
+        assertTrue(applicationTypeChecker.isFinished(caseData));
+    }
+
+    @Test
+    public void whenTypeOfApplicationNoNowSoughtSelectedThenIsFinishedReturnsTrue() {
+        CaseData caseData = CaseData.builder()
+            .ordersApplyingFor(Collections.singletonList(childArrangementsOrder))
+            .natureOfOrder("Test")
+            .consentOrder(Yes)
+            .applicationPermissionRequired(noNowSought)
             .applicationDetails("Test details")
             .build();
 
