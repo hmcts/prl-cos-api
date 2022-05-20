@@ -35,7 +35,7 @@ public class SendgridService {
 
     public void sendEmail(JsonObject caseData) throws IOException {
 
-        String subject = PRL_RPA_NOTIFICATION + caseData.get("id");
+        String subject = PRL_RPA_NOTIFICATION + caseData.get("id") + ".json";
         Content content = new Content("text/plain", " ");
         Attachments attachments = new Attachments();
         String data = Base64.getEncoder().encodeToString(caseData.toString().getBytes());
@@ -52,6 +52,7 @@ public class SendgridService {
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
             sg.api(request);
+            log.info("Notification to RPA sent successfully");
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
         }
