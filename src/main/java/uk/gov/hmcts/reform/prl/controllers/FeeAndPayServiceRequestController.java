@@ -45,7 +45,6 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
                 .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference()).build(),
             CaseData.class
         );
-
         return CallbackResponse.builder()
                 .data(caseData)
                 .build();
