@@ -1,15 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import io.restassured.response.Response;
 import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,8 +15,6 @@ import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.IntegrationTest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.util.CosApiClient;
 
 import static org.junit.Assert.assertEquals;
@@ -39,23 +34,10 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
 
-    @DisplayName("temporary test to verify gov UK notifications integration")
-    @Test
-    @Ignore
-    public void sendEmail() {
-        cosApiClient.sendEmail(CallbackRequest.builder()
-                                   .caseDetails(CaseDetails.builder().build())
-                                   .build());
-    }
-
-
     @Test
     public void testDocumentGenerate_return200() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-
-        Response response = callDocGenerateAndSave(requestBody);
-
         HttpGet httpGet = new HttpGet(documentPrlGenerateUri);
         httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);

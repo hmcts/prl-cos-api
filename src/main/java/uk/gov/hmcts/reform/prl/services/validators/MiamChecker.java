@@ -70,17 +70,17 @@ public class MiamChecker implements EventChecker {
                 finished =  checkMiamExemptions(caseData);
             }
         }
-
         if (finished) {
             taskErrorService.removeError(MIAM_ERROR);
             return true;
-        } else {
-            taskErrorService.addEventError(MIAM, MIAM_ERROR, MIAM_ERROR.getError());
-            return false;
         }
-
+        Optional<YesOrNo> hasConsentOrder = ofNullable(caseData.getConsentOrder());
+        taskErrorService.addEventError(MIAM, MIAM_ERROR, MIAM_ERROR.getError());
+        if (hasConsentOrder.isPresent() && YesOrNo.Yes.equals(hasConsentOrder.get())) {
+            taskErrorService.removeError(MIAM_ERROR);
+        }
+        return false;
     }
-
 
 
     @Override
