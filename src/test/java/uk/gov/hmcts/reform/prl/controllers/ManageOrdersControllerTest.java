@@ -377,7 +377,6 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    @Ignore
     public void saveOrderDetailsTest() throws Exception {
 
         applicant = PartyDetails.builder()
@@ -469,7 +468,7 @@ public class ManageOrdersControllerTest {
             authToken,
             callbackRequest
         );
-        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("createSelectOrderOptions"));
         assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
     }
