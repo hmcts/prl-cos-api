@@ -132,10 +132,13 @@ public abstract class IntegrationTest {
             .roles(new UserCode[]{UserCode.builder().code("caseworker-privatelaw-solicitor").build()})
             .build();
 
-        SerenityRest.given()
+        Response userResponse = null;
+
+        userResponse = SerenityRest.given()
             .header("Content-Type", "application/json")
             .body(ResourceLoader.objectToJson(userRequest))
             .post(idamCreateUrl());
+        log.info("User response when creating {} ",userResponse.getStatusCode());
     }
 
     public Response callInvalidPrePopulateFeeAndSolicitorName(String requestBody) {

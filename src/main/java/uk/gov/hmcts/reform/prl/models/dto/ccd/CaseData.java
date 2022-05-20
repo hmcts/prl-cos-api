@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityStatementDisclaimerEnum;
+import uk.gov.hmcts.reform.prl.enums.CourtDetailsPilotEnum;
 import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
@@ -71,6 +72,9 @@ import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -93,6 +97,7 @@ public class CaseData implements MappableObject {
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
+    private final String dateSubmittedAndTime;
 
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;
@@ -523,8 +528,8 @@ public class CaseData implements MappableObject {
     /**
      * FL401 Upload Documents.
      */
-    private final List<Document> fl401UploadWitnessDocuments;
-    private final List<Document> fl401UploadSupportDocuments;
+    private final List<Element<Document>> fl401UploadWitnessDocuments;
+    private final List<Element<Document>> fl401UploadSupportDocuments;
 
     /**
      * Send to Gatekeeper.
@@ -552,5 +557,34 @@ public class CaseData implements MappableObject {
     private String isCourtEmailFound;
     private String isDocumentGenerated;
     private String isNotificationSent;
+
+    /**
+     * Solicitor Details.
+     */
+    private String caseSolicitorName;
+    private String caseSolicitorOrgName;
+
+    /**
+     * FL401 Court details for Pilot.
+     */
+    private final CourtDetailsPilotEnum submitCountyCourtSelection;
+
+    public CaseData setDateSubmittedDate() {
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        this.toBuilder()
+            .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
+            .dateSubmittedAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime))
+            .build();
+
+        return this;
+    }
+
+    public CaseData setIssueDate() {
+        this.toBuilder()
+            .issueDate(LocalDate.now())
+            .build();
+
+        return this;
+    }
 
 }
