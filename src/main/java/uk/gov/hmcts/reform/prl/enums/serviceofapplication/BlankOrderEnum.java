@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.ServiceOfApplication;
+package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum GeneralFormUndertakingEnum {
+public enum BlankOrderEnum {
 
-    generalForm("General form of undertaking (N117)");
+    blank("Blank order (FL404B)");
 
     private final String displayedValue;
 
@@ -20,8 +20,8 @@ public enum GeneralFormUndertakingEnum {
     }
 
     @JsonCreator
-    public static GeneralFormUndertakingEnum getValue(String key) {
-        return GeneralFormUndertakingEnum.valueOf(key);
+    public static BlankOrderEnum getValue(String key) {
+        return BlankOrderEnum.valueOf(key);
     }
 
 }

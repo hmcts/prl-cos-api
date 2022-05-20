@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.complextypes.ServiceOfApplication;
+package uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication;
 
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 public class ConfirmRecipients {
     private final List<OrderRecipientsEnum> applicantsList;
-    private final List<OtherOrderRecipientsEnum>otherPeopleList;
+    private final List<OtherOrderRecipientsEnum> otherPeopleList;
 
     private final List<RestrictToCafcassHmcts> cafcassEmailOptionChecked;
     private final List<RestrictToCafcassHmcts> otherEmailOptionChecked;

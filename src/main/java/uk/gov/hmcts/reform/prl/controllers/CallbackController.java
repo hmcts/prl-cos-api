@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.ServiceOfApplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -50,16 +49,13 @@ import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkf
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
@@ -410,7 +406,8 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseDataUpdated = servePartiesService.populateHeader(caseData,caseDataUpdated);
         if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
-            List<String> createdOrders = caseData.getOrderCollection().stream().map(Element::getValue).map((orderDetails)-> orderDetails.getOrderType())
+            List<String> createdOrders = caseData.getOrderCollection().stream()
+                .map(Element::getValue).map((orderDetails) -> orderDetails.getOrderType())
                 .collect(Collectors.toList());
             caseDataUpdated = servePartiesService.getOrderSelectionsEnumValues(createdOrders,caseDataUpdated);
         }
