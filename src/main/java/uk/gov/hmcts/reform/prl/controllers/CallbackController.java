@@ -408,7 +408,8 @@ public class CallbackController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (!caseData.getOrderCollection().isEmpty() && caseData.getOrderCollection() != null) {
+        caseDataUpdated = servePartiesService.populateHeader(caseData,caseDataUpdated);
+        if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
             List<String> createdOrders = caseData.getOrderCollection().stream().map(Element::getValue).map((orderDetails)-> orderDetails.getOrderType())
                 .collect(Collectors.toList());
             caseDataUpdated = servePartiesService.getOrderSelectionsEnumValues(createdOrders,caseDataUpdated);

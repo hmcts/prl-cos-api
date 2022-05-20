@@ -49,10 +49,9 @@ public class ServePartiesService {
 
     private final ObjectMapper objectMapper;
 
-    public Map<String, Object> populateHeader(CaseData caseData) {
-        Map<String, Object> headerMap = new HashMap<>();
-        headerMap.put("manageOrderHeader1", getHeaderInfo(caseData));
-        return headerMap;
+    public Map<String, Object> populateHeader(CaseData caseData, Map<String,Object> caseDataUpdated) {
+        caseDataUpdated.put("serviceOfApplicationHeader", getHeaderInfo(caseData));
+        return caseDataUpdated;
     }
 
     public String getCollapsableOfSentDocuments() {
