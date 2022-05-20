@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models;
+package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -6,24 +6,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@Jacksonized
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Builder(toBuilder = true)
 public class ManageOrders {
+
+    private final String childListForSpecialGuardianship;
+
     @JsonProperty("cafcassEmailAddress")
     private final List<Element<String>> cafcassEmailAddress;
     @JsonProperty("otherEmailAddress")
-    private final List<Element<String>> otherEmailAddress;
+    private final List<Element<String>> otherEmailAddres;
+    @JsonProperty("isCaseWithdrawn")
+    private final YesOrNo isCaseWithdrawn;
+    private final String recitalsOrPreamble;
+    private final String orderDirections;
+    private final String furtherDirectionsIfRequired;
 
     private final String manageOrdersCourtName;
     @JsonProperty("manageOrdersCourtAddress")
@@ -51,8 +59,5 @@ public class ManageOrders {
     private final YesOrNo underTakingFormSign;
 
     private final YesOrNo isTheOrderByConsent;
-    private final String recitalsOrPreamble;
-    private final String orderDirections;
-    private final String furtherDirectionsIfRequired;
     private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
 }
