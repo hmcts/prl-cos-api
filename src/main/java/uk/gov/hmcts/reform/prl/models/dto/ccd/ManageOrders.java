@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -39,7 +38,7 @@ public class ManageOrders {
     private final String furtherDirectionsIfRequired;
 
     private final String manageOrdersCourtName;
-    @JsonIgnore
+    @JsonProperty("manageOrdersCourtAddress")
     private final Address manageOrdersCourtAddress;
     private final String manageOrdersCaseNo;
     private final String manageOrdersApplicant;
@@ -48,12 +47,12 @@ public class ManageOrders {
     private final String manageOrdersRespondentReference;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate manageOrdersRespondentDob;
-    @JsonIgnore
+    @JsonProperty("manageOrdersRespondentAddress")
     private final Address manageOrdersRespondentAddress;
     private final YesOrNo manageOrdersUnderTakingRepr;
     private final UnderTakingEnum underTakingSolicitorCounsel;
     private final String manageOrdersUnderTakingPerson;
-    @JsonIgnore
+    @JsonProperty("manageOrdersUnderTakingAddress")
     private final Address manageOrdersUnderTakingAddress;
     private final String manageOrdersUnderTakingTerms;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
