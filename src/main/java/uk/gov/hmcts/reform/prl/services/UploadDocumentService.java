@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,15 +17,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class UploadDocumentService {
+
     private final AuthTokenGenerator authTokenGenerator;
     private final CaseDocumentClient caseDocumentClient;
-
-    @Autowired
-    public UploadDocumentService(AuthTokenGenerator authTokenGenerator, CaseDocumentClient caseDocumentClient) {
-        this.authTokenGenerator = authTokenGenerator;
-        this.caseDocumentClient = caseDocumentClient;
-    }
 
     public Document uploadDocument(byte[] pdf, String fileName, String contentType, String authorisation) {
         MultipartFile file = new InMemoryMultipartFile("files", fileName, contentType, pdf);
