@@ -65,6 +65,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.ServiceOfApplication.ConfirmRecipients;
+import uk.gov.hmcts.reform.prl.models.complextypes.ServiceOfApplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
@@ -586,4 +588,10 @@ public class CaseData implements MappableObject {
      *  Withdraw request flag.
      */
     private String isWithdrawRequestSent;
+
+    /**
+     *  Service Of Application.
+     */
+    private OrdersToServeSA serviceOfApplicationScreen1;
+    private ConfirmRecipients confirmRecipients;
 }
