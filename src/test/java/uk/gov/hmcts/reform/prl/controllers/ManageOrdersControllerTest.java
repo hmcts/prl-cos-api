@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -16,18 +17,22 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
@@ -42,6 +47,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -183,8 +189,6 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
 
-
-
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .populatePreviewOrderWhenOrderUploaded(authToken, callbackRequest);
         assertNotNull(callbackResponse);
@@ -207,7 +211,7 @@ public class ManageOrdersControllerTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .caseTypeOfApplication("FL401")
+            .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
@@ -216,7 +220,7 @@ public class ManageOrdersControllerTest {
 
         CaseData updatedCaseData = CaseData.builder()
             .id(12345L)
-            .caseTypeOfApplication("FL401")
+            .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
@@ -248,7 +252,60 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
+    public void testFetchChildrenNamesListWithHomeSituation() {
+        ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
+            .childFullName("TestName")
+            .childsAge("23")
+            .build();
+
+        Element<ChildrenLiveAtAddress> wrappedChildren = Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build();
+        List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .home(Home.builder().children(listOfChildren).build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        CaseData updatedCaseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .home(Home.builder().children(listOfChildren).build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .fl401FamilymanCaseNumber("12345")
+            .childrenList("Child 1: TestName\n")
+            .selectedOrder(
+                "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
+                    + "enforcement application (C82)\\n\\n")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
+
+        CallbackResponse callbackResponse = manageOrdersController.fetchChildDetails(callbackRequest);
+        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
+        assertEquals(
+            "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
+            callbackResponse.getData().getSelectedOrder());
+    }
+
+    @Test
     public void testSubmitAmanageorderEmailValidation() throws Exception {
+
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -316,7 +373,134 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
-            .sendEmail(callbackRequest.getCaseDetails());
+            .sendEmailToCafcassAndOtherParties(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    @Ignore
+    public void saveOrderDetailsTest() throws Exception {
+
+        applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .email("applicant@tests.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondent@tests.com")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        String cafcassEmail = "testing@cafcass.com";
+
+        Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
+        List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .cafcassEmailAddress(listOfCafcassEmail)
+            .build();
+
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .respondents(listOfRespondents)
+            .children(listOfChildren)
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                                 .build())
+            .build();
+
+        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+            OrderDetails.builder().build()).build());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
+            .thenReturn(orderDetailsList);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
+            authToken,
+            callbackRequest
+        );
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("createSelectOrderOptions"));
+        assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
+    }
+
+    @Test
+    public void populateHeaderTest() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .previewOrderDoc(Document.builder().build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("manageOrderHeader1","test");
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populateHeader(caseData))
+            .thenReturn(stringObjectMap);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateHeader(
+            callbackRequest
+        );
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("manageOrderHeader1"));
     }
 
     @Test
@@ -391,5 +575,100 @@ public class ManageOrdersControllerTest {
         List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
         verify(manageOrderService, times(1))
             .updateCaseDataWithAppointedGuardianNames(caseDetails, namesList);
+    }
+
+    @Test
+    public void testSubmitManageOrderCafacassEmailNotification() throws Exception {
+
+        applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .email("applicant@tests.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondent@tests.com")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        String cafcassEmail = "testing@cafcass.com";
+
+        Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
+        List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .cafcassEmailAddress(listOfCafcassEmail)
+            .build();
+
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .respondents(listOfRespondents)
+            .children(listOfChildren)
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                                 .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
+            authToken,
+            callbackRequest
+        );
+        verify(manageOrderEmailService, times(1))
+            .sendEmailToCafcassAndOtherParties(callbackRequest.getCaseDetails());
     }
 }
