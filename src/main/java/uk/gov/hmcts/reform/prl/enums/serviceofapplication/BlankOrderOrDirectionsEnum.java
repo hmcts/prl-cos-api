@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.ServiceOfApplication;
+package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum ParentalResponsibilityEnum {
+public enum BlankOrderOrDirectionsEnum {
 
-    parentalResponsibility("Parental responsibility order (C45A)");
+    blankOrderOrDirections("Blank order or directions (C21)");
 
     private final String displayedValue;
 
@@ -20,8 +20,8 @@ public enum ParentalResponsibilityEnum {
     }
 
     @JsonCreator
-    public static ParentalResponsibilityEnum getValue(String key) {
-        return ParentalResponsibilityEnum.valueOf(key);
+    public static BlankOrderOrDirectionsEnum getValue(String key) {
+        return BlankOrderOrDirectionsEnum.valueOf(key);
     }
 
 }

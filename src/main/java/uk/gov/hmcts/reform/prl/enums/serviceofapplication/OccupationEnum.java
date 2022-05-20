@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.ServiceOfApplication;
+package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum NonMolestationEnum {
+public enum OccupationEnum {
 
-    nonMolestation("Non-molestation order (FL404A)");
+    occupation("Occupation order (FL404)");
 
     private final String displayedValue;
 
@@ -20,8 +20,8 @@ public enum NonMolestationEnum {
     }
 
     @JsonCreator
-    public static NonMolestationEnum getValue(String key) {
-        return NonMolestationEnum.valueOf(key);
+    public static OccupationEnum getValue(String key) {
+        return OccupationEnum.valueOf(key);
     }
 
 }

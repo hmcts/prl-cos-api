@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.ServiceOfApplication;
+package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum OtherUploadAnOrderEnum {
+public enum NonMolestationEnum {
 
-    other("Other (upload an order)");
+    nonMolestation("Non-molestation order (FL404A)");
 
     private final String displayedValue;
 
@@ -20,7 +20,8 @@ public enum OtherUploadAnOrderEnum {
     }
 
     @JsonCreator
-    public static OtherUploadAnOrderEnum getValue(String key) {
-        return OtherUploadAnOrderEnum.valueOf(key);
+    public static NonMolestationEnum getValue(String key) {
+        return NonMolestationEnum.valueOf(key);
     }
+
 }

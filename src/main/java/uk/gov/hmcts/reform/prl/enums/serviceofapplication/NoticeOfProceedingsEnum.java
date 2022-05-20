@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.ServiceOfApplication;
+package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum PowerOfArrestEnum {
+public enum NoticeOfProceedingsEnum {
 
-    powerOfArrest("Power of arrest (FL406)");
+    noticeOfProceedings("Notice of proceedings (FL402)");
 
     private final String displayedValue;
 
@@ -20,8 +20,8 @@ public enum PowerOfArrestEnum {
     }
 
     @JsonCreator
-    public static PowerOfArrestEnum getValue(String key) {
-        return PowerOfArrestEnum.valueOf(key);
+    public static NoticeOfProceedingsEnum getValue(String key) {
+        return NoticeOfProceedingsEnum.valueOf(key);
     }
 
 }

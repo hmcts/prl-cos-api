@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.ServiceOfApplication;
+package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum AppointmentOfGuardianEnum {
+public enum BlankOrderOrDirectionsWithdrawEnum {
 
-    appointmentOfGuardian("Appointment of a guardian (C47A)");
+    blankOrderOrDirectionsWithdraw("Blank order or directions (C21) - to withdraw application");
 
     private final String displayedValue;
 
@@ -20,8 +20,8 @@ public enum AppointmentOfGuardianEnum {
     }
 
     @JsonCreator
-    public static AppointmentOfGuardianEnum getValue(String key) {
-        return AppointmentOfGuardianEnum.valueOf(key);
+    public static BlankOrderOrDirectionsWithdrawEnum getValue(String key) {
+        return BlankOrderOrDirectionsWithdrawEnum.valueOf(key);
     }
 
 }
