@@ -504,6 +504,69 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
+
+    public void saveOrderDetailsTest() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .previewOrderDoc(Document.builder().build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .build();
+        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+            OrderDetails.builder().build()).build());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
+            .thenReturn(orderDetailsList);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
+            authToken,
+            callbackRequest
+        );
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("createSelectOrderOptions"));
+        assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
+    }
+
+    @Test
+    public void populateHeaderTest() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .previewOrderDoc(Document.builder().build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("manageOrderHeader1","test");
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populateHeader(caseData))
+            .thenReturn(stringObjectMap);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateHeader(
+            callbackRequest
+        );
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("manageOrderHeader1"));
+    }
+
+    @Test
     public void testShowPreviewOrderWhenOrderCreated() throws Exception {
 
         applicant = PartyDetails.builder()
