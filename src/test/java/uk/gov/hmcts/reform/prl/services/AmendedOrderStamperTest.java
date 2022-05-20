@@ -16,7 +16,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ResourceReader.readBytes;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -42,7 +41,7 @@ public class AmendedOrderStamperTest {
 
     @Before
     public void init() {
-        when(authTokenGenerator.generate()).thenReturn("s2s");
+        //        when(authTokenGenerator.generate()).thenReturn("s2s");
     }
 
     @Test
