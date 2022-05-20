@@ -223,6 +223,10 @@ document:
       prl_c43_filename: ChildArrangements_Specific_Prohibited_Steps_C43.pdf
       prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
       prl_c43_draft_filename: ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
+      prl_n117_draft_template: PRL-ORDERS-N117-DRAFT.docx
+      prl_n117_draft_filename: N117CreateOrderDraft.pdf
+      prl_n117_template: PRL-ORDERS-N117-FINAL.docx
+      prl_n117_filename: N117CreateOrder.pdf
 
 southampton:
   court:
