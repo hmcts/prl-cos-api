@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.ServiceOfApplication;
+package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum BlankOrderOrDirectionsWithdrawEnum {
+public enum ChildArrangementsSpecificProhibitedOrderEnum {
 
-    blankOrderOrDirectionsWithdraw("Blank order or directions (C21) - to withdraw application");
+    childArrangementsSpecificProhibitedOrder("Child arrangements, specific issue or prohibited steps order (C43)");
 
     private final String displayedValue;
 
@@ -20,8 +20,8 @@ public enum BlankOrderOrDirectionsWithdrawEnum {
     }
 
     @JsonCreator
-    public static BlankOrderOrDirectionsWithdrawEnum getValue(String key) {
-        return BlankOrderOrDirectionsWithdrawEnum.valueOf(key);
+    public static ChildArrangementsSpecificProhibitedOrderEnum getValue(String key) {
+        return ChildArrangementsSpecificProhibitedOrderEnum.valueOf(key);
     }
 
 }

@@ -64,10 +64,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
@@ -503,7 +501,8 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseDataUpdated = servePartiesService.populateHeader(caseData,caseDataUpdated);
         if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
-            List<String> createdOrders = caseData.getOrderCollection().stream().map(Element::getValue).map((orderDetails)-> orderDetails.getOrderType())
+            List<String> createdOrders = caseData.getOrderCollection().stream()
+                .map(Element::getValue).map((orderDetails) -> orderDetails.getOrderType())
                 .collect(Collectors.toList());
             caseDataUpdated = servePartiesService.getOrderSelectionsEnumValues(createdOrders,caseDataUpdated);
         }

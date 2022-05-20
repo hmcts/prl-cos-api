@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.ServiceOfApplication;
+package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum BlankOrderEnum {
+public enum NoticeOfProceedingsPartiesEnum {
 
-    blank("Blank order (FL404B)");
+    noticeOfProceedingsParties("Notice of proceedings (C6) (Notice to parties)");
 
     private final String displayedValue;
 
@@ -20,8 +20,8 @@ public enum BlankOrderEnum {
     }
 
     @JsonCreator
-    public static BlankOrderEnum getValue(String key) {
-        return BlankOrderEnum.valueOf(key);
+    public static NoticeOfProceedingsPartiesEnum getValue(String key) {
+        return NoticeOfProceedingsPartiesEnum.valueOf(key);
     }
 
 }
