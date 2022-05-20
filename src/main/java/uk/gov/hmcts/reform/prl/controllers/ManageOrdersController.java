@@ -55,7 +55,6 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("*** Magistrate details : {}",caseData.getMagistrateLastName());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
