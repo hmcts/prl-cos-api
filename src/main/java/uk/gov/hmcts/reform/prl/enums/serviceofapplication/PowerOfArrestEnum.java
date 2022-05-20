@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.ServiceOfApplication;
+package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum StandardDirectionsOrderEnum {
+public enum PowerOfArrestEnum {
 
-    standardDirectionsOrder("Standard directions order");
+    powerOfArrest("Power of arrest (FL406)");
 
     private final String displayedValue;
 
@@ -20,8 +20,8 @@ public enum StandardDirectionsOrderEnum {
     }
 
     @JsonCreator
-    public static StandardDirectionsOrderEnum getValue(String key) {
-        return StandardDirectionsOrderEnum.valueOf(key);
+    public static PowerOfArrestEnum getValue(String key) {
+        return PowerOfArrestEnum.valueOf(key);
     }
 
 }

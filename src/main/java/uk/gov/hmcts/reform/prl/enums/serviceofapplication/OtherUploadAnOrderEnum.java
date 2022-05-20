@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.ServiceOfApplication;
+package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum ChildArrangementsSpecificProhibitedOrderEnum {
+public enum OtherUploadAnOrderEnum {
 
-    childArrangementsSpecificProhibitedOrder("Child arrangements, specific issue or prohibited steps order (C43)");
+    other("Other (upload an order)");
 
     private final String displayedValue;
 
@@ -20,8 +20,7 @@ public enum ChildArrangementsSpecificProhibitedOrderEnum {
     }
 
     @JsonCreator
-    public static ChildArrangementsSpecificProhibitedOrderEnum getValue(String key) {
-        return ChildArrangementsSpecificProhibitedOrderEnum.valueOf(key);
+    public static OtherUploadAnOrderEnum getValue(String key) {
+        return OtherUploadAnOrderEnum.valueOf(key);
     }
-
 }
