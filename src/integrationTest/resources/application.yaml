@@ -4,7 +4,7 @@ server:
 runs-locally: ${RUNS_LOCALLY:true}
 
 env: ${test_environment:local}
-TEST_URL: https://localhost:4044
+TEST_URL: http://localhost:4044
 
 case:
   orchestration:
@@ -77,7 +77,14 @@ uk:
           english:
             SOLICITOR: a080f4ce-a07f-43ec-a3f0-f196d83f7730
             CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
+            RETURNAPPLICATION: 41a7ffcd-a5ec-4377-ba50-59619ad0ac8c
+            WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
+            COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
+            GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
+            DA_SOLICITOR: d65830b7-eb13-46c3-b772-03976a67210d
+            DA_LOCALCOURT: 9d6b311a-a764-45a7-9dd9-cd1d06408214
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
+            SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -98,7 +105,7 @@ send-grid:
 payments:
   api:
     url: ${PAY_URL:http://payment-api-aat.service.core-compute-aat.internal}
-    callback-url: ${PAY_CALLBACK_URL:http://payment-api-demo.service.core-compute-demo.internal/service-request-update}
+    callback-url: ${PAY_CALLBACK_URL:http://payment-api-aat.service.core-compute-aat.internal/service-request-update}
   authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
 
 fees-register:
@@ -134,10 +141,16 @@ idam:
       context-path: /oauth2/token
   user:
     genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
+  solicitor:
+    username: ${IDAM_SOLICITOR_USERNAME:xxxxxxx}
+    password: ${IDAM_SOLICITOR_PASSWORD:xxxxxx}
+  system-update:
+    username: ${IDAM_SOLICITOR_USERNAME:dummysolicitor@test.com}
+    password: ${IDAM_SOLICITOR_PASSWORD:dummy}
 
 core_case_data:
   api:
-    url: http://localhost:4452
+    url: http://ccd-data-store-api-aat.service.core-compute-aat.internal
 
 resources:
   images:
@@ -195,6 +208,21 @@ document:
       fl401_draft_welsh_filename: Draft_DA_Welsh_application
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
+    common:
+      prl_c21_template: PRL-ORDER-C21-COMMON.docx
+      prl_c21_filename: C21CreateOrder.pdf
+      prl_c21_welsh_template: PRL-ORDER-C21-WELSH-COMMON.docx
+      prl_c21_welsh_filename: C21WelshCreateOrder.pdf
+      prl_c21_draft_template: PRL-ORDER-C21-DRAFT-COMMON.docx
+      prl_c21_draft_filename: C21CreateOrderDraft.pdf
+      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
+      C43A_draft_filename: C43ADraftCreateOrder.pdf
+      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
+      C43A_final_filename: C43AFinalCreateOrder.pdf
+      prl_c43_template: PRL-ORDER-C43-FINAL.docx
+      prl_c43_filename: C43CreateOrder.pdf
+      prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
+      prl_c43_draft_filename: C43CreateOrderDraft.pdf
 
 southampton:
   court:

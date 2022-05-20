@@ -32,6 +32,7 @@ public class SolicitorEmailService {
     private final EmailTemplatesConfig emailTemplatesConfig;
     private final ObjectMapper objectMapper;
     private final UserService userService;
+    private static final String DATE_FORMAT = "dd-MM-yyyy";
 
     @Autowired
     private EmailService emailService;
@@ -70,7 +71,7 @@ public class SolicitorEmailService {
                 .caseReference(String.valueOf(caseDetails.getId()))
                 .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
                 .applicantName(applicantNames)
-                .courtName(court.getCourtName())
+                .courtName((court != null) ? court.getCourtName() : "")
                 .courtEmail(courtEmail)
                 .caseLink(manageCaseUrl + "/" + caseDetails.getId())
                 .build();
@@ -102,7 +103,7 @@ public class SolicitorEmailService {
             .build();
     }
 
-    public void sendEmailToSolicitor(CaseDetails caseDetails, UserDetails userDetails) {
+    public void sendWithDrawEmailToSolicitor(CaseDetails caseDetails, UserDetails userDetails) {
         String solicitorEmail = "";
         CaseData caseData = emailService.getCaseData(caseDetails);
         List<PartyDetails> applicants = caseData
@@ -135,10 +136,10 @@ public class SolicitorEmailService {
 
         String solicitorEmail = "";
 
-        PartyDetails fl401Applicant = emailService.getCaseData(caseDetails)
-            .getApplicantsFL401();
+        String applicantSolicitorEmail = emailService.getCaseData(caseDetails)
+            .getApplicantsFL401()
+            .getSolicitorEmail();
 
-        String applicantSolicitorEmail = fl401Applicant.getSolicitorEmail();
         solicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
 
         emailService.send(
@@ -168,6 +169,75 @@ public class SolicitorEmailService {
             .courtName(caseData.getCourtName())
             .courtEmail(caseData.getCourtEmailAddress())
             .caseLink(manageCaseUrl + "/" + caseData.getId())
+            .build();
+    }
+
+    public void sendWithDrawEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails) {
+        String fl401SolicitorEmail = "";
+
+        String applicantSolicitorEmail = emailService.getCaseData(caseDetails)
+            .getApplicantsFL401()
+            .getSolicitorEmail();
+
+        fl401SolicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
+
+        emailService.send(
+            fl401SolicitorEmail,
+            EmailTemplateNames.WITHDRAW,
+            buildCaseWithdrawEmail(caseDetails),
+            LanguagePreference.english
+        );
+    }
+
+    public void sendWithDrawEmailToSolicitorAfterIssuedState(CaseDetails caseDetails, UserDetails userDetails) {
+        String solicitorEmail = "";
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        List<PartyDetails> applicants = caseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> applicantSolicitorEmailList = applicants.stream()
+            .map(PartyDetails::getSolicitorEmail)
+            .collect(Collectors.toList());
+
+        solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
+            && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(
+            0)
+            : userDetails.getEmail();
+        emailService.send(
+            solicitorEmail,
+            EmailTemplateNames.WITHDRAW_AFTER_ISSUED_SOLICITOR,
+            buildCaseWithdrawEmailAfterIssuedState(caseDetails),
+            LanguagePreference.english
+        );
+    }
+
+    public void sendWithDrawEmailToFl401SolicitorAfterIssuedState(CaseDetails caseDetails, UserDetails userDetails) {
+        String fl401SolicitorEmail = "";
+
+        String applicantSolicitorEmail = emailService.getCaseData(caseDetails)
+            .getApplicantsFL401()
+            .getSolicitorEmail();
+
+        fl401SolicitorEmail = applicantSolicitorEmail != null ? applicantSolicitorEmail : userDetails.getEmail();
+
+        emailService.send(
+            fl401SolicitorEmail,
+            EmailTemplateNames.WITHDRAW_AFTER_ISSUED_SOLICITOR,
+            buildCaseWithdrawEmailAfterIssuedState(caseDetails),
+            LanguagePreference.english
+        );
+    }
+
+    private EmailTemplateVars buildCaseWithdrawEmailAfterIssuedState(CaseDetails caseDetails) {
+
+        return SolicitorEmail.builder()
+            .issueDate(caseDetails.getData().get("issueDate").toString())
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .caseLink(manageCaseUrl + "/" + caseDetails.getId())
             .build();
     }
 }

@@ -132,10 +132,13 @@ public abstract class IntegrationTest {
             .roles(new UserCode[]{UserCode.builder().code("caseworker-privatelaw-solicitor").build()})
             .build();
 
-        SerenityRest.given()
+        Response userResponse = null;
+
+        userResponse = SerenityRest.given()
             .header("Content-Type", "application/json")
             .body(ResourceLoader.objectToJson(userRequest))
             .post(idamCreateUrl());
+        log.info("User response when creating {} ",userResponse.getStatusCode());
     }
 
     public Response callInvalidPrePopulateFeeAndSolicitorName(String requestBody) {
@@ -182,11 +185,6 @@ public abstract class IntegrationTest {
 
     private String idamCodeUrl() {
 
-        System.out.println(idamUserBaseUrl + idamAuthorizeContextPath
-                               + "?response_type=code"
-                               + "&client_id=" + idamAuthClientID
-                               + "&redirect_uri=" + idamRedirectUri);
-
         return idamUserBaseUrl + idamAuthorizeContextPath
             + "?response_type=code"
             + "&client_id=" + idamAuthClientID
@@ -194,13 +192,6 @@ public abstract class IntegrationTest {
     }
 
     private String idamTokenUrl(String code) {
-
-        System.out.println(idamUserBaseUrl + idamTokenContextPath
-                               + "?code=" + code
-                               + "&client_id=" + idamAuthClientID
-                               + "&client_secret=" + idamSecret
-                               + "&redirect_uri=" + idamRedirectUri
-                               + "&grant_type=authorization_code");
 
         return idamUserBaseUrl + idamTokenContextPath
             + "?code=" + code
