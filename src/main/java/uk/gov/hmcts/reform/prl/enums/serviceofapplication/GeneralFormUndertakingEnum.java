@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.ServiceOfApplication;
+package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum AmendDischargedVariedEnum {
+public enum GeneralFormUndertakingEnum {
 
-    amendDischargedVaried("Amended, discharged or varied order (FL404B)");
+    generalForm("General form of undertaking (N117)");
 
     private final String displayedValue;
 
@@ -20,8 +20,8 @@ public enum AmendDischargedVariedEnum {
     }
 
     @JsonCreator
-    public static AmendDischargedVariedEnum getValue(String key) {
-        return AmendDischargedVariedEnum.valueOf(key);
+    public static GeneralFormUndertakingEnum getValue(String key) {
+        return GeneralFormUndertakingEnum.valueOf(key);
     }
 
 }

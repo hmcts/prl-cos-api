@@ -5,35 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.OrderDetails;
-import uk.gov.hmcts.reform.prl.enums.OtherOrderDetails;
-import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.*;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 
 @Service
 @Slf4j
@@ -64,14 +44,15 @@ public class ServePartiesService {
         collapsible.add("</summary>");
         collapsible.add("<div class='govuk-details__text'>");
         collapsible.add("<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (blank)</li><li>C8 (Cafcass and Local Authority only)</li>");
-        collapsible.add("<li>Annex Z</li><li>Privacy notice</li><li>Any orders and hearing notices created at the initial gatekeeping stage</li></ul>");
+        collapsible.add("<li>Annex Z</li><li>Privacy notice</li><li>Any orders and"
+                            + " hearing notices created at the initial gatekeeping stage</li></ul>");
         collapsible.add("</div>");
         collapsible.add("</details>");
         return String.join("\n\n", collapsible);
     }
 
-    public Map<String,Object> getOrderSelectionsEnumValues(List<String> orderList, Map<String,Object> caseData){
-        for (int i=0;i<orderList.size();i++) {
+    public Map<String,Object> getOrderSelectionsEnumValues(List<String> orderList, Map<String,Object> caseData) {
+        for (int i = 0;i < orderList.size();i++) {
             caseData = getUpdatedCaseData(orderList.get(i),caseData);
         }
         return caseData;
