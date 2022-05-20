@@ -125,11 +125,6 @@ public class ManageOrderService {
         Map<String,String> fieldsMap = new HashMap();
         switch (selectedOrder) {
             case blankOrderOrDirections:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
-                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
-                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
-                break;
             case blankOrderOrDirectionsWithdraw:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
