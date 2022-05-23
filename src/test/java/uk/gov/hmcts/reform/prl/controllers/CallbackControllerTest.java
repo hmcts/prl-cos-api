@@ -1518,7 +1518,6 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController.prePopulateCourtDetails(callbackRequest);
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
-
     }
 }
 
