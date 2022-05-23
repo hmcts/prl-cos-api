@@ -76,5 +76,6 @@
   </suppress>
   <suppress>
     <cve>CVE-2022-22968</cve>
+    <cve>CVE-2022-29885</cve>
   </suppress>
 </suppressions>
