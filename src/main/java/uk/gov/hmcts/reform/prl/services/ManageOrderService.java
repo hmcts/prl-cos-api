@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -44,7 +43,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 
 @Service
 @Slf4j
@@ -122,6 +120,18 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_c47a_filename}")
     protected String c47aFile;
+
+    @Value("${document.templates.common.prl_n117_draft_template}")
+    protected String n117DraftTemplate;
+
+    @Value("${document.templates.common.prl_n117_draft_filename}")
+    protected String n117DraftFile;
+
+    @Value("${document.templates.common.prl_n117_template}")
+    protected String n117Template;
+
+    @Value("${document.templates.common.prl_n117_filename}")
+    protected String n117File;
 
     @Value("${document.templates.common.prl_fl404b_draft_template}")
     protected String fl404bDraftTemplate;
@@ -201,6 +211,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
                 break;
+            case generalForm:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE,n117DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, n117DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME,n117Template);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, n117File);
+                break;
             case amendDischargedVaried:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404bDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404bDraftFile);
@@ -242,44 +258,30 @@ public class ManageOrderService {
     }
 
     private String getChildInfoFromCaseData(CaseData caseData) {
-
         StringBuilder builder = new StringBuilder();
-
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            List<Child> children = caseData.getChildren().stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-
+            List<Child> children = new ArrayList<>();
+            if (caseData.getChildren() != null) {
+                children = caseData.getChildren().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+            }
             for (int i = 0; i < children.size(); i++) {
                 Child child = children.get(i);
-                builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + child.getLastName()));
+                builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + " " + child.getLastName()));
                 builder.append("\n");
             }
-
         } else {
-            builder.append(getFl401ChildrenString(caseData));
-        }
-        return builder.toString();
-    }
-
-    private String getFl401ChildrenString(CaseData caseData) {
-        StringBuilder builder = new StringBuilder();
-        if (ofNullable(caseData.getApplicantChildDetails()).isPresent()) {
-            List<ApplicantChild> children = unwrapElements(caseData.getApplicantChildDetails());
-            for (int i = 0; i < children.size(); i++) {
-                ApplicantChild child = children.get(i);
-                builder.append(String.format("Child %d: %s", i + 1, child.getFullName()));
-                builder.append("\n");
-            }
-        }
-        if (ofNullable(caseData.getHome()).isPresent() && ofNullable(caseData.getHome().getChildren()).isPresent()) {
-            List<ChildrenLiveAtAddress> childrenInHome = caseData.getHome().getChildren().stream()
-                .map(Element::getValue).collect(Collectors.toList());
-
-            for (int i = 0; i < childrenInHome.size(); i++) {
-                ChildrenLiveAtAddress child = childrenInHome.get(i);
-                builder.append(String.format("Child %d: %s", i + 1, child.getChildFullName()));
-                builder.append("\n");
+            Optional<List<Element<ApplicantChild>>> applicantChildDetails = ofNullable(caseData.getApplicantChildDetails());
+            if (applicantChildDetails.isPresent()) {
+                List<ApplicantChild> children = applicantChildDetails.get().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                for (int i = 0; i < children.size(); i++) {
+                    ApplicantChild child = children.get(i);
+                    builder.append(String.format("Child %d: %s", i + 1, child.getFullName()));
+                    builder.append("\n");
+                }
             }
         }
         return builder.toString();

@@ -251,7 +251,11 @@ document:
       prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
-      prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
+      prl_c47a_draft_filename: C47ACreateOrderDraft.pdf
+      prl_n117_draft_template: PRL-ORDERS-N117-DRAFT.docx
+      prl_n117_draft_filename: N117CreateOrderDraft.pdf
+      prl_n117_template: PRL-ORDERS-N117-FINAL.docx
+      prl_n117_filename: N117CreateOrder.pdf
       prl_fl404b_final_template: PRL-ORDER-FL404b-FINAL-COMMON.docx
       prl_fl404b_final_filename: amended_dischared_or_varied_order_fl404b_final.pdf
       prl_fl404b_draft_template: PRL-ORDER-FL404b-DRAFT-COMMON.docx

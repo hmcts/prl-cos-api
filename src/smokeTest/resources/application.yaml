@@ -237,6 +237,10 @@ document:
       prl_c49_draft_filename: C49ADraftCreateOrder.pdf
       prl_c49_template: PRL-ORDER-C49-COMMON.docx
       prl_c49_filename: C49FinalCreateOrder.pdf
+      prl_n117_draft_template: PRL-ORDERS-N117-DRAFT.docx
+      prl_n117_draft_filename: N117CreateOrderDraft.pdf
+      prl_n117_template: PRL-ORDERS-N117-FINAL.docx
+      prl_n117_filename: N117CreateOrder.pdf
       prl_c43_template: PRL-ORDER-C43-FINAL.docx
       prl_c43_filename: C43CreateOrder.pdf
       prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
