@@ -97,8 +97,9 @@ public class ManageOrdersController {
             CaseData.class
         );
         CaseData caseDataInput = manageOrderService.getUpdatedCaseData(caseData);
-        if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDataInput = manageOrderService.populateCustomOrderFields(caseData);
+        }
         String childOption = null;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             childOption = IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
