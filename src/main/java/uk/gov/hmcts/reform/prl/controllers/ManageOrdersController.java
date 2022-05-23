@@ -38,6 +38,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.reflections.Reflections.log;
 
 @RestController
 @RequiredArgsConstructor
@@ -73,9 +74,13 @@ public class ManageOrdersController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("Enter the getcasedata to... with order type{}",caseData.getCreateSelectOrderOptions());
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+            log.info("Enter if loop to... with case data{}",caseData.getDateOrderMade());
             caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
+            log.info("updated case data{}==== with doc link ==={}",caseDataUpdated, caseData.getPreviewOrderDoc());
         } else {
+            log.info("ENtering into else... {}", caseData.getAppointmentOfGuardian());
             caseDataUpdated.put("previewOrderDoc",caseData.getAppointmentOfGuardian());
         }
 

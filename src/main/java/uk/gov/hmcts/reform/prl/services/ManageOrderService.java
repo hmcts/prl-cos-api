@@ -374,10 +374,15 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> getCaseData(String authorisation, CaseData caseData,
-                             Map<String, Object> caseDataUpdated)
+                                           Map<String, Object> caseDataUpdated)
         throws Exception {
 
+        log.info("Trying the get the document--");
+
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
+
+        log.info("trying to get the template name =={}== and  file name **{}**"
+            ,fieldsMap.get(PrlAppsConstants.TEMPLATE), fieldsMap.get(PrlAppsConstants.FILE_NAME));
 
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
@@ -391,8 +396,12 @@ public class ManageOrderService {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+
+        log.info("Updated Document details: {}", caseDataUpdated.get("previewOrderDoc"));
+        log.info("Updated Case Data: {}", caseDataUpdated);
         return caseDataUpdated;
     }
+
 
     public ManageOrders getN117FormData(CaseData caseData) {
 
