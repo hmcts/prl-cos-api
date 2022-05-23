@@ -357,7 +357,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
 
-  testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '4.5.1'
+  testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.0.1'
   testImplementation group: 'io.rest-assured', name: 'json-path', version: '4.5.1'
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: '4.5.1'
   testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
