@@ -61,10 +61,10 @@ pba:
 
 feature-toggle:
   toggle:
-    example: false
+    example: ${FEATURE_EXAMPLE:false}
 
 xui:
-  url: http://localhost:3000
+  url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
 uk:
   gov:
@@ -129,18 +129,18 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: GT2V6PLQ34XGPTPM
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
-    url: http://localhost:5000
+    url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
-    redirect_uri: http://localhost:3000/oauth2/callback
-    secret: W7supXKMJgcEWKBS
+    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
+    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
 
 prl:
   system-update:
-    username: prl_local_sysupdate@mailinator.com
-    password: Password12
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
 
 
 security:
@@ -148,14 +148,14 @@ security:
     client:
       provider:
         oidc:
-          issuer-uri: http://locahost:5000/o
+          issuer-uri: ${idam.web.url}/o
       registration:
         oidc:
           client-id: internal
           client-secret: internal
 core_case_data:
   api:
-    url: http://localhost:4452
+    url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
 
 auth:
   idam:
@@ -180,7 +180,7 @@ case_document_am:
   url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
 
 prl-dgs-api:
-  url: http://localhost:4007
+  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
 
 courtfinder:
   api:

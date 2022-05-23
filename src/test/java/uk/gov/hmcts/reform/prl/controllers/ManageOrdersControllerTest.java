@@ -46,7 +46,6 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -407,8 +406,8 @@ public class ManageOrdersControllerTest {
             authToken,
             callbackRequest
         );
-        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
-        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("createSelectOrderOptions"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("createSelectOrderOptions"));
         assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
     }
 
