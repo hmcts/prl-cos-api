@@ -144,7 +144,7 @@ public class ManageOrderEmailService {
             .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
             .familyManNumber(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                                  ? caseData.getFamilymanCaseNumber() : caseData.getFl401FamilymanCaseNumber())
-            .orderLink(caseData.getPreviewOrderDoc().getDocumentUrl())
+            .orderLink(caseData.getPreviewOrderDoc().getDocumentFileName())
             .build();
 
     }
