@@ -54,11 +54,9 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
-        Tomcat
+        Tomcat 9.0.58
         ]]></notes>
     <cve>CVE-2022-29885</cve>
-    <cve>CVE-2022-29885</cve>
   </suppress>
-
 
 </suppressions>
