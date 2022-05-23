@@ -94,9 +94,8 @@ public class ManageOrdersController {
         );
         CaseData caseDataInput = manageOrderService.getUpdatedCaseData(caseData);
         if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseDataInput = caseDataInput.toBuilder().manageOrders(manageOrderService.getN117FormData(caseData)).build();
+            caseDataInput = manageOrderService.populateCustomOrderFields(caseData);
         }
-
         return CallbackResponse.builder()
             .data(caseDataInput)
             .build();

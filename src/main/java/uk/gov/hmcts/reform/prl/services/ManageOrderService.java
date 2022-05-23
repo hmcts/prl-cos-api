@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -98,6 +99,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c43_filename}")
     protected String c43File;
 
+    @Value("${document.templates.common.prl_fl404_draft_template}")
+    protected String fl404DraftTemplate;
+
+    @Value("${document.templates.common.prl_fl404_draft_filename}")
+    protected String fl404DraftFile;
+
+    @Value("${document.templates.common.prl_fl404_template}")
+    protected String fl404Template;
+
+    @Value("${document.templates.common.prl_fl404_filename}")
+    protected String fl404File;
+
     @Value("${document.templates.common.prl_c47a_draft_template}")
     protected String c47aDraftTemplate;
 
@@ -109,6 +122,18 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_c47a_filename}")
     protected String c47aFile;
+
+    @Value("${document.templates.common.prl_fl404b_draft_template}")
+    protected String fl404bDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl404b_draft_filename}")
+    protected String fl404bDraftFile;
+
+    @Value("${document.templates.common.prl_fl404b_final_template}")
+    protected String fl404bTemplate;
+
+    @Value("${document.templates.common.prl_fl404b_final_filename}")
+    protected String fl404bFile;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
@@ -158,6 +183,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c43Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c43File);
                 break;
+            case occupation:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404Template);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404File);
+                break;
             case specialGuardianShip:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c43ADraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c43ADraftFilename);
@@ -170,6 +201,13 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
                 break;
+            case amendDischargedVaried:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404bDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404bDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404bTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404bFile);
+                break;
+
             default:
                 break;
         }
@@ -410,7 +448,7 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    public ManageOrders getN117FormData(CaseData caseData) {
+    public CaseData getN117FormData(CaseData caseData) {
 
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
@@ -429,8 +467,45 @@ public class ManageOrderService {
         if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
             orderData = orderData.toBuilder().manageOrdersRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
-        return orderData;
+
+        return caseData.toBuilder().manageOrders(orderData).build();
     }
 
+    public CaseData populateCustomOrderFields(CaseData caseData) {
+        CreateSelectOrderOptionsEnum order = caseData.getCreateSelectOrderOptions();
 
+        switch (order) {
+            case amendDischargedVaried:
+            case occupation:
+            case nonMolestation:
+            case powerOfArrest:
+            case blank:
+                return getFl404bFields(caseData);
+            case generalForm:
+                return getN117FormData(caseData);
+            default:
+                return caseData;
+        }
+    }
+
+    private CaseData getFl404bFields(CaseData caseData) {
+        FL404 orderData = FL404.builder()
+            .fl404bCaseNumber(String.valueOf(caseData.getId()))
+            .fl404bCourtName(caseData.getCourtName())
+            .fl404bApplicantName(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
+                                               caseData.getApplicantsFL401().getLastName()))
+            .fl404bRespondentName(String.format("%s %s", caseData.getRespondentsFL401().getFirstName(),
+                                                caseData.getRespondentsFL401().getLastName()))
+            .build();
+
+        if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+            orderData = orderData.toBuilder().fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+        }
+        if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+            orderData = orderData.toBuilder().fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+        }
+        return caseData.toBuilder().manageOrders(ManageOrders.builder()
+                                                     .fl404CustomFields(orderData).build()).build();
+
+    }
 }
