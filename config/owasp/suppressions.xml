@@ -52,4 +52,13 @@
         ]]></notes>
     <cve>CVE-2020-36518</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+        Tomcat
+        ]]></notes>
+    <cve>CVE-2022-29885</cve>
+    <cve>CVE-2022-29885</cve>
+  </suppress>
+
+
 </suppressions>
