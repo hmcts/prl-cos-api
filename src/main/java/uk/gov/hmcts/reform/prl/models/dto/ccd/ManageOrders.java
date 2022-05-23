@@ -35,32 +35,49 @@ public class ManageOrders {
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
 
+    @JsonProperty("manageOrdersCourtName")
     private final String manageOrdersCourtName;
     @JsonProperty("manageOrdersCourtAddress")
     private final Address manageOrdersCourtAddress;
+    @JsonProperty("manageOrdersCaseNo")
     private final String manageOrdersCaseNo;
+    @JsonProperty("manageOrdersApplicant")
     private final String manageOrdersApplicant;
+    @JsonProperty("manageOrdersApplicantReference")
     private final String manageOrdersApplicantReference;
+    @JsonProperty("manageOrdersRespondent")
     private final String manageOrdersRespondent;
+    @JsonProperty("manageOrdersRespondentReference")
     private final String manageOrdersRespondentReference;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonProperty("manageOrdersRespondentDob")
     private final LocalDate manageOrdersRespondentDob;
     @JsonProperty("manageOrdersRespondentAddress")
     private final Address manageOrdersRespondentAddress;
+    @JsonProperty("manageOrdersUnderTakingRepr")
     private final YesOrNo manageOrdersUnderTakingRepr;
+    @JsonProperty("underTakingSolicitorCounsel")
     private final UnderTakingEnum underTakingSolicitorCounsel;
+    @JsonProperty("manageOrdersUnderTakingPerson")
     private final String manageOrdersUnderTakingPerson;
     @JsonProperty("manageOrdersUnderTakingAddress")
     private final Address manageOrdersUnderTakingAddress;
+    @JsonProperty("manageOrdersUnderTakingTerms")
     private final String manageOrdersUnderTakingTerms;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonProperty("manageOrdersDateOfUnderTaking")
     private final LocalDate manageOrdersDateOfUnderTaking;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonProperty("underTakingDateExpiry")
     private final LocalDate underTakingDateExpiry;
+    @JsonProperty("underTakingExpiryTime")
     private final String underTakingExpiryTime;
+    @JsonProperty("underTakingFormSign")
     private final YesOrNo underTakingFormSign;
 
+    @JsonProperty("isTheOrderByConsent")
     private final YesOrNo isTheOrderByConsent;
+    @JsonProperty("judgeOrMagistrateTitle")
     private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
 
 
