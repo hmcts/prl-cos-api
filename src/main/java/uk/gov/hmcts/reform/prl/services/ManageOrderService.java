@@ -109,6 +109,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_fl404_filename}")
     protected String fl404File;
 
+    @Value("${document.templates.common.prl_fl404a_draft_template}")
+    protected String fl404aDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl404a_draft_filename}")
+    protected String fl404aDraftFile;
+
+    @Value("${document.templates.common.prl_fl404a_final_template}")
+    protected String fl404aFinalTemplate;
+
+    @Value("${document.templates.common.prl_fl404a_final_filename}")
+    protected String fl404aFinalFile;
+
     @Value("${document.templates.common.prl_c47a_draft_template}")
     protected String c47aDraftTemplate;
 
@@ -210,6 +222,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c47aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
+                break;
+            case nonMolestation:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404aDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404aDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404aFinalTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404aFinalFile);
                 break;
             case generalForm:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE,n117DraftTemplate);
