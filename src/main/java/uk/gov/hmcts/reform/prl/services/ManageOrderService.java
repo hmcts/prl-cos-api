@@ -381,8 +381,8 @@ public class ManageOrderService {
 
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
 
-        log.info("trying to get the template name =={}== and  file name **{}**"
-            ,fieldsMap.get(PrlAppsConstants.TEMPLATE), fieldsMap.get(PrlAppsConstants.FILE_NAME));
+        log.info("trying to get the template name =={}== and  file name **{}**",
+                 fieldsMap.get(PrlAppsConstants.TEMPLATE), fieldsMap.get(PrlAppsConstants.FILE_NAME));
 
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
