@@ -61,10 +61,10 @@ pba:
 
 feature-toggle:
   toggle:
-    example: ${FEATURE_EXAMPLE:false}
+    example: false
 
 xui:
-  url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
+  url: http://localhost:3000
 
 uk:
   gov:
@@ -129,18 +129,18 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+    totp-secret: GT2V6PLQ34XGPTPM
   api:
-    url: https://idam-api.aat.platform.hmcts.net
+    url: http://localhost:5000
   client:
     id: prl-cos-api
-    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    redirect_uri: http://localhost:3000/oauth2/callback
+    secret: W7supXKMJgcEWKBS
 
 prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+    username: prl_local_sysupdate@mailinator.com
+    password: Password12
 
 
 security:
@@ -148,14 +148,14 @@ security:
     client:
       provider:
         oidc:
-          issuer-uri: ${idam.web.url}/o
+          issuer-uri: http://locahost:5000/o
       registration:
         oidc:
           client-id: internal
           client-secret: internal
 core_case_data:
   api:
-    url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
+    url: http://localhost:4452
 
 auth:
   idam:
@@ -180,7 +180,7 @@ case_document_am:
   url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
 
 prl-dgs-api:
-  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
+  url: http://localhost:4007
 
 courtfinder:
   api:
@@ -244,10 +244,18 @@ document:
       prl_c43_filename: C43CreateOrder.pdf
       prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
       prl_c43_draft_filename: C43CreateOrderDraft.pdf
+      prl_fl404_template: PRL-ORDERS-FL404-FINAL.docx
+      prl_fl404_filename: occupation_order_FL404_final.pdf
+      prl_fl404_draft_template: PRL-ORDERS-FL404-DRAFT.docx
+      prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
       prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
       prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
+      prl_fl404b_final_template: PRL-ORDER-FL404b-FINAL-COMMON.docx
+      prl_fl404b_final_filename: amended_dischared_or_varied_order_fl404b_final.pdf
+      prl_fl404b_draft_template: PRL-ORDER-FL404b-DRAFT-COMMON.docx
+      prl_fl404b_draft_filename: amended_dischared_or_varied_order_fl404b_draft.pdf
 
 southampton:
   court:

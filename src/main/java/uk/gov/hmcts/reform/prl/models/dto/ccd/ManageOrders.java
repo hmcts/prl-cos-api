@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -61,4 +62,7 @@ public class ManageOrders {
 
     private final YesOrNo isTheOrderByConsent;
     private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
+
+    @JsonProperty("fl404CustomFields")
+    private final FL404 fl404CustomFields;
 }

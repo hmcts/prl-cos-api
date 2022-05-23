@@ -42,6 +42,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -239,7 +240,8 @@ public class ManageOrdersControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
+        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
 
         CallbackResponse callbackResponse = manageOrdersController.fetchChildDetails(callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
