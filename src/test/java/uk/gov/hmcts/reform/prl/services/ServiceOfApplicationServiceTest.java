@@ -22,11 +22,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class ServePartiesServiceTest {
+public class ServiceOfApplicationServiceTest {
 
 
     @InjectMocks
-    private ServePartiesService servePartiesService;
+    private ServiceOfApplicationService serviceOfApplicationService;
 
     @Mock
     private DgsService dgsService;
@@ -50,7 +50,7 @@ public class ServePartiesServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        Map<String, Object> responseMap = servePartiesService.populateHeader(caseData, new HashMap<>());
+        Map<String, Object> responseMap = serviceOfApplicationService.populateHeader(caseData, new HashMap<>());
 
         assertEquals("Case Name: Test Case 45678\n\n"
                          + "Family Man ID: familyman12345\n\n", responseMap.get("serviceOfApplicationHeader"));
@@ -65,7 +65,7 @@ public class ServePartiesServiceTest {
             .applicantCaseName("Test Case 45678")
             .build();
 
-        Map<String, Object> responseMap = servePartiesService.populateHeader(caseData, new HashMap<>());
+        Map<String, Object> responseMap = serviceOfApplicationService.populateHeader(caseData, new HashMap<>());
 
         assertEquals("Case Name: Test Case 45678\n\n"
                          + "Family Man ID: \n\n", responseMap.get("serviceOfApplicationHeader"));
@@ -81,7 +81,7 @@ public class ServePartiesServiceTest {
             .familymanCaseNumber("familyman12345")
             .build();
 
-        Map<String, Object> responseMap = servePartiesService.populateHeader(caseData, new HashMap<>());
+        Map<String, Object> responseMap = serviceOfApplicationService.populateHeader(caseData, new HashMap<>());
 
         assertEquals("Case Name: Test Case 45678\n\n"
                          + "Family Man ID: familyman12345\n\n", responseMap.get("serviceOfApplicationHeader"));
@@ -116,7 +116,7 @@ public class ServePartiesServiceTest {
                                              "Notice of proceedings (FL402)",
                                              "Blank order (FL404B)",
                                              "Other (upload an order)");
-        Map<String, Object> responseMap = servePartiesService.getOrderSelectionsEnumValues(createdOrders, new HashMap<>());
+        Map<String, Object> responseMap = serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders, new HashMap<>());
 
         assertEquals("1", responseMap.get("option1"));
 
@@ -125,7 +125,7 @@ public class ServePartiesServiceTest {
     @Test
     public void testCollapasableGettingPopulated() {
 
-        String responseMap = servePartiesService.getCollapsableOfSentDocuments();
+        String responseMap = serviceOfApplicationService.getCollapsableOfSentDocuments();
 
         assertNotNull(responseMap);
 
