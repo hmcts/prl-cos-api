@@ -12,12 +12,16 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
-import uk.gov.hmcts.reform.prl.models.dto.notify.ServiceOfApplicationSolicitorEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.ApplicantSolicitorEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
@@ -30,13 +34,8 @@ public class ServiceOfApplicationEmailService {
     @Autowired
     private EmailService emailService;
 
-    @Value("${uk.gov.notify.email.application.email-id}")
-    private String courtEmail;
-
     @Value("${xui.url}")
     private String manageCaseUrl;
-
-
 
     public void sendEmailC100(CaseDetails caseDetails) throws Exception {
         log.info("Sending the server Parties emails for C100 Application for caseId {}", caseDetails.getId());
@@ -60,7 +59,7 @@ public class ServiceOfApplicationEmailService {
                 emailService.send(
                     applicant.getSolicitorEmail(),
                     EmailTemplateNames.APPLICANT_SOLICITOR,
-                    buildEmail(caseDetails,solicitorName),
+                    buildApplicantSolicitorEmail(caseDetails,solicitorName),
                     LanguagePreference.english
                 );
             }
@@ -72,7 +71,23 @@ public class ServiceOfApplicationEmailService {
                     emailService.send(
                         respondent.getSolicitorEmail(),
                         EmailTemplateNames.RESPONDENT_SOLICITOR,
-                        buildEmail(caseDetails, solicitorName),
+                        buildRespondentSolicitorEmail(caseDetails, solicitorName),
+                        LanguagePreference.english
+                    );
+                } else {
+                    String applicantNames = "";
+                    for (int i = 0; i < applicants.size(); i++) {
+                        applicantNames += applicants.get(i).getFirstName() + " " + applicants.get(i).getLastName();
+                        if (applicants.size() >= 1 && (i == applicants.size() - 2)) {
+                            applicantNames += " and ";
+                        } else {
+                            applicantNames += ", ";
+                        }
+                    }
+                    emailService.send(
+                        respondent.getSolicitorEmail(),
+                        EmailTemplateNames.RESPONDENT_WITHOUT_SOLICITOR,
+                        buildRespondentEmail(caseDetails, "solicitorName"),
                         LanguagePreference.english
                     );
                 }
@@ -91,7 +106,7 @@ public class ServiceOfApplicationEmailService {
         emailService.send(
             applicant.getSolicitorEmail(),
             EmailTemplateNames.APPLICANT_SOLICITOR,
-            buildEmail(caseDetails,solicitorName),
+            buildApplicantSolicitorEmail(caseDetails,solicitorName),
             LanguagePreference.english
         );
 
@@ -100,23 +115,50 @@ public class ServiceOfApplicationEmailService {
             emailService.send(
                 respondent.getSolicitorEmail(),
                 EmailTemplateNames.RESPONDENT_SOLICITOR,
-                buildEmail(caseDetails, respondentSolicitorName),
+                buildRespondentSolicitorEmail(caseDetails, respondentSolicitorName),
                 LanguagePreference.english
             );
         }
     }
 
-    private EmailTemplateVars buildEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
+    private EmailTemplateVars buildApplicantSolicitorEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
-
-        return ServiceOfApplicationSolicitorEmail.builder()
+        Map<String,Object> privacy = new HashMap<>();
+        privacy.put("file",NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf")).get("file"));
+        return ApplicantSolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
             .solicitorName(solicitorName)
             .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
-            .privacyNoticeLink(NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf")))
+            .privacyNoticeLink(privacy)
             .issueDate(caseData.getIssueDate())
+            .build();
+    }
+
+    private EmailTemplateVars buildRespondentSolicitorEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
+
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        return RespondentSolicitorEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .solicitorName(solicitorName)
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
+            .issueDate(caseData.getIssueDate())
+            .build();
+    }
+
+    private EmailTemplateVars buildRespondentEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
+
+        CaseData caseData = emailService.getCaseData(caseDetails);
+
+        return RespondentEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .respondentName("")
+            .createLink(manageCaseUrl + URL_STRING + caseDetails.getId())
+            .applicantNames("")
+            .accessCode("")
             .build();
     }
 }

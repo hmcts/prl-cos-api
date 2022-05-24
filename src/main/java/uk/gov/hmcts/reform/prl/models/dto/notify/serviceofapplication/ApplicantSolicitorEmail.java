@@ -1,28 +1,35 @@
-package uk.gov.hmcts.reform.prl.models.dto.notify;
+package uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
-import org.json.JSONObject;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 @Data
-public class ServiceOfApplicationSolicitorEmail extends EmailTemplateVars {
+public class ApplicantSolicitorEmail extends EmailTemplateVars {
 
+    @JsonProperty("caseName")
     private final String caseName;
+    @JsonProperty("issueDate")
     private final LocalDate issueDate;
+    @JsonProperty("solicitorName")
     private final String solicitorName;
+    @JsonProperty("caseLink")
     private final String caseLink;
-    private final JSONObject privacyNoticeLink;
+    @JsonProperty("privacyNoticeLink")
+    private final Map<String,Object> privacyNoticeLink;
 
 
     @Builder
-    public ServiceOfApplicationSolicitorEmail(String caseReference,
+    public ApplicantSolicitorEmail(String caseReference,
                                               String caseName,
                                               LocalDate issueDate,
                                               String solicitorName,
                                               String caseLink,
-                                              JSONObject privacyNoticeLink) {
+                                              Map<String,Object> privacyNoticeLink) {
         super(caseReference);
         this.caseName = caseName;
         this.issueDate = issueDate;
@@ -30,5 +37,4 @@ public class ServiceOfApplicationSolicitorEmail extends EmailTemplateVars {
         this.caseLink = caseLink;
         this.privacyNoticeLink = privacyNoticeLink;
     }
-
 }
