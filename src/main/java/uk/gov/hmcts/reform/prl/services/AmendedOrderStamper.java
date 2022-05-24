@@ -22,11 +22,14 @@ import java.awt.Color;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 import static uk.gov.hmcts.reform.prl.utils.DocumentsHelper.hasExtension;
 import static uk.gov.hmcts.reform.prl.utils.ResourceReader.readBytes;
@@ -52,30 +55,28 @@ public class AmendedOrderStamper {
                     + getExtension(original.getDocumentFileName())
             );
         }
-
         ResponseEntity<Resource> downloadedDocument = caseDocumentClient.getDocumentBinary(authorisation,
                                                                                            authTokenGenerator.generate(),
                                                                                            original.getDocumentBinaryUrl());
 
-        try {
-            byte[] documentContents = downloadedDocument.getBody().getInputStream().readAllBytes();
+        Optional<Resource> documentResponse = ofNullable(downloadedDocument.getBody());
+        if (documentResponse.isPresent()) {
+            byte[] documentContents = documentResponse.get().getInputStream().readAllBytes();
             try {
                 return amendDocument(documentContents);
             } catch (IOException e) {
                 log.error("Could not add amendment text to {}", original, e);
                 throw new UncheckedIOException(e);
             }
-        } catch (NullPointerException np) {
-            log.error("Could not get document body from response {}", original, np);
-            throw new IOException(np);
+        } else {
+            throw new IOException("Unable to amend PDF");
         }
-
     }
 
     private byte[] amendDocument(byte[] binaries) throws IOException {
         try (PDDocument document = PDDocument.load(binaries)) {
-            final ByteArrayInputStream font_binaries = new ByteArrayInputStream(readBytes(FONT_LOCATION));
-            final PDFont font = PDType0Font.load(document, font_binaries);
+            final ByteArrayInputStream fontBinaries = new ByteArrayInputStream(readBytes(FONT_LOCATION));
+            final PDFont font = PDType0Font.load(document, fontBinaries);
 
             final PDPage page = document.getPage(0);
 
