@@ -7,6 +7,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.util.List;
+
 @Getter
 public class CaseInviteEmail extends EmailTemplateVars {
 
@@ -26,11 +28,20 @@ public class CaseInviteEmail extends EmailTemplateVars {
         this.caseLink = caseLink;
         this.citizenSignUpLink = citizenSignUpLink;
         this.caseName = caseData.getApplicantCaseName();
-        this.applicantName = getFirstApplicantFullName(caseData);
+        this.applicantName = getApplicantNames(caseData);
     }
 
-    private static String getFirstApplicantFullName(CaseData caseData) {
-        PartyDetails applicant = ElementUtils.unwrapElements(caseData.getApplicants()).get(0);
-        return String.format("%s %s", applicant.getFirstName(), applicant.getLastName());
+    private static String getApplicantNames(CaseData caseData) {
+        List<PartyDetails> applicants = ElementUtils.unwrapElements(caseData.getApplicants());
+        String applicantNames = "";
+        for (int i = 0; i < applicants.size(); i++) {
+            applicantNames += applicants.get(i).getFirstName() + " " + applicants.get(i).getLastName();
+            if (applicants.size() >= 1 && (i == applicants.size() - 2)) {
+                applicantNames += " and ";
+            } else if (applicants.size() != 1) {
+                applicantNames += ", ";
+            }
+        }
+        return applicantNames;
     }
 }
