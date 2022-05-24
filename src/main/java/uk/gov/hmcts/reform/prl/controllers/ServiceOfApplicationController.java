@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 
 import java.util.Map;
 
@@ -28,9 +28,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Slf4j
 public class ServiceOfApplicationController {
 
-
     @Autowired
-    private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
+    private ServiceOfApplicationService serviceOfApplicationService;
 
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Serve Parties Email Notification")
@@ -40,13 +39,11 @@ public class ServiceOfApplicationController {
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest
-    ) {
+    ) throws Exception {
         log.info("send Email Notification To Server Parties, On \"Service Of Application\" Event Triggered");
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        serviceOfApplicationEmailService.sendEmail(caseDetails);
+        serviceOfApplicationService.sendEmail(caseDetails);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
-
 }

@@ -7,13 +7,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
-import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ServiceOfApplicationSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
+import uk.gov.service.notify.NotificationClient;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,8 +37,9 @@ public class ServiceOfApplicationEmailService {
     private String manageCaseUrl;
 
 
-    public void sendEmail(CaseDetails caseDetails) {
-        log.info("Sending the server Parties emails for caseId {}", caseDetails.getId());
+
+    public void sendEmailC100(CaseDetails caseDetails) throws Exception {
+        log.info("Sending the server Parties emails for C100 Application for caseId {}", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         List<PartyDetails> applicants = caseData
@@ -45,43 +48,75 @@ public class ServiceOfApplicationEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        if(applicants != null && !applicants.isEmpty()) {
-            List<String> applicantSolicitorEmailList = applicants.stream()
-                .map(PartyDetails::getSolicitorEmail)
-                .collect(Collectors.toList());
+        List<PartyDetails> respondents = caseData
+            .getRespondents()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
 
-            if(applicantSolicitorEmailList != null && !applicantSolicitorEmailList.isEmpty()) {
-                applicantSolicitorEmailList.forEach(email -> emailService.send(
-                    email,
+        if(!applicants.isEmpty()) {
+            for (PartyDetails applicant : applicants) {
+                String solicitorName = applicant.getRepresentativeFirstName() + " " + applicant.getRepresentativeLastName();
+                emailService.send(
+                    applicant.getSolicitorEmail(),
                     EmailTemplateNames.APPLICANT_SOLICITOR,
-                    buildEmail(caseDetails),
+                    buildEmail(caseDetails,solicitorName),
                     LanguagePreference.english
-                ));
+                );
+            }
+        }
+        if (!respondents.isEmpty()) {
+            for (PartyDetails respondent : respondents) {
+                if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())) {
+                    String solicitorName = respondent.getRepresentativeFirstName() + " " + respondent.getRepresentativeLastName();
+                    emailService.send(
+                        respondent.getSolicitorEmail(),
+                        EmailTemplateNames.RESPONDENT_SOLICITOR,
+                        buildEmail(caseDetails, solicitorName),
+                        LanguagePreference.english
+                    );
+                }
             }
         }
     }
 
+    public void sendEmailFL401(CaseDetails caseDetails) throws Exception {
+        log.info("Sending the server Parties emails for C100 Application for caseId {}", caseDetails.getId());
 
-    private EmailTemplateVars buildEmail(CaseDetails caseDetails, String solicitorName) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        PartyDetails applicant = caseData.getApplicantsFL401();
+        PartyDetails respondent = caseData.getRespondentsFL401();
+
+        String solicitorName = applicant.getRepresentativeFirstName() + " " + applicant.getRepresentativeLastName();
+        emailService.send(
+            applicant.getSolicitorEmail(),
+            EmailTemplateNames.APPLICANT_SOLICITOR,
+            buildEmail(caseDetails,solicitorName),
+            LanguagePreference.english
+        );
+
+        if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())) {
+            String respondentSolicitorName = respondent.getRepresentativeFirstName() + " " + respondent.getRepresentativeLastName();
+            emailService.send(
+                respondent.getSolicitorEmail(),
+                EmailTemplateNames.RESPONDENT_SOLICITOR,
+                buildEmail(caseDetails, respondentSolicitorName),
+                LanguagePreference.english
+            );
+        }
+    }
+
+    private EmailTemplateVars buildEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
 
         return ServiceOfApplicationSolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
-            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .caseName(caseData.getApplicantCaseName())
             .solicitorName(solicitorName)
             .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
-            .privacyNoticeLink()
+            .privacyNoticeLink(NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf")))
+            .issueDate(caseData.getIssueDate())
             .build();
     }
-
-
-    private List<PartyDetails> getApplicants(CaseData caseData) {
-        return caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-    }
-
 }

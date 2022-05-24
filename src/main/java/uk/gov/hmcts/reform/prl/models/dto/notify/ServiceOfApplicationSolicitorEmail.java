@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.prl.models.dto.notify;
 
 import lombok.Builder;
 import lombok.Data;
-import org.joda.time.LocalDate;
+import org.json.JSONObject;
+
+import java.time.LocalDate;
 
 @Data
 public class ServiceOfApplicationSolicitorEmail extends EmailTemplateVars {
@@ -11,7 +13,7 @@ public class ServiceOfApplicationSolicitorEmail extends EmailTemplateVars {
     private final LocalDate issueDate;
     private final String solicitorName;
     private final String caseLink;
-    private final String privacyNoticeLink;
+    private final JSONObject privacyNoticeLink;
 
 
     @Builder
@@ -20,7 +22,7 @@ public class ServiceOfApplicationSolicitorEmail extends EmailTemplateVars {
                                               LocalDate issueDate,
                                               String solicitorName,
                                               String caseLink,
-                                              String privacyNoticeLink) {
+                                              JSONObject privacyNoticeLink) {
         super(caseReference);
         this.caseName = caseName;
         this.issueDate = issueDate;
