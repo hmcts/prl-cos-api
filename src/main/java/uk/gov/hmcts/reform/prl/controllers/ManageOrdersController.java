@@ -170,9 +170,10 @@ public class ManageOrdersController {
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+        } else {
+            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
         }
 
-        caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
 
         caseDataUpdated.remove("previewOrderDoc");
         caseDataUpdated.remove("dateOrderMade");

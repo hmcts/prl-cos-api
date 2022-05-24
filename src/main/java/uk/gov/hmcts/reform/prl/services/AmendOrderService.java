@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -11,7 +12,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -66,7 +69,10 @@ public class AmendOrderService {
                 OrderDetails amended = order.getValue().toBuilder()
                     .orderDocument(amendedDocument)
                     .otherDetails(order.getValue().getOtherDetails().toBuilder()
-                                      .orderAmendedDate(time.now().toLocalDate())
+                                      .orderAmendedDate(time.now().format(DateTimeFormatter.ofPattern(
+                                          PrlAppsConstants.D_MMMM_YYYY,
+                                          Locale.UK
+                                      )))
                                       .build())
                     .build();
 
