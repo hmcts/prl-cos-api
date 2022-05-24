@@ -233,9 +233,9 @@ document:
       prl_c21_draft_template: PRL-ORDER-C21-DRAFT-COMMON.docx
       prl_c21_draft_filename: C21CreateOrderDraft.pdf
       C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
-      C43A_draft_filename: C43ADraftCreateOrder.pdf
+      C43A_draft_filename: SpecialGuardianshipOrderDraft.pdf
       C43A_final_template: PRL-ORDER-C43A-FINAL.docx
-      C43A_final_filename: C43AFinalCreateOrder.pdf
+      C43A_final_filename: SpecialGuardianshipOrderFinal.pdf
       prl_c43_template: PRL-ORDER-C43-FINAL.docx
       prl_c43_filename: C43CreateOrder.pdf
       prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
@@ -248,6 +248,10 @@ document:
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-ORDERS-N117-FINAL.docx
       prl_n117_filename: N117CreateOrder.pdf
+      prl_c45a_template: PRL-ORDER-C45A-FINAL.docx
+      prl_c45a_filename: ParentalResponsibilityOrderFinal.pdf
+      prl_c45a_draft_template: PRL-ORDER-C45A-DRAFT-FINAL.docx
+      prl_c45a_draft_filename: ParentalResponsibilityOrderDraft.pdf
 
 southampton:
   court:
