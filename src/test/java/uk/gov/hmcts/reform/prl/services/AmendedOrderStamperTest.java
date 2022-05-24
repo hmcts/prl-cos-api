@@ -58,6 +58,7 @@ public class AmendedOrderStamperTest {
         Document inputPdf = Document.builder()
             .documentFileName(FILE_NAME)
             .documentBinaryUrl(BINARY_URL)
+            .documentUrl(BINARY_URL)
             .build();
 
         Resource expectedResource = new ClassPathResource("documents/document.pdf");
