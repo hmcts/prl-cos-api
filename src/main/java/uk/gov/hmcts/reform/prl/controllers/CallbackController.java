@@ -392,26 +392,4 @@ public class CallbackController {
         return caseDataUpdated;
 
     }
-
-    @PostMapping(path = "/service-of-application-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback for add case number submit event")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse aboutToStartServiceOfApplication(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
-    ) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseDataUpdated = serviceOfApplicationService.populateHeader(caseData,caseDataUpdated);
-        if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
-            List<String> createdOrders = caseData.getOrderCollection().stream()
-                .map(Element::getValue).map((orderDetails) -> orderDetails.getOrderType())
-                .collect(Collectors.toList());
-            caseDataUpdated = serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders,caseDataUpdated);
-        }
-        caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
 }
