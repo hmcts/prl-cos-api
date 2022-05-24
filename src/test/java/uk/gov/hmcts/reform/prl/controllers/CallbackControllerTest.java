@@ -52,7 +52,7 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
-import uk.gov.hmcts.reform.prl.services.ServePartiesService;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -155,7 +155,7 @@ public class CallbackControllerTest {
     private AddCaseNoteService addCaseNoteService;
 
     @Mock
-    private ServePartiesService servePartiesService;
+    private ServiceOfApplicationService serviceOfApplicationService;
 
     @Mock
     private DocumentGenService documentGenService;
@@ -1022,8 +1022,8 @@ public class CallbackControllerTest {
         caseData.put("serviceOfApplicationHeader","TestHeader");
         caseData.put("option1","1");
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
-        when(servePartiesService.populateHeader(Mockito.any(CaseData.class),Mockito.anyMap())).thenReturn(caseData);
-        when(servePartiesService.getCollapsableOfSentDocuments()).thenReturn("Collapsable");
+        when(serviceOfApplicationService.populateHeader(Mockito.any(CaseData.class), Mockito.anyMap())).thenReturn(caseData);
+        when(serviceOfApplicationService.getCollapsableOfSentDocuments()).thenReturn("Collapsable");
         List<String> createdOrders = new ArrayList<>();
         createdOrders.add("Standard directions order");
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -1031,7 +1031,7 @@ public class CallbackControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-        when(servePartiesService.getOrderSelectionsEnumValues(Mockito.anyList(),Mockito.anyMap())).thenReturn(caseData);
+        when(serviceOfApplicationService.getOrderSelectionsEnumValues(Mockito.anyList(), Mockito.anyMap())).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .aboutToStartServiceOfApplication(authToken, callbackRequest);
         assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("sentDocumentPlaceHolder"),"Collapsable");
@@ -1050,11 +1050,11 @@ public class CallbackControllerTest {
             .build();
         caseData.put("serviceOfApplicationHeader","TestHeader");
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
-        when(servePartiesService.populateHeader(Mockito.any(CaseData.class),Mockito.anyMap())).thenReturn(caseData);
-        when(servePartiesService.getCollapsableOfSentDocuments()).thenReturn("Collapsable");
+        when(serviceOfApplicationService.populateHeader(Mockito.any(CaseData.class), Mockito.anyMap())).thenReturn(caseData);
+        when(serviceOfApplicationService.getCollapsableOfSentDocuments()).thenReturn("Collapsable");
         List<String> createdOrders = new ArrayList<>();
         createdOrders.add("Standard directions order");
-        when(servePartiesService.getOrderSelectionsEnumValues(Mockito.anyList(),Mockito.anyMap())).thenReturn(caseData);
+        when(serviceOfApplicationService.getOrderSelectionsEnumValues(Mockito.anyList(), Mockito.anyMap())).thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
