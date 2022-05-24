@@ -56,7 +56,7 @@ public class AmendedOrderStamper {
         }
         ResponseEntity<Resource> downloadedDocument = caseDocumentClient.getDocumentBinary(authorisation,
                                                                                            authTokenGenerator.generate(),
-                                                                                           original.getDocumentBinaryUrl());
+                                                                                           original.getDocumentUrl());
 
         Optional<Resource> documentResponse = ofNullable(downloadedDocument.getBody());
         if (documentResponse.isPresent()) {
