@@ -44,7 +44,7 @@ import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
-import uk.gov.hmcts.reform.prl.services.ServePartiesService;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -96,7 +96,7 @@ public class CallbackController {
     private final AllTabServiceImpl allTabsService;
     private final UserService userService;
     private final DocumentGenService documentGenService;
-    private final ServePartiesService servePartiesService;
+    private final ServiceOfApplicationService serviceOfApplicationService;
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
 
@@ -499,14 +499,14 @@ public class CallbackController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseDataUpdated = servePartiesService.populateHeader(caseData,caseDataUpdated);
+        caseDataUpdated = serviceOfApplicationService.populateHeader(caseData,caseDataUpdated);
         if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
             List<String> createdOrders = caseData.getOrderCollection().stream()
                 .map(Element::getValue).map((orderDetails) -> orderDetails.getOrderType())
                 .collect(Collectors.toList());
-            caseDataUpdated = servePartiesService.getOrderSelectionsEnumValues(createdOrders,caseDataUpdated);
+            caseDataUpdated = serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders,caseDataUpdated);
         }
-        caseDataUpdated.put("sentDocumentPlaceHolder", servePartiesService.getCollapsableOfSentDocuments());
+        caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }

@@ -61,6 +61,7 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -172,6 +173,9 @@ public class CallbackControllerTest {
 
     @Mock
     private DocumentGenService documentGenService;
+
+    @Mock
+    private ServiceOfApplicationService serviceOfApplicationService;
 
     @Mock
     private  ConfidentialityTabService confidentialityTabService;

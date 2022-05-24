@@ -17,7 +17,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ServePartiesService {
+public class ServiceOfApplicationService {
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
