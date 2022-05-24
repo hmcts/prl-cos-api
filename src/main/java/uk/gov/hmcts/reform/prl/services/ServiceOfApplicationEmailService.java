@@ -54,7 +54,7 @@ public class ServiceOfApplicationEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        if(!applicants.isEmpty()) {
+        if (!applicants.isEmpty()) {
             for (PartyDetails applicant : applicants) {
                 String solicitorName = applicant.getRepresentativeFirstName() + " " + applicant.getRepresentativeLastName();
                 emailService.send(
