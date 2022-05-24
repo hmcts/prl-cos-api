@@ -84,12 +84,12 @@ public class ServiceOfApplicationEmailService {
                             applicantNames += ", ";
                         }
                     }
-                    emailService.send(
-                        respondent.getSolicitorEmail(),
-                        EmailTemplateNames.RESPONDENT_WITHOUT_SOLICITOR,
-                        buildRespondentEmail(caseDetails, "solicitorName"),
-                        LanguagePreference.english
-                    );
+//                    emailService.send(
+//                        respondent.getSolicitorEmail(),
+//                        EmailTemplateNames.RESPONDENT_WITHOUT_SOLICITOR,
+//                        buildRespondentEmail(caseDetails, "solicitorName"),
+//                        LanguagePreference.english
+//                    );
                 }
             }
         }

@@ -87,6 +87,9 @@ feature-toggle:
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
+citizen_frontend:
+  url: http://example.com
+
 uk:
   gov:
     notify:
