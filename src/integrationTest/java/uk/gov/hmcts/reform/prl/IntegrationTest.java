@@ -185,11 +185,6 @@ public abstract class IntegrationTest {
 
     private String idamCodeUrl() {
 
-        System.out.println(idamUserBaseUrl + idamAuthorizeContextPath
-                               + "?response_type=code"
-                               + "&client_id=" + idamAuthClientID
-                               + "&redirect_uri=" + idamRedirectUri);
-
         return idamUserBaseUrl + idamAuthorizeContextPath
             + "?response_type=code"
             + "&client_id=" + idamAuthClientID
@@ -197,13 +192,6 @@ public abstract class IntegrationTest {
     }
 
     private String idamTokenUrl(String code) {
-
-        System.out.println(idamUserBaseUrl + idamTokenContextPath
-                               + "?code=" + code
-                               + "&client_id=" + idamAuthClientID
-                               + "&client_secret=" + idamSecret
-                               + "&redirect_uri=" + idamRedirectUri
-                               + "&grant_type=authorization_code");
 
         return idamUserBaseUrl + idamTokenContextPath
             + "?code=" + code

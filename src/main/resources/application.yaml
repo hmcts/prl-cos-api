@@ -19,6 +19,27 @@ spring:
     import: "optional:configtree:/mnt/secrets/"
   application:
     name: Prl cos api
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
+#    username: ${DB_USER_NAME}
+#    password: ${DB_PASSWORD}
+#    properties:
+#      charSet: UTF-8
+#    hikari:
+#      minimumIdle: 2
+#      maximumPoolSize: 10
+#      idleTimeout: 10000
+#      poolName: {to-be-defined}HikariCP
+#      maxLifetime: 7200000
+#      connectionTimeout: 30000
+#  jpa:
+#    properties:
+#      hibernate:
+#        jdbc:
+#          lob:
+#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
+#            non_contextual_creation: true
 
 azure:
   application-insights:
@@ -60,8 +81,11 @@ uk:
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
             COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
             GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
+            GATEKEEPER_FL401: c078de4d-9177-4e0d-ab9f-5adcf27a6ee5
             DA_SOLICITOR: d65830b7-eb13-46c3-b772-03976a67210d
             DA_LOCALCOURT: 9d6b311a-a764-45a7-9dd9-cd1d06408214
+            WITHDRAW_AFTER_ISSUED_LOCAL_COURT: 233e4bfa-d9ec-42c2-a06a-d8cce9abd238
+            WITHDRAW_AFTER_ISSUED_SOLICITOR: ba39a8e6-c553-457e-b526-3c241cd207f6
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
           welsh:
@@ -224,9 +248,10 @@ document:
       prl_c45a_filename: C45ACreateOrder.pdf
       prl_c45a_draft_template: PRL-ORDER-C45A-DRAFT-COMMON.docx
       prl_c45a_draft_filename: C45ACreateOrderDraft.pdf
-
-
-
+      prl_n117_draft_template: PRL-ORDERS-N117-DRAFT.docx
+      prl_n117_draft_filename: N117CreateOrderDraft.pdf
+      prl_n117_template: PRL-ORDERS-N117-FINAL.docx
+      prl_n117_filename: N117CreateOrder.pdf
 
 southampton:
   court:
