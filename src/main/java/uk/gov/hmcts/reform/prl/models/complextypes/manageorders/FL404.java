@@ -42,6 +42,7 @@ public class FL404 {
     private final List<String> fl404bRespondentNotHarassOrIntimidate;
     private final List<String> fl404bRespondentNotToTelephoneChild;
     private final List<String> fl404bRespondentNotToEnterSchool;
+    private final String fl404bAddMoreDetailsPhoneChild;
     private final String fl404bAddMoreDetailsTelephone;
     private final String fl404bAddMoreDetailsProperty;
     private final String fl404bAddSchool;
