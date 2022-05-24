@@ -243,6 +243,10 @@ document:
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-ORDERS-N117-FINAL.docx
       prl_n117_filename: N117CreateOrder.pdf
+      prl_c45a_template: PRL-ORDER-C45A-FINAL.docx
+      prl_c45a_filename: ParentalResponsibilityOrderFinal.pdf
+      prl_c45a_draft_template: PRL-ORDER-C45A-DRAFT-FINAL.docx
+      prl_c45a_draft_filename: ParentalResponsibilityOrderDraft.pdf
 
 southampton:
   court:
