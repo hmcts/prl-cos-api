@@ -94,4 +94,11 @@ public class ManageOrders {
     private final List<ChildSelectorEnum> childSelectorOption14;
     @JsonProperty("childSelectorOption15")
     private final List<ChildSelectorEnum> childSelectorOption15;
+
+    /**
+     * C45A.
+     */
+    @JsonProperty("parentName")
+    private String parentName;
+
 }
