@@ -54,6 +54,7 @@ public class AmendedOrderStamper {
                     + getExtension(original.getDocumentFileName())
             );
         }
+        log.info("Attempting to download document for amending");
         ResponseEntity<Resource> downloadedDocument = caseDocumentClient.getDocumentBinary(authorisation,
                                                                                            authTokenGenerator.generate(),
                                                                                            original.getDocumentUrl());
