@@ -1,11 +1,14 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,12 @@ public class ServiceOfApplicationService {
 
     @Autowired
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
+
+    @Autowired
+    private final CaseInviteManager caseInviteManager;
+
+    @Autowired
+    private final ObjectMapper objectMapper;
 
     public Map<String, Object> populateHeader(CaseData caseData, Map<String,Object> caseDataUpdated) {
         caseDataUpdated.put("serviceOfApplicationHeader", getHeaderInfo(caseData));
@@ -136,7 +145,12 @@ public class ServiceOfApplicationService {
     }
 
     public void sendEmail(CaseDetails caseDetails) throws Exception {
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseDetails.getData().get("caseTypeOfApplication").toString())) {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        caseInviteManager.generatePinAndSendNotificationEmail(caseData);
+
+        log.info("Sending service of application email notifications");
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             serviceOfApplicationEmailService.sendEmailC100(caseDetails);
         } else {
             serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
