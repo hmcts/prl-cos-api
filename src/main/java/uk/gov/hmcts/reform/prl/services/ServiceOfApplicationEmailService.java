@@ -47,50 +47,31 @@ public class ServiceOfApplicationEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
+        for (PartyDetails applicant : applicants) {
+            String solicitorName = applicant.getRepresentativeFirstName() + " " + applicant.getRepresentativeLastName();
+            emailService.send(
+                applicant.getSolicitorEmail(),
+                EmailTemplateNames.APPLICANT_SOLICITOR,
+                buildApplicantSolicitorEmail(caseDetails,solicitorName),
+                LanguagePreference.english
+            );
+        }
+
         List<PartyDetails> respondents = caseData
             .getRespondents()
             .stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        if (!applicants.isEmpty()) {
-            for (PartyDetails applicant : applicants) {
-                String solicitorName = applicant.getRepresentativeFirstName() + " " + applicant.getRepresentativeLastName();
+        for (PartyDetails respondent : respondents) {
+            if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())) {
+                String solicitorName = respondent.getRepresentativeFirstName() + " " + respondent.getRepresentativeLastName();
                 emailService.send(
-                    applicant.getSolicitorEmail(),
-                    EmailTemplateNames.APPLICANT_SOLICITOR,
-                    buildApplicantSolicitorEmail(caseDetails,solicitorName),
+                    respondent.getSolicitorEmail(),
+                    EmailTemplateNames.RESPONDENT_SOLICITOR,
+                    buildRespondentSolicitorEmail(caseDetails, solicitorName),
                     LanguagePreference.english
                 );
-            }
-        }
-        if (!respondents.isEmpty()) {
-            for (PartyDetails respondent : respondents) {
-                if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())) {
-                    String solicitorName = respondent.getRepresentativeFirstName() + " " + respondent.getRepresentativeLastName();
-                    emailService.send(
-                        respondent.getSolicitorEmail(),
-                        EmailTemplateNames.RESPONDENT_SOLICITOR,
-                        buildRespondentSolicitorEmail(caseDetails, solicitorName),
-                        LanguagePreference.english
-                    );
-                } else {
-                    String applicantNames = "";
-                    for (int i = 0; i < applicants.size(); i++) {
-                        applicantNames += applicants.get(i).getFirstName() + " " + applicants.get(i).getLastName();
-                        if (applicants.size() >= 1 && (i == applicants.size() - 2)) {
-                            applicantNames += " and ";
-                        } else {
-                            applicantNames += ", ";
-                        }
-                    }
-//                    emailService.send(
-//                        respondent.getSolicitorEmail(),
-//                        EmailTemplateNames.RESPONDENT_WITHOUT_SOLICITOR,
-//                        buildRespondentEmail(caseDetails, "solicitorName"),
-//                        LanguagePreference.english
-//                    );
-                }
             }
         }
     }
