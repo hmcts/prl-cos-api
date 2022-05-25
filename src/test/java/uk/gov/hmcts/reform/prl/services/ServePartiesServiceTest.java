@@ -26,7 +26,7 @@ public class ServePartiesServiceTest {
 
 
     @InjectMocks
-    private ServePartiesService servePartiesService;
+    private ServiceOfApplicationService servePartiesService;
 
     @Mock
     private DgsService dgsService;
