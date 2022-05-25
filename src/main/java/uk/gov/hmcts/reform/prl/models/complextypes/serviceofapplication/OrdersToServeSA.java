@@ -66,7 +66,6 @@ public class OrdersToServeSA {
 
     public List<String> getSelectedOrders() {
         return Stream.of(OrdersToServeSA.class.getDeclaredFields()).filter(Objects::nonNull)
-            .map(x -> x.)
             .map(field -> {
                 try {
                     return field.get(this);
@@ -74,8 +73,10 @@ public class OrdersToServeSA {
                     e.printStackTrace();
                 }
                 return null;
+            }).filter(Objects::nonNull)
+            .map(Object::toString)
+            .map(s -> s.substring(1, s.length() - 1))
+            .collect(Collectors.toList());
     }
-
-            .collect(Collectors.toList())
 
 }
