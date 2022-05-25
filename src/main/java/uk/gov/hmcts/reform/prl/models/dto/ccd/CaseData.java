@@ -540,12 +540,6 @@ public class CaseData implements MappableObject {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
 
-    @JsonProperty("childOption")
-    private final String childOption;
-
-    @JsonProperty("childrenList")
-    private final String childrenList;
-
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
 
     @JsonUnwrapped

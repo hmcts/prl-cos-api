@@ -22,7 +22,9 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildSelectorOptions;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -226,7 +228,7 @@ public class ManageOrdersControllerTest {
             .children(listOfChildren)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .fl401FamilymanCaseNumber("12345")
-            .childrenList("Child 1: TestName\n")
+            .childSelectorOptions(ChildSelectorOptions.builder().childrenList("Child 1: TestName\n").build())
             .selectedOrder(
                 "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
                     + "enforcement application (C82)\\n\\n")
@@ -245,7 +247,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
 
         CallbackResponse callbackResponse = manageOrdersController.fetchChildDetails(callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
+        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildSelectorOptions().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
             callbackResponse.getData().getSelectedOrder());
@@ -278,7 +280,7 @@ public class ManageOrdersControllerTest {
             .home(Home.builder().children(listOfChildren).build())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .fl401FamilymanCaseNumber("12345")
-            .childrenList("Child 1: TestName\n")
+            .childSelectorOptions(ChildSelectorOptions.builder().childrenList("Child 1: TestName\n").build())
             .selectedOrder(
                 "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
                     + "enforcement application (C82)\\n\\n")
@@ -297,7 +299,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
 
         CallbackResponse callbackResponse = manageOrdersController.fetchChildDetails(callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
+        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildSelectorOptions().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
             callbackResponse.getData().getSelectedOrder());
