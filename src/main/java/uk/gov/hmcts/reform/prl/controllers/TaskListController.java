@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -30,6 +31,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 @RestController
 @RequestMapping("/update-task-list")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@Slf4j
 public class TaskListController extends AbstractCallbackController {
 
     @Autowired
@@ -54,7 +56,9 @@ public class TaskListController extends AbstractCallbackController {
                 .getApplicantsFL401();
 
             if (Objects.nonNull(fl401Applicant)) {
+                log.info("adding applicant name in casedata: ");
                 caseData.setApplicantName(fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
+                log.info("Applicant case name in case data is: {}",caseData.getApplicantName());
             }
         } else {
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
@@ -64,8 +68,10 @@ public class TaskListController extends AbstractCallbackController {
                     .map(Element::getValue)
                     .collect(Collectors.toList());
                 PartyDetails applicant1 = applicants.get(0);
+                log.info("adding applicant name in casedata: ");
                 if (Objects.nonNull(applicant1)) {
                     caseData.setApplicantName(applicant1.getFirstName() + " " + applicant1.getLastName());
+                    log.info("Applicant case name in case data is: {}",caseData.getApplicantName());
                 }
 
             }
@@ -75,10 +81,14 @@ public class TaskListController extends AbstractCallbackController {
                 Child child = children.get(0);
                 if (Objects.nonNull(child)) {
                     caseData.setChildName(child.getFirstName() + " " + child.getLastName());
+                    log.info("child case name in case data is: {}",caseData.getChildName());
                 }
 
             }
         }
+
+        log.info("applicant Name : {}",caseData.getApplicantName());
+        log.info("child Name : {}",caseData.getChildName());
 
 
     }
