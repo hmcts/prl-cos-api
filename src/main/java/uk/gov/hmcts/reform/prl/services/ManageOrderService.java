@@ -494,7 +494,8 @@ public class ManageOrderService {
             orderData = orderData.toBuilder().manageOrdersRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
 
-        return caseData.toBuilder().manageOrders(orderData).build();
+        return caseData.toBuilder().manageOrders(orderData)
+            .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
     public CaseData populateCustomOrderFields(CaseData caseData) {
@@ -531,7 +532,9 @@ public class ManageOrderService {
             orderData = orderData.toBuilder().fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
         return caseData.toBuilder().manageOrders(ManageOrders.builder()
-                                                     .fl404CustomFields(orderData).build()).build();
+                                                     .fl404CustomFields(orderData)
+                                                     .build())
+            .selectedOrder(getSelectedOrderInfo(caseData)).build();
 
     }
 }

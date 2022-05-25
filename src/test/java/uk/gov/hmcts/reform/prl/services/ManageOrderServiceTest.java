@@ -153,6 +153,7 @@ public class ManageOrderServiceTest {
             .id(12345674L)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .courtName("Court name")
+            .childArrangementOrders(ChildArrangementOrdersEnum.authorityC31)
             .applicantsFL401(PartyDetails.builder()
                                  .firstName("app")
                                  .lastName("testLast")
