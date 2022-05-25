@@ -87,7 +87,7 @@ public class ManageOrderServiceTest {
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
 
-        assertEquals("Child 1: Test Name\n", caseData1.getChildSelectorOptions().getChildrenList());
+        assertEquals("Child 1: Test Name\n", caseData1.getChildrenList());
         assertNotNull(caseData1.getSelectedOrder());
 
     }
@@ -123,7 +123,7 @@ public class ManageOrderServiceTest {
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
 
-        assertEquals("Child 1: TestName\n", caseData1.getChildSelectorOptions().getChildrenList());
+        assertEquals("Child 1: TestName\n", caseData1.getChildrenList());
         assertNotNull(caseData1.getSelectedOrder());
     }
 
