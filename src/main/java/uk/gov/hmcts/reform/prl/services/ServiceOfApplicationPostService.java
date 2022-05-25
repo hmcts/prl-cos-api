@@ -1,23 +1,24 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.nullness.Opt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 
 @Service
 @RequiredArgsConstructor
@@ -29,11 +30,23 @@ public class ServiceOfApplicationPostService {
     @Autowired
     private OrdersToServeSA orders;
 
-    private static String LETTER_TYPE = "RespondentServiceOfApplication";
+    @Autowired
+    private DocumentGenService documentGenService;
+
+    private final static String LETTER_TYPE = "RespondentServiceOfApplication";
 
 
-    public void send(CaseData caseData, String authorisation) {
-        bulkPrintService.send(String.valueOf(caseData.getId()), authorisation, LETTER_TYPE, getListOfDocumentInfo(caseData));
+    public void send(CaseData caseData, String authorisation) throws Exception {
+        bulkPrintService.send(String.valueOf(caseData.getId()), authorisation, LETTER_TYPE, getListOfDocumentInfo(authorisation, caseData));
+    }
+
+    private List<GeneratedDocumentInfo> getListOfDocumentInfo(String auth, CaseData caseData) throws Exception {
+        List<GeneratedDocumentInfo> docs = new ArrayList<>();
+        docs.add(generateCoverSheet(auth, caseData));
+        docs.add(getFinalDocument(caseData));
+        getC1aDocument(caseData).ifPresent(docs::add);
+        docs.addAll(getSelectedOrders(caseData));
+        return docs;
     }
 
     private GeneratedDocumentInfo getFinalDocument(CaseData caseData) {
@@ -61,13 +74,6 @@ public class ServiceOfApplicationPostService {
         return YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmChildAbuseYesNo());
     }
 
-    private List<GeneratedDocumentInfo> getListOfDocumentInfo(CaseData caseData) {
-        List<GeneratedDocumentInfo> docs = new ArrayList<>();
-        getC1aDocument(caseData).ifPresent(docs::add);
-        docs.add(getFinalDocument(caseData));
-        docs.addAll(getSelectedOrders(caseData));
-        return docs;
-    }
 
     private List<GeneratedDocumentInfo> getSelectedOrders(CaseData caseData) {
         List<GeneratedDocumentInfo> docs = new ArrayList<>();
@@ -83,8 +89,6 @@ public class ServiceOfApplicationPostService {
             .collect(Collectors.toList());
 
     }
-
-
 
     private String getSelectedOrderTypes(String selectedOrder) {
         switch (selectedOrder) {
@@ -130,8 +134,10 @@ public class ServiceOfApplicationPostService {
         return "";
     }
 
-
-
+    private GeneratedDocumentInfo generateCoverSheet(String authorisation, CaseData caseData) throws Exception {
+        return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation, caseData,
+                                                                      DOCUMENT_COVER_SHEET_HINT, welshCase(caseData)));
+    }
 
 
 
