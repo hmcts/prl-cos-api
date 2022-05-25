@@ -29,6 +29,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
@@ -130,6 +131,18 @@ public class DocumentGenService {
 
     @Value("${document.templates.fl401.fl401_c8_welsh_filename}")
     protected String fl401C8WelshFilename;
+
+    @Value("${document.templates.common.doc_cover_sheet_template}")
+    protected String docCoverSheetTemplate;
+
+    @Value("${document.templates.common.doc_cover_sheet_welsh_template}")
+    protected String docCoverSheetWelshTemplate;
+
+    @Value("${document.templates.common.doc_cover_sheet_filename}")
+    protected String docCoverSheetFilename;
+
+    @Value("${document.templates.common.doc_cover_sheet_welsh_filename}")
+    protected String docCoverSheetWelshFilename;
 
     @Autowired
     private DgsService dgsService;
@@ -284,6 +297,9 @@ public class DocumentGenService {
             case DRAFT_HINT:
                 fileName = findDraftFilename(isWelsh, caseTypeOfApp);
                 break;
+            case DOCUMENT_COVER_SHEET_HINT:
+                fileName = findDocCoversheetFileName(isWelsh);
+                break;
             default:
                 fileName = "";
         }
@@ -320,6 +336,12 @@ public class DocumentGenService {
         return fileName;
     }
 
+    private String findDocCoversheetFileName(boolean isWelsh) {
+
+        return !isWelsh ? docCoverSheetFilename : docCoverSheetWelshFilename;
+
+    }
+
     private String getTemplate(CaseData caseData, String docGenFor, boolean isWelsh) {
         String caseTypeOfApp = caseData.getCaseTypeOfApplication();
         String template = "";
@@ -336,6 +358,9 @@ public class DocumentGenService {
                 break;
             case DRAFT_HINT:
                 template = findDraftTemplate(isWelsh, caseTypeOfApp);
+                break;
+            case DOCUMENT_COVER_SHEET_HINT:
+                template = findDocCoverSheetTemplate(isWelsh);
                 break;
             default:
                 template = "";
@@ -371,6 +396,11 @@ public class DocumentGenService {
             template = !isWelsh ? fl401C8Template : fl401C8WelshTemplate;
         }
         return template;
+    }
+
+    private String findDocCoverSheetTemplate(boolean isWelsh) {
+            return  !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
+
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {

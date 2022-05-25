@@ -81,6 +81,7 @@ public class PrlAppsConstants {
     public static final String C1A_HINT = "C1A";
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
+    public static final String DOCUMENT_COVER_SHEET_HINT = "DOC_COVER_SHEET";
 
     public static final String TEMPLATE = "template";
     public static final String FILE_NAME = "fileName";
