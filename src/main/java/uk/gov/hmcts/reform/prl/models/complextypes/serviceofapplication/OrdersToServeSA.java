@@ -23,6 +23,9 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.TransferOfCaseToAnothe
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @Builder
@@ -59,4 +62,20 @@ public class OrdersToServeSA {
     private final Document pd36qLetter;
     private final Document specialArrangementsLetter;
     private final Document additionalDocuments;
+
+
+    public List<String> getSelectedOrders() {
+        return Stream.of(OrdersToServeSA.class.getDeclaredFields()).filter(Objects::nonNull)
+            .map(x -> x.)
+            .map(field -> {
+                try {
+                    return field.get(this);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+                return null;
+    }
+
+            .collect(Collectors.toList())
+
 }
