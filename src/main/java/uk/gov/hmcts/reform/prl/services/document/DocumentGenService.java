@@ -257,6 +257,7 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
+
     private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh)
         throws Exception {
         return generateDocumentField(
@@ -469,5 +470,9 @@ public class DocumentGenService {
             isApplicantInformationConfidential = true;
         }
         return isApplicantInformationConfidential;
+    }
+
+    public Document generateSingleDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh) throws Exception {
+        return getDocument(authorisation, caseData, hint, isWelsh);
     }
 }
