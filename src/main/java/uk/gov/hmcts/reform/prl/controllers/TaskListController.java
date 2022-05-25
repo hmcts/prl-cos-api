@@ -74,7 +74,7 @@ public class TaskListController extends AbstractCallbackController {
                 List<Child> children = childrenWrapped.get().stream().map(Element::getValue).collect(Collectors.toList());
                 Child child = children.get(0);
                 if (Objects.nonNull(child)) {
-                    caseData.setChildname(child.getFirstName() + " " + child.getLastName());
+                    caseData.setChildName(child.getFirstName() + " " + child.getLastName());
                 }
 
             }
