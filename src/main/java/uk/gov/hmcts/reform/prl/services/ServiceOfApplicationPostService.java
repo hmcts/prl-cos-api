@@ -65,6 +65,7 @@ public class ServiceOfApplicationPostService {
         List<GeneratedDocumentInfo> docs = new ArrayList<>();
         getC1aDocument(caseData).ifPresent(docs::add);
         docs.add(getFinalDocument(caseData));
+        docs.addAll(getSelectedOrders(caseData));
         return docs;
     }
 
