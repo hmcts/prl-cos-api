@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 
 @Service
 @Slf4j
@@ -41,38 +42,41 @@ public class ServiceOfApplicationEmailService {
         log.info("Sending the server Parties emails for C100 Application for caseId {}", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
-        List<PartyDetails> applicants = caseData
+        Map<String, String> applicantSolicitors = caseData
             .getApplicants()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .collect(Collectors.toMap(
+                PartyDetails::getSolicitorEmail,
+                i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
+            ));
 
-        for (PartyDetails applicant : applicants) {
-            String solicitorName = applicant.getRepresentativeFirstName() + " " + applicant.getRepresentativeLastName();
+        for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
+
             emailService.send(
-                applicant.getSolicitorEmail(),
+                appSols.getKey(),
                 EmailTemplateNames.APPLICANT_SOLICITOR,
-                buildApplicantSolicitorEmail(caseDetails,solicitorName),
+                buildApplicantSolicitorEmail(caseDetails, appSols.getValue()),
                 LanguagePreference.english
             );
         }
-
-        List<PartyDetails> respondents = caseData
+        Map<String, String> respondentSolicitors = caseData
             .getRespondents()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
+            .collect(Collectors.toMap(
+                PartyDetails::getSolicitorEmail,
+                i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
+            ));
 
-        for (PartyDetails respondent : respondents) {
-            if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())) {
-                String solicitorName = respondent.getRepresentativeFirstName() + " " + respondent.getRepresentativeLastName();
-                emailService.send(
-                    respondent.getSolicitorEmail(),
-                    EmailTemplateNames.RESPONDENT_SOLICITOR,
-                    buildRespondentSolicitorEmail(caseDetails, solicitorName),
-                    LanguagePreference.english
-                );
-            }
+        for (Map.Entry<String, String> resSols : applicantSolicitors.entrySet()) {
+            emailService.send(
+                resSols.getKey(),
+                EmailTemplateNames.RESPONDENT_SOLICITOR,
+                buildRespondentSolicitorEmail(caseDetails, resSols.getValue()),
+                LanguagePreference.english
+            );
         }
     }
 
@@ -87,7 +91,7 @@ public class ServiceOfApplicationEmailService {
         emailService.send(
             applicant.getSolicitorEmail(),
             EmailTemplateNames.APPLICANT_SOLICITOR,
-            buildApplicantSolicitorEmail(caseDetails,solicitorName),
+            buildApplicantSolicitorEmail(caseDetails, solicitorName),
             LanguagePreference.english
         );
 
@@ -105,8 +109,9 @@ public class ServiceOfApplicationEmailService {
     private EmailTemplateVars buildApplicantSolicitorEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
-        Map<String,Object> privacy = new HashMap<>();
-        privacy.put("file",NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf")).get("file"));
+        Map<String, Object> privacy = new HashMap<>();
+        privacy.put("file",
+                    NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf")).get("file"));
         return ApplicantSolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
