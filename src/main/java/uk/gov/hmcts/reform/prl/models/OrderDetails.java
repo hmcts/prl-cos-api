@@ -23,7 +23,6 @@ public class OrderDetails {
     private final Document orderDocument;
     private final OtherOrderDetails otherDetails;
 
-
     @JsonIgnore
     public String getLabelForDynamicList() {
 
@@ -33,5 +32,4 @@ public class OrderDetails {
             this.getOtherDetails().getOrderCreatedDate()
         );
     }
-
 }
