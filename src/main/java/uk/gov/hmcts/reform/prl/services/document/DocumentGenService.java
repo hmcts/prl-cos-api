@@ -209,7 +209,7 @@ public class DocumentGenService {
 
     private boolean isConfidentialInformationPresentForC100(CaseData caseData) {
         return C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            && ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+            &&  ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
             && !caseData.getApplicantsConfidentialDetails().isEmpty()
             || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
             && !caseData.getChildrenConfidentialDetails().isEmpty();
@@ -221,11 +221,7 @@ public class DocumentGenService {
 
         caseData = fillOrgDetails(caseData);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info(
-            "Selected Language for generating the docs English => {}, Welsh => {}",
-            documentLanguage.isGenEng(),
-            documentLanguage.isGenWelsh()
-        );
+        log.info("Selected Language for generating the docs English => {}, Welsh => {}", documentLanguage.isGenEng(), documentLanguage.isGenWelsh());
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put("isEngDocGen", Yes.toString());
             updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
@@ -294,7 +290,7 @@ public class DocumentGenService {
                 fileName = findC8Filename(isWelsh, caseTypeOfApp);
                 break;
             case C1A_HINT:
-                fileName = !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
+                fileName =  !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
                 break;
             case FINAL_HINT:
                 fileName = findFinalFilename(isWelsh, caseTypeOfApp);
@@ -404,8 +400,7 @@ public class DocumentGenService {
     }
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
-        return !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
-
+        return  !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {

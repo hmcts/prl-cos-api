@@ -30,8 +30,7 @@ public class ServiceOfApplicationPostService {
     @Autowired
     private DocumentGenService documentGenService;
 
-    private static String LETTER_TYPE = "RespondentServiceOfApplication";
-
+    private static final String LETTER_TYPE = "RespondentServiceOfApplication";
 
     public void send(CaseData caseData, String authorisation) throws Exception {
         // Sends post to the respondents who are not represented by a solicitor
@@ -40,6 +39,7 @@ public class ServiceOfApplicationPostService {
             .filter(partyDetails -> !YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
             .filter(partyDetails -> YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()))
             .forEach(partyDetails -> {
+
 
                 try {
                     bulkPrintService.send(
@@ -57,7 +57,7 @@ public class ServiceOfApplicationPostService {
     private List<GeneratedDocumentInfo> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
         List<GeneratedDocumentInfo> docs = new ArrayList<>();
 
-        docs.add(generateCoverSheet(auth, getRespondentCaseData(partyDetails, caseData)));
+        docs.add(generateCoverSheet(auth, getRespondentCaseData(partyDetails,caseData)));
         docs.add(getFinalDocument(caseData));
         getC1aDocument(caseData).ifPresent(docs::add);
         docs.addAll(getSelectedOrders(caseData));
@@ -161,12 +161,11 @@ public class ServiceOfApplicationPostService {
     }
 
     private GeneratedDocumentInfo generateCoverSheet(String authorisation, CaseData caseData) throws Exception {
-        return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation,
-                                                                                 caseData,
-                                                                                 DOCUMENT_COVER_SHEET_HINT,
-                                                                                 welshCase(caseData)
-        ));
+        return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation, caseData,
+                                                                                 DOCUMENT_COVER_SHEET_HINT, welshCase(caseData)));
     }
+
+
 
 
 }
