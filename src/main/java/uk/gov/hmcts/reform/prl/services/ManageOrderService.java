@@ -138,8 +138,7 @@ public class ManageOrderService {
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
         return CaseData.builder()
-            //            .childSelectorOptions(ChildSelectorOptions.builder()
-            //                                                           .childrenList(getChildInfoFromCaseData(caseData)).build())
+            .childrenList(getChildInfoFromCaseData(caseData))
             .manageOrders(ManageOrders.builder().childListForSpecialGuardianship(getChildInfoFromCaseData(caseData))
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
@@ -234,8 +233,10 @@ public class ManageOrderService {
             }
             for (int i = 0; i < children.size(); i++) {
                 Child child = children.get(i);
-                builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + " " + child.getLastName()));
-                builder.append("\n");
+                builder.append(String.format("<p>Child %d: %s ", i + 1, child.getFirstName()
+                    + " " + child.getLastName()
+                    + "</p> <br />"));
+                //builder.append("\n");
             }
         } else {
             Optional<List<Element<ApplicantChild>>> applicantChildDetails = ofNullable(caseData.getApplicantChildDetails());

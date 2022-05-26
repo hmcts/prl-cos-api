@@ -110,12 +110,13 @@ public class ManageOrdersController {
                     .collect(joining());
             }
         }
-        //String childrenList = caseDataInput.getChildSelectorOptions().getChildrenList();
+        String childrenList = caseDataInput.getChildrenList();
         caseDataInput = caseDataInput.toBuilder()
             .childSelectorOptions(ChildSelectorOptions.builder()
                                       .childOption(childOption)
-                                      //.childrenList(childrenList)
-                                      .build()).build();
+                                      .build())
+            .childrenList(childrenList)
+            .build();
         caseDataInput = caseDataInput.toBuilder()
             .childOption(childOption)
             .build();
