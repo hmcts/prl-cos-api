@@ -33,7 +33,6 @@ public class ServiceOfApplicationPostService {
 
     private static final String LETTER_TYPE = "RespondentServiceOfApplication";
 
-
     public List<GeneratedDocumentInfo> send(CaseData caseData, String authorisation) throws Exception {
         // Sends post to the respondents who are not represented by a solicitor
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
@@ -71,11 +70,12 @@ public class ServiceOfApplicationPostService {
     }
 
     private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
-        return CaseData
+        CaseData respondentCaseData = CaseData
             .builder()
             .id(caseData.getId())
             .respondents(List.of(element(partyDetails)))
             .build();
+        return respondentCaseData;
     }
 
     private GeneratedDocumentInfo getFinalDocument(CaseData caseData) {
@@ -102,7 +102,6 @@ public class ServiceOfApplicationPostService {
     private boolean hasAllegationsOfHarm(CaseData caseData) {
         return YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo());
     }
-
 
     private List<GeneratedDocumentInfo> getSelectedOrders(CaseData caseData) {
         List<GeneratedDocumentInfo> docs = new ArrayList<>();
@@ -170,8 +169,4 @@ public class ServiceOfApplicationPostService {
         return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation, caseData,
                                                                       DOCUMENT_COVER_SHEET_HINT, welshCase(caseData)));
     }
-
-
-
-
 }
