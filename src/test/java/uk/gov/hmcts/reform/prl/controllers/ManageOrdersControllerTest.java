@@ -247,7 +247,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
 
         CallbackResponse callbackResponse = manageOrdersController.fetchChildDetails(callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildSelectorOptions().getChildrenList());
+        assertNull(callbackResponse.getData().getChildSelectorOptions().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
             callbackResponse.getData().getSelectedOrder());
@@ -299,7 +299,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
 
         CallbackResponse callbackResponse = manageOrdersController.fetchChildDetails(callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildSelectorOptions().getChildrenList());
+        assertNull("Child 1: TestName\n", callbackResponse.getData().getChildSelectorOptions().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
             callbackResponse.getData().getSelectedOrder());

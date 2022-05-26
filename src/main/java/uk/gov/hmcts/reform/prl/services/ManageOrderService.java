@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildSelectorOptions;
+//import uk.gov.hmcts.reform.prl.models.complextypes.ChildSelectorOptions;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -137,8 +137,9 @@ public class ManageOrderService {
     }
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
-        return CaseData.builder().childSelectorOptions(ChildSelectorOptions.builder()
-                                                           .childrenList(getChildInfoFromCaseData(caseData)).build())
+        return CaseData.builder()
+            //            .childSelectorOptions(ChildSelectorOptions.builder()
+            //                                                           .childrenList(getChildInfoFromCaseData(caseData)).build())
             .manageOrders(ManageOrders.builder().childListForSpecialGuardianship(getChildInfoFromCaseData(caseData))
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
