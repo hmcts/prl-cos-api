@@ -13,8 +13,8 @@ public class ChildSelectorOptions {
 
     //@JsonProperty("childrenList")
     //private final String childrenList;
-    @JsonProperty("isTheOrderAboutAllChildren")
-    private final String isTheOrderAboutAllChildren;
+    //@JsonProperty("isTheOrderAboutAllChildren")
+    //private final String isTheOrderAboutAllChildren;
     @JsonProperty("childOption")
     private final String childOption;
     @JsonProperty("childSelectorOption1")
