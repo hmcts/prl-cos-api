@@ -33,6 +33,16 @@ public class CaseInviteManager {
         return caseData;
     }
 
+    public CaseData reGeneratePinAndSendNotificationEmail(CaseData caseData) {
+
+
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = c100CaseInviteService.generateAndSendRespondentCaseInvite(caseData);
+        } else {
+            caseData = fl401CaseInviteService.generateAndSendRespondentCaseInvite(caseData);
+        }
+        return caseData;
+    }
 
 
 }
