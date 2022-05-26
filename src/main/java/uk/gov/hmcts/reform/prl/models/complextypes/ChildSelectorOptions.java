@@ -11,8 +11,8 @@ import java.util.List;
 @Builder
 public class ChildSelectorOptions {
 
-    @JsonProperty("childrenList")
-    private final String childrenList;
+    //@JsonProperty("childrenList")
+    //private final String childrenList;
     @JsonProperty("isTheOrderAboutAllChildren")
     private final String isTheOrderAboutAllChildren;
     @JsonProperty("childOption")
