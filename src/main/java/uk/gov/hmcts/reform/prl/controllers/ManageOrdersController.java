@@ -115,7 +115,9 @@ public class ManageOrdersController {
             .childSelectorOptions(ChildSelectorOptions.builder()
                                       .childOption(childOption)
                                       //.childrenList(childrenList)
-                                      .build())
+                                      .build());
+        caseDataInput = caseDataInput.toBuilder()
+            .childOption(childOption)
             .build();
         return CallbackResponse.builder()
             .data(caseDataInput)

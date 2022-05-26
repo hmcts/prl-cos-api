@@ -90,7 +90,6 @@ public class ManageOrderServiceTest {
 
         assertNull(caseData1.getChildSelectorOptions());
         assertNotNull(caseData1.getSelectedOrder());
-
     }
 
     @Test
