@@ -7,22 +7,17 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import javax.servlet.http.Part;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
-import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
-
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
+import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -35,7 +30,7 @@ public class ServiceOfApplicationPostService {
     @Autowired
     private DocumentGenService documentGenService;
 
-    private final static String LETTER_TYPE = "RespondentServiceOfApplication";
+    private static String LETTER_TYPE = "RespondentServiceOfApplication";
 
 
     public void send(CaseData caseData, String authorisation) throws Exception {
@@ -46,23 +41,23 @@ public class ServiceOfApplicationPostService {
             .filter(partyDetails -> YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()))
             .forEach(partyDetails -> {
 
-            try {
-                bulkPrintService.send(
-                    String.valueOf(caseData.getId()),
-                    authorisation,
-                    LETTER_TYPE,
-                    getListOfDocumentInfo(authorisation, caseData, partyDetails)
-                );
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+                try {
+                    bulkPrintService.send(
+                        String.valueOf(caseData.getId()),
+                        authorisation,
+                        LETTER_TYPE,
+                        getListOfDocumentInfo(authorisation, caseData, partyDetails)
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
     }
 
     private List<GeneratedDocumentInfo> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
         List<GeneratedDocumentInfo> docs = new ArrayList<>();
 
-        docs.add(generateCoverSheet(auth, getRespondentCaseData(partyDetails,caseData)));
+        docs.add(generateCoverSheet(auth, getRespondentCaseData(partyDetails, caseData)));
         docs.add(getFinalDocument(caseData));
         getC1aDocument(caseData).ifPresent(docs::add);
         docs.addAll(getSelectedOrders(caseData));
@@ -72,17 +67,17 @@ public class ServiceOfApplicationPostService {
     }
 
     private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
-            CaseData respondentCaseData = CaseData
-                .builder()
-                .id(caseData.getId())
-                .respondents(List.of(element(partyDetails)))
-                .build();
+        CaseData respondentCaseData = CaseData
+            .builder()
+            .id(caseData.getId())
+            .respondents(List.of(element(partyDetails)))
+            .build();
         return respondentCaseData;
     }
 
     private GeneratedDocumentInfo getFinalDocument(CaseData caseData) {
         if (!welshCase(caseData)) {
-             return toGeneratedDocumentInfo(caseData.getFinalDocument());
+            return toGeneratedDocumentInfo(caseData.getFinalDocument());
         }
         return toGeneratedDocumentInfo(caseData.getFinalWelshDocument());
     }
@@ -166,11 +161,12 @@ public class ServiceOfApplicationPostService {
     }
 
     private GeneratedDocumentInfo generateCoverSheet(String authorisation, CaseData caseData) throws Exception {
-        return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation, caseData,
-                                                                      DOCUMENT_COVER_SHEET_HINT, welshCase(caseData)));
+        return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation,
+                                                                                 caseData,
+                                                                                 DOCUMENT_COVER_SHEET_HINT,
+                                                                                 welshCase(caseData)
+        ));
     }
-
-
 
 
 }
