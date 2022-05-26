@@ -141,6 +141,7 @@ public class ManageOrderService {
             //            .childSelectorOptions(ChildSelectorOptions.builder()
             //                                                           .childrenList(getChildInfoFromCaseData(caseData)).build())
             .manageOrders(ManageOrders.builder().childListForSpecialGuardianship(getChildInfoFromCaseData(caseData))
+                              .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
