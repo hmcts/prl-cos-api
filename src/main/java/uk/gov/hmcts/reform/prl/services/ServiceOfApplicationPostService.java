@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -22,6 +23,7 @@ import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInf
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ServiceOfApplicationPostService {
 
@@ -51,7 +53,7 @@ public class ServiceOfApplicationPostService {
                     );
                     sentDocs.addAll(docs);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.info("The bulk print service has failed: " + e);
                 }
             });
         return sentDocs;
@@ -161,9 +163,6 @@ public class ServiceOfApplicationPostService {
     }
 
     private GeneratedDocumentInfo generateCoverSheet(String authorisation, CaseData caseData) throws Exception {
-        Document d = documentGenService.generateSingleDocument(authorisation, caseData,
-                                                               DOCUMENT_COVER_SHEET_HINT, welshCase(caseData));
-
         return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation, caseData,
                                                                       DOCUMENT_COVER_SHEET_HINT, welshCase(caseData)));
     }
