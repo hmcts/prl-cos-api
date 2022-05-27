@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -57,71 +58,7 @@ public class ServiceOfApplicationService {
 
     public Map<String,Object> getOrderSelectionsEnumValues(List<String> orderList, Map<String,Object> caseData) {
         for (String s : orderList) {
-            caseData.putAll(getUpdatedCaseData(s, caseData));
-        }
-        return caseData;
-    }
-
-    private Map<String,Object> getUpdatedCaseData(String selectedOrder, Map<String,Object> caseData) {
-
-        switch (selectedOrder) {
-
-            case "Standard directions order":
-                caseData.put("option1","1");
-                break;
-            case "Blank order or directions (C21)":
-                caseData.put("option2","1");
-                break;
-            case "Blank order or directions (C21) - to withdraw application":
-                caseData.put("option3","1");
-                break;
-            case "Child arrangements, specific issue or prohibited steps order (C43)":
-                caseData.put("option4","1");
-                break;
-            case "Parental responsibility order (C45A)":
-                caseData.put("option5","1");
-                break;
-            case "Special guardianship order (C43A)":
-                caseData.put("option6","1");
-                break;
-            case "Notice of proceedings (C6) (Notice to parties)":
-                caseData.put("option7","1");
-                break;
-            case "Notice of proceedings (C6a) (Notice to non-parties)":
-                caseData.put("option8","1");
-                break;
-            case "Transfer of case to another court (C49)":
-                caseData.put("option9","1");
-                break;
-            case "Appointment of a guardian (C47A)":
-                caseData.put("option10","1");
-                break;
-            case "Non-molestation order (FL404A)":
-                caseData.put("option11","1");
-                break;
-            case "Occupation order (FL404)":
-                caseData.put("option12","1");
-                break;
-            case "Power of arrest (FL406)":
-                caseData.put("option13","1");
-                break;
-            case "Amended, discharged or varied order (FL404B)":
-                caseData.put("option14","1");
-                break;
-            case "General form of undertaking (N117)":
-                caseData.put("option15","1");
-                break;
-            case "Notice of proceedings (FL402)":
-                caseData.put("option16","1");
-                break;
-            case "Other (upload an order)":
-                caseData.put("option17","1");
-                break;
-            case "Blank order (FL404B)":
-                caseData.put("option18","1");
-                break;
-            default:
-                break;
+            caseData.put(CreateSelectOrderOptionsEnum.mapOptionFromDisplayedValue(s),"1");
         }
         return caseData;
     }

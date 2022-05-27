@@ -117,7 +117,7 @@ public class ServiceOfApplicationServiceTest {
                                              "Blank order (FL404B)",
                                              "Other (upload an order)");
         Map<String, Object> responseMap = serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders, new HashMap<>());
-
+        assertEquals(18,responseMap.values().size());
         assertEquals("1", responseMap.get("option1"));
 
     }
