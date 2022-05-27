@@ -33,7 +33,6 @@ public class ServiceOfApplicationPostService {
 
     private static final String LETTER_TYPE = "RespondentServiceOfApplication";
 
-
     public List<GeneratedDocumentInfo> send(CaseData caseData, String authorisation) throws Exception {
         // Sends post to the respondents who are not represented by a solicitor
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();

@@ -401,7 +401,6 @@ public class DocumentGenService {
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
         return  !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
-
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
