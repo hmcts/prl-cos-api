@@ -113,9 +113,10 @@ public class CaseData implements MappableObject {
     @JsonAlias({"applicantCaseName", "applicantOrRespondentCaseName"})
     private final String applicantCaseName;
 
-    private  String applicantName;
 
-    private  String childName;
+    private String applicantName;
+
+    private String childName;
 
     /**
      * Confidential Disclaimer.
