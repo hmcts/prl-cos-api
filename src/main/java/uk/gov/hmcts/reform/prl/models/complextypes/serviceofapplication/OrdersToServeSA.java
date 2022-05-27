@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.AmendDischargedVariedEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.AppointmentOfGuardianEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.BlankOrderEnum;
