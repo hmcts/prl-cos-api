@@ -68,9 +68,9 @@ public class ServiceOfApplicationControllerTest {
         when(serviceOfApplicationService.getOrderSelectionsEnumValues(Mockito.anyList(), Mockito.anyMap())).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
             .handleAboutToStart(callbackRequest);
-        assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("sentDocumentPlaceHolder"),"Collapsable");
-        assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("option1"),"1");
-        assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("serviceOfApplicationHeader"),"TestHeader");
+        assertEquals("Collapsable", aboutToStartOrSubmitCallbackResponse.getData().get("sentDocumentPlaceHolder"));
+        assertEquals("1", aboutToStartOrSubmitCallbackResponse.getData().get("option1"));
+        assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("serviceOfApplicationHeader"));
     }
 
     @Test
@@ -94,9 +94,9 @@ public class ServiceOfApplicationControllerTest {
                              .data(caseData).build()).build();
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
             .handleAboutToStart(callbackRequest);
-        assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("sentDocumentPlaceHolder"),"Collapsable");
-        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("option1"));
-        assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("serviceOfApplicationHeader"),"TestHeader");
+        assertEquals("Collapsable", aboutToStartOrSubmitCallbackResponse.getData().get("sentDocumentPlaceHolder"));
+        assertEquals("1", aboutToStartOrSubmitCallbackResponse.getData().get("option1"));
+        assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("serviceOfApplicationHeader"));
     }
 
     @Test
