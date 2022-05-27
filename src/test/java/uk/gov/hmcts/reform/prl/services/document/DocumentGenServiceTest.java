@@ -54,6 +54,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
@@ -853,6 +854,12 @@ public class DocumentGenServiceTest {
         );
         verifyNoMoreInteractions(dgsService);
 
+    }
+
+    @Test
+    public void testSingleDocGeneration() throws Exception {
+        documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_COVER_SHEET_HINT, false);
+        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
 }
