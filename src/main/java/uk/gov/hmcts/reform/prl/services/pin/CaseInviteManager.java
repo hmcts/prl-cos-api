@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.ArrayList;
+
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @Slf4j
@@ -35,7 +37,7 @@ public class CaseInviteManager {
 
     public CaseData reGeneratePinAndSendNotificationEmail(CaseData caseData) {
 
-
+        caseData = caseData.toBuilder().respondentCaseInvites(new ArrayList<>()).build();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = c100CaseInviteService.generateAndSendRespondentCaseInvite(caseData);
         } else {
