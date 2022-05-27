@@ -84,6 +84,7 @@ public class CallbackControllerFT {
     private static final String C100_SEND_TO_GATEKEEPER = "requests/call-back-controller-send-to-gatekeeper.json";
     private static final String C100_RESEND_RPA = "requests/call-back-controller-resend-rpa.json";
     private static final String FL401_ABOUT_TO_SUBMIT_CREATION = "requests/call-back-controller-about-to-submit-case-creation.json";
+    private static final String FL401_CASE_DATA = "requests/call-back-controller-fl401-case-data.json";
 
     @Before
     public void setUp() {
@@ -242,7 +243,21 @@ public class CallbackControllerFT {
     public void givenC100Case_whenRpaResent_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
 
-        mockMvc.perform(post("/resend-rpa")
+        mockMvc.perform(post("/update-applicant-child-names")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    }
+
+    @Test
+    public void updateApplicantAndChildName() throws Exception {
+        String requestBody = ResourceLoader.loadJson(FL401_CASE_DATA);
+
+        mockMvc.perform(post("/send-to-gatekeeper")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
