@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 
 import java.util.ArrayList;
@@ -22,6 +23,8 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -33,6 +36,9 @@ public class ServiceOfApplicationControllerTest {
 
     @Mock
     private ServiceOfApplicationService serviceOfApplicationService;
+
+    @Mock
+    private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -81,8 +87,6 @@ public class ServiceOfApplicationControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         when(serviceOfApplicationService.populateHeader(Mockito.any(CaseData.class), Mockito.anyMap())).thenReturn(caseData);
         when(serviceOfApplicationService.getCollapsableOfSentDocuments()).thenReturn("Collapsable");
-        List<String> createdOrders = new ArrayList<>();
-        createdOrders.add("Standard directions order");
         when(serviceOfApplicationService.getOrderSelectionsEnumValues(Mockito.anyList(), Mockito.anyMap())).thenReturn(caseData);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -94,5 +98,20 @@ public class ServiceOfApplicationControllerTest {
         assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("sentDocumentPlaceHolder"),"Collapsable");
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("option1"));
         assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("serviceOfApplicationHeader"),"TestHeader");
+    }
+
+    @Test
+    public void testHandleAboutToSubmit() throws Exception {
+
+        Map<String, Object> caseData = CaseData.builder().build().toMap(objectMapper);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+
+        serviceOfApplicationController.handleAboutToSubmit(callbackRequest);
+        verify(serviceOfApplicationService).sendEmail(callbackRequest.getCaseDetails());
+
     }
 }
