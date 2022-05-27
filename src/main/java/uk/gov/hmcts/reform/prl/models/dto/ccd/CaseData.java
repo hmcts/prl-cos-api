@@ -553,6 +553,9 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ManageOrders manageOrders = ManageOrders.builder().build();
 
+    @JsonUnwrapped
+    @Builder.Default
+    private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs = ServiceOfApplicationUploadDocs.builder().build();
 
     /**
      * Solicitor Details.
