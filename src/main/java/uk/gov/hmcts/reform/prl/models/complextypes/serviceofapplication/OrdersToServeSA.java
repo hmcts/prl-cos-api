@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.PowerOfArrestEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SpecialGuardianShipEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StandardDirectionsOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.TransferOfCaseToAnotherCourtEnum;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 import java.util.Objects;
@@ -58,11 +57,6 @@ public class OrdersToServeSA {
 
     private final List<NoticeOfProceedingsEnum> noticeOfProceedingsEnumOption;
     private final List<OtherUploadAnOrderEnum>    otherUploadAnOrderOption;
-
-    private final Document pd36qLetter;
-    private final Document specialArrangementsLetter;
-    private final Document additionalDocuments;
-
 
     public List<String> getSelectedOrders() {
         return Stream.of(OrdersToServeSA.class.getDeclaredFields()).filter(Objects::nonNull)
