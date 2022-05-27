@@ -44,8 +44,8 @@ public class CaseInviteManagerTest {
     private CaseData caseData;
 
     @Before
-    public void init(){
-         caseData = CaseData.builder()
+    public void init() {
+        caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(PartyDetails.builder()
@@ -61,14 +61,18 @@ public class CaseInviteManagerTest {
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                                              .build())))
             .build();
-        CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1", UUID.randomUUID());
-        CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2", UUID.randomUUID());
-        List<Element<CaseInvite>> respondentCaseInvites = List.of(element(caseInvite1),element(caseInvite2));
+        CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1",
+                                                UUID.randomUUID());
+        CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2",
+                                                UUID.randomUUID());
+        List<Element<CaseInvite>> respondentCaseInvites = List.of(element(caseInvite1), element(caseInvite2));
 
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(launchDarklyClient.isFeatureEnabled("generate-pin")).thenReturn(true);
-        when(c100CaseInviteService.generateAndSendRespondentCaseInvite(any())).thenReturn(CaseData.builder().respondentCaseInvites(respondentCaseInvites).build());
-        when(fl401CaseInviteService.generateAndSendRespondentCaseInvite(any())).thenReturn(CaseData.builder().respondentCaseInvites(respondentCaseInvites).build());
+        when(c100CaseInviteService.generateAndSendRespondentCaseInvite(any()))
+            .thenReturn(CaseData.builder().respondentCaseInvites(respondentCaseInvites).build());
+        when(fl401CaseInviteService.generateAndSendRespondentCaseInvite(any()))
+            .thenReturn(CaseData.builder().respondentCaseInvites(respondentCaseInvites).build());
     }
 
     @Test
@@ -83,10 +87,12 @@ public class CaseInviteManagerTest {
             .getCaseInviteEmail());
 
     }
+
     @Test
     public void testGeneratePinAndNotificationEmailForFL401() throws Exception {
 
-        CaseData actualCaseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData.toBuilder().caseTypeOfApplication("FL401").build());
+        CaseData actualCaseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData.toBuilder().caseTypeOfApplication(
+            "FL401").build());
 
         assertEquals(2, actualCaseData.getRespondentCaseInvites().size());
         assertEquals("abc1@de.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
@@ -108,9 +114,11 @@ public class CaseInviteManagerTest {
             .getCaseInviteEmail());
 
     }
+
     @Test
     public void testReGeneratePinAndNotificationEmailForFL401() throws Exception {
-        CaseData actualCaseData = caseInviteManager.reGeneratePinAndSendNotificationEmail(caseData.toBuilder().caseTypeOfApplication("FL401").build());
+        CaseData actualCaseData = caseInviteManager.reGeneratePinAndSendNotificationEmail(caseData.toBuilder().caseTypeOfApplication(
+            "FL401").build());
 
         assertEquals(2, actualCaseData.getRespondentCaseInvites().size());
         assertEquals("abc1@de.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
