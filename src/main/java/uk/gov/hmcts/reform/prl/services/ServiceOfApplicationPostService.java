@@ -33,7 +33,7 @@ public class ServiceOfApplicationPostService {
 
     private static final String LETTER_TYPE = "RespondentServiceOfApplication";
 
-    public List<GeneratedDocumentInfo> send(CaseData caseData, String authorisation) throws Exception {
+    public List<GeneratedDocumentInfo> send(CaseData caseData, String authorisation) {
         // Sends post to the respondents who are not represented by a solicitor
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         caseData.getRespondents().stream()
@@ -104,8 +104,6 @@ public class ServiceOfApplicationPostService {
     }
 
     private List<GeneratedDocumentInfo> getSelectedOrders(CaseData caseData) {
-        List<GeneratedDocumentInfo> docs = new ArrayList<>();
-
         List<String> orderNames = caseData.getServiceOfApplicationScreen1().getSelectedOrders().stream()
             .map(this::getSelectedOrderTypes)
             .collect(Collectors.toList());

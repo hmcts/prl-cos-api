@@ -67,7 +67,7 @@ public class ServiceOfApplicationEmailService {
                 i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
             ));
 
-        for (Map.Entry<String, String> resSols : applicantSolicitors.entrySet()) {
+        for (Map.Entry<String, String> resSols : respondentSolicitors.entrySet()) {
             emailService.send(
                 resSols.getKey(),
                 EmailTemplateNames.RESPONDENT_SOLICITOR,
@@ -119,7 +119,7 @@ public class ServiceOfApplicationEmailService {
             .build();
     }
 
-    private EmailTemplateVars buildRespondentSolicitorEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
+    private EmailTemplateVars buildRespondentSolicitorEmail(CaseDetails caseDetails, String solicitorName) {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         return RespondentSolicitorEmail.builder()
@@ -130,18 +130,4 @@ public class ServiceOfApplicationEmailService {
             .issueDate(caseData.getIssueDate())
             .build();
     }
-
-    //    private EmailTemplateVars buildRespondentEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
-    //
-    //        CaseData caseData = emailService.getCaseData(caseDetails);
-    //
-    //        return RespondentEmail.builder()
-    //            .caseReference(String.valueOf(caseDetails.getId()))
-    //            .caseName(caseData.getApplicantCaseName())
-    //            .respondentName("")
-    //            .createLink(manageCaseUrl + URL_STRING + caseDetails.getId())
-    //            .applicantNames("")
-    //            .accessCode("")
-    //            .build();
-    //    }
 }
