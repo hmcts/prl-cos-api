@@ -38,7 +38,6 @@ import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -85,7 +84,6 @@ public class CallbackController {
     private final AllTabServiceImpl allTabsService;
     private final UserService userService;
     private final DocumentGenService documentGenService;
-    private final ServiceOfApplicationService serviceOfApplicationService;
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
 

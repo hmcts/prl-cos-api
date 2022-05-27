@@ -33,15 +33,15 @@ public class CaseInviteEmail extends EmailTemplateVars {
 
     private static String getApplicantNames(CaseData caseData) {
         List<PartyDetails> applicants = ElementUtils.unwrapElements(caseData.getApplicants());
-        String applicantNames = "";
+        StringBuilder applicantNames = new StringBuilder();
         for (int i = 0; i < applicants.size(); i++) {
-            applicantNames += applicants.get(i).getFirstName() + " " + applicants.get(i).getLastName();
+            applicantNames.append(String.format("%s %s", applicants.get(i).getFirstName(), applicants.get(i).getLastName()));
             if (applicants.size() >= 1 && (i == applicants.size() - 2)) {
-                applicantNames += " and ";
+                applicantNames.append(" and ");
             } else if (applicants.size() != 1) {
-                applicantNames += ", ";
+                applicantNames.append(", ");
             }
         }
-        return applicantNames;
+        return applicantNames.toString();
     }
 }
