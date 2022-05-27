@@ -7,22 +7,18 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import javax.servlet.http.Part;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
-import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
-
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
+import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -35,28 +31,31 @@ public class ServiceOfApplicationPostService {
     @Autowired
     private DocumentGenService documentGenService;
 
-    private final static String LETTER_TYPE = "RespondentServiceOfApplication";
+    private static final String LETTER_TYPE = "RespondentServiceOfApplication";
 
 
-    public void send(CaseData caseData, String authorisation) throws Exception {
+    public List<GeneratedDocumentInfo> send(CaseData caseData, String authorisation) throws Exception {
         // Sends post to the respondents who are not represented by a solicitor
+        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         caseData.getRespondents().stream()
             .map(Element::getValue)
             .filter(partyDetails -> !YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
             .filter(partyDetails -> YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()))
             .forEach(partyDetails -> {
-
-            try {
-                bulkPrintService.send(
-                    String.valueOf(caseData.getId()),
-                    authorisation,
-                    LETTER_TYPE,
-                    getListOfDocumentInfo(authorisation, caseData, partyDetails)
-                );
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+                try {
+                    List<GeneratedDocumentInfo> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
+                    bulkPrintService.send(
+                        String.valueOf(caseData.getId()),
+                        authorisation,
+                        LETTER_TYPE,
+                        docs
+                    );
+                    sentDocs.addAll(docs);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        return sentDocs;
     }
 
     private List<GeneratedDocumentInfo> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
@@ -72,17 +71,16 @@ public class ServiceOfApplicationPostService {
     }
 
     private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
-            CaseData respondentCaseData = CaseData
-                .builder()
-                .id(caseData.getId())
-                .respondents(List.of(element(partyDetails)))
-                .build();
-        return respondentCaseData;
+        return CaseData
+            .builder()
+            .id(caseData.getId())
+            .respondents(List.of(element(partyDetails)))
+            .build();
     }
 
     private GeneratedDocumentInfo getFinalDocument(CaseData caseData) {
         if (!welshCase(caseData)) {
-             return toGeneratedDocumentInfo(caseData.getFinalDocument());
+            return toGeneratedDocumentInfo(caseData.getFinalDocument());
         }
         return toGeneratedDocumentInfo(caseData.getFinalWelshDocument());
     }
@@ -102,7 +100,7 @@ public class ServiceOfApplicationPostService {
     }
 
     private boolean hasAllegationsOfHarm(CaseData caseData) {
-        return YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmChildAbuseYesNo());
+        return YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo());
     }
 
 
@@ -123,41 +121,41 @@ public class ServiceOfApplicationPostService {
 
     private String getSelectedOrderTypes(String selectedOrder) {
         switch (selectedOrder) {
-            case "standardDirectionsOrderOption":
+            case "standardDirectionsOrder":
                 return "Standard directions order";
-            case "blankOrderOrDirectionsOption":
+            case "blankOrderOrDirections":
                 return "Blank order or directions (C21)";
-            case "blankOrderOrDirectionsWithdrawOption":
+            case "blankOrderOrDirectionsWithdraw":
                 return "Blank order or directions (C21) - to withdraw application";
-            case "childArrangementSpecificOrderOption":
+            case "childArrangementSpecificOrder":
                 return "Child arrangements, specific issue or prohibited steps order (C43)";
-            case "parentalResponsibilityOption":
+            case "parentalResponsibility":
                 return "Parental responsibility order (C45A)";
-            case "specialGuardianShipOption":
+            case "specialGuardianShip":
                 return "Special guardianship order (C43A)";
-            case "noticeOfProceedingsPartiesOption":
+            case "noticeOfProceedingsParties":
                 return "Notice of proceedings (C6) (Notice to parties)";
-            case "noticeOfProceedingsNonPartiesOption":
+            case "noticeOfProceedingsNonParties":
                 return "Notice of proceedings (C6a) (Notice to non-parties)";
-            case "transferOfCaseToAnotherCourtOption":
+            case "transferOfCaseToAnotherCourt":
                 return "Transfer of case to another court (C49)";
-            case "appointmentOfGuardianOption":
+            case "appointmentOfGuardian":
                 return "Appointment of a guardian (C47A)";
-            case "nonMolestationOption":
+            case "nonMolestation":
                 return "Non-molestation order (FL404A)";
-            case "occupationOption":
+            case "occupation":
                 return "Occupation order (FL404)";
-            case "powerOfArrestOption":
+            case "powerOfArrest":
                 return "Power of arrest (FL406)";
-            case "amendDischargedVariedOption":
+            case "amendDischargedVaried":
                 return "Amended, discharged or varied order (FL404B)";
-            case "generalFormUndertakingOption":
+            case "generalFormUndertaking":
                 return "General form of undertaking (N117)";
-            case "noticeOfProceedingsEnumOption":
+            case "noticeOfProceedingsEnum":
                 return "Notice of proceedings (FL402)";
-            case "otherUploadAnOrderOption":
+            case "otherUploadAnOrder":
                 return "Other (upload an order)";
-            case "blankOrderEnumOption":
+            case "blankOrderEnum":
                 return "Blank order (FL404B)";
             default:
                 break;
@@ -166,6 +164,9 @@ public class ServiceOfApplicationPostService {
     }
 
     private GeneratedDocumentInfo generateCoverSheet(String authorisation, CaseData caseData) throws Exception {
+        Document d = documentGenService.generateSingleDocument(authorisation, caseData,
+                                                               DOCUMENT_COVER_SHEET_HINT, welshCase(caseData));
+
         return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation, caseData,
                                                                       DOCUMENT_COVER_SHEET_HINT, welshCase(caseData)));
     }
