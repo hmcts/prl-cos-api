@@ -20,12 +20,10 @@ import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 
 @Service
 @Slf4j
