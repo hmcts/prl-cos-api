@@ -539,7 +539,7 @@ def sonarExclusions = [
   '**src/main/java/uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java',
   '**uk/gov/hmcts/reform/prl/services/validators/EventsChecker.java',
   '**uk/gov/hmcts/reform/prl/services/pin/*',
-  '**uk/gov/hmcts/reform/prl/controllers/ServeCaseController.java'
+  '**uk/gov/hmcts/reform/prl/controllers/ServeCaseController.java',
   '**uk/gov/hmcts/reform/prl/services/document/DocumentGenService.java',
   '**uk/gov/hmcts/reform/prl/utils/DocumentUtils.java',
   '**uk/uk/gov/hmcts/reform/prl/services/ServiceOfApplicationPostService.java',
