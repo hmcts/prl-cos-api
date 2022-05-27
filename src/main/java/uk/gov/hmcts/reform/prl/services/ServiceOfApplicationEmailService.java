@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.ApplicantSolicitorEmail;
-import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
@@ -132,17 +131,17 @@ public class ServiceOfApplicationEmailService {
             .build();
     }
 
-    private EmailTemplateVars buildRespondentEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
-
-        CaseData caseData = emailService.getCaseData(caseDetails);
-
-        return RespondentEmail.builder()
-            .caseReference(String.valueOf(caseDetails.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .respondentName("")
-            .createLink(manageCaseUrl + URL_STRING + caseDetails.getId())
-            .applicantNames("")
-            .accessCode("")
-            .build();
-    }
+    //    private EmailTemplateVars buildRespondentEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
+    //
+    //        CaseData caseData = emailService.getCaseData(caseDetails);
+    //
+    //        return RespondentEmail.builder()
+    //            .caseReference(String.valueOf(caseDetails.getId()))
+    //            .caseName(caseData.getApplicantCaseName())
+    //            .respondentName("")
+    //            .createLink(manageCaseUrl + URL_STRING + caseDetails.getId())
+    //            .applicantNames("")
+    //            .accessCode("")
+    //            .build();
+    //    }
 }
