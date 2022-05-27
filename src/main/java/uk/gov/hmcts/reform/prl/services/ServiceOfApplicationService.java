@@ -56,8 +56,8 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String,Object> getOrderSelectionsEnumValues(List<String> orderList, Map<String,Object> caseData) {
-        for (int i = 0;i < orderList.size();i++) {
-            caseData = getUpdatedCaseData(orderList.get(i),caseData);
+        for (String s : orderList) {
+            caseData.putAll(getUpdatedCaseData(s, caseData));
         }
         return caseData;
     }
