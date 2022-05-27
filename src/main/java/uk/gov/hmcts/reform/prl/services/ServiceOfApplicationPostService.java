@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.CannotCreateTransactionException;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -106,7 +108,7 @@ public class ServiceOfApplicationPostService {
 
     private List<GeneratedDocumentInfo> getSelectedOrders(CaseData caseData) {
         List<String> orderNames = caseData.getServiceOfApplicationScreen1().getSelectedOrders().stream()
-            .map(this::getSelectedOrderTypes)
+            .map(CreateSelectOrderOptionsEnum::getDisplayedValueFromEnumString)
             .collect(Collectors.toList());
 
         return caseData.getOrderCollection().stream()
@@ -115,50 +117,6 @@ public class ServiceOfApplicationPostService {
             .map(i -> toGeneratedDocumentInfo(i.getOrderDocument()))
             .collect(Collectors.toList());
 
-    }
-
-    private String getSelectedOrderTypes(String selectedOrder) {
-        switch (selectedOrder) {
-            case "standardDirectionsOrder":
-                return "Standard directions order";
-            case "blankOrderOrDirections":
-                return "Blank order or directions (C21)";
-            case "blankOrderOrDirectionsWithdraw":
-                return "Blank order or directions (C21) - to withdraw application";
-            case "childArrangementSpecificOrder":
-                return "Child arrangements, specific issue or prohibited steps order (C43)";
-            case "parentalResponsibility":
-                return "Parental responsibility order (C45A)";
-            case "specialGuardianShip":
-                return "Special guardianship order (C43A)";
-            case "noticeOfProceedingsParties":
-                return "Notice of proceedings (C6) (Notice to parties)";
-            case "noticeOfProceedingsNonParties":
-                return "Notice of proceedings (C6a) (Notice to non-parties)";
-            case "transferOfCaseToAnotherCourt":
-                return "Transfer of case to another court (C49)";
-            case "appointmentOfGuardian":
-                return "Appointment of a guardian (C47A)";
-            case "nonMolestation":
-                return "Non-molestation order (FL404A)";
-            case "occupation":
-                return "Occupation order (FL404)";
-            case "powerOfArrest":
-                return "Power of arrest (FL406)";
-            case "amendDischargedVaried":
-                return "Amended, discharged or varied order (FL404B)";
-            case "generalFormUndertaking":
-                return "General form of undertaking (N117)";
-            case "noticeOfProceedingsEnum":
-                return "Notice of proceedings (FL402)";
-            case "otherUploadAnOrder":
-                return "Other (upload an order)";
-            case "blankOrderEnum":
-                return "Blank order (FL404B)";
-            default:
-                break;
-        }
-        return "";
     }
 
     private GeneratedDocumentInfo generateCoverSheet(String authorisation, CaseData caseData) throws Exception {
