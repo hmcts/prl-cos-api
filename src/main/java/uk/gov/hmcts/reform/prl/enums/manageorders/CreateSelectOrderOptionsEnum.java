@@ -75,4 +75,11 @@ public enum CreateSelectOrderOptionsEnum {
             .findFirst().orElse("");
     }
 
+    public static String getDisplayedValueFromEnumString(String enteredValue) {
+        return Arrays.stream(CreateSelectOrderOptionsEnum.values())
+            .map(i -> CreateSelectOrderOptionsEnum.valueOf(enteredValue))
+            .map(i -> i.displayedValue)
+            .findFirst().orElse("");
+    }
+
 }
