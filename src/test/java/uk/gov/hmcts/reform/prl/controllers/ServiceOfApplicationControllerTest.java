@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -95,7 +94,6 @@ public class ServiceOfApplicationControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
             .handleAboutToStart(callbackRequest);
         assertEquals("Collapsable", aboutToStartOrSubmitCallbackResponse.getData().get("sentDocumentPlaceHolder"));
-        assertEquals("1", aboutToStartOrSubmitCallbackResponse.getData().get("option1"));
         assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("serviceOfApplicationHeader"));
     }
 
