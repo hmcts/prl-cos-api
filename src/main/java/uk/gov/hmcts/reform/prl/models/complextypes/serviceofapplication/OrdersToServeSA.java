@@ -29,32 +29,25 @@ import java.util.stream.Stream;
 @Data
 @Builder
 public class OrdersToServeSA {
+
     private final String sentDocumentPlaceHolder;
 
     private final List<StandardDirectionsOrderEnum> standardDirectionsOrderOption;
     private final List<BlankOrderOrDirectionsEnum>    blankOrderOrDirectionsOption;
-
     private final List<BlankOrderOrDirectionsWithdrawEnum> blankOrderOrDirectionsWithdrawOption;
     private final List<ChildArrangementsSpecificProhibitedOrderEnum>    childArrangementSpecificOrderOption;
-
     private final List<ParentalResponsibilityEnum> parentalResponsibilityOption;
     private final List<SpecialGuardianShipEnum>    specialGuardianShipOption;
-
     private final List<NoticeOfProceedingsPartiesEnum> noticeOfProceedingsPartiesOption;
     private final List<NoticeOfProceedingsNonPartiesEnum>    noticeOfProceedingsNonPartiesOption;
-
     private final List<TransferOfCaseToAnotherCourtEnum> transferOfCaseToAnotherCourtOption;
     private final List<AppointmentOfGuardianEnum>    appointmentOfGuardianOption;
-
     private final List<NonMolestationEnum> nonMolestationOption;
     private final List<OccupationEnum>    occupationOption;
-
     private final List<PowerOfArrestEnum> powerOfArrestOption;
     private final List<AmendDischargedVariedEnum>    amendDischargedVariedOption;
-
     private final List<BlankOrderEnum> blankOrderEnumOption;
     private final List<GeneralFormUndertakingEnum>    generalFormUndertakingOption;
-
     private final List<NoticeOfProceedingsEnum> noticeOfProceedingsEnumOption;
     private final List<OtherUploadAnOrderEnum>    otherUploadAnOrderOption;
 
