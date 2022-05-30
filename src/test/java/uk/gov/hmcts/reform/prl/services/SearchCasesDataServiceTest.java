@@ -99,8 +99,6 @@ public class SearchCasesDataServiceTest {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .applicants(null)
-            .children(null)
             .build();
 
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
@@ -119,14 +117,24 @@ public class SearchCasesDataServiceTest {
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
+        PartyDetails respondent1 = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .applicantsFL401(applicant1)
+            .respondentsFL401(respondent1)
             .build();
 
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
         searchCasesDataService.updateApplicantAndChildNames(objectMapper,caseDataUpdated);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
+        assertEquals("test1 test22", caseDataUpdated.get("respondentName"));
+
     }
 }

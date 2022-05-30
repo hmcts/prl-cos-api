@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,10 +33,17 @@ public class SearchCasesDataService {
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
+            PartyDetails fl401respondent = caseData
+                .getRespondentsFL401();
 
             if (Objects.nonNull(fl401Applicant)) {
                 log.info("adding applicant name in casedata for FL401");
                 caseDetails.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
+            }
+
+            if (Objects.nonNull(fl401respondent)) {
+                log.info("adding applicant name in casedata for FL401");
+                caseDetails.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
             }
         } else {
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
@@ -54,6 +62,7 @@ public class SearchCasesDataService {
             Optional<List<Element<Child>>> childrenWrapped = ofNullable(caseData.getChildren());
             if (!childrenWrapped.isEmpty() && !childrenWrapped.get().isEmpty()) {
                 List<Child> children = childrenWrapped.get().stream().map(Element::getValue).collect(Collectors.toList());
+                children.sort(Comparator.comparing(Child::getDateOfBirth, Comparator.nullsLast(Comparator.naturalOrder())));
                 Child child = children.get(0);
                 log.info("adding child name for  for C100");
                 if (Objects.nonNull(child)) {
