@@ -55,17 +55,9 @@ public class AmendedOrderStamper {
             );
         }
 
-        String s2s = authTokenGenerator.generate();
         log.info("Attempting to download document for amending");
-        log.info("**************************************");
-        log.info("Auth: " + authorisation);
-        log.info("ServiceAuth: " + s2s);
-
-
-        log.info("Doc url: " + original.getDocumentUrl());
-        log.info("**************************************");
         ResponseEntity<Resource> downloadedDocument = caseDocumentClient.getDocumentBinary(authorisation,
-                                                                                           s2s,
+                                                                                           authTokenGenerator.generate(),
                                                                                            original.getDocumentUrl());
 
         Optional<Resource> documentResponse = ofNullable(downloadedDocument.getBody());
