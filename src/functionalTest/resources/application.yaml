@@ -134,10 +134,19 @@ idam:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
+    baseUrl: https://idam-api.aat.platform.hmcts.net
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
     secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
-
-prl:
+    clientId: xuiwebapp
+    authorize:
+      context-path: /oauth2/authorize
+    token:
+      context-path: /oauth2/token
+  user:
+    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
+  solicitor:
+    username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
+    password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
