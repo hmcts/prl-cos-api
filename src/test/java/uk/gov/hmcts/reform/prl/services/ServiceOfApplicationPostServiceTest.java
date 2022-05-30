@@ -254,7 +254,4 @@ public class ServiceOfApplicationPostServiceTest {
                                                 toGeneratedDocumentInfo(finalC1a),
                                                 toGeneratedDocumentInfo(standardDirectionsOrder))));
     }
-
-
-
 }

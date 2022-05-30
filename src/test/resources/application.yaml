@@ -327,6 +327,14 @@ document:
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
       prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
+      prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
+      prl_c7_blank_filename: C7BlankDocument.pdf
+      prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
+      prl_c8_blank_filename: C8BlankDocument.pdf
+      prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
+      prl_c1a_blank_filename: C1ABlankDocument.pdf
+      prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
+      prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
 
 southampton:
   court:
