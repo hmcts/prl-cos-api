@@ -46,6 +46,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildSelectorOptions;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
@@ -538,12 +539,13 @@ public class CaseData implements MappableObject {
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
+    @JsonProperty("isTheOrderAboutAllChildren")
+    private final String isTheOrderAboutAllChildren;
+    //@JsonProperty("childrenList")
+    //private final String childrenList;
 
     @JsonProperty("childOption")
     private final String childOption;
-
-    @JsonProperty("childrenList")
-    private final String childrenList;
 
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
 
@@ -551,6 +553,7 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ManageOrders manageOrders = ManageOrders.builder().build();
 
+    private final ChildSelectorOptions childSelectorOptions;
 
     /**
      * Solicitor Details.

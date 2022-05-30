@@ -226,7 +226,7 @@ public class ManageOrdersControllerTest {
             .children(listOfChildren)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .fl401FamilymanCaseNumber("12345")
-            .childrenList("Child 1: TestName\n")
+            //.childrenList("Child 1: TestName\n")
             .selectedOrder(
                 "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
                     + "enforcement application (C82)\\n\\n")
@@ -245,7 +245,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
 
         CallbackResponse callbackResponse = manageOrdersController.fetchChildDetails(callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
+        assertNotNull(callbackResponse.getData().getChildSelectorOptions());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
             callbackResponse.getData().getSelectedOrder());
@@ -278,7 +278,7 @@ public class ManageOrdersControllerTest {
             .home(Home.builder().children(listOfChildren).build())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .fl401FamilymanCaseNumber("12345")
-            .childrenList("Child 1: TestName\n")
+            //.childrenList("Child 1: TestName\n")
             .selectedOrder(
                 "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
                     + "enforcement application (C82)\\n\\n")
@@ -297,7 +297,8 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
 
         CallbackResponse callbackResponse = manageOrdersController.fetchChildDetails(callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
+        assertNotNull(callbackResponse.getData().getChildSelectorOptions());
+
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
             callbackResponse.getData().getSelectedOrder());

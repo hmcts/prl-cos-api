@@ -35,6 +35,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -87,9 +88,8 @@ public class ManageOrderServiceTest {
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
 
-        assertEquals("Child 1: Test Name\n", caseData1.getChildrenList());
+        assertNull(caseData1.getChildSelectorOptions());
         assertNotNull(caseData1.getSelectedOrder());
-
     }
 
     @Test
@@ -123,7 +123,7 @@ public class ManageOrderServiceTest {
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
 
-        assertEquals("Child 1: TestName\n", caseData1.getChildrenList());
+        assertNull(caseData1.getChildSelectorOptions());
         assertNotNull(caseData1.getSelectedOrder());
     }
 

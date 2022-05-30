@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+//import uk.gov.hmcts.reform.prl.models.complextypes.ChildSelectorOptions;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -108,6 +109,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_n117_filename}")
     protected String n117File;
 
+    @Value("${document.templates.common.prl_c45a_draft_template}")
+    protected String c45aDraftTemplate;
+
+    @Value("${document.templates.common.prl_c45a_draft_filename}")
+    protected String c45aDraftFile;
+
+    @Value("${document.templates.common.prl_c45a_template}")
+    protected String c45aTemplate;
+
+    @Value("${document.templates.common.prl_c45a_filename}")
+    protected String c45aFile;
+
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
     @Autowired
@@ -124,8 +137,10 @@ public class ManageOrderService {
     }
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
-        return CaseData.builder().childrenList(getChildInfoFromCaseData(caseData))
-            .manageOrders(ManageOrders.builder().childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
+        return CaseData.builder()
+            //.childrenList(getChildInfoFromCaseData(caseData))
+            .manageOrders(ManageOrders.builder().childListForSpecialGuardianship(getChildInfoFromCaseData(caseData))
+                              .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
@@ -167,6 +182,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, n117DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME,n117Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, n117File);
+                break;
+            case parentalResponsibility:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, c45aDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, c45aDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c45aTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c45aFile);
                 break;
             default:
                 break;
@@ -212,8 +233,10 @@ public class ManageOrderService {
             }
             for (int i = 0; i < children.size(); i++) {
                 Child child = children.get(i);
-                builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + " " + child.getLastName()));
-                builder.append("\n");
+                builder.append(String.format("<p>Child %d: %s ", i + 1, child.getFirstName()
+                    + " " + child.getLastName()
+                    + "</p> <br />"));
+                //builder.append("\n");
             }
         } else {
             Optional<List<Element<ApplicantChild>>> applicantChildDetails = ofNullable(caseData.getApplicantChildDetails());

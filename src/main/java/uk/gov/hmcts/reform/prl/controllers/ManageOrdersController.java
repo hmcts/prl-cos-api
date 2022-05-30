@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildSelectorOptions;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -109,6 +110,13 @@ public class ManageOrdersController {
                     .collect(joining());
             }
         }
+        //String childrenList = caseDataInput.getChildrenList();
+        caseDataInput = caseDataInput.toBuilder()
+            .childSelectorOptions(ChildSelectorOptions.builder()
+                                      .childOption(childOption)
+                                      .build())
+            //.childrenList(childrenList)
+            .build();
         caseDataInput = caseDataInput.toBuilder()
             .childOption(childOption)
             .build();

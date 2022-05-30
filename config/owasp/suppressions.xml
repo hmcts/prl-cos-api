@@ -78,6 +78,9 @@
   </suppress>
   <suppress>
     <cve>CVE-2022-22968</cve>
+    <cve>CVE-2022-22971</cve>
+    <cve>CVE-2022-22970</cve>
+    <cve>CVE-2022-29885</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
