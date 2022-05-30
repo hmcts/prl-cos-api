@@ -45,6 +45,8 @@
     <cve>CVE-2016-1000027</cve>
     <cve>CVE-2021-22060</cve>
     <cve>CVE-2021-42550</cve>
+    <cve>CVE-2022-22970</cve>
+    <cve>CVE-2022-22971</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -64,4 +66,11 @@
     <cve>CVE-2022-22970</cve>
     <cve>CVE-2022-29885</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+        Tomcat 9.0.58
+        ]]></notes>
+    <cve>CVE-2022-29885</cve>
+  </suppress>
+
 </suppressions>
