@@ -60,6 +60,8 @@ public class AmendedOrderStamper {
         log.info("**************************************");
         log.info("Auth: " + authorisation);
         log.info("ServiceAuth: " + s2s);
+
+
         log.info("Doc url: " + original.getDocumentUrl());
         log.info("**************************************");
         ResponseEntity<Resource> downloadedDocument = caseDocumentClient.getDocumentBinary(authorisation,

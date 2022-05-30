@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +43,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 
 @RestController
+@Slf4j
 @RequiredArgsConstructor
 public class ManageOrdersController {
 
@@ -169,6 +171,7 @@ public class ManageOrdersController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+            log.info("Final application doc: " + caseData.getFinalDocument().getDocumentUrl());
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else {
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
