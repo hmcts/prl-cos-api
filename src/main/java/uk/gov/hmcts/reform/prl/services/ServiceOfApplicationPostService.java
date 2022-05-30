@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -18,7 +19,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -61,13 +66,16 @@ public class ServiceOfApplicationPostService {
 
     private List<GeneratedDocumentInfo> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
         List<GeneratedDocumentInfo> docs = new ArrayList<>();
-
-        docs.add(generateCoverSheet(auth, getRespondentCaseData(partyDetails,caseData)));
+        docs.add(generateDocument(auth, getRespondentCaseData(partyDetails,caseData),DOCUMENT_COVER_SHEET_HINT));
         docs.add(getFinalDocument(caseData));
         getC1aDocument(caseData).ifPresent(docs::add);
         docs.addAll(getSelectedOrders(caseData));
-
-
+        docs.addAll(getUploadedDocumentsServiceOfApplication(caseData));
+        CaseData blankCaseData = CaseData.builder().build();
+        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_PRIVACY_NOTICE_HINT));
+        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C1A_BLANK_HINT));
+        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C7_BLANK_HINT));
+        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C8_BLANK_HINT));
         return docs;
     }
 
@@ -77,6 +85,16 @@ public class ServiceOfApplicationPostService {
             .id(caseData.getId())
             .respondents(List.of(element(partyDetails)))
             .build();
+    }
+
+    private List<GeneratedDocumentInfo> getUploadedDocumentsServiceOfApplication(CaseData caseData) {
+        List<GeneratedDocumentInfo> docs = new ArrayList<>();
+        Optional<Document> pd36qLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getPd36qLetter());
+        Optional<Document> specialArrangementLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs()
+                                                                              .getSpecialArrangementsLetter());
+        pd36qLetter.ifPresent(document -> docs.add(toGeneratedDocumentInfo(document)));
+        specialArrangementLetter.ifPresent(document -> docs.add(toGeneratedDocumentInfo(document)));
+        return docs;
     }
 
     private GeneratedDocumentInfo getFinalDocument(CaseData caseData) {
@@ -118,12 +136,8 @@ public class ServiceOfApplicationPostService {
 
     }
 
-    private GeneratedDocumentInfo generateCoverSheet(String authorisation, CaseData caseData) throws Exception {
+    private GeneratedDocumentInfo generateDocument(String authorisation, CaseData caseData, String documentName) throws Exception {
         return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation, caseData,
-                                                                      DOCUMENT_COVER_SHEET_HINT, welshCase(caseData)));
+                                                                      documentName, welshCase(caseData)));
     }
-
-
-
-
 }

@@ -260,6 +260,14 @@ document:
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-ORDERS-N117-FINAL.docx
       prl_n117_filename: N117CreateOrder.pdf
+      prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
+      prl_c7_blank_filename: C7BlankDocument.pdf
+      prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
+      prl_c8_blank_filename: C8BlankDocument.pdf
+      prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
+      prl_c1a_blank_filename: C1ABlankDocument.pdf
+      prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
+      prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
 
 southampton:
   court:
