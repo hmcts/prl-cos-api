@@ -50,6 +50,7 @@ public class ServiceOfApplicationPostService {
             .forEach(partyDetails -> {
                 try {
                     List<GeneratedDocumentInfo> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
+                    log.info("*** Initiating request to Bulk print service ***");
                     bulkPrintService.send(
                         String.valueOf(caseData.getId()),
                         authorisation,
