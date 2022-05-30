@@ -49,7 +49,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
-import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -57,7 +56,6 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -157,12 +155,6 @@ public class CallbackControllerTest {
 
     @Mock
     private CaseWorkerEmailService caseWorkerEmailService;
-
-    @Mock
-    private AddCaseNoteService addCaseNoteService;
-
-    @Mock
-    private ServiceOfApplicationService serviceOfApplicationService;
 
     @Mock
     private DocumentGenService documentGenService;
@@ -1020,7 +1012,6 @@ public class CallbackControllerTest {
             .sendWithDrawEmailToFl401Solicitor(callbackRequest.getCaseDetails(), userDetails);
         verifyNoMoreInteractions(caseWorkerEmailService);
     }
-
 
     @Test
     public void testGenerateDocumentSubmitApplicationWithC8() throws Exception {
