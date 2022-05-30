@@ -524,6 +524,7 @@ public class DocumentGenService {
     }
 
     public Document generateSingleDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh) throws Exception {
+        log.info(" *** Document generation initiated for {} *** ",hint);
         return getDocument(authorisation, caseData, hint, isWelsh);
     }
 }
