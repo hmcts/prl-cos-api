@@ -116,6 +116,9 @@ public class CaseData implements MappableObject {
 
     private String applicantName;
 
+    private String respondentName;
+
+
     private String childName;
 
     /**
