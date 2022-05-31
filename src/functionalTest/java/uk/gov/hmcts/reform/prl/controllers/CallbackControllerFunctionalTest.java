@@ -159,17 +159,4 @@ public class CallbackControllerFunctionalTest {
             .body("data.issueDate", equalTo(LocalDate.now().toString()))
             .assertThat().statusCode(200);
     }
-
-    @Test
-    public void givenRequestWithCaseData_ResponseContainsHeaderAndCollapsable() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        request
-            .header("Authorization", userToken)
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/service-of-application-start")
-            .then()
-            .assertThat().statusCode(200);
-    }
 }
