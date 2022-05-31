@@ -2,10 +2,8 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.net.URL;
+import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class ResourceLoader {
 
@@ -14,13 +12,13 @@ public class ResourceLoader {
     }
 
     public static byte[] loadResource(final String filePath) throws Exception {
-        URL url = ResourceLoader.class.getClassLoader().getResource(filePath);
+        InputStream io = ResourceLoader.class.getClassLoader().getResourceAsStream(filePath);
 
-        if (url == null) {
+        if (io == null) {
             throw new IllegalArgumentException(String.format("Could not find resource in path %s", filePath));
         }
 
-        return Files.readAllBytes(Paths.get(url.toURI()));
+        return io.readAllBytes();
     }
 
     public static <T> T loadJsonToObject(String filePath, Class<T> type) {
