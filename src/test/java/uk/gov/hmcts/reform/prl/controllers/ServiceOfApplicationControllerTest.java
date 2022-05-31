@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,14 +100,19 @@ public class ServiceOfApplicationControllerTest {
 
     @Test
     public void testHandleAboutToSubmit() throws Exception {
+        CaseData cd = CaseData.builder()
+            .respondentCaseInvites(Collections.emptyList())
+            .build();
 
-        Map<String, Object> caseData = CaseData.builder().build().toMap(objectMapper);
+        Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
 
+        when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
+        when(serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails())).thenReturn(cd);
         serviceOfApplicationController.handleAboutToSubmit(callbackRequest);
         verify(serviceOfApplicationService).sendEmail(callbackRequest.getCaseDetails());
 

@@ -36,7 +36,7 @@ public class ServiceOfApplicationEmailService {
     private String manageCaseUrl;
 
     public void sendEmailC100(CaseDetails caseDetails) throws Exception {
-        log.info("Sending the server Parties emails for C100 Application for caseId {}", caseDetails.getId());
+        log.info("Sending the serve Parties emails for C100 Application for caseId {}", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         Map<String, String> applicantSolicitors = caseData
