@@ -81,10 +81,10 @@ public class ServiceOfApplicationService {
             : FAMILY_MAN_ID + caseData.getFamilymanCaseNumber();
     }
 
-    public void sendEmail(CaseDetails caseDetails) throws Exception {
+    public CaseData sendEmail(CaseDetails caseDetails) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        caseInviteManager.generatePinAndSendNotificationEmail(caseData);
+        caseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
 
         log.info("Sending service of application email notifications");
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -92,5 +92,7 @@ public class ServiceOfApplicationService {
         } else {
             serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
         }
+
+        return caseData;
     }
 }
