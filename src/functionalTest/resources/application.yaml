@@ -223,6 +223,10 @@ document:
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
     common:
+      doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
+      doc_cover_sheet_welsh_template: not_implemented
+      doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
+      doc_cover_sheet_welsh_filename: not_implemented
       prl_c21_template: PRL-ORDER-C21-COMMON.docx
       prl_c21_filename: C21CreateOrder.pdf
       prl_c21_welsh_template: PRL-ORDER-C21-WELSH-COMMON.docx
