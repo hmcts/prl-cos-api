@@ -105,7 +105,7 @@ public class ResetAccessCodeControllerTest {
         List<Element<CaseInvite>> respondentCaseInvites = List.of(element(caseInvite1), element(caseInvite2));
 
         AboutToStartOrSubmitCallbackResponse response = resetAccessCodeController
-            .resetPin(callbackRequest);
+            .resetAccessCode(callbackRequest);
         assertTrue(response.getData().containsKey("respondentCaseInvites"));
     }
 }
