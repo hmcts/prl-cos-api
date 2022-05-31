@@ -71,6 +71,9 @@ feature-toggle:
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
+citizen_frontend:
+  url: http://example.com
+
 uk:
   gov:
     notify:
@@ -93,6 +96,11 @@ uk:
             WITHDRAW_AFTER_ISSUED_SOLICITOR: ba39a8e6-c553-457e-b526-3c241cd207f6
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
+            APPLICANT_SOLICITOR: 72e32651-a952-4063-8a85-5f28950fcc84
+            RESPONDENT_SOLICITOR: 8d3e5c9b-6fca-4c1c-8b31-40c2b9686251
+            RESPONDENT_WITHOUT_SOLICITOR: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
+            CASE_INVITE: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
+
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -139,23 +147,8 @@ idam:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
-    baseUrl: https://idam-api.aat.platform.hmcts.net
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
     secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
-    clientId: xuiwebapp
-    authorize:
-      context-path: /oauth2/authorize
-    token:
-      context-path: /oauth2/token
-  user:
-    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
-  solicitor:
-    username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
-    password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
-  system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
-
 
 security:
   oauth2:
@@ -294,6 +287,14 @@ document:
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
       prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
+      doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
+      doc_cover_sheet_welsh_template: not_implemented
+      doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
+      doc_cover_sheet_welsh_filename: not_implemented
+      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
+      C43A_draft_filename: C43ADraftCreateOrder.pdf
+      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
+      C43A_final_filename: C43AFinalCreateOrder.pdf
       prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
       prl_c7_blank_filename: C7BlankDocument.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
@@ -302,6 +303,7 @@ document:
       prl_c1a_blank_filename: C1ABlankDocument.pdf
       prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
+
 
 southampton:
   court:
