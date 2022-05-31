@@ -99,7 +99,6 @@ public class ResetAccessCodeControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-
         CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1", UUID.randomUUID());
         CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2", UUID.randomUUID());
         List<Element<CaseInvite>> respondentCaseInvites = List.of(element(caseInvite1), element(caseInvite2));
