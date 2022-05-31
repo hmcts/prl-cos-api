@@ -37,7 +37,7 @@ public class ResetAccessCodeController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Resubmission completed"),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse resetPin(
+    public AboutToStartOrSubmitCallbackResponse resetAccessCode(
         @RequestBody CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = new HashMap<>(callbackRequest.getCaseDetails().getData());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
