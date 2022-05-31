@@ -3,9 +3,13 @@ package uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 
 @Data
+@Getter
+@EqualsAndHashCode(callSuper = true)
 public class RespondentEmail extends EmailTemplateVars {
 
     @JsonProperty("caseName")
