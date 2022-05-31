@@ -67,8 +67,10 @@ public class ServiceOfApplicationController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(@RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
-        return AboutToStartOrSubmitCallbackResponse.builder().build();
+        CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
+        Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        updatedCaseData.put("respondentCaseInvites", caseData.getRespondentCaseInvites());
+        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
 
     }
 }
