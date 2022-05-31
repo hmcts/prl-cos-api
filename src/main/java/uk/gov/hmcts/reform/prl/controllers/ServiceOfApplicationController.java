@@ -66,10 +66,10 @@ public class ServiceOfApplicationController {
         @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(@RequestBody CallbackRequest callbackRequest) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
+
+        CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        updatedCaseData.put("respondentCaseInvites",caseData.getRespondentCaseInvites());
+        updatedCaseData.put("respondentCaseInvites", caseData.getRespondentCaseInvites());
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
 
     }
