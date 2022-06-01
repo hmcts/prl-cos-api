@@ -193,17 +193,17 @@ rd_professional:
 document:
   templates:
     c100:
-      c100_final_template: C100-Final-Document.docx
+      c100_final_template: PRL-C100-R1-Final-Document.docx
       c100_final_filename: C100FinalDocument.pdf
-      c100_draft_template: PRL-C100-Draft-Final.docx
+      c100_draft_template: PRL-C100-R1-Draft-Document.docx
       c100_draft_filename: Draft_C100_application.pdf
       c100_c8_template: PRL-C8-Final-Changes.docx
       c100_c8_filename: C8Document.pdf
       c100_c1a_template: PRL-C1A.docx
       c100_c1a_filename: C1A_Document.pdf
-      c100_final_welsh_template: PRL-Final-C100-WelshLang.docx
+      c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
       c100_final_welsh_filename: C100FinalDocumentWelsh.pdf
-      c100_draft_welsh_template: PRL-Draft-C100-WelshLang.docx
+      c100_draft_welsh_template: PRL-C100-R1-Draft-WelshLang.docx
       c100_draft_welsh_filename: Draft_C100_application_welsh.pdf
       c100_c8_welsh_template: PRL-C8-WelshLang.docx
       c100_c8_welsh_filename: C8Document_Welsh.pdf
@@ -233,6 +233,18 @@ document:
       C43A_draft_filename: C43ADraftCreateOrder.pdf
       C43A_final_template: PRL-ORDER-C43A-FINAL.docx
       C43A_final_filename: C43AFinalCreateOrder.pdf
+      prl_c43_template: PRL-ORDER-C43-FINAL.docx
+      prl_c43_filename: C43CreateOrder.pdf
+      prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
+      prl_c43_draft_filename: C43CreateOrderDraft.pdf
+      prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
+      prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
+      prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
+      prl_c47a_draft_filename: C47ACreateOrderDraft.pdf
+      prl_n117_draft_template: PRL-ORDERS-N117-DRAFT.docx
+      prl_n117_draft_filename: N117CreateOrderDraft.pdf
+      prl_n117_template: PRL-ORDERS-N117-FINAL.docx
+      prl_n117_filename: N117CreateOrder.pdf
 
 southampton:
   court:

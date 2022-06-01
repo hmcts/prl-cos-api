@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityStatementDisclaimerEnum;
@@ -40,9 +41,11 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
@@ -189,6 +192,15 @@ public class CaseData implements MappableObject {
     private final PartyDetails applicantsFL401;
 
     /**
+     * caseNotes details.
+     */
+    private List<Element<CaseNoteDetails>> caseNotes;
+    //@JsonProperty("caseNoteDetails")
+    //private final CaseNoteDetails caseNoteDetails;
+    private final String subject;
+    private final String caseNote;
+
+    /**
      * Child details.
      */
     private final List<Element<Child>> children;
@@ -226,8 +238,13 @@ public class CaseData implements MappableObject {
     private final String soleTraderName1;
     private final Document miamCertificationDocumentUpload1;
 
+    /**
+     * Allegations of harm.
+     */
+
     @JsonUnwrapped
     private final AllegationOfHarm allegationOfHarm;
+
     /**
      * Other people in the case.
      */
@@ -481,6 +498,8 @@ public class CaseData implements MappableObject {
     @JsonProperty("viewPDFlinkLabelText")
     private String viewPdfLinkLabelText;
 
+    private List<Element<CaseInvite>> respondentCaseInvites;
+
 
     /**
      *  FL401 submit status flags.
@@ -512,42 +531,34 @@ public class CaseData implements MappableObject {
     private final ManageOrdersOptionsEnum manageOrdersOptions;
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
 
-    /*Commented below as getiing too many parameters error for @AllArgsConstructor
-    * */
-    //create orders flow
-    //private final CafcassEnum cafcassRecipient;
-
-    //private final HearingTypeEnum hearingType;
-    //private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
-
     private final List<OrderRecipientsEnum> orderRecipients;
-    //private final OtherEnum otherRecipient;
-    //private final OtherOrderRecipientsEnum otherOrderRecipients;
-    //private final SelectTypeOfOrderEnum selectTypeOfOrder;
-    //private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
-
 
     private final YesOrNo doesOrderClosesCase;
-    private final YesOrNo isTheOrderByConsent;
     private final YesOrNo wasTheOrderApprovedAtHearing;
     private final String judgeOrMagistrateTitle;
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
-    //private final List<String> cafcassEmailAddress;
-    //private final List<String> otherEmailAddress;
+
+    @JsonProperty("childOption")
+    private final String childOption;
+
+    @JsonProperty("childrenList")
     private final String childrenList;
 
+    private List<Element<AppointedGuardianFullName>> appointedGuardianName;
+
     @JsonUnwrapped
-    private final ManageOrders manageOrders;
+    @Builder.Default
+    private final ManageOrders manageOrders = ManageOrders.builder().build();
+
     /**
      * Solicitor Details.
      */
     private String caseSolicitorName;
     private String caseSolicitorOrgName;
     private String selectedOrder;
-
 
     /**
      * FL401 Court details for Pilot.
