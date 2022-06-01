@@ -8,6 +8,7 @@ import lombok.Getter;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 @Data
 @Getter
@@ -22,17 +23,20 @@ public class RespondentSolicitorEmail extends EmailTemplateVars {
     private final String solicitorName;
     @JsonProperty("caseLink")
     private final String caseLink;
+    @JsonProperty("privacyNoticeLink")
+    private final Map<String,Object> privacyNoticeLink;
 
     @Builder
     public RespondentSolicitorEmail(String caseReference,
                                                         String caseName,
                                                         LocalDate issueDate,
                                                         String solicitorName,
-                                                        String caseLink) {
+                                                        String caseLink,Map<String,Object> privacyNoticeLink) {
         super(caseReference);
         this.caseName = caseName;
         this.issueDate = issueDate;
         this.solicitorName = solicitorName;
         this.caseLink = caseLink;
+        this.privacyNoticeLink = privacyNoticeLink;
     }
 }

@@ -119,14 +119,18 @@ public class ServiceOfApplicationEmailService {
             .build();
     }
 
-    private EmailTemplateVars buildRespondentSolicitorEmail(CaseDetails caseDetails, String solicitorName) {
+    private EmailTemplateVars buildRespondentSolicitorEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
+        Map<String, Object> privacy = new HashMap<>();
+        privacy.put("file",
+                    NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf")).get("file"));
         return RespondentSolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
             .solicitorName(solicitorName)
             .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
+            .privacyNoticeLink(privacy)
             .issueDate(caseData.getIssueDate())
             .build();
     }
