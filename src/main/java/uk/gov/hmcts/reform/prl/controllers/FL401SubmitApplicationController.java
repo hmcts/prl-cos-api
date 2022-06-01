@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -57,6 +58,9 @@ public class FL401SubmitApplicationController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AllTabServiceImpl allTabService;
 
     @Autowired
     private SolicitorEmailService solicitorEmailService;
@@ -91,6 +95,7 @@ public class FL401SubmitApplicationController {
         List<String> errorList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         boolean mandatoryEventStatus = fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData);
+
         if (!mandatoryEventStatus) {
             errorList.add(
                 "Statement of truth and submit is not allowed for this case unless you finish all the mandatory events");
@@ -110,6 +115,10 @@ public class FL401SubmitApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        caseData = caseData.toBuilder()
+            .solicitorName(userService.getUserDetails(authorisation).getFullName())
+            .build();
 
         final LocalDate localDate = LocalDate.now();
 
