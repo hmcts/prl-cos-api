@@ -42,7 +42,7 @@ public class SearchCasesDataService {
             }
 
             if (Objects.nonNull(fl401respondent)) {
-                log.info("adding applicant name in casedata for FL401");
+                log.info("adding respondent name in casedata for FL401");
                 caseDetails.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
             }
         } else {
