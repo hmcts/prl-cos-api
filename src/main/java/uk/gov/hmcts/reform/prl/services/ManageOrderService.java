@@ -14,11 +14,9 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -44,7 +42,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 
 @Service
 @Slf4j
@@ -188,10 +185,6 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl402FinalFile);
                 break;
             case generalForm:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE,"");
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, "");
-                break;
-            case generalForm:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE,n117DraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, n117DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME,n117Template);
@@ -258,85 +251,6 @@ public class ManageOrderService {
             }
         }
         return builder.toString();
-    }
-
-    private OrderDetails getCurrentOrderDetails(String authorisation, CaseData caseData)
-        throws Exception {
-        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
-            Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                CaseDetails.builder().caseData(caseData).build(),
-                fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
-            );
-            return OrderDetails.builder().orderType(caseData.getSelectedOrder())
-                .orderDocument(Document.builder()
-                                   .documentUrl(generatedDocumentInfo.getUrl())
-                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                   .documentHash(generatedDocumentInfo.getHashToken())
-                                   .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
-                .otherDetails(OtherOrderDetails.builder()
-                                  .createdBy(caseData.getJudgeOrMagistratesLastName())
-                                  .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                      PrlAppsConstants.D_MMMM_YYYY,
-                                      Locale.UK
-                                  )))
-                                  .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
-                                      PrlAppsConstants.D_MMMM_YYYY,
-                                      Locale.UK
-                                  )))
-                                  .orderRecipients(getAllRecipients(caseData)).build())
-                .dateCreated(dateTime.now())
-                .build();
-        } else {
-            return OrderDetails.builder().orderType(caseData.getSelectedOrder())
-                .orderDocument(caseData.getAppointmentOfGuardian())
-                .otherDetails(OtherOrderDetails.builder()
-                                  .createdBy(caseData.getJudgeOrMagistratesLastName())
-                                  .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                      PrlAppsConstants.D_MMMM_YYYY,
-                                      Locale.UK
-                                  )))
-                                  .orderRecipients(getAllRecipients(caseData)).build())
-                .dateCreated(dateTime.now())
-                .build();
-        }
-
-    }
-
-    private String getAllRecipients(CaseData caseData) {
-        StringBuilder recipientsList = new StringBuilder();
-        Optional<List<OrderRecipientsEnum>> appResRecipientList = ofNullable(caseData.getOrderRecipients());
-        if (appResRecipientList.isPresent() && caseData.getOrderRecipients().contains(applicantOrApplicantSolicitor)) {
-            recipientsList.append(getApplicantSolicitorDetails(caseData));
-            recipientsList.append('\n');
-        }
-        if (appResRecipientList.isPresent()
-            && caseData.getOrderRecipients().contains(respondentOrRespondentSolicitor)) {
-            recipientsList.append(getRespondentSolicitorDetails(caseData));
-            recipientsList.append('\n');
-        }
-        return recipientsList.toString();
-    }
-
-    private String getApplicantSolicitorDetails(CaseData caseData) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            List<PartyDetails> applicants = caseData
-                .getApplicants()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-            List<String> applicantSolicitorNames  = applicants.stream()
-                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Applicant's Solicitor)")
-                .collect(Collectors.toList());
-            return String.join("\n", applicantSolicitorNames);
-        } else {
-            PartyDetails applicantFl401 = caseData.getApplicantsFL401();
-            String applicantSolicitorName = applicantFl401.getRepresentativeFirstName()
-                + " "
-                + applicantFl401.getRepresentativeLastName();
-            return  applicantSolicitorName;
-        }
     }
 
     private OrderDetails getCurrentOrderDetails(String authorisation, CaseData caseData)
