@@ -251,6 +251,10 @@ document:
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-ORDERS-N117-FINAL.docx
       prl_n117_filename: N117CreateOrder.pdf
+      prl_fl402_draft_template: PRL-FL402-Notice-Of-Proceedings-Draft.docx
+      prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
+      prl_fl402_final_template: PRL-FL402-Notice-Of-Proceedings-Final.docx
+      prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
 
 southampton:
   court:
