@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -112,4 +113,6 @@ public class ManageOrders {
     @JsonIgnore
     private final Address fl402HearingCourtAddress;
 
+    @JsonProperty("fl404bCustomFields")
+    private final FL404b fl404bCustomFields;
 }
