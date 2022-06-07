@@ -94,4 +94,5 @@ public class PrlAppsConstants {
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
 
+    public static final String APPOINTED_GUARDIAN_FULL_NAME = "appointedGuardianFullName";
 }

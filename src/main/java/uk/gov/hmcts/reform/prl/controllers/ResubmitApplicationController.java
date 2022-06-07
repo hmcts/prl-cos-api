@@ -113,7 +113,6 @@ public class ResubmitApplicationController {
 
         log.info("Court name for return application: === {}===", caseDataUpdated.get(COURT_NAME_FIELD));
         if (previousStates.isPresent()) {
-            // For submitted state - No docs will be generated.
             if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
                 caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
                 caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
@@ -124,19 +123,18 @@ public class ResubmitApplicationController {
                 caseWorkerEmailService.sendEmail(caseDetails);
                 solicitorEmailService.sendEmail(caseDetails);
             }
-            // For Case issue state - All docs will be regenerated.
             if (State.CASE_ISSUE.getValue().equalsIgnoreCase(previousStates.get())) {
                 caseData = organisationService.getApplicantOrganisationDetails(caseData);
                 caseData = organisationService.getRespondentOrganisationDetails(caseData);
                 caseData = caseData.setIssueDate();
                 caseData = caseData.toBuilder().state(State.CASE_ISSUE).build();
 
-                caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
                 caseDataUpdated.put(STATE_FIELD, State.CASE_ISSUE);
                 caseDataUpdated.put(PrlAppsConstants.ISSUE_DATE_FIELD, caseData.getIssueDate());
                 caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
             }
-
+            // All docs will be regenerated in both issue and submitted state jira FPET-21
+            caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
             // remove the tick from submit screens so not present if resubmitted again
             caseDataUpdated.put("confidentialityDisclaimerSubmit", Collections.singletonMap("confidentialityChecksChecked", null));
