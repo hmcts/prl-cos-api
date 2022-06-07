@@ -534,6 +534,7 @@ public class CaseData implements MappableObject {
 
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo wasTheOrderApprovedAtHearing;
+    private final String judgeOrMagistrateTitle;
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -550,7 +551,6 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final ManageOrders manageOrders = ManageOrders.builder().build();
-
 
     /**
      * Solicitor Details.

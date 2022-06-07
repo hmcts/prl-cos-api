@@ -179,7 +179,6 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testPopulatePreviewOrderBlankOrderFromCaseData() throws Exception {
-
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -479,6 +478,7 @@ public class ManageOrderServiceTest {
     @Test
     public void testPopulateFinalOrderFromCaseDataFL401ForMultipleOrders() throws Exception {
 
+
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -502,6 +502,7 @@ public class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+
 
     }
 }

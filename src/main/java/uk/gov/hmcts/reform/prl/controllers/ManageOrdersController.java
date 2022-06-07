@@ -58,7 +58,6 @@ public class ManageOrdersController {
     @Autowired
     private ManageOrderEmailService manageOrderEmailService;
 
-
     @Value("${document.templates.common.C43A_draft_template}")
     protected String c43ADraftTemplate;
 
@@ -73,7 +72,9 @@ public class ManageOrdersController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+        if (caseData.getCreateSelectOrderOptions() != null
+            && !caseData.getCreateSelectOrderOptions().equals(CreateSelectOrderOptionsEnum.generalForm)
+            && caseData.getDateOrderMade() != null) {
             caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
         } else {
             caseDataUpdated.put("previewOrderDoc",caseData.getAppointmentOfGuardian());
@@ -82,6 +83,8 @@ public class ManageOrdersController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
+
+
 
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to fetch child details ")
