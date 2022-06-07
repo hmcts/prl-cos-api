@@ -45,8 +45,8 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -344,9 +344,10 @@ public class ManageOrdersControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
+        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
 
-        CallbackResponse callbackResponse = manageOrdersController.fetchChildDetails(callbackRequest);
+        CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",

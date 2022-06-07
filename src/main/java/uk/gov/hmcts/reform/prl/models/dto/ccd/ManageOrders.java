@@ -6,13 +6,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildSelectorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -95,4 +95,7 @@ public class ManageOrders {
     private final List<ChildSelectorEnum> childSelectorOption14;
     @JsonProperty("childSelectorOption15")
     private final List<ChildSelectorEnum> childSelectorOption15;
+
+    @JsonProperty("fl404bCustomFields")
+    private final FL404b fl404bCustomFields;
 }
