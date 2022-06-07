@@ -58,18 +58,6 @@ public class ManageOrdersController {
     @Autowired
     private ManageOrderEmailService manageOrderEmailService;
 
-    @Value("${document.templates.common.prl_c21_template}")
-    protected String c21Template;
-
-    @Value("${document.templates.common.prl_c21_filename}")
-    protected String c21File;
-
-    @Value("${document.templates.common.prl_c21_welsh_template}")
-    protected String c21WelshTemplate;
-
-    @Value("${document.templates.common.prl_c21_welsh_filename}")
-    protected String c21WelshFile;
-
     @Value("${document.templates.common.C43A_draft_template}")
     protected String c43ADraftTemplate;
 
@@ -93,8 +81,6 @@ public class ManageOrdersController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
-
-
 
     @PostMapping(path = "/fetch-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to fetch case data and custom order fields")

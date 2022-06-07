@@ -212,6 +212,94 @@ public class ManageOrderServiceTest {
 
         assertEquals("Case Name: Test Case 45678\n\n"
                          + "Family Man ID: familyman12345\n\n", responseMap.get("manageOrderHeader1"));
+
+    }
+
+    @Test
+    public void testPopulatePreviewOrderBlankOrderFromCaseData() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        manageOrderService.getCaseData("test token", caseData, caseDataUpdated);
+
+        assertNotNull(caseDataUpdated.get("previewOrderDoc"));
+
+    }
+
+    @Test
+    public void testPopulatePreviewOrderCAorderFromCaseData() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        manageOrderService.getCaseData("test token",caseData,caseDataUpdated);
+
+        assertNotNull(caseDataUpdated.get("previewOrderDoc"));
+
+    }
+
+    @Test
+    public void testPopulatePreviewOrderSpecificGuardianOrderFromCaseData() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        manageOrderService.getCaseData("test token",caseData,caseDataUpdated);
+
+        assertNotNull(caseDataUpdated.get("previewOrderDoc"));
+
     }
 
     @Test
@@ -229,7 +317,7 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw)
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
@@ -348,6 +436,31 @@ public class ManageOrderServiceTest {
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
 
+    }
+
+    @Test
+    public void testUpdateCaseDataWithAppointedGuardianNames() {
+
+        List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
+        AppointedGuardianFullName appointedGuardianFullName = AppointedGuardianFullName.builder()
+            .guardianFullName("Full Name")
+            .build();
+
+        Element<AppointedGuardianFullName> wrappedName = Element.<AppointedGuardianFullName>builder().value(appointedGuardianFullName).build();
+        List<Element<AppointedGuardianFullName>> caseDataNameList = Collections.singletonList(wrappedName);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .appointedGuardianName(caseDataNameList)
+            .build();
+
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails =
+            uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        manageOrderService.updateCaseDataWithAppointedGuardianNames(caseDetails, namesList);
+        assertEquals(caseDataNameList.get(0).getValue().getGuardianFullName(), "Full Name");
     }
 
     @Test
@@ -498,30 +611,5 @@ public class ManageOrderServiceTest {
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
 
-    }
-
-    @Test
-    public void testUpdateCaseDataWithAppointedGuardianNames() {
-
-        List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
-        AppointedGuardianFullName appointedGuardianFullName = AppointedGuardianFullName.builder()
-            .guardianFullName("Full Name")
-            .build();
-
-        Element<AppointedGuardianFullName> wrappedName = Element.<AppointedGuardianFullName>builder().value(appointedGuardianFullName).build();
-        List<Element<AppointedGuardianFullName>> caseDataNameList = Collections.singletonList(wrappedName);
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .appointedGuardianName(caseDataNameList)
-            .build();
-
-        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails =
-            uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L).build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
-        manageOrderService.updateCaseDataWithAppointedGuardianNames(caseDetails, namesList);
-        assertEquals(caseDataNameList.get(0).getValue().getGuardianFullName(), "Full Name");
     }
 }
