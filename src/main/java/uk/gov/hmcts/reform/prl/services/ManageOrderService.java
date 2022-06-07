@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -108,6 +109,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_fl402_final_filename}")
     protected String fl402FinalFile;
 
+    @Value("${document.templates.common.prl_fl404b_draft_template}")
+    protected String fl404bDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl404b_draft_filename}")
+    protected String fl404bDraftFile;
+
+    @Value("${document.templates.common.prl_fl404b_final_template}")
+    protected String fl404bTemplate;
+
+    @Value("${document.templates.common.prl_fl404b_final_filename}")
+    protected String fl404bFile;
+
     @Value("${document.templates.common.prl_n117_draft_template}")
     protected String n117DraftTemplate;
 
@@ -177,6 +190,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c47aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
+                break;
+            case amendDischargedVaried:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404bDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404bDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404bTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404bFile);
                 break;
             case noticeOfProceedings:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl402DraftTemplate);
@@ -294,7 +313,6 @@ public class ManageOrderService {
                 .dateCreated(dateTime.now())
                 .build();
         }
-
     }
 
     private String getAllRecipients(CaseData caseData) {
@@ -413,6 +431,39 @@ public class ManageOrderService {
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
         return caseDataUpdated;
+    }
+
+    public CaseData populateCustomOrderFields(CaseData caseData) {
+        CreateSelectOrderOptionsEnum order = caseData.getCreateSelectOrderOptions();
+
+        switch (order) {
+            case amendDischargedVaried:
+            case blank:
+                return getFl404bFields(caseData);
+            default:
+                return caseData;
+        }
+    }
+
+    private CaseData getFl404bFields(CaseData caseData) {
+        FL404b orderData = FL404b.builder()
+            .fl404bCaseNumber(String.valueOf(caseData.getId()))
+            .fl404bCourtName(caseData.getCourtName())
+            .fl404bApplicantName(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
+                                               caseData.getApplicantsFL401().getLastName()))
+            .fl404bRespondentName(String.format("%s %s", caseData.getRespondentsFL401().getFirstName(),
+                                                caseData.getRespondentsFL401().getLastName()))
+            .build();
+
+        if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+            orderData = orderData.toBuilder().fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+        }
+        if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+            orderData = orderData.toBuilder().fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+        }
+        return caseData.toBuilder().manageOrders(ManageOrders.builder()
+                                                     .fl404bCustomFields(orderData).build()).build();
+
     }
 
     public ManageOrders getN117FormData(CaseData caseData) {
