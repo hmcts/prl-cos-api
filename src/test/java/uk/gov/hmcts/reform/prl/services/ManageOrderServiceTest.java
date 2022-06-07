@@ -80,7 +80,7 @@ public class ManageOrderServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .caseTypeOfApplication("FL401")
+            .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
@@ -180,6 +180,7 @@ public class ManageOrderServiceTest {
         CaseData updatedCaseData = manageOrderService.populateCustomOrderFields(caseData);
 
         assertEquals(updatedCaseData.getManageOrders().getFl404bCustomFields(), expectedDetails);
+    }
 
     @Test
     public void testPupulateHeaderC100Test() {
@@ -279,7 +280,7 @@ public class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData))
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
 
     }
 
@@ -460,6 +461,39 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testPopulateFinalOrderFromCaseDataCaseAmendDischargedVariedFl404b() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = ElementUtils.element(details);
+        partyDetails.add(partyDetailsElement);
+        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
+        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.amendDischargedVaried)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .orderRecipients(recipientList)
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
@@ -489,85 +523,5 @@ public class ManageOrderServiceTest {
 
         manageOrderService.updateCaseDataWithAppointedGuardianNames(caseDetails, namesList);
         assertEquals(caseDataNameList.get(0).getValue().getGuardianFullName(), "Full Name");
-    }
-
-    @Test
-    public void testPopulateFinalOrderFromCaseDataFL401() throws Exception {
-
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
-        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
-        PartyDetails details = PartyDetails.builder()
-            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
-            .build();
-        Element<PartyDetails> partyDetailsElement = ElementUtils.element(details);
-        partyDetails.add(partyDetailsElement);
-        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
-        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantCaseName("Test Case 45678")
-            .applicantsFL401(PartyDetails.builder().firstName("firstname")
-                                 .lastName("lastname")
-                                 .representativeFirstName("firstname")
-                                 .representativeLastName("lastname")
-                                 .build())
-            .respondentsFL401(PartyDetails.builder().firstName("firstname")
-                                  .lastName("lastname")
-                                  .representativeFirstName("firstname")
-                                  .representativeLastName("lastname")
-                                  .build())
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .fl401FamilymanCaseNumber("familyman12345")
-            .dateOrderMade(LocalDate.now())
-            .orderRecipients(recipientList)
-            .applicants(partyDetails)
-            .respondents(partyDetails)
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .build();
-
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
-
-        when(dateTime.now()).thenReturn(LocalDateTime.now());
-
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
-
-    }
-
-    @Test
-    public void testPopulateFinalOrderFromCaseDataFL401ForMultipleOrders() throws Exception {
-
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantCaseName("Test Case 45678")
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(new ArrayList<>())
-            .dateOrderMade(LocalDate.now())
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .build();
-
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
-            .thenReturn(generatedDocumentInfo);
-
-        when(dateTime.now()).thenReturn(LocalDateTime.now());
-
-        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
-
     }
 }
