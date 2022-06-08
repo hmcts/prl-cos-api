@@ -44,7 +44,14 @@ public class C100CaseInviteService implements CaseInviteService {
             if (!respondentHasLegalRepresentation(respondent.getValue()) && Yes.equals(respondent.getValue().getCanYouProvideEmailAddress())) {
                 CaseInvite caseInvite = generateRespondentCaseInvite(respondent);
                 caseInvites.add(element(caseInvite));
-                sendCaseInvite(caseInvite, respondent.getValue(), caseData);
+                //sendCaseInvite(caseInvite, respondent.getValue(), caseData);
+            }
+        }
+        if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
+            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                CaseInvite caseInvite = generateRespondentCaseInvite(applicant);
+                caseInvites.add(element(caseInvite));
+                //sendCaseInvite(caseInvite, applicant.getValue(), caseData);
             }
         }
         if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
