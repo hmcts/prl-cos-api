@@ -172,7 +172,7 @@ public class DocumentGenService {
                 && YesOrNo.Yes.equals(caseData.getAllegationsOfHarmYesNo())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
             }
-            if (!State.SUBMITTED_PAID.equals(caseData.getState())) {
+            if (!State.CASE_ISSUE.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
             }
         }
