@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
@@ -171,7 +172,10 @@ public class DocumentGenService {
                 && YesOrNo.Yes.equals(caseData.getAllegationsOfHarmYesNo())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
             }
-            updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
+            if (!State.CASE_ISSUE.equals(caseData.getState()))
+            {
+                updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
+            }
         }
         if (documentLanguage.isGenWelsh()) {
             updatedCaseData.put("isWelshDocGen", Yes.toString());
