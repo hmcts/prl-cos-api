@@ -226,11 +226,11 @@ document:
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
     common:
-      prl_c21_template: PRL-ORDER-C21-COMMON.docx
+      prl_c21_template: PRL-ORDER-C21-FINAL.docx
       prl_c21_filename: C21CreateOrder.pdf
       prl_c21_welsh_template: PRL-ORDER-C21-WELSH-COMMON.docx
       prl_c21_welsh_filename: C21WelshCreateOrder.pdf
-      prl_c21_draft_template: PRL-ORDER-C21-DRAFT-COMMON.docx
+      prl_c21_draft_template: PRL-ORDER-C21-DRAFT-FINAL.docx
       prl_c21_draft_filename: C21CreateOrderDraft.pdf
       C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
       C43A_draft_filename: C43ADraftCreateOrder.pdf
