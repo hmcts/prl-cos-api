@@ -172,7 +172,7 @@ public class DocumentGenService {
                 && YesOrNo.Yes.equals(caseData.getAllegationsOfHarmYesNo())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
             }
-            if (!State.CASE_ISSUE.equals(caseData.getState())) {
+            if (State.CASE_ISSUE.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
             }
         }
@@ -189,7 +189,9 @@ public class DocumentGenService {
                 && YesOrNo.Yes.equals(caseData.getAllegationsOfHarmYesNo())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(authorisation, caseData, C1A_HINT, true));
             }
-            updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, getDocument(authorisation, caseData, FINAL_HINT, true));
+            if (State.CASE_ISSUE.equals(caseData.getState())) {
+                updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, getDocument(authorisation, caseData, FINAL_HINT, true));
+            }
         }
 
         return updatedCaseData;
