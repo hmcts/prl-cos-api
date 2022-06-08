@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.pin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -19,6 +20,9 @@ public class FL401CaseInviteService implements CaseInviteService {
 
     @Autowired
     CaseInviteEmailService caseInviteEmailService;
+
+    @Autowired
+    private LaunchDarklyClient launchDarklyClient;
 
 
     private CaseInvite generateRespondentCaseInvite(PartyDetails partyDetails) {
@@ -39,6 +43,13 @@ public class FL401CaseInviteService implements CaseInviteService {
             CaseInvite caseInvite = generateRespondentCaseInvite(respondent);
             caseInvites.add(element(caseInvite));
             sendCaseInvite(caseInvite, respondent, caseData);
+        }
+
+        if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
+            PartyDetails applicant = caseData.getApplicantsFL401();
+            CaseInvite caseInvite = generateRespondentCaseInvite(applicant);
+            caseInvites.add(element(caseInvite));
+            sendCaseInvite(caseInvite, applicant, caseData);
         }
         return caseData.toBuilder().respondentCaseInvites(caseInvites).build();
     }
