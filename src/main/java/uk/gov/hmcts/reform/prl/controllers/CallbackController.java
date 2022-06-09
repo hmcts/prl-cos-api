@@ -85,7 +85,6 @@ public class CallbackController {
     private final AllTabServiceImpl allTabsService;
     private final UserService userService;
     private final DocumentGenService documentGenService;
-
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
 
@@ -420,5 +419,3 @@ public class CallbackController {
 
     }
 }
-
-
