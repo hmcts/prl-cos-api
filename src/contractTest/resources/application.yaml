@@ -106,7 +106,10 @@ payments:
   api:
     url: ${PAY_URL:}
     callback-url: ${PAY_CALLBACK_URL:}
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
+
+#Whitelisted prl_cos_api just to test, once the basic testing is done then this has to be replaced with family gateway service
+private-law:
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:prl_cos_api}
 
 fees-register:
   api:
