@@ -197,12 +197,13 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse prePopulateCourtDetails(
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws NotFoundException {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Court closestChildArrangementsCourt = courtLocatorService
             .getNearestFamilyCourt(caseData);
-        Optional<CourtEmailAddress> courtEmailAddress = courtLocatorService.getEmailAddress(closestChildArrangementsCourt);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() : courtLocatorService
+            .getEmailAddress(closestChildArrangementsCourt);
         if (courtEmailAddress.isPresent()) {
-            log.info("court email {} with case id {}", courtEmailAddress.get().getAddress(),caseData.getId());
+            log.info("Found court email for case id {}",caseData.getId());
             caseDataUpdated.put("localCourtAdmin",List.of(
                 Element.<LocalCourtAdminEmail>builder().value(LocalCourtAdminEmail.builder().email(courtEmailAddress.get().getAddress()).build())
                     .build()));
