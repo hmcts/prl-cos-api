@@ -3,6 +3,27 @@ server:
 
 runs-locally: ${RUNS_LOCALLY:true}
 
+env: ${test_environment:local}
+TEST_URL: https://localhost:4044
+
+case:
+  orchestration:
+    service:
+      base:
+        uri: '#{environment["TEST_URL"].replaceFirst("https://", "http://")}'
+    prepopulate:
+      uri: ${case.orchestration.service.base.uri}/getSolicitorAndFeeDetails
+    documentgenerate:
+      uri: ${case.orchestration.service.base.uri}/generate-save-draft-document
+
+prl:
+  system-update:
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
+  document:
+    generate:
+      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
+
 management:
   endpoint:
     health:
@@ -95,7 +116,10 @@ uk:
             RESPONDENT_SOLICITOR: 8d3e5c9b-6fca-4c1c-8b31-40c2b9686251
             RESPONDENT_WITHOUT_SOLICITOR: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
             CASE_INVITE: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
-
+            DA_SOLICITOR: d65830b7-eb13-46c3-b772-03976a67210d
+            DA_LOCALCOURT: 9d6b311a-a764-45a7-9dd9-cd1d06408214
+            EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
+            SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -142,14 +166,24 @@ idam:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
+    baseUrl: https://idam-api.aat.platform.hmcts.net
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
     secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
-
-prl:
+    clientId: xuiwebapp
+    authorize:
+      context-path: /oauth2/authorize
+    token:
+      context-path: /oauth2/token
+  user:
+    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
+  solicitor:
+    username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
+    password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
 
+test-url: ${TEST_URL:http://localhost:4044}
 
 security:
   oauth2:
@@ -195,7 +229,11 @@ courtfinder:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
 launchdarkly:
-  sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
+  sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
+
+rd_professional:
+  api:
+    url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}
 
 rd_professional:
   api:
@@ -256,6 +294,14 @@ document:
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
       prl_c47a_draft_filename: C47ACreateOrderDraft.pdf
+      prl_fl402_draft_template: PRL-FL402-Notice-Of-Proceedings-Draft.docx
+      prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
+      prl_fl402_final_template: PRL-FL402-Notice-Of-Proceedings-Final.docx
+      prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
+      prl_fl404b_final_template: PRL-ORDER-FL404b-FINAL-COMMON.docx
+      prl_fl404b_final_filename: amended_dischared_or_varied_order_fl404b_final.pdf
+      prl_fl404b_draft_template: PRL-ORDER-FL404b-DRAFT-COMMON.docx
+      prl_fl404b_draft_filename: amended_dischared_or_varied_order_fl404b_draft.pdf
       prl_n117_draft_template: PRL-ORDERS-N117-DRAFT.docx
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-ORDERS-N117-FINAL.docx
