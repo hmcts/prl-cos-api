@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
@@ -88,6 +89,8 @@ public class CallbackController {
     private final ServePartiesService servePartiesService;
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
+
+    private final ConfidentialityTabService confidentialityTabService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -160,6 +163,31 @@ public class CallbackController {
                 .build();
         }
         return caseData;
+    }
+
+    @PostMapping(path = "/generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to Generate document after submit application")
+    public AboutToStartOrSubmitCallbackResponse generateDocumentSubmitApplication(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        caseData = caseData.toBuilder().applicantsConfidentialDetails(confidentialityTabService
+                .getConfidentialApplicantDetails(caseData.getApplicants().stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList())))
+            .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(caseData.getChildren()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList()))).build();
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        Map<String,Object> map = documentGenService.generateDocuments(authorisation, caseData);
+
+        caseDataUpdated.putAll(map);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/update-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

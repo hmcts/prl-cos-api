@@ -496,7 +496,6 @@ pitest {
     'uk.gov.hmcts.reform.prl.models.*',
     'uk.gov.hmcts.reform.prl.enums.*',
     'uk.gov.hmcts.reform.prl.Application.*',
-    'uk.gov.hmcts.reform.prl.utils.SslVerificationDisabler.*',
     'uk.gov.hmcts.reform.prl.utils.ElementUtils.*',
   ]
   threads = 10
@@ -531,7 +530,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/models/**/*',
   '**uk/gov/hmcts/reform/prl/enums/**/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
-  '**uk/gov/hmcts/reform/prl/utils/SslVerificationDisabler.*',
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/utils/ElementUtils.java',
   '**src/main/java/uk/gov/hmcts/reform/prl/enums/manageorders/*',
