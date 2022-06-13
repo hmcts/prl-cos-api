@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -77,6 +78,9 @@ public class ResubmitApplicationController {
 
     @Autowired
     AllTabServiceImpl allTabService;
+
+    @Autowired
+    private ConfidentialityTabService confidentialityTabService;
 
     @PostMapping(path = "/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to change the state and document generation and submit application. ")
@@ -134,6 +138,7 @@ public class ResubmitApplicationController {
             }
             // All docs will be regenerated in both issue and submitted state jira FPET-21
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+            caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
             // remove the tick from submit screens so not present if resubmitted again
             caseDataUpdated.put("confidentialityDisclaimerSubmit", Collections.singletonMap("confidentialityChecksChecked", null));
