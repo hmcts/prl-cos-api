@@ -25,7 +25,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequiredArgsConstructor
 public class CaseCreationController {
 
-    private static final String serviceAuth = "ServiceAuthorization";
+    private static final String SERVICE_AUTH = "ServiceAuthorization";
 
     private final CaseCreationService caseCreationService;
     private final AuthorisationService authorisationService;
@@ -37,10 +37,10 @@ public class CaseCreationController {
         @ApiResponse(code = 400, message = "Bad Request")})
     public Map<String, String> createCase(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestHeader(serviceAuth) String serviceAuthorization,
+        @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @RequestBody CaseData inputData
     ) {
-        if (authorisationService.authorise(serviceAuthorization)) {
+        if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
             CaseDetails caseDetails = caseCreationService.createCourtNavCase(
                 authorisation,
                 inputData,

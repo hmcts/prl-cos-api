@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
@@ -27,9 +26,6 @@ public class CaseCreationServiceTest {
     private final String s2sToken = "s2s token";
     private final String randomUserId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
 
-
-    @Mock
-    private AuthTokenGenerator authTokenGenerator;
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
 
