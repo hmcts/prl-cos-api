@@ -42,7 +42,7 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
     private boolean validateChildrensDetails(CaseData caseData) {
         Optional<List<Element<Child>>> childrenWrapped = ofNullable(caseData.getChildren());
 
-        if (childrenWrapped.isEmpty() && !childrenWrapped.get().isEmpty()) {
+        if (childrenWrapped.isPresent() && !childrenWrapped.get().isEmpty()) {
             List<Child> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
