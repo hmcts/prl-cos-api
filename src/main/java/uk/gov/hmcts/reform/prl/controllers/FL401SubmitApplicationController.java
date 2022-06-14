@@ -150,7 +150,7 @@ public class FL401SubmitApplicationController {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         caseDataUpdated.put(
             DATE_AND_TIME_SUBMITTED_FIELD,
-            DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
+            DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(zonedDateTime)
         );
         caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
 

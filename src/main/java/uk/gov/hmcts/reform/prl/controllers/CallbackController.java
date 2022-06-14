@@ -174,7 +174,7 @@ public class CallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(
             DATE_AND_TIME_SUBMITTED_FIELD,
-            DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("Europe/London")))
+            DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("Europe/London")))
         );
 
         Map<String,Object> map = documentGenService.generateDocuments(authorisation, caseData);
