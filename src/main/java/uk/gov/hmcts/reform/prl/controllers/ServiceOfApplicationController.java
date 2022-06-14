@@ -75,7 +75,6 @@ public class ServiceOfApplicationController {
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         updatedCaseData.put("respondentCaseInvites", caseData.getRespondentCaseInvites());
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
-        log.info("**** all tabs service **** {}", allTabsFields);
         updatedCaseData.putAll(allTabsFields);
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
