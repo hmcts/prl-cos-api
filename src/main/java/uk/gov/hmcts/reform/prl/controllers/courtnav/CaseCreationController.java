@@ -40,10 +40,15 @@ public class CaseCreationController {
         @RequestHeader(serviceAuth) String serviceAuthorization,
         @RequestBody CaseData inputData
     ) {
-        if(authorisationService.authorise(serviceAuthorization)){
-
+        if (authorisationService.authorise(serviceAuthorization)) {
+            CaseDetails caseDetails = caseCreationService.createCourtNavCase(
+                authorisation,
+                inputData,
+                serviceAuthorization
+            );
+            return Map.of("status", "case created successfully", "id", String.valueOf(caseDetails.getId()));
+        } else {
+            return Map.of("status", "Failure");
         }
-        CaseDetails caseDetails = caseCreationService.createCourtNavCase(authorisation, inputData, serviceAuthorization);
-        return  Map.of("status","case created successfully","id",String.valueOf(caseDetails.getId()));
     }
 }
