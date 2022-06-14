@@ -299,7 +299,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
 
   compile group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '2.2.0'
-  compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '5.7.1'
+  compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '5.9.0'
   compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   compile group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   compile group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.6'
