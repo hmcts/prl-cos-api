@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,49 +37,33 @@ public class ManageOrders {
     private final String orderDirections;
     private final String furtherDirectionsIfRequired;
 
-    @JsonProperty("manageOrdersCourtName")
+    //N117
     private final String manageOrdersCourtName;
     @JsonProperty("manageOrdersCourtAddress")
     private final Address manageOrdersCourtAddress;
-    @JsonProperty("manageOrdersCaseNo")
     private final String manageOrdersCaseNo;
-    @JsonProperty("manageOrdersApplicant")
     private final String manageOrdersApplicant;
-    @JsonProperty("manageOrdersApplicantReference")
     private final String manageOrdersApplicantReference;
-    @JsonProperty("manageOrdersRespondent")
     private final String manageOrdersRespondent;
-    @JsonProperty("manageOrdersRespondentReference")
     private final String manageOrdersRespondentReference;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    @JsonProperty("manageOrdersRespondentDob")
     private final LocalDate manageOrdersRespondentDob;
     @JsonProperty("manageOrdersRespondentAddress")
     private final Address manageOrdersRespondentAddress;
-    @JsonProperty("manageOrdersUnderTakingRepr")
     private final YesOrNo manageOrdersUnderTakingRepr;
-    @JsonProperty("underTakingSolicitorCounsel")
     private final UnderTakingEnum underTakingSolicitorCounsel;
-    @JsonProperty("manageOrdersUnderTakingPerson")
     private final String manageOrdersUnderTakingPerson;
     @JsonProperty("manageOrdersUnderTakingAddress")
     private final Address manageOrdersUnderTakingAddress;
-    @JsonProperty("manageOrdersUnderTakingTerms")
     private final String manageOrdersUnderTakingTerms;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    @JsonProperty("manageOrdersDateOfUnderTaking")
     private final LocalDate manageOrdersDateOfUnderTaking;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    @JsonProperty("underTakingDateExpiry")
     private final LocalDate underTakingDateExpiry;
-    @JsonProperty("underTakingExpiryTime")
     private final String underTakingExpiryTime;
-    @JsonProperty("underTakingFormSign")
     private final YesOrNo underTakingFormSign;
 
-    @JsonProperty("isTheOrderByConsent")
     private final YesOrNo isTheOrderByConsent;
-    @JsonProperty("judgeOrMagistrateTitle")
     private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
 
 
@@ -111,4 +97,22 @@ public class ManageOrders {
     private final List<ChildSelectorEnum> childSelectorOption14;
     @JsonProperty("childSelectorOption15")
     private final List<ChildSelectorEnum> childSelectorOption15;
+
+    //FL402
+    private final String manageOrdersFl402CourtName;
+    @JsonIgnore
+    private final Address manageOrdersFl402CourtAddress;
+    private final String manageOrdersFl402CaseNo;
+    private final String manageOrdersFl402Applicant;
+    private final String manageOrdersFl402ApplicantRef;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate manageOrdersDateOfhearing;
+    private final String dateOfHearingTime;
+    private final String dateOfHearingTimeEstimate;
+    private final String fl402HearingCourtname;
+    @JsonIgnore
+    private final Address fl402HearingCourtAddress;
+
+    @JsonProperty("fl404bCustomFields")
+    private final FL404b fl404bCustomFields;
 }

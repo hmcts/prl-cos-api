@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -96,6 +97,30 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c47a_filename}")
     protected String c47aFile;
 
+    @Value("${document.templates.common.prl_fl402_draft_template}")
+    protected String fl402DraftTemplate;
+
+    @Value("${document.templates.common.prl_fl402_draft_filename}")
+    protected String fl402DraftFile;
+
+    @Value("${document.templates.common.prl_fl402_final_template}")
+    protected String fl402FinalTemplate;
+
+    @Value("${document.templates.common.prl_fl402_final_filename}")
+    protected String fl402FinalFile;
+
+    @Value("${document.templates.common.prl_fl404b_draft_template}")
+    protected String fl404bDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl404b_draft_filename}")
+    protected String fl404bDraftFile;
+
+    @Value("${document.templates.common.prl_fl404b_final_template}")
+    protected String fl404bTemplate;
+
+    @Value("${document.templates.common.prl_fl404b_final_filename}")
+    protected String fl404bFile;
+
     @Value("${document.templates.common.prl_n117_draft_template}")
     protected String n117DraftTemplate;
 
@@ -138,6 +163,10 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
                 break;
+            case standardDirectionsOrder:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE,"");
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, "");
+                break;
             case blankOrderOrDirectionsWithdraw:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
@@ -161,6 +190,18 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c47aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
+                break;
+            case amendDischargedVaried:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404bDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404bDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404bTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404bFile);
+                break;
+            case noticeOfProceedings:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, fl402DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, fl402DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl402FinalTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl402FinalFile);
                 break;
             case generalForm:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE,n117DraftTemplate);
@@ -272,7 +313,6 @@ public class ManageOrderService {
                 .dateCreated(dateTime.now())
                 .build();
         }
-
     }
 
     private String getAllRecipients(CaseData caseData) {
@@ -323,10 +363,9 @@ public class ManageOrderService {
             return String.join("\n", respondentSolicitorNames);
         } else {
             PartyDetails respondentFl401 = caseData.getRespondentsFL401();
-            String respondentSolicitorName = respondentFl401.getRepresentativeFirstName()
+            return respondentFl401.getRepresentativeFirstName()
                 + " "
                 + respondentFl401.getRepresentativeLastName();
-            return  respondentSolicitorName;
         }
     }
 
@@ -394,6 +433,39 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
+    public CaseData populateCustomOrderFields(CaseData caseData) {
+        CreateSelectOrderOptionsEnum order = caseData.getCreateSelectOrderOptions();
+
+        switch (order) {
+            case amendDischargedVaried:
+            case blank:
+                return getFl404bFields(caseData);
+            default:
+                return caseData;
+        }
+    }
+
+    private CaseData getFl404bFields(CaseData caseData) {
+        FL404b orderData = FL404b.builder()
+            .fl404bCaseNumber(String.valueOf(caseData.getId()))
+            .fl404bCourtName(caseData.getCourtName())
+            .fl404bApplicantName(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
+                                               caseData.getApplicantsFL401().getLastName()))
+            .fl404bRespondentName(String.format("%s %s", caseData.getRespondentsFL401().getFirstName(),
+                                                caseData.getRespondentsFL401().getLastName()))
+            .build();
+
+        if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+            orderData = orderData.toBuilder().fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+        }
+        if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+            orderData = orderData.toBuilder().fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+        }
+        return caseData.toBuilder().manageOrders(ManageOrders.builder()
+                                                     .fl404bCustomFields(orderData).build()).build();
+
+    }
+
     public ManageOrders getN117FormData(CaseData caseData) {
 
         ManageOrders orderData = ManageOrders.builder()
@@ -416,5 +488,15 @@ public class ManageOrderService {
         return orderData;
     }
 
+    public ManageOrders getFL402FormData(CaseData caseData) {
 
+        return ManageOrders.builder()
+            .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
+            .manageOrdersFl402CourtName(caseData.getCourtName())
+            .manageOrdersFl402Applicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
+                                                 caseData.getApplicantsFL401().getLastName()))
+            .manageOrdersFl402ApplicantRef(String.format("%s %s", caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                                                          caseData.getApplicantsFL401().getRepresentativeLastName()))
+            .build();
+    }
 }
