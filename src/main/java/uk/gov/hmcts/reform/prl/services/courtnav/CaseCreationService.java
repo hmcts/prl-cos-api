@@ -13,8 +13,6 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.Map;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
