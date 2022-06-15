@@ -152,7 +152,7 @@ public class ManageOrdersController {
     ) {
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        manageOrderEmailService.sendEmail(caseDetails);
+        manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -169,6 +169,8 @@ public class ManageOrdersController {
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("orderCollection", manageOrderService
+            .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
