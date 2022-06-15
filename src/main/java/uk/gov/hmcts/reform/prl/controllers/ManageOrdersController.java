@@ -84,7 +84,6 @@ public class ManageOrdersController {
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             log.info("Enter if loop to... with case data{}",caseData.getDateOrderMade());
             caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
-            log.info("updated case data{}==== with doc link ==={}",caseDataUpdated, caseData.getPreviewOrderDoc());
         } else {
             log.info("ENtering into else... {}", caseData.getAppointmentOfGuardian());
             caseDataUpdated.put("previewOrderDoc",caseData.getAppointmentOfGuardian());
