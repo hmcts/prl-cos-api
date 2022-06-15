@@ -500,7 +500,6 @@ pitest {
     'uk.gov.hmcts.reform.prl.models.*',
     'uk.gov.hmcts.reform.prl.enums.*',
     'uk.gov.hmcts.reform.prl.Application.*',
-    'uk.gov.hmcts.reform.prl.utils.SslVerificationDisabler.*',
     'uk.gov.hmcts.reform.prl.utils.ElementUtils.*',
   ]
   threads = 10
@@ -536,15 +535,10 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/exception/*',
   '**uk/gov/hmcts/reform/prl/enums/**/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
-  '**uk/gov/hmcts/reform/prl/utils/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/utils/ElementUtils.java',
   '**uk/gov/hmcts/reform/prl/services/validators/EventsChecker.java',
-  '**uk/gov/hmcts/reform/prl/services/pin/*',
-  '**uk/gov/hmcts/reform/prl/controllers/ServeCaseController.java',
-  '**uk/gov/hmcts/reform/prl/controllers/ManageOrders.java',
-  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java'
-
+  '**uk/gov/hmcts/reform/prl/services/pin/*'
 ]
 
 sonarqube {
