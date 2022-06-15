@@ -271,7 +271,6 @@ document:
       prl_fl404b_draft_template: PRL-ORDER-FL404b-DRAFT-COMMON.docx
       prl_fl404b_draft_filename: amended_dischared_or_varied_order_fl404b_draft.pdf
 
-
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
