@@ -1047,7 +1047,6 @@ public class CallbackControllerTest {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Map<String, Object> caseDetailsUpdatedwithName = new HashMap<>();
         caseDetailsUpdatedwithName.put("applicantName","test1 test22");
-        caseDetailsUpdatedwithName.put("childName","Test Name");
 
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
         when(searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated)).thenReturn(caseDetailsUpdatedwithName);
@@ -1059,7 +1058,6 @@ public class CallbackControllerTest {
             callbackRequest);
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
         assertEquals("test1 test22", caseDetailsRespnse.get("applicantName"));
-        assertEquals("Test Name", caseDetailsRespnse.get("childName"));
     }
 
     @Test
