@@ -149,7 +149,7 @@ public class ManageOrderService {
     }
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
-        return CaseData.builder().childrenList(getChildInfoFromCaseData(caseData))
+        return caseData.toBuilder().childrenList(getChildInfoFromCaseData(caseData))
             .manageOrders(ManageOrders.builder().childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
