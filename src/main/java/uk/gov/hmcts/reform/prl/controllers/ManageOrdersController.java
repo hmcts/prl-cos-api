@@ -40,6 +40,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.reflections.Reflections.log;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 
 @Slf4j
@@ -79,9 +80,12 @@ public class ManageOrdersController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("Enter the getcasedata to... with order type{}",caseData.getCreateSelectOrderOptions());
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+            log.info("Enter if loop to... with case data{}",caseData.getDateOrderMade());
             caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
         } else {
+            log.info("ENtering into else... {}", caseData.getAppointmentOfGuardian());
             caseDataUpdated.put("previewOrderDoc",caseData.getAppointmentOfGuardian());
         }
 
@@ -89,7 +93,7 @@ public class ManageOrdersController {
 
     }
 
-    @PostMapping(path = "/fetch-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to fetch case data and custom order fields")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Child details are fetched"),
