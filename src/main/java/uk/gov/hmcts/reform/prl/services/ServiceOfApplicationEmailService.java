@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -57,21 +58,22 @@ public class ServiceOfApplicationEmailService {
                 LanguagePreference.english
             );
         }
-        Map<String, String> respondentSolicitors = caseData
+        Map<String, List<String>> respondentSolicitors = caseData
             .getRespondents()
             .stream()
             .map(Element::getValue)
             .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
             .collect(Collectors.toMap(
                 PartyDetails::getSolicitorEmail,
-                i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
+                i -> List.of(i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
+                             i.getFirstName() + " " + i.getLastName())
             ));
 
-        for (Map.Entry<String, String> resSols : respondentSolicitors.entrySet()) {
+        for (Map.Entry<String, List<String>> resSols : respondentSolicitors.entrySet()) {
             emailService.send(
                 resSols.getKey(),
                 EmailTemplateNames.RESPONDENT_SOLICITOR,
-                buildRespondentSolicitorEmail(caseDetails, resSols.getValue()),
+                buildRespondentSolicitorEmail(caseDetails, resSols.getValue().get(0),resSols.getValue().get(1)),
                 LanguagePreference.english
             );
         }
@@ -97,7 +99,7 @@ public class ServiceOfApplicationEmailService {
             emailService.send(
                 respondent.getSolicitorEmail(),
                 EmailTemplateNames.RESPONDENT_SOLICITOR,
-                buildRespondentSolicitorEmail(caseDetails, respondentSolicitorName),
+                buildRespondentSolicitorEmail(caseDetails, respondentSolicitorName, respondent.getFirstName() + " " + respondent.getLastName()),
                 LanguagePreference.english
             );
         }
@@ -119,7 +121,7 @@ public class ServiceOfApplicationEmailService {
             .build();
     }
 
-    private EmailTemplateVars buildRespondentSolicitorEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
+    private EmailTemplateVars buildRespondentSolicitorEmail(CaseDetails caseDetails, String solicitorName, String respondentName) throws Exception {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         Map<String, Object> privacy = new HashMap<>();
@@ -131,6 +133,7 @@ public class ServiceOfApplicationEmailService {
             .solicitorName(solicitorName)
             .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .privacyNoticeLink(privacy)
+            .respondentName(respondentName)
             .issueDate(caseData.getIssueDate())
             .build();
     }
