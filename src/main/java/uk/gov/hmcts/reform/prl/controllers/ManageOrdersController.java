@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -38,6 +39,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 
 @RestController
 @RequiredArgsConstructor
@@ -57,6 +59,9 @@ public class ManageOrdersController {
 
     @Autowired
     private ManageOrderEmailService manageOrderEmailService;
+
+    @Autowired
+    private AmendOrderService amendOrderService;
 
     @Value("${document.templates.common.C43A_draft_template}")
     protected String c43ADraftTemplate;
@@ -149,8 +154,7 @@ public class ManageOrdersController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/save-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Save order details")
+    @PostMapping(path = "/manage-orders/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
@@ -163,8 +167,14 @@ public class ManageOrdersController {
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("orderCollection", manageOrderService
-            .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
+
+        if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+            caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+        } else {
+            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
+        }
+
+
         caseDataUpdated.remove("previewOrderDoc");
         caseDataUpdated.remove("dateOrderMade");
         caseDataUpdated.remove("createSelectOrderOptions");
@@ -187,4 +197,22 @@ public class ManageOrdersController {
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+
+    @PostMapping(path = "/amend-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to show preview order for special guardianship create order")
+    public AboutToStartOrSubmitCallbackResponse populateOrderToAmendDownloadLink(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+            caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
+        }
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+
 }
