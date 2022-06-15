@@ -71,7 +71,6 @@ public class SearchCasesDataServiceTest {
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
         searchCasesDataService.updateApplicantAndChildNames(objectMapper,caseDataUpdated);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
-        assertEquals("Test Name", caseDataUpdated.get("childName"));
 
 
     }
@@ -90,7 +89,6 @@ public class SearchCasesDataServiceTest {
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
         searchCasesDataService.updateApplicantAndChildNames(objectMapper,caseDataUpdated);
         assertNull(caseDataUpdated.get("applicantName"));
-        assertNull(caseDataUpdated.get("childName"));
     }
 
     @Test

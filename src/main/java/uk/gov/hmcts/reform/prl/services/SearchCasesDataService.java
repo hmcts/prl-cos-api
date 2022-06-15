@@ -7,11 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -59,17 +57,7 @@ public class SearchCasesDataService {
                 }
 
             }
-            Optional<List<Element<Child>>> childrenWrapped = ofNullable(caseData.getChildren());
-            if (!childrenWrapped.isEmpty() && !childrenWrapped.get().isEmpty()) {
-                List<Child> children = childrenWrapped.get().stream().map(Element::getValue).collect(Collectors.toList());
-                children.sort(Comparator.comparing(Child::getDateOfBirth, Comparator.nullsLast(Comparator.naturalOrder())));
-                Child child = children.get(0);
-                log.info("adding child name for  for C100");
-                if (Objects.nonNull(child)) {
-                    caseDetails.put("childName", child.getFirstName() + " " + child.getLastName());
-                }
 
-            }
         }
 
         return caseDetails;
