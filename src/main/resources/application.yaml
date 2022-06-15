@@ -88,6 +88,7 @@ uk:
             WITHDRAW_AFTER_ISSUED_SOLICITOR: ba39a8e6-c553-457e-b526-3c241cd207f6
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
+            CAFCASS_OTHER: b77818d7-7756-4d83-8ecd-e2b54f512cf2
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -177,7 +178,7 @@ send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
 
 case_document_am:
-  url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
+  url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
 
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
@@ -241,6 +242,17 @@ document:
       prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
       prl_c43_draft_filename: ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
       prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
+      prl_c47a_filename: C47ACreateOrder.pdf
+      prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
+      prl_c47a_draft_filename: C47ACreateOrderDraft.pdf
+      prl_c49_draft_template: PRL-ORDER-C49-DRAFT-COMMON.docx
+      prl_c49_draft_filename: C49ADraftCreateOrder.pdf
+      prl_c49_template: PRL-ORDER-C49-COMMON.docx
+      prl_c49_filename: C49FinalCreateOrder.pdf
+      prl_c45a_template: PRL-ORDERS-C45A-FINAL.docx
+      prl_c45a_filename: C45ACreateOrder.pdf
+      prl_c45a_draft_template: PRL-ORDERS-C45A-DRAFT.docx
+      prl_c45a_draft_filename: C45ACreateOrderDraft.pdf
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
       prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
