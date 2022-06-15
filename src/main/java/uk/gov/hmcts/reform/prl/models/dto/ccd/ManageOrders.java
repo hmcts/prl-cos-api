@@ -35,8 +35,11 @@ public class ManageOrders {
     private final List<Element<String>> otherEmailAddress;
     @JsonProperty("isCaseWithdrawn")
     private final YesOrNo isCaseWithdrawn;
+    @JsonProperty("recitalsOrPreamble")
     private final String recitalsOrPreamble;
+    @JsonProperty("orderDirections")
     private final String orderDirections;
+    @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
 
     //N117
