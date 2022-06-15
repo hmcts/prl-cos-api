@@ -63,7 +63,6 @@ public class ManageOrdersController {
     @Autowired
     private AmendOrderService amendOrderService;
 
-
     @Value("${document.templates.common.C43A_draft_template}")
     protected String c43ADraftTemplate;
 
@@ -88,19 +87,20 @@ public class ManageOrdersController {
 
     }
 
-    @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to fetch child details ")
+    @PostMapping(path = "/fetch-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to fetch case data and custom order fields")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Child details are fetched"),
         @ApiResponse(code = 400, message = "Bad Request")})
-    public CallbackResponse fetchChildDetails(
+    public CallbackResponse fetchOrderDetails(
         @RequestBody CallbackRequest callbackRequest
     ) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        CaseData caseDataInput = manageOrderService.getUpdatedCaseData(caseData);
+        caseData = manageOrderService.getUpdatedCaseData(caseData);
+        caseData = manageOrderService.populateCustomOrderFields(caseData);
         String childOption = null;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             childOption = IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
@@ -114,11 +114,11 @@ public class ManageOrdersController {
                     .collect(joining());
             }
         }
-        caseDataInput = caseDataInput.toBuilder()
+        caseData = caseData.toBuilder()
             .childOption(childOption)
             .build();
         return CallbackResponse.builder()
-            .data(caseDataInput)
+            .data(caseData)
             .build();
     }
 
