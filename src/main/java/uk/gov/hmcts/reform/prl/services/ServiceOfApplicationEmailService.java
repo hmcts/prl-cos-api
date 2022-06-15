@@ -58,22 +58,26 @@ public class ServiceOfApplicationEmailService {
                 LanguagePreference.english
             );
         }
-        Map<String, List<String>> respondentSolicitors = caseData
+        List<Map<String,List<String>>> respondentSolicitors = caseData
             .getRespondents()
             .stream()
             .map(Element::getValue)
             .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
-            .collect(Collectors.toMap(
-                PartyDetails::getSolicitorEmail,
-                i -> List.of(i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
-                             i.getFirstName() + " " + i.getLastName())
-            ));
+            .map(i -> {
+                Map<String, List<String>> temp = new HashMap<>();
+                temp.put(i.getSolicitorEmail(),List.of(i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
+                                                              i.getFirstName() + " " + i.getLastName()));
+                return temp;
+            })
+            .collect(Collectors.toList());
 
-        for (Map.Entry<String, List<String>> resSols : respondentSolicitors.entrySet()) {
+        for (Map<String,List<String>> resSols : respondentSolicitors) {
+            String solicitorEmail = resSols.keySet().toArray()[0].toString();
             emailService.send(
-                resSols.getKey(),
+                solicitorEmail,
                 EmailTemplateNames.RESPONDENT_SOLICITOR,
-                buildRespondentSolicitorEmail(caseDetails, resSols.getValue().get(0),resSols.getValue().get(1)),
+                buildRespondentSolicitorEmail(caseDetails, resSols.get(solicitorEmail).get(0),
+                                              resSols.get(solicitorEmail).get(1)),
                 LanguagePreference.english
             );
         }
