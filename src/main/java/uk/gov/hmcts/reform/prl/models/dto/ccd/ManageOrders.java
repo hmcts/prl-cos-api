@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 
 import java.time.LocalDate;
@@ -33,8 +35,11 @@ public class ManageOrders {
     private final List<Element<String>> otherEmailAddress;
     @JsonProperty("isCaseWithdrawn")
     private final YesOrNo isCaseWithdrawn;
+    @JsonProperty("recitalsOrPreamble")
     private final String recitalsOrPreamble;
+    @JsonProperty("orderDirections")
     private final String orderDirections;
+    @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
 
     //N117
@@ -65,6 +70,10 @@ public class ManageOrders {
 
     private final YesOrNo isTheOrderByConsent;
     private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
+
+    private Document manageOrdersDocumentToAmend;
+    private Document manageOrdersAmendedOrder;
+    private DynamicList amendOrderDynamicList;
 
 
     @JsonProperty("childSelectorOption1")
@@ -115,4 +124,5 @@ public class ManageOrders {
 
     @JsonProperty("fl404bCustomFields")
     private final FL404b fl404bCustomFields;
+
 }

@@ -3,27 +3,6 @@ server:
 
 runs-locally: ${RUNS_LOCALLY:true}
 
-env: ${test_environment:local}
-TEST_URL: https://localhost:4044
-
-case:
-  orchestration:
-    service:
-      base:
-        uri: '#{environment["TEST_URL"].replaceFirst("https://", "http://")}'
-    prepopulate:
-      uri: ${case.orchestration.service.base.uri}/getSolicitorAndFeeDetails
-    documentgenerate:
-      uri: ${case.orchestration.service.base.uri}/generate-save-draft-document
-
-prl:
-  system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
-  document:
-    generate:
-      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
-
 management:
   endpoint:
     health:
@@ -40,10 +19,36 @@ spring:
     import: "optional:configtree:/mnt/secrets/"
   application:
     name: Prl cos api
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
+#    username: ${DB_USER_NAME}
+#    password: ${DB_PASSWORD}
+#    properties:
+#      charSet: UTF-8
+#    hikari:
+#      minimumIdle: 2
+#      maximumPoolSize: 10
+#      idleTimeout: 10000
+#      poolName: {to-be-defined}HikariCP
+#      maxLifetime: 7200000
+#      connectionTimeout: 30000
+#  jpa:
+#    properties:
+#      hibernate:
+#        jdbc:
+#          lob:
+#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
+#            non_contextual_creation: true
 
 azure:
   application-insights:
     instrumentation-key: ${APP_INSIGHTS_INSTRUMENTATION_KEY:00000000-0000-0000-0000-000000000000}
+
+prl:
+  system-update:
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
 
 logging:
   level:
@@ -81,8 +86,11 @@ uk:
             WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
             COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
             GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
+            GATEKEEPER_FL401: c078de4d-9177-4e0d-ab9f-5adcf27a6ee5
             DA_SOLICITOR: d65830b7-eb13-46c3-b772-03976a67210d
             DA_LOCALCOURT: 9d6b311a-a764-45a7-9dd9-cd1d06408214
+            WITHDRAW_AFTER_ISSUED_LOCAL_COURT: 233e4bfa-d9ec-42c2-a06a-d8cce9abd238
+            WITHDRAW_AFTER_ISSUED_SOLICITOR: ba39a8e6-c553-457e-b526-3c241cd207f6
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
           welsh:
@@ -95,18 +103,18 @@ notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
 
-payments:
-  api:
-    url: ${PAY_URL:}
-    callback-url: ${PAY_CALLBACK_URL:}
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
-
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
+
+payments:
+  api:
+    url: ${PAY_URL:}
+    callback-url: ${PAY_CALLBACK_URL:}
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
 
 fees-register:
   api:
@@ -145,14 +153,23 @@ idam:
     username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
     password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
   system-update:
-    username: ${IDAM_SOLICITOR_USERNAME:dummysolicitor@test.com}
-    password: ${IDAM_SOLICITOR_PASSWORD:dummy}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
 
-test-url: ${TEST_URL:http://localhost:4044}
 
+security:
+  oauth2:
+    client:
+      provider:
+        oidc:
+          issuer-uri: ${idam.web.url}/o
+      registration:
+        oidc:
+          client-id: internal
+          client-secret: internal
 core_case_data:
   api:
-    url: ${CORE_CASE_DATA_API_URL:http://localhost:4452}
+    url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
 
 auth:
   idam:
@@ -184,7 +201,7 @@ courtfinder:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
 launchdarkly:
-  sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
+  sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
 
 rd_professional:
   api:
