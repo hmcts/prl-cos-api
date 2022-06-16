@@ -230,6 +230,7 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c49DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c49Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c49File);
+                break;
             case amendDischargedVaried:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404bDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404bDraftFile);
