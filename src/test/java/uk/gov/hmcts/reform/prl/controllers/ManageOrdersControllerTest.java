@@ -543,7 +543,6 @@ public class ManageOrdersControllerTest {
             .hashToken("testHashToken")
             .build();
 
-
         caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
