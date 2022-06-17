@@ -121,12 +121,6 @@ notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
 
-payments:
-  api:
-    url: ${PAY_URL:}
-    callback-url: ${PAY_CALLBACK_URL:}
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
-
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
   rpa:
@@ -168,13 +162,6 @@ idam:
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
     secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
 
-
-prl:
-  system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
-
-
 security:
   oauth2:
     client:
@@ -185,10 +172,10 @@ security:
         oidc:
           client-id: internal
           client-secret: internal
+
 core_case_data:
   api:
     url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
-
     clientId: xuiwebapp
     authorize:
       context-path: /oauth2/authorize
@@ -202,13 +189,7 @@ core_case_data:
   system-update:
     username: ${IDAM_SOLICITOR_USERNAME:dummysolicitor@test.com}
     password: ${IDAM_SOLICITOR_PASSWORD:dummy}
-
 test-url: ${TEST_URL:http://localhost:4044}
-
-core_case_data:
-  api:
-    url: ${CORE_CASE_DATA_API_URL:http://localhost:4452}
-
 
 auth:
   idam:
@@ -288,10 +269,6 @@ document:
       C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
       C43A_draft_filename: Special_Guardianship_Order_C43A_Draft.pdf
       C43A_final_template: PRL-ORDER-C43A-FINAL.docx
-      prl_c49_draft_template: PRL-ORDER-C49-DRAFT-COMMON.docx
-      prl_c49_draft_filename: C49ADraftCreateOrder.pdf
-      prl_c49_template: PRL-ORDER-C49-COMMON.docx
-      prl_c49_filename: C49FinalCreateOrder.pdf
       prl_c43_template: PRL-ORDER-C43-FINAL.docx
       prl_c43_filename: ChildArrangements_Specific_Prohibited_Steps_C43.pdf
       prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
@@ -299,10 +276,6 @@ document:
       prl_fl404_filename: occupation_order_FL404_final.pdf
       prl_fl404_draft_template: PRL-ORDERS-FL404-DRAFT.docx
       prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
-      prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
-      prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
-      prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
-      prl_c47a_draft_filename: C47ACreateOrderDraft.pdf
       prl_c43_draft_filename: ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
       prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
@@ -316,10 +289,6 @@ document:
       prl_c45a_filename: C45ACreateOrder.pdf
       prl_c45a_draft_template: PRL-ORDERS-C45A-DRAFT.docx
       prl_c45a_draft_filename: C45ACreateOrderDraft.pdf
-      prl_fl404b_final_template: PRL-ORDER-FL404b-FINAL-COMMON.docx
-      prl_fl404b_final_filename: amended_dischared_or_varied_order_fl404b_final.pdf
-      prl_fl404b_draft_template: PRL-ORDER-FL404b-DRAFT-COMMON.docx
-      prl_fl404b_draft_filename: amended_dischared_or_varied_order_fl404b_draft.pdf
       prl_n117_draft_template: PRL-ORDERS-N117-DRAFT.docx
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-ORDERS-N117-FINAL.docx

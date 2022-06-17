@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
-import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -355,42 +354,6 @@ public class ManageOrderServiceTest {
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
     }
 
-    public void whenFl404bOrder_thenPopulateCustomFields() {
-        CaseData caseData = CaseData.builder()
-            .id(12345674L)
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
-            .courtName("Court name")
-            .applicantsFL401(PartyDetails.builder()
-                                 .firstName("app")
-                                 .lastName("testLast")
-                                 .build())
-            .respondentsFL401(PartyDetails.builder()
-                                  .firstName("resp")
-                                  .lastName("testLast")
-                                  .dateOfBirth(LocalDate.of(1990, 10, 20))
-                                  .address(Address.builder()
-                                               .addressLine1("add1")
-                                               .postCode("n145kk")
-                                               .build())
-                                  .build())
-            .build();
-
-        FL404b expectedDetails = FL404b.builder()
-            .fl404bApplicantName("app testLast")
-            .fl404bCaseNumber("12345674")
-            .fl404bCourtName("Court name")
-            .fl404bRespondentName("resp testLast")
-            .fl404bRespondentAddress(Address.builder()
-                                         .addressLine1("add1")
-                                         .postCode("n145kk")
-                                         .build())
-            .fl404bRespondentDob(LocalDate.of(1990, 10, 20))
-            .build();
-
-        CaseData updatedCaseData = manageOrderService.populateCustomOrderFields(caseData);
-
-        assertEquals(updatedCaseData.getManageOrders().getFl404bCustomFields(), expectedDetails);
-    }
 
     @Test
     public void testPupulateHeaderC100Test() {
