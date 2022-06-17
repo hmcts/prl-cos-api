@@ -1,6 +1,7 @@
-package uk.gov.hmcts.reform.prl.enums;
+package uk.gov.hmcts.reform.prl.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +9,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
+
 
 @Data
 @AllArgsConstructor
@@ -20,4 +22,16 @@ public class OrderDetails {
     private final String orderType;
     private final Document orderDocument;
     private final OtherOrderDetails otherDetails;
+
+
+    @JsonIgnore
+    public String getLabelForDynamicList() {
+
+        return String.format(
+            "%s - %s",
+            this.orderType,
+            this.getOtherDetails().getOrderCreatedDate()
+        );
+    }
+
 }
