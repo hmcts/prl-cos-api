@@ -60,7 +60,7 @@ public class PrlAppsConstants {
 
     public static final String DOCUMENT_FIELD_C1A_WELSH = "c1AWelshDocument";
     public static final String DOCUMENT_FIELD_C8_WELSH = "c8WelshDocument";
-    public static final String  DOCUMENT_FIELD_FINAL_WELSH = "finalWelshDocument";
+    public static final String DOCUMENT_FIELD_FINAL_WELSH = "finalWelshDocument";
 
     public static final String CHILD_ARRANGEMENT_CASE = "CHILD ARRANGEMENT CASE";
     public static final String ISSUE_EVENT_CODE = "001";
@@ -93,6 +93,5 @@ public class PrlAppsConstants {
     public static final String D_MMMM_YYYY = "d MMMM yyyy";
 
     public static final String APPOINTED_GUARDIAN_FULL_NAME = "appointedGuardianFullName";
-
 
 }
