@@ -147,18 +147,6 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c47a_filename}")
     protected String c47aFile;
 
-    @Value("${document.templates.common.prl_c45a_draft_template}")
-    protected String c45aDraftTemplate;
-
-    @Value("${document.templates.common.prl_c45a_draft_filename}")
-    protected String c45aDraftFile;
-
-    @Value("${document.templates.common.prl_c45a_template}")
-    protected String c45aTemplate;
-
-    @Value("${document.templates.common.prl_c45a_filename}")
-    protected String c45aFile;
-
     @Value("${document.templates.common.prl_fl402_draft_template}")
     protected String fl402DraftTemplate;
 
@@ -296,12 +284,6 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, n117DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME,n117Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, n117File);
-                break;
-            case parentalResponsibility:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE, c45aDraftTemplate);
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, c45aDraftFile);
-                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c45aTemplate);
-                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c45aFile);
                 break;
             case amendDischargedVaried:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404bDraftTemplate);
