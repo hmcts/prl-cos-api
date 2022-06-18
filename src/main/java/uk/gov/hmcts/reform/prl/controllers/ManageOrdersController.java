@@ -72,6 +72,7 @@ public class ManageOrdersController {
     @Value("${document.templates.common.C43A_draft_filename}")
     protected String c43ADraftFilename;
 
+
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to show preview order in next screen for upload order")
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
@@ -106,7 +107,9 @@ public class ManageOrdersController {
             CaseData.class
         );
         caseData = manageOrderService.getUpdatedCaseData(caseData);
-        caseData = manageOrderService.populateCustomOrderFields(caseData);
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = manageOrderService.populateCustomOrderFields(caseData);
+        }
         String childOption = null;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             childOption = IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
@@ -181,7 +184,6 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
         }
-
 
         caseDataUpdated.remove("previewOrderDoc");
         caseDataUpdated.remove("dateOrderMade");

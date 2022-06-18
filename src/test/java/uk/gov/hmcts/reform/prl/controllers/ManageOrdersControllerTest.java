@@ -95,6 +95,7 @@ public class ManageOrdersControllerTest {
     @Mock
     private UserDetails userDetails;
 
+
     PartyDetails applicant;
 
     PartyDetails respondent;
