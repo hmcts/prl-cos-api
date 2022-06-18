@@ -10,8 +10,10 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildSelectorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -44,6 +46,53 @@ public class ManageOrders {
     private final String orderDirections;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
+    private final String courtName1;
+    private final Address courtAddress;
+    private final String caseNumber;
+    private final String applicantName1;
+    private final String applicantReference;
+    private final String respondentReference;
+    private final String respondentName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate respondentDateOfBirth;
+    private final Address respondentAddress;
+    private final Address addressTheOrderAppliesTo;
+    private final String courtDeclares;
+    @JsonProperty("courtDeclares2")
+    private final List<ApplicantOccupationEnum> courtDeclares2;
+    private final String homeRights;
+    private final String applicantInstructions;
+    private final String theRespondent;
+    @JsonProperty("theRespondent2")
+    private final List<RespondentOccupationEnum> theRespondent2;
+    private final YesOrNo powerOfArrest1;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate respondentDay1;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate respondentDay2;
+    private String respondentStartTime;
+    private String respondentEndTime;
+    private final YesOrNo powerOfArrest2;
+    private final String whenTheyLeave;
+    private final YesOrNo powerOfArrest3;
+    private final String moreDetails;
+    private final YesOrNo powerOfArrest4;
+    private final String instructionRelating;
+    private final YesOrNo powerOfArrest5;
+    private final YesOrNo powerOfArrest6;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate dateOrderMade1;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate dateOrderEnds;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate datePlaceHearing;
+    private String datePlaceHearingTime;
+    private String dateOrderEndsTime;
+    private final String courtName2;
+    private final Address ukPostcode2;
+    private final String applicantCost;
+    private final String orderNotice;
+    private final String hearingTimeEstimate;
 
     /**
      * C43.

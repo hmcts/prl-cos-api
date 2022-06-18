@@ -496,7 +496,7 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        manageOrderService.getCaseData("test token", caseData, caseDataUpdated);
+        manageOrderService.getCaseData("test token",caseData,caseDataUpdated);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
 
