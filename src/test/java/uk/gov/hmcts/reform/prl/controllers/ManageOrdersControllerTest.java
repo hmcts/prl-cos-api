@@ -45,8 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -584,7 +583,7 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         // assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("createSelectOrderOptions"));
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("createSelectOrderOptions"));
         assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
     }
 
