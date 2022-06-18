@@ -60,7 +60,7 @@ public class PrlAppsConstants {
 
     public static final String DOCUMENT_FIELD_C1A_WELSH = "c1AWelshDocument";
     public static final String DOCUMENT_FIELD_C8_WELSH = "c8WelshDocument";
-    public static final String  DOCUMENT_FIELD_FINAL_WELSH = "finalWelshDocument";
+    public static final String DOCUMENT_FIELD_FINAL_WELSH = "finalWelshDocument";
 
     public static final String CHILD_ARRANGEMENT_CASE = "CHILD ARRANGEMENT CASE";
     public static final String ISSUE_EVENT_CODE = "001";
@@ -77,6 +77,7 @@ public class PrlAppsConstants {
     public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
     public static final String ISSUED_STATE = State.CASE_ISSUE.getValue();
     public static final String GATEKEEPING_STATE = State.GATEKEEPING.getValue();
+
     public static final String C8_HINT = "C8";
     public static final String C1A_HINT = "C1A";
     public static final String FINAL_HINT = "FINAL";
@@ -92,6 +93,5 @@ public class PrlAppsConstants {
     public static final String D_MMMM_YYYY = "d MMMM yyyy";
 
     public static final String APPOINTED_GUARDIAN_FULL_NAME = "appointedGuardianFullName";
-
 
 }
