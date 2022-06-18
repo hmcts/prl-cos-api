@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
@@ -118,6 +119,8 @@ public class ManageOrders {
     @JsonProperty("childSelectorOption15")
     private final List<ChildSelectorEnum> childSelectorOption15;
 
+    @JsonProperty("fl404CustomFields")
+    private final FL404 fl404CustomFields;
     //FL402
     private final String manageOrdersFl402CourtName;
     @JsonIgnore
@@ -135,5 +138,4 @@ public class ManageOrders {
 
     @JsonProperty("fl404bCustomFields")
     private final FL404b fl404bCustomFields;
-
 }
