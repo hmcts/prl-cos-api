@@ -168,6 +168,12 @@ public class ManageOrders {
     @JsonProperty("childSelectorOption15")
     private final List<ChildSelectorEnum> childSelectorOption15;
 
+    /**
+     * C45A.
+     */
+    @JsonProperty("parentName")
+    private String parentName;
+
     @JsonProperty("fl404CustomFields")
     private final FL404 fl404CustomFields;
     //FL402
