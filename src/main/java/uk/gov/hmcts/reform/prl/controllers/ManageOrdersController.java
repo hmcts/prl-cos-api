@@ -95,7 +95,7 @@ public class ManageOrdersController {
 
     }
 
-    @PostMapping(path = "fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to fetch case data and custom order fields")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Child details are fetched"),
@@ -179,6 +179,8 @@ public class ManageOrdersController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
             caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
+        } else {
+            caseDataUpdated.put("isWithdrawRequestSent", "Approved");
         }
         caseDataUpdated.put("orderCollection", manageOrderService
             .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
