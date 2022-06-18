@@ -265,7 +265,11 @@ document:
       prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
-      prl_c47a_draft_filename: C47ACreateOrderDraft.pdf
+      prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
+      prl_c45a_template: PRL-ORDER-C45A-FINAL.docx
+      prl_c45a_filename: Parental_Responsibility_Order_C45A.pdf
+      prl_c45a_draft_template: PRL-ORDER-C45A-DRAFT-FINAL.docx
+      prl_c45a_draft_filename: Parental_Responsibility_Order_C45A_draft.pdf
       prl_c45a_template: PRL-ORDERS-C45A-FINAL.docx
       prl_c45a_filename: C45ACreateOrder.pdf
       prl_c45a_draft_template: PRL-ORDERS-C45A-DRAFT.docx
