@@ -250,6 +250,10 @@ document:
       C43A_draft_filename: Special_Guardianship_Order_C43A_Draft.pdf
       C43A_final_template: PRL-ORDER-C43A-FINAL.docx
       C43A_final_filename: Special_Guardianship_Order_C43A.pdf
+      prl_c49_draft_template: PRL-ORDER-C49-DRAFT-COMMON.docx
+      prl_c49_draft_filename: C49ADraftCreateOrder.pdf
+      prl_c49_template: PRL-ORDER-C49-COMMON.docx
+      prl_c49_filename: C49FinalCreateOrder.pdf
       prl_c43_template: PRL-ORDER-C43-FINAL.docx
       prl_c43_filename: ChildArrangements_Specific_Prohibited_Steps_C43.pdf
       prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
@@ -258,6 +262,10 @@ document:
       prl_fl404_draft_template: PRL-ORDERS-FL404-DRAFT.docx
       prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
       prl_c43_draft_filename: ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
+      prl_fl404_template: PRL-ORDERS-FL404-FINAL.docx
+      prl_fl404_filename: occupation_order_FL404_final.pdf
+      prl_fl404_draft_template: PRL-ORDERS-FL404-DRAFT.docx
+      prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
       prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
@@ -274,7 +282,10 @@ document:
       prl_fl404b_final_filename: amended_dischared_or_varied_order_fl404b_final.pdf
       prl_fl404b_draft_template: PRL-ORDER-FL404b-DRAFT-COMMON.docx
       prl_fl404b_draft_filename: amended_dischared_or_varied_order_fl404b_draft.pdf
-
+      prl_fl404a_final_template: PRL-ORDERS-FL404A-NM-FINAL.docx
+      prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
+      prl_fl404a_draft_template: PRL-ORDERS-FL404A-NM-DRAFT.docx
+      prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}

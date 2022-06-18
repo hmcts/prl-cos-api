@@ -514,14 +514,6 @@ public class CaseData implements MappableObject {
     /**
      *  Manage Orders.
      */
-    //upload orders flow
-
-    /*
-    private DomesticAbuseOrdersEnum domesticAbuseOrders;
-    private FcOrdersEnum fcOrders;
-    private OtherOrdersOptionEnum otherOrdersOption;
-    private String nameOfOrder;
-    private YesOrNo isTheOrderUploadedByConsent;*/
 
     private final List<Element<OrderDetails>> orderCollection;
 
@@ -531,8 +523,8 @@ public class CaseData implements MappableObject {
 
     private final ManageOrdersOptionsEnum manageOrdersOptions;
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
-
     private final List<OrderRecipientsEnum> orderRecipients;
+
 
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo wasTheOrderApprovedAtHearing;
@@ -561,6 +553,7 @@ public class CaseData implements MappableObject {
     private String caseSolicitorName;
     private String caseSolicitorOrgName;
     private String selectedOrder;
+
 
     /**
      * FL401 Court details for Pilot.
