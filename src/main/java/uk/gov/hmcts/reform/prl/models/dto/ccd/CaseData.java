@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.OrderDetails;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
@@ -35,11 +34,13 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
@@ -55,6 +56,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
+import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -512,14 +514,6 @@ public class CaseData implements MappableObject {
     /**
      *  Manage Orders.
      */
-    //upload orders flow
-
-    /*
-    private DomesticAbuseOrdersEnum domesticAbuseOrders;
-    private FcOrdersEnum fcOrders;
-    private OtherOrdersOptionEnum otherOrdersOption;
-    private String nameOfOrder;
-    private YesOrNo isTheOrderUploadedByConsent;*/
 
     private final List<Element<OrderDetails>> orderCollection;
 
@@ -529,11 +523,12 @@ public class CaseData implements MappableObject {
 
     private final ManageOrdersOptionsEnum manageOrdersOptions;
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
-
     private final List<OrderRecipientsEnum> orderRecipients;
+
 
     private final YesOrNo doesOrderClosesCase;
     private final YesOrNo wasTheOrderApprovedAtHearing;
+    private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -544,20 +539,21 @@ public class CaseData implements MappableObject {
 
     @JsonProperty("childrenList")
     private final String childrenList;
+    @JsonProperty("magistrateLastName")
+    private final List<Element<MagistrateLastName>> magistrateLastName;
 
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
 
     @JsonUnwrapped
     @Builder.Default
     private final ManageOrders manageOrders = ManageOrders.builder().build();
-
-
     /**
      * Solicitor Details.
      */
     private String caseSolicitorName;
     private String caseSolicitorOrgName;
     private String selectedOrder;
+
 
     /**
      * FL401 Court details for Pilot.
