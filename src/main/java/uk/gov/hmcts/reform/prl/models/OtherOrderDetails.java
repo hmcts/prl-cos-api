@@ -1,11 +1,9 @@
-package uk.gov.hmcts.reform.prl.enums;
+package uk.gov.hmcts.reform.prl.models;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -15,7 +13,7 @@ public class OtherOrderDetails {
 
     private final String createdBy;
     private final String orderCreatedDate;
-    private final LocalDateTime orderAmendedDate;
+    private final String orderAmendedDate;
     private final String orderMadeDate;
     private final String orderRecipients;
 }
