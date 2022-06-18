@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
@@ -176,6 +177,9 @@ public class ManageOrdersController {
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
+            caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
+        }
         caseDataUpdated.put("orderCollection", manageOrderService
             .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
 
