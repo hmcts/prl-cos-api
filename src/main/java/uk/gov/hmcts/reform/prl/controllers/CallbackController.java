@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -43,6 +44,9 @@ import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkf
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,6 +55,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -74,6 +79,7 @@ public class CallbackController {
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
 
+    private final SearchCasesDataService searchCasesDataService;
     private final ConfidentialityTabService confidentialityTabService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -166,6 +172,10 @@ public class CallbackController {
                 .map(Element::getValue)
                 .collect(Collectors.toList()))).build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(
+            DATE_AND_TIME_SUBMITTED_FIELD,
+            DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("Europe/London")))
+        );
 
         Map<String,Object> map = documentGenService.generateDocuments(authorisation, caseData);
 
@@ -282,6 +292,23 @@ public class CallbackController {
         requireNonNull(caseData);
         sendgridService.sendEmail(c100JsonMapper.map(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/update-applicant-child-names", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Resend case data json to RPA")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse updateApplicantAndChildNames(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) throws IOException {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        requireNonNull(caseData);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated = searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
