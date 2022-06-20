@@ -52,7 +52,7 @@ public class ManageOrders {
     private final String applicantName1;
     private final String applicantReference;
     private final String respondentReference;
-    private final String respondentName;
+    private final String orderRespondentName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate respondentDateOfBirth;
     private final Address respondentAddress;
