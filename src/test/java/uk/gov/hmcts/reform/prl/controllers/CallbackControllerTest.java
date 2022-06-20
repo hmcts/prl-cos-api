@@ -56,6 +56,7 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -138,6 +139,9 @@ public class CallbackControllerTest {
 
     @Mock
     AllTabServiceImpl allTabsService;
+
+    @Mock
+    SearchCasesDataService searchCasesDataService;
 
     @Mock
     SendgridService sendgridService;
@@ -643,6 +647,54 @@ public class CallbackControllerTest {
             .build();
 
         sendEmail(SOLICITOR_EMAIL, withdrawApplication, 1);
+    }
+
+    @Test
+    public void testUpdateApplicantAndChildNames() throws Exception {
+
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantList)
+            .children(listOfChildren)
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDetailsUpdatedwithName = new HashMap<>();
+        caseDetailsUpdatedwithName.put("applicantName","test1 test22");
+
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+        when(searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated)).thenReturn(caseDetailsUpdatedwithName);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .data(caseDataUpdated).build()).build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.updateApplicantAndChildNames(
+            authToken,
+            callbackRequest);
+        Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
+        assertEquals("test1 test22", caseDetailsRespnse.get("applicantName"));
     }
 
     @Test
