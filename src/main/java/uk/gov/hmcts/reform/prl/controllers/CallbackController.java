@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -23,13 +24,17 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
+import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
@@ -44,6 +49,7 @@ import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkf
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -79,7 +85,9 @@ public class CallbackController {
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
 
+    private final CourtFinderService courtLocatorService;
     private final SearchCasesDataService searchCasesDataService;
+
     private final ConfidentialityTabService confidentialityTabService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -184,6 +192,26 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+    @PostMapping(path = "/pre-populate-court-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to pre  populate court details")
+    public AboutToStartOrSubmitCallbackResponse prePopulateCourtDetails(
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws NotFoundException {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Court closestChildArrangementsCourt = courtLocatorService
+            .getNearestFamilyCourt(caseData);
+        Optional<CourtEmailAddress> courtEmailAddress = courtLocatorService.getEmailAddress(closestChildArrangementsCourt);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (courtEmailAddress.isPresent()) {
+            log.info("court email {} with case id {}", courtEmailAddress.get().getAddress(),caseData.getId());
+            caseDataUpdated.put("localCourtAdmin",List.of(
+                Element.<LocalCourtAdminEmail>builder().value(LocalCourtAdminEmail.builder().email(courtEmailAddress.get().getAddress()).build())
+                    .build()));
+        } else {
+            log.info("Court email not found for case id {}",caseData.getId());
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
     @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to Issue and send to local court")
     public AboutToStartOrSubmitCallbackResponse issueAndSendToLocalCourt(
@@ -194,6 +222,7 @@ public class CallbackController {
             requireNonNull(caseData);
             sendgridService.sendEmail(c100JsonMapper.map(caseData));
         }
+
         caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
