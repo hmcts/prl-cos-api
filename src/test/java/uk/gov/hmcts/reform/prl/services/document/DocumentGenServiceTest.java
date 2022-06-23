@@ -88,6 +88,7 @@ public class DocumentGenServiceTest {
     public static final String authToken = "Bearer TestAuthToken";
 
     CaseData c100CaseData;
+    CaseData c100CaseDataFinal;
     CaseData c100CaseDataC1A;
     CaseData fl401CaseData;
     CaseData fl401CaseDataApplicantConfidential;
@@ -182,6 +183,20 @@ public class DocumentGenServiceTest {
             .childrenConfidentialDetails(childConfidentialList)
             .build();
 
+        c100CaseDataFinal = CaseData.builder()
+            .id(123456789123L)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .allegationsOfHarmYesNo(Yes)
+            .applicants(listOfApplicants)
+            .state(State.SUBMITTED_PAID)
+            .allegationsOfHarmYesNo(No)
+            .applicantsConfidentialDetails(applicantConfidentialList)
+            .childrenConfidentialDetails(childConfidentialList)
+            .build();
+
         c100CaseDataC1A = CaseData.builder()
             .id(123456789123L)
             .welshLanguageRequirement(Yes)
@@ -245,7 +260,7 @@ public class DocumentGenServiceTest {
                                             .childFullName("test")
                                             .build())))
                       .build())
-            .state(State.CASE_ISSUE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .home(homefull)
             .build();
 
@@ -276,7 +291,7 @@ public class DocumentGenServiceTest {
                                                     .childFullName("test")
                                                     .build())))
                       .build())
-            .state(State.CASE_ISSUE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .home(homefull)
             .build();
     }
@@ -320,6 +335,47 @@ public class DocumentGenServiceTest {
         );
         verifyNoMoreInteractions(dgsService);
     }
+
+    @Test
+    public void generateDocsForC100TestFinalDoc() throws Exception {
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+        when(organisationService.getApplicantOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
+        when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
+
+        Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataFinal);
+
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
+        assertFalse(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+        assertFalse(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
+        assertFalse(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
+        assertFalse(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A));
+
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+        verify(dgsService, times(1)).generateWelshDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+        verifyNoMoreInteractions(dgsService);
+    }
+
 
     @Test
     public void generateDocsForFL401TestWithOrganisation() throws Exception {
@@ -492,7 +548,9 @@ public class DocumentGenServiceTest {
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
+        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
 
         verify(dgsService, times(2)).generateDocument(
@@ -619,7 +677,7 @@ public class DocumentGenServiceTest {
                                .build())
             .applicantsFL401(applicant)
             .home(homefull)
-            .state(State.CASE_ISSUE)
+            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -630,7 +688,7 @@ public class DocumentGenServiceTest {
                                          .documentHash(generatedDocumentInfo.getHashToken())
                                          .documentFileName("FL401-Final.docx")
                                          .build())
-                      .state(State.CASE_ISSUE)
+                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                       .build())
             .build();
 
@@ -734,7 +792,7 @@ public class DocumentGenServiceTest {
                                .build())
             .applicantsFL401(applicant)
             .home(homefull)
-            .state(State.CASE_ISSUE)
+            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -745,7 +803,7 @@ public class DocumentGenServiceTest {
                                          .documentHash(generatedDocumentInfo.getHashToken())
                                          .documentFileName("FL401-Final.docx")
                                          .build())
-                      .state(State.CASE_ISSUE)
+                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                       .build())
             .build();
 
@@ -839,7 +897,7 @@ public class DocumentGenServiceTest {
                                .build())
             .applicantsFL401(applicant)
             .home(null)
-            .state(State.CASE_ISSUE)
+            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
@@ -850,7 +908,7 @@ public class DocumentGenServiceTest {
                                          .documentHash(generatedDocumentInfo.getHashToken())
                                          .documentFileName("FL401-Final.docx")
                                          .build())
-                      .state(State.CASE_ISSUE)
+                      .state(State.AWAITING_SUBMISSION_TO_HMCTS)
                       .build())
             .build();
 
