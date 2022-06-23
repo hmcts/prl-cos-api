@@ -520,4 +520,20 @@ public class CourtFinderServiceTest {
         courtFinderService.getCorrectPartyPostcode(caseData);
     }
 
+
+    @Test
+    public void givenC100ApplicationsMatchedInExplanationReturnCourtEmailAddress() {
+
+        CourtEmailAddress courtEmailAddressWithC100ApplicationsKey = CourtEmailAddress.builder()
+            .address("brighton.breathingspace@justice.gov.uk")
+            .explanation("C100 applications")
+            .build();
+
+        horshamCourt.setCourtEmailAddresses(Collections.singletonList(courtEmailAddressWithC100ApplicationsKey));
+
+        Optional<CourtEmailAddress> emailAddress = courtFinderService.getEmailAddress(horshamCourt);
+
+        Assert.assertTrue(emailAddress.isPresent());
+    }
+
 }
