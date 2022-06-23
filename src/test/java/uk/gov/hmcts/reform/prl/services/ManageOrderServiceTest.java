@@ -631,7 +631,7 @@ public class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         manageOrderService.updateCaseDataWithAppointedGuardianNames(caseDetails, namesList);
-        assertEquals(caseDataNameList.get(0).getValue().getGuardianFullName(), "Full Name");
+        assertEquals("Full Name", caseDataNameList.get(0).getValue().getGuardianFullName());
     }
 
     @Test

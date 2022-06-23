@@ -520,11 +520,12 @@ public class ManageOrderService {
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .manageOrdersCourtName(caseData.getCourtName())
-            .manageOrdersApplicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
+            .manageOrdersApplicant(String.format(PrlAppsConstants.STRING_FORMATTER, caseData.getApplicantsFL401().getFirstName(),
                                                  caseData.getApplicantsFL401().getLastName()))
-            .manageOrdersRespondent(String.format("%s %s", caseData.getRespondentsFL401().getFirstName(),
+            .manageOrdersRespondent(String.format(PrlAppsConstants.STRING_FORMATTER, caseData.getRespondentsFL401().getFirstName(),
                                                   caseData.getRespondentsFL401().getLastName()))
-            .manageOrdersApplicantReference(String.format("%s %s", caseData.getApplicantsFL401().getRepresentativeFirstName(),
+            .manageOrdersApplicantReference(String.format(PrlAppsConstants.STRING_FORMATTER, caseData.getApplicantsFL401()
+                                                              .getRepresentativeFirstName(),
                                                           caseData.getApplicantsFL401().getRepresentativeLastName()))
             .build();
 
@@ -560,9 +561,9 @@ public class ManageOrderService {
         FL404 orderData = FL404.builder()
             .fl404bCaseNumber(String.valueOf(caseData.getId()))
             .fl404bCourtName(caseData.getCourtName())
-            .fl404bApplicantName(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
+            .fl404bApplicantName(String.format(PrlAppsConstants.STRING_FORMATTER, caseData.getApplicantsFL401().getFirstName(),
                                                caseData.getApplicantsFL401().getLastName()))
-            .fl404bRespondentName(String.format("%s %s", caseData.getRespondentsFL401().getFirstName(),
+            .fl404bRespondentName(String.format(PrlAppsConstants.STRING_FORMATTER, caseData.getRespondentsFL401().getFirstName(),
                                                 caseData.getRespondentsFL401().getLastName()))
             .build();
 
@@ -611,10 +612,11 @@ public class ManageOrderService {
         return ManageOrders.builder()
             .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
             .manageOrdersFl402CourtName(caseData.getCourtName())
-            .manageOrdersFl402Applicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
-                                                 caseData.getApplicantsFL401().getLastName()))
-            .manageOrdersFl402ApplicantRef(String.format("%s %s", caseData.getApplicantsFL401().getRepresentativeFirstName(),
-                                                          caseData.getApplicantsFL401().getRepresentativeLastName()))
+            .manageOrdersFl402Applicant(String.format(PrlAppsConstants.STRING_FORMATTER, caseData.getApplicantsFL401().getFirstName(),
+                                                      caseData.getApplicantsFL401().getLastName()))
+            .manageOrdersFl402ApplicantRef(String.format(PrlAppsConstants.STRING_FORMATTER, caseData.getApplicantsFL401()
+                                                             .getRepresentativeFirstName(),
+                                                         caseData.getApplicantsFL401().getRepresentativeLastName()))
             .build();
     }
 }
