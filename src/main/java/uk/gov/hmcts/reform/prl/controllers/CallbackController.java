@@ -233,7 +233,6 @@ public class CallbackController {
                                          SUBMITTED_STATE, RETURN_STATE
         );
 
-        boolean previousStateInList = previousState.filter(stateList::contains).isPresent();
 
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
@@ -402,26 +401,26 @@ public class CallbackController {
         List<Element<OtherDocuments>> otherDocuments = caseData.getOtherDocuments();
         if (furtherEvidences != null) {
             furtherEvidences = furtherEvidences.stream()
-                    .filter(element -> {
-                        return element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup);
-                    })
+                    .filter(element ->
+                         element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup)
+                    )
                 .collect(Collectors.toList());
             caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
         }
         if (correspondence != null) {
             correspondence = correspondence.stream()
-                .filter(element -> {
-                    return element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup);
-                })
+                .filter(element ->
+                     element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup)
+                )
                 .collect(Collectors.toList());
             caseDataUpdated.put("correspondenceForTabDisplay", correspondence);
         }
         if (otherDocuments != null) {
 
             otherDocuments = otherDocuments.stream()
-                .filter(element -> {
-                    return element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup);
-                })
+                .filter(element ->
+                     element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup)
+                )
                 .collect(Collectors.toList());
             caseDataUpdated.put("otherDocumentsForTabDisplay", otherDocuments);
         }
