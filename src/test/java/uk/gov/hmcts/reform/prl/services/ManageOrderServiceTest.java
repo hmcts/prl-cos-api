@@ -187,6 +187,47 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void whenGeneralOrder_thenPopulateCustomFields() {
+        CaseData caseData = CaseData.builder()
+            .id(12345674L)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm)
+            .courtName("Court name")
+            .childArrangementOrders(ChildArrangementOrdersEnum.authorityC31)
+            .applicantsFL401(PartyDetails.builder()
+                                 .firstName("app")
+                                 .lastName("testLast")
+                                 .build())
+            .respondentsFL401(PartyDetails.builder()
+                                  .firstName("resp")
+                                  .lastName("testLast")
+                                  .dateOfBirth(LocalDate.of(1990, 10, 20))
+                                  .address(Address.builder()
+                                               .addressLine1("add1")
+                                               .postCode("n145kk")
+                                               .build())
+                                  .build())
+            .build();
+
+        FL404 expectedDetails = FL404.builder()
+            .fl404bApplicantName("app testLast")
+            .fl404bCaseNumber("12345674")
+            .fl404bCourtName("Court name")
+            .fl404bRespondentName("resp testLast")
+            .fl404bRespondentAddress(Address.builder()
+                                         .addressLine1("add1")
+                                         .postCode("n145kk")
+                                         .build())
+            .fl404bRespondentDob(LocalDate.of(1990, 10, 20))
+            .build();
+
+        CaseData updatedCaseData = manageOrderService.populateCustomOrderFields(caseData);
+
+        assertNotNull(updatedCaseData.getManageOrders());
+
+
+    }
+
+    @Test
     public void testPopulatePreviewOrderFromCaSpecificOrder() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
