@@ -12,14 +12,15 @@ import uk.gov.service.notify.NotificationClient;
 @Setter
 public class NotificationsServiceConfiguration {
 
-    @Value("${notify.api-key}")
+    @Value("${uk.gov.notify.api.key}")
     private String key;
 
-    @Value("${notify.baseUrl}")
+    @Value("${uk.gov.notify.api.baseUrl}")
     private String baseUrl;
 
     @Bean
     public NotificationClient notificationClient() {
         return new NotificationClient(key, baseUrl);
     }
+
 }

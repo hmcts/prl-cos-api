@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.OTHER_PROCEEDINGS_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.DONT_KNOW;
-import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.NO;
-import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.YES;
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.dontKnow;
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.no;
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Service
 public class OtherProceedingsChecker implements EventChecker {
@@ -34,7 +34,7 @@ public class OtherProceedingsChecker implements EventChecker {
         boolean otherProceedingsCompleted = otherProceedings.isPresent();
 
         if (otherProceedingsCompleted
-            && (otherProceedings.get().equals(NO) || otherProceedings.get().equals(DONT_KNOW))) {
+            && (otherProceedings.get().equals(no) || otherProceedings.get().equals(dontKnow))) {
             taskErrorService.removeError(OTHER_PROCEEDINGS_ERROR);
             return  true;
         }
@@ -48,7 +48,7 @@ public class OtherProceedingsChecker implements EventChecker {
                 .collect(Collectors.toList());
 
             //if a collection item is added and then removed the collection exists as length 0
-            if (allProceedings.size() == 0) {
+            if (allProceedings.isEmpty()) {
                 return false;
             }
 
@@ -78,7 +78,7 @@ public class OtherProceedingsChecker implements EventChecker {
 
         Optional<YesNoDontKnow> otherProceedings = ofNullable(caseData.getPreviousOrOngoingProceedingsForChildren());
 
-        if (otherProceedings.isPresent() && otherProceedings.get().equals(YES)) {
+        if (otherProceedings.isPresent() && otherProceedings.get().equals(yes)) {
             taskErrorService.addEventError(OTHER_PROCEEDINGS, OTHER_PROCEEDINGS_ERROR,
                                            OTHER_PROCEEDINGS_ERROR.getError());
             return true;

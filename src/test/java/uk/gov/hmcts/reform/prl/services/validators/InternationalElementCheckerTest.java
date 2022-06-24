@@ -8,7 +8,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InternationalElementCheckerTest {
@@ -25,7 +27,7 @@ public class InternationalElementCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
         boolean hasMandatory = internationalElementChecker.hasMandatoryCompleted(caseData);
-        assert (!hasMandatory);
+        assertFalse(hasMandatory);
     }
 
     @Test
@@ -33,31 +35,31 @@ public class InternationalElementCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
         boolean isFinished = internationalElementChecker.isFinished(caseData);
-        assert (!isFinished);
+        assertFalse(isFinished);
     }
 
     @Test
     public void notFinishedWithFieldValuesYes() {
 
-        CaseData caseData = CaseData.builder().habitualResidentInOtherState(YES).jurisdictionIssue(YES)
-            .requestToForeignAuthority(YES).build();
+        CaseData caseData = CaseData.builder().habitualResidentInOtherState(Yes).jurisdictionIssue(Yes)
+            .requestToForeignAuthority(Yes).build();
         boolean isFinished = internationalElementChecker.isFinished(caseData);
-        assert (!isFinished);
+        assertFalse(isFinished);
     }
 
     @Test
     public void finishedWithFieldValuesYes() {
 
         CaseData caseData = CaseData.builder()
-            .habitualResidentInOtherState(YES)
+            .habitualResidentInOtherState(Yes)
             .habitualResidentInOtherStateGiveReason("reason")
-            .jurisdictionIssue(YES)
+            .jurisdictionIssue(Yes)
             .jurisdictionIssueGiveReason("reason")
-            .requestToForeignAuthority(YES)
+            .requestToForeignAuthority(Yes)
             .requestToForeignAuthorityGiveReason("reason")
             .build();
         boolean isFinished = internationalElementChecker.isFinished(caseData);
-        assert (isFinished);
+        assertTrue(isFinished);
     }
 
     @Test
@@ -66,14 +68,14 @@ public class InternationalElementCheckerTest {
         CaseData caseData = CaseData.builder().habitualResidentInOtherState(null).jurisdictionIssue(null)
             .requestToForeignAuthority(null).build();
         boolean isStarted = internationalElementChecker.isStarted(caseData);
-        assert !(isStarted);
+        assertFalse(isStarted);
     }
 
     @Test
     public void notStartedWithUnattendedFieldValues() {
         CaseData caseData = CaseData.builder().build();
         boolean isStarted = internationalElementChecker.isStarted(caseData);
-        assert (!isStarted);
+        assertFalse(isStarted);
     }
 
 }

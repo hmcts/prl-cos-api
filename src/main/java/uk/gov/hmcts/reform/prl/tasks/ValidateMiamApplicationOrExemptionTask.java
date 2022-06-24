@@ -8,9 +8,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.APPLICANT_ATTENDED_MIAM;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CLAIMING_EXEMPTION_MIAM;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.NO;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_ATTENDED_MIAM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLAIMING_EXEMPTION_MIAM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 
 
 @Component

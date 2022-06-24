@@ -12,10 +12,10 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.WELSH_LANGUAGE_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.ENGLISH;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.WELSH;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.NO;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.YES;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.welsh;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Service
 public class WelshLanguageRequirementsChecker implements EventChecker {
@@ -31,21 +31,21 @@ public class WelshLanguageRequirementsChecker implements EventChecker {
         Optional<YesOrNo> englishRequirements = ofNullable(caseData.getWelshLanguageRequirementApplicationNeedEnglish());
         Optional<YesOrNo> welshRequirements = ofNullable(caseData.getLanguageRequirementApplicationNeedWelsh());
 
-        if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(NO)) {
+        if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(No)) {
             taskErrorService.removeError(WELSH_LANGUAGE_ERROR);
             return true;
         }
-        if (applicationLanguage.isPresent() && applicationLanguage.get().equals(ENGLISH)) {
-            if (welshRequirements.isPresent()) {
-                taskErrorService.removeError(WELSH_LANGUAGE_ERROR);
-                return  true;
-            }
+        if (applicationLanguage.isPresent()
+            && applicationLanguage.get().equals(english)
+            && welshRequirements.isPresent()) {
+            taskErrorService.removeError(WELSH_LANGUAGE_ERROR);
+            return true;
         }
-        if (applicationLanguage.isPresent() && applicationLanguage.get().equals(WELSH)) {
-            if (englishRequirements.isPresent()) {
-                taskErrorService.removeError(WELSH_LANGUAGE_ERROR);
-                return  true;
-            }
+        if (applicationLanguage.isPresent()
+            && applicationLanguage.get().equals(welsh)
+            && englishRequirements.isPresent()) {
+            taskErrorService.removeError(WELSH_LANGUAGE_ERROR);
+            return true;
         }
         return false;
     }
@@ -55,9 +55,11 @@ public class WelshLanguageRequirementsChecker implements EventChecker {
 
         Optional<YesOrNo> welshLanguageRequirement = ofNullable(caseData.getWelshLanguageRequirement());
 
-        if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(YES)) {
+        if (welshLanguageRequirement.isPresent() && welshLanguageRequirement.get().equals(Yes)) {
             taskErrorService.addEventError(WELSH_LANGUAGE_REQUIREMENTS, WELSH_LANGUAGE_ERROR,
-                                           WELSH_LANGUAGE_ERROR.getError());
+                                           WELSH_LANGUAGE_ERROR.getError()
+            );
+
             return true;
         }
         return false;

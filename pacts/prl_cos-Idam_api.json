@@ -1,0 +1,157 @@
+{
+  "provider": {
+    "name": "Idam_api"
+  },
+  "consumer": {
+    "name": "prl_cos"
+  },
+  "interactions": [
+    {
+      "description": "a request to generate solicitor details",
+      "request": {
+        "method": "GET",
+        "path": "/details",
+        "headers": {
+          "Authorization": "TestServiceAuthToken",
+          "Content-Type": "application/json"
+        }
+      },
+      "response": {
+        "status": 200
+      },
+      "providerStates": [
+        {
+          "name": "A request to get solicitor name"
+        }
+      ]
+    },
+    {
+      "description": "IDAM returns user info to the client",
+      "request": {
+        "method": "GET",
+        "path": "/o/userinfo",
+        "headers": {
+          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre"
+        },
+        "generators": {
+          "header": {
+            "Authorization": {
+              "type": "ProviderState",
+              "expression": "Bearer ${access_token}",
+              "dataType": "STRING"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "sub": "prl_aat_solicitor@mailinator.com",
+          "uid": "33dff5a7-3b6f-45f1-b5e7-5f9be1ede355",
+          "roles": [
+            "caseworker-privatelaw-solicitor"
+          ],
+          "name": "John Smith",
+          "given_name": "John",
+          "family_name": "Smith"
+        },
+        "matchingRules": {
+          "body": {
+            "$.sub": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.uid": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.roles": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.roles[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.name": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.given_name": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.family_name": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "I have obtained an access_token as a user",
+          "params": {
+            "password": "generic",
+            "scope": "openid profile roles",
+            "redirect_uri": "http://www.dummy-pact-service.com/callback",
+            "client_secret": "pactsecret",
+            "client_id": "pact",
+            "username": "prl_aat_solicitor@mailinator.com"
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.1.11"
+    }
+  }
+}

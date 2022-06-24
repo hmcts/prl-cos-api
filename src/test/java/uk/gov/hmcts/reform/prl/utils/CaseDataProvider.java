@@ -16,10 +16,11 @@ public class CaseDataProvider {
     }
 
     public static CaseData english() {
-        return CaseData.builder().languagePreferenceWelsh(YesOrNo.NO).build();
+        return CaseData.builder().languagePreferenceWelsh(YesOrNo.No).build();
     }
 
     public static CaseData welsh() {
-        return CaseData.builder().languagePreferenceWelsh(YesOrNo.YES).build();
+        return CaseData.builder().languagePreferenceWelsh(YesOrNo.Yes).build();
     }
+
 }

@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractCallbackController {
 
@@ -17,13 +19,11 @@ public abstract class AbstractCallbackController {
     private EventService eventPublisher;
 
     protected CaseData getCaseData(CaseDetails caseDetails) {
+        return CaseUtils.getCaseData(caseDetails, objectMapper);
+    }
 
-        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-            .toBuilder()
-            .id(caseDetails.getId())
-            .build();
-
-        return caseData;
+    protected Map<String, Object> toMap(Object object) {
+        return objectMapper.convertValue(object, Map.class);
     }
 
 

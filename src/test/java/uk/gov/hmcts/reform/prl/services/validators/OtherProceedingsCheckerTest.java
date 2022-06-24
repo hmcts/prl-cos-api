@@ -14,6 +14,9 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(MockitoJUnitRunner.class)
 public class OtherProceedingsCheckerTest {
 
@@ -26,37 +29,37 @@ public class OtherProceedingsCheckerTest {
     @Test
     public void startedWithPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
-            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.YES)
+            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .build();
         boolean isStarted = otherProceedingsChecker.isStarted(caseData);
-        assert (isStarted);
+        assertTrue(isStarted);
     }
 
     @Test
     public void notStartedWithoutPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
-            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.NO)
+            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.no)
             .build();
         boolean isStarted = otherProceedingsChecker.isStarted(caseData);
-        assert (!isStarted);
+        assertFalse(isStarted);
     }
 
     @Test
     public void finishedIfNoPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
-            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.NO)
+            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.no)
             .build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
-        assert (isFinished);
+        assertTrue(isFinished);
     }
 
     @Test
     public void notFinishedWithPreviousOrOngoingProceedings() {
         CaseData caseData = CaseData.builder()
-            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.YES)
+            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
-        assert (!isFinished);
+        assertFalse(isFinished);
     }
 
     @Test
@@ -68,11 +71,10 @@ public class OtherProceedingsCheckerTest {
 
 
         CaseData caseData = CaseData.builder()
-            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.YES)
+            .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .existingProceedings(listOfProceedings)
             .build();
         boolean isFinished = otherProceedingsChecker.isFinished(caseData);
-        assert (!isFinished);
+        assertFalse(isFinished);
     }
-
 }

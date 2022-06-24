@@ -1,0 +1,228 @@
+server:
+  port: 4044
+
+runs-locally: ${RUNS_LOCALLY:true}
+
+env: ${test_environment:local}
+TEST_URL: https://localhost:4044
+
+case:
+  orchestration:
+    service:
+      base:
+        uri: '#{environment["TEST_URL"].replaceFirst("https://", "http://")}'
+    prepopulate:
+      uri: ${case.orchestration.service.base.uri}/getSolicitorAndFeeDetails
+    documentgenerate:
+      uri: ${case.orchestration.service.base.uri}/generate-save-draft-document
+
+prl:
+  system-update:
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
+  document:
+    generate:
+      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
+
+management:
+  endpoint:
+    health:
+      show-details: "always"
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health, info, prometheus
+
+  #If you use a database then uncomment below lines and update db properties accordingly
+spring:
+  config:
+    import: "optional:configtree:/mnt/secrets/"
+  application:
+    name: Prl cos api
+
+azure:
+  application-insights:
+    instrumentation-key: ${APP_INSIGHTS_INSTRUMENTATION_KEY:00000000-0000-0000-0000-000000000000}
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    uk.gov.hmcts.reform.prl: DEBUG
+    au.com.dius.pact: DEBUG
+  pattern:
+    console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
+
+pba:
+  validation:
+    service:
+      api:
+        baseurl: ${PRD_API_BASEURL:http://localhost:8892}
+
+feature-toggle:
+  toggle:
+    example: ${FEATURE_EXAMPLE:false}
+
+xui:
+  url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
+
+uk:
+  gov:
+    notify:
+      api:
+        key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxx}
+        baseUrl: https://api.notifications.service.gov.uk
+      email:
+        templates:
+          english:
+            SOLICITOR: a080f4ce-a07f-43ec-a3f0-f196d83f7730
+            CASEWORKER: 8c1cd107-b76f-4e10-9c44-afb49415cda2
+            RETURNAPPLICATION: 41a7ffcd-a5ec-4377-ba50-59619ad0ac8c
+            WITHDRAW: 1c2c272a-1514-4d52-a673-393f857da34d
+            COURTADMIN: f980e4a8-4eed-4887-9ae9-cb2c6a42fec7
+            GATEKEEPER: 52223e2c-1c68-470b-b0bb-66121569adb1
+            DA_SOLICITOR: d65830b7-eb13-46c3-b772-03976a67210d
+            DA_LOCALCOURT: 9d6b311a-a764-45a7-9dd9-cd1d06408214
+            EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
+            SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
+          welsh:
+            EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
+        application:
+          email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
+          court-name: Court Name
+
+notify:
+  api-key: fake-key
+  baseUrl: https://api.notifications.service.gov.uk
+
+payments:
+  api:
+    url: ${PAY_URL:}
+    callback-url: ${PAY_CALLBACK_URL:}
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
+
+send-grid:
+  api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
+  rpa:
+    email:
+      to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
+      from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
+
+fees-register:
+  api:
+    url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}
+  parameters:
+    C100_SUBMISSION_FEE:
+      channel: default
+      event: miscellaneous
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: ChildArrangement
+      service: private law
+
+# NEW BELOW THIS LINE
+
+idam:
+  s2s-auth:
+    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
+    microservice: prl_cos_api
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+  api:
+    url: https://idam-api.aat.platform.hmcts.net
+  client:
+    id: prl-cos-api
+    baseUrl: https://idam-api.aat.platform.hmcts.net
+    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
+    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    clientId: xuiwebapp
+    authorize:
+      context-path: /oauth2/authorize
+    token:
+      context-path: /oauth2/token
+  user:
+    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
+  solicitor:
+    username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
+    password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
+  system-update:
+    username: ${IDAM_SOLICITOR_USERNAME:dummysolicitor@test.com}
+    password: ${IDAM_SOLICITOR_PASSWORD:dummy}
+
+test-url: ${TEST_URL:http://localhost:4044}
+
+core_case_data:
+  api:
+    url: ${CORE_CASE_DATA_API_URL:http://localhost:4452}
+
+auth:
+  idam:
+    client:
+      baseUrl: http://localhost:5000
+  provider:
+    service:
+      client:
+        baseUrl: http://localhost:4502
+
+
+
+resources:
+  images:
+    baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
+
+
+send-letter:
+  url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
+
+case_document_am:
+  url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
+
+prl-dgs-api:
+  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
+
+courtfinder:
+  api:
+    url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
+
+launchdarkly:
+  sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
+
+rd_professional:
+  api:
+    url: ${PRD_API_BASEURL:http://rd-professional-api-aat.service.core-compute-aat.internal}
+
+document:
+  templates:
+    c100:
+      c100_final_template: C100-Final-Document.docx
+      c100_final_filename: C100FinalDocument.pdf
+      c100_draft_template: PRL-C100-Draft-Final.docx
+      c100_draft_filename: Draft_C100_application.pdf
+      c100_c8_template: PRL-C8-Final-Changes.docx
+      c100_c8_filename: C8Document.pdf
+      c100_c1a_template: PRL-C1A.docx
+      c100_c1a_filename: C1A_Document.pdf
+      c100_final_welsh_template: PRL-Final-C100-WelshLang.docx
+      c100_final_welsh_filename: C100FinalDocumentWelsh.pdf
+      c100_draft_welsh_template: PRL-Draft-C100-WelshLang.docx
+      c100_draft_welsh_filename: Draft_C100_application_welsh.pdf
+      c100_c8_welsh_template: PRL-C8-WelshLang.docx
+      c100_c8_welsh_filename: C8Document_Welsh.pdf
+      c100_c1a_welsh_template: PRL-C1A-WelshLang.docx
+      c100_c1a_welsh_filename: C1A_Document_Welsh.pdf
+    fl401:
+      fl401_final_template: FL401-Final.docx
+      fl401_final_filename: FL401FinalDocument.pdf
+      fl401_draft_template: FL401-draft.docx
+      fl401_draft_filename: Draft_DA_application
+      fl401_c8_template: PRL-DA-C8.docx
+      fl401_c8_filename: C8_Document.pdf
+      fl401_final_welsh_template: FL401-Final-Welsh.docx
+      fl401_final_welsh_filename: FL401FinalDocumentWelsh.pdf
+      fl401_draft_welsh_template: FL401-draft-Welsh.docx
+      fl401_draft_welsh_filename: Draft_DA_Welsh_application
+      fl401_c8_welsh_template: FL401-c8-welsh.docx
+      fl401_c8_welsh_filename: C8_Document_Welsh.pdf
+
+southampton:
+  court:
+    email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}

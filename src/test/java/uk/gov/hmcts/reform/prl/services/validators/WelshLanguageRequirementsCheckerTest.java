@@ -8,6 +8,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import static org.junit.Assert.assertFalse;
+
 @RunWith(MockitoJUnitRunner.class)
 public class WelshLanguageRequirementsCheckerTest {
 
@@ -21,20 +23,13 @@ public class WelshLanguageRequirementsCheckerTest {
     public void whenNoCaseDataThenIsStartedFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assert !welshLanguageRequirementsChecker.isStarted(caseData);
-
+        assertFalse(welshLanguageRequirementsChecker.isStarted(caseData));
     }
 
     @Test
     public void whenNoCaseDataThenIsFinishedFalse() {
         CaseData caseData = CaseData.builder().build();
 
-        assert !welshLanguageRequirementsChecker.isFinished(caseData);
-
+        assertFalse(welshLanguageRequirementsChecker.isFinished(caseData));
     }
-
-
-
-
-
 }

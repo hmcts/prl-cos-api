@@ -27,6 +27,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import uk.gov.hmcts.reform.prl.util.CosApiClient;
 
+import java.util.Collection;
+import java.util.Map;
+
 
 @Configuration
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform.prl.*", "uk.gov.hmcts.reform.prl.services.*",
@@ -49,7 +52,18 @@ public class ServiceContextConfiguration {
     public RequestInterceptor requestInterceptor() {
         return (RequestTemplate template) -> {
             if (template.request().httpMethod() == Request.HttpMethod.POST) {
-                template.header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+                Map<String, Collection<String>> headers = template.request().headers();
+                if (headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+                    Collection<String> listOfContentType = headers.get(HttpHeaders.CONTENT_TYPE);
+                    if (!listOfContentType.contains("x-www-form-urlencoded")) {
+                        template.header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+                    } else {
+                        template.header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+                    }
+                } else {
+                    template.header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+                }
+
             }
         };
     }

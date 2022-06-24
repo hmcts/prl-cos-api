@@ -16,7 +16,7 @@ public abstract class AbstractWorkflow<T> implements Workflow<T> {
     public T execute(Task<T>[] tasks, DefaultTaskContext context, T payload, Pair... pairs) throws WorkflowException {
         threadLocalContext.set(context);
 
-        for (Pair pair : pairs) {
+        for (Pair<Object, Object> pair : pairs) {
             getContext().setTransientObject(pair.getKey().toString(), pair.getValue());
         }
 
@@ -37,8 +37,8 @@ public abstract class AbstractWorkflow<T> implements Workflow<T> {
         Set<Map.Entry<String, Object>> entrySet = threadLocalContext.get().getTransientObjects().entrySet();
         Map<String, Object> errors = new HashMap<>();
 
-        for (Map.Entry entry : entrySet) {
-            String key = (String) entry.getKey();
+        for (Map.Entry<String, Object> entry : entrySet) {
+            String key = entry.getKey();
             if (key.endsWith("_Error")) {
                 errors.put(key, entry.getValue());
             }
@@ -51,7 +51,7 @@ public abstract class AbstractWorkflow<T> implements Workflow<T> {
 
     /**
      * Just to fix sonar issue.
-     * */
+     */
     public void unload() {
         this.threadLocalContext.remove();
     }

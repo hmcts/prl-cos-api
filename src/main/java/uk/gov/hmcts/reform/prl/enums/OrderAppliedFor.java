@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.prl.enums;
 
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @RequiredArgsConstructor
+@JsonSerialize(using = CustomEnumSerializer.class)
 public enum OrderAppliedFor {
 
     childArrangementsOrder("Child Arrangements Order"),
@@ -12,5 +14,15 @@ public enum OrderAppliedFor {
     specificIssueOrder("specificIssueOrder");
 
     private final String displayedValue;
+
+    @JsonValue
+    public String getDisplayedValue() {
+        return displayedValue;
+    }
+
+    @JsonCreator
+    public static OrderAppliedFor getValue(String key) {
+        return OrderAppliedFor.valueOf(key);
+    }
 
 }

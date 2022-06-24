@@ -8,11 +8,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.APPLICATION_CONSIDERED_IN_DAYS_AND_HOURS;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.DAYS;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.HOURS;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.IS_APPLICATION_URGENT;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.YES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICATION_CONSIDERED_IN_DAYS_AND_HOURS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DAYS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HOURS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_APPLICATION_URGENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 
 @Component
 public class ApplicationTimetableTimeValidationTask implements Task<WorkflowResult> {

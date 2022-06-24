@@ -1,10 +1,11 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.models.documents.ProceedingOrderDocument;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,7 +16,9 @@ public class ProceedingDetails {
 
     private final ProceedingsEnum previousOrOngoingProceedings;
     private final String caseNumber;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateStarted;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateEnded;
     private final List<TypeOfOrderEnum> typeOfOrder;
     private final String otherTypeOfOrder;
@@ -24,6 +27,6 @@ public class ProceedingDetails {
     private final String nameOfChildrenInvolved;
     private final String nameOfGuardian;
     private final String nameAndOffice;
-    private final ProceedingOrderDocument uploadRelevantOrder;
+    private final Document uploadRelevantOrder;
 
 }

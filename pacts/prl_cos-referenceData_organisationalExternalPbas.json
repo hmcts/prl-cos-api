@@ -13,12 +13,8 @@
         "path": "/refdata/external/v1/organisations/pbas",
         "headers": {
           "Authorization": "Bearer UserAuthToken",
+          "UserEmail": "someemailaddress@organisation.com",
           "ServiceAuthorization": "ServiceToken"
-        },
-        "query": {
-          "email": [
-            "someemailaddress@organisation.com"
-          ]
         }
       },
       "response": {

@@ -9,8 +9,7 @@ import java.util.List;
 @Data
 @Builder
 public class WelshNeed {
-
     private final String whoNeedsWelsh;
-    private final List<SpokenOrWrittenWelshEnum> spokenOrWritten;
-
+    private  List<SpokenOrWrittenWelshEnum> spokenOrWritten;
+    private  List<SpokenOrWrittenWelshEnum> fl401SpokenOrWritten;
 }
