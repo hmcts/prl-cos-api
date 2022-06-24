@@ -13,7 +13,11 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -21,9 +25,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -34,6 +40,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -61,6 +68,9 @@ public class ManageOrderServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private ElementUtils elementUtils;
 
     @Test
     public void getUpdatedCaseDataCaTest() {
@@ -1031,7 +1041,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFinalOrderFromCaseDataCasegeneralForm() throws Exception {
+    public void testPopulateFinalOrderFromCaseDataCaseGeneralForm() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1069,5 +1079,58 @@ public class ManageOrderServiceTest {
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
 
+    }
+
+    @Test
+    public void testOrderToAmendDownloadLinkNotNull() {
+
+        List<Element<OrderDetails>> orderCollection = new ArrayList<>();
+        orderCollection.add(Element.<OrderDetails>builder().id(UUID.fromString("598670c5-c019-41f5-8711-1f5946f04c50"))
+                                .value(OrderDetails.builder()
+                                        .orderType("test")
+                                           .orderDocument(Document.builder().build())
+                                           .dateCreated(LocalDateTime.now())
+                                           .otherDetails(OtherOrderDetails.builder().build()).build()).build());
+
+        List<DynamicListElement> elements = new ArrayList<>();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderCollection)
+            .dateOrderMade(LocalDate.now())
+            .manageOrders(ManageOrders.builder().amendOrderDynamicList(DynamicList.builder().listItems(elements).build()).build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getManageOrders().getAmendOrderDynamicList(), objectMapper)).thenReturn(UUID.fromString("598670c5-c019-41f5-8711-1f5946f04c50"));
+        assertNotNull(manageOrderService.getOrderToAmendDownloadLink(caseData));
+    }
+
+    @Test
+    public void testFL402FormDataNotNull() {
+        List<Element<OrderDetails>> orderCollection = new ArrayList<>();
+        List<DynamicListElement> elements = new ArrayList<>();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .applicantsFL401(PartyDetails.builder().firstName("first")
+                                 .lastName("last")
+                                 .representativeLastName("repLastName")
+                                 .representativeFirstName("repFirstName").build())
+
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderCollection)
+            .dateOrderMade(LocalDate.now())
+            .manageOrders(ManageOrders.builder().amendOrderDynamicList(DynamicList.builder().listItems(elements).build()).build())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        assertNotNull(manageOrderService.getFL402FormData(caseData));
     }
 }
