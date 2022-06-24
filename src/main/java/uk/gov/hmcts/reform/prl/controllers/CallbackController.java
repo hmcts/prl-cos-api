@@ -176,6 +176,27 @@ public class CallbackController {
         return caseData;
     }
 
+    @PostMapping(path = "/pre-populate-court-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to pre  populate court details")
+    public AboutToStartOrSubmitCallbackResponse prePopulateCourtDetails(
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws NotFoundException {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Court closestChildArrangementsCourt = courtLocatorService
+            .getNearestFamilyCourt(caseData);
+        Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() : courtLocatorService
+            .getEmailAddress(closestChildArrangementsCourt);
+        if (courtEmailAddress.isPresent()) {
+            log.info("Found court email for case id {}",caseData.getId());
+            caseDataUpdated.put("localCourtAdmin",List.of(
+                Element.<LocalCourtAdminEmail>builder().value(LocalCourtAdminEmail.builder().email(courtEmailAddress.get().getAddress()).build())
+                    .build()));
+        } else {
+            log.info("Court email not found for case id {}",caseData.getId());
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
     @PostMapping(path = "/generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to Generate document after submit application")
     public AboutToStartOrSubmitCallbackResponse generateDocumentSubmitApplication(
