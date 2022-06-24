@@ -5,6 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.models.user.UserInfo;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -13,5 +17,17 @@ public class UserService {
 
     public UserDetails getUserDetails(String authorisation) {
         return idamClient.getUserDetails(authorisation);
+    }
+
+    public UserInfo getUserInfo(String authorisation, UserRoles roleName) {
+        UserDetails idamClientUserDetails = idamClient.getUserDetails(authorisation);
+        Optional<String> surname = idamClientUserDetails.getSurname();
+        return UserInfo.builder()
+            .idamId(idamClientUserDetails.getId())
+            .firstName(idamClientUserDetails.getFullName())
+            .lastName(surname.orElse("Surname not present"))
+            .emailAddress(idamClientUserDetails.getEmail())
+            .role(roleName.name())
+            .build();
     }
 }

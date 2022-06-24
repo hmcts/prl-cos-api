@@ -5,67 +5,90 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.*;
-import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
+import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
+import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
+import uk.gov.hmcts.reform.prl.services.SendgridService;
+import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
+import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
-import java.util.HashMap;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class CallbackController {
 
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final ExampleService exampleService;
+    private final OrganisationService organisationService;
     private final ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
+    private final SolicitorEmailService solicitorEmailService;
+    private final CaseWorkerEmailService caseWorkerEmailService;
+
     private final ObjectMapper objectMapper;
-    private final DgsService dgsService;
+    private final AllTabServiceImpl allTabsService;
+    private final UserService userService;
+    private final DocumentGenService documentGenService;
 
-    private static final String DRAFT_ORDER_DOC = "draftOrderDoc";
+    private final SendgridService sendgridService;
+    private final C100JsonMapper c100JsonMapper;
 
+    private final CourtFinderService courtLocatorService;
+    private final SearchCasesDataService searchCasesDataService;
 
-    /**
-     * It's just an example - to be removed when there are real tasks sending emails.
-     */
-    @PostMapping(path = "/send-email", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to send email")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public CallbackResponse sendEmail(
-        @RequestBody @ApiParam("CaseData") CallbackRequest request
-    ) throws WorkflowException {
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument("", request.getCaseDetails());
-        /*return ok(
-            CallbackResponse.builder()
-                .data(exampleService.executeExampleWorkflow(request.getCaseDetails()))
-                .build()
-        );*/
-    /*Map<String, CCDDocument> details = new HashMap<String, CCDDocument>();
-        details.put(DRAFT_ORDER_DOC,CCDDocument.builder().documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl("http://dm-store:8080/documents/ed257124-dfda-4c75-932a-6ef237fd03d6/binary")
-            .documentFileName("LR Local Setup.pdf").build())*/
-        return CallbackResponse
-            .builder()
-            .data(CaseData.builder().draftOrderDoc(CCDDocument.builder().documentUrl(generatedDocumentInfo.getUrl())
-                                                       .documentBinaryUrl("http://dm-store:8080/documents/ed257124-dfda-4c75-932a-6ef237fd03d6/binary")
-                                                       .documentFileName("LR Local Setup.pdf").build()).build())
-            .build();
-    }
+    private final ConfidentialityTabService confidentialityTabService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -102,7 +125,261 @@ public class CallbackController {
         );
     }
 
+    @PostMapping(path = "/generate-save-draft-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to generate and store document")
+    public AboutToStartOrSubmitCallbackResponse generateAndStoreDocument(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody @ApiParam("CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest request
+    ) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
 
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = buildTypeOfApplicationCaseData(caseData);
+        }
 
+        Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
 
+        // Generate draft documents and set to casedataupdated..
+        caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private CaseData buildTypeOfApplicationCaseData(CaseData caseData) {
+        Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
+        if (typeOfApplicationOrders.isEmpty() || (typeOfApplicationOrders.get().getOrderType().contains(
+            FL401OrderTypeEnum.occupationOrder)
+            && typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
+            caseData = caseData.toBuilder().build();
+        } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
+            caseData = caseData.toBuilder()
+                .respondentBehaviourData(null)
+                .build();
+        } else if (typeOfApplicationOrders.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
+            caseData = caseData.toBuilder()
+                .home(null)
+                .build();
+        }
+        return caseData;
+    }
+
+    @PostMapping(path = "/generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to Generate document after submit application")
+    public AboutToStartOrSubmitCallbackResponse generateDocumentSubmitApplication(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        caseData = caseData.toBuilder().applicantsConfidentialDetails(confidentialityTabService
+                .getConfidentialApplicantDetails(caseData.getApplicants().stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList())))
+            .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(caseData.getChildren()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList()))).build();
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(
+            DATE_AND_TIME_SUBMITTED_FIELD,
+            DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("Europe/London")))
+        );
+
+        Map<String,Object> map = documentGenService.generateDocuments(authorisation, caseData);
+
+        caseDataUpdated.putAll(map);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/pre-populate-court-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to pre  populate court details")
+    public AboutToStartOrSubmitCallbackResponse prePopulateCourtDetails(
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws NotFoundException {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Court closestChildArrangementsCourt = courtLocatorService
+            .getNearestFamilyCourt(caseData);
+        Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() : courtLocatorService
+            .getEmailAddress(closestChildArrangementsCourt);
+        if (courtEmailAddress.isPresent()) {
+            log.info("Found court email for case id {}",caseData.getId());
+            caseDataUpdated.put("localCourtAdmin",List.of(
+                Element.<LocalCourtAdminEmail>builder().value(LocalCourtAdminEmail.builder().email(courtEmailAddress.get().getAddress()).build())
+                    .build()));
+        } else {
+            log.info("Court email not found for case id {}",caseData.getId());
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to Issue and send to local court")
+    public AboutToStartOrSubmitCallbackResponse issueAndSendToLocalCourt(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        if (YesOrNo.No.equals(caseData.getConsentOrder())) {
+            requireNonNull(caseData);
+            sendgridService.sendEmail(c100JsonMapper.map(caseData));
+        }
+
+        caseData = caseData.toBuilder().issueDate(LocalDate.now()).build();
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        // Generate All Docs and set to casedataupdated.
+        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+
+        // Refreshing the page in the same event. Hence no external event call needed.
+        // Getting the tab fields and add it to the casedetails..
+        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+
+        caseDataUpdated.putAll(allTabsFields);
+        caseDataUpdated.put("issueDate", caseData.getIssueDate());
+
+        try {
+            caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
+        } catch (Exception ex) {
+            log.info("Email notification could not be sent due to following {}", ex.getMessage());
+        }
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/update-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to refresh the tabs")
+    public void updateApplication(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        allTabsService.updateAllTabs(caseData);
+    }
+
+    @PostMapping(path = "/case-withdrawn-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Send Email Notification on Case Withdraw")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse sendEmailNotificationOnCaseWithdraw(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
+        Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
+            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                solicitorEmailService.sendWithDrawEmailToSolicitor(caseDetails, userDetails);
+                // Refreshing the page in the same event. Hence no external event call needed.
+                // Getting the tab fields and add it to the casedetails..
+                Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+                caseDataUpdated.putAll(allTabsFields);
+            } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                solicitorEmailService.sendWithDrawEmailToFl401Solicitor(caseDetails, userDetails);
+            }
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/send-to-gatekeeper", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Send Email Notification on Send to gatekeeper ")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse sendEmailForSendToGatekeeper(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+
+        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseWorkerEmailService.sendEmailToGateKeeper(caseDetails);
+
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
+
+        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+        caseDataUpdated.putAll(allTabsFields);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/resend-rpa", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Resend case data json to RPA")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse resendNotificationtoRpa(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) throws IOException {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        requireNonNull(caseData);
+        sendgridService.sendEmail(c100JsonMapper.map(caseData));
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/update-applicant-child-names", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Resend case data json to RPA")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse updateApplicantAndChildNames(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) throws IOException {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        requireNonNull(caseData);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated = searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Copy fl401 case name to C100 Case name")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse aboutToSubmitCaseCreation(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        // Updating the case name for FL401
+        if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
+            caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
+        }
+
+        // Saving the logged-in Solicitor and Org details for the docs..
+        caseDataUpdated = getSolicitorDetails(authorisation, caseDataUpdated);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated) {
+        log.info("Fetching the user and Org Details ");
+        try {
+            UserDetails userDetails = userService.getUserDetails(authorisation);
+            Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
+            caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
+            if (userOrganisation.isPresent()) {
+                log.info("Got the Org Details");
+                caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
+            }
+            log.info("SUCCESSFULLY fetched user and Org Details ");
+        } catch (Exception e) {
+            log.error("Error while fetching User or Org details for the logged in user ", e);
+        }
+
+        return caseDataUpdated;
+    }
 }

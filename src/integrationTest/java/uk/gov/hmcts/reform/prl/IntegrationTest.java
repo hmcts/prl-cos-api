@@ -32,28 +32,31 @@ public abstract class IntegrationTest {
     @Value("${case.orchestration.prepopulate.uri}")
     protected String prePopulateUri;
 
+    @Value("${case.orchestration.documentgenerate.uri}")
+    protected String documentGenerateUri;
+
     @Value("${http.proxy:#{null}}")
     protected String httpProxy;
 
     @Value("${idam.user.genericpassword}")
     protected String aatPassword;
 
-    @Value("${auth.idam.client.baseUrl}")
+    @Value("${idam.api.url}")
     private String idamUserBaseUrl;
 
-    @Value("${auth.idam.client.redirectUri}")
+    @Value("${idam.client.redirect_uri}")
     private String idamRedirectUri;
 
-    @Value("${idam.client.aat.authorize.context-path}")
+    @Value("${idam.client.authorize.context-path}")
     private String idamAuthorizeContextPath;
 
-    @Value("${idam.client.aat.token.context-path}")
+    @Value("${idam.client.token.context-path}")
     private String idamTokenContextPath;
 
-    @Value("${auth.idam.client.clientId}")
+    @Value("${idam.client.clientId}")
     private String idamAuthClientID;
 
-    @Value("${auth.idam.client.secret}")
+    @Value("${idam.client.secret}")
     private String idamSecret;
 
     @Value("${idam.s2s-auth.url}")
@@ -96,12 +99,21 @@ public abstract class IntegrationTest {
             );
     }
 
+    public Response callDocGenerateAndSave(String requestBody) {
+        return DocumentGenerateUtil
+                .documentGenerate(
+                requestBody,
+                documentGenerateUri,
+                "Bearer TestAuthToken"
+            );
+    }
+
     private synchronized String getUserToken() {
         username =  "simulate-delivered" + UUID.randomUUID() + "@mailinator.com";
 
         if (userToken == null) {
             createCaseworkerUserInIdam(username, aatPassword);
-            userToken = generateUserTokenWithNoRoles(username, "genericPassword123");
+            userToken = generateUserTokenWithNoRoles(username, aatPassword);
         }
         return userToken;
     }
@@ -120,10 +132,13 @@ public abstract class IntegrationTest {
             .roles(new UserCode[]{UserCode.builder().code("caseworker-privatelaw-solicitor").build()})
             .build();
 
-        SerenityRest.given()
+        Response userResponse = null;
+
+        userResponse = SerenityRest.given()
             .header("Content-Type", "application/json")
             .body(ResourceLoader.objectToJson(userRequest))
             .post(idamCreateUrl());
+        log.info("User response when creating {} ",userResponse.getStatusCode());
     }
 
     public Response callInvalidPrePopulateFeeAndSolicitorName(String requestBody) {
@@ -131,7 +146,7 @@ public abstract class IntegrationTest {
             .prePopulateFeeAndSolicitorName(
                 requestBody,
                 prePopulateUri,
-                getUserToken()
+                "Bearer TestAuthToken"
             );
     }
 
@@ -215,4 +230,5 @@ public abstract class IntegrationTest {
             throw new RuntimeException(e);
         }
     }
+
 }

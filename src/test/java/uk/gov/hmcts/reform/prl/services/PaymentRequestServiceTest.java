@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
-import uk.gov.hmcts.reform.prl.enums.OrchestrationConstants;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -70,7 +70,7 @@ public class PaymentRequestServiceTest {
         paymentServiceRequest = PaymentServiceRequest.builder()
             .callBackUrl(null)
             .casePaymentRequest(CasePaymentRequestDto.builder()
-                                    .action(OrchestrationConstants.PAYMENT_ACTION)
+                                    .action(PrlAppsConstants.PAYMENT_ACTION)
                                     .responsibleParty("123").build())
             .caseReference(String.valueOf("123"))
             .ccdCaseNumber(String.valueOf("123"))
@@ -119,7 +119,7 @@ public class PaymentRequestServiceTest {
 
         PaymentServiceResponse psr = paymentRequestService.createServiceRequest(callbackRequest, "test token");
         assertNotNull(psr);
-        assertEquals(psr.getServiceRequestReference(), "response");
+        assertEquals("response", psr.getServiceRequestReference());
 
     }
 
@@ -159,10 +159,8 @@ public class PaymentRequestServiceTest {
 
     @Test
     public void shouldThrowNullPointerException() throws Exception {
+        callbackRequest = CallbackRequest.builder().build();
         assertThrows(NullPointerException.class, () -> {
-            callbackRequest = CallbackRequest.builder()
-                .build();
-
             PaymentServiceResponse psr = paymentRequestService.createServiceRequest(callbackRequest, "");
         });
     }

@@ -1,28 +1,31 @@
 package uk.gov.hmcts.reform.prl.enums;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
-@Getter
 @RequiredArgsConstructor
+@JsonSerialize(using = CustomEnumSerializer.class)
 public enum YesOrNo {
 
     @JsonProperty("Yes")
-    YES("Yes"),
+    Yes("Yes"),
 
     @JsonProperty("No")
-    NO("No");
+    No("No");
 
     private final String value;
 
-    public static YesOrNo from(Boolean val) {
-        return val ? YES : NO;
+    @JsonCreator
+    public static YesOrNo getValue(String key) {
+        return YesOrNo.valueOf(key);
     }
 
-    @JsonIgnore
-    public boolean toBoolean() {
-        return YES.name().equalsIgnoreCase(this.name());
+    @JsonValue
+    public String getDisplayedValue() {
+        return value;
     }
+
 }

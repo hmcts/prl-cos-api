@@ -5,9 +5,10 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -20,9 +21,9 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILD_DETAILS_ERROR;
-import static uk.gov.hmcts.reform.prl.enums.Gender.OTHER;
-import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.ANOTHER_PERSON;
-import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.YES;
+import static uk.gov.hmcts.reform.prl.enums.Gender.other;
+import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
+import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Service
 public class ChildChecker implements EventChecker {
@@ -35,7 +36,7 @@ public class ChildChecker implements EventChecker {
 
         Optional<List<Element<Child>>> childrenWrapped = ofNullable(caseData.getChildren());
 
-        if (childrenWrapped.isPresent() && childrenWrapped.get().size() != 0) {
+        if (!childrenWrapped.isEmpty() && !childrenWrapped.get().isEmpty()) {
             List<Child> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
@@ -62,7 +63,7 @@ public class ChildChecker implements EventChecker {
 
         boolean anyStarted = false;
 
-        if (childrenWrapped.isPresent() && childrenWrapped.get().size() != 0) {
+        if (!childrenWrapped.isEmpty() && !childrenWrapped.get().isEmpty()) {
             List<Child> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
@@ -84,13 +85,13 @@ public class ChildChecker implements EventChecker {
 
     private boolean validateMandatoryFieldsCompleted(Child child) {
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(child.getFirstName()));
         fields.add(ofNullable(child.getLastName()));
         fields.add(ofNullable(child.getDateOfBirth()));
         Optional<Gender> gender = ofNullable(child.getGender());
         fields.add(gender);
-        if (gender.isPresent() && gender.get().equals(OTHER)) {
+        if (gender.isPresent() && gender.get().equals(other)) {
             fields.add(ofNullable(child.getOtherGender()));
         }
         fields.add(ofNullable(child.getOrderAppliedFor()));
@@ -100,28 +101,36 @@ public class ChildChecker implements EventChecker {
         if (childLivesWith.isPresent() && childLivesWith.get().equals(Collections.emptyList())) {
             return false;
         }
-        if (childLivesWith.isPresent() && childLivesWith.get().contains(ANOTHER_PERSON)) {
-            fields.add(ofNullable(child.getOtherPersonWhoLivesWithChild()));
-            Optional<YesOrNo> isAddressKnown = ofNullable(child.getIsChildCurrentAddressKnown());
-            fields.add(isAddressKnown);
-            if (isAddressKnown.isPresent() && isAddressKnown.get().equals(YesOrNo.YES)) {
-                fields.add(ofNullable(child.getAddress().getAddressLine1()));
-                fields.add(ofNullable(child.getIsChildAddressConfidential()));
+        if (childLivesWith.isPresent() && childLivesWith.get().contains(anotherPerson)) {
+            Optional<List<Element<OtherPersonWhoLivesWithChild>>> personWhoLivesWithChildList =  ofNullable(child.getPersonWhoLivesWithChild());
+            if (personWhoLivesWithChildList.isEmpty()
+                || (personWhoLivesWithChildList.get().equals(Collections.emptyList()))) {
+                return false;
             }
-
+            personWhoLivesWithChildList.get().stream().map(Element::getValue).forEach(eachRow -> {
+                fields.add(ofNullable(eachRow.getFirstName()));
+                fields.add(ofNullable(eachRow.getLastName()));
+                Optional<Address> address = ofNullable(eachRow.getAddress());
+                fields.add(ofNullable(address));
+                if (address.isPresent() && ofNullable(address.get().getAddressLine1()).isEmpty()) {
+                    fields.add(Optional.empty());
+                }
+                fields.add(ofNullable(eachRow.getRelationshipToChildDetails()));
+                fields.add(ofNullable(eachRow.getIsPersonIdentityConfidential()));
+            });
         }
-
+        fields.add(ofNullable(child.getParentalResponsibilityDetails()));
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 
     }
 
     private boolean validateAdditionalFieldsCompleted(CaseData caseData) {
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
 
         Optional<YesNoDontKnow> childLocalAuth = ofNullable(caseData.getChildrenKnownToLocalAuthority());
         fields.add(childLocalAuth);
-        if (childLocalAuth.isPresent() && childLocalAuth.get().equals(YES)) {
+        if (childLocalAuth.isPresent() && childLocalAuth.get().equals(yes)) {
             fields.add(ofNullable(caseData.getChildrenKnownToLocalAuthorityTextArea()));
         }
         fields.add(ofNullable(caseData.getChildrenSubjectOfChildProtectionPlan()));
@@ -132,7 +141,7 @@ public class ChildChecker implements EventChecker {
 
     private boolean validateAnyFieldStarted(Child c) {
 
-        List<Optional> fields = new ArrayList<>();
+        List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(c.getFirstName()));
         fields.add(ofNullable(c.getLastName()));
         fields.add(ofNullable(c.getDateOfBirth()));
@@ -142,8 +151,8 @@ public class ChildChecker implements EventChecker {
         fields.add(ofNullable(c.getApplicantsRelationshipToChild()));
         fields.add(ofNullable(c.getRespondentsRelationshipToChild()));
         fields.add(ofNullable(c.getChildLiveWith()));
-        fields.add(ofNullable(c.getChildrenKnownToLocalAuthority()));
-        fields.add(ofNullable(c.getChildrenSubjectOfChildProtectionPlan()));
+
+        fields.add(ofNullable(c.getParentalResponsibilityDetails()));
 
         return  fields.stream().anyMatch(Optional::isPresent);
     }

@@ -11,4 +11,5 @@ public class GeneratedDocumentInfo {
     private String mimeType;
     private String createdOn;
     private String hashToken;
+    private String binaryUrl;
 }

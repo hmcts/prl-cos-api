@@ -9,11 +9,11 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LitigationCapacityCheckerTest {
-
-
     @Mock
     TaskErrorService taskErrorService;
 
@@ -25,58 +25,58 @@ public class LitigationCapacityCheckerTest {
 
         CaseData caseData = CaseData.builder().build();
         boolean hasMandatory = litigationCapacityChecker.hasMandatoryCompleted(caseData);
-        assert (!hasMandatory);
+        assertFalse(hasMandatory);
     }
 
     @Test
     public void notStartedWithoutFieldValues() {
         CaseData caseData = CaseData.builder().build();
         boolean isStarted = litigationCapacityChecker.isStarted(caseData);
-        assert (!isStarted);
+        assertFalse(isStarted);
     }
 
     @Test
     public void startedWithFieldOtherFactors() {
-        CaseData caseData = CaseData.builder().litigationCapacityOtherFactors(YesOrNo.YES).build();
+        CaseData caseData = CaseData.builder().litigationCapacityOtherFactors(YesOrNo.Yes).build();
         boolean isStarted = litigationCapacityChecker.isStarted(caseData);
-        assert (isStarted);
+        assertTrue(isStarted);
     }
 
     @Test
     public void notFinishedWithNullLitigationValues() {
         CaseData caseData = CaseData.builder().build();
         boolean isFinished = litigationCapacityChecker.isFinished(caseData);
-        assert (!isFinished);
+        assertFalse(isFinished);
     }
 
     @Test
     public void finishedWithLitigationOtherFactors() {
         CaseData caseData = CaseData.builder()
-            .litigationCapacityOtherFactors(YesOrNo.YES)
+            .litigationCapacityOtherFactors(YesOrNo.Yes)
             .litigationCapacityOtherFactorsDetails("")
             .build();
         boolean isFinished = litigationCapacityChecker.isFinished(caseData);
-        assert (isFinished);
+        assertTrue(isFinished);
     }
 
     @Test
     public void finishedWithLitigationFactorsOrReferrals() {
         CaseData caseData = CaseData.builder()
-            .litigationCapacityOtherFactors(YesOrNo.NO)
+            .litigationCapacityOtherFactors(YesOrNo.No)
             .litigationCapacityFactors("Test")
             .litigationCapacityReferrals("test ")
             .build();
         boolean isFinished = litigationCapacityChecker.isFinished(caseData);
-        assert (isFinished);
+        assertTrue(isFinished);
     }
 
     @Test
     public void finishedWithOtherFactorsAsNo() {
         CaseData caseData = CaseData.builder()
-            .litigationCapacityOtherFactors(YesOrNo.NO)
+            .litigationCapacityOtherFactors(YesOrNo.No)
             .build();
         boolean isFinished = litigationCapacityChecker.isFinished(caseData);
-        assert (isFinished);
+        assertTrue(isFinished);
     }
 
 }

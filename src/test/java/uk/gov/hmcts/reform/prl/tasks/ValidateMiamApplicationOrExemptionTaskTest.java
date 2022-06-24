@@ -8,10 +8,10 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.APPLICANT_ATTENDED_MIAM;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.CLAIMING_EXEMPTION_MIAM;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.NO;
-import static uk.gov.hmcts.reform.prl.enums.OrchestrationConstants.YES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_ATTENDED_MIAM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLAIMING_EXEMPTION_MIAM;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.tasks.ValidateMiamApplicationOrExemptionTask.ERROR_MSG_MIAM;
 
 public class ValidateMiamApplicationOrExemptionTaskTest {

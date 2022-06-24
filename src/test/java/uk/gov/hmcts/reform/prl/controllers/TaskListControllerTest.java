@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -28,7 +27,6 @@ public class TaskListControllerTest {
         CaseDataChanged caseDataChanged = new CaseDataChanged(CaseData.builder().build());
         taskListController.publishEvent(caseDataChanged);
 
-        verify(eventPublisher, times(1)).publishEvent(eq(caseDataChanged));
-
+        verify(eventPublisher, times(1)).publishEvent(caseDataChanged);
     }
 }
