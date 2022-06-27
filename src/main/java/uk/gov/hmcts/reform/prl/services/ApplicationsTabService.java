@@ -81,6 +81,7 @@ import uk.gov.hmcts.reform.prl.services.tab.TabService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.FieldGenerator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -137,7 +138,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("fl401RespondentTable", getFl401RespondentTable(caseData));
             Map<String,Object> applicantFamilyMap = getApplicantsFamilyDetails(caseData);
             applicationTab.put("applicantFamilyTable", applicantFamilyMap);
-            if (applicantFamilyMap.containsKey("applicantChild")) {
+            if (("Yes").equals(applicantFamilyMap.get("doesApplicantHaveChildren"))) {
                 applicationTab.put("fl401ChildDetailsTable", applicantFamilyMap.get("applicantChild"));
             }
             applicationTab.put("respondentBehaviourTable", getFl401RespondentBehaviourTable(caseData));
