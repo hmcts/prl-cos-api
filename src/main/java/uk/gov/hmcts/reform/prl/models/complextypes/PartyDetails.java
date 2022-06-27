@@ -17,12 +17,26 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class PartyDetails {
+
+    /**
+     * Case Invite Fields
+     */
+
+    private UUID idamId;
+    // if party is accessing citizen-ui then this is the linked email
+    private String userEmail;
+
+
+    /**
+     * Case Data Fields
+     */
 
     private final String firstName;
     private final String lastName;
