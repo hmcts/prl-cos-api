@@ -398,13 +398,8 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseData = caseData.setIssueDate();
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("issueDate", caseData.getIssueDate());
-
-        caseDataUpdated.putAll(allTabsService.getAllTabsFields(caseData));
+        caseDataUpdated.put("issueDate", LocalDate.now());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
