@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -144,8 +145,11 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.putAll(manageOrderService.clearManageOrdersFields(caseData));
+        caseDataMap.putAll(manageOrderService.populateHeader(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(manageOrderService.populateHeader(caseData))
+            .data(caseDataMap)
             .build();
     }
 
@@ -191,9 +195,6 @@ public class ManageOrdersController {
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
         }
 
-        caseDataUpdated.remove("previewOrderDoc");
-        caseDataUpdated.remove("dateOrderMade");
-        caseDataUpdated.remove("createSelectOrderOptions");
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
