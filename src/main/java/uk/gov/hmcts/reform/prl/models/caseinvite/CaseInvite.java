@@ -17,6 +17,7 @@ public class CaseInvite {
     private String accessCode;
     private String invitedUserId;
     private LocalDate expiryDate;
+    private String hasLinked;
 
     @Builder()
     public CaseInvite() {
@@ -29,6 +30,7 @@ public class CaseInvite {
         this.invitedUserId = invitedUserId;
         this.partyId = partyId;
         this.expiryDate = LocalDate.now().plus(2, ChronoUnit.WEEKS);
+        this.hasLinked = "No";
     }
 
     public CaseInvite generateAccessCode(String caseInviteEmail, UUID partyId) {
