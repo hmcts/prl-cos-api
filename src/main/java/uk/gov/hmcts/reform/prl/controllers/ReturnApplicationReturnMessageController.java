@@ -65,6 +65,8 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
         if (!returnApplicationService.noRejectReasonSelected(caseData)) {
             caseDataUpdated.put("returnMessage", returnApplicationService.getReturnMessage(caseData, userDetails));
         }
+        allTabsService.updateAllTabs(caseData);
+        allTabsService.getAllTabsFields(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
