@@ -1,9 +1,10 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,10 +79,10 @@ public class FL401SubmitApplicationController {
 
 
     @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to send FL401 application notification. ")
+    @Operation(description = "Callback to send FL401 application notification. ")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Application Submitted."),
-        @ApiResponse(code = 400, message = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "Application Submitted."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
     public CallbackResponse fl401SubmitApplicationValidation(@RequestHeader("Authorization")
                                                                  String authorisation,
                                                              @RequestBody CallbackRequest callbackRequest) {
@@ -99,10 +100,10 @@ public class FL401SubmitApplicationController {
     }
 
     @PostMapping(path = "/fl401-generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to generate FL401 final document and submit application. ")
+    @Operation(description = "Callback to generate FL401 final document and submit application. ")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Application Submitted."),
-        @ApiResponse(code = 400, message = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "Application Submitted."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse fl401GenerateDocumentSubmitApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
@@ -160,10 +161,10 @@ public class FL401SubmitApplicationController {
     }
 
     @PostMapping(path = "/fl401-submit-application-send-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to send FL401 application notification. ")
+    @Operation(description = "Callback to send FL401 application notification. ")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Application Submitted."),
-        @ApiResponse(code = 400, message = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "Application Submitted."),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public CallbackResponse fl401SendApplicationNotification(@RequestHeader("Authorization")
                                                                      String authorisation,
                                                                    @RequestBody CallbackRequest callbackRequest) {

@@ -226,3 +226,14 @@ document:
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
+
+springdoc:
+  swagger-ui:
+    operationsSorter: alpha
+    tagsSorter : alpha
+    doc-expansion : none
+  model-converters:
+    pageable-converter:
+      enabled: true
+    polymorphic-converter:
+      enabled: true
