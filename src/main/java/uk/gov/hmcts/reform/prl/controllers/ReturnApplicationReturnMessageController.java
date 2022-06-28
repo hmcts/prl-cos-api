@@ -1,9 +1,10 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +46,10 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
     CaseEventHandler caseEventHandler;
 
     @PostMapping(path = "/return-application-return-message", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to get return message of the return application ")
+    @Operation(description = "Callback to get return message of the return application ")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback proceeded"),
-        @ApiResponse(code = 400, message = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "Callback proceeded"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse returnApplicationReturnMessage(
         @RequestHeader("Authorization") String authorisation,
         @RequestBody CallbackRequest callbackRequest
@@ -69,7 +70,7 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
     }
 
     @PostMapping(path = "/return-application-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to send return application email notification")
+    @Operation(description = "Callback to send return application email notification")
     public AboutToStartOrSubmitCallbackResponse returnApplicationEmailNotification(
         @RequestBody CallbackRequest callbackRequest) {
 

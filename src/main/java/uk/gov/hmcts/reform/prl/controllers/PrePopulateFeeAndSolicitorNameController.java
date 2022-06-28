@@ -1,9 +1,10 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,10 +86,10 @@ public class PrePopulateFeeAndSolicitorNameController {
     public static final String CURRENCY_SIGN_POUND = "£";
 
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to get Solicitor name and fee amount. ")
+    @Operation(description = "Callback to get Solicitor name and fee amount. ")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "User name received."),
-        @ApiResponse(code = 400, message = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "User name received."),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public CallbackResponse prePopulateSolicitorAndFees(@RequestHeader("Authorization") String authorisation,
                                                         @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<String> errorList = new ArrayList<>();
