@@ -22,8 +22,7 @@ public class CaseUtils {
             .id(caseDetails.getId())
             .state(state)
             .createdDate(caseDetails.getCreatedDate())
-            .lastModifiedDate(caseDetails.getLastModified())
-            .caseTypeOfApplication(caseDetails.getCaseTypeId());
+            .lastModifiedDate(caseDetails.getLastModified());
 
         if ((State.SUBMITTED_PAID.equals(state))) {
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));

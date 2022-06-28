@@ -105,7 +105,7 @@
         }
       ]
     },
-    "case_type_id": "C100",
+    "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",
     "id": 0,
     "jurisdiction": "string",
@@ -118,7 +118,7 @@
   "case_details_before": {
     "callback_response_status": "string",
     "case_data": {},
-    "case_type_id": "C100",
+    "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",
     "id": 0,
     "jurisdiction": "string",
