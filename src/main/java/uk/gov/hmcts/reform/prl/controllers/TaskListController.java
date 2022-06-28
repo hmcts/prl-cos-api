@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 @Api
 @RestController
@@ -23,7 +23,7 @@ public class TaskListController extends AbstractCallbackController {
 
     @Autowired
     @Qualifier("allTabsService")
-    AllTabsService tabService;
+    AllTabServiceImpl tabService;
 
     @PostMapping("/submitted")
     public void handleSubmitted(@RequestBody CallbackRequest callbackRequest,
@@ -31,6 +31,6 @@ public class TaskListController extends AbstractCallbackController {
 
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         publishEvent(new CaseDataChanged(caseData));
-        tabService.updateAllTabs(caseData);
+        tabService.updateAllTabsIncludingConfTab(caseData);
     }
 }
