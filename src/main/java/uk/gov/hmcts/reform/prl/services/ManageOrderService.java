@@ -208,7 +208,6 @@ public class ManageOrderService {
         }
         emptyManageOrdersMap.put("manageOrdersOptions", null);
         emptyManageOrdersMap.put("dateOrderMade", null);
-        emptyManageOrdersMap.put("createSelectOrderOptions", null);
         emptyManageOrdersMap.put("approvalDate", null);
         emptyManageOrdersMap.put("appointmentOfGuardian", null);
         emptyManageOrdersMap.put("previewOrderDoc", null);
