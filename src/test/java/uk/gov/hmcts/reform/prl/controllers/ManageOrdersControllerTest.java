@@ -583,8 +583,6 @@ public class ManageOrdersControllerTest {
             authToken,
             callbackRequest
         );
-        // assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("createSelectOrderOptions"));
         assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
     }
 
