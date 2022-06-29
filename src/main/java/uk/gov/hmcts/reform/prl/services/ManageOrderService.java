@@ -206,20 +206,7 @@ public class ManageOrderService {
         for (Field field : caseData.getManageOrders().getClass().getDeclaredFields()) {
             emptyManageOrdersMap.put(field.getName(), null);
         }
-        emptyManageOrdersMap.put("manageOrdersOptions", null);
-        emptyManageOrdersMap.put("dateOrderMade", null);
-        emptyManageOrdersMap.put("approvalDate", null);
-        emptyManageOrdersMap.put("appointmentOfGuardian", null);
         emptyManageOrdersMap.put("previewOrderDoc", null);
-        emptyManageOrdersMap.put("doesOrderClosesCase", null);
-        emptyManageOrdersMap.put("wasTheOrderApprovedAtHearing", null);
-        emptyManageOrdersMap.put("judgeOrMagistratesLastName", null);
-        emptyManageOrdersMap.put("justiceLegalAdviserFullName", null);
-        emptyManageOrdersMap.put("childOption", null);
-        emptyManageOrdersMap.put("childrenList", null);
-        emptyManageOrdersMap.put("magistrateLastName", null);
-        emptyManageOrdersMap.put("appointedGuardianName", null);
-
         return emptyManageOrdersMap;
     }
 
