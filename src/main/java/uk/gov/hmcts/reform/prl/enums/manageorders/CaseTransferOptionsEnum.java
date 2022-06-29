@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.enums.manageorders;
 
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -10,10 +9,13 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum ChildSelectorEnum {
-
-    @JsonProperty("SELECTED")
-    SELECTED("SELECTED", "Yes");
+public enum CaseTransferOptionsEnum {
+    @JsonProperty("theHighCourt")
+    theHighCourt("theHighCourt", "The high court"),
+    @JsonProperty("countyCourt")
+    countyCourt("countyCourt", "County court"),
+    @JsonProperty("familyProceedingCourt")
+    familyProceedingCourt("familyProceedingCourt", "Family proceedings court");
 
     private final String id;
     private final String displayedValue;
@@ -24,7 +26,7 @@ public enum ChildSelectorEnum {
     }
 
     @JsonCreator
-    public static ChildSelectorEnum getValue(String key) {
-        return ChildSelectorEnum.valueOf(key);
+    public static CaseTransferOptionsEnum getValue(String key) {
+        return CaseTransferOptionsEnum.valueOf(key);
     }
 }
