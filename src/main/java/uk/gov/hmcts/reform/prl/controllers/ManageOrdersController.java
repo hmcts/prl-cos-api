@@ -84,7 +84,7 @@ public class ManageOrdersController {
         log.info("Enter the getcasedata to... with order type{}",caseData.getCreateSelectOrderOptions());
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             log.info("Enter if loop to... with case data{}",caseData.getDateOrderMade());
-            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
+            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
         } else {
             log.info("ENtering into else... {}", caseData.getAppointmentOfGuardian());
             caseDataUpdated.put("previewOrderDoc",caseData.getAppointmentOfGuardian());
@@ -143,8 +143,6 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        caseData.builder().manageOrders(null).build();
-
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageOrderService.populateHeader(caseData))
             .build();
@@ -183,8 +181,6 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
         }
-        caseDataUpdated.put("orderCollection", manageOrderService
-            .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
@@ -210,7 +206,7 @@ public class ManageOrdersController {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
-            manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
+            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

@@ -495,9 +495,9 @@ public class ManageOrderService {
         });
     }
 
-    public Map<String, Object> getCaseData(String authorisation, CaseData caseData,
-                             Map<String, Object> caseDataUpdated)
+    public Map<String, Object> getCaseData(String authorisation, CaseData caseData)
         throws Exception {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
 
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
 
