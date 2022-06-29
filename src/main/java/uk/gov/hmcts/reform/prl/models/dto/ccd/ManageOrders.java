@@ -195,6 +195,8 @@ public class ManageOrders {
     @JsonProperty("fl404bCustomFields")
     private final FL404b fl404bCustomFields;
 
+    @JsonProperty("isOrderDrawnForCafcass")
+    private final YesOrNo isOrderDrawnForCafcass;
     @JsonProperty("cafcassReports")
     private final List<CafcassReportsEnum> cafcassReports;
 }
