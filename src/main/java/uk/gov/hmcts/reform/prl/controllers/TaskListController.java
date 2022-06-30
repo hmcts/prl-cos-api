@@ -56,7 +56,7 @@ public class TaskListController extends AbstractCallbackController {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
-        String state = caseData.getState().getValue();
+        String state = callbackRequest.getCaseDetails().getState();
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))) {
             try {
                 caseDataUpdated = dgsService.generateDocuments(authorisation, caseData);
