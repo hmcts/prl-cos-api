@@ -20,7 +20,8 @@
       spring-expression-5.3.9.jar
       spring-jcl-5.3.9.jar
       spring-web-5.3.9.jar
-      spring-webmvc-5.3.9.jar]]></notes>
+      spring-webmvc-5.3.9.jar
+      Apache Tomcat ]]></notes>
     <cve>CVE-2022-22950</cve>
   </suppress>
 </suppressions>
