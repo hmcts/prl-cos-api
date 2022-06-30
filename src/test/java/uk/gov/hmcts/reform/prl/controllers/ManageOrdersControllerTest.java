@@ -584,7 +584,6 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         // assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("createSelectOrderOptions"));
         assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
     }
 
