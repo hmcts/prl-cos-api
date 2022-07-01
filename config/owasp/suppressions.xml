@@ -22,5 +22,6 @@
       spring-webmvc-5.3.9.jar]]></notes>
     <cve>CVE-2022-22950</cve>
     <cve>CVE-2022-34305</cve>
+    <cve>CVE-2022-33915</cve>
   </suppress>
 </suppressions>
