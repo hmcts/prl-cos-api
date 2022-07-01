@@ -429,28 +429,38 @@ public class CallbackController {
         List<Element<OtherDocuments>> otherDocuments = caseData.getOtherDocuments();
         if (furtherEvidences != null) {
             furtherEvidences = furtherEvidences.stream()
-                    .filter(element -> {
-                        return element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup);
-                    })
+                    .filter(element -> element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
                 .collect(Collectors.toList());
             caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
+
+            List<Element<FurtherEvidence>> furtherEvidencesNotConfidential = furtherEvidences.stream()
+                .filter(element -> element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
+                .collect(Collectors.toList());
+            caseDataUpdated.put("mainAppDocForTabDisplayNotConfidential", furtherEvidencesNotConfidential);
         }
         if (correspondence != null) {
             correspondence = correspondence.stream()
-                .filter(element -> {
-                    return element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup);
-                })
+                .filter(element -> element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup))
                 .collect(Collectors.toList());
             caseDataUpdated.put("correspondenceForTabDisplay", correspondence);
+
+            List<Element<Correspondence>> correspondenceForTabDisplayNotConfidential = correspondence.stream()
+                .filter(element -> !element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup))
+                .collect(Collectors.toList());
+            caseDataUpdated.put("correspondenceForTabDisplayNotConfidential", correspondenceForTabDisplayNotConfidential);
         }
         if (otherDocuments != null) {
 
             otherDocuments = otherDocuments.stream()
-                .filter(element -> {
-                    return element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup);
-                })
+                .filter(element -> element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
                 .collect(Collectors.toList());
             caseDataUpdated.put("otherDocumentsForTabDisplay", otherDocuments);
+
+            List<Element<OtherDocuments>> otherDocumentsForTabDisplayNotConfidential = otherDocuments.stream()
+                .filter(element -> !element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
+                .collect(Collectors.toList());
+            caseDataUpdated.put("otherDocumentsForTabDisplayNotConfidential", otherDocumentsForTabDisplayNotConfidential);
+
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
