@@ -434,7 +434,7 @@ public class CallbackController {
             caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
 
             List<Element<FurtherEvidence>> furtherEvidencesNotConfidential = furtherEvidences.stream()
-                .filter(element -> element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
+                .filter(element -> !element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
                 .collect(Collectors.toList());
             caseDataUpdated.put("mainAppNotConf", furtherEvidencesNotConfidential);
         }
