@@ -25,8 +25,6 @@ public class RespondentSolicitorEmail extends EmailTemplateVars {
     private final String respondentName;
     @JsonProperty("caseLink")
     private final String caseLink;
-    @JsonProperty("respondentName")
-    private final String respondentName;
     @JsonProperty("privacyNoticeLink")
     private final Map<String,Object> privacyNoticeLink;
 
