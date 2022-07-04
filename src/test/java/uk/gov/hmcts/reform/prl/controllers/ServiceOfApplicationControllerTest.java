@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +39,9 @@ public class ServiceOfApplicationControllerTest {
 
     @Mock
     private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
+
+    @Mock
+    AllTabServiceImpl allTabService;
 
     @Mock
     private ObjectMapper objectMapper;
