@@ -52,7 +52,7 @@ public class ServiceOfApplicationEmailService {
 
             emailService.send(
                 appSols.getKey(),
-                EmailTemplateNames.APPLICANT_SOLICITOR,
+                EmailTemplateNames.APPLICANT_SOLICITOR_CA,
                 buildApplicantSolicitorEmail(caseDetails, appSols.getValue()),
                 LanguagePreference.english
             );
@@ -78,7 +78,7 @@ public class ServiceOfApplicationEmailService {
     }
 
     public void sendEmailFL401(CaseDetails caseDetails) throws Exception {
-        log.info("Sending the server Parties emails for C100 Application for caseId {}", caseDetails.getId());
+        log.info("Sending the server Parties emails for FL401 Application for caseId {}", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         PartyDetails applicant = caseData.getApplicantsFL401();
@@ -87,7 +87,7 @@ public class ServiceOfApplicationEmailService {
         String solicitorName = applicant.getRepresentativeFirstName() + " " + applicant.getRepresentativeLastName();
         emailService.send(
             applicant.getSolicitorEmail(),
-            EmailTemplateNames.APPLICANT_SOLICITOR,
+            EmailTemplateNames.APPLICANT_SOLICITOR_DA,
             buildApplicantSolicitorEmail(caseDetails, solicitorName),
             LanguagePreference.english
         );
