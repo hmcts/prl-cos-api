@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -22,7 +24,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
-
+@Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseEventHandler {
@@ -35,6 +37,8 @@ public class CaseEventHandler {
     @EventListener
     public void handleCaseDataChange(final CaseDataChanged event) {
         final CaseData caseData = event.getCaseData();
+
+        log.info("event Change  Class CaseData : {}",new Gson().toJson(caseData));
 
         final String taskList = getUpdatedTaskList(caseData);
 
