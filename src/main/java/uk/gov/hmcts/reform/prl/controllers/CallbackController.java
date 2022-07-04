@@ -447,7 +447,11 @@ public class CallbackController {
             List<Element<Correspondence>> correspondenceForTabDisplayNotConfidential = correspondence.stream()
                 .filter(element -> !element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup))
                 .collect(Collectors.toList());
+
             caseDataUpdated.put("corrNotConf", correspondenceForTabDisplayNotConfidential);
+            log.info(correspondenceForTabDisplayNotConfidential.toString());
+            log.info("***********");
+            log.info(caseDataUpdated.get("corrNotConf").toString());
         }
         if (otherDocuments != null) {
 
