@@ -93,5 +93,7 @@ public class PrlAppsConstants {
     public static final String D_MMMM_YYYY = "d MMMM yyyy";
 
     public static final String APPOINTED_GUARDIAN_FULL_NAME = "appointedGuardianFullName";
+    public static final String PREVIOUS_OR_ONGOING_PROCEEDINGS = "previousOrOngoingProceedings";
+    public static final String STRING_FORMATTER = "%s %s";
 
 }
