@@ -3,10 +3,18 @@ appVersion: "1.0"
 description: A Helm chart for prl-cos-api App
 name: prl-cos
 home: https://github.com/hmcts/prl-cos-api
+<<<<<<< HEAD
 version: 0.0.23
+=======
+version: 0.0.22
+>>>>>>> bce004601 (Bumping chart version/ fixing aliases)
 maintainers:
   - name: HMCTS Family Private Law team
 dependencies:
   - name: java
+<<<<<<< HEAD
     version: 4.0.1
+=======
+    version: 3.7.2
+>>>>>>> bce004601 (Bumping chart version/ fixing aliases)
     repository: 'https://hmctspublic.azurecr.io/helm/v1/repo/'
