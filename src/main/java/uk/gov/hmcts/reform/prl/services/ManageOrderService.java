@@ -319,9 +319,8 @@ public class ManageOrderService {
         if (caseData.getFl401FamilymanCaseNumber() == null && caseData.getFamilymanCaseNumber() == null) {
             return FAMILY_MAN_ID;
         }
-        return FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            ? FAMILY_MAN_ID + caseData.getFl401FamilymanCaseNumber()
-            : FAMILY_MAN_ID + caseData.getFamilymanCaseNumber();
+        //changed as single family man number field
+        return FAMILY_MAN_ID + caseData.getFamilymanCaseNumber();
     }
 
     private String getChildInfoFromCaseData(CaseData caseData) {
