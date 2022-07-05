@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -145,6 +146,54 @@ public class ResubmitApplicationController {
             caseDataUpdated.put("submitAgreeStatement", null);
         }
 
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
+            .build();
+    }
+
+    @PostMapping(path = "/fl401/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to change the state and send notifications.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Resubmission completed"),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse fl401resubmitApplication(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
+        Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
+            ResubmitApplicationController::getPreviousState).findFirst();
+        Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
+
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+
+        if (previousStates.isPresent() && State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
+            caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
+            caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+            caseData = caseData.setDateSubmittedDate();
+            caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
+            caseDataUpdated.put(
+                DATE_AND_TIME_SUBMITTED_FIELD,
+                DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)
+            );
+            try {
+                solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
+                caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+                caseDataUpdated.put("isNotificationSent", "Yes");
+            } catch (Exception e) {
+                log.error("Notification could not be sent due to {} ", e.getMessage());
+                caseDataUpdated.put("isNotificationSent", "No");
+            }
+        }
+        //set the resubmit fields to null so they are blank if multiple resubmissions
+        caseDataUpdated.put("fl401StmtOfTruthResubmit", null);
+        caseDataUpdated.put("fl401ConfidentialityCheckResubmit", null);
+        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+        caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();

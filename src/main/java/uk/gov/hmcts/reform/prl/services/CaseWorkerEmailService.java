@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -162,34 +163,42 @@ public class CaseWorkerEmailService {
             .contentFromDev(returnMessage)
             .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .build();
-
     }
 
+
     public void sendReturnApplicationEmailToSolicitor(CaseDetails caseDetails) {
-
         caseData = emailService.getCaseData(caseDetails);
+        String email = "";
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> applicants = caseData
+                .getApplicants()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
 
-        List<PartyDetails> applicants = caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
+            List<String> applicantEmailList = applicants.stream()
+                .map(PartyDetails::getSolicitorEmail)
+                .collect(Collectors.toList());
 
-        List<String> applicantEmailList = applicants.stream()
-            .map(PartyDetails::getSolicitorEmail)
-            .collect(Collectors.toList());
+            email = applicantEmailList.get(0);
 
-        String email = applicantEmailList.get(0);
+            if (applicants.size() > 1) {
+                email = caseData.getApplicantSolicitorEmailAddress();
+            }
+        } else {
+            PartyDetails fl401Applicant = caseData
+                .getApplicantsFL401();
 
-        if (applicants.size() > 1) {
-            email = caseData.getApplicantSolicitorEmailAddress();
+            email = fl401Applicant.getSolicitorEmail();
         }
+
         emailService.send(
             email,
             EmailTemplateNames.RETURNAPPLICATION,
             buildReturnApplicationEmail(caseDetails),
             LanguagePreference.english
         );
+
 
     }
 
@@ -209,7 +218,8 @@ public class CaseWorkerEmailService {
 
         emailList.forEach(email ->   emailService.send(
             email,
-            EmailTemplateNames.GATEKEEPER,
+            PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                ? EmailTemplateNames.GATEKEEPER_FL401 : EmailTemplateNames.GATEKEEPER,
             buildGatekeeperEmail(caseDetails),
             LanguagePreference.english
         ));
@@ -222,7 +232,7 @@ public class CaseWorkerEmailService {
         String typeOfHearing = "";
         String isCaseUrgent = NO;
 
-        if (caseData.getIsCaseUrgent().equals(YesOrNo.Yes)) {
+        if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
             typeOfHearing = URGENT_CASE;
             isCaseUrgent = YES;
         }
@@ -350,6 +360,31 @@ public class CaseWorkerEmailService {
             .issueDate(issueDate.format(dateTimeFormatter))
             .isConfidential(isConfidential)
             .caseLink(manageCaseUrl + "/" + caseData.getId())
+            .build();
+    }
+
+    public void sendWithdrawApplicationEmailToLocalCourt(CaseDetails caseDetails, String courtEmail) {
+
+        log.info("*** Sending FL401 withdraw application email to localcourt for case :{} ***", caseDetails.getId());
+
+        emailService.send(
+            courtEmail,
+            EmailTemplateNames.WITHDRAW_AFTER_ISSUED_LOCAL_COURT,
+            buildLocalCourtAdminEmailForWithdrawAfterIssued(caseDetails),
+            LanguagePreference.english
+        );
+    }
+
+    public EmailTemplateVars buildLocalCourtAdminEmailForWithdrawAfterIssued(CaseDetails caseDetails) {
+
+        log.info("*** building email to localcourt for withdraw after issued for case:{} ***", caseDetails.getId());
+        caseData = emailService.getCaseData(caseDetails);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+
+        return CaseWorkerEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
             .build();
     }
 }
