@@ -134,13 +134,14 @@ public class ManageOrderServiceTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .fl401FamilymanCaseNumber("familyman12345")
+            .familymanCaseNumber("familyman6789")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
         assertEquals("Case Name: Test Case 45678\n\n"
-                         + "Family Man ID: familyman12345\n\n", responseMap.get("manageOrderHeader1"));
+                         + "Family Man ID: familyman6789\n\n", responseMap.get("manageOrderHeader1"));
 
     }
 
