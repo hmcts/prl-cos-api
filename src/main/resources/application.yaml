@@ -16,14 +16,6 @@ case:
     documentgenerate:
       uri: ${case.orchestration.service.base.uri}/generate-save-draft-document
 
-prl:
-  system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
-  document:
-    generate:
-      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
-
 management:
   endpoint:
     health:
@@ -61,10 +53,10 @@ pba:
 
 feature-toggle:
   toggle:
-    example: ${FEATURE_EXAMPLE:false}
+    example: false
 
 xui:
-  url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
+  url: http://localhost:3000
 
 uk:
   gov:
@@ -130,33 +122,34 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+    totp-secret: GT2V6PLQ34XGPTPM
   api:
-    url: https://idam-api.aat.platform.hmcts.net
+    url: http://localhost:5000
   client:
     id: prl-cos-api
-    baseUrl: https://idam-api.aat.platform.hmcts.net
-    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
-    clientId: xuiwebapp
-    authorize:
-      context-path: /oauth2/authorize
-    token:
-      context-path: /oauth2/token
-  user:
-    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
-  solicitor:
-    username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
-    password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
+    redirect_uri: http://localhost:3000/oauth2/callback
+    secret: W7supXKMJgcEWKBS
+
+prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+    username: prl_local_sysupdate@mailinator.com
+    password: Password12
 
 test-url: ${TEST_URL:http://localhost:4044}
 
+security:
+  oauth2:
+    client:
+      provider:
+        oidc:
+          issuer-uri: http://locahost:5000/o
+      registration:
+        oidc:
+          client-id: internal
+          client-secret: internal
 core_case_data:
   api:
-    url: ${CORE_CASE_DATA_API_URL:http://localhost:4452}
+    url: http://localhost:4452
 
 auth:
   idam:
@@ -178,7 +171,7 @@ send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
 
 case_document_am:
-  url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
+  url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
 
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
@@ -188,7 +181,7 @@ courtfinder:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
 launchdarkly:
-  sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
+  sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
 
 rd_professional:
   api:
@@ -277,4 +270,6 @@ document:
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
+
+
 
