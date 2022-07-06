@@ -522,7 +522,7 @@ public class ManageOrderService {
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
-
+        log.info("*****Case data in service*** {}",caseData);
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
