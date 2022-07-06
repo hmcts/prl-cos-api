@@ -81,6 +81,24 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c49_filename}")
     protected String c49File;
 
+    @Value("${document.templates.fl401.fl401_fl406_draft_template}")
+    protected String fl406DraftTemplate;
+
+    @Value("${document.templates.fl401.fl401_fl406_draft_filename}")
+    protected String fl406DraftFile;
+
+    @Value("${document.templates.fl401.fl401_fl406_english_template}")
+    protected String fl406TemplateEnglish;
+
+    @Value("${document.templates.fl401.fl401_fl406_engllish_filename}")
+    protected String fl406FileEnglish;
+
+    @Value("${document.templates.fl401.fl401_fl406_welsh_template}")
+    protected String fl406TemplateWelsh;
+
+    @Value("${document.templates.fl401.fl401_fl406_welsh_filename}")
+    protected String fl406FileWelsh;
+
     @Value("${document.templates.common.C43A_final_template}")
     protected String c43AFinalTemplate;
 
@@ -216,10 +234,10 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
                 break;
             case powerOfArrest:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE, c49TDraftTemplate);
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, c49DraftFile);
-                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c49Template);
-                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c49File);
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, fl406DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, fl406DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl406TemplateEnglish);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl406FileEnglish);
                 break;
             case standardDirectionsOrder:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE,"");
