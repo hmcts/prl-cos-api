@@ -355,6 +355,11 @@ public class ManageOrderService {
 
     private OrderDetails getCurrentOrderDetails(String authorisation, CaseData caseData)
         throws Exception {
+
+        String flagSelectedOrder = caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
+            ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
+            : caseData.getChildArrangementOrders().getDisplayedValue();
+
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
@@ -362,7 +367,7 @@ public class ManageOrderService {
                 CaseDetails.builder().caseData(caseData).build(),
                 fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
             );
-            return OrderDetails.builder().orderType(caseData.getSelectedOrder())
+            return OrderDetails.builder().orderType(flagSelectedOrder)
                 .orderDocument(Document.builder()
                                    .documentUrl(generatedDocumentInfo.getUrl())
                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -382,7 +387,7 @@ public class ManageOrderService {
                 .dateCreated(dateTime.now())
                 .build();
         } else {
-            return OrderDetails.builder().orderType(caseData.getSelectedOrder())
+            return OrderDetails.builder().orderType(flagSelectedOrder)
                 .orderDocument(caseData.getAppointmentOfGuardian())
                 .otherDetails(OtherOrderDetails.builder()
                                   .createdBy(caseData.getJudgeOrMagistratesLastName())
