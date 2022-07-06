@@ -355,6 +355,33 @@ public class ManageOrderServiceTest {
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
     }
 
+    @Test
+    public void testPopulatePreviewOrderFromPowerOfArrest() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.powerOfArrest)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
+
+        assertNotNull(caseDataUpdated.get("previewOrderDoc"));
+    }
 
     @Test
     public void testPupulateHeaderC100Test() {
