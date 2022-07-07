@@ -28,10 +28,6 @@ public class DgsService {
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
-        log.info(
-            "in DGS Service casedata, before appobjectMapper {}",
-            caseDetails != null ? caseDetails.getCaseData() : "CaseDeatils empty"
-        );
         tempCaseDetails.put("caseDetails", AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
         log.info("in DGS Service tempCaseDetails, after appobjectMapper {}", tempCaseDetails);
         GeneratedDocumentInfo generatedDocumentInfo = null;
