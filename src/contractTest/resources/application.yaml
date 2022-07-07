@@ -3,27 +3,6 @@ server:
 
 runs-locally: ${RUNS_LOCALLY:true}
 
-env: ${test_environment:local}
-TEST_URL: https://localhost:4044
-
-case:
-  orchestration:
-    service:
-      base:
-        uri: '#{environment["TEST_URL"].replaceFirst("https://", "http://")}'
-    prepopulate:
-      uri: ${case.orchestration.service.base.uri}/getSolicitorAndFeeDetails
-    documentgenerate:
-      uri: ${case.orchestration.service.base.uri}/generate-save-draft-document
-
-prl:
-  system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
-  document:
-    generate:
-      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
-
 management:
   endpoint:
     health:
