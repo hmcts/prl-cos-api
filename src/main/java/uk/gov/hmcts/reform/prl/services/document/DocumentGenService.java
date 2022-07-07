@@ -269,7 +269,7 @@ public class DocumentGenService {
         if (null != generatedDocumentInfo) {
             caseData = caseData.toBuilder().isDocumentGenerated("Yes").build();
         }
-
+        log.info("****** Is the document generated for the template {} : {} ******", template,caseData.getIsDocumentGenerated());
         log.info("Genereated the {} document for case id {} ", template, caseData.getId());
         return generatedDocumentInfo;
     }
