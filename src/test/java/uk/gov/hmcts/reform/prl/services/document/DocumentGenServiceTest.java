@@ -47,6 +47,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -182,7 +183,7 @@ public class DocumentGenServiceTest {
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
-            .allegationsOfHarmYesNo(No)
+            //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -193,10 +194,10 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .allegationsOfHarmYesNo(Yes)
+            //.allegationsOfHarmYesNo(Yes)
             .applicants(listOfApplicants)
             .state(State.SUBMITTED_PAID)
-            .allegationsOfHarmYesNo(No)
+            //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -210,7 +211,7 @@ public class DocumentGenServiceTest {
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
-            .allegationsOfHarmYesNo(Yes)
+            //.allegationsOfHarmYesNo(Yes)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
