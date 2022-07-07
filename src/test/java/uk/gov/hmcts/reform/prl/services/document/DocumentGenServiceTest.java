@@ -183,6 +183,7 @@ public class DocumentGenServiceTest {
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
+            //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -193,9 +194,10 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .allegationOfHarm(allegationOfHarmYes)
+            //.allegationsOfHarmYesNo(Yes)
             .applicants(listOfApplicants)
             .state(State.SUBMITTED_PAID)
+            //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -209,7 +211,7 @@ public class DocumentGenServiceTest {
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
-            .allegationOfHarm(allegationOfHarmYes)
+            //.allegationsOfHarmYesNo(Yes)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
