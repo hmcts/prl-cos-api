@@ -52,7 +52,6 @@ public class TaskListController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         publishEvent(new CaseDataChanged(caseData));
-        tabService.updateAllTabsIncludingConfTab(caseData);
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
@@ -64,6 +63,7 @@ public class TaskListController extends AbstractCallbackController {
                 log.error("Error regenerating the document", e);
             }
         }
+        tabService.updateAllTabsIncludingConfTab(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
