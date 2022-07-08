@@ -212,8 +212,10 @@ public class ManageOrderService {
 
     private Map<String, Object> getChildrenListData(CaseData caseData) {
         Map<String, Object> childrenList = new HashMap<>();
-        childrenList.put("childrenList", getChildInfoFromCaseData(caseData));
-//        childrenList.put("manageOrders", ManageOrders.builder().childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)));
+        String childInfo = getChildInfoFromCaseData(caseData);
+
+        childrenList.put("childrenList", childInfo);
+        childrenList.put("childListForSpecialGuardianship", childInfo);
         return childrenList;
     }
 
@@ -521,16 +523,17 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
 
-//        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-//            authorisation,
-//            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-//            fieldsMap.get(PrlAppsConstants.TEMPLATE)
-//        );
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+            fieldsMap.get(PrlAppsConstants.TEMPLATE)
+        );
 
         caseDataUpdated.put("isEngDocGen", Yes.toString());
         caseDataUpdated.put("previewOrderDoc", Document.builder()
-            .documentUrl("http://dm-store:8080/documents/cb961f7b-47e2-4954-a0e0-ca9a46ed2365")
-            .documentBinaryUrl("http://dm-store:8080/documents/cb961f7b-47e2-4954-a0e0-ca9a46ed2365")
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
         return caseDataUpdated;
     }
