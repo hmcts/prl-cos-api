@@ -38,8 +38,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.joining;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
@@ -204,6 +208,13 @@ public class ManageOrderService {
         return caseData.toBuilder().childrenList(getChildInfoFromCaseData(caseData))
             .manageOrders(ManageOrders.builder().childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
+    }
+
+    private Map<String, Object> getChildrenListData(CaseData caseData) {
+        Map<String, Object> childrenList = new HashMap<>();
+        childrenList.put("childrenList", getChildInfoFromCaseData(caseData));
+//        childrenList.put("manageOrders", ManageOrders.builder().childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)));
+        return childrenList;
     }
 
     private Map<String,String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
@@ -510,17 +521,16 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
 
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-            fieldsMap.get(PrlAppsConstants.TEMPLATE)
-        );
+//        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+//            authorisation,
+//            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+//            fieldsMap.get(PrlAppsConstants.TEMPLATE)
+//        );
 
         caseDataUpdated.put("isEngDocGen", Yes.toString());
         caseDataUpdated.put("previewOrderDoc", Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentUrl("http://dm-store:8080/documents/cb961f7b-47e2-4954-a0e0-ca9a46ed2365")
+            .documentBinaryUrl("http://dm-store:8080/documents/cb961f7b-47e2-4954-a0e0-ca9a46ed2365")
             .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
         return caseDataUpdated;
     }
@@ -627,4 +637,32 @@ public class ManageOrderService {
                                                           caseData.getApplicantsFL401().getRepresentativeLastName()))
             .build();
     }
+
+
+    public Map<String, Object> getChildOptionList(CaseData caseData) {
+        Map<String, Object> childMap = getChildrenListData(caseData);
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = populateCustomOrderFields(caseData);
+        }
+        String childOption = null;
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            childOption = IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
+                .mapToObj(Integer::toString)
+                .collect(joining());
+        } else {
+            Optional<List<Element<ApplicantChild>>> applicantChildDetails = Optional.ofNullable(caseData.getApplicantChildDetails());
+            if (applicantChildDetails.isPresent()) {
+                childOption = IntStream.range(0, defaultIfNull(applicantChildDetails.get(), emptyList()).size())
+                    .mapToObj(Integer::toString)
+                    .collect(joining());
+            }
+        }
+
+        childMap.put("childOption", childOption);
+
+        return childMap;
+    }
+
+
+
 }
