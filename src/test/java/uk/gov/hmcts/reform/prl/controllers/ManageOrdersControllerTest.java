@@ -119,6 +119,7 @@ public class ManageOrdersControllerTest {
     public void testSubmitApplicationEventValidation() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
+            .courtName("Horsham Court")
             .appointmentOfGuardian(Document.builder().build())
             .build();
 
@@ -138,6 +139,10 @@ public class ManageOrdersControllerTest {
                              .id(12345L)
                              .data(stringObjectMap)
                              .build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(stringObjectMap)
+                                   .build())
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
