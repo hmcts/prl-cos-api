@@ -35,12 +35,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
@@ -425,7 +428,9 @@ public class ManageOrderService {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
             List<String> applicantSolicitorNames  = applicants.stream()
-                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Applicant's Solicitor)")
+                .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
+                    ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
+                    : APPLICANT_SOLICITOR)
                 .collect(Collectors.toList());
             return String.join("\n", applicantSolicitorNames);
         } else {
@@ -449,7 +454,7 @@ public class ManageOrderService {
                 return "";
             }
             List<String> respondentSolicitorNames = respondents.stream()
-                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Respondent's Solicitor)")
+                .map(party -> party.getSolicitorOrg().getOrganisationName() + RESPONDENT_SOLICITOR)
                 .collect(Collectors.toList());
             return String.join("\n", respondentSolicitorNames);
         } else {
