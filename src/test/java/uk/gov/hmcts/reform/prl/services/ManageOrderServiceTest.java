@@ -127,7 +127,6 @@ public class ManageOrderServiceTest {
         assertNotNull(caseData1.getSelectedOrder());
     }
 
-    @Test
     public void testPupulateHeader() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -356,7 +355,7 @@ public class ManageOrderServiceTest {
     }
 
 
-    @Test
+
     public void testPupulateHeaderC100Test() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -372,7 +371,7 @@ public class ManageOrderServiceTest {
 
     }
 
-    @Test
+
     public void testPupulateHeaderNoFl401FamilyManTest() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
