@@ -128,7 +128,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPupulateHeader() {
+    public void testPopulateHeader() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
