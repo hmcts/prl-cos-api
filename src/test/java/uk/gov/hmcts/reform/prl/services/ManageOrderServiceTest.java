@@ -127,7 +127,6 @@ public class ManageOrderServiceTest {
         assertNotNull(caseData1.getSelectedOrder());
     }
 
-    @Test
     public void testPupulateHeader() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -383,7 +382,7 @@ public class ManageOrderServiceTest {
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
     }
 
-    @Test
+
     public void testPupulateHeaderC100Test() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -399,7 +398,7 @@ public class ManageOrderServiceTest {
 
     }
 
-    @Test
+
     public void testPupulateHeaderNoFl401FamilyManTest() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -795,6 +794,47 @@ public class ManageOrderServiceTest {
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.amendDischargedVaried)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .orderRecipients(recipientList)
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+
+    }
+
+    @Test
+    public void testAddOrderDetailsAndReturnReverseSortedListWithNullOrgName() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName(null).build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = ElementUtils.element(details);
+        partyDetails.add(partyDetailsElement);
+        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
+        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
             .dateOrderMade(LocalDate.now())
             .orderRecipients(recipientList)
