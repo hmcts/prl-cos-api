@@ -35,12 +35,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
@@ -213,7 +216,7 @@ public class ManageOrderService {
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
-        headerMap.put("manageOrderHeader1", getHeaderInfo(caseData));
+        //headerMap.put("manageOrderHeader1", getHeaderInfo(caseData));
         headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
         return headerMap;
     }
@@ -442,8 +445,11 @@ public class ManageOrderService {
                 .stream()
                 .map(Element::getValue)
                 .collect(Collectors.toList());
-            List<String> applicantSolicitorNames = applicants.stream()
-                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Applicant's Solicitor)")
+
+            List<String> applicantSolicitorNames  = applicants.stream()
+                .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
+                    ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
+                    : APPLICANT_SOLICITOR)
                 .collect(Collectors.toList());
             return String.join("\n", applicantSolicitorNames);
         } else {
@@ -467,7 +473,7 @@ public class ManageOrderService {
                 return "";
             }
             List<String> respondentSolicitorNames = respondents.stream()
-                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Respondent's Solicitor)")
+                .map(party -> party.getSolicitorOrg().getOrganisationName() + RESPONDENT_SOLICITOR)
                 .collect(Collectors.toList());
             return String.join("\n", respondentSolicitorNames);
         } else {

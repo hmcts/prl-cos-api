@@ -84,7 +84,13 @@ public class ManageOrdersController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("courtName and Id from CaseData {} {}", caseData.getCourtName(), caseData.getCourtId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("Enter the getcasedata to... with order type{}", caseData.getCreateSelectOrderOptions());
+        if (callbackRequest
+            .getCaseDetailsBefore() != null && callbackRequest
+            .getCaseDetailsBefore().getData().get("courtName") != null) {
+            caseData.setCourtName(callbackRequest
+                                      .getCaseDetailsBefore().getData().get("courtName").toString());
+        }
+        log.info("Enter the getcasedata to... with order type{}",caseData.getCreateSelectOrderOptions());
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             log.info("Enter if loop to... with case data{}", caseData.getDateOrderMade());
             caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
@@ -146,6 +152,7 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        caseData = manageOrderService.getUpdatedCaseData(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageOrderService.populateHeader(caseData))
             .build();
