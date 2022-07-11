@@ -239,6 +239,12 @@ document:
       fl401_draft_welsh_filename: Draft_DA_Welsh_application
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
+      fl401_fl406_draft_template: PRL-FL406-ORDERS-DRAFT.docx
+      fl401_fl406_draft_filename: Power_of_arrest.pdf
+      fl401_fl406_english_template: PRL-FL406-ORDERS-FINAL-ENGLISH.docx
+      fl401_fl406_engllish_filename: Power_of_arrest.pdf
+      fl401_fl406_welsh_template: PRL-FL406-ORDERS-FINAL-WELSH.docx
+      fl401_fl406_welsh_filename: Power_of_arrest.pdf
     common:
       prl_c21_template: PRL-ORDER-C21-FINAL.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf
