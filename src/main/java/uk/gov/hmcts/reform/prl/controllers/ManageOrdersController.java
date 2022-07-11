@@ -55,7 +55,7 @@ public class ManageOrdersController {
     private final UserService userService;
 
     @Autowired
-    private  ManageOrderService manageOrderService;
+    private ManageOrderService manageOrderService;
 
     @Autowired
     private final DocumentLanguageService documentLanguageService;
@@ -78,8 +78,11 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-
+        log.info("courtName and Id from callBack request {}",
+                 callbackRequest.getCaseDetails().getData().get("courtName"),
+                 callbackRequest.getCaseDetails().getData().get("courtId"));
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("courtName and Id from CaseData {} {}", caseData.getCourtName(), caseData.getCourtId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
@@ -89,11 +92,11 @@ public class ManageOrdersController {
         }
         log.info("Enter the getcasedata to... with order type{}",caseData.getCreateSelectOrderOptions());
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
-            log.info("Enter if loop to... with case data{}",caseData.getDateOrderMade());
+            log.info("Enter if loop to... with case data{}", caseData.getDateOrderMade());
             caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
         } else {
             log.info("ENtering into else... {}", caseData.getAppointmentOfGuardian());
-            caseDataUpdated.put("previewOrderDoc",caseData.getAppointmentOfGuardian());
+            caseDataUpdated.put("previewOrderDoc", caseData.getAppointmentOfGuardian());
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -149,6 +152,7 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        caseData = manageOrderService.getUpdatedCaseData(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageOrderService.populateHeader(caseData))
             .build();
@@ -191,7 +195,8 @@ public class ManageOrdersController {
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else {
-            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
+            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,
+                                                                                                caseData));
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
