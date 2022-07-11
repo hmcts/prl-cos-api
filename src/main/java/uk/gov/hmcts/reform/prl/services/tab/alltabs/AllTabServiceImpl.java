@@ -85,6 +85,11 @@ public class AllTabServiceImpl implements AllTabsService {
             combinedFieldsMap.put("c8WelshDocument", caseData.getC8WelshDocument());
         }
         getDocumentsMap(caseData,combinedFieldsMap);
+        log.info("*******allegations doc field Tabs********* : {}",combinedFieldsMap.get("c1ADocument"));
+        log.info("*******Confidental doc field Tabs********* : {}",combinedFieldsMap.get("c8Document"));
+        log.info("*******Final Document doc field Tabs********* : {}",combinedFieldsMap.get("finalDocument"));
+        log.info("*******welsh final document doc field Tabs********* : {}",combinedFieldsMap.get("finalWelshDocument"));
+
         // Calling event to refresh the page.
         refreshCcdUsingEvent(caseData, combinedFieldsMap);
     }
