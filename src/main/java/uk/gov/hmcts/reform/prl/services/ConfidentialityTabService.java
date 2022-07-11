@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -33,19 +34,25 @@ public class ConfidentialityTabService {
 
     public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
 
-        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            List<PartyDetails> applicants = caseData.getApplicants().stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-            applicantsConfidentialDetails = getConfidentialApplicantDetails(
-                applicants);
-
-            List<Child> children = caseData.getChildren().stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(children);
+            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
+            Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
+            if (applicantList.isPresent()) {
+                List<PartyDetails> applicants = caseData.getApplicants().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                applicantsConfidentialDetails = getConfidentialApplicantDetails(
+                    applicants);
+            }
+            Optional<List<Element<Child>>> chiildList = ofNullable(caseData.getChildren());
+            if (chiildList.isPresent()) {
+                List<Child> children = caseData.getChildren().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                childrenConfidentialDetails = getChildrenConfidentialDetails(children);
+            }
 
             return Map.of(
                 "applicantsConfidentialDetails",
@@ -68,6 +75,7 @@ public class ConfidentialityTabService {
                 childrenConfidentialDetails
             );
         }
+
     }
 
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetails(List<Child> children) {
