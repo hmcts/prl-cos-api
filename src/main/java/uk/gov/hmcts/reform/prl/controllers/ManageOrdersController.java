@@ -152,7 +152,6 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        caseData = manageOrderService.getUpdatedCaseData(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageOrderService.populateHeader(caseData))
             .build();
