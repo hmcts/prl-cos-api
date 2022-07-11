@@ -35,12 +35,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
@@ -80,6 +83,24 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_c49_filename}")
     protected String c49File;
+
+    @Value("${document.templates.fl401.fl401_fl406_draft_template}")
+    protected String fl406DraftTemplate;
+
+    @Value("${document.templates.fl401.fl401_fl406_draft_filename}")
+    protected String fl406DraftFile;
+
+    @Value("${document.templates.fl401.fl401_fl406_english_template}")
+    protected String fl406TemplateEnglish;
+
+    @Value("${document.templates.fl401.fl401_fl406_engllish_filename}")
+    protected String fl406FileEnglish;
+
+    @Value("${document.templates.fl401.fl401_fl406_welsh_template}")
+    protected String fl406TemplateWelsh;
+
+    @Value("${document.templates.fl401.fl401_fl406_welsh_filename}")
+    protected String fl406FileWelsh;
 
     @Value("${document.templates.common.C43A_final_template}")
     protected String c43AFinalTemplate;
@@ -195,7 +216,7 @@ public class ManageOrderService {
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
-        headerMap.put("manageOrderHeader1", getHeaderInfo(caseData));
+        //headerMap.put("manageOrderHeader1", getHeaderInfo(caseData));
         headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
         return headerMap;
     }
@@ -206,8 +227,8 @@ public class ManageOrderService {
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
-    private Map<String,String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
-        Map<String,String> fieldsMap = new HashMap();
+    private Map<String, String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
+        Map<String, String> fieldsMap = new HashMap();
         switch (selectedOrder) {
             case blankOrderOrDirections:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
@@ -216,13 +237,13 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
                 break;
             case powerOfArrest:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE, c49TDraftTemplate);
-                fieldsMap.put(PrlAppsConstants.FILE_NAME, c49DraftFile);
-                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c49Template);
-                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c49File);
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, fl406DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, fl406DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl406TemplateEnglish);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl406FileEnglish);
                 break;
             case standardDirectionsOrder:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE,"");
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, "");
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, "");
                 break;
             case blankOrderOrDirectionsWithdraw:
@@ -280,9 +301,9 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl402FinalFile);
                 break;
             case generalForm:
-                fieldsMap.put(PrlAppsConstants.TEMPLATE,n117DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, n117DraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, n117DraftFile);
-                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME,n117Template);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, n117Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, n117File);
                 break;
             case amendDischargedVaried:
@@ -424,8 +445,11 @@ public class ManageOrderService {
                 .stream()
                 .map(Element::getValue)
                 .collect(Collectors.toList());
+
             List<String> applicantSolicitorNames  = applicants.stream()
-                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Applicant's Solicitor)")
+                .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
+                    ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
+                    : APPLICANT_SOLICITOR)
                 .collect(Collectors.toList());
             return String.join("\n", applicantSolicitorNames);
         } else {
@@ -433,7 +457,7 @@ public class ManageOrderService {
             String applicantSolicitorName = applicantFl401.getRepresentativeFirstName()
                 + " "
                 + applicantFl401.getRepresentativeLastName();
-            return  applicantSolicitorName;
+            return applicantSolicitorName;
         }
     }
 
@@ -449,7 +473,7 @@ public class ManageOrderService {
                 return "";
             }
             List<String> respondentSolicitorNames = respondents.stream()
-                .map(party -> party.getSolicitorOrg().getOrganisationName() + " (Respondent's Solicitor)")
+                .map(party -> party.getSolicitorOrg().getOrganisationName() + RESPONDENT_SOLICITOR)
                 .collect(Collectors.toList());
             return String.join("\n", respondentSolicitorNames);
         } else {
@@ -479,7 +503,7 @@ public class ManageOrderService {
     }
 
     public void updateCaseDataWithAppointedGuardianNames(uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails,
-                                                    List<Element<AppointedGuardianFullName>> guardianNamesList) {
+                                                         List<Element<AppointedGuardianFullName>> guardianNamesList) {
         CaseData mappedCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
         List<AppointedGuardianFullName> appointedGuardianFullNameList = mappedCaseData
             .getAppointedGuardianName()
@@ -531,11 +555,15 @@ public class ManageOrderService {
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .manageOrdersCourtName(caseData.getCourtName())
             .manageOrdersApplicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
-                                                 caseData.getApplicantsFL401().getLastName()))
+                                                 caseData.getApplicantsFL401().getLastName()
+            ))
             .manageOrdersRespondent(String.format("%s %s", caseData.getRespondentsFL401().getFirstName(),
-                                                  caseData.getRespondentsFL401().getLastName()))
-            .manageOrdersApplicantReference(String.format("%s %s", caseData.getApplicantsFL401().getRepresentativeFirstName(),
-                                                          caseData.getApplicantsFL401().getRepresentativeLastName()))
+                                                  caseData.getRespondentsFL401().getLastName()
+            ))
+            .manageOrdersApplicantReference(String.format("%s %s",
+                                                          caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                                                          caseData.getApplicantsFL401().getRepresentativeLastName()
+            ))
             .build();
 
         if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
@@ -571,9 +599,11 @@ public class ManageOrderService {
             .fl404bCaseNumber(String.valueOf(caseData.getId()))
             .fl404bCourtName(caseData.getCourtName())
             .fl404bApplicantName(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
-                                               caseData.getApplicantsFL401().getLastName()))
+                                               caseData.getApplicantsFL401().getLastName()
+            ))
             .fl404bRespondentName(String.format("%s %s", caseData.getRespondentsFL401().getFirstName(),
-                                                caseData.getRespondentsFL401().getLastName()))
+                                                caseData.getRespondentsFL401().getLastName()
+            ))
             .build();
 
         if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
@@ -609,7 +639,8 @@ public class ManageOrderService {
             .findFirst()
             .orElseThrow(() -> new UnsupportedOperationException(String.format(
                 "Could not find action to amend order for order with id \"%s\"",
-                caseData.getManageOrders().getAmendOrderDynamicList().getValueCode())));
+                caseData.getManageOrders().getAmendOrderDynamicList().getValueCode()
+            )));
 
         return Map.of("manageOrdersDocumentToAmend", selectedOrder.getOrderDocument());
 
@@ -622,9 +653,12 @@ public class ManageOrderService {
             .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
             .manageOrdersFl402CourtName(caseData.getCourtName())
             .manageOrdersFl402Applicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
-                                                 caseData.getApplicantsFL401().getLastName()))
-            .manageOrdersFl402ApplicantRef(String.format("%s %s", caseData.getApplicantsFL401().getRepresentativeFirstName(),
-                                                          caseData.getApplicantsFL401().getRepresentativeLastName()))
+                                                      caseData.getApplicantsFL401().getLastName()
+            ))
+            .manageOrdersFl402ApplicantRef(String.format("%s %s",
+                                                         caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                                                         caseData.getApplicantsFL401().getRepresentativeLastName()
+            ))
             .build();
     }
 }
