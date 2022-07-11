@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.lang.reflect.Field;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -453,6 +454,29 @@ public class ManageOrderService {
                 + applicantFl401.getRepresentativeLastName();
             return  applicantSolicitorName;
         }
+    }
+
+    public Map<String, Object> clearManageOrdersFields(CaseData caseData) {
+        Map<String, Object> emptyManageOrdersMap = new HashMap<>();
+        for (Field field : caseData.getManageOrders().getClass().getDeclaredFields()) {
+            emptyManageOrdersMap.put(field.getName(), null);
+        }
+        emptyManageOrdersMap.put("manageOrdersOptions", null);
+        emptyManageOrdersMap.put("dateOrderMade", null);
+        emptyManageOrdersMap.put("createSelectOrderOptions", null);
+        emptyManageOrdersMap.put("approvalDate", null);
+        emptyManageOrdersMap.put("appointmentOfGuardian", null);
+        emptyManageOrdersMap.put("previewOrderDoc", null);
+        emptyManageOrdersMap.put("doesOrderClosesCase", null);
+        emptyManageOrdersMap.put("wasTheOrderApprovedAtHearing", null);
+        emptyManageOrdersMap.put("judgeOrMagistratesLastName", null);
+        emptyManageOrdersMap.put("justiceLegalAdviserFullName", null);
+        emptyManageOrdersMap.put("childOption", null);
+        emptyManageOrdersMap.put("childrenList", null);
+        emptyManageOrdersMap.put("magistrateLastName", null);
+        emptyManageOrdersMap.put("appointedGuardianName", null);
+
+        return emptyManageOrdersMap;
     }
 
     private String getRespondentSolicitorDetails(CaseData caseData) {
