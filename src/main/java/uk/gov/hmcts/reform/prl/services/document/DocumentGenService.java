@@ -214,7 +214,10 @@ public class DocumentGenService {
             updatedCaseData.put(DOCUMENT_FIELD_C8, null);
             updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
         }
-
+        log.info("*******allegations doc field ********* : {}",updatedCaseData.get("c1ADocument"));
+        log.info("*******Confidental doc field ********* : {}",updatedCaseData.get("c8Document"));
+        log.info("*******Final Document doc field ********* : {}",updatedCaseData.get("finalDocument"));
+        log.info("*******welsh final document doc field ********* : {}",updatedCaseData.get("finalWelshDocument"));
         return updatedCaseData;
     }
 
