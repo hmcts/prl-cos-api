@@ -176,7 +176,6 @@ public class ManageOrders {
     private final FL404 fl404CustomFields;
     //FL402
     private final String manageOrdersFl402CourtName;
-    @JsonIgnore
     private final Address manageOrdersFl402CourtAddress;
     private final String manageOrdersFl402CaseNo;
     private final String manageOrdersFl402Applicant;
@@ -186,7 +185,6 @@ public class ManageOrders {
     private final String dateOfHearingTime;
     private final String dateOfHearingTimeEstimate;
     private final String fl402HearingCourtname;
-    @JsonIgnore
     private final Address fl402HearingCourtAddress;
 
     @JsonProperty("fl404bCustomFields")

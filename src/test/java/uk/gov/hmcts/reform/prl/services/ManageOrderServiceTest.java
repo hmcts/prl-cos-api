@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -185,6 +186,45 @@ public class ManageOrderServiceTest {
 
 
     }
+
+    @Test
+    public void whenFl402Order_thenPopulateCustomFields() {
+        CaseData caseData = CaseData.builder()
+            .id(12345674L)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+            .courtName("Court name")
+            .childArrangementOrders(ChildArrangementOrdersEnum.authorityC31)
+            .applicantsFL401(PartyDetails.builder()
+                                 .firstName("app")
+                                 .lastName("testLast")
+                                 .representativeFirstName("test")
+                                 .representativeLastName("test1")
+                                 .build())
+            .respondentsFL401(PartyDetails.builder()
+                                  .firstName("resp")
+                                  .lastName("testLast")
+                                  .dateOfBirth(LocalDate.of(1990, 10, 20))
+                                  .address(Address.builder()
+                                               .addressLine1("add1")
+                                               .postCode("n145kk")
+                                               .build())
+                                  .build())
+            .build();
+
+        ManageOrders expectedDetails = ManageOrders.builder()
+            .manageOrdersFl402CaseNo("12345674")
+            .manageOrdersFl402CourtName("Court name")
+            .manageOrdersFl402Applicant("app testLast")
+            .manageOrdersFl402ApplicantRef("test test1")
+            .build();
+
+        CaseData updatedCaseData = manageOrderService.getFL402FormData(caseData);
+
+        assertEquals(updatedCaseData.getManageOrders(), expectedDetails);
+
+    }
+
+
 
     @Test
     public void testPopulatePreviewOrderFromCaSpecificOrder() throws Exception {
