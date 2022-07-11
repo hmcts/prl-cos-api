@@ -152,6 +152,10 @@ idam:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
 
+aca:
+  api:
+    url: ${ACA_SERVICE_API_BASEURL:http://localhost:4454}
+
 test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
