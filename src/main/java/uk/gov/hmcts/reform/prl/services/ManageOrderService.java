@@ -186,11 +186,17 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_fl404b_draft_filename}")
     protected String fl404bDraftFile;
 
+    @Value("${document.templates.common.prl_fl404b_blank_draft_filename}")
+    protected String fl404bBlankDraftFile;
+
     @Value("${document.templates.common.prl_fl404b_final_template}")
     protected String fl404bTemplate;
 
     @Value("${document.templates.common.prl_fl404b_final_filename}")
     protected String fl404bFile;
+
+    @Value("${document.templates.common.prl_fl404b_blank_final_filename}")
+    protected String fl404bBlankFile;
 
     @Value("${document.templates.common.prl_n117_draft_template}")
     protected String n117DraftTemplate;
@@ -310,6 +316,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404bDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404bTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404bFile);
+                break;
+            case blank:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404bDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404bBlankDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404bTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404bBlankFile);
                 break;
             default:
                 break;
