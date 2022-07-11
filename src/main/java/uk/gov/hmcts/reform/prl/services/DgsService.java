@@ -29,7 +29,6 @@ public class DgsService {
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put("caseDetails", AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
-        log.info("in DGS Service tempCaseDetails, after appobjectMapper {}", tempCaseDetails);
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
