@@ -140,6 +140,28 @@ public class ManageOrdersController {
             .build();
     }
 
+    @PostMapping(path = "/fetch-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to fetch case data and custom order fields")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Child details are fetched"),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public CallbackResponse prepopulateFL401CaseDetails(
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        caseData = manageOrderService.getUpdatedCaseData(caseData);
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = manageOrderService.populateCustomOrderFields(caseData);
+        }
+
+        return CallbackResponse.builder()
+            .data(caseData)
+            .build();
+    }
+
     @PostMapping(path = "/populate-header", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to populate the header")
     @ApiResponses(value = {
@@ -152,7 +174,6 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        caseData = manageOrderService.getUpdatedCaseData(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageOrderService.populateHeader(caseData))
             .build();

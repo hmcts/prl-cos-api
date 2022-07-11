@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -176,7 +175,6 @@ public class ManageOrders {
     private final FL404 fl404CustomFields;
     //FL402
     private final String manageOrdersFl402CourtName;
-    @JsonIgnore
     private final Address manageOrdersFl402CourtAddress;
     private final String manageOrdersFl402CaseNo;
     private final String manageOrdersFl402Applicant;
@@ -186,7 +184,6 @@ public class ManageOrders {
     private final String dateOfHearingTime;
     private final String dateOfHearingTimeEstimate;
     private final String fl402HearingCourtname;
-    @JsonIgnore
     private final Address fl402HearingCourtAddress;
 
     @JsonProperty("fl404bCustomFields")
