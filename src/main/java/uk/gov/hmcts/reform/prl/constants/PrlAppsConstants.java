@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.State;
 
+import java.util.List;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PrlAppsConstants {
     public static final String JURISDICTION = "PRIVATELAW";
@@ -97,4 +99,5 @@ public class PrlAppsConstants {
     public static final String APPLICANT_SOLICITOR = " (Applicant's Solicitor)";
     public static final String RESPONDENT_SOLICITOR = " (Respondent's Solicitor)";
 
+    public static final List<String> ROLES = List.of("caseworker-privatelaw-courtadmin","caseworker-privatelaw-judge","caseworker-privatelaw-la");
 }
