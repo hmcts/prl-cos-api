@@ -58,12 +58,10 @@ public class ManageOrders {
     private final LocalDate respondentDateOfBirth;
     private final Address respondentAddress;
     private final Address addressTheOrderAppliesTo;
-    private final String courtDeclares;
     @JsonProperty("courtDeclares2")
     private final List<ApplicantOccupationEnum> courtDeclares2;
     private final String homeRights;
     private final String applicantInstructions;
-    private final String theRespondent;
     @JsonProperty("theRespondent2")
     private final List<RespondentOccupationEnum> theRespondent2;
     private final YesOrNo powerOfArrest1;
@@ -91,7 +89,6 @@ public class ManageOrders {
     private String dateOrderEndsTime;
     private final String courtName2;
     private final Address ukPostcode2;
-    private final String applicantCost;
     private final String orderNotice;
     private final String hearingTimeEstimate;
 
