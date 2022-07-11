@@ -241,8 +241,8 @@ public class ManageOrderService {
         return childrenList;
     }
 
-    private Map<String,String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
-        Map<String,String> fieldsMap = new HashMap();
+    private Map<String, String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
+        Map<String, String> fieldsMap = new HashMap();
         switch (selectedOrder) {
             case blankOrderOrDirections:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
@@ -460,7 +460,7 @@ public class ManageOrderService {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
 
-            List<String> applicantSolicitorNames  = applicants.stream()
+            List<String> applicantSolicitorNames = applicants.stream()
                 .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
                     ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
                     : APPLICANT_SOLICITOR)
@@ -473,29 +473,6 @@ public class ManageOrderService {
                 + applicantFl401.getRepresentativeLastName();
             return applicantSolicitorName;
         }
-    }
-
-    public Map<String, Object> clearManageOrdersFields(CaseData caseData) {
-        Map<String, Object> emptyManageOrdersMap = new HashMap<>();
-        for (Field field : caseData.getManageOrders().getClass().getDeclaredFields()) {
-            emptyManageOrdersMap.put(field.getName(), null);
-        }
-        emptyManageOrdersMap.put("manageOrdersOptions", null);
-        emptyManageOrdersMap.put("dateOrderMade", null);
-        emptyManageOrdersMap.put("createSelectOrderOptions", null);
-        emptyManageOrdersMap.put("approvalDate", null);
-        emptyManageOrdersMap.put("appointmentOfGuardian", null);
-        emptyManageOrdersMap.put("previewOrderDoc", null);
-        emptyManageOrdersMap.put("doesOrderClosesCase", null);
-        emptyManageOrdersMap.put("wasTheOrderApprovedAtHearing", null);
-        emptyManageOrdersMap.put("judgeOrMagistratesLastName", null);
-        emptyManageOrdersMap.put("justiceLegalAdviserFullName", null);
-        emptyManageOrdersMap.put("childOption", null);
-        emptyManageOrdersMap.put("childrenList", null);
-        emptyManageOrdersMap.put("magistrateLastName", null);
-        emptyManageOrdersMap.put("appointedGuardianName", null);
-
-        return emptyManageOrdersMap;
     }
 
     private String getRespondentSolicitorDetails(CaseData caseData) {
@@ -597,9 +574,10 @@ public class ManageOrderService {
             .manageOrdersRespondent(String.format("%s %s", caseData.getRespondentsFL401().getFirstName(),
                                                   caseData.getRespondentsFL401().getLastName()
             ))
-            .manageOrdersApplicantReference(String.format("%s %s",
-                                                          caseData.getApplicantsFL401().getRepresentativeFirstName(),
-                                                          caseData.getApplicantsFL401().getRepresentativeLastName()
+            .manageOrdersApplicantReference(String.format(
+                "%s %s",
+                caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
             .build();
 
@@ -692,9 +670,10 @@ public class ManageOrderService {
             .manageOrdersFl402Applicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
                                                       caseData.getApplicantsFL401().getLastName()
             ))
-            .manageOrdersFl402ApplicantRef(String.format("%s %s",
-                                                         caseData.getApplicantsFL401().getRepresentativeFirstName(),
-                                                         caseData.getApplicantsFL401().getRepresentativeLastName()
+            .manageOrdersFl402ApplicantRef(String.format(
+                "%s %s",
+                caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
             .build();
     }
@@ -723,7 +702,6 @@ public class ManageOrderService {
 
         return childMap;
     }
-
 
 
 }
