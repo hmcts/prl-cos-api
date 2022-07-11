@@ -216,7 +216,6 @@ public class ManageOrderService {
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
-        headerMap.put("selectedOrder", getSelectedOrderInfo(caseData));
         headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
         return headerMap;
     }
@@ -589,6 +588,8 @@ public class ManageOrderService {
                 return getFl404bFields(caseData);
             case generalForm:
                 return getN117FormData(caseData);
+            case noticeOfProceedings:
+                return getFL402FormData(caseData);
             default:
                 return caseData;
         }
@@ -647,9 +648,9 @@ public class ManageOrderService {
 
     }
 
-    public ManageOrders getFL402FormData(CaseData caseData) {
+    public CaseData getFL402FormData(CaseData caseData) {
 
-        return ManageOrders.builder()
+        ManageOrders orderData =  ManageOrders.builder()
             .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
             .manageOrdersFl402CourtName(caseData.getCourtName())
             .manageOrdersFl402Applicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
@@ -660,5 +661,8 @@ public class ManageOrderService {
                                                          caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
             .build();
+
+        return caseData.toBuilder().manageOrders(orderData)
+            .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 }
