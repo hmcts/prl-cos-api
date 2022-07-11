@@ -1,6 +1,7 @@
 {
   "case_details": {
     "callback_response_status": "string",
+    "caseTypeOfApplication": "C100",
     "case_data": {
       "children": [
         {
