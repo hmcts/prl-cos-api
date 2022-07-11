@@ -74,6 +74,7 @@ public class TaskListController extends AbstractCallbackController {
             .c8WelshDocument((Document) caseDataUpdated.get("c8WelshDocument"))
             .finalDocument((Document) caseDataUpdated.get("finalDocument"))
             .finalWelshDocument((Document) caseDataUpdated.get("finalWelshDocument"))
+            .c1AWelshDocument((Document) caseDataUpdated.get("c1AWelshDocument"))
             .build();
         tabService.updateAllTabsIncludingConfTab(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
