@@ -84,7 +84,7 @@ public class AllTabServiceImpl implements AllTabsService {
         if (caseData.getC8WelshDocument() != null) {
             combinedFieldsMap.put("c8WelshDocument", caseData.getC8WelshDocument());
         }
-        combinedFieldsMap = getDocumentsMap(caseData,combinedFieldsMap);
+        getDocumentsMap(caseData,combinedFieldsMap);
         // Calling event to refresh the page.
         refreshCcdUsingEvent(caseData, combinedFieldsMap);
     }
