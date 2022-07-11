@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -60,6 +61,7 @@ public class AllTabServiceImplTest {
         when(CASE_DATA.getDateSubmitted()).thenReturn("2022-02-02");
         when(CASE_DATA.getCourtName()).thenReturn("TEST COURT");
         when(CASE_DATA.getCourtId()).thenReturn("COURT_!");
+
         doNothing().when(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
     }
 
@@ -76,6 +78,21 @@ public class AllTabServiceImplTest {
     @Test
     public void testAllTabsServiceIncConfTab() {
 
+        allTabService.updateAllTabsIncludingConfTab(CASE_DATA);
+
+        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+        verify(applicationsTabService).updateTab(CASE_DATA);
+        verify(caseSummaryTabService).updateTab(CASE_DATA);
+    }
+
+    @Test
+    public void testAllTabsServiceIncConfTabWithDocs() {
+        when(CASE_DATA.getC8Document()).thenReturn(Document.builder().build());
+        when(CASE_DATA.getC1ADocument()).thenReturn(Document.builder().build());
+        when(CASE_DATA.getC8WelshDocument()).thenReturn(Document.builder().build());
+        when(CASE_DATA.getC1AWelshDocument()).thenReturn(Document.builder().build());
+        when(CASE_DATA.getFinalDocument()).thenReturn(Document.builder().build());
+        when(CASE_DATA.getFinalWelshDocument()).thenReturn(Document.builder().build());
         allTabService.updateAllTabsIncludingConfTab(CASE_DATA);
 
         verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
