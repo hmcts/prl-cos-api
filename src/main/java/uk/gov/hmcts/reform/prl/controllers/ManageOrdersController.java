@@ -154,7 +154,7 @@ public class ManageOrdersController {
         );
 
         Map<String, Object> updatedCaseData = manageOrderService.populateHeader(caseData);
-        //updatedCaseData.putAll(manageOrderService.clearManageOrdersFields(caseData));
+        updatedCaseData.putAll(manageOrderService.clearManageOrdersFields(caseData));
         updatedCaseData.putAll(manageOrderService.getChildOptionList(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(updatedCaseData)
