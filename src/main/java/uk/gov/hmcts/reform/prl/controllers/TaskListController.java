@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -65,6 +66,15 @@ public class TaskListController extends AbstractCallbackController {
         }
         log.info("*******allegations doc foeld ********* : {}",caseDataUpdated.get("c1ADocument"));
         log.info("*******Confidental doc foeld ********* : {}",caseDataUpdated.get("c8Document"));
+        log.info("*******Confidental doc foeld ********* : {}",caseDataUpdated.get("finalDocument"));
+        log.info("*******Confidental doc foeld ********* : {}",caseDataUpdated.get("finalWelshDocument"));
+        caseData = caseData.toBuilder()
+            .c8Document((Document) caseDataUpdated.get("c8Document"))
+            .c1ADocument((Document) caseDataUpdated.get("c1ADocument"))
+            .c8WelshDocument((Document) caseDataUpdated.get("c8WelshDocument"))
+            .finalDocument((Document) caseDataUpdated.get("finalDocument"))
+            .finalWelshDocument((Document) caseDataUpdated.get("finalWelshDocument"))
+            .build();
         tabService.updateAllTabsIncludingConfTab(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
