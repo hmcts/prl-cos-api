@@ -326,23 +326,6 @@ public class ManageOrderService {
         return selectedOrder.toString();
     }
 
-    private String getHeaderInfo(CaseData caseData) {
-        StringBuilder headerInfo = new StringBuilder();
-        headerInfo.append("Case Name: " + caseData.getApplicantCaseName());
-        headerInfo.append("\n\n");
-        headerInfo.append(getFamilyManNumber(caseData));
-        headerInfo.append("\n\n");
-        return headerInfo.toString();
-    }
-
-    private String getFamilyManNumber(CaseData caseData) {
-        if (caseData.getFl401FamilymanCaseNumber() == null && caseData.getFamilymanCaseNumber() == null) {
-            return FAMILY_MAN_ID;
-        }
-        //changed as single family man number field
-        return FAMILY_MAN_ID + caseData.getFamilymanCaseNumber();
-    }
-
     private String getChildInfoFromCaseData(CaseData caseData) {
         StringBuilder builder = new StringBuilder();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
