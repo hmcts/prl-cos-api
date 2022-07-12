@@ -129,25 +129,6 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateHeader() {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .familymanCaseNumber("familyman6789")
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .build();
-
-        Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
-
-        assertEquals("Case Name: Test Case 45678\n\n"
-                         + "Family Man ID: familyman6789\n\n", responseMap.get("manageOrderHeader1"));
-
-    }
-
-
-    @Test
     public void whenFl404bOrder_thenPopulateCustomFields() {
         CaseData caseData = CaseData.builder()
             .id(12345674L)
@@ -224,7 +205,6 @@ public class ManageOrderServiceTest {
         assertEquals(updatedCaseData.getManageOrders(), expectedDetails);
 
     }
-
 
 
     @Test
@@ -685,7 +665,8 @@ public class ManageOrderServiceTest {
             .guardianFullName("Full Name")
             .build();
 
-        Element<AppointedGuardianFullName> wrappedName = Element.<AppointedGuardianFullName>builder().value(appointedGuardianFullName).build();
+        Element<AppointedGuardianFullName> wrappedName = Element.<AppointedGuardianFullName>builder().value(
+            appointedGuardianFullName).build();
         List<Element<AppointedGuardianFullName>> caseDataNameList = Collections.singletonList(wrappedName);
         CaseData caseData = CaseData.builder()
             .id(12345L)
