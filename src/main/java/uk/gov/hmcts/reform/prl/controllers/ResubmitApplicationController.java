@@ -116,7 +116,6 @@ public class ResubmitApplicationController {
         Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
             ResubmitApplicationController::getPreviousState).findFirst();
 
-        log.info("Court name for return application: === {}===", caseDataUpdated.get(COURT_NAME_FIELD));
         if (previousStates.isPresent()) {
             if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
                 caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();

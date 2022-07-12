@@ -326,7 +326,7 @@ public class CaseWorkerEmailService {
 
     public void sendEmailToFl401LocalCourt(CaseDetails caseDetails, String courtEmail) {
 
-        log.info("Sending FL401 email to localcourt for :{} =====", caseDetails.getId());
+        log.info("Sending FL401 email to localcourt for :{} ", caseDetails.getId());
 
         emailService.send(
             courtEmail,
@@ -338,7 +338,7 @@ public class CaseWorkerEmailService {
 
     public EmailTemplateVars buildFl401LocalCourtAdminEmail(CaseDetails caseDetails) {
 
-        log.info("building FL401 email to localcourt for :{} =====", caseDetails.getId());
+        log.info("building FL401 email to localcourt for :{} ", caseDetails.getId());
         caseData = emailService.getCaseData(caseDetails);
         PartyDetails fl401Applicant = caseData
             .getApplicantsFL401();
@@ -365,7 +365,7 @@ public class CaseWorkerEmailService {
 
     public void sendWithdrawApplicationEmailToLocalCourt(CaseDetails caseDetails, String courtEmail) {
 
-        log.info("*** Sending FL401 withdraw application email to localcourt for case :{} ***", caseDetails.getId());
+        log.info("Sending FL401 withdraw application email to local court for case :{} ", caseDetails.getId());
 
         emailService.send(
             courtEmail,
@@ -377,7 +377,7 @@ public class CaseWorkerEmailService {
 
     public EmailTemplateVars buildLocalCourtAdminEmailForWithdrawAfterIssued(CaseDetails caseDetails) {
 
-        log.info("*** building email to localcourt for withdraw after issued for case:{} ***", caseDetails.getId());
+        log.info("building email to local court for withdraw after issued for case:{} ", caseDetails.getId());
         caseData = emailService.getCaseData(caseDetails);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 

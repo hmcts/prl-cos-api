@@ -81,13 +81,13 @@ public class OrganisationService {
                         .organisations(organisations)
                         .build();
                 } catch (NotFoundException e) {
-                    log.info(
+                    log.error(
                         "OrganisationsAPi return 404, organisation not present for {} {} ",
                         organisationID,
                         e.getMessage()
                     );
                 } catch (Exception e) {
-                    log.info(
+                    log.error(
                         "Error while fetching org details for orgid {} {} ",
                         organisationID,
                         e.getMessage()
@@ -99,7 +99,7 @@ public class OrganisationService {
     }
 
     public Organisations getOrganisationDetaiils(String userToken, String organisationID) {
-        log.info("Fetching organisation details for organisation id: {}", organisationID);
+        log.trace("Fetching organisation details for organisation id: {}", organisationID);
 
         return organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
     }
@@ -117,13 +117,13 @@ public class OrganisationService {
                         .organisations(organisations)
                         .build();
                 } catch (NotFoundException e) {
-                    log.info(
+                    log.error(
                         "OrganisationsAPi return 404, organisation not present for {} {} ",
                         organisationID,
                         e.getMessage()
                     );
                 } catch (Exception e) {
-                    log.info(
+                    log.error(
                         "Error while fetching org details for orgid {} {} ",
                         organisationID,
                         e.getMessage()
