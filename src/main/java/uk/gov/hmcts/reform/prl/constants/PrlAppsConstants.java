@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.State;
 
+import java.util.List;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PrlAppsConstants {
     public static final String JURISDICTION = "PRIVATELAW";
@@ -48,7 +50,7 @@ public class PrlAppsConstants {
     public static final String FINAL_DOCUMENT_FIELD = "finalDocument";
     public static final String ISSUE_DATE_FIELD = "issueDate";
     public static final String DATE_SUBMITTED_FIELD = "dateSubmitted";
-    public static final String DATE_AND_TIME_SUBMITTED_FIELD = "dateAndTimeSubmitted";
+    public static final String DATE_AND_TIME_SUBMITTED_FIELD = "dateSubmittedAndTime";
     public static final String STATE_FIELD = "state";
 
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
@@ -77,6 +79,7 @@ public class PrlAppsConstants {
     public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
     public static final String ISSUED_STATE = State.CASE_ISSUE.getValue();
     public static final String GATEKEEPING_STATE = State.GATEKEEPING.getValue();
+
     public static final String C8_HINT = "C8";
     public static final String C1A_HINT = "C1A";
     public static final String FINAL_HINT = "FINAL";
@@ -98,4 +101,8 @@ public class PrlAppsConstants {
 
     public static final String APPOINTED_GUARDIAN_FULL_NAME = "appointedGuardianFullName";
 
+    public static final String APPLICANT_SOLICITOR = " (Applicant's Solicitor)";
+    public static final String RESPONDENT_SOLICITOR = " (Respondent's Solicitor)";
+
+    public static final List<String> ROLES = List.of("caseworker-privatelaw-courtadmin","caseworker-privatelaw-judge","caseworker-privatelaw-la");
 }
