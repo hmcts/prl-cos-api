@@ -39,7 +39,6 @@ public class SwaggerPublisherTest extends IntegrationTest {
 
         Path swaggerSpecPath = Paths.get(System.getProperty("java.io.tmpdir"), "swagger-specs.json");
 
-        log.info("Writing swagger specification to {}", swaggerSpecPath.toAbsolutePath());
         try (OutputStream outputStream = new BufferedOutputStream(Files.newOutputStream(swaggerSpecPath))) {
             outputStream.write(specs);
         }
