@@ -989,4 +989,47 @@ public class ManageOrderServiceTest {
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
 
     }
+
+    @Test
+    public void testChildOptionForC100Case() {
+
+        Child child1 = Child.builder()
+            .firstName("Test1")
+            .lastName("Name1")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test1")
+            .build();
+
+        Child child2 = Child.builder()
+            .firstName("Test2")
+            .lastName("Name2")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test2")
+            .build();
+
+        Element<Child> wrappedChildren1 = Element.<Child>builder().value(child1).build();
+        Element<Child> wrappedChildren2 = Element.<Child>builder().value(child2).build();
+        List<Element<Child>> listOfChildren = List.of(wrappedChildren1, wrappedChildren2);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .children(listOfChildren)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+        Map<String, Object> expectedResult = new HashMap<String, Object>();
+        expectedResult.put("childOption", "01");
+
+        Map<String, Object> actualMap = manageOrderService.getChildOptionList(caseData);
+        assertEquals("01", actualMap.get("childOption"));
+
+    }
 }
