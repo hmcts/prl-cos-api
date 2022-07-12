@@ -1032,4 +1032,44 @@ public class ManageOrderServiceTest {
         assertEquals("01", actualMap.get("childOption"));
 
     }
+
+
+    @Test
+    public void testChildOptionForFL401Case() {
+
+        ApplicantChild child = ApplicantChild.builder()
+            .fullName("TestName")
+            .build();
+
+        Element<ApplicantChild> wrappedChildren = Element.<ApplicantChild>builder().value(child).build();
+        List<Element<ApplicantChild>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .applicantChildDetails(listOfChildren)
+            .applicantsFL401(PartyDetails.builder()
+                                 .firstName("app")
+                                 .lastName("testLast")
+                                 .build())
+            .respondentsFL401(PartyDetails.builder()
+                                  .firstName("resp")
+                                  .lastName("testLast")
+                                  .dateOfBirth(LocalDate.of(1990, 10, 20))
+                                  .address(Address.builder()
+                                               .addressLine1("add1")
+                                               .postCode("n145kk")
+                                               .build())
+                                  .build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
+
+        Map<String, Object> actualMap = manageOrderService.getChildOptionList(caseData);
+        assertEquals("0", actualMap.get("childOption"));
+    }
 }
