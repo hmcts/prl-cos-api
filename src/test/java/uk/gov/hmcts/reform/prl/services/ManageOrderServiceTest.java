@@ -208,6 +208,50 @@ public class ManageOrderServiceTest {
 
 
     @Test
+    public void testN117FormData() {
+        CaseData caseData = CaseData.builder()
+            .id(12345674L)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+            .courtName("Court name")
+            .childArrangementOrders(ChildArrangementOrdersEnum.authorityC31)
+            .applicantsFL401(PartyDetails.builder()
+                                 .firstName("app")
+                                 .lastName("testLast")
+                                 .representativeFirstName("test")
+                                 .representativeLastName("test1")
+                                 .build())
+            .respondentsFL401(PartyDetails.builder()
+                                  .firstName("resp")
+                                  .lastName("testLast")
+                                  .dateOfBirth(LocalDate.of(1990, 10, 20))
+                                  .address(Address.builder()
+                                               .addressLine1("add1")
+                                               .postCode("n145kk")
+                                               .build())
+                                  .build())
+            .build();
+
+        ManageOrders expectedDetails = ManageOrders.builder()
+            .manageOrdersCourtName("Court name")
+            .manageOrdersCaseNo("12345674")
+            .manageOrdersApplicantReference("test test1")
+            .manageOrdersApplicant("app testLast")
+            .manageOrdersRespondent("resp testLast")
+            .manageOrdersRespondentDob(LocalDate.of(1990, 10, 20))
+            .manageOrdersRespondentAddress(Address.builder()
+                                               .addressLine1("add1")
+                                               .postCode("n145kk")
+                                               .build())
+            .build();
+
+        CaseData updatedCaseData = manageOrderService.getN117FormData(caseData);
+
+        assertEquals(updatedCaseData.getManageOrders(), expectedDetails);
+
+    }
+
+
+    @Test
     public void testPopulatePreviewOrderFromCaSpecificOrder() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
