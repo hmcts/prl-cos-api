@@ -15,7 +15,7 @@ public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("blankOrderOrDirections")
     blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)"),
     @JsonProperty("blankOrderOrDirectionsWithdraw")
-    blankOrderOrDirectionsWithdraw("blankOrderOrDirectionsWithdraw", "Blank order or directions (C21)"),
+    blankOrderOrDirectionsWithdraw("blankOrderOrDirectionsWithdraw", "Blank order or directions (C21) - to withdraw application"),
     @JsonProperty("childArrangementsSpecificProhibitedOrder")
     childArrangementsSpecificProhibitedOrder(
         "childArrangementsSpecificProhibitedOrder",
@@ -64,4 +64,5 @@ public enum CreateSelectOrderOptionsEnum {
     public static CreateSelectOrderOptionsEnum getValue(String key) {
         return CreateSelectOrderOptionsEnum.valueOf(key);
     }
+
 }
