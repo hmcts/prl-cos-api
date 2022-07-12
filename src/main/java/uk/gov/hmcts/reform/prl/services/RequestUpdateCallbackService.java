@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -66,10 +67,7 @@ public class RequestUpdateCallbackService {
         );
 
         if (!Objects.isNull(caseDetails.getId())) {
-            CaseData caseData = objectMapper.convertValue(
-                caseDetails.getData(),
-                CaseData.class
-            );
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             log.info(
                 "Refreshing tab based on the payment response for caseid {} ",
                 serviceRequestUpdateDto.getCcdCaseNumber()
@@ -125,7 +123,7 @@ public class RequestUpdateCallbackService {
                     closestChildArrangementsCourt.getCountyLocationCode())).build();
             }
         } catch (Exception e) {
-            log.info("Error while populating case date in payment request call {}", caseData.getId());
+            log.error("Error while populating case date in payment request call {}", caseData.getId());
         }
         return caseData;
     }
@@ -165,26 +163,22 @@ public class RequestUpdateCallbackService {
     }
 
     private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
-        return objectMapper.convertValue(
-            CaseData.builder()
-                .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
-                .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
-                                                         .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
-                                                         .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
-                                                         .serviceRequestAmount(serviceRequestUpdateDto.getServiceRequestAmount())
-                                                         .serviceRequestStatus(serviceRequestUpdateDto.getServiceRequestStatus())
-                                                         .callBackUpdateTimestamp(LocalDateTime.now())
-                                                         .payment(CcdPayment.builder().paymentAmount(
-                                                             serviceRequestUpdateDto.getPayment().getPaymentAmount())
-                                                                      .paymentReference(serviceRequestUpdateDto.getPayment().getPaymentReference())
-                                                                      .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
-                                                                      .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
-                                                                      .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
-                                                                      .build()).build()).build(),
-            CaseData.class
-        );
+        return CaseData.builder()
+            .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
+            .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
+                                                     .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
+                                                     .ccdCaseNumber(serviceRequestUpdateDto.getCcdCaseNumber())
+                                                     .serviceRequestAmount(serviceRequestUpdateDto.getServiceRequestAmount())
+                                                     .serviceRequestStatus(serviceRequestUpdateDto.getServiceRequestStatus())
+                                                     .callBackUpdateTimestamp(LocalDateTime.now())
+                                                     .payment(CcdPayment.builder().paymentAmount(
+                                                         serviceRequestUpdateDto.getPayment().getPaymentAmount())
+                                                                  .paymentReference(serviceRequestUpdateDto.getPayment().getPaymentReference())
+                                                                  .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
+                                                                  .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
+                                                                  .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
+                                                                  .build()).build()).build();
+
 
     }
-
-
 }

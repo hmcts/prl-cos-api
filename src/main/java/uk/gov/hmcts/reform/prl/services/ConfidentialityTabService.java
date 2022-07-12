@@ -7,45 +7,77 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.Fl401ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum.occupationOrder;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialityTabService {
 
-    private final CoreCaseDataService coreCaseDataService;
-
-
     public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
 
-        List<PartyDetails> applicants = caseData.getApplicants().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = getConfidentialApplicantDetails(
-            applicants);
-        List<Child> children = caseData.getChildren().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
 
-        List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(children);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
+            Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
+            if (applicantList.isPresent()) {
+                List<PartyDetails> applicants = caseData.getApplicants().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                applicantsConfidentialDetails = getConfidentialApplicantDetails(
+                    applicants);
+            }
+            Optional<List<Element<Child>>> chiildList = ofNullable(caseData.getChildren());
+            if (chiildList.isPresent()) {
+                List<Child> children = caseData.getChildren().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                childrenConfidentialDetails = getChildrenConfidentialDetails(children);
+            }
 
-        return Map.of(
-            "applicantsConfidentialDetails",
-            applicantsConfidentialDetails,
-            "childrenConfidentialDetails",
-            childrenConfidentialDetails
-        );
+            return Map.of(
+                "applicantsConfidentialDetails",
+                applicantsConfidentialDetails,
+                "childrenConfidentialDetails",
+                childrenConfidentialDetails
+            );
+
+        } else {
+            if (null != caseData.getApplicantsFL401()) {
+                List<PartyDetails> fl401Applicant = List.of(caseData.getApplicantsFL401());
+                applicantsConfidentialDetails = getConfidentialApplicantDetails(
+                    fl401Applicant);
+            }
+
+            List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(caseData);
+
+            return Map.of(
+                "applicantsConfidentialDetails",
+                applicantsConfidentialDetails,
+                "fl401ChildrenConfidentialDetails",
+                childrenConfidentialDetails
+            );
+
+        }
 
     }
 
@@ -109,7 +141,7 @@ public class ConfidentialityTabService {
     }
 
     private Element<ApplicantConfidentialityDetails> getApplicantConfidentialityElement(boolean addressSet,
-              boolean emailSet, boolean phoneSet, PartyDetails applicant) {
+                                                                                        boolean emailSet, boolean phoneSet, PartyDetails applicant) {
 
         return Element
             .<ApplicantConfidentialityDetails>builder()
@@ -122,4 +154,23 @@ public class ConfidentialityTabService {
                        .build()).build();
     }
 
+    public List<Element<Fl401ChildConfidentialityDetails>> getFl401ChildrenConfidentialDetails(CaseData caseData) {
+        List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
+        if (caseData.getTypeOfApplicationOrders().getOrderType().contains(occupationOrder)
+            && ofNullable(caseData.getHome().getChildren()).isPresent()) {
+            List<ChildrenLiveAtAddress> children = unwrapElements(caseData.getHome().getChildren());
+            for (ChildrenLiveAtAddress child : children) {
+                if (child.getKeepChildrenInfoConfidential().equals(YesOrNo.Yes)) {
+                    Element<Fl401ChildConfidentialityDetails> childElement = Element
+                        .<Fl401ChildConfidentialityDetails>builder()
+                        .value(Fl401ChildConfidentialityDetails.builder()
+                                   .fullName(child.getChildFullName()).build()).build();
+                    childrenConfidentialDetails.add(childElement);
+                }
+            }
+        }
+        return childrenConfidentialDetails;
+    }
+
 }
+
