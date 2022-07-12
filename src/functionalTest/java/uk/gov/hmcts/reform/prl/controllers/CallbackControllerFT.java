@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -163,7 +164,7 @@ public class CallbackControllerFT {
             .caseTypeOfApplication("C100")
             .state(State.CASE_ISSUE)
             .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
-            .allegationsOfHarmYesNo(YesOrNo.Yes)
+            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
             .build();
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
