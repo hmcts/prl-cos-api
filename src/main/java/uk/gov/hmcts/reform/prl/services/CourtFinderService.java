@@ -46,7 +46,6 @@ public class CourtFinderService {
                 .findClosestDomesticAbuseCourtByPostCode(
                     getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));
         } else {
-            log.info("Getting court with postcode: " + getCorrectPartyPostcode(caseData));
             serviceArea = courtFinderApi
                 .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
         }

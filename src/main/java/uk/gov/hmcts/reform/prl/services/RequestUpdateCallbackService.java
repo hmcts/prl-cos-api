@@ -123,7 +123,7 @@ public class RequestUpdateCallbackService {
                     closestChildArrangementsCourt.getCountyLocationCode())).build();
             }
         } catch (Exception e) {
-            log.info("Error while populating case date in payment request call {}", caseData.getId());
+            log.error("Error while populating case date in payment request call {}", caseData.getId());
         }
         return caseData;
     }

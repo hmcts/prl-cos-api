@@ -152,8 +152,6 @@ public class FL401SubmitApplicationController {
                 .build();
         }
         caseData = caseData.setDateSubmittedDate();
-        log.info("Generating the Final document of FL401 for case id " + caseData.getId());
-        log.info("Issue date for the application: {} ", caseData.getIssueDate());
 
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
 

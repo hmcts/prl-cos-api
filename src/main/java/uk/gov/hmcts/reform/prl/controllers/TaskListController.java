@@ -64,10 +64,6 @@ public class TaskListController extends AbstractCallbackController {
                 log.error("Error regenerating the document", e);
             }
         }
-        log.info("*******allegations doc foeld ********* : {}",caseDataUpdated.get("c1ADocument"));
-        log.info("*******Confidental doc foeld ********* : {}",caseDataUpdated.get("c8Document"));
-        log.info("*******Confidental doc foeld ********* : {}",caseDataUpdated.get("finalDocument"));
-        log.info("*******Confidental doc foeld ********* : {}",caseDataUpdated.get("finalWelshDocument"));
         caseData = caseData.toBuilder()
             .c8Document((Document) caseDataUpdated.get("c8Document"))
             .c1ADocument((Document) caseDataUpdated.get("c1ADocument"))

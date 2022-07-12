@@ -138,7 +138,6 @@ public abstract class IntegrationTest {
             .header("Content-Type", "application/json")
             .body(ResourceLoader.objectToJson(userRequest))
             .post(idamCreateUrl());
-        log.info("User response when creating {} ",userResponse.getStatusCode());
     }
 
     public Response callInvalidPrePopulateFeeAndSolicitorName(String requestBody) {
