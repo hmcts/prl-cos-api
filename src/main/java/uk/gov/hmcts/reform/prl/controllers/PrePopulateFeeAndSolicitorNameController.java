@@ -127,7 +127,6 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .build();
 
             caseData = buildGeneratedDocumentCaseData(authorisation, callbackRequest, caseData, caseDataForOrgDetails);
-            log.info("Court name: === {}===", caseData.getCourtName());
 
             log.info("Saving Court name into DB..");
         }
@@ -145,7 +144,6 @@ public class PrePopulateFeeAndSolicitorNameController {
         CaseData caseDataForOrgDetails)
         throws Exception {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
-    
         if (documentLanguage.isGenEng()) {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
