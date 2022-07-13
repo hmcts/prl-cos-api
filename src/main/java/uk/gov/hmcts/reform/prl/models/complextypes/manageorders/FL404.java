@@ -23,6 +23,7 @@ public class FL404 {
     private final LocalDate fl404bRespondentDob;
     private final Address fl404bRespondentAddress;
     private final String fl404bHearingOutcome;
+    private final String fl404bChangedCourtLocation;
 
     private final String fl404bPowerOfArrestParagraph;
     private final String fl404bRiskOfSignificantHarm;
