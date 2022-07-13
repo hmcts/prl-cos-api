@@ -5,17 +5,18 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.OrderDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StandardDirectionsOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.util.ArrayList;
@@ -88,6 +89,8 @@ public class ServiceOfApplicationPostServiceTest {
             .serviceOfApplicationScreen1(OrdersToServeSA.builder().build())
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .respondents(List.of(element(respondent)))
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
+                                                .pd36qLetter(Document.builder().build()).build())
             .build();
 
         when(documentGenService.generateSingleDocument(any(String.class), any(CaseData.class), any(String.class), any(boolean.class)))
@@ -135,6 +138,8 @@ public class ServiceOfApplicationPostServiceTest {
             .serviceOfApplicationScreen1(OrdersToServeSA.builder().build())
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .respondents(List.of(element(respondent)))
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
+                                                .pd36qLetter(Document.builder().build()).build())
             .build();
 
         List<GeneratedDocumentInfo> sentDocs = postService.send(caseData, AUTH);
@@ -180,6 +185,8 @@ public class ServiceOfApplicationPostServiceTest {
             .serviceOfApplicationScreen1(OrdersToServeSA.builder().build())
             .orderCollection(List.of(element(OrderDetails.builder().build())))
             .respondents(List.of(element(respondent)))
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
+                                                .pd36qLetter(Document.builder().build()).build())
             .build();
 
         List<GeneratedDocumentInfo> sentDocs = postService.send(caseData, AUTH);
@@ -246,6 +253,8 @@ public class ServiceOfApplicationPostServiceTest {
             .respondents(List.of(element(respondent)))
             .orderCollection(orderCollection)
             .serviceOfApplicationScreen1(orders)
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
+                                                .pd36qLetter(Document.builder().build()).build())
             .build();
 
         List<GeneratedDocumentInfo> sentDocs = postService.send(caseData, AUTH);
