@@ -186,11 +186,17 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_fl404b_draft_filename}")
     protected String fl404bDraftFile;
 
+    @Value("${document.templates.common.prl_fl404b_blank_draft_filename}")
+    protected String fl404bBlankDraftFile;
+
     @Value("${document.templates.common.prl_fl404b_final_template}")
     protected String fl404bTemplate;
 
     @Value("${document.templates.common.prl_fl404b_final_filename}")
     protected String fl404bFile;
+
+    @Value("${document.templates.common.prl_fl404b_blank_final_filename}")
+    protected String fl404bBlankFile;
 
     @Value("${document.templates.common.prl_n117_draft_template}")
     protected String n117DraftTemplate;
@@ -216,7 +222,6 @@ public class ManageOrderService {
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
-        //headerMap.put("manageOrderHeader1", getHeaderInfo(caseData));
         headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
         return headerMap;
     }
@@ -312,6 +317,12 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404bTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404bFile);
                 break;
+            case blank:
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404bDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404bBlankDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404bTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404bBlankFile);
+                break;
             default:
                 break;
         }
@@ -325,23 +336,6 @@ public class ManageOrderService {
                                  : caseData.getChildArrangementOrders().getDisplayedValue());
         selectedOrder.append("\n\n");
         return selectedOrder.toString();
-    }
-
-    private String getHeaderInfo(CaseData caseData) {
-        StringBuilder headerInfo = new StringBuilder();
-        headerInfo.append("Case Name: " + caseData.getApplicantCaseName());
-        headerInfo.append("\n\n");
-        headerInfo.append(getFamilyManNumber(caseData));
-        headerInfo.append("\n\n");
-        return headerInfo.toString();
-    }
-
-    private String getFamilyManNumber(CaseData caseData) {
-        if (caseData.getFl401FamilymanCaseNumber() == null && caseData.getFamilymanCaseNumber() == null) {
-            return FAMILY_MAN_ID;
-        }
-        //changed as single family man number field
-        return FAMILY_MAN_ID + caseData.getFamilymanCaseNumber();
     }
 
     private String getChildInfoFromCaseData(CaseData caseData) {
@@ -589,6 +583,8 @@ public class ManageOrderService {
                 return getFl404bFields(caseData);
             case generalForm:
                 return getN117FormData(caseData);
+            case noticeOfProceedings:
+                return getFL402FormData(caseData);
             default:
                 return caseData;
         }
@@ -647,9 +643,9 @@ public class ManageOrderService {
 
     }
 
-    public ManageOrders getFL402FormData(CaseData caseData) {
+    public CaseData getFL402FormData(CaseData caseData) {
 
-        return ManageOrders.builder()
+        ManageOrders orderData =  ManageOrders.builder()
             .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
             .manageOrdersFl402CourtName(caseData.getCourtName())
             .manageOrdersFl402Applicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
@@ -660,5 +656,8 @@ public class ManageOrderService {
                                                          caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
             .build();
+
+        return caseData.toBuilder().manageOrders(orderData)
+            .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 }

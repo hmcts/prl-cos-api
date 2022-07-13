@@ -62,9 +62,11 @@ public class ConfidentialityTabService {
             );
 
         } else {
-            List<PartyDetails> fl401Applicant = List.of(caseData.getApplicantsFL401());
-            applicantsConfidentialDetails = getConfidentialApplicantDetails(
-                fl401Applicant);
+            if (null != caseData.getApplicantsFL401()) {
+                List<PartyDetails> fl401Applicant = List.of(caseData.getApplicantsFL401());
+                applicantsConfidentialDetails = getConfidentialApplicantDetails(
+                    fl401Applicant);
+            }
 
             List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(caseData);
 
@@ -74,6 +76,7 @@ public class ConfidentialityTabService {
                 "fl401ChildrenConfidentialDetails",
                 childrenConfidentialDetails
             );
+
         }
 
     }

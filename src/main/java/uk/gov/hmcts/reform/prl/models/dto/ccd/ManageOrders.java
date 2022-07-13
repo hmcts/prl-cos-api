@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -58,12 +57,10 @@ public class ManageOrders {
     private final LocalDate respondentDateOfBirth;
     private final Address respondentAddress;
     private final Address addressTheOrderAppliesTo;
-    private final String courtDeclares;
     @JsonProperty("courtDeclares2")
     private final List<ApplicantOccupationEnum> courtDeclares2;
     private final String homeRights;
     private final String applicantInstructions;
-    private final String theRespondent;
     @JsonProperty("theRespondent2")
     private final List<RespondentOccupationEnum> theRespondent2;
     private final YesOrNo powerOfArrest1;
@@ -91,7 +88,6 @@ public class ManageOrders {
     private String dateOrderEndsTime;
     private final String courtName2;
     private final Address ukPostcode2;
-    private final String applicantCost;
     private final String orderNotice;
     private final String hearingTimeEstimate;
 
@@ -179,7 +175,6 @@ public class ManageOrders {
     private final FL404 fl404CustomFields;
     //FL402
     private final String manageOrdersFl402CourtName;
-    @JsonIgnore
     private final Address manageOrdersFl402CourtAddress;
     private final String manageOrdersFl402CaseNo;
     private final String manageOrdersFl402Applicant;
@@ -189,7 +184,6 @@ public class ManageOrders {
     private final String dateOfHearingTime;
     private final String dateOfHearingTimeEstimate;
     private final String fl402HearingCourtname;
-    @JsonIgnore
     private final Address fl402HearingCourtAddress;
 
     @JsonProperty("fl404bCustomFields")
