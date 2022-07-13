@@ -645,7 +645,6 @@ public class CallbackControllerTest {
             .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(),"test@gmail.com");
     }
 
-    @Ignore
     @Test
     public void testSendCaseWithdrawNotificationNotInCaseIssuedState() throws Exception {
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
