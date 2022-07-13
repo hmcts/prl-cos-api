@@ -545,6 +545,8 @@ public class ManageOrderService {
 
     public CaseData getN117FormData(CaseData caseData) {
 
+        log.info("Court name before N117 order {}", caseData.getCourtName());
+
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .manageOrdersCourtName(caseData.getCourtName())
@@ -559,6 +561,8 @@ public class ManageOrderService {
                                                           caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
             .build();
+
+        log.info("Court name after N117 order set{}", orderData.getManageOrdersCourtName());
 
         if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
             orderData = orderData.toBuilder().manageOrdersRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
@@ -580,7 +584,8 @@ public class ManageOrderService {
             case nonMolestation:
             case powerOfArrest:
             case blank:
-                return getFl404bFields(caseData);
+                CaseData fl404bFields = getFl404bFields(caseData);
+                return fl404bFields;
             case generalForm:
                 return getN117FormData(caseData);
             case noticeOfProceedings:
@@ -591,6 +596,9 @@ public class ManageOrderService {
     }
 
     private CaseData getFl404bFields(CaseData caseData) {
+
+        log.info("Court name before FL404 order {}", caseData.getCourtName());
+
         FL404 orderData = FL404.builder()
             .fl404bCaseNumber(String.valueOf(caseData.getId()))
             .fl404bCourtName(caseData.getCourtName())
@@ -601,6 +609,8 @@ public class ManageOrderService {
                                                 caseData.getRespondentsFL401().getLastName()
             ))
             .build();
+
+        log.info("FL404b court name: {}", orderData.getFl404bCourtName());
 
         if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
             orderData = orderData.toBuilder().fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
@@ -645,6 +655,7 @@ public class ManageOrderService {
 
     public CaseData getFL402FormData(CaseData caseData) {
 
+        log.info("Court name before FL402 order {}", caseData.getCourtName());
         ManageOrders orderData =  ManageOrders.builder()
             .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
             .manageOrdersFl402CourtName(caseData.getCourtName())
@@ -656,6 +667,8 @@ public class ManageOrderService {
                                                          caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
             .build();
+        log.info("Court name after FL402 order set{}", orderData.getManageOrdersFl402CourtName());
+
 
         return caseData.toBuilder().manageOrders(orderData)
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
