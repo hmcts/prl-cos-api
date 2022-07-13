@@ -64,6 +64,7 @@ public class TaskListController extends AbstractCallbackController {
                 log.error("Error regenerating the document", e);
             }
         }
+        log.info("*******Case data updated in task list controller********* : {}",caseDataUpdated);
 
         caseData = caseData.toBuilder()
             .c8Document((Document) caseDataUpdated.get("c8Document"))
@@ -73,6 +74,7 @@ public class TaskListController extends AbstractCallbackController {
             .finalWelshDocument((Document) caseDataUpdated.get("finalWelshDocument"))
             .c1AWelshDocument((Document) caseDataUpdated.get("c1AWelshDocument"))
             .build();
+        log.info("*******Case data Tabs task list controller********* : {}",caseData);
         tabService.updateAllTabsIncludingConfTab(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
