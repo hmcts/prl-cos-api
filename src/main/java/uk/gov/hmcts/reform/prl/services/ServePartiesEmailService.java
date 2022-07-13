@@ -44,12 +44,12 @@ public class ServePartiesEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        if(applicants != null && !applicants.isEmpty()) {
+        if (applicants != null && !applicants.isEmpty()) {
             List<String> applicantSolicitorEmailList = applicants.stream()
                 .map(PartyDetails::getSolicitorEmail)
                 .collect(Collectors.toList());
 
-            if(applicantSolicitorEmailList != null && !applicantSolicitorEmailList.isEmpty()) {
+            if (applicantSolicitorEmailList != null && !applicantSolicitorEmailList.isEmpty()) {
                 applicantSolicitorEmailList.forEach(email -> emailService.send(
                     email,
                     EmailTemplateNames.APPLICANT_SOLICITOR,
