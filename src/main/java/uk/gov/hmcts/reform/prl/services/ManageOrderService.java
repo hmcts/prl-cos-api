@@ -233,7 +233,7 @@ public class ManageOrderService {
     }
 
     private Map<String, String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
-        Map<String, String> fieldsMap = new HashMap();
+        Map<String, String> fieldsMap = new HashMap<>();
         switch (selectedOrder) {
             case blankOrderOrDirections:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c21TDraftTemplate);
@@ -451,7 +451,7 @@ public class ManageOrderService {
             String applicantSolicitorName = applicantFl401.getRepresentativeFirstName()
                 + " "
                 + applicantFl401.getRepresentativeLastName();
-            return applicantSolicitorName;
+            return applicantFl401.getRepresentativeLastName();
         }
     }
 
@@ -463,7 +463,7 @@ public class ManageOrderService {
                 .map(Element::getValue)
                 .filter(r -> YesNoDontKnow.yes.equals(r.getDoTheyHaveLegalRepresentation()))
                 .collect(Collectors.toList());
-            if (respondents.size() < 1) {
+            if (respondents.isEmpty()) {
                 return "";
             }
             List<String> respondentSolicitorNames = respondents.stream()
@@ -548,13 +548,13 @@ public class ManageOrderService {
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .manageOrdersCourtName(caseData.getCourtName())
-            .manageOrdersApplicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
+            .manageOrdersApplicant(String.format( PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
                                                  caseData.getApplicantsFL401().getLastName()
             ))
-            .manageOrdersRespondent(String.format("%s %s", caseData.getRespondentsFL401().getFirstName(),
+            .manageOrdersRespondent(String.format(PrlAppsConstants.FORMAT, caseData.getRespondentsFL401().getFirstName(),
                                                   caseData.getRespondentsFL401().getLastName()
             ))
-            .manageOrdersApplicantReference(String.format("%s %s",
+            .manageOrdersApplicantReference(String.format(PrlAppsConstants.FORMAT,
                                                           caseData.getApplicantsFL401().getRepresentativeFirstName(),
                                                           caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
@@ -594,10 +594,10 @@ public class ManageOrderService {
         FL404 orderData = FL404.builder()
             .fl404bCaseNumber(String.valueOf(caseData.getId()))
             .fl404bCourtName(caseData.getCourtName())
-            .fl404bApplicantName(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
+            .fl404bApplicantName(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
                                                caseData.getApplicantsFL401().getLastName()
             ))
-            .fl404bRespondentName(String.format("%s %s", caseData.getRespondentsFL401().getFirstName(),
+            .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT, caseData.getRespondentsFL401().getFirstName(),
                                                 caseData.getRespondentsFL401().getLastName()
             ))
             .build();
@@ -648,10 +648,10 @@ public class ManageOrderService {
         ManageOrders orderData =  ManageOrders.builder()
             .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
             .manageOrdersFl402CourtName(caseData.getCourtName())
-            .manageOrdersFl402Applicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
+            .manageOrdersFl402Applicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
                                                       caseData.getApplicantsFL401().getLastName()
             ))
-            .manageOrdersFl402ApplicantRef(String.format("%s %s",
+            .manageOrdersFl402ApplicantRef(String.format(PrlAppsConstants.FORMAT,
                                                          caseData.getApplicantsFL401().getRepresentativeFirstName(),
                                                          caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
