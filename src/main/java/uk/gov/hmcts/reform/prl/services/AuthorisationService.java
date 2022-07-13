@@ -22,14 +22,11 @@ public class AuthorisationService {
 
     public Boolean authorise(String serviceAuthHeader) {
         String callingService;
-        log.info("About to authorise request");
         callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
         if (callingService != null && Arrays.asList(s2sAuthorisedServices.split(","))
             .contains(callingService)) {
-            log.info("Request authorised for {}", callingService);
             return true;
         } else {
-            log.info("Request not authorised for {}", callingService);
             throw new AuthorisationException("Request not authorised");
         }
     }
