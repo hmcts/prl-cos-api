@@ -548,7 +548,7 @@ public class ManageOrderService {
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .manageOrdersCourtName(caseData.getCourtName())
-            .manageOrdersApplicant(String.format( PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
+            .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
                                                  caseData.getApplicantsFL401().getLastName()
             ))
             .manageOrdersRespondent(String.format(PrlAppsConstants.FORMAT, caseData.getRespondentsFL401().getFirstName(),
