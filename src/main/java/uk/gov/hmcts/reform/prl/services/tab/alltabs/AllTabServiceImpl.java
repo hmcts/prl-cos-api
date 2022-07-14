@@ -78,12 +78,7 @@ public class AllTabServiceImpl implements AllTabsService {
         if (caseData.getCourtId() != null) {
             combinedFieldsMap.put("courtId", caseData.getCourtId());
         }
-        if (caseData.getC8Document() != null) {
-            combinedFieldsMap.put("c8Document", caseData.getC8Document());
-        }
-        if (caseData.getC8WelshDocument() != null) {
-            combinedFieldsMap.put("c8WelshDocument", caseData.getC8WelshDocument());
-        }
+
         getDocumentsMap(caseData,combinedFieldsMap);
         log.info("*******Combined fields map in tabs service********* : {}",combinedFieldsMap);
         log.info("*******Case data Tabs service********* : {}",caseData);
@@ -95,15 +90,33 @@ public class AllTabServiceImpl implements AllTabsService {
     private Map<String, Object> getDocumentsMap(CaseData caseData, Map<String, Object> documentMap) {
         if (caseData.getC1ADocument() != null) {
             documentMap.put("c1ADocument", caseData.getC1ADocument());
+        } else {
+            documentMap.put("c1ADocument", null);
         }
         if (caseData.getC1AWelshDocument() != null) {
             documentMap.put("c1AWelshDocument", caseData.getC1AWelshDocument());
+        } else {
+            documentMap.put("c1AWelshDocument", null);
         }
         if (caseData.getFinalDocument() != null) {
             documentMap.put("finalDocument", caseData.getFinalDocument());
+        } else {
+            documentMap.put("finalDocument", null);
         }
         if (caseData.getFinalWelshDocument() != null) {
             documentMap.put("finalWelshDocument", caseData.getFinalWelshDocument());
+        } else {
+            documentMap.put("finalWelshDocument", null);
+        }
+        if (caseData.getC8Document() != null) {
+            documentMap.put("c8Document", caseData.getC8Document());
+        } else {
+            documentMap.put("c8Document", null);
+        }
+        if (caseData.getC8WelshDocument() != null) {
+            documentMap.put("c8WelshDocument", caseData.getC8WelshDocument());
+        } else {
+            documentMap.put("c8WelshDocument", null);
         }
         return documentMap;
     }
