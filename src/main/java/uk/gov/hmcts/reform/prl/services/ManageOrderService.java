@@ -543,7 +543,7 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    public CaseData getN117FormData(CaseData caseData) {
+    private CaseData getN117FormData(CaseData caseData) {
 
         log.info("Court name before N117 order {}", caseData.getCourtName());
 
