@@ -99,4 +99,19 @@ public class AllTabServiceImplTest {
         verify(applicationsTabService).updateTab(CASE_DATA);
         verify(caseSummaryTabService).updateTab(CASE_DATA);
     }
+
+    @Test
+    public void testAllTabsServiceIncConfidentailWithEmptyDocs() {
+        when(CASE_DATA.getC8Document()).thenReturn(null);
+        when(CASE_DATA.getC1ADocument()).thenReturn(null);
+        when(CASE_DATA.getC8WelshDocument()).thenReturn(null);
+        when(CASE_DATA.getC1AWelshDocument()).thenReturn(null);
+        when(CASE_DATA.getFinalDocument()).thenReturn(null);
+        when(CASE_DATA.getFinalWelshDocument()).thenReturn(null);
+        allTabService.updateAllTabsIncludingConfTab(CASE_DATA);
+
+        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+        verify(applicationsTabService).updateTab(CASE_DATA);
+        verify(caseSummaryTabService).updateTab(CASE_DATA);
+    }
 }
