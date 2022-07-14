@@ -59,7 +59,7 @@ public class ServiceOfApplicationControllerTest {
         caseData.put("serviceOfApplicationHeader","TestHeader");
         caseData.put("option1","1");
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
-        when(serviceOfApplicationService.populateHeader(Mockito.any(CaseData.class), Mockito.anyMap())).thenReturn(caseData);
+
         when(serviceOfApplicationService.getCollapsableOfSentDocuments()).thenReturn("Collapsable");
         List<String> createdOrders = new ArrayList<>();
         createdOrders.add("Standard directions order");
@@ -88,7 +88,7 @@ public class ServiceOfApplicationControllerTest {
             .build();
         caseData.put("serviceOfApplicationHeader","TestHeader");
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
-        when(serviceOfApplicationService.populateHeader(Mockito.any(CaseData.class), Mockito.anyMap())).thenReturn(caseData);
+
         when(serviceOfApplicationService.getCollapsableOfSentDocuments()).thenReturn("Collapsable");
         when(serviceOfApplicationService.getOrderSelectionsEnumValues(Mockito.anyList(), Mockito.anyMap())).thenReturn(caseData);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
