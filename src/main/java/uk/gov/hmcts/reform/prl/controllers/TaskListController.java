@@ -59,7 +59,7 @@ public class TaskListController extends AbstractCallbackController {
         String state = callbackRequest.getCaseDetails().getState();
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))) {
             try {
-                caseDataUpdated = dgsService.generateDocuments(authorisation, caseData);
+                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
             }
