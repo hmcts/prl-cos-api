@@ -89,7 +89,7 @@ public class ManageOrderServiceTest {
             .build();
 
         CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
-        assertEquals("Child 1: Test Name\n", caseData1.getChildrenList());
+        assertEquals("Child 1: Test Name\n\n", caseData1.getChildrenList());
         assertNotNull(caseData1.getSelectedOrder());
     }
 
@@ -127,24 +127,6 @@ public class ManageOrderServiceTest {
         assertEquals("Child 1: TestName\n", caseData1.getChildrenList());
         assertNotNull(caseData1.getSelectedOrder());
     }
-
-    public void testPupulateHeader() {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .familymanCaseNumber("familyman6789")
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .build();
-
-        Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
-
-        assertEquals("Case Name: Test Case 45678\n\n"
-                         + "Family Man ID: familyman6789\n\n", responseMap.get("manageOrderHeader1"));
-
-    }
-
 
     @Test
     public void whenFl404bOrder_thenPopulateCustomFields() {
@@ -224,6 +206,49 @@ public class ManageOrderServiceTest {
 
     }
 
+
+    @Test
+    public void testN117FormData() {
+        CaseData caseData = CaseData.builder()
+            .id(12345674L)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+            .courtName("Court name")
+            .childArrangementOrders(ChildArrangementOrdersEnum.authorityC31)
+            .applicantsFL401(PartyDetails.builder()
+                                 .firstName("app")
+                                 .lastName("testLast")
+                                 .representativeFirstName("test")
+                                 .representativeLastName("test1")
+                                 .build())
+            .respondentsFL401(PartyDetails.builder()
+                                  .firstName("resp")
+                                  .lastName("testLast")
+                                  .dateOfBirth(LocalDate.of(1990, 10, 20))
+                                  .address(Address.builder()
+                                               .addressLine1("add1")
+                                               .postCode("n145kk")
+                                               .build())
+                                  .build())
+            .build();
+
+        ManageOrders expectedDetails = ManageOrders.builder()
+            .manageOrdersCourtName("Court name")
+            .manageOrdersCaseNo("12345674")
+            .manageOrdersApplicantReference("test test1")
+            .manageOrdersApplicant("app testLast")
+            .manageOrdersRespondent("resp testLast")
+            .manageOrdersRespondentDob(LocalDate.of(1990, 10, 20))
+            .manageOrdersRespondentAddress(Address.builder()
+                                               .addressLine1("add1")
+                                               .postCode("n145kk")
+                                               .build())
+            .build();
+
+        CaseData updatedCaseData = manageOrderService.getN117FormData(caseData);
+
+        assertEquals(updatedCaseData.getManageOrders(), expectedDetails);
+
+    }
 
 
     @Test
@@ -684,7 +709,8 @@ public class ManageOrderServiceTest {
             .guardianFullName("Full Name")
             .build();
 
-        Element<AppointedGuardianFullName> wrappedName = Element.<AppointedGuardianFullName>builder().value(appointedGuardianFullName).build();
+        Element<AppointedGuardianFullName> wrappedName = Element.<AppointedGuardianFullName>builder().value(
+            appointedGuardianFullName).build();
         List<Element<AppointedGuardianFullName>> caseDataNameList = Collections.singletonList(wrappedName);
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -1006,5 +1032,88 @@ public class ManageOrderServiceTest {
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
 
+    }
+
+    @Test
+    public void testChildOptionForC100Case() {
+
+        Child child1 = Child.builder()
+            .firstName("Test1")
+            .lastName("Name1")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test1")
+            .build();
+
+        Child child2 = Child.builder()
+            .firstName("Test2")
+            .lastName("Name2")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test2")
+            .build();
+
+        Element<Child> wrappedChildren1 = Element.<Child>builder().value(child1).build();
+        Element<Child> wrappedChildren2 = Element.<Child>builder().value(child2).build();
+        List<Element<Child>> listOfChildren = List.of(wrappedChildren1, wrappedChildren2);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .children(listOfChildren)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+        Map<String, Object> expectedResult = new HashMap<String, Object>();
+        expectedResult.put("childOption", "01");
+
+        Map<String, Object> actualMap = manageOrderService.getChildOptionList(caseData);
+        assertEquals("01", actualMap.get("childOption"));
+
+    }
+
+
+    @Test
+    public void testChildOptionForFL401Case() {
+
+        ApplicantChild child = ApplicantChild.builder()
+            .fullName("TestName")
+            .build();
+
+        Element<ApplicantChild> wrappedChildren = Element.<ApplicantChild>builder().value(child).build();
+        List<Element<ApplicantChild>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .applicantChildDetails(listOfChildren)
+            .applicantsFL401(PartyDetails.builder()
+                                 .firstName("app")
+                                 .lastName("testLast")
+                                 .build())
+            .respondentsFL401(PartyDetails.builder()
+                                  .firstName("resp")
+                                  .lastName("testLast")
+                                  .dateOfBirth(LocalDate.of(1990, 10, 20))
+                                  .address(Address.builder()
+                                               .addressLine1("add1")
+                                               .postCode("n145kk")
+                                               .build())
+                                  .build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
+
+        Map<String, Object> actualMap = manageOrderService.getChildOptionList(caseData);
+        assertEquals("0", actualMap.get("childOption"));
     }
 }

@@ -39,8 +39,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.joining;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
@@ -232,6 +236,15 @@ public class ManageOrderService {
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
+    private Map<String, Object> getChildrenListData(CaseData caseData) {
+        Map<String, Object> childrenList = new HashMap<>();
+        String childInfo = getChildInfoFromCaseData(caseData);
+
+        childrenList.put("childrenList", childInfo);
+        childrenList.put("childListForSpecialGuardianship", childInfo);
+        return childrenList;
+    }
+
     private Map<String, String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
         Map<String, String> fieldsMap = new HashMap<>();
         switch (selectedOrder) {
@@ -350,7 +363,7 @@ public class ManageOrderService {
             for (int i = 0; i < children.size(); i++) {
                 Child child = children.get(i);
                 builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + " " + child.getLastName()));
-                builder.append("\n");
+                builder.append("\n\n");
             }
         } else {
             Optional<List<Element<ApplicantChild>>> applicantChildDetails = ofNullable(caseData.getApplicantChildDetails());
@@ -440,7 +453,7 @@ public class ManageOrderService {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
 
-            List<String> applicantSolicitorNames  = applicants.stream()
+            List<String> applicantSolicitorNames = applicants.stream()
                 .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
                     ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
                     : APPLICANT_SOLICITOR)
@@ -660,4 +673,31 @@ public class ManageOrderService {
         return caseData.toBuilder().manageOrders(orderData)
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
+
+
+    public Map<String, Object> getChildOptionList(CaseData caseData) {
+        Map<String, Object> childMap = getChildrenListData(caseData);
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = populateCustomOrderFields(caseData);
+        }
+        String childOption = null;
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            childOption = IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
+                .mapToObj(Integer::toString)
+                .collect(joining());
+        } else {
+            Optional<List<Element<ApplicantChild>>> applicantChildDetails = Optional.ofNullable(caseData.getApplicantChildDetails());
+            if (applicantChildDetails.isPresent()) {
+                childOption = IntStream.range(0, defaultIfNull(applicantChildDetails.get(), emptyList()).size())
+                    .mapToObj(Integer::toString)
+                    .collect(joining());
+            }
+        }
+
+        childMap.put("childOption", childOption);
+
+        return childMap;
+    }
+
+
 }

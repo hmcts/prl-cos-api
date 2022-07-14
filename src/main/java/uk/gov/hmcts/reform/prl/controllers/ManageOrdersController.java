@@ -167,8 +167,11 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+
+        Map<String, Object> updatedCaseData = manageOrderService.populateHeader(caseData);
+        updatedCaseData.putAll(manageOrderService.getChildOptionList(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(manageOrderService.populateHeader(caseData))
+            .data(updatedCaseData)
             .build();
     }
 
