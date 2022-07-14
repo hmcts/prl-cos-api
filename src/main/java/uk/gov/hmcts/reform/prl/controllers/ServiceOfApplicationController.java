@@ -53,7 +53,7 @@ public class ServiceOfApplicationController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseDataUpdated = serviceOfApplicationService.populateHeader(caseData,caseDataUpdated);
+
         if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
             List<String> createdOrders = caseData.getOrderCollection().stream()
                 .map(Element::getValue).map(OrderDetails::getOrderType)
