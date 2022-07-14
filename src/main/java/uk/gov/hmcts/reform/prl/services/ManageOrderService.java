@@ -584,8 +584,7 @@ public class ManageOrderService {
             case nonMolestation:
             case powerOfArrest:
             case blank:
-                CaseData fl404bFields = getFl404bFields(caseData);
-                return fl404bFields;
+                return getFl404bFields(caseData);
             case generalForm:
                 return getN117FormData(caseData);
             case noticeOfProceedings:

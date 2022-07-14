@@ -449,10 +449,7 @@ public class ManageOrdersControllerTest {
                              .id(12345L)
                              .data(stringObjectMap)
                              .build())
-            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                                   .id(12345L)
-                                   .data(stringObjectMap)
-                                   .build())
+            .caseDetailsBefore(null)
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
