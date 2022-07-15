@@ -241,19 +241,6 @@ public class ManageOrderService {
         String childInfo = getChildInfoFromCaseData(caseData);
 
         childrenList.put("childrenList", childInfo);
-        List<PartyDetails> otherPeople = new ArrayList<>();
-        StringBuilder builder = new StringBuilder();
-        if (caseData.getOthersToNotify() != null) {
-            otherPeople = caseData.getOthersToNotify().stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-        }
-        for (int i = 0; i < otherPeople.size(); i++) {
-            PartyDetails otherParty = otherPeople.get(i);
-            builder.append(String.format("Other people %d: %s", i + 1, otherParty.getFirstName() + " " + otherParty.getLastName()));
-            builder.append("\n\n");
-        }
-        childrenList.put("otherPeopleList", builder.toString());
         childrenList.put("childListForSpecialGuardianship", childInfo);
         return childrenList;
     }
@@ -672,7 +659,7 @@ public class ManageOrderService {
 
     public CaseData getFL402FormData(CaseData caseData) {
 
-        ManageOrders orderData =  ManageOrders.builder()
+        ManageOrders orderData = ManageOrders.builder()
             .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
             .manageOrdersFl402CourtName(caseData.getCourtName())
             .manageOrdersFl402Applicant(String.format("%s %s", caseData.getApplicantsFL401().getFirstName(),
@@ -710,33 +697,40 @@ public class ManageOrderService {
         }
 
         childMap.put("childOption", childOption);
-        childMap.put("otherPeopleOption", IntStream.range(0, defaultIfNull(caseData.getOthersToNotify(), emptyList()).size())
-            .mapToObj(Integer::toString)
-            .collect(joining()));
 
         return childMap;
     }
 
 
     public Map<String, Object> getOtherPeopleOptionList(CaseData caseData) {
-        Map<String, Object> childMap = getChildrenListData(caseData);
-        String childOption = null;
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            childOption = IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
-                .mapToObj(Integer::toString)
-                .collect(joining());
-        } else {
-            Optional<List<Element<ApplicantChild>>> applicantChildDetails = Optional.ofNullable(caseData.getApplicantChildDetails());
-            if (applicantChildDetails.isPresent()) {
-                childOption = IntStream.range(0, defaultIfNull(applicantChildDetails.get(), emptyList()).size())
-                    .mapToObj(Integer::toString)
-                    .collect(joining());
-            }
+
+        log.info("Inside other people list logic and size is  {}", caseData.getOthersToNotify().size());
+        List<PartyDetails> otherPeopleList = new ArrayList<PartyDetails>();
+        Map<String, Object> otherPeopleMap = new HashMap<String, Object>();
+        StringBuilder builder = new StringBuilder();
+        if (caseData.getOthersToNotify() != null) {
+            otherPeopleList = caseData.getOthersToNotify().stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
         }
-
-        childMap.put("childOption", childOption);
-
-        return childMap;
+        for (int i = 0; i < otherPeopleList.size(); i++) {
+            PartyDetails otherParty = otherPeopleList.get(i);
+            builder.append(String.format(
+                "Other people %d: %s",
+                i + 1,
+                otherParty.getFirstName() + " " + otherParty.getLastName()
+            ));
+            builder.append("\n");
+        }
+        otherPeopleMap.put("otherPeopleList", builder.toString());
+        otherPeopleMap.put(
+            "otherPeopleOption",
+            IntStream.range(0, defaultIfNull(caseData.getOthersToNotify(), emptyList()).size())
+                .mapToObj(Integer::toString)
+                .collect(joining())
+        );
+        log.info("Before returning the map {}", otherPeopleMap);
+        return otherPeopleMap;
     }
 
 }
