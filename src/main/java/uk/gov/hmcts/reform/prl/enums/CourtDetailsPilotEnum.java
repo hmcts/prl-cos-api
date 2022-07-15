@@ -17,7 +17,8 @@ public enum CourtDetailsPilotEnum {
     haverfordwestCountyCourt("family.haverfordwest.countycourt@justice.gov.uk", "Haverfordwest County Court and Family Court", "217"),
     eastlondonfamilycourt("eastlondonfamilypr@justice.gov.uk","East London Family Court","121"),
     kingstonuponhullCountyCourt("hull.private.filing@justice.gov.uk","Kingston upon Hull County Court","239"),
-    newcastlecivilandfamilycourtsandTribunalCentre("newcastle.c100applications@justice.gov.uk","Newcastle Civil and Family Courts and Tribunal Centre ","278");
+    newcastlecivilandfamilycourtsandTribunalCentre("newcastle.c100applications@justice.gov.uk",
+                                                   "Newcastle Civil and Family Courts and Tribunal Centre ","278");
 
     private final String courtEmail;
     private final String courtName;
