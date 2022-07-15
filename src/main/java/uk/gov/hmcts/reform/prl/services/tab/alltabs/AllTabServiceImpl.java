@@ -78,11 +78,7 @@ public class AllTabServiceImpl implements AllTabsService {
         if (caseData.getCourtId() != null) {
             combinedFieldsMap.put("courtId", caseData.getCourtId());
         }
-
         getDocumentsMap(caseData,combinedFieldsMap);
-        log.info("*******Combined fields map in tabs service********* : {}",combinedFieldsMap);
-        log.info("*******Case data Tabs service********* : {}",caseData);
-
         // Calling event to refresh the page.
         refreshCcdUsingEvent(caseData, combinedFieldsMap);
     }
