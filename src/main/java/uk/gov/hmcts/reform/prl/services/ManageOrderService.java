@@ -241,6 +241,19 @@ public class ManageOrderService {
         String childInfo = getChildInfoFromCaseData(caseData);
 
         childrenList.put("childrenList", childInfo);
+        List<PartyDetails> otherPeople = new ArrayList<>();
+        StringBuilder builder = new StringBuilder();
+        if (caseData.getOthersToNotify() != null) {
+            otherPeople = caseData.getOthersToNotify().stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+        }
+        for (int i = 0; i < otherPeople.size(); i++) {
+            PartyDetails otherParty = otherPeople.get(i);
+            builder.append(String.format("Other people %d: %s", i + 1, otherParty.getFirstName() + " " + otherParty.getLastName()));
+            builder.append("\n\n");
+        }
+        childrenList.put("otherPeopleList", builder.toString());
         childrenList.put("childListForSpecialGuardianship", childInfo);
         return childrenList;
     }
@@ -390,17 +403,17 @@ public class ManageOrderService {
 
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            /*GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 CaseDetails.builder().caseData(caseData).build(),
                 fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
-            );
+            );*/
             return OrderDetails.builder().orderType(flagSelectedOrder)
-                .orderDocument(Document.builder()
+                /*.orderDocument(Document.builder()
                                    .documentUrl(generatedDocumentInfo.getUrl())
                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                    .documentHash(generatedDocumentInfo.getHashToken())
-                                   .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
+                                   .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())*/
                 .otherDetails(OtherOrderDetails.builder()
                                   .createdBy(caseData.getJudgeOrMagistratesLastName())
                                   .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
@@ -541,7 +554,7 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
 
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+        /*GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             fieldsMap.get(PrlAppsConstants.TEMPLATE)
@@ -552,7 +565,7 @@ public class ManageOrderService {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());*/
         return caseDataUpdated;
     }
 
@@ -697,9 +710,33 @@ public class ManageOrderService {
         }
 
         childMap.put("childOption", childOption);
+        childMap.put("otherPeopleOption", IntStream.range(0, defaultIfNull(caseData.getOthersToNotify(), emptyList()).size())
+            .mapToObj(Integer::toString)
+            .collect(joining()));
 
         return childMap;
     }
 
+
+    public Map<String, Object> getOtherPeopleOptionList(CaseData caseData) {
+        Map<String, Object> childMap = getChildrenListData(caseData);
+        String childOption = null;
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            childOption = IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
+                .mapToObj(Integer::toString)
+                .collect(joining());
+        } else {
+            Optional<List<Element<ApplicantChild>>> applicantChildDetails = Optional.ofNullable(caseData.getApplicantChildDetails());
+            if (applicantChildDetails.isPresent()) {
+                childOption = IntStream.range(0, defaultIfNull(applicantChildDetails.get(), emptyList()).size())
+                    .mapToObj(Integer::toString)
+                    .collect(joining());
+            }
+        }
+
+        childMap.put("childOption", childOption);
+
+        return childMap;
+    }
 
 }
