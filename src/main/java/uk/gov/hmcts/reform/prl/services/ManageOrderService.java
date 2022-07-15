@@ -403,17 +403,17 @@ public class ManageOrderService {
 
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
-            /*GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 CaseDetails.builder().caseData(caseData).build(),
                 fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
-            );*/
+            );
             return OrderDetails.builder().orderType(flagSelectedOrder)
-                /*.orderDocument(Document.builder()
+                .orderDocument(Document.builder()
                                    .documentUrl(generatedDocumentInfo.getUrl())
                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                    .documentHash(generatedDocumentInfo.getHashToken())
-                                   .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())*/
+                                   .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
                 .otherDetails(OtherOrderDetails.builder()
                                   .createdBy(caseData.getJudgeOrMagistratesLastName())
                                   .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
@@ -554,7 +554,7 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
 
-        /*GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
             authorisation,
             uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
             fieldsMap.get(PrlAppsConstants.TEMPLATE)
@@ -565,7 +565,7 @@ public class ManageOrderService {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());*/
+            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
         return caseDataUpdated;
     }
 
