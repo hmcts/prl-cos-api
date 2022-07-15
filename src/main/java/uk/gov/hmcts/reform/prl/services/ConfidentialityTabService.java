@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.Fl401ChildConfidentialityDetails;
@@ -156,19 +157,24 @@ public class ConfidentialityTabService {
 
     public List<Element<Fl401ChildConfidentialityDetails>> getFl401ChildrenConfidentialDetails(CaseData caseData) {
         List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
-        if (caseData.getTypeOfApplicationOrders().getOrderType().contains(occupationOrder)
-            && ofNullable(caseData.getHome().getChildren()).isPresent()) {
-            List<ChildrenLiveAtAddress> children = unwrapElements(caseData.getHome().getChildren());
-            for (ChildrenLiveAtAddress child : children) {
-                if (child.getKeepChildrenInfoConfidential().equals(YesOrNo.Yes)) {
-                    Element<Fl401ChildConfidentialityDetails> childElement = Element
-                        .<Fl401ChildConfidentialityDetails>builder()
-                        .value(Fl401ChildConfidentialityDetails.builder()
-                                   .fullName(child.getChildFullName()).build()).build();
-                    childrenConfidentialDetails.add(childElement);
+        Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
+        if (typeOfApplicationOrders.isPresent() && ofNullable(typeOfApplicationOrders.get().getOrderType()).isPresent()
+                        && !typeOfApplicationOrders.get().getOrderType().isEmpty()) {
+            if (typeOfApplicationOrders.get().getOrderType().contains(occupationOrder)
+                && ofNullable(caseData.getHome().getChildren()).isPresent()) {
+                List<ChildrenLiveAtAddress> children = unwrapElements(caseData.getHome().getChildren());
+                for (ChildrenLiveAtAddress child : children) {
+                    if (child.getKeepChildrenInfoConfidential().equals(YesOrNo.Yes)) {
+                        Element<Fl401ChildConfidentialityDetails> childElement = Element
+                            .<Fl401ChildConfidentialityDetails>builder()
+                            .value(Fl401ChildConfidentialityDetails.builder()
+                                       .fullName(child.getChildFullName()).build()).build();
+                        childrenConfidentialDetails.add(childElement);
+                    }
                 }
             }
         }
+
         return childrenConfidentialDetails;
     }
 
