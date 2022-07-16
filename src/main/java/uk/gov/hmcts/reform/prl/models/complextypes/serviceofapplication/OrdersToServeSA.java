@@ -23,40 +23,44 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.TransferOfCaseToAnothe
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @Builder
 public class OrdersToServeSA {
-    private final String sentDocumentPlaceHolder;
-
     private final List<StandardDirectionsOrderEnum> standardDirectionsOrderOption;
-    private final List<BlankOrderOrDirectionsEnum>    blankOrderOrDirectionsOption;
-
+    private final List<BlankOrderOrDirectionsEnum> blankOrderOrDirectionsOption;
     private final List<BlankOrderOrDirectionsWithdrawEnum> blankOrderOrDirectionsWithdrawOption;
-    private final List<ChildArrangementsSpecificProhibitedOrderEnum>    childArrangementSpecificOrderOption;
-
+    private final List<ChildArrangementsSpecificProhibitedOrderEnum> childArrangementSpecificOrderOption;
     private final List<ParentalResponsibilityEnum> parentalResponsibilityOption;
-    private final List<SpecialGuardianShipEnum>    specialGuardianShipOption;
-
+    private final List<SpecialGuardianShipEnum> specialGuardianShipOption;
     private final List<NoticeOfProceedingsPartiesEnum> noticeOfProceedingsPartiesOption;
-    private final List<NoticeOfProceedingsNonPartiesEnum>    noticeOfProceedingsNonPartiesOption;
-
+    private final List<NoticeOfProceedingsNonPartiesEnum> noticeOfProceedingsNonPartiesOption;
     private final List<TransferOfCaseToAnotherCourtEnum> transferOfCaseToAnotherCourtOption;
-    private final List<AppointmentOfGuardianEnum>    appointmentOfGuardianOption;
-
+    private final List<AppointmentOfGuardianEnum> appointmentOfGuardianOption;
     private final List<NonMolestationEnum> nonMolestationOption;
-    private final List<OccupationEnum>    occupationOption;
-
+    private final List<OccupationEnum> occupationOption;
     private final List<PowerOfArrestEnum> powerOfArrestOption;
-    private final List<AmendDischargedVariedEnum>    amendDischargedVariedOption;
-
+    private final List<AmendDischargedVariedEnum> amendDischargedVariedOption;
     private final List<BlankOrderEnum> blankOrderEnumOption;
-    private final List<GeneralFormUndertakingEnum>    generalFormUndertakingOption;
-
+    private final List<GeneralFormUndertakingEnum> generalFormUndertakingOption;
     private final List<NoticeOfProceedingsEnum> noticeOfProceedingsEnumOption;
-    private final List<OtherUploadAnOrderEnum>    otherUploadAnOrderOption;
+    private final List<OtherUploadAnOrderEnum> otherUploadAnOrderOption;
 
-    private final Document pd36qLetter;
-    private final Document specialArrangementsLetter;
-    private final Document additionalDocuments;
+    public List<String> getSelectedOrders() {
+        return Stream.of(OrdersToServeSA.class.getDeclaredFields()).filter(Objects::nonNull)
+            .map(field -> {
+                try {
+                    return field.get(this);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }).filter(Objects::nonNull)
+            .map(Object::toString)
+            .map(s -> s.substring(1, s.length() - 1))
+            .collect(Collectors.toList());
+    }
 }

@@ -4,7 +4,9 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OtherEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.CafcassServiceApplicationEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.util.List;
@@ -15,8 +17,8 @@ public class ConfirmRecipients {
     private final List<OrderRecipientsEnum> applicantsList;
     private final List<OtherOrderRecipientsEnum> otherPeopleList;
 
-    private final List<RestrictToCafcassHmcts> cafcassEmailOptionChecked;
-    private final List<RestrictToCafcassHmcts> otherEmailOptionChecked;
+    private final List<CafcassServiceApplicationEnum> cafcassEmailOptionChecked;
+    private final List<OtherEnum> otherEmailOptionChecked;
 
     private final List<Element<String>> cafcassEmailAddressList;
     private final List<Element<String>> otherEmailAddressList;

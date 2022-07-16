@@ -20,4 +20,5 @@ public class OrderDetails {
     private final String orderType;
     private final Document orderDocument;
     private final OtherOrderDetails otherDetails;
+
 }
