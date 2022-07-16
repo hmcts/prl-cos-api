@@ -194,6 +194,8 @@ public class DocumentGenService {
         return caseData;
     }
 
+
+
     public Map<String, Object> generateDocuments(String authorisation, CaseData caseData) throws Exception {
 
         Map<String, Object> updatedCaseData = new HashMap<>();
@@ -241,6 +243,7 @@ public class DocumentGenService {
 
         return updatedCaseData;
     }
+
 
     private boolean isConfidentialInformationPresentForC100(CaseData caseData) {
         return C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())

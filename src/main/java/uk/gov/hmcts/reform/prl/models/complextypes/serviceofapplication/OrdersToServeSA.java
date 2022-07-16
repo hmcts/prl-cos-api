@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.PowerOfArrestEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SpecialGuardianShipEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StandardDirectionsOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.TransferOfCaseToAnotherCourtEnum;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 import java.util.Objects;
@@ -29,7 +30,6 @@ import java.util.stream.Stream;
 @Data
 @Builder
 public class OrdersToServeSA {
-
     private final List<StandardDirectionsOrderEnum> standardDirectionsOrderOption;
     private final List<BlankOrderOrDirectionsEnum> blankOrderOrDirectionsOption;
     private final List<BlankOrderOrDirectionsWithdrawEnum> blankOrderOrDirectionsWithdrawOption;

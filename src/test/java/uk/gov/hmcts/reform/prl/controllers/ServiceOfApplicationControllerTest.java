@@ -7,6 +7,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.annotation.PropertySource;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.prl.enums.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
+
+import java.util.ArrayList;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -24,6 +32,13 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.Silent.class)
+@PropertySource(value = "classpath:application.yaml")
+public class ServiceOfApplicationControllerTest {
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +50,12 @@ public class ServiceOfApplicationControllerTest {
     private ServiceOfApplicationController serviceOfApplicationController;
 
     @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private ServiceOfApplicationService serviceOfApplicationService;
+
+    public static final String authToken = "Bearer TestAuthToken";
     private ServiceOfApplicationService serviceOfApplicationService;
 
     @Mock
@@ -45,7 +66,6 @@ public class ServiceOfApplicationControllerTest {
 
     @Mock
     private ObjectMapper objectMapper;
-
 
     @Test
     public void testServiceOfApplicationAboutToStart() throws Exception {

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication;
 
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrderRecipientsEnum;
