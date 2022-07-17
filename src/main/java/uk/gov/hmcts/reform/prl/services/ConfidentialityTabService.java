@@ -161,7 +161,7 @@ public class ConfidentialityTabService {
         if (typeOfApplicationOrders.isPresent() && ofNullable(typeOfApplicationOrders.get().getOrderType()).isPresent()
                         && !typeOfApplicationOrders.get().getOrderType().isEmpty()) {
             if (typeOfApplicationOrders.get().getOrderType().contains(occupationOrder)
-                && ofNullable(caseData.getHome().getChildren()).isPresent()) {
+                && ofNullable(caseData.getHome()).isPresent() && ofNullable(caseData.getHome().getChildren()).isPresent()) {
                 List<ChildrenLiveAtAddress> children = unwrapElements(caseData.getHome().getChildren());
                 for (ChildrenLiveAtAddress child : children) {
                     if (child.getKeepChildrenInfoConfidential().equals(YesOrNo.Yes)) {
