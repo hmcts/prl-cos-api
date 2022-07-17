@@ -46,6 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 
 @Slf4j
@@ -115,7 +116,6 @@ public class ResubmitApplicationController {
         Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
             ResubmitApplicationController::getPreviousState).findFirst();
 
-        log.info("Court name for return application: === {}===", caseDataUpdated.get(COURT_NAME_FIELD));
         if (previousStates.isPresent()) {
             if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
                 caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
@@ -180,15 +180,22 @@ public class ResubmitApplicationController {
                 DATE_AND_TIME_SUBMITTED_FIELD,
                 DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)
             );
-            try {
-                solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
-                caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
-                caseDataUpdated.put("isNotificationSent", "Yes");
-            } catch (Exception e) {
-                log.error("Notification could not be sent due to {} ", e.getMessage());
-                caseDataUpdated.put("isNotificationSent", "No");
-            }
         }
+        if (previousStates.isPresent() && State.CASE_ISSUE.getValue().equalsIgnoreCase(previousStates.get())) {
+            caseData = caseData.toBuilder().state(State. CASE_ISSUE).build();
+            caseDataUpdated.put(STATE_FIELD, State.CASE_ISSUE);
+            caseData = caseData.setIssueDate();
+            caseDataUpdated.put(ISSUE_DATE_FIELD, caseData.getIssueDate());
+        }
+        try {
+            solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
+            caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+            caseDataUpdated.put("isNotificationSent", "Yes");
+        } catch (Exception e) {
+            log.error("Notification could not be sent due to {} ", e.getMessage());
+            caseDataUpdated.put("isNotificationSent", "No");
+        }
+
         //set the resubmit fields to null so they are blank if multiple resubmissions
         caseDataUpdated.put("fl401StmtOfTruthResubmit", null);
         caseDataUpdated.put("fl401ConfidentialityCheckResubmit", null);

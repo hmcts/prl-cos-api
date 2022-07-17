@@ -66,7 +66,7 @@ public class C100IssueCaseController {
         try {
             caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
         } catch (Exception ex) {
-            log.info("Email notification could not be sent due to following {}", ex.getMessage());
+            log.error("Email notification could not be sent");
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
