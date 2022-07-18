@@ -50,7 +50,6 @@ public class AllTabServiceImpl implements AllTabsService {
         if (caseData.getCourtId() != null) {
             combinedFieldsMap.put("courtId", caseData.getCourtId());
         }
-
         // Calling event to refresh the page.
         refreshCcdUsingEvent(caseData, combinedFieldsMap);
     }
@@ -79,9 +78,21 @@ public class AllTabServiceImpl implements AllTabsService {
         if (caseData.getCourtId() != null) {
             combinedFieldsMap.put("courtId", caseData.getCourtId());
         }
-
+        getDocumentsMap(caseData,combinedFieldsMap);
         // Calling event to refresh the page.
         refreshCcdUsingEvent(caseData, combinedFieldsMap);
+    }
+
+    private Map<String, Object> getDocumentsMap(CaseData caseData, Map<String, Object> documentMap) {
+
+        documentMap.put("c1ADocument", caseData.getC1ADocument());
+        documentMap.put("c1AWelshDocument", caseData.getC1AWelshDocument());
+        documentMap.put("finalDocument", caseData.getFinalDocument());
+        documentMap.put("finalWelshDocument", caseData.getFinalWelshDocument());
+        documentMap.put("c8Document", caseData.getC8Document());
+        documentMap.put("c8WelshDocument", caseData.getC8WelshDocument());
+
+        return documentMap;
     }
 
     private Map<String, Object> getCombinedMap(CaseData caseData) {
