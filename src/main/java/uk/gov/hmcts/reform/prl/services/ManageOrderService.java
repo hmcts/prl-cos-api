@@ -448,9 +448,6 @@ public class ManageOrderService {
             return String.join("\n", applicantSolicitorNames);
         } else {
             PartyDetails applicantFl401 = caseData.getApplicantsFL401();
-            String applicantSolicitorName = applicantFl401.getRepresentativeFirstName()
-                + " "
-                + applicantFl401.getRepresentativeLastName();
             return applicantFl401.getRepresentativeLastName();
         }
     }
