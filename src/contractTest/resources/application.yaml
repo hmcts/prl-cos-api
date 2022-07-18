@@ -225,11 +225,11 @@ document:
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
     common:
-      prl_c21_template: PLR-GOR-ENG-C21-Blank-Order-Final.docx
+      prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf
-      prl_c21_welsh_template: PLR-GOR-WEL-C21-Blank-Order-Final.docx
+      prl_c21_welsh_template: PRL-GOR-WEL-C21-Blank-Order-Final.docx
       prl_c21_welsh_filename: Blank_Order_Directions_C21_Welsh.pdf
-      prl_c21_draft_template: PLR-GOR-ENG-C21-Blank-Order-Draft.docx
+      prl_c21_draft_template: PRL-GOR-ENG-C21-Blank-Order-Draft.docx
       prl_c21_draft_filename: Blank_Order_Directions_C21_Draft.pdf
       prl_c43a_draft_template: PRL-GOR-ENG-C43A-Special-Guardianship-Order-Draft.docx
       prl_c43a_draft_filename: Special_Guardianship_Order_C43A_Draft.pdf
