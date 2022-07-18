@@ -677,11 +677,18 @@ public class ManageOrderService {
     }
 
 
-    public Map<String, Object> getChildOptionList(CaseData caseData) {
+    //**Not sure if this call is really needed, commenting out to for now**//
+    /*public Map<String, Object> getChildOptionList(CaseData caseData) {
         Map<String, Object> childMap = getChildrenListData(caseData);
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = populateCustomOrderFields(caseData);
         }
+        String childOption = getChildListAsString(caseData);
+        childMap.put("childOption", childOption);
+        return childMap;
+    }*/
+
+    public String getChildListAsString(CaseData caseData) {
         String childOption = null;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             childOption = IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
@@ -695,14 +702,11 @@ public class ManageOrderService {
                     .collect(joining());
             }
         }
-
-        childMap.put("childOption", childOption);
-
-        return childMap;
+        return childOption;
     }
 
 
-    public Map<String, Object> getOtherPeopleOptionList(CaseData caseData) {
+    public Map<String, Object> getDynamicOtherPeopleListDetails(CaseData caseData) {
 
         log.info("Inside other people list logic and size is  {}", caseData.getOthersToNotify().size());
         List<PartyDetails> otherPeopleList = new ArrayList<PartyDetails>();
@@ -733,4 +737,11 @@ public class ManageOrderService {
         return otherPeopleMap;
     }
 
+    public Map<String, Object> getDynamicChildOptionListDetails(CaseData caseData) {
+        Map<String, Object> childMap = new HashMap<String, Object>();
+        childMap.put("childrenList", getChildInfoFromCaseData(caseData));
+        childMap.put("childOption", getChildListAsString(caseData));
+        log.info("getDynamicChildOptionListDetails :: Before returning the map {}", childMap);
+        return childMap;
+    }
 }

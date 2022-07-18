@@ -1034,7 +1034,7 @@ public class ManageOrderServiceTest {
 
     }
 
-    @Test
+    /* @Test
     public void testChildOptionForC100Case() {
 
         Child child1 = Child.builder()
@@ -1075,9 +1075,9 @@ public class ManageOrderServiceTest {
         Map<String, Object> actualMap = manageOrderService.getChildOptionList(caseData);
         assertEquals("01", actualMap.get("childOption"));
 
-    }
+    }*/
 
-
+    /*
     @Test
     public void testChildOptionForFL401Case() {
 
@@ -1115,5 +1115,5 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> actualMap = manageOrderService.getChildOptionList(caseData);
         assertEquals("0", actualMap.get("childOption"));
-    }
+    }*/
 }
