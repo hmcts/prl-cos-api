@@ -40,9 +40,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
+import static uk.gov.hmcts.reform.prl.enums.Gender.male;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
-import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
-import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.*;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageOrderServiceTest {
@@ -1116,4 +1116,132 @@ public class ManageOrderServiceTest {
         Map<String, Object> actualMap = manageOrderService.getChildOptionList(caseData);
         assertEquals("0", actualMap.get("childOption"));
     }*/
+
+    @Test
+    public void testGetChildListAsStringForC100Case() {
+
+        Child child1 = Child.builder()
+            .firstName("Test1")
+            .lastName("Name1")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test1")
+            .build();
+
+        Child child2 = Child.builder()
+            .firstName("Test2")
+            .lastName("Name2")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test2")
+            .build();
+
+        Element<Child> wrappedChildren1 = Element.<Child>builder().value(child1).build();
+        Element<Child> wrappedChildren2 = Element.<Child>builder().value(child2).build();
+        List<Element<Child>> listOfChildren = List.of(wrappedChildren1, wrappedChildren2);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .children(listOfChildren)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        String actual = manageOrderService.getChildListAsString(caseData);
+        assertEquals("01", actual);
+
+    }
+
+    @Test
+    public void testGetDynamicChildOptionListDetailsForC100Case() {
+
+        Child child1 = Child.builder()
+            .firstName("Test1")
+            .lastName("Name1")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test1")
+            .build();
+
+        Child child2 = Child.builder()
+            .firstName("Test2")
+            .lastName("Name2")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test2")
+            .build();
+
+        Element<Child> wrappedChildren1 = Element.<Child>builder().value(child1).build();
+        Element<Child> wrappedChildren2 = Element.<Child>builder().value(child2).build();
+        List<Element<Child>> listOfChildren = List.of(wrappedChildren1, wrappedChildren2);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .children(listOfChildren)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+        Map<String, Object> expectedResult = new HashMap<String, Object>();
+        expectedResult.put("childOption", "01");
+
+        Map<String, Object> actual = manageOrderService.getDynamicChildOptionListDetails(caseData);
+        assertEquals(2, actual.size());
+        assertEquals("01", actual.get("childOption"));
+        assertEquals("Child 1: Test1 Name1\n" +
+                         "\n" +
+                         "Child 2: Test2 Name2\n\n", actual.get("childrenList"));
+
+    }
+
+
+    @Test
+    public void testGetDynamicOtherpeopleListDetailsForC100Case() {
+
+        PartyDetails otherPeople1 = PartyDetails.builder()
+            .firstName("Test1")
+            .lastName("Name1")
+            .gender(female)
+            .phoneNumber("1234565")
+            .build();
+
+        PartyDetails otherPeople2 = PartyDetails.builder()
+            .firstName("Test2")
+            .lastName("Name2")
+            .gender(male)
+            .phoneNumber("1234565")
+            .build();
+
+        Element<PartyDetails> wrappedOtherPerson1 = Element.<PartyDetails>builder().value(otherPeople1).build();
+        Element<PartyDetails> wrappedOtherPerson2 = Element.<PartyDetails>builder().value(otherPeople2).build();
+        List<Element<PartyDetails>> listOfOtherPeople = List.of(wrappedOtherPerson1, wrappedOtherPerson2);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .othersToNotify(listOfOtherPeople)
+            .build();
+
+        Map<String, Object> actual = manageOrderService.getDynamicOtherPeopleListDetails(caseData);
+        assertEquals(2, actual.size());
+        assertEquals("01", actual.get("otherPeopleOption"));
+        assertEquals("Other people 1: Test1 Name1\n" +
+                         "\n" +
+                         "Other people 2: Test2 Name2\n\n", actual.get("otherPeopleList"));
+
+    }
+
+
 }

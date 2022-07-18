@@ -724,7 +724,7 @@ public class ManageOrderService {
                 i + 1,
                 otherParty.getFirstName() + " " + otherParty.getLastName()
             ));
-            builder.append("\n");
+            builder.append("\n\n");
         }
         otherPeopleMap.put("otherPeopleList", builder.toString());
         otherPeopleMap.put(

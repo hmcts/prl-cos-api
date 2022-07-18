@@ -46,13 +46,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
+import static uk.gov.hmcts.reform.prl.enums.Gender.male;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
@@ -1032,5 +1034,54 @@ public class ManageOrdersControllerTest {
         );
         verify(manageOrderService, times(1))
             .getOrderToAmendDownloadLink(caseData);
+    }
+
+
+    @Test
+    public void testOtherPeopleNamesList() {
+        PartyDetails otherPeople1 = PartyDetails.builder()
+            .firstName("Test1")
+            .lastName("Name1")
+            .gender(female)
+            .phoneNumber("1234565")
+            .build();
+
+        PartyDetails otherPeople2 = PartyDetails.builder()
+            .firstName("Test2")
+            .lastName("Name2")
+            .gender(male)
+            .phoneNumber("1234565")
+            .build();
+
+        Element<PartyDetails> wrappedOtherPerson1 = Element.<PartyDetails>builder().value(otherPeople1).build();
+        Element<PartyDetails> wrappedOtherPerson2 = Element.<PartyDetails>builder().value(otherPeople2).build();
+        List<Element<PartyDetails>> listOfOtherPeople = List.of(wrappedOtherPerson1, wrappedOtherPerson2);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .othersToNotify(listOfOtherPeople)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.getDynamicOtherPeopleListDetails(any())).thenReturn(Map.of("otherPeopleList","Other people 1: Test1 Name1\n" +
+        "\n" +
+            "Other people 2: Test2 Name2\n\n","otherPeopleOption","01"));
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateOtherPeopleList(callbackRequest);
+        assertTrue(callbackResponse.getData().containsKey("otherPeopleList"));
+        assertTrue(callbackResponse.getData().containsKey("otherPeopleOption"));
+        assertEquals("Other people 1: Test1 Name1\n" +
+                         "\n" +
+                         "Other people 2: Test2 Name2\n\n", callbackResponse.getData().get("otherPeopleList"));
     }
 }
