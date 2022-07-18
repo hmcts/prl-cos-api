@@ -46,13 +46,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.Gender.male;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -89,7 +89,7 @@ public class ManageOrdersControllerTest {
     private UserService userService;
 
     @Mock
-    private  DocumentLanguageService documentLanguageService;
+    private DocumentLanguageService documentLanguageService;
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
@@ -150,7 +150,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
-            .populatePreviewOrderWhenOrderUploaded("test token",callbackRequest);
+            .populatePreviewOrderWhenOrderUploaded("test token", callbackRequest);
         assertNotNull(callbackResponse);
     }
 
@@ -187,7 +187,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
-            .populatePreviewOrderWhenOrderUploaded("test token",callbackRequest);
+            .populatePreviewOrderWhenOrderUploaded("test token", callbackRequest);
         assertNotNull(callbackResponse);
     }
 
@@ -344,7 +344,8 @@ public class ManageOrdersControllerTest {
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
-            callbackResponse.getData().getSelectedOrder());
+            callbackResponse.getData().getSelectedOrder()
+        );
     }
 
     @Test
@@ -403,7 +404,8 @@ public class ManageOrdersControllerTest {
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
-            callbackResponse.getData().getSelectedOrder());
+            callbackResponse.getData().getSelectedOrder()
+        );
     }
 
     @Test
@@ -459,7 +461,8 @@ public class ManageOrdersControllerTest {
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
-            callbackResponse.getData().getSelectedOrder());
+            callbackResponse.getData().getSelectedOrder()
+        );
     }
 
     @Test
@@ -469,7 +472,8 @@ public class ManageOrdersControllerTest {
             .childsAge("23")
             .build();
 
-        Element<ChildrenLiveAtAddress> wrappedChildren = Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build();
+        Element<ChildrenLiveAtAddress> wrappedChildren = Element.<ChildrenLiveAtAddress>builder().value(
+            childrenLiveAtAddress).build();
         List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
@@ -512,7 +516,8 @@ public class ManageOrdersControllerTest {
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
-            callbackResponse.getData().getSelectedOrder());
+            callbackResponse.getData().getSelectedOrder()
+        );
     }
 
     @Test
@@ -522,7 +527,8 @@ public class ManageOrdersControllerTest {
             .childsAge("23")
             .build();
 
-        Element<ChildrenLiveAtAddress> wrappedChildren = Element.<ChildrenLiveAtAddress>builder().value(childrenLiveAtAddress).build();
+        Element<ChildrenLiveAtAddress> wrappedChildren = Element.<ChildrenLiveAtAddress>builder().value(
+            childrenLiveAtAddress).build();
         List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
@@ -565,7 +571,8 @@ public class ManageOrdersControllerTest {
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
-            callbackResponse.getData().getSelectedOrder());
+            callbackResponse.getData().getSelectedOrder()
+        );
     }
 
     @Test
@@ -723,7 +730,7 @@ public class ManageOrdersControllerTest {
             OrderDetails.builder().build()).build());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken, caseData))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -738,7 +745,7 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         // assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
-        assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
+        assertEquals(orderDetailsList, aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
     }
 
     @Test
@@ -752,7 +759,7 @@ public class ManageOrdersControllerTest {
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        stringObjectMap.put("manageOrderHeader1","test");
+        stringObjectMap.put("manageOrderHeader1", "test");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(caseData);
         when(manageOrderService.populateHeader(caseData))
@@ -1074,10 +1081,14 @@ public class ManageOrdersControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getDynamicOtherPeopleListDetails(any())).thenReturn(Map.of("otherPeopleList","Other people 1: Test1 Name1\n" +
-        "\n" +
-            "Other people 2: Test2 Name2\n\n","otherPeopleOption","01"));
-        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateOtherPeopleList(callbackRequest);
+        when(manageOrderService.getDynamicOtherPeopleListDetails(any())).thenReturn(Map.of("otherPeopleList",
+                                                                                           "Other people 1: Test1 Name1\n" +
+                                                                                               "\n" +
+                                                                                               "Other people 2: Test2 Name2\n\n",
+                                                                                           "otherPeopleOption",
+                                                                                           "01"));
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateOtherPeopleList(
+            callbackRequest);
         assertTrue(callbackResponse.getData().containsKey("otherPeopleList"));
         assertTrue(callbackResponse.getData().containsKey("otherPeopleOption"));
         assertEquals("Other people 1: Test1 Name1\n" +

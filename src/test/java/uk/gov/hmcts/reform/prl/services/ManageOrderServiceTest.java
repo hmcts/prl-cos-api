@@ -42,7 +42,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.Gender.male;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
-import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.*;
+import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
+import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageOrderServiceTest {
@@ -1125,8 +1126,6 @@ public class ManageOrderServiceTest {
             .lastName("Name1")
             .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(father)
             .parentalResponsibilityDetails("test1")
             .build();
 
@@ -1134,9 +1133,6 @@ public class ManageOrderServiceTest {
             .firstName("Test2")
             .lastName("Name2")
             .gender(female)
-            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(father)
             .parentalResponsibilityDetails("test2")
             .build();
 
@@ -1166,8 +1162,6 @@ public class ManageOrderServiceTest {
             .lastName("Name1")
             .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(father)
             .parentalResponsibilityDetails("test1")
             .build();
 
@@ -1176,8 +1170,6 @@ public class ManageOrderServiceTest {
             .lastName("Name2")
             .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(father)
             .parentalResponsibilityDetails("test2")
             .build();
 
