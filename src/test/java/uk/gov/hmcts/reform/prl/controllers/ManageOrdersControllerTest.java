@@ -1081,18 +1081,17 @@ public class ManageOrdersControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getDynamicOtherPeopleListDetails(any())).thenReturn(Map.of("otherPeopleList",
-                                                                                           "Other people 1: Test1 Name1\n" +
-                                                                                               "\n" +
-                                                                                               "Other people 2: Test2 Name2\n\n",
-                                                                                           "otherPeopleOption",
-                                                                                           "01"));
+        when(manageOrderService.getDynamicOtherPeopleListDetails(any())).thenReturn(Map.of(
+            "otherPeopleList",
+            "Other people 1: Test1 Name1\n\n" + "Other people 2: Test2 Name2\n\n",
+            "otherPeopleOption",
+            "01"
+        ));
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateOtherPeopleList(
             callbackRequest);
         assertTrue(callbackResponse.getData().containsKey("otherPeopleList"));
         assertTrue(callbackResponse.getData().containsKey("otherPeopleOption"));
-        assertEquals("Other people 1: Test1 Name1\n" +
-                         "\n" +
-                         "Other people 2: Test2 Name2\n\n", callbackResponse.getData().get("otherPeopleList"));
+        assertEquals("Other people 1: Test1 Name1\n\n" + "Other people 2: Test2 Name2\n\n",
+                     callbackResponse.getData().get("otherPeopleList"));
     }
 }

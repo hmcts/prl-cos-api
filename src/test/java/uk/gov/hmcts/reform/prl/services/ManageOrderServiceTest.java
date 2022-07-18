@@ -1191,12 +1191,9 @@ public class ManageOrderServiceTest {
         Map<String, Object> actual = manageOrderService.getDynamicChildOptionListDetails(caseData);
         assertEquals(2, actual.size());
         assertEquals("01", actual.get("childOption"));
-        assertEquals("Child 1: Test1 Name1\n" +
-                         "\n" +
-                         "Child 2: Test2 Name2\n\n", actual.get("childrenList"));
+        assertEquals("Child 1: Test1 Name1\n\n" + "Child 2: Test2 Name2\n\n", actual.get("childrenList"));
 
     }
-
 
     @Test
     public void testGetDynamicOtherpeopleListDetailsForC100Case() {
@@ -1229,9 +1226,10 @@ public class ManageOrderServiceTest {
         Map<String, Object> actual = manageOrderService.getDynamicOtherPeopleListDetails(caseData);
         assertEquals(2, actual.size());
         assertEquals("01", actual.get("otherPeopleOption"));
-        assertEquals("Other people 1: Test1 Name1\n" +
-                         "\n" +
-                         "Other people 2: Test2 Name2\n\n", actual.get("otherPeopleList"));
+        assertEquals(
+            "Other people 1: Test1 Name1\n\n" + "Other people 2: Test2 Name2\n\n",
+            actual.get("otherPeopleList")
+        );
 
     }
 
