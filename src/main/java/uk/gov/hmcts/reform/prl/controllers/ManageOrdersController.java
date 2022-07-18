@@ -41,7 +41,6 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.reflections.Reflections.log;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 
 @Slf4j
@@ -56,7 +55,7 @@ public class ManageOrdersController {
     private final UserService userService;
 
     @Autowired
-    private  ManageOrderService manageOrderService;
+    private ManageOrderService manageOrderService;
 
     @Autowired
     private final DocumentLanguageService documentLanguageService;
@@ -79,16 +78,18 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("Enter the getcasedata to... with order type{}",caseData.getCreateSelectOrderOptions());
+        if (callbackRequest
+            .getCaseDetailsBefore() != null && callbackRequest
+            .getCaseDetailsBefore().getData().get("courtName") != null) {
+            caseData.setCourtName(callbackRequest
+                                      .getCaseDetailsBefore().getData().get("courtName").toString());
+        }
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
-            log.info("Enter if loop to... with case data{}",caseData.getDateOrderMade());
-            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
+            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
         } else {
-            log.info("ENtering into else... {}", caseData.getAppointmentOfGuardian());
-            caseDataUpdated.put("previewOrderDoc",caseData.getAppointmentOfGuardian());
+            caseDataUpdated.put("previewOrderDoc", caseData.getAppointmentOfGuardian());
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -127,6 +128,28 @@ public class ManageOrdersController {
         caseData = caseData.toBuilder()
             .childOption(childOption)
             .build();
+        return CallbackResponse.builder()
+            .data(caseData)
+            .build();
+    }
+
+    @PostMapping(path = "/fetch-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to fetch case data and custom order fields")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Child details are fetched"),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public CallbackResponse prepopulateFL401CaseDetails(
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        caseData = manageOrderService.getUpdatedCaseData(caseData);
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = manageOrderService.populateCustomOrderFields(caseData);
+        }
+
         return CallbackResponse.builder()
             .data(caseData)
             .build();
@@ -182,18 +205,14 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
         }
-        caseDataUpdated.put("orderCollection", manageOrderService
-            .addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else {
-            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,caseData));
+            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,
+                                                                                                caseData));
         }
 
-        caseDataUpdated.remove("previewOrderDoc");
-        caseDataUpdated.remove("dateOrderMade");
-        caseDataUpdated.remove("createSelectOrderOptions");
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -209,7 +228,7 @@ public class ManageOrdersController {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
-            manageOrderService.getCaseData(authorisation, caseData, caseDataUpdated);
+            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

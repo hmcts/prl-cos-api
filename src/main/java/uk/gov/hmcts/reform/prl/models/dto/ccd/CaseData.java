@@ -116,6 +116,11 @@ public class CaseData implements MappableObject {
     private final String caseTypeOfApplication;
 
     /**
+     * Case Type Of Application.
+     */
+    private final String selectedCaseTypeID;
+
+    /**
      * Case name.
      */
     @JsonAlias({"applicantCaseName", "applicantOrRespondentCaseName"})
@@ -346,7 +351,8 @@ public class CaseData implements MappableObject {
      * Add case number.
      */
     private final String familymanCaseNumber;
-    private final String fl401FamilymanCaseNumber;
+    @JsonIgnore
+    private final String fl401FamilymanCaseNumber; //field is no longer in use
 
     /**
      * Manage Documents.
@@ -570,7 +576,7 @@ public class CaseData implements MappableObject {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         this.toBuilder()
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
-            .dateSubmittedAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime))
+            .dateSubmittedAndTime(DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa").format(zonedDateTime).toUpperCase())
             .build();
 
         return this;

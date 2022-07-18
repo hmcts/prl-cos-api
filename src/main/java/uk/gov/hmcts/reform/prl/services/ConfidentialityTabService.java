@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.Fl401ChildConfidentialityDetails;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -33,19 +35,25 @@ public class ConfidentialityTabService {
 
     public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
 
-        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            List<PartyDetails> applicants = caseData.getApplicants().stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-            applicantsConfidentialDetails = getConfidentialApplicantDetails(
-                applicants);
-
-            List<Child> children = caseData.getChildren().stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(children);
+            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
+            Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
+            if (applicantList.isPresent()) {
+                List<PartyDetails> applicants = caseData.getApplicants().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                applicantsConfidentialDetails = getConfidentialApplicantDetails(
+                    applicants);
+            }
+            Optional<List<Element<Child>>> chiildList = ofNullable(caseData.getChildren());
+            if (chiildList.isPresent()) {
+                List<Child> children = caseData.getChildren().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                childrenConfidentialDetails = getChildrenConfidentialDetails(children);
+            }
 
             return Map.of(
                 "applicantsConfidentialDetails",
@@ -55,9 +63,11 @@ public class ConfidentialityTabService {
             );
 
         } else {
-            List<PartyDetails> fl401Applicant = List.of(caseData.getApplicantsFL401());
-            applicantsConfidentialDetails = getConfidentialApplicantDetails(
-                fl401Applicant);
+            if (null != caseData.getApplicantsFL401()) {
+                List<PartyDetails> fl401Applicant = List.of(caseData.getApplicantsFL401());
+                applicantsConfidentialDetails = getConfidentialApplicantDetails(
+                    fl401Applicant);
+            }
 
             List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(caseData);
 
@@ -67,7 +77,9 @@ public class ConfidentialityTabService {
                 "fl401ChildrenConfidentialDetails",
                 childrenConfidentialDetails
             );
+
         }
+
     }
 
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetails(List<Child> children) {
@@ -145,19 +157,24 @@ public class ConfidentialityTabService {
 
     public List<Element<Fl401ChildConfidentialityDetails>> getFl401ChildrenConfidentialDetails(CaseData caseData) {
         List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
-        if (caseData.getTypeOfApplicationOrders().getOrderType().contains(occupationOrder)
-            && ofNullable(caseData.getHome().getChildren()).isPresent()) {
-            List<ChildrenLiveAtAddress> children = unwrapElements(caseData.getHome().getChildren());
-            for (ChildrenLiveAtAddress child : children) {
-                if (child.getKeepChildrenInfoConfidential().equals(YesOrNo.Yes)) {
-                    Element<Fl401ChildConfidentialityDetails> childElement = Element
-                        .<Fl401ChildConfidentialityDetails>builder()
-                        .value(Fl401ChildConfidentialityDetails.builder()
-                                   .fullName(child.getChildFullName()).build()).build();
-                    childrenConfidentialDetails.add(childElement);
+        Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
+        if (typeOfApplicationOrders.isPresent() && ofNullable(typeOfApplicationOrders.get().getOrderType()).isPresent()
+                        && !typeOfApplicationOrders.get().getOrderType().isEmpty()) {
+            if (typeOfApplicationOrders.get().getOrderType().contains(occupationOrder)
+                && ofNullable(caseData.getHome()).isPresent() && ofNullable(caseData.getHome().getChildren()).isPresent()) {
+                List<ChildrenLiveAtAddress> children = unwrapElements(caseData.getHome().getChildren());
+                for (ChildrenLiveAtAddress child : children) {
+                    if (child.getKeepChildrenInfoConfidential().equals(YesOrNo.Yes)) {
+                        Element<Fl401ChildConfidentialityDetails> childElement = Element
+                            .<Fl401ChildConfidentialityDetails>builder()
+                            .value(Fl401ChildConfidentialityDetails.builder()
+                                       .fullName(child.getChildFullName()).build()).build();
+                        childrenConfidentialDetails.add(childElement);
+                    }
                 }
             }
         }
+
         return childrenConfidentialDetails;
     }
 

@@ -106,6 +106,38 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
+    public void testApplicantConfidentialDetailsWhenNull() {
+
+        partyDetails1 = PartyDetails.builder()
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .build();
+        List<Element<ApplicantConfidentialityDetails>> expectedOutput = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 1")
+                               .lastName("XYZ 2")
+                               .email("abc1@xyz.com")
+                               .phoneNumber("09876543211")
+                               .address(address)
+                               .build()).build());
+        assertEquals(
+            expectedOutput,
+            confidentialityTabService.getConfidentialApplicantDetails(List.of(partyDetails1))
+        );
+
+    }
+
+    @Test
     public void testChildConfidentialDetails() {
         OtherPersonWhoLivesWithChild personWhoLivesWithChild1 = OtherPersonWhoLivesWithChild.builder()
             .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
@@ -312,5 +344,55 @@ public class ConfidentialityTabServiceTest {
         assertTrue(stringObjectMap.containsKey("fl401ChildrenConfidentialDetails"));
 
     }
+
+    @Test
+    public void testApplicantConfidentialDetailsWhenNoApplicantsPresent() {
+
+        CaseData caseData = CaseData.builder()
+            .applicants(null)
+            .children(null)
+            .caseTypeOfApplication(C100_CASE_TYPE).build();
+        Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
+
+        assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
+        assertTrue(stringObjectMap.containsKey("childrenConfidentialDetails"));
+        assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantsConfidentialDetails"));
+        assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("childrenConfidentialDetails"));
+
+    }
+
+    @Test
+    public void testApplicantConfidentialDetailsWhenNoFL401ApplicantsPresent() {
+
+        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
+            .childFullName("Test")
+            .keepChildrenInfoConfidential(YesOrNo.Yes)
+            .build();
+
+        Element<ChildrenLiveAtAddress> child1 = Element.<ChildrenLiveAtAddress>builder().value(
+            child).build();
+
+        List<Element<ChildrenLiveAtAddress>> listOfChild = List.of(
+            child1
+        );
+
+        CaseData caseData = CaseData.builder()
+            .applicantsFL401(null)
+            .respondentsFL401(null)
+            .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
+                                         .orderType(List.of(FL401OrderTypeEnum.occupationOrder))
+                                         .build())
+            .home(Home.builder()
+                      .children(listOfChild)
+                      .build())
+
+            .caseTypeOfApplication(FL401_CASE_TYPE).build();
+        Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
+
+        assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantsConfidentialDetails"));
+        assertTrue(stringObjectMap.containsKey("fl401ChildrenConfidentialDetails"));
+
+    }
+
 
 }
