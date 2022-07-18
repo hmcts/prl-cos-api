@@ -1034,7 +1034,7 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        assertNotNull(manageOrderService.populateHeader(caseData).containsKey("amendOrderDynamicList"));
+        assertNotNull(manageOrderService.populateHeader(caseData).get("amendOrderDynamicList"));
     }
 
     @Test
