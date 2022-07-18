@@ -66,10 +66,10 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c21_filename}")
     protected String c21File;
 
-    @Value("${document.templates.common.C43A_draft_template}")
+    @Value("${document.templates.common.prl_c43a_draft_template}")
     protected String c43ADraftTemplate;
 
-    @Value("${document.templates.common.C43A_draft_filename}")
+    @Value("${document.templates.common.prl_c43a_draft_filename}")
     protected String c43ADraftFilename;
 
     @Value("${document.templates.common.prl_c49_draft_template}")
@@ -102,10 +102,10 @@ public class ManageOrderService {
     @Value("${document.templates.fl401.fl401_fl406_welsh_filename}")
     protected String fl406FileWelsh;
 
-    @Value("${document.templates.common.C43A_final_template}")
+    @Value("${document.templates.common.prl_c43a_final_template}")
     protected String c43AFinalTemplate;
 
-    @Value("${document.templates.common.C43A_final_filename}")
+    @Value("${document.templates.common.prl_c43a_final_filename}")
     protected String c43AFinalFilename;
 
     @Value("${document.templates.common.prl_c43_draft_template}")
