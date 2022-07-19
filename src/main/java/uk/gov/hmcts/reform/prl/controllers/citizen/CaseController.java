@@ -36,7 +36,7 @@ public class CaseController {
     @Autowired
     CaseService caseService;
 
-    @GetMapping(path = "/{caseId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
     @ApiOperation(value = "Frontend to fetch the data")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Case details returned", response = CallbackResponse.class),
