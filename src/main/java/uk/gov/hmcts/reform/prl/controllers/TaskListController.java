@@ -59,7 +59,8 @@ public class TaskListController extends AbstractCallbackController {
         String state = callbackRequest.getCaseDetails().getState();
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))) {
             try {
-                caseDataUpdated = dgsService.generateDocuments(authorisation, caseData);
+                log.info("Generating documents for the amended details");
+                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
             }
@@ -70,6 +71,7 @@ public class TaskListController extends AbstractCallbackController {
             .c8WelshDocument((Document) caseDataUpdated.get("c8WelshDocument"))
             .finalDocument((Document) caseDataUpdated.get("finalDocument"))
             .finalWelshDocument((Document) caseDataUpdated.get("finalWelshDocument"))
+            .c1AWelshDocument((Document) caseDataUpdated.get("c1AWelshDocument"))
             .build();
         tabService.updateAllTabsIncludingConfTab(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
