@@ -1046,6 +1046,64 @@ public class ManageOrdersControllerTest {
 
     @Test
     public void testOtherPeopleNamesList() {
+        Child child1 = Child.builder()
+            .firstName("Test1")
+            .lastName("Name1")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test1")
+            .build();
+
+        Child child2 = Child.builder()
+            .firstName("Test2")
+            .lastName("Name2")
+            .gender(female)
+            .parentalResponsibilityDetails("test2")
+            .build();
+
+        Element<Child> wrappedChildren1 = Element.<Child>builder().value(child1).build();
+        Element<Child> wrappedChildren2 = Element.<Child>builder().value(child2).build();
+        List<Element<Child>> listOfChildren = List.of(wrappedChildren1, wrappedChildren2);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .children(listOfChildren)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.getDynamicChildOptionListDetails(any())).thenReturn(Map.of(
+            "childrenList",
+            "Child 1: Test1 Name1\n\n" + "Child 2: Test2 Name2\n\n",
+            "childOption",
+            "01"
+        ));
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateChildrenList(
+            callbackRequest);
+        assertTrue(callbackResponse.getData().containsKey("childOption"));
+        assertTrue(callbackResponse.getData().containsKey("childrenList"));
+        assertEquals(
+            "Child 1: Test1 Name1\n\n" + "Child 2: Test2 Name2\n\n",
+            callbackResponse.getData().get("childrenList")
+        );
+        assertEquals("01", callbackResponse.getData().get("childOption"));
+
+
+    }
+
+
+    @Test
+    public void testChildrenNamesList() {
         PartyDetails otherPeople1 = PartyDetails.builder()
             .firstName("Test1")
             .lastName("Name1")
@@ -1091,7 +1149,9 @@ public class ManageOrdersControllerTest {
             callbackRequest);
         assertTrue(callbackResponse.getData().containsKey("otherPeopleList"));
         assertTrue(callbackResponse.getData().containsKey("otherPeopleOption"));
-        assertEquals("Other people 1: Test1 Name1\n\n" + "Other people 2: Test2 Name2\n\n",
-                     callbackResponse.getData().get("otherPeopleList"));
+        assertEquals(
+            "Other people 1: Test1 Name1\n\n" + "Other people 2: Test2 Name2\n\n",
+            callbackResponse.getData().get("otherPeopleList")
+        );
     }
 }
