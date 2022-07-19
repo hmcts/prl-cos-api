@@ -1154,6 +1154,32 @@ public class ManageOrderServiceTest {
 
     }
 
+
+    @Test
+    public void testGetChildListAsStringForFL401Case() {
+
+        ApplicantChild child = ApplicantChild.builder()
+            .fullName("TestName")
+            .build();
+
+        Element<ApplicantChild> wrappedChildren = Element.<ApplicantChild>builder().value(child).build();
+        List<Element<ApplicantChild>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .applicantChildDetails(listOfChildren)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        String actual = manageOrderService.getChildListAsString(caseData);
+        assertEquals("0", actual);
+
+    }
+
     @Test
     public void testGetDynamicChildOptionListDetailsForC100Case() {
 

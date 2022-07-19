@@ -709,8 +709,8 @@ public class ManageOrderService {
     public Map<String, Object> getDynamicOtherPeopleListDetails(CaseData caseData) {
 
         log.info("Inside other people list logic and size is  {}", caseData.getOthersToNotify().size());
-        List<PartyDetails> otherPeopleList = new ArrayList<PartyDetails>();
-        Map<String, Object> otherPeopleMap = new HashMap<String, Object>();
+        List<PartyDetails> otherPeopleList = new ArrayList<>();
+        Map<String, Object> otherPeopleMap = new HashMap<>();
         StringBuilder builder = new StringBuilder();
         if (caseData.getOthersToNotify() != null) {
             otherPeopleList = caseData.getOthersToNotify().stream()
@@ -738,7 +738,7 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> getDynamicChildOptionListDetails(CaseData caseData) {
-        Map<String, Object> childMap = new HashMap<String, Object>();
+        Map<String, Object> childMap = new HashMap<>();
         childMap.put("childrenList", getChildInfoFromCaseData(caseData));
         childMap.put("childOption", getChildListAsString(caseData));
         log.info("getDynamicChildOptionListDetails :: Before returning the map {}", childMap);
