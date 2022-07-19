@@ -73,6 +73,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -441,7 +443,7 @@ public class CaseData implements MappableObject {
     private String reasonForAmendCourtDetails;
 
     /**
-     * Final document.
+     * Final document. (C100)
      */
 
     @JsonProperty("finalDocument")
@@ -559,6 +561,11 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final ManageOrders manageOrders;
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
+
     /**
      * Solicitor Details.
      */
@@ -594,4 +601,10 @@ public class CaseData implements MappableObject {
      *  Withdraw request flag.
      */
     private String isWithdrawRequestSent;
+
+    /**
+     *  Service Of Application.
+     */
+    private OrdersToServeSA serviceOfApplicationScreen1;
+    private ConfirmRecipients confirmRecipients;
 }
