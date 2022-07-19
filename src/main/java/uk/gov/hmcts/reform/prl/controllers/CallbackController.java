@@ -260,9 +260,6 @@ public class CallbackController {
                                          PENDING_STATE,
                                          SUBMITTED_STATE, RETURN_STATE
         );
-
-        boolean previousStateInList = previousState.filter(stateList::contains).isPresent();
-
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
