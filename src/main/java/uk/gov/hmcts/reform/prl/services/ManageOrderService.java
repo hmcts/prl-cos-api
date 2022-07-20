@@ -553,7 +553,7 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    private CaseData getN117FormData(CaseData caseData) {
+    public CaseData getN117FormData(CaseData caseData) {
 
         log.info("Court name before N117 order {}", caseData.getCourtName());
 
@@ -740,7 +740,6 @@ public class ManageOrderService {
                 .mapToObj(Integer::toString)
                 .collect(joining())
         );
-        log.info("Before returning the map {}", otherPeopleMap);
         return otherPeopleMap;
     }
 
@@ -748,7 +747,6 @@ public class ManageOrderService {
         Map<String, Object> childMap = new HashMap<>();
         childMap.put("childrenList", getChildInfoFromCaseData(caseData));
         childMap.put("childOption", getChildListAsString(caseData));
-        log.info("getDynamicChildOptionListDetails :: Before returning the map {}", childMap);
         return childMap;
     }
 }
