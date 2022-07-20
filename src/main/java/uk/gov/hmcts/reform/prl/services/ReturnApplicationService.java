@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -22,24 +24,32 @@ public class ReturnApplicationService {
 
     public String getLegalFullName(CaseData caseData) {
 
-        String legalName;
+        String legalName = "";
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
-        Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
+            if (applicantsWrapped.isPresent() && applicantsWrapped.get().size() == 1) {
+                List<PartyDetails> applicants = applicantsWrapped.get()
+                    .stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
 
-        if (applicantsWrapped.isPresent() && applicantsWrapped.get().size() == 1) {
-            List<PartyDetails> applicants = applicantsWrapped.get()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
+                String legalFirstName = applicants.get(0).getRepresentativeFirstName();
+                String legalLastName = applicants.get(0).getRepresentativeLastName();
 
-            String legalFirstName = applicants.get(0).getRepresentativeFirstName();
-            String legalLastName = applicants.get(0).getRepresentativeLastName();
+                legalName = legalFirstName + " " + legalLastName;
 
+            } else {
+                legalName = caseData.getSolicitorName();
+            }
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            PartyDetails fl401Applicant = caseData
+                .getApplicantsFL401();
+            String legalFirstName = fl401Applicant.getRepresentativeFirstName();
+            String legalLastName = fl401Applicant.getRepresentativeLastName();
             legalName = legalFirstName + " " + legalLastName;
-
-        } else {
-            legalName = caseData.getSolicitorName();
         }
+
         return legalName;
     }
 
@@ -48,7 +58,9 @@ public class ReturnApplicationService {
         boolean noOptionSelected = true;
 
         boolean hasSelectedOption = allNonEmpty(caseData.getRejectReason());
-
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            hasSelectedOption = allNonEmpty(caseData.getFl401RejectReason());
+        }
         if (hasSelectedOption) {
             noOptionSelected = false;
         }
@@ -65,9 +77,14 @@ public class ReturnApplicationService {
             .append("Dear " + getLegalFullName(caseData) + ",\n\n")
             .append("Thank you for your application."
                         + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n");
-
-        for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
-            returnMsgStr.append(reasonEnum.getReturnMsgText());
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
+                returnMsgStr.append(reasonEnum.getReturnMsgText());
+            }
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
+                returnMsgStr.append(reasonEnum.getReturnMsgText());
+            }
         }
 
         returnMsgStr.append("Please resolve these issues and resubmit your application.\n\n")
@@ -86,9 +103,17 @@ public class ReturnApplicationService {
 
         returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
 
-        for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
-            returnMsgStr.append(reasonEnum.getDisplayedValue());
-            returnMsgStr.append("\n\n");
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
+                returnMsgStr.append(reasonEnum.getDisplayedValue());
+                returnMsgStr.append("\n\n");
+            }
+
+        } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
+                returnMsgStr.append(reasonEnum.getDisplayedValue());
+                returnMsgStr.append("\n\n");
+            }
         }
 
         returnMsgStr.append("Resolve these concerns and resend your application."

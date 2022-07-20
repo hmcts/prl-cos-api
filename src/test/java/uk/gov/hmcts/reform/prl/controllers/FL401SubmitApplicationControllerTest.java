@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -65,6 +66,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
@@ -93,6 +96,10 @@ public class FL401SubmitApplicationControllerTest {
 
     @Mock
     private UserDetails userDetails;
+
+
+    @Mock
+    ConfidentialityTabService confidentialityTabService;
 
     @Mock
     AllTabServiceImpl allTabsService;
@@ -176,6 +183,21 @@ public class FL401SubmitApplicationControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
+
+        CallbackResponse callbackResponse = CallbackResponse.builder()
+            .data(caseData)
+            .errors(Collections.singletonList("test"))
+            .build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("last")
+            .build();
+
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
+
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -184,13 +206,6 @@ public class FL401SubmitApplicationControllerTest {
                              .build())
             .build();
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(caseData)
-            .errors(Collections.singletonList("test"))
-            .build();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         fl401SubmitApplicationController.fl401SubmitApplicationValidation(authToken, callbackRequest);
         verify(fl401StatementOfTruthAndSubmitChecker, times(1)).hasMandatoryCompleted(caseData);
     }
@@ -303,19 +318,22 @@ public class FL401SubmitApplicationControllerTest {
                              .build())
             .build();
 
-        Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
-            CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
-        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
-        when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetails(),
-            objectMapper
-        )))
-            .thenReturn(court);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         AboutToStartOrSubmitCallbackResponse response = fl401SubmitApplicationController
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
+
+
+        assertTrue(response.getData().containsKey(COURT_EMAIL_ADDRESS_FIELD));
+        assertTrue(response.getData().containsKey(COURT_NAME_FIELD));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
@@ -432,6 +450,13 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
@@ -551,10 +576,15 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
-
-
     }
 
 
@@ -666,6 +696,13 @@ public class FL401SubmitApplicationControllerTest {
         )))
             .thenReturn(court);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
         verify(documentGenService, times(1)).generateDocuments(
@@ -771,6 +808,13 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
         verify(documentGenService, times(1)).generateDocuments(
@@ -863,6 +907,15 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
+        fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
@@ -963,6 +1016,14 @@ public class FL401SubmitApplicationControllerTest {
         )))
             .thenReturn(court);
 
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
+        fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
+
         AboutToStartOrSubmitCallbackResponse response = fl401SubmitApplicationController
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 
@@ -1057,6 +1118,13 @@ public class FL401SubmitApplicationControllerTest {
             objectMapper
         )))
             .thenReturn(court);
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+
         AboutToStartOrSubmitCallbackResponse response = fl401SubmitApplicationController
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
 

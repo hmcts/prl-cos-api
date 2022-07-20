@@ -22,11 +22,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -36,6 +38,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -60,6 +63,9 @@ public class FL401SubmitApplicationController {
     private UserService userService;
 
     @Autowired
+    private AllTabServiceImpl allTabService;
+
+    @Autowired
     private SolicitorEmailService solicitorEmailService;
 
     @Autowired
@@ -77,6 +83,8 @@ public class FL401SubmitApplicationController {
     @Autowired
     OrganisationService organisationService;
 
+    @Autowired
+    private ConfidentialityTabService confidentialityTabService;
 
     @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to send FL401 application notification. ")
@@ -90,6 +98,7 @@ public class FL401SubmitApplicationController {
         List<String> errorList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         boolean mandatoryEventStatus = fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData);
+
         if (!mandatoryEventStatus) {
             errorList.add(
                 "Statement of truth and submit is not allowed for this case unless you finish all the mandatory events");
@@ -109,6 +118,10 @@ public class FL401SubmitApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        caseData = caseData.toBuilder()
+            .solicitorName(userService.getUserDetails(authorisation).getFullName())
+            .build();
 
         final LocalDate localDate = LocalDate.now();
 
@@ -141,8 +154,6 @@ public class FL401SubmitApplicationController {
                 .build();
         }
         caseData = caseData.setDateSubmittedDate();
-        log.info("Generating the Final document of FL401 for case id " + caseData.getId());
-        log.info("Issue date for the application: {} ", caseData.getIssueDate());
 
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
 
@@ -151,9 +162,10 @@ public class FL401SubmitApplicationController {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         caseDataUpdated.put(
             DATE_AND_TIME_SUBMITTED_FIELD,
-            DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(zonedDateTime)
-        );
+            DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa", Locale.UK).format(zonedDateTime).toUpperCase());
         caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
+
+        caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
