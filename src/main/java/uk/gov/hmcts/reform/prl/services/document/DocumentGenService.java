@@ -167,10 +167,15 @@ public class DocumentGenService {
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                     && isApplicantOrChildDetailsConfidential(caseData)) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_C8, null);
             }
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                && YesOrNo.Yes.equals(caseData.getAllegationsOfHarmYesNo())) {
+                && caseData.getAllegationOfHarm() != null
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
             }
             if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUE.equals(
                 caseData.getState())) {
@@ -184,27 +189,40 @@ public class DocumentGenService {
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                 && isApplicantOrChildDetailsConfidential(caseData)) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, null);
             }
 
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                && YesOrNo.Yes.equals(caseData.getAllegationsOfHarmYesNo())) {
+                && caseData.getAllegationOfHarm() != null
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(authorisation, caseData, C1A_HINT, true));
+            } else {
+                updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, null);
             }
             if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUE.equals(
                 caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, getDocument(authorisation, caseData, FINAL_HINT, true));
             }
         }
-
+        if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, null);
+        } else if (!documentLanguage.isGenEng() && documentLanguage.isGenWelsh()) {
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C8, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
+        }
         return updatedCaseData;
     }
 
-    public boolean isConfidentialInformationPresentForC100(CaseData caseData) {
-        return (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
-            &&  (ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+    private boolean isConfidentialInformationPresentForC100(CaseData caseData) {
+        return C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            &&  ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
             && !caseData.getApplicantsConfidentialDetails().isEmpty()
             || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-            && !caseData.getChildrenConfidentialDetails().isEmpty());
+            && !caseData.getChildrenConfidentialDetails().isEmpty();
     }
 
     public Map<String, Object> generateDraftDocuments(String authorisation, CaseData caseData) throws Exception {
@@ -267,8 +285,8 @@ public class DocumentGenService {
         if (null != generatedDocumentInfo) {
             caseData = caseData.toBuilder().isDocumentGenerated("Yes").build();
         }
-
-        log.info("Genereated the {} document for case id {} ", template, caseData.getId());
+        log.info("Is the document generated for the template {} : {} ", template, caseData.getIsDocumentGenerated());
+        log.info("Generated the {} document for case id {} ", template, caseData.getId());
         return generatedDocumentInfo;
     }
 
@@ -382,10 +400,9 @@ public class DocumentGenService {
         PartyDetails partyDetails = caseData.getApplicantsFL401();
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
 
-        return isApplicantDetailsConfidential(partyDetails) || isChildrenDetailsConfidentiality(
-            caseData,
-            typeOfApplicationOrders
-        );
+        boolean isChildrenConfidential = isChildrenDetailsConfidentiality(caseData, typeOfApplicationOrders);
+
+        return isApplicantDetailsConfidential(partyDetails) || isChildrenConfidential;
 
     }
 
