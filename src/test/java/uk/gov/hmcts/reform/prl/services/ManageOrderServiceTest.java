@@ -725,7 +725,7 @@ public class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         manageOrderService.updateCaseDataWithAppointedGuardianNames(caseDetails, namesList);
-        assertEquals(caseDataNameList.get(0).getValue().getGuardianFullName(), "Full Name");
+        assertEquals("Full Name",caseDataNameList.get(0).getValue().getGuardianFullName());
     }
 
     @Test
@@ -1035,89 +1035,6 @@ public class ManageOrderServiceTest {
 
     }
 
-    /* @Test
-    public void testChildOptionForC100Case() {
-
-        Child child1 = Child.builder()
-            .firstName("Test1")
-            .lastName("Name1")
-            .gender(female)
-            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(father)
-            .parentalResponsibilityDetails("test1")
-            .build();
-
-        Child child2 = Child.builder()
-            .firstName("Test2")
-            .lastName("Name2")
-            .gender(female)
-            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(father)
-            .parentalResponsibilityDetails("test2")
-            .build();
-
-        Element<Child> wrappedChildren1 = Element.<Child>builder().value(child1).build();
-        Element<Child> wrappedChildren2 = Element.<Child>builder().value(child2).build();
-        List<Element<Child>> listOfChildren = List.of(wrappedChildren1, wrappedChildren2);
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicantCaseName("Test Case 45678")
-            .familymanCaseNumber("familyman12345")
-            .children(listOfChildren)
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .build();
-        Map<String, Object> expectedResult = new HashMap<String, Object>();
-        expectedResult.put("childOption", "01");
-
-        Map<String, Object> actualMap = manageOrderService.getChildOptionList(caseData);
-        assertEquals("01", actualMap.get("childOption"));
-
-    }*/
-
-    /*
-    @Test
-    public void testChildOptionForFL401Case() {
-
-        ApplicantChild child = ApplicantChild.builder()
-            .fullName("TestName")
-            .build();
-
-        Element<ApplicantChild> wrappedChildren = Element.<ApplicantChild>builder().value(child).build();
-        List<Element<ApplicantChild>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantCaseName("Test Case 45678")
-            .familymanCaseNumber("familyman12345")
-            .applicantChildDetails(listOfChildren)
-            .applicantsFL401(PartyDetails.builder()
-                                 .firstName("app")
-                                 .lastName("testLast")
-                                 .build())
-            .respondentsFL401(PartyDetails.builder()
-                                  .firstName("resp")
-                                  .lastName("testLast")
-                                  .dateOfBirth(LocalDate.of(1990, 10, 20))
-                                  .address(Address.builder()
-                                               .addressLine1("add1")
-                                               .postCode("n145kk")
-                                               .build())
-                                  .build())
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .build();
-
-        CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
-
-        Map<String, Object> actualMap = manageOrderService.getChildOptionList(caseData);
-        assertEquals("0", actualMap.get("childOption"));
-    }*/
-
     @Test
     public void testGetChildListAsStringForC100Case() {
 
@@ -1152,6 +1069,35 @@ public class ManageOrderServiceTest {
         String actual = manageOrderService.getChildListAsString(caseData);
         assertEquals("01", actual);
 
+    }
+    
+    @Test
+    public void testPopulateHeader() {
+
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName(null).build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = ElementUtils.element(details);
+        partyDetails.add(partyDetailsElement);
+        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
+        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .orderRecipients(recipientList)
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        assertNotNull(manageOrderService.populateHeader(caseData).get("amendOrderDynamicList"));
     }
 
 
@@ -1220,6 +1166,46 @@ public class ManageOrderServiceTest {
         assertEquals("Child 1: Test1 Name1\n\n" + "Child 2: Test2 Name2\n\n", actual.get("childrenList"));
 
     }
+    
+    @Test
+    public void testPopulateFinalOrderFromCaseDataCaseOccupationOrder() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = ElementUtils.element(details);
+        partyDetails.add(partyDetailsElement);
+        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
+        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.occupation)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .orderRecipients(recipientList)
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+    }
 
     @Test
     public void testGetDynamicOtherpeopleListDetailsForC100Case() {
@@ -1258,6 +1244,4 @@ public class ManageOrderServiceTest {
         );
 
     }
-
-
 }
