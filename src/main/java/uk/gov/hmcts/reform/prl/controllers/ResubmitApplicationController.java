@@ -155,10 +155,10 @@ public class ResubmitApplicationController {
     }
 
     @PostMapping(path = "/fl401/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to change the state and send notifications.")
+    @Operation(description = "Callback to change the state and send notifications.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Resubmission completed"),
-        @ApiResponse(code = 400, message = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "Resubmission completed"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse fl401resubmitApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
