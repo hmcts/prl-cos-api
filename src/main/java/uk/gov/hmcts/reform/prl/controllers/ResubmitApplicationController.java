@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -37,6 +38,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,6 +47,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 
 @Slf4j
@@ -79,6 +82,9 @@ public class ResubmitApplicationController {
     @Autowired
     AllTabServiceImpl allTabService;
 
+    @Autowired
+    private ConfidentialityTabService confidentialityTabService;
+
     @PostMapping(path = "/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to change the state and document generation and submit application. ")
     @ApiResponses(value = {
@@ -111,7 +117,6 @@ public class ResubmitApplicationController {
         Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
             ResubmitApplicationController::getPreviousState).findFirst();
 
-        log.info("Court name for return application: === {}===", caseDataUpdated.get(COURT_NAME_FIELD));
         if (previousStates.isPresent()) {
             if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
                 caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
@@ -119,7 +124,8 @@ public class ResubmitApplicationController {
                 ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
                 caseData = caseData.setDateSubmittedDate();
                 caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
-                caseDataUpdated.put(DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
+                caseDataUpdated.put(DATE_AND_TIME_SUBMITTED_FIELD,
+                                    DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa", Locale.UK).format(zonedDateTime).toUpperCase());
                 caseWorkerEmailService.sendEmail(caseDetails);
                 solicitorEmailService.sendEmail(caseDetails);
             }
@@ -135,6 +141,7 @@ public class ResubmitApplicationController {
             }
             // All docs will be regenerated in both issue and submitted state jira FPET-21
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+            caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
             // remove the tick from submit screens so not present if resubmitted again
             caseDataUpdated.put("confidentialityDisclaimerSubmit", Collections.singletonMap("confidentialityChecksChecked", null));
@@ -175,15 +182,22 @@ public class ResubmitApplicationController {
                 DATE_AND_TIME_SUBMITTED_FIELD,
                 DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)
             );
-            try {
-                solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
-                caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
-                caseDataUpdated.put("isNotificationSent", "Yes");
-            } catch (Exception e) {
-                log.error("Notification could not be sent due to {} ", e.getMessage());
-                caseDataUpdated.put("isNotificationSent", "No");
-            }
         }
+        if (previousStates.isPresent() && State.CASE_ISSUE.getValue().equalsIgnoreCase(previousStates.get())) {
+            caseData = caseData.toBuilder().state(State. CASE_ISSUE).build();
+            caseDataUpdated.put(STATE_FIELD, State.CASE_ISSUE);
+            caseData = caseData.setIssueDate();
+            caseDataUpdated.put(ISSUE_DATE_FIELD, caseData.getIssueDate());
+        }
+        try {
+            solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
+            caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+            caseDataUpdated.put("isNotificationSent", "Yes");
+        } catch (Exception e) {
+            log.error("Notification could not be sent due to {} ", e.getMessage());
+            caseDataUpdated.put("isNotificationSent", "No");
+        }
+
         //set the resubmit fields to null so they are blank if multiple resubmissions
         caseDataUpdated.put("fl401StmtOfTruthResubmit", null);
         caseDataUpdated.put("fl401ConfidentialityCheckResubmit", null);

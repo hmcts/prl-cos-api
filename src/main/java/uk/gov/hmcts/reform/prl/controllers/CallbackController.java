@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -30,14 +31,18 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
+import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -49,7 +54,11 @@ import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkf
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -58,6 +67,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_STATE;
@@ -88,6 +98,9 @@ public class CallbackController {
 
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
+
+    private final CourtFinderService courtLocatorService;
+    private final SearchCasesDataService searchCasesDataService;
 
     private final ConfidentialityTabService confidentialityTabService;
 
@@ -164,6 +177,27 @@ public class CallbackController {
         return caseData;
     }
 
+    @PostMapping(path = "/pre-populate-court-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to pre  populate court details")
+    public AboutToStartOrSubmitCallbackResponse prePopulateCourtDetails(
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws NotFoundException {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Court closestChildArrangementsCourt = courtLocatorService
+            .getNearestFamilyCourt(caseData);
+        Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() : courtLocatorService
+            .getEmailAddress(closestChildArrangementsCourt);
+        if (courtEmailAddress.isPresent()) {
+            log.info("Found court email for case id {}",caseData.getId());
+            caseDataUpdated.put("localCourtAdmin",List.of(
+                Element.<LocalCourtAdminEmail>builder().value(LocalCourtAdminEmail.builder().email(courtEmailAddress.get().getAddress()).build())
+                    .build()));
+        } else {
+            log.info("Court email not found for case id {}",caseData.getId());
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
     @PostMapping(path = "/generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to Generate document after submit application")
     public AboutToStartOrSubmitCallbackResponse generateDocumentSubmitApplication(
@@ -181,6 +215,10 @@ public class CallbackController {
                 .map(Element::getValue)
                 .collect(Collectors.toList()))).build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        caseDataUpdated.put(
+            DATE_AND_TIME_SUBMITTED_FIELD,
+            DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa", Locale.UK).format(zonedDateTime).toUpperCase());
 
         Map<String,Object> map = documentGenService.generateDocuments(authorisation, caseData);
 
@@ -222,16 +260,13 @@ public class CallbackController {
                                          PENDING_STATE,
                                          SUBMITTED_STATE, RETURN_STATE
         );
-
-        boolean previousStateInList = previousState.filter(stateList::contains).isPresent();
-
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             if (previousState.isPresent() && !stateList.contains(previousState.get())) {
                 caseDataUpdated.put("isWithdrawRequestSent", "Pending");
-                log.info("**** Case is updated as WithdrawRequestSent **** ");
+                log.info("Case is updated as WithdrawRequestSent");
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                     solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
                     Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
@@ -313,6 +348,23 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+    @PostMapping(path = "/update-applicant-child-names", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Resend case data json to RPA")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse updateApplicantAndChildNames(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) throws IOException {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        requireNonNull(caseData);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated = searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
     @PostMapping(path = "/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Copy fl401 case name to C100 Case name")
     @ApiResponses(value = {
@@ -328,6 +380,10 @@ public class CallbackController {
         if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
             caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
         }
+        if (caseDataUpdated.get("caseTypeOfApplication") != null) {
+            caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
+        }
+
 
         // Saving the logged-in Solicitor and Org details for the docs..
         caseDataUpdated = getSolicitorDetails(authorisation, caseDataUpdated);
@@ -370,33 +426,44 @@ public class CallbackController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<Element<FurtherEvidence>> furtherEvidences = caseData.getFurtherEvidences();
-        List<Element<Correspondence>> correspondence = caseData.getCorrespondence();
-        List<Element<OtherDocuments>> otherDocuments = caseData.getOtherDocuments();
-        if (furtherEvidences != null) {
-            furtherEvidences = furtherEvidences.stream()
-                    .filter(element -> {
-                        return element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup);
-                    })
+        List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
+        List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
+        List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
+        if (furtherEvidencesList != null) {
+            List<Element<FurtherEvidence>> furtherEvidences = furtherEvidencesList.stream()
+                    .filter(element -> element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
                 .collect(Collectors.toList());
             caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
+
+            List<Element<FurtherEvidence>> furtherEvidencesNotConfidential = furtherEvidencesList.stream()
+                .filter(element -> !element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
+                .collect(Collectors.toList());
+            caseDataUpdated.put("mainAppNotConf", furtherEvidencesNotConfidential);
         }
-        if (correspondence != null) {
-            correspondence = correspondence.stream()
-                .filter(element -> {
-                    return element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup);
-                })
+        if (correspondenceList != null) {
+            List<Element<Correspondence>> correspondence = correspondenceList.stream()
+                .filter(element -> element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup))
                 .collect(Collectors.toList());
             caseDataUpdated.put("correspondenceForTabDisplay", correspondence);
-        }
-        if (otherDocuments != null) {
 
-            otherDocuments = otherDocuments.stream()
-                .filter(element -> {
-                    return element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup);
-                })
+            List<Element<Correspondence>> correspondenceForTabDisplayNotConfidential = correspondenceList.stream()
+                .filter(element -> !element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup))
+                .collect(Collectors.toList());
+
+            caseDataUpdated.put("corrNotConf", correspondenceForTabDisplayNotConfidential);
+        }
+        if (otherDocumentsList != null) {
+
+            List<Element<OtherDocuments>> otherDocuments = otherDocumentsList.stream()
+                .filter(element -> element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
                 .collect(Collectors.toList());
             caseDataUpdated.put("otherDocumentsForTabDisplay", otherDocuments);
+
+            List<Element<OtherDocuments>> otherDocumentsForTabDisplayNotConfidential = otherDocumentsList.stream()
+                .filter(element -> !element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
+                .collect(Collectors.toList());
+            caseDataUpdated.put("otherDocNotConf", otherDocumentsForTabDisplayNotConfidential);
+
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

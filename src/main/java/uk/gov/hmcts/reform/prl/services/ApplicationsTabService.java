@@ -137,7 +137,7 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("fl401RespondentTable", getFl401RespondentTable(caseData));
             Map<String,Object> applicantFamilyMap = getApplicantsFamilyDetails(caseData);
             applicationTab.put("applicantFamilyTable", applicantFamilyMap);
-            if (applicantFamilyMap.containsKey("applicantChild")) {
+            if (("Yes").equals(applicantFamilyMap.get("doesApplicantHaveChildren"))) {
                 applicationTab.put("fl401ChildDetailsTable", applicantFamilyMap.get("applicantChild"));
             }
             applicationTab.put("respondentBehaviourTable", getFl401RespondentBehaviourTable(caseData));
@@ -453,11 +453,11 @@ public class ApplicationsTabService implements TabService {
         Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getPreviousOrOngoingProceedingsForChildren());
         if (proceedingCheck.isPresent()) {
             return Collections.singletonMap(
-                "previousOrOngoingProceedings",
+                PrlAppsConstants.PREVIOUS_OR_ONGOING_PROCEEDINGS,
                 caseData.getPreviousOrOngoingProceedingsForChildren().getDisplayedValue()
             );
         }
-        return Collections.singletonMap("previousOrOngoingProceedings", "");
+        return Collections.singletonMap(PrlAppsConstants.PREVIOUS_OR_ONGOING_PROCEEDINGS, "");
     }
 
     public Map<String, Object> getFL401OtherProceedingsTable(CaseData caseData) {
@@ -465,13 +465,13 @@ public class ApplicationsTabService implements TabService {
             Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding());
             if (proceedingCheck.isPresent()) {
                 return Collections.singletonMap(
-                    "previousOrOngoingProceedings",
+                    PrlAppsConstants.PREVIOUS_OR_ONGOING_PROCEEDINGS,
                     caseData.getFl401OtherProceedingDetails().getHasPrevOrOngoingOtherProceeding().getDisplayedValue()
                 );
             }
         }
 
-        return Collections.singletonMap("previousOrOngoingProceedings", "");
+        return Collections.singletonMap(PrlAppsConstants.PREVIOUS_OR_ONGOING_PROCEEDINGS, "");
     }
 
     public List<Element<OtherProceedingsDetails>> getOtherProceedingsDetailsTable(CaseData caseData) {
