@@ -37,6 +37,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,6 +46,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 
@@ -151,17 +153,18 @@ public class FL401SubmitApplicationController {
                 .build();
         }
         caseData = caseData.setDateSubmittedDate();
-        log.info("Generating the Final document of FL401 for case id " + caseData.getId());
-        log.info("Issue date for the application: {} ", caseData.getIssueDate());
 
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
 
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        caseDataUpdated.put(
+            DATE_AND_TIME_SUBMITTED_FIELD,
+            DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa", Locale.UK).format(zonedDateTime).toUpperCase());
         caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
 
-        caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
+        caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)

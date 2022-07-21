@@ -114,7 +114,6 @@ public class SendAndReplyController extends AbstractCallbackController {
             List<Element<Message>> messages;
             if (caseData.getMessageReply().getIsReplying().equals(YesOrNo.No)) {
                 messages = sendAndReplyService.closeMessage(selectedValue, caseData);
-                log.info(String.format("Closing message with id: %s", selectedValue));
                 List<Element<Message>> closedMessages = messages.stream()
                     .filter(m -> m.getValue().getStatus().equals(MessageStatus.CLOSED))
                     .collect(Collectors.toList());
