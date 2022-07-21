@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -20,12 +21,13 @@ public class CaseCreationService {
 
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamClient idamClient;
+    private final AuthTokenGenerator authTokenGenerator;
 
-    public CaseDetails createCourtNavCase(String authToken, CaseData testInput, String serviceAuthorization) {
+    public CaseDetails createCourtNavCase(String authToken, CaseData testInput) {
         StartEventResponse startEventResponse =
             coreCaseDataApi.startForCaseworker(
                 authToken,
-                serviceAuthorization,
+                authTokenGenerator.generate(),
                 idamClient.getUserInfo(authToken).getUid(),
                 PrlAppsConstants.JURISDICTION,
                 PrlAppsConstants.CASE_TYPE,
@@ -41,7 +43,7 @@ public class CaseCreationService {
 
         return coreCaseDataApi.submitForCaseworker(
             authToken,
-            serviceAuthorization,
+            authTokenGenerator.generate(),
             idamClient.getUserInfo(authToken).getUid(),
             PrlAppsConstants.JURISDICTION,
             PrlAppsConstants.CASE_TYPE,
