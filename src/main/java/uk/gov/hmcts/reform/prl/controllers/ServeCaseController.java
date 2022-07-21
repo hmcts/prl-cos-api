@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 
-@Tag(name = "case-invite")
+@Tag(name = "serve-case-controller")
 @RestController
 @RequestMapping("/case-invite")
 public class ServeCaseController {
