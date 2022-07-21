@@ -12,7 +12,9 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 
@@ -64,5 +66,42 @@ public class CaseService {
             true,
             caseDataContent
         );
+    }
+
+    public CaseDetails createCase(CaseData caseData, String authToken, String s2sToken) {
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+
+        return createCase(caseData, authToken, s2sToken, userDetails);
+    }
+
+    private CaseDetails createCase(CaseData caseData, String authToken, String s2sToken, UserDetails userDetails) {
+        return coreCaseDataApi.submitForCitizen(
+                authToken,
+                s2sToken,
+                userDetails.getId(),
+                JURISDICTION,
+                CASE_TYPE,
+                true,
+                getCaseDataContent(authToken, s2sToken, caseData, userDetails.getId())
+        );
+    }
+
+    private CaseDataContent getCaseDataContent(String authorization, String s2sToken, CaseData caseData, String userId) {
+        return CaseDataContent.builder()
+                .data(caseData)
+                .event(Event.builder().id(CITIZEN_PRL_CREATE_EVENT).build())
+                .eventToken(getEventToken(authorization, s2sToken, userId, CITIZEN_PRL_CREATE_EVENT))
+                .build();
+    }
+
+    public String getEventToken(String authorization, String s2sToken, String userId, String eventId) {
+        StartEventResponse res = coreCaseDataApi.startForCitizen(authorization,
+                s2sToken,
+                userId,
+                JURISDICTION,
+                CASE_TYPE,
+                eventId);
+
+        return nonNull(res) ? res.getToken() : null;
     }
 }

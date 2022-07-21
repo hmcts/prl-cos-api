@@ -68,4 +68,19 @@ public class CaseController {
                                                                 eventId).getData(), CaseData.class);
     }
 
+    @PostMapping("/create")
+    @ApiOperation("Call CCD to create case")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "created"),
+            @ApiResponse(code = 401, message = "Provided Authorization token is missing or invalid"),
+            @ApiResponse(code = 500, message = "Internal Server Error")
+    })
+    public CaseData createCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                               @RequestHeader("serviceAuthorization") String s2sToken,
+                               @RequestBody CaseData caseData) {
+
+        return objectMapper.convertValue(caseService.createCase(caseData,
+                authorisation, s2sToken).getData(), CaseData.class);
+    }
+
 }
