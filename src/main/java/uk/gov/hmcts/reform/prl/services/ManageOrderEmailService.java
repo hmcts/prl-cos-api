@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+
 
 
 @Service
@@ -142,8 +142,7 @@ public class ManageOrderEmailService {
             .caseName(caseData.getApplicantCaseName())
             .caseUrgency(typeOfHearing)
             .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
-            .familyManNumber(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                                 ? caseData.getFamilymanCaseNumber() : caseData.getFl401FamilymanCaseNumber())
+            .familyManNumber(caseData.getFamilymanCaseNumber())
             .orderLink(caseData.getPreviewOrderDoc().getDocumentFileName())
             .build();
 

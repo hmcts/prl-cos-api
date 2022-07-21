@@ -183,6 +183,7 @@ public class DocumentGenServiceTest {
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
+            //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -193,9 +194,10 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .allegationOfHarm(allegationOfHarmYes)
+            //.allegationsOfHarmYesNo(Yes)
             .applicants(listOfApplicants)
             .state(State.SUBMITTED_PAID)
+            //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -209,7 +211,7 @@ public class DocumentGenServiceTest {
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
-            .allegationOfHarm(allegationOfHarmYes)
+            //.allegationsOfHarmYesNo(Yes)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -338,22 +340,22 @@ public class DocumentGenServiceTest {
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertFalse(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_WELSH));
+        assertFalse(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_WELSH));
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
         assertFalse(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A));
+        assertFalse(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A));
 
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             any()
         );
-        verify(dgsService, times(2)).generateWelshDocument(
+        verify(dgsService, times(1)).generateWelshDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             any()
         );
-        //verifyNoMoreInteractions(dgsService);
+        verifyNoMoreInteractions(dgsService);
     }
 
 

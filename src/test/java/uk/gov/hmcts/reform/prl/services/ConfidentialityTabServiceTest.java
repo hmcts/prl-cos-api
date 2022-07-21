@@ -361,4 +361,38 @@ public class ConfidentialityTabServiceTest {
 
     }
 
+    @Test
+    public void testApplicantConfidentialDetailsWhenNoFL401ApplicantsPresent() {
+
+        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
+            .childFullName("Test")
+            .keepChildrenInfoConfidential(YesOrNo.Yes)
+            .build();
+
+        Element<ChildrenLiveAtAddress> child1 = Element.<ChildrenLiveAtAddress>builder().value(
+            child).build();
+
+        List<Element<ChildrenLiveAtAddress>> listOfChild = List.of(
+            child1
+        );
+
+        CaseData caseData = CaseData.builder()
+            .applicantsFL401(null)
+            .respondentsFL401(null)
+            .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
+                                         .orderType(List.of(FL401OrderTypeEnum.occupationOrder))
+                                         .build())
+            .home(Home.builder()
+                      .children(listOfChild)
+                      .build())
+
+            .caseTypeOfApplication(FL401_CASE_TYPE).build();
+        Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
+
+        assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantsConfidentialDetails"));
+        assertTrue(stringObjectMap.containsKey("fl401ChildrenConfidentialDetails"));
+
+    }
+
+
 }

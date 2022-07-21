@@ -36,7 +36,6 @@ public class ApplicantsMapper {
         List<PartyDetails> applicantList = applicants.stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
-        log.info("Applicant list size  {}", applicantList.size());
         AtomicInteger counter = new AtomicInteger(1);
         return applicantList.stream().map(applicant -> getApplicant(counter, applicant, applicantSolicitorMap)).collect(
             JsonCollectors.toJsonArray());

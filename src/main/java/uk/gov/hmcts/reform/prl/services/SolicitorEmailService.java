@@ -76,7 +76,7 @@ public class SolicitorEmailService {
                 .caseLink(manageCaseUrl + "/" + caseDetails.getId())
                 .build();
         } catch (NotFoundException e) {
-            log.info("Cannot send email {}", e.getMessage());
+            log.error("Cannot send email");
         }
         return null;
     }
@@ -132,7 +132,7 @@ public class SolicitorEmailService {
 
     public void sendEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails) {
 
-        log.info("trying to send email for Solicitor FL401 {} ====:", caseDetails.getId());
+        log.info("trying to send email for Solicitor FL401 {} :", caseDetails.getId());
 
         String solicitorEmail = "";
 
@@ -153,7 +153,7 @@ public class SolicitorEmailService {
 
     public EmailTemplateVars buildFl401SolicitorEmail(CaseDetails caseDetails) {
 
-        log.info("trying to build email for Solicitor FL401 {} ------:", caseDetails.getId());
+        log.info("trying to build email for Solicitor FL401 {} :", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
 
