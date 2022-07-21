@@ -50,7 +50,7 @@ public class CaseCreationControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/case-creation")
+            .post("/case")
             .then().assertThat().statusCode(200);
     }
 
@@ -62,7 +62,7 @@ public class CaseCreationControllerFunctionalTest {
             .header("Authorization", "Bearer xyz", "ServiceAuthorization", "abc")
             .when()
             .contentType("application/json")
-            .post("/case-creation")
+            .post("/case")
             .then().assertThat().statusCode(500);
     }
 }
