@@ -5,6 +5,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -35,16 +37,14 @@ public class CaseCreationControllerTest {
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
         CaseData caseData = CaseData.builder().id(1234567891234567L).build();
 
-        Map<String, String> callbackResponse = caseCreationController.createCase("Bearer:test", "s2s token", caseData);
-        assertEquals("case created successfully", callbackResponse.get("status"));
-        assertEquals("1234567891234567", callbackResponse.get("id"));
+        ResponseEntity response = caseCreationController.createCase("Bearer:test", "s2s token", caseData);
+        assertEquals(200, response.getStatusCodeValue());
 
     }
 
-    @Test
+    @Test(expected = ResponseStatusException.class)
     public void shouldNotCreateCaseWhenCalledWithInvalidS2SToken() {
         CaseData caseData = CaseData.builder().id(1234567891234567L).build();
-        Map<String, String> callbackResponse = caseCreationController.createCase("Bearer:test", "s2s token", caseData);
-        assertEquals("Failure", callbackResponse.get("status"));
+        ResponseEntity response = caseCreationController.createCase("Bearer:test", "s2s token", caseData);
     }
 }
