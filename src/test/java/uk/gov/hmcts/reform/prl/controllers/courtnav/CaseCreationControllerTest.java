@@ -33,7 +33,7 @@ public class CaseCreationControllerTest {
     @Test
     public void shouldCreateCaseWhenCalled() {
         when(authorisationService.authorise(any())).thenReturn(true);
-        when(caseCreationService.createCourtNavCase(any(), any(), any())).thenReturn(CaseDetails.builder().id(
+        when(caseCreationService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
         CaseData caseData = CaseData.builder().id(1234567891234567L).build();
 

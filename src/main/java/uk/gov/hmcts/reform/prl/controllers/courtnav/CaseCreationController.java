@@ -45,8 +45,7 @@ public class CaseCreationController {
         if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
             CaseDetails caseDetails = caseCreationService.createCourtNavCase(
                 authorisation,
-                inputData,
-                serviceAuthorization
+                inputData
             );
             return ResponseEntity.ok().body(new CaseCreationResponse(String.valueOf(caseDetails.getId())));
         } else {

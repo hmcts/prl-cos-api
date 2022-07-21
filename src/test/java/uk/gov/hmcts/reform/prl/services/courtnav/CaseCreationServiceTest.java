@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
@@ -32,6 +33,9 @@ public class CaseCreationServiceTest {
     @Mock
     private IdamClient idamClient;
 
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
     @InjectMocks
     CaseCreationService caseCreationService;
 
@@ -42,13 +46,14 @@ public class CaseCreationServiceTest {
     public void setup() {
         caseData = CaseData.builder().id(1234567891234567L).applicantCaseName("xyz").build();
         when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(randomUserId).build());
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any())
         ).thenReturn(StartEventResponse.builder().eventId("courtnav-case-creation").token("eventToken").build());
     }
 
     @Test
     public void shouldStartAndSubmitEventWithEventData() {
-        caseCreationService.createCourtNavCase("Bearer abc", caseData, "s2s token");
+        caseCreationService.createCourtNavCase("Bearer abc", caseData);
         verify(coreCaseDataApi).startForCaseworker(authToken, s2sToken,
                                                    randomUserId, PrlAppsConstants.JURISDICTION,
                                                    PrlAppsConstants.CASE_TYPE, "courtnav-case-creation"
