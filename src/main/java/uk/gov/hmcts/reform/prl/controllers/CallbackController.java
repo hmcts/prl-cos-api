@@ -24,7 +24,9 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
@@ -375,6 +377,7 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         // Updating the case name for FL401
         if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
@@ -386,7 +389,7 @@ public class CallbackController {
 
 
         // Saving the logged-in Solicitor and Org details for the docs..
-        caseDataUpdated = getSolicitorDetails(authorisation, caseDataUpdated);
+        caseDataUpdated = getSolicitorDetails(authorisation,caseDataUpdated,caseData);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -468,7 +471,8 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated) {
+    private Map<String, Object> getSolicitorDetails(String authorisation,Map<String, Object> caseDataUpdated,CaseData caseData) {
+
         log.info("Fetching the user and Org Details ");
         try {
             UserDetails userDetails = userService.getUserDetails(authorisation);
@@ -477,6 +481,15 @@ public class CallbackController {
             if (userOrganisation.isPresent()) {
                 log.info("Got the Org Details");
                 caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
+                OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+                    .organisation(Organisation.builder()
+                                      .organisationID(userOrganisation.get().getOrganisationIdentifier())
+                                      .organisationName(userOrganisation.get().getName())
+                                      .build())
+                    .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
+                    .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
+                    .build();
+                caseDataUpdated.put("applicantOrganisationPolicy",applicantOrganisationPolicy);
             }
             log.info("SUCCESSFULLY fetched user and Org Details ");
         } catch (Exception e) {
