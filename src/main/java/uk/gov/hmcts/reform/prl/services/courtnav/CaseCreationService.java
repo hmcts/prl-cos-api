@@ -13,7 +13,9 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.FL401Case;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -27,6 +29,8 @@ public class CaseCreationService {
     public CaseDetails createCourtNavCase(String authToken, CaseData testInput) {
         log.info("Roles of the calling user",idamClient.getUserInfo(authToken).getRoles());
         log.info("Name of the calling user",idamClient.getUserInfo(authToken).getName());
+        Map<String, Object> inputMap = new HashMap<>();
+        inputMap.put("applicantCaseName",testInput.getApplicantCaseName());
         StartEventResponse startEventResponse =
             coreCaseDataApi.startForCaseworker(
                 authToken,
@@ -42,7 +46,7 @@ public class CaseCreationService {
             .event(Event.builder()
                        .id(startEventResponse.getEventId())
                        .build())
-            .data(FL401Case.builder().applicantCaseName(testInput.getApplicantCaseName()).build()).build();
+            .data(inputMap).build();
 
         return coreCaseDataApi.submitForCaseworker(
             authToken,
