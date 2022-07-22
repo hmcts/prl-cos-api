@@ -16,7 +16,7 @@ plugins {
   id 'jacoco'
   id 'org.owasp.dependencycheck' version '6.2.2'
   id 'org.sonarqube' version '3.3'
-  id 'org.springframework.boot' version '2.6.7'
+  id 'org.springframework.boot' version '2.7.0'
   id 'au.com.dius.pact' version '4.2.6'
 }
 
@@ -53,17 +53,15 @@ def versions = [
   serenityCucumber             : '1.9.50',
   serviceTokenGenerator        : '3.1.1',
   sonarPitest                  : '0.5',
-  springfoxSwagger             : '3.0.0',
   springSecurityCrypto         : '5.4.5',
   springSecurityRsa            : '1.0.9.RELEASE',
-  springBoot                   : '2.5.4',
-  springCloud                  : '3.0.3',
+  springBoot                   : '2.7.0',
+  springCloud                  : '3.1.1',
   tomcat                       : '9.0.63',
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.7.3',
   pdfbox                       : '2.0.24'
 ]
-ext["logback.version"] = '1.2.11'
 
 allprojects {
 
@@ -248,6 +246,7 @@ dependencyCheck {
 }
 
 dependencies {
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.9'
 
   implementation 'org.testng:testng:7.5'
   implementation 'org.testng:testng:7.5'
@@ -267,9 +266,6 @@ dependencies {
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
   implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
   implementation group: 'io.github.openfeign', name: 'feign-httpclient'
-  implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
-  implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
-  implementation group: 'io.springfox', name: 'springfox-spring-webflux', version: versions.springfoxSwagger
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.0'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
   implementation group: 'org.apache.commons', name: 'commons-math3', version: versions.commonsMath3
@@ -435,6 +431,7 @@ dependencies {
   contractTestCompile("org.junit.jupiter:junit-jupiter-api:5.8.2")
   contractTestRuntime("org.junit.jupiter:junit-jupiter-engine:5.8.2")
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.2"
+  testCompileOnly 'org.apiguardian:apiguardian-api:1.0.0'
   contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.7.2')
 
   contractTestCompile sourceSets.main.runtimeClasspath

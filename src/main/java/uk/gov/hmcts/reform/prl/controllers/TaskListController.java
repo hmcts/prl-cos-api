@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 
 
-@Api
+@Tag(name = "task-list-controller")
 @Slf4j
 @RestController
 @RequestMapping("/update-task-list")

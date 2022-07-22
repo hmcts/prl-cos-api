@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-@Api
+@Tag(name = "case-initiation-controller")
 @RestController
 @RequestMapping("/case-initiation")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
