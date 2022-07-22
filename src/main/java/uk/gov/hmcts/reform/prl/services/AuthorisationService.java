@@ -17,7 +17,7 @@ public class AuthorisationService {
 
     private final ServiceAuthorisationApi serviceAuthorisationApi;
 
-    @Value("${payments.authorised-services}")
+    @Value("${private-law.authorised-services}")
     private String s2sAuthorisedServices;
 
     public Boolean authorise(String serviceAuthHeader) {

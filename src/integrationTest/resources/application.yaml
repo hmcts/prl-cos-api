@@ -128,13 +128,14 @@ send-grid:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
 
+#Whitelisted prl_cos_api just to test, once the basic testing is done then this has to be replaced with family gateway service
+private-law:
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:prl_cos_api}
 
 payments:
   api:
     url: ${PAY_URL:}
     callback-url: ${PAY_CALLBACK_URL:}
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
-
 
 fees-register:
   api:
