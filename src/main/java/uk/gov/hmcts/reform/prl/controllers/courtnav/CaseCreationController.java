@@ -42,6 +42,8 @@ public class CaseCreationController {
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @RequestBody CaseData inputData
     ) {
+        log.info("s2s token inside controller {}", serviceAuthorization);
+        log.info("auth token inside controller {}", authorisation);
         if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
             CaseDetails caseDetails = caseCreationService.createCourtNavCase(
                 authorisation,
