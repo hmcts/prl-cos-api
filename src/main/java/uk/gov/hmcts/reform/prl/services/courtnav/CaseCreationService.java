@@ -32,7 +32,7 @@ public class CaseCreationService {
         log.info("ApplicantCaseName::::: {}", testInput.getApplicantCaseName());
         log.info("caseData::::: {}", testInput);
         Map<String, Object> inputMap = new HashMap<>();
-        inputMap.put("applicantCaseName", "ABC");
+        inputMap.put("applicantCaseName", testInput.getApplicantCaseName());
         StartEventResponse startEventResponse =
             coreCaseDataApi.startForCaseworker(
                 authToken,
