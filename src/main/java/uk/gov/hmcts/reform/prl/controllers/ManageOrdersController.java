@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
@@ -37,6 +39,7 @@ import java.util.stream.IntStream;
 import javax.ws.rs.core.HttpHeaders;
 
 import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -167,15 +170,66 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+
+        Map<String, Object> updatedCaseData = manageOrderService.populateHeader(caseData);
+        //updatedCaseData.putAll(manageOrderService.getChildOptionList(caseData)); **Not sure if this call is needed**
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(manageOrderService.populateHeader(caseData))
+            .data(updatedCaseData)
+            .build();
+    }
+
+    @PostMapping(path = "/other-people-dynamic-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to populate other people dynamic list")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Other people details are fetched"),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse populateOtherPeopleList(
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Optional<List<Element<PartyDetails>>> othersToNotify = ofNullable(caseData.getOthersToNotify());
+        if (othersToNotify.isPresent()) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(manageOrderService.getDynamicOtherPeopleListDetails(caseData))
+                .build();
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(callbackRequest.getCaseDetails().getData())
+            .build();
+    }
+
+    @PostMapping(path = "/children-dynamic-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to populate children dynamic list")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Child details are fetched"),
+        @ApiResponse(code = 400, message = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse populateChildrenList(
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Optional<List<Element<ApplicantChild>>> applicantChildDetails = ofNullable(caseData.getApplicantChildDetails());
+        Optional<List<Element<Child>>> childElementsCheck = ofNullable(caseData.getChildren());
+        if (applicantChildDetails.isPresent() || childElementsCheck.isPresent()) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(manageOrderService.getDynamicChildOptionListDetails(caseData))
+                .build();
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(callbackRequest.getCaseDetails().getData())
             .build();
     }
 
     @PostMapping(path = "/case-order-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Send Email Notification on Case order")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
+        @ApiResponse(code = 200, message = "Callback processed.",
+            response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse sendEmailNotificationOnClosingOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -209,8 +263,10 @@ public class ManageOrdersController {
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else {
-            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,
-                                                                                                caseData));
+            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+                authorisation,
+                caseData
+            ));
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
