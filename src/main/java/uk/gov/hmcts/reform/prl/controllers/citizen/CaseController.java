@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -79,8 +80,9 @@ public class CaseController {
                                @RequestHeader("serviceAuthorization") String s2sToken,
                                @RequestBody CaseData caseData) {
 
-        return objectMapper.convertValue(caseService.createCase(caseData,
-                authorisation, s2sToken).getData(), CaseData.class);
+        CaseDetails caseDetails = caseService.createCase(caseData, authorisation, s2sToken);
+        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+                .toBuilder().id(caseDetails.getId()).build();
     }
 
 }
