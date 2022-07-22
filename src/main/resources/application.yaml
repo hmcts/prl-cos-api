@@ -130,7 +130,7 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:GT2V6PLQ34XGPTPM}
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:XXXXXXXX}
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
