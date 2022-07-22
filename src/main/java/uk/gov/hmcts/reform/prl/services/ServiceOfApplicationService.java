@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Service
 @Slf4j
@@ -33,11 +32,6 @@ public class ServiceOfApplicationService {
 
     @Autowired
     private final ObjectMapper objectMapper;
-
-    public Map<String, Object> populateHeader(CaseData caseData, Map<String,Object> caseDataUpdated) {
-        caseDataUpdated.put("serviceOfApplicationHeader", getHeaderInfo(caseData));
-        return caseDataUpdated;
-    }
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -62,24 +56,6 @@ public class ServiceOfApplicationService {
             caseData.put(CreateSelectOrderOptionsEnum.mapOptionFromDisplayedValue(s),"1");
         }
         return caseData;
-    }
-
-    private String getHeaderInfo(CaseData caseData) {
-        StringBuilder headerInfo = new StringBuilder();
-        headerInfo.append("Case Name: " + caseData.getApplicantCaseName());
-        headerInfo.append("\n\n");
-        headerInfo.append(getFamilyManNumber(caseData));
-        headerInfo.append("\n\n");
-        return headerInfo.toString();
-    }
-
-    private String getFamilyManNumber(CaseData caseData) {
-        if (caseData.getFl401FamilymanCaseNumber() == null && caseData.getFamilymanCaseNumber() == null) {
-            return FAMILY_MAN_ID;
-        }
-        return FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            ? FAMILY_MAN_ID + caseData.getFl401FamilymanCaseNumber()
-            : FAMILY_MAN_ID + caseData.getFamilymanCaseNumber();
     }
 
     public CaseData sendEmail(CaseDetails caseDetails) throws Exception {
