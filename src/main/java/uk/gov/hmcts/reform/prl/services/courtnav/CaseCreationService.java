@@ -27,10 +27,10 @@ public class CaseCreationService {
     private final AuthTokenGenerator authTokenGenerator;
 
     public CaseDetails createCourtNavCase(String authToken, CaseData testInput) {
-        log.info("Roles of the calling user",idamClient.getUserInfo(authToken).getRoles());
-        log.info("Name of the calling user",idamClient.getUserInfo(authToken).getName());
+        log.info("Roles of the calling user { }",idamClient.getUserInfo(authToken).getRoles());
+        log.info("Name of the calling user { }",idamClient.getUserInfo(authToken).getName());
         Map<String, Object> inputMap = new HashMap<>();
-        inputMap.put("applicantCaseName",testInput.getApplicantCaseName());
+        inputMap.put("applicantCaseName","ABC");
         StartEventResponse startEventResponse =
             coreCaseDataApi.startForCaseworker(
                 authToken,
