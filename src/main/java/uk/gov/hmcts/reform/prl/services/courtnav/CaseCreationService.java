@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.FL401Case;
 
 @Slf4j
 @Service
@@ -41,7 +42,7 @@ public class CaseCreationService {
             .event(Event.builder()
                        .id(startEventResponse.getEventId())
                        .build())
-            .data(testInput).build();
+            .data(FL401Case.builder().applicantCaseName(testInput.getApplicantCaseName())).build();
 
         return coreCaseDataApi.submitForCaseworker(
             authToken,

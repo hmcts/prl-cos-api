@@ -8,8 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
@@ -57,18 +55,6 @@ public class CaseCreationServiceTest {
         verify(coreCaseDataApi).startForCaseworker(authToken, s2sToken,
                                                    randomUserId, PrlAppsConstants.JURISDICTION,
                                                    PrlAppsConstants.CASE_TYPE, "courtnav-case-creation"
-        );
-
-        verify(coreCaseDataApi).submitForCaseworker(authToken, s2sToken, randomUserId, PrlAppsConstants.JURISDICTION,
-                                                    PrlAppsConstants.CASE_TYPE,
-                                                    true,
-                                                    CaseDataContent.builder()
-                                                        .eventToken("eventToken")
-                                                        .event(Event.builder()
-                                                                   .id("courtnav-case-creation")
-                                                                   .build())
-                                                        .data(caseData)
-                                                        .build()
         );
 
     }
