@@ -42,7 +42,7 @@ public class CaseCreationService {
             .event(Event.builder()
                        .id(startEventResponse.getEventId())
                        .build())
-            .data(FL401Case.builder().applicantCaseName(testInput.getApplicantCaseName())).build();
+            .data(FL401Case.builder().applicantCaseName(testInput.getApplicantCaseName()).build()).build();
 
         return coreCaseDataApi.submitForCaseworker(
             authToken,
