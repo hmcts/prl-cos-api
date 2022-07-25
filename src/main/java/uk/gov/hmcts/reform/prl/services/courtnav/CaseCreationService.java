@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.FL401Case;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,37 +33,9 @@ public class CaseCreationService {
         log.info("ApplicantCaseName::::: {}", testInput.getApplicantCaseName());
         Map<String, Object> inputMap = new HashMap<>();
         inputMap.put("applicantCaseName", testInput.getApplicantCaseName());
-        if (testInput.getApplicantCaseName() != null && testInput.getApplicantCaseName().equalsIgnoreCase("CASEWORKER")) {
-            log.info("****************executing caseworker flow***************");
-            StartEventResponse startEventResponse =
-                coreCaseDataApi.startForCaseworker(
-                    authToken,
-                    authTokenGenerator.generate(),
-                    idamClient.getUserInfo(authToken).getUid(),
-                    PrlAppsConstants.JURISDICTION,
-                    PrlAppsConstants.CASE_TYPE,
-                    "courtnav-case-creation"
-                );
-
-            CaseDataContent caseDataContent = CaseDataContent.builder()
-                .eventToken(startEventResponse.getToken())
-                .event(Event.builder()
-                           .id(startEventResponse.getEventId())
-                           .build())
-                .data(inputMap).build();
-
-            return coreCaseDataApi.submitForCaseworker(
-                authToken,
-                authTokenGenerator.generate(),
-                idamClient.getUserInfo(authToken).getUid(),
-                PrlAppsConstants.JURISDICTION,
-                PrlAppsConstants.CASE_TYPE,
-                true,
-                caseDataContent
-            );
-        } else {
-            log.info("****************executing citizen flow***************");
-            StartEventResponse res = coreCaseDataApi.startForCitizen(
+        log.info("****************executing caseworker flow***************");
+        StartEventResponse startEventResponse =
+            coreCaseDataApi.startForCaseworker(
                 authToken,
                 authTokenGenerator.generate(),
                 idamClient.getUserInfo(authToken).getUid(),
@@ -71,23 +44,22 @@ public class CaseCreationService {
                 "courtnav-case-creation"
             );
 
-            CaseDataContent caseDataContent = CaseDataContent.builder()
-                .eventToken(res.getToken())
-                .event(Event.builder()
-                           .id(res.getEventId())
-                           .build())
-                .data(inputMap).build();
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(Event.builder()
+                       .id(startEventResponse.getEventId())
+                       .build())
+            .data(FL401Case.builder().applicantCaseName(testInput.getApplicantCaseName()).build()).build();
 
-            return coreCaseDataApi.submitForCitizen(
-                authToken,
-                authTokenGenerator.generate(),
-                idamClient.getUserInfo(authToken).getUid(),
-                PrlAppsConstants.JURISDICTION,
-                PrlAppsConstants.CASE_TYPE,
-                true,
-                caseDataContent
-            );
-        }
+        return coreCaseDataApi.submitForCaseworker(
+            authToken,
+            authTokenGenerator.generate(),
+            idamClient.getUserInfo(authToken).getUid(),
+            PrlAppsConstants.JURISDICTION,
+            PrlAppsConstants.CASE_TYPE,
+            true,
+            caseDataContent
+        );
     }
 }
 

@@ -8,8 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
-import uk.gov.hmcts.reform.prl.exception.AuthorisationException;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -36,16 +36,16 @@ public class AuthorisationServiceTest {
 
     }
 
-    @Test(expected = AuthorisationException.class)
+    @Test
     public void doNotAuthoriseWhenTheServiceIsCalledFromUnknownApi() {
         when(serviceAuthorisationApi.getServiceName(any())).thenReturn("unknown_api");
-        authorisationService.authorise("Bearer abcasda");
+        assertFalse(authorisationService.authorise("Bearer abc"));
 
     }
 
-    @Test(expected = AuthorisationException.class)
+    @Test
     public void throwUnAuthorisedExceptionWhenS2sTokenIsMalformed() {
-        authorisationService.authorise("Bearer malformed");
+        assertFalse(authorisationService.authorise("Bearer malformed"));
     }
 
 

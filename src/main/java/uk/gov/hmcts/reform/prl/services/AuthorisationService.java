@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
-import uk.gov.hmcts.reform.prl.exception.AuthorisationException;
 
 import java.util.Arrays;
 
@@ -22,12 +21,16 @@ public class AuthorisationService {
 
     public Boolean authorise(String serviceAuthHeader) {
         String callingService;
-        callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
-        if (callingService != null && Arrays.asList(s2sAuthorisedServices.split(","))
-            .contains(callingService)) {
-            return true;
-        } else {
-            throw new AuthorisationException("Request not authorised");
+        try {
+            callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
+            if (callingService != null && Arrays.asList(s2sAuthorisedServices.split(","))
+                .contains(callingService)) {
+                return true;
+            }
+        } catch (Exception ex) {
+            //do nothing
+            log.error("S2S token is not authorised");
         }
+        return false;
     }
 }
