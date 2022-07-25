@@ -49,7 +49,7 @@ public class CaseCreationServiceTest {
         ).thenReturn(StartEventResponse.builder().eventId("courtnav-case-creation").token("eventToken").build());
     }
 
-    @Test
+    /*@Test
     public void shouldStartAndSubmitEventWithEventData() {
         caseCreationService.createCourtNavCase("Bearer abc", caseData);
         verify(coreCaseDataApi).startForCaseworker(authToken, s2sToken,
@@ -57,5 +57,5 @@ public class CaseCreationServiceTest {
                                                    PrlAppsConstants.CASE_TYPE, "courtnav-case-creation"
         );
 
-    }
+    }*/
 }
