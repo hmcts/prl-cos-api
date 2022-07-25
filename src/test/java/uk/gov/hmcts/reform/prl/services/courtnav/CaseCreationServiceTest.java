@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.services.courtnav;
 
 import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -10,11 +12,14 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class CaseCreationServiceTest {
 
@@ -46,7 +51,7 @@ public class CaseCreationServiceTest {
         ).thenReturn(StartEventResponse.builder().eventId("courtnav-case-creation").token("eventToken").build());
     }
 
-    /*@Test
+    @Test
     public void shouldStartAndSubmitEventWithEventData() {
         caseCreationService.createCourtNavCase("Bearer abc", caseData);
         verify(coreCaseDataApi).startForCaseworker(authToken, s2sToken,
@@ -54,5 +59,5 @@ public class CaseCreationServiceTest {
                                                    PrlAppsConstants.CASE_TYPE, "courtnav-case-creation"
         );
 
-    }*/
+    }
 }
