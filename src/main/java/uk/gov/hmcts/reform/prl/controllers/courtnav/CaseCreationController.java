@@ -36,7 +36,10 @@ public class CaseCreationController {
     @ApiOperation(value = "Third party to call this service to create a case in CCD")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Case is created", response = CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 403, message = "Forbidden"),
+        @ApiResponse(code = 500, message = "Internal server error")
+    })
     public ResponseEntity createCase(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
