@@ -30,11 +30,39 @@ public class CaseCreationService {
         log.info("Roles of the calling user {}", idamClient.getUserInfo(authToken).getRoles());
         log.info("Name of the calling user {}", idamClient.getUserInfo(authToken).getName());
         log.info("ApplicantCaseName::::: {}", testInput.getApplicantCaseName());
-        log.info("caseData::::: {}", testInput);
         Map<String, Object> inputMap = new HashMap<>();
         inputMap.put("applicantCaseName", testInput.getApplicantCaseName());
-        StartEventResponse startEventResponse =
-            coreCaseDataApi.startForCaseworker(
+        if (testInput.getApplicantCaseName() != null && testInput.getApplicantCaseName().equalsIgnoreCase("CASEWORKER")) {
+            log.info("****************executing caseworker flow***************");
+            StartEventResponse startEventResponse =
+                coreCaseDataApi.startForCaseworker(
+                    authToken,
+                    authTokenGenerator.generate(),
+                    idamClient.getUserInfo(authToken).getUid(),
+                    PrlAppsConstants.JURISDICTION,
+                    PrlAppsConstants.CASE_TYPE,
+                    "courtnav-case-creation"
+                );
+
+            CaseDataContent caseDataContent = CaseDataContent.builder()
+                .eventToken(startEventResponse.getToken())
+                .event(Event.builder()
+                           .id(startEventResponse.getEventId())
+                           .build())
+                .data(inputMap).build();
+
+            return coreCaseDataApi.submitForCaseworker(
+                authToken,
+                authTokenGenerator.generate(),
+                idamClient.getUserInfo(authToken).getUid(),
+                PrlAppsConstants.JURISDICTION,
+                PrlAppsConstants.CASE_TYPE,
+                true,
+                caseDataContent
+            );
+        } else {
+            log.info("****************executing citizen flow***************");
+            StartEventResponse res = coreCaseDataApi.startForCitizen(
                 authToken,
                 authTokenGenerator.generate(),
                 idamClient.getUserInfo(authToken).getUid(),
@@ -43,22 +71,23 @@ public class CaseCreationService {
                 "courtnav-case-creation"
             );
 
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .eventToken(startEventResponse.getToken())
-            .event(Event.builder()
-                       .id(startEventResponse.getEventId())
-                       .build())
-            .data(inputMap).build();
+            CaseDataContent caseDataContent = CaseDataContent.builder()
+                .eventToken(res.getToken())
+                .event(Event.builder()
+                           .id(res.getEventId())
+                           .build())
+                .data(inputMap).build();
 
-        return coreCaseDataApi.submitForCaseworker(
-            authToken,
-            authTokenGenerator.generate(),
-            idamClient.getUserInfo(authToken).getUid(),
-            PrlAppsConstants.JURISDICTION,
-            PrlAppsConstants.CASE_TYPE,
-            true,
-            caseDataContent
-        );
+            return coreCaseDataApi.submitForCitizen(
+                authToken,
+                authTokenGenerator.generate(),
+                idamClient.getUserInfo(authToken).getUid(),
+                PrlAppsConstants.JURISDICTION,
+                PrlAppsConstants.CASE_TYPE,
+                true,
+                caseDataContent
+            );
+        }
     }
 }
 
