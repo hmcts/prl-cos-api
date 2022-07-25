@@ -594,4 +594,10 @@ public class CaseData implements MappableObject {
      *  Withdraw request flag.
      */
     private String isWithdrawRequestSent;
+
+    /**
+     *  Draft an order.
+     */
+    @JsonUnwrapped
+    private final DraftAnOrder draftAnOrder;
 }
