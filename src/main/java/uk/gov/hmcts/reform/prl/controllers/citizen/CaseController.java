@@ -7,7 +7,13 @@ import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -84,7 +90,7 @@ public class CaseController {
                                      @RequestHeader(value = "caseId", required = false) String caseId,
                                      @RequestHeader("serviceAuthorization") String s2sToken,
                                      @RequestHeader("accessCode") String accessCode) {
-        caseService.linkCitizenToCase(authorisation, s2sToken, accessCode ,caseId);
+        caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
     }
 
 }
