@@ -165,6 +165,12 @@ idam:
     id: prl-cos-api
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
     secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+  solicitor:
+    username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
+    password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
+  system-update:
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
 
 security:
   oauth2:
@@ -271,6 +277,12 @@ document:
       fl401_draft_welsh_filename: Draft_DA_Welsh_application
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
+      fl401_fl406_draft_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Draft.docx
+      fl401_fl406_draft_filename: Power_of_arrest.pdf
+      fl401_fl406_english_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Final.docx
+      fl401_fl406_engllish_filename: Power_of_arrest.pdf
+      fl401_fl406_welsh_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Final.docx
+      fl401_fl406_welsh_filename: Power_of_arrest.pdf
     common:
       prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf
@@ -284,6 +296,7 @@ document:
       prl_c43_template: PRL-GOR-ENG-C43-Child-Arrangements-Final.docx
       prl_c43_filename: ChildArrangements_Specific_Prohibited_Steps_C43.pdf
       prl_c43_draft_template: PRL-GOR-ENG-C43-Child-Arrangements-Draft.docx
+      prl_c43a_final_filename: Special_Guardianship_Order_C43A.pdf
       prl_fl404_template: PRL-GOR-ENG-FL404-Occupation-Order-Final.docx
       prl_fl404_filename: occupation_order_FL404_final.pdf
       prl_fl404_draft_template: PRL-GOR-ENG-FL404-Occupation-Order-Draft.docx
@@ -315,6 +328,10 @@ document:
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
       prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
+      prl_fl402_draft_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
+      prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
+      prl_fl402_final_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
+      prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
 
 southampton:
   court:
