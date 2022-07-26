@@ -500,9 +500,9 @@ public class CallbackController {
         return caseDataUpdated;
     }
 
-    @PostMapping(path = "/draft-an-order-mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/draft-an-order-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to Generate document for draft an order")
-    public AboutToStartOrSubmitCallbackResponse draftAnOrderMidEventCallback(
+    public AboutToStartOrSubmitCallbackResponse draftAnOrderAboutToStartEventCallback(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
@@ -521,6 +521,63 @@ public class CallbackController {
         log.info("*** case details {} ***", caseDetails);
         log.info("*** generate document info {} ***", generatedDocumentInfo);
         log.info("*** document {} ***", document);
+        log.info("*** caseDataUpdated {} ***", caseDataUpdated);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/draft-an-order-mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to Generate document for draft an order")
+    public AboutToStartOrSubmitCallbackResponse draftAnOrderMidEventCallback(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("previewDraftAnOrder","\n"
+            + "<b>Non-molestation order</b>\n"
+            + "Section 42 Family Law Act 1996\n" + "\n" + "Ordered on 4 May 2022 by Her Honour Judge Evans\n" + "\n"
+            + "Family court sitting at: Maidstone family court\n" + "\n" + "<b>People in the case</b>\n" + "\n"
+            + "Applicant: Rebecca Travis\n" + "Applicant reference: abcd6789\n" + "\n"
+            + "Respondent: James Smith born 31 October 1984     \n" + "Respondent reference: efgh4567 \n" + "\n"
+            + "\n" + "\n" + "\n"
+            + "<b>Important notice to the respondent, James Smith born 31 October 1984, of 3 Cherry Close, Tonbridge, Kent TN9 1TT</b>\n"
+            + "\n" + "You must obey this order. You should read it carefully. \n" + "\n"
+            + "If you do not understand anything in this order, you should go to a solicitor, legal advice centre or Citizens Advice. \n"
+            + "\n" + "You have a right to apply to the court to change or cancel the order. \n" + "\n"
+            + "<b>Warning: If, without reasonable excuse, you do anything which you are forbidden from doing by this order, "
+            + "you will be committing a criminal offence and liable on conviction to a term of imprisonment not "
+            + "exceeding 5 years or to a fine or to both.\n"
+            + "Alternatively, if you do not obey this order, you will be guilty of contempt of court and you may be "
+            + "sent to prison, be fined, or have your assets seized.</b>\n"
+            + "\n" + "\n" + "\n" + "By consent\n" + "The court orders:\n" + "\n"
+            + "The respondent James Smith must not use or threaten violence against the applicant Rebecca Travis, and "
+            + "must not instruct, encourage or in any way suggest that any other person should do so. \n"
+            + "\n" + "This order applies to the respondent once it is personally served on them or once they have been "
+            + "made aware of it.\n"
+            + "\n" + "This order applies until: 4 May 2023 1pm\n" + "\n"
+            + "The respondent has the right to apply to the court at any time to change or cancel this order. If the "
+            + "respondent intends to rely on any evidence to support their application, this must be provided in writing"
+            + " to the applicant or applicant’s solicitors in advance. \n"
+            + "\n" + "If the respondent intends to oppose the order at the next hearing, they must notify the court in "
+            + "advance that they intend to attend the hearing and oppose the order. If the respondent does not notify "
+            + "the court, the court may decide that the applicant or applicant’s solicitor does not need to attend the "
+            + "next hearing, and at the next hearing may make an order to extend the injunction. \n"
+            + "\n" + "A further hearing will take place on <b>20 May 2022 10am</b> at Maidstone family court, Medway "
+            + "county and family court, 9-11 The Brook, Chatham, Kent ME 4JZ\n"
+            + "\n" + "It is estimated the hearing will last: 1 hour\n"
+            + "If the respondent does not attend this hearing at this time, the court may make an order in their absence.\n"
+            + "\n" + "The order is made without notice to the respondent.\n" + "\n" + "\n" + "\n" + "\n" + "\n"
+            + "Where the court has made a non-molestation order, a copy of the order must be delivered to the officer "
+            + "in charge of the police station for the applicant’s address, or such other police station as the court "
+            + "may specify, and must be accompanied by a statement showing that the respondent has been served with the "
+            + "order or informed of its terms: see FPR 2010, rule 10.10\n"
+            + "\n" + "\n" + "\n" + "\n" + "<b>Note to the arresting officer</b>\n"
+            + "Under section 42A of the Family Law Act 1996, breach of a non-molestation order is a criminal offence "
+            + "punishable by up to 5 years’ imprisonment. It is an arrestable offence and it is not necessary to obtain a warrant.\n"
+            + "\n" + "A person who without reasonable excuse does anything that they are prohibited from doing by a "
+            + "non-molestation order is guilty of an offence.\n"
+            + "Family Law Act 1996, section 42A(1).\n" + "\n" + "\n" + "\n" + "\n" + "\n" + "\n" + "\n" + "\n");
         log.info("*** caseDataUpdated {} ***", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
