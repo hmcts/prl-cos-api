@@ -1,19 +1,22 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAccessApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.*;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.ccd.client.model.UserId;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.elastic.Query;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 
 import java.util.ArrayList;
@@ -61,9 +64,6 @@ public class CaseService {
     public List<CaseData> retrieveCases(String authToken, String s2sToken,String role,String userId) {
         Map<String, String> searchCriteria = new HashMap<>();
 
-/*        searchCriteria.put("APPLICANT".equalsIgnoreCase(role)
-                               ? "data.id" :
-                               "data.respondent.submittedId",userId);*/
         searchCriteria.put("sortDirection", "desc");
         searchCriteria.put("page", "1");
 
@@ -84,7 +84,7 @@ public class CaseService {
     private List<CaseDetails> performSearch(String authToken,UserDetails user, Map<String, String> searchCriteria, String serviceAuthToken) {
         List<CaseDetails> result;
 
-            result = coreCaseDataApi.searchForCitizen(
+        result = coreCaseDataApi.searchForCitizen(
                 authToken,
                 serviceAuthToken,
                 user.getId(),
@@ -174,7 +174,7 @@ public class CaseService {
         try {
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
             EventRequestData eventRequestData = eventRequest(CaseEventDetail.builder().id("applicantsDetails")
-            .eventName("applicantsDetails").build(), userDetails.getId(),authorisation);
+                .eventName("applicantsDetails").build(), userDetails.getId(),authorisation);
 
             StartEventResponse startEventResponse = startUpdate(
                 authorisation,
