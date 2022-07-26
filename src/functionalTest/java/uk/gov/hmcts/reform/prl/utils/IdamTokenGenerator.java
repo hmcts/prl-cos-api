@@ -23,6 +23,12 @@ public class IdamTokenGenerator {
     @Value("${idam.systemupdate.password}")
     private String systemUpdatePassword;
 
+    @Value("${idam.citizen.username}")
+    private String citizenUsername;
+
+    @Value("${idam.citizen.password}")
+    private String citizenPassword;
+
     @Autowired
     private IdamClient idamClient;
 
@@ -34,8 +40,8 @@ public class IdamTokenGenerator {
         return idamClient.getAccessToken(systemUpdateUsername, systemUpdatePassword);
     }
 
-    public String generateIdamTokenForUser(String username, String password) {
-        return idamClient.getAccessToken(username, password);
+    public String generateIdamTokenForCitizen() {
+        return idamClient.getAccessToken(citizenUsername, citizenPassword);
     }
 
     public UserDetails getUserDetailsFor(final String token) {

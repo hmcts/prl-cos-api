@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -66,6 +67,22 @@ public class CaseController {
                                                                 s2sToken,
                                                                 caseId,
                                                                 eventId).getData(), CaseData.class);
+    }
+
+    @PostMapping("/case/create")
+    @ApiOperation("Call CCD to create case")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "created"),
+            @ApiResponse(code = 401, message = "Provided Authorization token is missing or invalid"),
+            @ApiResponse(code = 500, message = "Internal Server Error")
+    })
+    public CaseData createCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                               @RequestHeader("serviceAuthorization") String s2sToken,
+                               @RequestBody CaseData caseData) {
+
+        CaseDetails caseDetails = caseService.createCase(caseData, authorisation, s2sToken);
+        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+                .toBuilder().id(caseDetails.getId()).build();
     }
 
 }
