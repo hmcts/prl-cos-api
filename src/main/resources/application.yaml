@@ -18,8 +18,8 @@ case:
 
 prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
+    username: prl_local_sysupdate@mailinator.com
+    password: Password12
   document:
     generate:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
@@ -64,7 +64,10 @@ feature-toggle:
     example: ${FEATURE_EXAMPLE:false}
 
 xui:
-  url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
+  url: http://localhost:3000
+
+citizen_frontend:
+  url: http://example.com
 
 uk:
   gov:
@@ -130,14 +133,14 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+    totp-secret: GT2V6PLQ34XGPTPM
   api:
-    url: https://idam-api.aat.platform.hmcts.net
+    url: http://localhost:5000
   client:
     id: prl-cos-api
     baseUrl: https://idam-api.aat.platform.hmcts.net
-    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    redirect_uri: http://localhost:3000/oauth2/callback
+    secret: W7supXKMJgcEWKBS
     clientId: xuiwebapp
     authorize:
       context-path: /oauth2/authorize
@@ -149,8 +152,8 @@ idam:
     username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
     password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+    username: ${IDAM_SOLICITOR_USERNAME:dummysolicitor@test.com}
+    password: ${IDAM_SOLICITOR_PASSWORD:dummy}
 
 test-url: ${TEST_URL:http://localhost:4044}
 
@@ -178,10 +181,10 @@ send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
 
 case_document_am:
-  url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
+  url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
 
 prl-dgs-api:
-  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
+  url: http://localhost:4007
 
 courtfinder:
   api:
