@@ -10,6 +10,7 @@ import java.util.List;
 public class PrlAppsConstants {
     public static final String JURISDICTION = "PRIVATELAW";
     public static final String CASE_TYPE = "PRLAPPS";
+    public static final String CITIZEN_PRL_CREATE_EVENT = "solicitorCreate";
 
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
