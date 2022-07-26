@@ -500,7 +500,7 @@ public class CallbackController {
         return caseDataUpdated;
     }
 
-    @PostMapping(path = "/draft-an-order-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/draft-an-order-mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to Generate document for draft an order")
     public AboutToStartOrSubmitCallbackResponse draftAnOrderAboutToStartEventCallback(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -525,7 +525,7 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/draft-an-order-mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/draft-an-order-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Callback to Generate document for draft an order")
     public AboutToStartOrSubmitCallbackResponse draftAnOrderMidEventCallback(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
