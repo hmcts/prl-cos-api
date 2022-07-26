@@ -500,8 +500,8 @@ public class CallbackController {
         return caseDataUpdated;
     }
 
-    @PostMapping(path = "/draft-an-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to Generate document after submit application")
+    @PostMapping(path = "/draft-an-order-mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Callback to Generate document for draft an order")
     public AboutToStartOrSubmitCallbackResponse draftAnOrderMidEventCallback(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
@@ -518,6 +518,10 @@ public class CallbackController {
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(draftAnOrderFile).build();
         caseDataUpdated.put("previewDraftAnOrderDocument",document);
+        log.info("*** case details {} ***", caseDetails);
+        log.info("*** generate document info {} ***", generatedDocumentInfo);
+        log.info("*** document {} ***", document);
+        log.info("*** caseDataUpdated {} ***", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
