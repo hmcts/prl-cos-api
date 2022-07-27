@@ -1520,6 +1520,44 @@ public class CallbackControllerTest {
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
 
     }
+
+    @Test
+    public void testDraftOrderDocgeneration() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("PRL-DRAFT-C100-20.docx")
+                               .build())
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class),Mockito.anyString())).thenReturn(generatedDocumentInfo);
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        //AboutToStartOrSubmitCallbackResponse response = callbackController.draftAnOrderMidEventCallback(authToken, callbackRequest);
+
+        //assertTrue(response.getData().containsKey("previewDraftAnOrderDocument"));
+    }
 }
 
 
