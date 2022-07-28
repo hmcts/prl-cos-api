@@ -595,5 +595,5 @@ public class CaseData implements MappableObject {
      */
     private String isWithdrawRequestSent;
 
-    private List<String> testChild;
+    private Map<String,List> testChild;
 }
