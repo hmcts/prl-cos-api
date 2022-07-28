@@ -687,11 +687,11 @@ public class ApplicationsTabServiceTest {
     @Test
     public void testOtherProceedingsOverviewTableMapper() {
         Map<String, Object> completeOverviewMap = Map.of(
-            "previousOrOngoingProceedings",
+            PrlAppsConstants.PREVIOUS_OR_ONGOING_PROCEEDINGS,
             caseDataWithParties.getPreviousOrOngoingProceedingsForChildren()
                 .getDisplayedValue()
         );
-        Map<String, Object> emptyOverviewMap = Map.of("previousOrOngoingProceedings", "");
+        Map<String, Object> emptyOverviewMap = Map.of(PrlAppsConstants.PREVIOUS_OR_ONGOING_PROCEEDINGS, "");
 
         assertEquals(completeOverviewMap, applicationsTabService.getOtherProceedingsTable(caseDataWithParties));
         assertEquals(emptyOverviewMap, applicationsTabService.getOtherProceedingsTable(emptyCaseData));
@@ -1188,7 +1188,7 @@ public class ApplicationsTabServiceTest {
                 FL401OtherProceedingDetails.builder().hasPrevOrOngoingOtherProceeding(YesNoDontKnow.yes).build())
             .build();
 
-        Map<String, Object> expected =   Map.of("previousOrOngoingProceedings","Yes");
+        Map<String, Object> expected =   Map.of(PrlAppsConstants.PREVIOUS_OR_ONGOING_PROCEEDINGS,"Yes");
         Map<String, Object> result = applicationsTabService.getFL401OtherProceedingsTable(caseData);
         assertEquals(expected, result);
     }

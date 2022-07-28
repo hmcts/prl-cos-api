@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 
 
-@Api
+@Tag(name = "task-list-controller")
 @Slf4j
 @RestController
 @RequestMapping("/update-task-list")
@@ -59,7 +59,8 @@ public class TaskListController extends AbstractCallbackController {
         String state = callbackRequest.getCaseDetails().getState();
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))) {
             try {
-                caseDataUpdated = dgsService.generateDocuments(authorisation, caseData);
+                log.info("Generating documents for the amended details");
+                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
             }
@@ -70,6 +71,7 @@ public class TaskListController extends AbstractCallbackController {
             .c8WelshDocument((Document) caseDataUpdated.get("c8WelshDocument"))
             .finalDocument((Document) caseDataUpdated.get("finalDocument"))
             .finalWelshDocument((Document) caseDataUpdated.get("finalWelshDocument"))
+            .c1AWelshDocument((Document) caseDataUpdated.get("c1AWelshDocument"))
             .build();
         tabService.updateAllTabsIncludingConfTab(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
