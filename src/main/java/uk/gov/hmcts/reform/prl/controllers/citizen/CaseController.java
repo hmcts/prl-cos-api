@@ -1,9 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
@@ -37,10 +34,7 @@ public class CaseController {
     CaseService caseService;
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
-    @ApiOperation(value = "Frontend to fetch the data")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Case details returned", response = CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
+    @Operation(description = "Frontend to fetch the data")
     public CaseData serviceRequestUpdate(
         @PathVariable("caseId") String caseId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String userToken,
@@ -53,7 +47,7 @@ public class CaseController {
     }
 
     @PostMapping(value = "{caseId}/{eventId}/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation("Updates case")
+    @Operation(description = "Updating casedata")
     public CaseData updateCase(
         @Valid @NotNull @RequestBody CaseData caseData,
         @PathVariable("caseId") String caseId,
