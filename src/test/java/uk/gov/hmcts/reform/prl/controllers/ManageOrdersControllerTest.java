@@ -424,6 +424,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .fl401FamilymanCaseNumber("familyman12345")
+            .courtName("testCourt")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .build();
@@ -433,6 +434,66 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .courtName("testCourt")
+            .childrenList("Child 1: TestName\n")
+            .selectedOrder(
+                "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
+                    + "enforcement application (C82)\\n\\n")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .caseDetailsBefore(null)
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
+
+        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails(callbackRequest);
+        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
+        assertEquals(
+            "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
+            callbackResponse.getData().getSelectedOrder());
+    }
+
+    @Test
+    public void testNotPrepopulateFl401DataNoticeOfProceedingsIfC100() {
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .courtName("testCourt")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
+            .build();
+
+        CaseData updatedCaseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .courtName("testCourt")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .childrenList("Child 1: TestName\n")
             .selectedOrder(
@@ -447,6 +508,10 @@ public class ManageOrdersControllerTest {
                              .id(12345L)
                              .data(stringObjectMap)
                              .build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(stringObjectMap)
+                                   .build())
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -475,6 +540,7 @@ public class ManageOrdersControllerTest {
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
+            .courtName("testCourt")
             .home(Home.builder().children(listOfChildren).build())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
@@ -500,6 +566,10 @@ public class ManageOrdersControllerTest {
                              .id(12345L)
                              .data(stringObjectMap)
                              .build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(stringObjectMap)
+                                   .build())
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);

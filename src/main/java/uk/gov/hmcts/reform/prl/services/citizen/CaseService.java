@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import java.util.Map;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -52,6 +57,8 @@ public class CaseService {
     @Autowired
     SystemUserService systemUserService;
 
+    @Autowired
+    ObjectMapper objectMapper;
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId) {
 
@@ -98,6 +105,9 @@ public class CaseService {
 
     private CaseDetails updateCaseDetails(CaseData caseData, String authToken, String s2sToken, String caseId,
                                           String eventId, UserDetails userDetails) {
+        log.info("Input casedata, applicantcaseName :::: {}", caseData.getApplicantCaseName());
+        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+        Iterables.removeIf(caseDataMap.values(), Objects::isNull);
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             authToken,
             s2sToken,
@@ -113,7 +123,7 @@ public class CaseService {
             .event(Event.builder()
                        .id(startEventResponse.getEventId())
                        .build())
-            .data(caseData)
+            .data(caseDataMap)
             .build();
 
         return coreCaseDataApi.submitEventForCaseWorker(
