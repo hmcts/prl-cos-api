@@ -185,10 +185,7 @@ public class ManageOrdersController {
     }
 
     @PostMapping(path = "/other-people-dynamic-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to populate other people dynamic list")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Other people details are fetched"),
-        @ApiResponse(code = 400, message = "Bad Request")})
+    @Operation(description = "Callback to populate other people dynamic list")
     public AboutToStartOrSubmitCallbackResponse populateOtherPeopleList(
         @RequestBody CallbackRequest callbackRequest
     ) {
@@ -208,10 +205,7 @@ public class ManageOrdersController {
     }
 
     @PostMapping(path = "/children-dynamic-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to populate children dynamic list")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Child details are fetched"),
-        @ApiResponse(code = 400, message = "Bad Request")})
+    @Operation(description = "Callback to populate other people dynamic list")
     public AboutToStartOrSubmitCallbackResponse populateChildrenList(
         @RequestBody CallbackRequest callbackRequest
     ) {
