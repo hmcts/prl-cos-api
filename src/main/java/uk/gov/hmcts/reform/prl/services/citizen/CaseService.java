@@ -66,37 +66,37 @@ public class CaseService {
 
     }
 
-    public List<CaseData> retrieveCases(String authToken, String s2sToken,String role,String userId) {
+    public List<CaseData> retrieveCases(String authToken, String s2sToken, String role, String userId) {
         Map<String, String> searchCriteria = new HashMap<>();
 
         searchCriteria.put("sortDirection", "desc");
         searchCriteria.put("page", "1");
 
-        return searchCasesWith(authToken, s2sToken,searchCriteria);
+        return searchCasesWith(authToken, s2sToken, searchCriteria);
     }
 
     private List<CaseData> searchCasesWith(String authToken, String s2sToken, Map<String, String> searchCriteria) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
         List<CaseDetails> caseDetails = new ArrayList<>();
-        caseDetails.addAll(performSearch(authToken,userDetails,searchCriteria,s2sToken));
-        return  caseDetails
+        caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
+        return caseDetails
             .stream()
             .map(caseDetailsConverter::extractCase)
             .collect(Collectors.toList());
     }
 
-    private List<CaseDetails> performSearch(String authToken,UserDetails user, Map<String, String> searchCriteria, String serviceAuthToken) {
+    private List<CaseDetails> performSearch(String authToken, UserDetails user, Map<String, String> searchCriteria, String serviceAuthToken) {
         List<CaseDetails> result;
 
         result = coreCaseDataApi.searchForCitizen(
-                authToken,
-                serviceAuthToken,
-                user.getId(),
-                JURISDICTION,
-                CASE_TYPE,
-                searchCriteria
-            );
+            authToken,
+            serviceAuthToken,
+            user.getId(),
+            JURISDICTION,
+            CASE_TYPE,
+            searchCriteria
+        );
 
         return result;
     }
@@ -136,37 +136,24 @@ public class CaseService {
         );
     }
 
-    public void linkCitizenToCase(String authorisation,String s2sToken, String accessCode, String caseId) {
-        String userId  = idamClient.getUserDetails(authorisation).getId();
+    public void linkCitizenToCase(String authorisation, String s2sToken, String accessCode, String caseId) {
+        String userId = idamClient.getUserDetails(authorisation).getId();
         String emailId = idamClient.getUserDetails(authorisation).getEmail();
-        this.grantAccessToCase(systemUserService.getSysUserToken(),s2sToken, caseId, userId);
-        this.revokeAccessToCase(systemUserService.getSysUserToken(), accessCode, caseId);
-        this.updateCitizenIdAndEmail(authorisation, caseId, userId, emailId,s2sToken,"applicantsDetails");
+        this.grantAccessToCase(systemUserService.getSysUserToken(), caseId, userId);
+        this.updateCitizenIdAndEmail(authorisation, caseId, userId, emailId, s2sToken, "applicantsDetails");
 
     }
 
-
-    private void revokeAccessToCase(String accessToken, String letterHolderId, String caseId) {
-        String sysUserId  = idamClient.getUserDetails(accessToken).getId();
-        caseAccessApi.revokeAccessToCase(accessToken,
-                                         authTokenGenerator.generate(),
-                                         sysUserId,
-                                         JURISDICTION,
-                                         CASE_TYPE,
-                                         caseId,
-                                         letterHolderId
-        );
-    }
-
-    private void grantAccessToCase(String sysUserToken,String s2sToken, String caseId, String userId) {
-        String sysUserId  = idamClient.getUserDetails(sysUserToken).getId();
-        caseAccessApi.grantAccessToCase(sysUserToken,
-                                        authTokenGenerator.generate(),
-                                        sysUserId,
-                                        JURISDICTION,
-                                        CASE_TYPE,
-                                        caseId,
-                                        new UserId(userId)
+    private void grantAccessToCase(String sysUserToken, String caseId, String userId) {
+        String sysUserId = idamClient.getUserDetails(sysUserToken).getId();
+        caseAccessApi.grantAccessToCase(
+            sysUserToken,
+            authTokenGenerator.generate(),
+            sysUserId,
+            JURISDICTION,
+            CASE_TYPE,
+            caseId,
+            new UserId(userId)
         );
     }
 
@@ -181,17 +168,19 @@ public class CaseService {
     ) {
         try {
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
-            EventRequestData eventRequestData = eventRequest(CaseEventDetail.builder().id("applicantsDetails")
-                .eventName("applicantsDetails").build(), userDetails.getId(),authorisation);
+            EventRequestData eventRequestData = eventRequest(
+                CaseEventDetail.builder().id("applicantsDetails")
+                    .eventName("applicantsDetails").build(),
+                userDetails.getId(),
+                authorisation
+            );
 
             StartEventResponse startEventResponse = startUpdate(
                 authorisation,
                 s2sToken,
                 eventRequestData,
-                Long.valueOf(caseId),
-                false
+                Long.valueOf(caseId)
             );
-
 
             CaseDataContent caseDataContent = CaseDataContent.builder()
                 .eventToken(startEventResponse.getToken())
@@ -200,12 +189,12 @@ public class CaseService {
                            .build())
                 .build();
 
-            return submitUpdate(authorisation,
-                                s2sToken,
-                                eventRequestData,
-                                caseDataContent,
-                                Long.valueOf(caseId),
-                                false
+            return submitUpdate(
+                authorisation,
+                s2sToken,
+                eventRequestData,
+                caseDataContent,
+                Long.valueOf(caseId)
             );
         } catch (Exception exception) {
             throw new RuntimeException();
@@ -216,30 +205,17 @@ public class CaseService {
         String authorisation,
         String s2sToken,
         EventRequestData eventRequestData,
-        Long caseId,
-        boolean isRepresented
+        Long caseId
     ) {
-        if (isRepresented) {
-            return coreCaseDataApi.startEventForCaseWorker(
-                authorisation,
-                s2sToken,
-                eventRequestData.getUserId(),
-                eventRequestData.getJurisdictionId(),
-                eventRequestData.getCaseTypeId(),
-                caseId.toString(),
-                eventRequestData.getEventId()
-            );
-        } else {
-            return coreCaseDataApi.startEventForCitizen(
-                authorisation,
-                s2sToken,
-                eventRequestData.getUserId(),
-                eventRequestData.getJurisdictionId(),
-                eventRequestData.getCaseTypeId(),
-                caseId.toString(),
-                eventRequestData.getEventId()
-            );
-        }
+        return coreCaseDataApi.startEventForCitizen(
+            authorisation,
+            s2sToken,
+            eventRequestData.getUserId(),
+            eventRequestData.getJurisdictionId(),
+            eventRequestData.getCaseTypeId(),
+            caseId.toString(),
+            eventRequestData.getEventId()
+        );
     }
 
     private CaseDetails submitUpdate(
@@ -247,35 +223,21 @@ public class CaseService {
         String s2sToken,
         EventRequestData eventRequestData,
         CaseDataContent caseDataContent,
-        Long caseId,
-        boolean isRepresented
+        Long caseId
     ) {
-        if (isRepresented) {
-            return coreCaseDataApi.submitEventForCaseWorker(
-                authorisation,
-                s2sToken,
-                eventRequestData.getUserId(),
-                eventRequestData.getJurisdictionId(),
-                eventRequestData.getCaseTypeId(),
-                caseId.toString(),
-                eventRequestData.isIgnoreWarning(),
-                caseDataContent
-            );
-        } else {
-            return coreCaseDataApi.submitEventForCitizen(
-                authorisation,
-                s2sToken,
-                eventRequestData.getUserId(),
-                eventRequestData.getJurisdictionId(),
-                eventRequestData.getCaseTypeId(),
-                caseId.toString(),
-                eventRequestData.isIgnoreWarning(),
-                caseDataContent
-            );
-        }
+        return coreCaseDataApi.submitEventForCitizen(
+            authorisation,
+            s2sToken,
+            eventRequestData.getUserId(),
+            eventRequestData.getJurisdictionId(),
+            eventRequestData.getCaseTypeId(),
+            caseId.toString(),
+            eventRequestData.isIgnoreWarning(),
+            caseDataContent
+        );
     }
 
-    private EventRequestData eventRequest(CaseEventDetail caseEvent, String userId,String authorisation) {
+    private EventRequestData eventRequest(CaseEventDetail caseEvent, String userId, String authorisation) {
         return EventRequestData.builder()
             .userToken(authorisation)
             .userId(userId)
@@ -285,5 +247,4 @@ public class CaseService {
             .ignoreWarning(true)
             .build();
     }
-
 }
