@@ -87,6 +87,10 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getAppointmentOfGuardian());
         }
+        Optional<List<Element<PartyDetails>>> othersToNotify = ofNullable(caseData.getOthersToNotify());
+        if (othersToNotify.isPresent()) {
+            caseDataUpdated.putAll(manageOrderService.getDynamicOtherPeopleListDetails(caseData));
+        }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
