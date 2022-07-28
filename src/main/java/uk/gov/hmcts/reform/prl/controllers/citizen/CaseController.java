@@ -35,9 +35,9 @@ public class CaseController {
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
-    public CaseData serviceRequestUpdate(
+    public CaseData getCase(
         @PathVariable("caseId") String caseId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String userToken,
+        @RequestHeader(value = "Authorization", required = false) String userToken,
         @RequestHeader("serviceAuthorization") String s2sToken
     ) {
         return objectMapper.convertValue(
@@ -55,11 +55,13 @@ public class CaseController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken
     ) {
-        return objectMapper.convertValue(caseService.updateCase(caseData,
-                                                                authorisation,
-                                                                s2sToken,
-                                                                caseId,
-                                                                eventId).getData(), CaseData.class);
+        return objectMapper.convertValue(caseService.updateCase(
+            caseData,
+            authorisation,
+            s2sToken,
+            caseId,
+            eventId
+        ).getData(), CaseData.class);
     }
 
 }
