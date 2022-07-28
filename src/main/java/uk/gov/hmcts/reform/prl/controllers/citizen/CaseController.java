@@ -67,10 +67,6 @@ public class CaseController {
     }
 
     @GetMapping(path = "/citizen/{role}/retrieve-cases/{userId}", produces = APPLICATION_JSON)
-    @ApiOperation(value = "Frontend to fetch case list")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Case details returned", response = CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
     public List<CaseData> retrieveCases(
         @PathVariable("role") String role,
         @PathVariable("userId") String userId,
@@ -81,7 +77,6 @@ public class CaseController {
     }
 
     @PutMapping("/citizen/link")
-    @ApiOperation("Links citizen to case")
     public void linkDefendantToClaim(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                      @RequestHeader(value = "caseId", required = false) String caseId,
                                      @RequestHeader("serviceAuthorization") String s2sToken,
