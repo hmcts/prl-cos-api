@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.caseaccess.AssignCaseAccessRequest;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
@@ -20,25 +21,29 @@ public class AssignCaseAccessService {
     private final AuthTokenGenerator authTokenGenerator;
     private final AssignCaseAccessClient assignCaseAccessClient;
     private final UserService userService;
+    private final LaunchDarklyClient launchDarklyClient;
 
 
     public void assignCaseAccess(String caseId, String authorisation) {
-        UserDetails userDetails =  userService.getUserDetails(authorisation);
 
-        String userId = userDetails.getId();
+        if (launchDarklyClient.isFeatureEnabled("share-a-case")) {
+            UserDetails userDetails = userService.getUserDetails(authorisation);
 
-        log.info("CaseId: {} of type {} assigning case access to user {}", caseId, CASE_TYPE, userId);
+            String userId = userDetails.getId();
 
-        String serviceToken = authTokenGenerator.generate();
-        assignCaseAccessClient.assignCaseAccess(
-             authorisation,
-             serviceToken,
-             true,
-             buildAssignCaseAccessRequest(caseId, userId, CASE_TYPE)
-        );
-        ccdDataStoreService.removeCreatorRole(caseId, authorisation);
+            log.info("CaseId: {} of type {} assigning case access to user {}", caseId, CASE_TYPE, userId);
 
-        log.info("CaseId: {} assigned case access to user {}", caseId, userId);
+            String serviceToken = authTokenGenerator.generate();
+            assignCaseAccessClient.assignCaseAccess(
+                authorisation,
+                serviceToken,
+                true,
+                buildAssignCaseAccessRequest(caseId, userId, CASE_TYPE)
+            );
+            ccdDataStoreService.removeCreatorRole(caseId, authorisation);
+
+            log.info("CaseId: {} assigned case access to user {}", caseId, userId);
+        }
     }
 
     private AssignCaseAccessRequest buildAssignCaseAccessRequest(String caseId, String userId, String caseTypeId) {

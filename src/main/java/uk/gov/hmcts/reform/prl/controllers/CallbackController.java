@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -107,6 +108,8 @@ public class CallbackController {
     private final SearchCasesDataService searchCasesDataService;
 
     private final ConfidentialityTabService confidentialityTabService;
+
+    private final LaunchDarklyClient launchDarklyClient;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -492,15 +495,17 @@ public class CallbackController {
             if (userOrganisation.isPresent()) {
                 log.info("Got the Org Details");
                 caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
-                OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
-                    .organisation(Organisation.builder()
-                                      .organisationID(userOrganisation.get().getOrganisationIdentifier())
-                                      .organisationName(userOrganisation.get().getName())
-                                      .build())
-                    .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
-                    .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
-                    .build();
-                caseDataUpdated.put("applicantOrganisationPolicy",applicantOrganisationPolicy);
+                if (launchDarklyClient.isFeatureEnabled("share-a-case")) {
+                    OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+                        .organisation(Organisation.builder()
+                                          .organisationID(userOrganisation.get().getOrganisationIdentifier())
+                                          .organisationName(userOrganisation.get().getName())
+                                          .build())
+                        .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
+                        .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
+                        .build();
+                    caseDataUpdated.put("applicantOrganisationPolicy",applicantOrganisationPolicy);
+                }
             }
             log.info("SUCCESSFULLY fetched user and Org Details ");
         } catch (Exception e) {
