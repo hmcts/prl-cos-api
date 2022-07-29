@@ -11,10 +11,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -64,6 +66,8 @@ import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
+import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
@@ -84,6 +88,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -175,7 +181,19 @@ public class CallbackControllerTest {
     private DocumentGenService documentGenService;
 
     @Mock
+    private LaunchDarklyClient launchDarklyClient;
+
+    @Mock
     private  ConfidentialityTabService confidentialityTabService;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    private CcdDataStoreService ccdDataStoreService;
+
+    @Mock
+    private AssignCaseAccessClient assignCaseAccessClient;
 
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -881,6 +899,7 @@ public class CallbackControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
                              .data(caseDetails).build()).build();
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .aboutToSubmitCaseCreation(authToken, callbackRequest);
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
@@ -910,6 +929,7 @@ public class CallbackControllerTest {
         CaseData caseDataUpdated = CaseData.builder().id(123L)
             .applicantCaseName("abcd").applicantOrganisationPolicy(applicantOrganisationPolicy).build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseDataUpdated);
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(false);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .aboutToSubmitCaseCreation(authToken, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
@@ -950,6 +970,13 @@ public class CallbackControllerTest {
         CaseData caseDataUpdated = CaseData.builder().id(123L)
             .applicantCaseName("abcd").applicantOrganisationPolicy(applicantOrganisationPolicy).build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseDataUpdated);
+        UserDetails userDetails = new UserDetails();
+        when(userService.getUserDetails(anyString())).thenReturn(userDetails);
+        doNothing().when(ccdDataStoreService).removeCreatorRole(anyString(), anyString());
+        when(authTokenGenerator.generate()).thenReturn("Generate");
+        doNothing().when(assignCaseAccessClient)
+            .assignCaseAccess(anyString(), anyString(), anyBoolean(), any());
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .aboutToSubmitCaseCreation(authToken, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
