@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
+import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -62,6 +64,24 @@ public class CaseController {
             caseId,
             eventId
         ).getData(), CaseData.class);
+    }
+
+    @GetMapping(path = "/citizen/{role}/retrieve-cases/{userId}", produces = APPLICATION_JSON)
+    public List<CaseData> retrieveCases(
+        @PathVariable("role") String role,
+        @PathVariable("userId") String userId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader("serviceAuthorization") String s2sToken
+    ) {
+        return caseService.retrieveCases(authorisation, s2sToken, role, userId);
+    }
+
+    @PutMapping("/citizen/link")
+    public void linkDefendantToClaim(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                     @RequestHeader(value = "caseId", required = false) String caseId,
+                                     @RequestHeader("serviceAuthorization") String s2sToken,
+                                     @RequestHeader("accessCode") String accessCode) {
+        caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
     }
 
 }
