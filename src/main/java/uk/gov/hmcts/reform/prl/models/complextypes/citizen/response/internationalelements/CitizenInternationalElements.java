@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalElements;
+package uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
