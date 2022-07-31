@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.UserId;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
@@ -246,5 +248,35 @@ public class CaseService {
             .eventId(caseEvent.getEventName())
             .ignoreWarning(true)
             .build();
+    }
+
+    public String validateAccessCode(String userToken, String s2sToken, String caseId, String accessCode) {
+        log.info("validateAccessCode");
+        log.info("parameters are :" + caseId + " and " + accessCode);
+        String accessCodeStatus = "Invalid access code";
+        CaseData caseData = objectMapper.convertValue(
+            coreCaseDataApi.getCase(userToken, s2sToken, caseId).getData(),
+            CaseData.class
+        );
+
+        log.info("caseData testing::" + caseData);
+
+        List<CaseInvite> matchingCaseInvite = caseData.getRespondentCaseInvites()
+            .stream()
+            .map(Element::getValue)
+            .filter(x -> accessCode.equals(x.getAccessCode()))
+            .collect(Collectors.toList());
+
+        log.info("matchingCaseInvite testing::" + matchingCaseInvite);
+        if (matchingCaseInvite.size() > 0) {
+            for(CaseInvite caseInvite: matchingCaseInvite){
+                if("Yes".equals(caseInvite.isHasLinked())) {
+                    accessCodeStatus = "Access code already linked";
+                }
+            }
+            accessCodeStatus = "Access code is valid";
+        }
+        log.info("accessCodeStatus" + accessCodeStatus);
+        return accessCodeStatus;
     }
 }
