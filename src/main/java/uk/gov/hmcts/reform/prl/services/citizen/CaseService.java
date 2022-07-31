@@ -270,7 +270,7 @@ public class CaseService {
         log.info("matchingCaseInvite testing::" + matchingCaseInvite);
         if (matchingCaseInvite.size() > 0) {
             for (CaseInvite caseInvite : matchingCaseInvite) {
-                if ("Yes".equals(caseInvite.isHasLinked())) {
+                if ("Yes".equals(caseInvite.getHasLinked())) {
                     accessCodeStatus = "Access code already linked";
                 }
             }

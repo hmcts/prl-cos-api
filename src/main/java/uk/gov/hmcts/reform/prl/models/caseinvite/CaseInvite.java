@@ -16,7 +16,7 @@ public class CaseInvite {
     private String caseInviteEmail;
     private String accessCode;
     private String invitedUserId;
-    private boolean hasLinked;
+    private String hasLinked;
     private LocalDate expiryDate;
 
 
