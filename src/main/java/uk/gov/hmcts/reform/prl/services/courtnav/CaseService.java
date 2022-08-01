@@ -96,12 +96,13 @@ public class CaseService {
 
 
             StartEventResponse startEventResponse =
-                coreCaseDataApi.startForCaseworker(
+                coreCaseDataApi.startEventForCaseWorker(
                     authorisation,
                     authTokenGenerator.generate(),
                     idamClient.getUserInfo(authorisation).getUid(),
                     PrlAppsConstants.JURISDICTION,
                     PrlAppsConstants.CASE_TYPE,
+                    caseId,
                     "courtnav-case-creation"
                 );
 
@@ -112,12 +113,13 @@ public class CaseService {
                            .build())
                 .data(caseData).build();
 
-            CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
+            CaseDetails caseDetails = coreCaseDataApi.submitEventForCaseWorker(
                 authorisation,
                 authTokenGenerator.generate(),
                 idamClient.getUserInfo(authorisation).getUid(),
                 PrlAppsConstants.JURISDICTION,
                 PrlAppsConstants.CASE_TYPE,
+                caseId,
                 true,
                 caseDataContent
             );
