@@ -43,8 +43,8 @@ public class CaseController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity createCase(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+        @RequestHeader(value = "Authorization", required = false) String authorisation,
+        @RequestHeader(value = "serviceAuthorization") String serviceAuthorization,
         @RequestBody CaseData inputData
     ) {
         log.info("s2s token inside controller {}", serviceAuthorization);
