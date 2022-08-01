@@ -103,7 +103,7 @@ public class CaseService {
                     PrlAppsConstants.JURISDICTION,
                     PrlAppsConstants.CASE_TYPE,
                     caseId,
-                    "courtnav-case-creation"
+                    "courtnav-document-upload"
                 );
 
             CaseDataContent caseDataContent = CaseDataContent.builder()
