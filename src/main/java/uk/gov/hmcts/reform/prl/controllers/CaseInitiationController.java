@@ -30,7 +30,6 @@ public class CaseInitiationController extends AbstractCallbackController {
     public void handleSubmitted(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                 @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("authorisation token: {}",authorisation);
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         final CaseData caseData = getCaseData(caseDetails);
 
