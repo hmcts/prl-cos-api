@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.courtnav;
 
 import io.swagger.v3.oas.annotations.Operation;
+
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
@@ -12,17 +13,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseCreationResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ResponseMessage;
-import uk.gov.hmcts.reform.prl.models.dto.document.UploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CaseService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @Slf4j
 @RestController
@@ -62,7 +66,7 @@ public class CaseController {
     }
 
 
-    @PostMapping(path = "{caseId}/document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "{caseId}/document", produces = APPLICATION_JSON_VALUE, consumes = MULTIPART_FORM_DATA_VALUE)
     @Operation(description = "Uploading document for a specific case in CCD")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Document is uploaded"),
@@ -74,14 +78,15 @@ public class CaseController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @PathVariable("caseId") String caseId,
-        @RequestBody UploadDocumentRequest inputData
+        @RequestParam MultipartFile file,
+        @RequestParam String typeOfDocument
     ) {
         log.info("s2s token inside uploadDocument controller {}", serviceAuthorization);
         log.info("auth token inside uploadDocument controller {}", authorisation);
         if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
-            caseService.uploadDocument(authorisation, inputData.getDocument(), inputData.getTypeOfDocument(), caseId);
+            caseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
             return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully:"
-                                                                    + inputData.getDocument().getOriginalFilename()));
+                                                                    + file.getOriginalFilename()));
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
