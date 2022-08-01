@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CaseCreationServiceTest {
+public class CaseServiceTest {
 
     private final String authToken = "Bearer abc";
     private final String s2sToken = "s2s token";
@@ -35,7 +35,7 @@ public class CaseCreationServiceTest {
     private AuthTokenGenerator authTokenGenerator;
 
     @InjectMocks
-    CaseCreationService caseCreationService;
+    CaseService caseService;
 
 
     private CaseData caseData;
@@ -51,7 +51,7 @@ public class CaseCreationServiceTest {
 
     @Test
     public void shouldStartAndSubmitEventWithEventData() {
-        caseCreationService.createCourtNavCase("Bearer abc", caseData);
+        caseService.createCourtNavCase("Bearer abc", caseData);
         verify(coreCaseDataApi).startForCaseworker(authToken, s2sToken,
                                                    randomUserId, PrlAppsConstants.JURISDICTION,
                                                    PrlAppsConstants.CASE_TYPE, "courtnav-case-creation"
