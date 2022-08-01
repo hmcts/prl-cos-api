@@ -594,4 +594,12 @@ public class CaseData implements MappableObject {
      *  Withdraw request flag.
      */
     private String isWithdrawRequestSent;
+
+    /**
+     *  Courtnav uploaded files.
+     */
+
+    private Document fl401Doc1;
+    private Document fl401Doc2;
+
 }
