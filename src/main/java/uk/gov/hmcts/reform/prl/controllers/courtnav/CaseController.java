@@ -84,7 +84,7 @@ public class CaseController {
         log.info("auth token inside uploadDocument controller {}", authorisation);
         if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
             caseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
-            return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully:"
+            return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
                                                                     + file.getOriginalFilename()));
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
