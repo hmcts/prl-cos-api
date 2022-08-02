@@ -197,6 +197,9 @@ resources:
   images:
     baseUrl: 'https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/'
 
+aca:
+  api:
+    url: ${ACA_SERVICE_API_BASEURL:http://localhost:4454}
 
 send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
