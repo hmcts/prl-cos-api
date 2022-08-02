@@ -3,8 +3,10 @@ package uk.gov.hmcts.reform.prl.services.courtnav;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -29,6 +31,7 @@ import java.util.Map;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseService {
 
+    public static final String COURTNAV_DOCUMENT_UPLOAD_EVENT_ID = "courtnav-document-upload";
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
@@ -103,7 +106,7 @@ public class CaseService {
                     PrlAppsConstants.JURISDICTION,
                     PrlAppsConstants.CASE_TYPE,
                     caseId,
-                    "courtnav-document-upload"
+                    COURTNAV_DOCUMENT_UPLOAD_EVENT_ID
                 );
 
             CaseDataContent caseDataContent = CaseDataContent.builder()
@@ -124,8 +127,11 @@ public class CaseService {
                 caseDataContent
             );
 
-            log.info("Document has saved in caseData {}", caseDetails.getData().get(typeOfDocument));
+            log.info("Document has been saved in caseData {}", caseDetails.getData().get(typeOfDocument));
 
+        } else {
+            log.error("Un acceptable type of document {}", typeOfDocument);
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
         }
     }
 
