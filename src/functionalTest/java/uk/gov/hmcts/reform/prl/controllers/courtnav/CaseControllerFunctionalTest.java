@@ -8,11 +8,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
+
+import java.io.File;
 
 @Slf4j
 @SpringBootTest
@@ -56,7 +60,7 @@ public class CaseControllerFunctionalTest {
 
 
     @Test
-    public void givenNoCaseDataInRequestBody_then200Response() throws Exception {
+    public void givenNoCaseDataInRequestBody_then500Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header("Authorization", "Bearer xyz", "ServiceAuthorization", "abc")
@@ -64,5 +68,21 @@ public class CaseControllerFunctionalTest {
             .contentType("application/json")
             .post("/case")
             .then().assertThat().statusCode(500);
+    }
+
+    @Test
+    public void givenValidDocumentData_then200Response() {
+        request
+            .header(
+                "Authorization",
+                idamTokenGenerator.generateIdamTokenForSystem(),
+                "ServiceAuthorization",
+                serviceAuthenticationGenerator.generate()
+            )
+            .multiPart("file",new File("courtnav/Dummy_pdf_file.pdf"))
+            .pathParam("caseId","1647520545879276")
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/{caseId}/document")
+            .then().assertThat().statusCode(200);
     }
 }
