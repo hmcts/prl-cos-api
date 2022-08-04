@@ -15,4 +15,5 @@ public class CcdPayment {
     private String paymentMethod;
     private String caseReference;
     private String accountNumber;
+
 }

@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
-import uk.gov.hmcts.reform.prl.enums.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -53,7 +53,7 @@ public class ServiceOfApplicationController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseDataUpdated = serviceOfApplicationService.populateHeader(caseData,caseDataUpdated);
+
         if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
             List<String> createdOrders = caseData.getOrderCollection().stream()
                 .map(Element::getValue).map(OrderDetails::getOrderType)

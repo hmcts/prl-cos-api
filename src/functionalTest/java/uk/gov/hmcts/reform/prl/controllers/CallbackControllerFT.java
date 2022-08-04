@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -14,15 +15,19 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
@@ -76,6 +81,9 @@ public class CallbackControllerFT {
     @MockBean
     private AllTabServiceImpl allTabService;
 
+    @MockBean
+    private CourtFinderService courtLocatorService;
+
     private static final String MIAM_VALIDATION_REQUEST_ERROR = "requests/call-back-controller-miam-request-error.json";
     private static final String MIAM_VALIDATION_REQUEST_NO_ERROR = "requests/call-back-controller-miam-request-no-error.json";
     private static final String C100_GENERATE_DRAFT_DOC = "requests/call-back-controller-generate-save-doc.json";
@@ -85,6 +93,7 @@ public class CallbackControllerFT {
     private static final String C100_SEND_TO_GATEKEEPER = "requests/call-back-controller-send-to-gatekeeper.json";
     private static final String C100_RESEND_RPA = "requests/call-back-controller-resend-rpa.json";
     private static final String FL401_ABOUT_TO_SUBMIT_CREATION = "requests/call-back-controller-about-to-submit-case-creation.json";
+    private static final String FL401_CASE_DATA = "requests/call-back-controller-fl401-case-data.json";
 
     @Before
     public void setUp() {
@@ -153,6 +162,7 @@ public class CallbackControllerFT {
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
+            .state(State.CASE_ISSUE)
             .applicantsConfidentialDetails(List.of(element(ApplicantConfidentialityDetails.builder().build())))
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
             .build();
@@ -243,7 +253,21 @@ public class CallbackControllerFT {
     public void givenC100Case_whenRpaResent_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
 
-        mockMvc.perform(post("/resend-rpa")
+        mockMvc.perform(post("/update-applicant-child-names")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    }
+
+    @Test
+    public void updateApplicantAndChildName() throws Exception {
+        String requestBody = ResourceLoader.loadJson(FL401_CASE_DATA);
+
+        mockMvc.perform(post("/send-to-gatekeeper")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .content(requestBody)
@@ -277,5 +301,26 @@ public class CallbackControllerFT {
             .andReturn();
 
     }
+
+    @Test
+    public void givenC100CasePrePopulateCourtDetailsWithValidCourt() throws Exception {
+        when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(Court.builder().build());
+        when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.of(CourtEmailAddress.builder()
+            .address("123@gamil.com").build()));
+        String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
+        mockMvc.perform(post("/pre-populate-court-details").contentType(MediaType.APPLICATION_JSON).content(requestBody)
+            .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+                .andExpect(jsonPath("data.localCourtAdmin[0].value.email").value("123@gamil.com")).andReturn();
+    }
+
+    @Test
+    public void givenC100CasePrePopulateCourtDetailsWithoutValidCourt() throws Exception {
+        when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(null);
+        String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
+        mockMvc.perform(post("/pre-populate-court-details").contentType(MediaType.APPLICATION_JSON).content(requestBody)
+                .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+            .andExpect(jsonPath("data.localCourtAdmin").doesNotHaveJsonPath()).andReturn();
+    }
+
 
 }
