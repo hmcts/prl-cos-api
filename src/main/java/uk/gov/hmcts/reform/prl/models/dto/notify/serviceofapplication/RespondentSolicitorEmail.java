@@ -25,8 +25,6 @@ public class RespondentSolicitorEmail extends EmailTemplateVars {
     private final String respondentName;
     @JsonProperty("caseLink")
     private final String caseLink;
-    @JsonProperty("respondentName")
-    private final String respondentName;
     @JsonProperty("privacyNoticeLink")
     private final Map<String,Object> privacyNoticeLink;
 
@@ -38,7 +36,7 @@ public class RespondentSolicitorEmail extends EmailTemplateVars {
                                     String respondentName,
                                     String caseLink,
                                     Map<String, Object> privacyNoticeLink) {
-                                                        
+
         super(caseReference);
         this.caseName = caseName;
         this.issueDate = issueDate;
@@ -46,6 +44,5 @@ public class RespondentSolicitorEmail extends EmailTemplateVars {
         this.respondentName = respondentName;
         this.caseLink = caseLink;
         this.privacyNoticeLink = privacyNoticeLink;
-        this.respondentName =  respondentName;
     }
 }
