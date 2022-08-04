@@ -15,12 +15,16 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -82,6 +86,9 @@ public class ResubmitApplicationControllerTest {
 
     @Mock
     private Court court;
+
+    @Mock
+    private ConfidentialityTabService confidentialityTabService;
 
     private CallbackRequest callbackRequest;
     private CaseDetails caseDetails;
@@ -311,6 +318,27 @@ public class ResubmitApplicationControllerTest {
 
     }
 
-
-
+    @Test
+    public void resubmitApplicationConfidentUpdateConfidentialityTabService() throws Exception {
+        List<CaseEventDetail> caseEvents = List.of(
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.CASE_ISSUE.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
+        );
+        when(organisationService.getApplicantOrganisationDetails(caseData)).thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(caseData)).thenReturn(caseDataIssued);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(confidentialityTabService.updateConfidentialityDetails(Mockito.any(CaseData.class))).thenReturn(Map.of(
+            "applicantsConfidentialDetails",
+            List.of(Element.builder().value(ApplicantConfidentialityDetails.builder().build())),
+            "childrenConfidentialDetails",
+            List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
+        ));
+        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        assertTrue(response.getData().containsKey("applicantsConfidentialDetails"));
+        assertTrue(response.getData().containsKey("childrenConfidentialDetails"));
+    }
 }

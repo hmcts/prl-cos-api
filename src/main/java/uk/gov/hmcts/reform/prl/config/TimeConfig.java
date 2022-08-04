@@ -16,4 +16,5 @@ public class TimeConfig {
     public Time currentTime() {
         return () -> ZonedDateTime.now(ZoneId.of("Europe/London")).toLocalDateTime();
     }
+
 }

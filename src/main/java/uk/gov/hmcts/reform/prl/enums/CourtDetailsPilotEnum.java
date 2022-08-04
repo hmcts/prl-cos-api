@@ -14,7 +14,8 @@ public enum CourtDetailsPilotEnum {
     porttalbotCountyCourt("family.porttalbot.countycourt@justice.gov.uk", "Port Talbot Justice Centre", "3357"),
     llanelliCountyCourt("family.llanelli.countycourt@justice.gov.uk", "Llanelli Law Courts", "253"),
     aberystwythCountyCourt("family.aberystwyth.countycourt@justice.gov.uk", "Aberystwyth Justice Centre", "102"),
-    haverfordwestCountyCourt("family.haverfordwest.countycourt@justice.gov.uk", "Haverfordwest County Court and Family Court", "217");
+    haverfordwestCountyCourt("family.haverfordwest.countycourt@justice.gov.uk", "Haverfordwest County Court and Family Court", "217"),
+    eastlondonfamilycourt("eastlondonfamilypr@justice.gov.uk","East London Family Court","121");
 
     private final String courtEmail;
     private final String courtName;

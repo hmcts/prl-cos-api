@@ -7,9 +7,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.OrderDetails;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -39,54 +38,6 @@ public class ServiceOfApplicationServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
-
-    @Test
-    public void testPopulateHeader() {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
-            .build();
-
-        Map<String, Object> responseMap = serviceOfApplicationService.populateHeader(caseData, new HashMap<>());
-
-        assertEquals("Case Name: Test Case 45678\n\n"
-                         + "Family Man ID: familyman12345\n\n", responseMap.get("serviceOfApplicationHeader"));
-
-    }
-
-    @Test
-    public void testPopulateHeaderWithoutFamilyManData() {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantCaseName("Test Case 45678")
-            .build();
-
-        Map<String, Object> responseMap = serviceOfApplicationService.populateHeader(caseData, new HashMap<>());
-
-        assertEquals("Case Name: Test Case 45678\n\n"
-                         + "Family Man ID: \n\n", responseMap.get("serviceOfApplicationHeader"));
-
-    }
-
-    @Test
-    public void testPopulateHeaderWithC100CaseType() {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicantCaseName("Test Case 45678")
-            .familymanCaseNumber("familyman12345")
-            .build();
-
-        Map<String, Object> responseMap = serviceOfApplicationService.populateHeader(caseData, new HashMap<>());
-
-        assertEquals("Case Name: Test Case 45678\n\n"
-                         + "Family Man ID: familyman12345\n\n", responseMap.get("serviceOfApplicationHeader"));
-
-    }
 
     @Test
     public void testListOfOrdersCreated() {
