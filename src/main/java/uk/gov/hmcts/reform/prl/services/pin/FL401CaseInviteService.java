@@ -25,7 +25,7 @@ public class FL401CaseInviteService implements CaseInviteService {
     private LaunchDarklyClient launchDarklyClient;
 
 
-    private CaseInvite generateRespondentCaseInvite(PartyDetails partyDetails) {
+    private CaseInvite generateCaseInvite(PartyDetails partyDetails) {
         //no party id required as fl401 cases have only a single respondent
         return new CaseInvite().generateAccessCode(partyDetails.getEmail(), null);
     }
@@ -40,14 +40,14 @@ public class FL401CaseInviteService implements CaseInviteService {
         List<Element<CaseInvite>> caseInvites = caseData.getRespondentCaseInvites() != null ? caseData.getRespondentCaseInvites() : new ArrayList<>();
 
         if (!respondentHasLegalRepresentation(respondent) && Yes.equals(respondent.getCanYouProvideEmailAddress())) {
-            CaseInvite caseInvite = generateRespondentCaseInvite(respondent);
+            CaseInvite caseInvite = generateCaseInvite(respondent);
             caseInvites.add(element(caseInvite));
             sendCaseInvite(caseInvite, respondent, caseData);
         }
 
         if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
             PartyDetails applicant = caseData.getApplicantsFL401();
-            CaseInvite caseInvite = generateRespondentCaseInvite(applicant);
+            CaseInvite caseInvite = generateCaseInvite(applicant);
             caseInvites.add(element(caseInvite));
             sendCaseInvite(caseInvite, applicant, caseData);
         }
