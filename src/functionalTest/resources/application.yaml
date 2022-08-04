@@ -277,17 +277,15 @@ document:
       prl_c43_draft_filename: ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
-      prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
-      prl_c45a_template: PRL-ORDER-C45A-FINAL.docx
-      prl_c45a_filename: Parental_Responsibility_Order_C45A.pdf
-      prl_c45a_draft_template: PRL-ORDER-C45A-DRAFT-FINAL.docx
-      prl_c45a_draft_filename: Parental_Responsibility_Order_C45A_draft.pdf
+      prl_c47a_draft_filename: AppointmentOfaGuardian(C47A)Draft.pdf
+      prl_fl402_draft_template: PRL-FL402-Notice-Of-Proceedings-Draft.docx
+      prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
+      prl_fl402_final_template: PRL-FL402-Notice-Of-Proceedings-Final.docx
+      prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
       prl_fl404b_final_template: PRL-ORDER-FL404b-FINAL-COMMON.docx
-      prl_fl404b_final_filename: amended_discharged_or_varied_order_fl404b_final.pdf
-      prl_fl404b_blank_final_filename: blank_order_fl404b_final.pdf
+      prl_fl404b_final_filename: amended_dischared_or_varied_order_fl404b_final.pdf
       prl_fl404b_draft_template: PRL-ORDER-FL404b-DRAFT-COMMON.docx
-      prl_fl404b_draft_filename: amended_discharged_or_varied_order_fl404b_draft.pdf
-      prl_fl404b_blank_draft_filename: blank_order_fl404b_draft.pdf
+      prl_fl404b_draft_filename: amended_dischared_or_varied_order_fl404b_draft.pdf
       prl_n117_draft_template: PRL-ORDERS-N117-DRAFT.docx
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-ORDERS-N117-FINAL.docx
@@ -304,10 +302,6 @@ document:
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
       prl_fl404a_draft_template: PRL-ORDERS-FL404A-NM-DRAFT.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
-      prl_fl402_draft_template: PRL-FL402-Notice-Of-Proceedings-Draft.docx
-      prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
-      prl_fl402_final_template: PRL-FL402-Notice-Of-Proceedings-Final.docx
-      prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
 
 southampton:
   court:
