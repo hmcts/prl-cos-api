@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -52,33 +53,39 @@ public class ServiceOfApplicationEmailService {
 
             emailService.send(
                 appSols.getKey(),
-                EmailTemplateNames.APPLICANT_SOLICITOR,
+                EmailTemplateNames.APPLICANT_SOLICITOR_CA,
                 buildApplicantSolicitorEmail(caseDetails, appSols.getValue()),
                 LanguagePreference.english
             );
         }
-        Map<String, String> respondentSolicitors = caseData
+        List<Map<String,List<String>>> respondentSolicitors = caseData
             .getRespondents()
             .stream()
             .map(Element::getValue)
             .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
-            .collect(Collectors.toMap(
-                PartyDetails::getSolicitorEmail,
-                i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName()
-            ));
+            .map(i -> {
+                Map<String, List<String>> temp = new HashMap<>();
+                temp.put(i.getSolicitorEmail(),List.of(i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
+                                                              i.getFirstName() + " " + i.getLastName()));
+                return temp;
+            })
+            .collect(Collectors.toList());
 
-        for (Map.Entry<String, String> resSols : respondentSolicitors.entrySet()) {
+        for (Map<String,List<String>> resSols : respondentSolicitors) {
+            String solicitorEmail = resSols.keySet().toArray()[0].toString();
             emailService.send(
-                resSols.getKey(),
+                solicitorEmail,
                 EmailTemplateNames.RESPONDENT_SOLICITOR,
-                buildRespondentSolicitorEmail(caseDetails, resSols.getValue()),
+                buildRespondentSolicitorEmail(caseDetails, resSols.get(solicitorEmail).get(0),
+                                              resSols.get(solicitorEmail).get(1)),
                 LanguagePreference.english
             );
+
         }
     }
 
     public void sendEmailFL401(CaseDetails caseDetails) throws Exception {
-        log.info("Sending the server Parties emails for C100 Application for caseId {}", caseDetails.getId());
+        log.info("Sending the server Parties emails for FL401 Application for caseId {}", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         PartyDetails applicant = caseData.getApplicantsFL401();
@@ -87,28 +94,31 @@ public class ServiceOfApplicationEmailService {
         String solicitorName = applicant.getRepresentativeFirstName() + " " + applicant.getRepresentativeLastName();
         emailService.send(
             applicant.getSolicitorEmail(),
-            EmailTemplateNames.APPLICANT_SOLICITOR,
+            EmailTemplateNames.APPLICANT_SOLICITOR_DA,
             buildApplicantSolicitorEmail(caseDetails, solicitorName),
             LanguagePreference.english
         );
 
         if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())) {
-            String respondentSolicitorName = respondent.getRepresentativeFirstName() + " " + respondent.getRepresentativeLastName();
+            String respondentSolicitorName = respondent.getRepresentativeFirstName() + " "
+                + respondent.getRepresentativeLastName();
             emailService.send(
                 respondent.getSolicitorEmail(),
                 EmailTemplateNames.RESPONDENT_SOLICITOR,
-                buildRespondentSolicitorEmail(caseDetails, respondentSolicitorName),
+                buildRespondentSolicitorEmail(caseDetails, respondentSolicitorName, respondent.getFirstName() + " " + respondent.getLastName()),
                 LanguagePreference.english
             );
         }
     }
 
-    private EmailTemplateVars buildApplicantSolicitorEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
+    private EmailTemplateVars buildApplicantSolicitorEmail(CaseDetails caseDetails, String solicitorName)
+        throws Exception {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         Map<String, Object> privacy = new HashMap<>();
         privacy.put("file",
-                    NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf")).get("file"));
+                    NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf"))
+                        .get("file"));
         return ApplicantSolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
@@ -119,19 +129,23 @@ public class ServiceOfApplicationEmailService {
             .build();
     }
 
-    private EmailTemplateVars buildRespondentSolicitorEmail(CaseDetails caseDetails, String solicitorName) throws Exception {
+    private EmailTemplateVars buildRespondentSolicitorEmail(CaseDetails caseDetails, String solicitorName,
+                                                            String respondentName) throws Exception {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         Map<String, Object> privacy = new HashMap<>();
         privacy.put("file",
-                    NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf")).get("file"));
+                    NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf"))
+                        .get("file"));
         return RespondentSolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
             .solicitorName(solicitorName)
             .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .privacyNoticeLink(privacy)
+            .respondentName(respondentName)
             .issueDate(caseData.getIssueDate())
+            .respondentName(respondentName)
             .build();
     }
 }
