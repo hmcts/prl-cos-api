@@ -36,6 +36,7 @@ public class RespondentSolicitorEmail extends EmailTemplateVars {
                                     String respondentName,
                                     String caseLink,
                                     Map<String, Object> privacyNoticeLink) {
+
         super(caseReference);
         this.caseName = caseName;
         this.issueDate = issueDate;
