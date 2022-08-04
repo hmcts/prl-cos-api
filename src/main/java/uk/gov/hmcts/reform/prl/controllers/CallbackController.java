@@ -577,7 +577,7 @@ public class CallbackController {
             + "punishable by up to 5 years’ imprisonment. It is an arrestable offence and it is not necessary to obtain a warrant.\n"
             + "\n" + "A person who without reasonable excuse does anything that they are prohibited from doing by a "
             + "non-molestation order is guilty of an offence.\n"
-            + "Family Law Act 1996, section 42A(1).\n" + "\n" + "\n" + "\n" + "\n" + "\n" + "\n" + "\n" + "\n");
+            + "<h2>Family Law Act 1996, section 42A(1).</h2>\n" + "\n" + "\n" + "\n" + "\n" + "\n" + "\n" + "\n" + "\n");
         log.info("*** caseDataUpdated {} ***", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
