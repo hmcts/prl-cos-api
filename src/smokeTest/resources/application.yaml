@@ -273,16 +273,24 @@ document:
       prl_c47a_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Final.docx
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Draft.docx
-      prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
       prl_c45a_template: PRL-GOR-ENG-C45A-Parental-Responsibility-Order-Final.docx
       prl_c45a_filename: C45ACreateOrder.pdf
       prl_c45a_draft_template: PRL-GOR-ENG-C45A-Parental-Responsibility-Order-Draft.docx
       prl_c45a_draft_filename: C45ACreateOrderDraft.pdf
       prl_n117_draft_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Draft.docx
+      prl_c47a_draft_filename: AppointmentOfaGuardian(C47A)Draft.pdf
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
       prl_n117_filename: N117CreateOrder.pdf
       prl_fl402_draft_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
+      prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
+      prl_c7_blank_filename: C7BlankDocument.pdf
+      prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
+      prl_c8_blank_filename: C8BlankDocument.pdf
+      prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
+      prl_c1a_blank_filename: C1ABlankDocument.pdf
+      prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
+      prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
       prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
       prl_fl402_final_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
@@ -304,15 +312,6 @@ document:
       C43A_draft_filename: C43ADraftCreateOrder.pdf
       C43A_final_template: PRL-ORDER-C43A-FINAL.docx
       C43A_final_filename: C43AFinalCreateOrder.pdf
-      prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
-      prl_c7_blank_filename: C7BlankDocument.pdf
-      prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
-      prl_c8_blank_filename: C8BlankDocument.pdf
-      prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
-      prl_c1a_blank_filename: C1ABlankDocument.pdf
-      prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
-      prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
-
 
 southampton:
   court:
