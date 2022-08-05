@@ -64,6 +64,7 @@ public class FL401ApplicationMapper {
     public CaseData mapCourtNavData(CourtNavCaseData courtNavCaseData) {
 
         return CaseData.builder()
+            .applicantAge(courtNavCaseData.getApplicantHowOld())
             .applicantCaseName(courtNavCaseData.getCourtNavCaseName())
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
                                          .orderType(courtNavCaseData.getOrdersAppliedFor())

@@ -28,7 +28,7 @@ public enum SignatureEnum {
     }
 
     @JsonCreator
-    public static FamilyHomeEnum getValue(String key) {
-        return FamilyHomeEnum.valueOf(key);
+    public static SignatureEnum getValue(String key) {
+        return SignatureEnum.valueOf(key);
     }
 }

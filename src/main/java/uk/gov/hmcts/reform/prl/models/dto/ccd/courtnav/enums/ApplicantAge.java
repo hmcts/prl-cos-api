@@ -34,7 +34,7 @@ public enum ApplicantAge {
         return displayedValue;
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static ApplicantAge getValue(String key) {
         return ApplicantAge.valueOf(key);
     }

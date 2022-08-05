@@ -30,7 +30,7 @@ public enum ContractEnum {
     }
 
     @JsonCreator
-    public static MortgageNamedAfterEnum getValue(String key) {
-        return MortgageNamedAfterEnum.valueOf(key);
+    public static ContractEnum getValue(String key) {
+        return ContractEnum.valueOf(key);
     }
 }
