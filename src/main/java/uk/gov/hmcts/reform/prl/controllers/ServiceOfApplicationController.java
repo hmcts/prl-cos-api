@@ -53,7 +53,7 @@ public class ServiceOfApplicationController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseDataUpdated = serviceOfApplicationService.populateHeader(caseData,caseDataUpdated);
+
         if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
             List<String> createdOrders = caseData.getOrderCollection().stream()
                 .map(Element::getValue).map(OrderDetails::getOrderType)
@@ -70,10 +70,9 @@ public class ServiceOfApplicationController {
         @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(@RequestBody CallbackRequest callbackRequest) throws Exception {
-
         CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        updatedCaseData.put("respondentCaseInvites", caseData.getRespondentCaseInvites());
+        updatedCaseData.put("respondentCaseInvites",caseData.getRespondentCaseInvites());
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
