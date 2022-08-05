@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseCreationResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ResponseMessage;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CaseService;
 
@@ -36,6 +38,7 @@ public class CaseController {
 
     private final CaseService caseService;
     private final AuthorisationService authorisationService;
+    private final FL401ApplicationMapper fl401ApplicationMapper;
 
     @PostMapping(path = "/case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Third party to call this service to create a case in CCD")
@@ -48,14 +51,15 @@ public class CaseController {
     public ResponseEntity createCase(
         @RequestHeader(value = "Authorization", required = false) String authorisation,
         @RequestHeader(value = "serviceAuthorization") String serviceAuthorization,
-        @RequestBody CaseData inputData
+        @RequestBody CourtNavCaseData inputData
     ) {
         log.info("s2s token inside controller {}", serviceAuthorization);
         log.info("auth token inside controller {}", authorisation);
         if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
+            CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
             CaseDetails caseDetails = caseService.createCourtNavCase(
                 authorisation,
-                inputData
+                caseData
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(new CaseCreationResponse(
                 String.valueOf(caseDetails.getId())));

@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -66,6 +67,9 @@ public class PartyDetails {
     @JsonIgnore
     private final String caseTypeOfApplication;
     private final YesOrNo respondentLivedWithApplicant;
+
+    private final PreferredContactEnum applicantPreferredContact;
+    private final String applicantContactInstructions;
 
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)

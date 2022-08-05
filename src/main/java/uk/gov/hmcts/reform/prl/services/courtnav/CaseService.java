@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.FL401Case;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.FL401CaseData;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -59,7 +59,7 @@ public class CaseService {
             .event(Event.builder()
                        .id(startEventResponse.getEventId())
                        .build())
-            .data(FL401Case.builder().applicantCaseName(testInput.getApplicantCaseName()).build()).build();
+            .data(FL401CaseData.builder().applicantCaseName(testInput.getApplicantCaseName()).build()).build();
 
         return coreCaseDataApi.submitForCaseworker(
             authToken,
