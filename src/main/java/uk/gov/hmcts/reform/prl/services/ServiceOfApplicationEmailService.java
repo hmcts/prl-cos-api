@@ -105,7 +105,9 @@ public class ServiceOfApplicationEmailService {
             emailService.send(
                 respondent.getSolicitorEmail(),
                 EmailTemplateNames.RESPONDENT_SOLICITOR,
-                buildRespondentSolicitorEmail(caseDetails, respondentSolicitorName, respondent.getFirstName() + " " + respondent.getLastName()),
+                buildRespondentSolicitorEmail(caseDetails, respondentSolicitorName,
+                                              respondent.getFirstName() + " "
+                                                  + respondent.getLastName()),
                 LanguagePreference.english
             );
         }

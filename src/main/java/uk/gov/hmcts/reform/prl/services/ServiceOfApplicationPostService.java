@@ -81,11 +81,12 @@ public class ServiceOfApplicationPostService {
     }
 
     private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
-        return CaseData
+        CaseData respondentCaseData = CaseData
             .builder()
             .id(caseData.getId())
             .respondents(List.of(element(partyDetails)))
             .build();
+        return respondentCaseData;
     }
 
     private List<GeneratedDocumentInfo> getUploadedDocumentsServiceOfApplication(CaseData caseData) {
@@ -122,7 +123,6 @@ public class ServiceOfApplicationPostService {
     private boolean hasAllegationsOfHarm(CaseData caseData) {
         return YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo());
     }
-
 
     private List<GeneratedDocumentInfo> getSelectedOrders(CaseData caseData) {
         List<String> orderNames = caseData.getServiceOfApplicationScreen1().getSelectedOrders().stream()

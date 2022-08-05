@@ -38,6 +38,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -123,7 +124,8 @@ public class ResubmitApplicationController {
                 ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
                 caseData = caseData.setDateSubmittedDate();
                 caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
-                caseDataUpdated.put(DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(zonedDateTime));
+                caseDataUpdated.put(DATE_AND_TIME_SUBMITTED_FIELD,
+                                    DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa", Locale.UK).format(zonedDateTime).toUpperCase());
                 caseWorkerEmailService.sendEmail(caseDetails);
                 solicitorEmailService.sendEmail(caseDetails);
             }
