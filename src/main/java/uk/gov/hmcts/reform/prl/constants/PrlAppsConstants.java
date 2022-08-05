@@ -103,6 +103,12 @@ public class PrlAppsConstants {
 
     public static final String APPLICANT_SOLICITOR = " (Applicant's Solicitor)";
     public static final String RESPONDENT_SOLICITOR = " (Respondent's Solicitor)";
+    public static final String COURT_NAME = "courtName";
 
-    public static final List<String> ROLES = List.of("caseworker-privatelaw-courtadmin","caseworker-privatelaw-judge","caseworker-privatelaw-la");
+    public static final List<String> ROLES = List.of("caseworker-privatelaw-courtadmin",
+                                                     "caseworker-privatelaw-judge",
+                                                     "caseworker-privatelaw-la");
+    public static final String PREVIOUS_OR_ONGOING_PROCEEDINGS = "previousOrOngoingProceedings";
+
+    public static final String FORMAT = "%s %s";
 }

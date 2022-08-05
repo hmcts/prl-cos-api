@@ -58,6 +58,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -213,10 +214,10 @@ public class CallbackController {
                 .map(Element::getValue)
                 .collect(Collectors.toList()))).build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         caseDataUpdated.put(
             DATE_AND_TIME_SUBMITTED_FIELD,
-            DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("Europe/London")))
-        );
+            DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa", Locale.UK).format(zonedDateTime).toUpperCase());
 
         Map<String,Object> map = documentGenService.generateDocuments(authorisation, caseData);
 
@@ -258,9 +259,6 @@ public class CallbackController {
                                          PENDING_STATE,
                                          SUBMITTED_STATE, RETURN_STATE
         );
-
-        boolean previousStateInList = previousState.filter(stateList::contains).isPresent();
-
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -381,6 +379,10 @@ public class CallbackController {
         if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
             caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
         }
+        if (caseDataUpdated.get("caseTypeOfApplication") != null) {
+            caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
+        }
+
 
         // Saving the logged-in Solicitor and Org details for the docs..
         caseDataUpdated = getSolicitorDetails(authorisation, caseDataUpdated);
