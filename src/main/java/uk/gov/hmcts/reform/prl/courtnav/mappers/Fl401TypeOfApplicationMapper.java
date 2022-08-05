@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
 @Component
-public class TypeOfApplicationMapper {
+public class Fl401TypeOfApplicationMapper {
 
     public JsonObject map(CourtNavCaseData courtNavCaseData) {
 
