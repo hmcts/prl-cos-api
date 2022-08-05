@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
@@ -61,6 +60,7 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -169,6 +169,9 @@ public class CallbackControllerTest {
 
     @Mock
     private DocumentGenService documentGenService;
+
+    @Mock
+    private ServiceOfApplicationService serviceOfApplicationService;
 
     @Mock
     private  ConfidentialityTabService confidentialityTabService;
@@ -641,7 +644,6 @@ public class CallbackControllerTest {
             .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(),"test@gmail.com");
     }
 
-    @Ignore
     @Test
     public void testSendCaseWithdrawNotificationNotInCaseIssuedState() throws Exception {
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
@@ -1485,7 +1487,6 @@ public class CallbackControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
     }
 
-
     @Test
     public void testPrePopulateCourtDetails() throws NotFoundException {
 
@@ -1516,6 +1517,5 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController.prePopulateCourtDetails(callbackRequest);
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
-
     }
 }

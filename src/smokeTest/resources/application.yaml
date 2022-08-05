@@ -156,9 +156,8 @@ idam:
     username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
     password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
-
+    username: ${IDAM_SOLICITOR_USERNAME:dummysolicitor@test.com}
+    password: ${IDAM_SOLICITOR_PASSWORD:dummy}
 
 security:
   oauth2:
@@ -242,51 +241,48 @@ document:
       fl401_draft_welsh_filename: Draft_DA_Welsh_application
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
-      fl401_fl406_draft_template: PRL-FL406-ORDERS-DRAFT.docx
+      fl401_fl406_draft_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Draft.docx
       fl401_fl406_draft_filename: Power_of_arrest.pdf
-      fl401_fl406_english_template: PRL-FL406-ORDERS-FINAL-ENGLISH.docx
+      fl401_fl406_english_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_engllish_filename: Power_of_arrest.pdf
-      fl401_fl406_welsh_template: PRL-FL406-ORDERS-FINAL-WELSH.docx
+      fl401_fl406_welsh_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_welsh_filename: Power_of_arrest.pdf
     common:
-      doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
-      doc_cover_sheet_welsh_template: not_implemented
-      doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
-      doc_cover_sheet_welsh_filename: not_implemented
-      prl_c21_template: PRL-ORDER-C21-FINAL.docx
+      prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf
-      prl_c21_welsh_template: PRL-ORDER-C21-WELSH-COMMON.docx
+      prl_c21_welsh_template: PRL-GOR-WEL-C21-Blank-Order-Final.docx
       prl_c21_welsh_filename: Blank_Order_Directions_C21_Welsh.pdf
-      prl_c21_draft_template: PRL-ORDER-C21-DRAFT-FINAL.docx
+      prl_c21_draft_template: PRL-GOR-ENG-C21-Blank-Order-Draft.docx
       prl_c21_draft_filename: Blank_Order_Directions_C21_Draft.pdf
-      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
-      C43A_draft_filename: Special_Guardianship_Order_C43A_Draft.pdf
-      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
-      C43A_final_filename: Special_Guardianship_Order_C43A.pdf
-      prl_c49_draft_template: PRL-ORDER-C49-DRAFT-COMMON.docx
+      prl_c43a_draft_template: PRL-GOR-ENG-C43A-Special-Guardianship-Order-Draft.docx
+      prl_c43a_draft_filename: Special_Guardianship_Order_C43A_Draft.pdf
+      prl_c43a_final_template: PRL-GOR-ENG-C43A-Special-Guardianship-Order-Final.docx
+      prl_c43a_final_filename: Special_Guardianship_Order_C43A.pdf
+      prl_c49_draft_template: PRL-GOR-ENG-C49-Transfer-Of-Case-Draft.docx
       prl_c49_draft_filename: C49ADraftCreateOrder.pdf
-      prl_c49_template: PRL-ORDER-C49-COMMON.docx
+      prl_c49_template: PRL-GOR-ENG-C49-Transfer-Of-Case-Final.docx
       prl_c49_filename: C49FinalCreateOrder.pdf
-      prl_c43_template: PRL-ORDER-C43-FINAL.docx
+      prl_c43_template: PRL-GOR-ENG-C43-Child-Arrangements-Final.docx
       prl_c43_filename: ChildArrangements_Specific_Prohibited_Steps_C43.pdf
-      prl_c43_draft_template: PRL-ORDER-C43-DRAFT.docx
+      prl_c43_draft_template: PRL-GOR-ENG-C43-Child-Arrangements-Draft.docx
       prl_c43_draft_filename: ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
-      prl_fl404_template: PRL-ORDERS-FL404-FINAL.docx
+      prl_fl404_template: PRL-GOR-ENG-FL404-Occupation-Order-Final.docx
       prl_fl404_filename: occupation_order_FL404_final.pdf
-      prl_fl404_draft_template: PRL-ORDERS-FL404-DRAFT.docx
+      prl_fl404_draft_template: PRL-GOR-ENG-FL404-Occupation-Order-Draft.docx
       prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
-      prl_c47a_template: PRL-ORDERS-C47A-FINAL.docx
+      prl_c47a_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Final.docx
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
-      prl_c47a_draft_template: PRL-ORDERS-C47A-DRAFT.docx
-      prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
-      prl_c45a_template: PRL-ORDERS-C45A-FINAL.docx
+      prl_c47a_draft_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Draft.docx
+      prl_c45a_template: PRL-GOR-ENG-C45A-Parental-Responsibility-Order-Final.docx
       prl_c45a_filename: C45ACreateOrder.pdf
-      prl_c45a_draft_template: PRL-ORDERS-C45A-DRAFT.docx
+      prl_c45a_draft_template: PRL-GOR-ENG-C45A-Parental-Responsibility-Order-Draft.docx
       prl_c45a_draft_filename: C45ACreateOrderDraft.pdf
-      prl_n117_draft_template: PRL-ORDERS-N117-DRAFT.docx
+      prl_n117_draft_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Draft.docx
+      prl_c47a_draft_filename: AppointmentOfaGuardian(C47A)Draft.pdf
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
-      prl_n117_template: PRL-ORDERS-N117-FINAL.docx
+      prl_n117_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
       prl_n117_filename: N117CreateOrder.pdf
+      prl_fl402_draft_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
       prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
       prl_c7_blank_filename: C7BlankDocument.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
@@ -295,20 +291,27 @@ document:
       prl_c1a_blank_filename: C1ABlankDocument.pdf
       prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
-      prl_fl402_draft_template: PRL-FL402-Notice-Of-Proceedings-Draft.docx
       prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
-      prl_fl402_final_template: PRL-FL402-Notice-Of-Proceedings-Final.docx
+      prl_fl402_final_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
-      prl_fl404b_final_template: PRL-ORDER-FL404b-FINAL-COMMON.docx
+      prl_fl404b_final_template: PRL-GOR-ENG-FL404B-Common-Final.docx
       prl_fl404b_final_filename: amended_discharged_or_varied_order_fl404b_final.pdf
       prl_fl404b_blank_final_filename: blank_order_fl404b_final.pdf
-      prl_fl404b_draft_template: PRL-ORDER-FL404b-DRAFT-COMMON.docx
+      prl_fl404b_draft_template: PRL-GOR-ENG-FL404B-Common-Draft.docx
       prl_fl404b_draft_filename: amended_discharged_or_varied_order_fl404b_draft.pdf
       prl_fl404b_blank_draft_filename: blank_order_fl404b_draft.pdf
-      prl_fl404a_final_template: PRL-ORDERS-FL404A-NM-FINAL.docx
+      prl_fl404a_final_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Final.docx
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
-      prl_fl404a_draft_template: PRL-ORDERS-FL404A-NM-DRAFT.docx
+      prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
+      doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
+      doc_cover_sheet_welsh_template: not_implemented
+      doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
+      doc_cover_sheet_welsh_filename: not_implemented
+      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
+      C43A_draft_filename: C43ADraftCreateOrder.pdf
+      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
+      C43A_final_filename: C43AFinalCreateOrder.pdf
 
 southampton:
   court:

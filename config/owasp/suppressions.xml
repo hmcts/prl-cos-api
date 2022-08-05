@@ -25,5 +25,36 @@
     <cve>CVE-2022-22950</cve>
     <cve>CVE-2022-34305</cve>
     <cve>CVE-2022-33915</cve>
+    <cve>CVE-2022-31569</cve>
+      Spring web influx
+  ]]></notes>
+    <cve>CVE-2022-22965</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      Spring web influx
+  ]]></notes>
+    <cve>CVE-2022-22965</cve>
+    <cve>CVE-2016-1000027</cve>
+    <cve>CVE-2022-22968</cve>
+    <cve>CVE-2022-22971</cve>
+    <cve>CVE-2022-22970</cve>
+    <cve>CVE-2022-29885</cve>
+  </suppress>
+  <suppress>
+    <cve>CVE-2022-22968</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+        Tomcat 9.0.58
+        ]]></notes>
+    <cve>CVE-2022-29885</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+        Serve dependencies
+        ]]></notes>
+    <cve>CVE-2022-33915</cve>
+    <cve>CVE-2022-34305</cve>
   </suppress>
 </suppressions>
