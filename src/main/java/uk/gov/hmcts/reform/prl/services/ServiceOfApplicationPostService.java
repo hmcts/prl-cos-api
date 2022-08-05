@@ -65,6 +65,31 @@ public class ServiceOfApplicationPostService {
         return sentDocs;
     }
 
+    public List<GeneratedDocumentInfo> sendApplicantAndRedpondentSolicitor(CaseData caseData, String authorisation) {
+        // Sends post to the respondents who are not represented by a solicitor
+        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
+        caseData.getRespondents().stream()
+            .map(Element::getValue)
+            .filter(partyDetails -> !YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
+            .filter(partyDetails -> YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()))
+            .forEach(partyDetails -> {
+                try {
+                    List<GeneratedDocumentInfo> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
+                    log.info("*** Initiating request to Bulk print service ***");
+                    bulkPrintService.send(
+                        String.valueOf(caseData.getId()),
+                        authorisation,
+                        LETTER_TYPE,
+                        docs
+                    );
+                    sentDocs.addAll(docs);
+                } catch (Exception e) {
+                    log.info("The bulk print service has failed: " + e);
+                }
+            });
+        return sentDocs;
+    }
+
     private List<GeneratedDocumentInfo> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
         List<GeneratedDocumentInfo> docs = new ArrayList<>();
         docs.add(generateDocument(auth, getRespondentCaseData(partyDetails,caseData),DOCUMENT_COVER_SHEET_HINT));
