@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CaseService;
@@ -34,6 +36,9 @@ public class CaseControllerTest {
     @Mock
     private CaseService caseService;
 
+    @Mock
+    private FL401ApplicationMapper fl401ApplicationMapper;
+
     MockMultipartFile file;
 
     @Before
@@ -49,12 +54,16 @@ public class CaseControllerTest {
 
     @Test
     public void shouldCreateCaseWhenCalled() {
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .build();
         when(authorisationService.authorise(any())).thenReturn(true);
         when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
-        CourtNavCaseData caseData = CourtNavCaseData.builder().courtNavCaseName("test").build();
+        CourtNavCaseData courtNavCaseData = CourtNavCaseData.builder().courtNavCaseName("test").build();
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
 
-        ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", caseData);
+        ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
         assertEquals(201, response.getStatusCodeValue());
 
     }
