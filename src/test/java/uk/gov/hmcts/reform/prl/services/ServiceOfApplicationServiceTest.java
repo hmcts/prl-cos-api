@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -19,6 +20,8 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUE;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationServiceTest {
@@ -82,4 +85,25 @@ public class ServiceOfApplicationServiceTest {
 
     }
 
+    @Test
+    public void testSendViaPost() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTyoeOfApplication","C100");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails
+            .builder()
+            .id(123L)
+            .state(CASE_ISSUE.getValue())
+            .data(casedata)
+            .build();
+        CaseData caseData1 = serviceOfApplicationService.sendPost(caseDetails,"test auth");
+
+    }
 }
