@@ -51,10 +51,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static java.util.Optional.ofNullable;
 
 
 @Component
@@ -200,7 +197,6 @@ public class FL401ApplicationMapper {
     }
 
     private List<Element<ChildrenLiveAtAddress>> mapHomeChildren(List<Element<ChildAtAddress>> childrenApplicantResponsibility) {
-        Optional<List<Element<ChildAtAddress>>> childElementsCheck = ofNullable(childrenApplicantResponsibility);
 
         List<ChildrenLiveAtAddress> childList = new ArrayList<>();
         for (Element<ChildAtAddress> child : childrenApplicantResponsibility) {
@@ -217,7 +213,6 @@ public class FL401ApplicationMapper {
     }
 
     private List<Element<ApplicantChild>> mapProtectedChild(List<Element<ProtectedChild>> protectedChildren) {
-        Optional<List<Element<ProtectedChild>>> childElementsCheck = ofNullable(protectedChildren);
 
         List<ApplicantChild> childList = new ArrayList<>();
         for (Element<ProtectedChild> protectedChild : protectedChildren) {
