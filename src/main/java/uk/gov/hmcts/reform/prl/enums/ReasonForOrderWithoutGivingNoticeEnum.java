@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
+
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ReasonForOrderWithoutGivingNoticeEnum {
@@ -27,6 +29,12 @@ public enum ReasonForOrderWithoutGivingNoticeEnum {
     @JsonCreator
     public static ReasonForOrderWithoutGivingNoticeEnum getValue(String key) {
         return ReasonForOrderWithoutGivingNoticeEnum.valueOf(key);
+    }
+
+    public static ReasonForOrderWithoutGivingNoticeEnum getDisplayedValueFromEnumString(String enteredValue) {
+        return Arrays.stream(ReasonForOrderWithoutGivingNoticeEnum.values())
+            .map(i -> ReasonForOrderWithoutGivingNoticeEnum.valueOf(enteredValue))
+            .findFirst().orElse(null);
     }
 
 }

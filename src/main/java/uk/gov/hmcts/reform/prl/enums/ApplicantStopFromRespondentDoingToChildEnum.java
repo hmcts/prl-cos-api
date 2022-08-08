@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
+
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ApplicantStopFromRespondentDoingToChildEnum {
@@ -38,5 +40,10 @@ public enum ApplicantStopFromRespondentDoingToChildEnum {
         return ApplicantStopFromRespondentDoingToChildEnum.valueOf(key);
     }
 
+    public static ApplicantStopFromRespondentDoingToChildEnum getDisplayedValueFromEnumString(String enteredValue) {
+        return Arrays.stream(ApplicantStopFromRespondentDoingToChildEnum.values())
+            .map(i -> ApplicantStopFromRespondentDoingToChildEnum.valueOf(enteredValue))
+            .findFirst().orElse(null);
+    }
 
 }
