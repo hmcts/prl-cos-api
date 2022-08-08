@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.AmendDischargedVariedEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.AppointmentOfGuardianEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.BlankOrderEnum;
@@ -26,6 +27,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Data
 @Builder
 public class OrdersToServeSA {
@@ -55,7 +57,7 @@ public class OrdersToServeSA {
                 try {
                     return field.get(this);
                 } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                    log.info("*** Error while returning selected orders ***");
                 }
                 return null;
             }).filter(Objects::nonNull)
