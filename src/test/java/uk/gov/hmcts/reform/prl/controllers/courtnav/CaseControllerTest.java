@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CaseService;
 
@@ -52,7 +52,7 @@ public class CaseControllerTest {
         when(authorisationService.authorise(any())).thenReturn(true);
         when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
-        CaseData caseData = CaseData.builder().id(1234567891234567L).build();
+        CourtNavCaseData caseData = CourtNavCaseData.builder().courtNavCaseName("test").build();
 
         ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", caseData);
         assertEquals(201, response.getStatusCodeValue());
@@ -61,7 +61,7 @@ public class CaseControllerTest {
 
     @Test(expected = ResponseStatusException.class)
     public void shouldNotCreateCaseWhenCalledWithInvalidS2SToken() {
-        CaseData caseData = CaseData.builder().id(1234567891234567L).build();
+        CourtNavCaseData caseData = CourtNavCaseData.builder().courtNavCaseName("test").build();
         ResponseEntity response = caseController
             .createCase("Bearer:test", "s2s token", caseData);
     }
