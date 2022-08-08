@@ -65,53 +65,25 @@ public class ServiceOfApplicationPostService {
         return sentDocs;
     }
 
-    public List<GeneratedDocumentInfo> sendApplicantAndRedpondentSolicitor(CaseData caseData, String authorisation) {
-        // Sends post to the respondents and applicants who are not represented by a solicitor
+    public List<GeneratedDocumentInfo> sendDocs(CaseData caseData, String authorisation) {
+        // Sends post to the respondents who are not represented by a solicitor
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
-        caseData.getRespondents().stream()
-            .map(Element::getValue)
-            .filter(partyDetails -> !YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
-            .filter(partyDetails -> YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()))
-            .forEach(partyDetails -> {
-                try {
-                    List<GeneratedDocumentInfo> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
-                    log.info("*** Initiating request to Bulk print service ***");
-                    bulkPrintService.send(
-                        String.valueOf(caseData.getId()),
-                        authorisation,
-                        LETTER_TYPE,
-                        docs
-                    );
-                    sentDocs.addAll(docs);
-                } catch (Exception e) {
-                    log.info("The bulk print service has failed: " + e);
-                }
-            });
-        return sentDocs;
-    }
-
-    public List<GeneratedDocumentInfo> sendApplicantSolicitorAndRedpondentSolicitor(CaseData caseData, String authorisation) {
-        // Sends post to the respondents and applicants who are not represented by a solicitor
-        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
-        caseData.getRespondents().stream()
-            .map(Element::getValue)
-            .filter(partyDetails -> !YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
-            .filter(partyDetails -> YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()))
-            .forEach(partyDetails -> {
-                try {
-                    List<GeneratedDocumentInfo> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
-                    log.info("*** Initiating request to Bulk print service ***");
-                    bulkPrintService.send(
-                        String.valueOf(caseData.getId()),
-                        authorisation,
-                        LETTER_TYPE,
-                        docs
-                    );
-                    sentDocs.addAll(docs);
-                } catch (Exception e) {
-                    log.info("The bulk print service has failed: " + e);
-                }
-            });
+        CaseData blankCaseData = CaseData.builder().build();
+        caseData.getOthersToNotify().stream()
+                .map(Element::getValue)
+                    .filter(partyDetails -> YesOrNo.Yes.getDisplayedValue()
+                        .equalsIgnoreCase(partyDetails.getIsCurrentAddressKnown().getDisplayedValue()))
+                        .forEach(partyDetails -> {
+                            List<GeneratedDocumentInfo> docs = null;
+                            docs = getUploadedDocumentsServiceOfApplication(caseData);
+                            try {
+                                docs.add(generateDocument(authorisation, blankCaseData,DOCUMENT_PRIVACY_NOTICE_HINT));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            sentDocs.addAll(sendBulkPrint(String.valueOf(caseData.getId()),authorisation,docs));
+                        }
+        );
         return sentDocs;
     }
 
@@ -190,5 +162,22 @@ public class ServiceOfApplicationPostService {
     private GeneratedDocumentInfo generateDocument(String authorisation, CaseData caseData, String documentName) throws Exception {
         return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation, caseData,
                                                                       documentName, welshCase(caseData)));
+    }
+
+    private List<GeneratedDocumentInfo> sendBulkPrint(String id,String authorisation, List<GeneratedDocumentInfo> docs) {
+        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
+        try {
+            log.info("*** Initiating request to Bulk print service ***");
+            bulkPrintService.send(
+                id,
+                authorisation,
+                LETTER_TYPE,
+                docs
+            );
+            sentDocs.addAll(docs);
+        } catch (Exception e) {
+            log.info("The bulk print service has failed: " + e);
+        }
+        return sentDocs;
     }
 }
