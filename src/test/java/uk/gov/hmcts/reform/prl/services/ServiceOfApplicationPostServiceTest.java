@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -96,7 +97,7 @@ public class ServiceOfApplicationPostServiceTest {
 
         when(documentGenService.generateSingleDocument(any(String.class), any(CaseData.class), any(String.class), any(boolean.class)))
             .thenReturn(coverSheet);
-
+        when(bulkPrintService.send(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(null);
         List<GeneratedDocumentInfo> sentDocs = postService.send(caseData, AUTH);
         assertTrue(sentDocs.containsAll(List.of(toGeneratedDocumentInfo(finalDoc), toGeneratedDocumentInfo(coverSheet))));
     }

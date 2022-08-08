@@ -79,7 +79,7 @@ public class ServiceOfApplicationPostService {
                             try {
                                 docs.add(generateDocument(authorisation, blankCaseData,DOCUMENT_PRIVACY_NOTICE_HINT));
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                log.info("*** Error while generating privacy notice to be served ***");
                             }
                             sentDocs.addAll(sendBulkPrint(String.valueOf(caseData.getId()),authorisation,docs));
                         }
