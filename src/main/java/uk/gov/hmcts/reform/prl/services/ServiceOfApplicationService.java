@@ -70,7 +70,7 @@ public class ServiceOfApplicationService {
         } else {
             serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
         }
-        return caseInviteManager.generatePinAndSendNotificationEmail(caseData);
+        return caseData;
     }
 
     public CaseData sendPost(CaseDetails caseDetails, String authorization) throws Exception {
