@@ -50,13 +50,13 @@ public class CaseController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity createCase(
-        @RequestHeader(value = "Authorization", required = false) String authorisation,
+        @RequestHeader(value = "Authorization") String authorisation,
         @RequestHeader(value = "serviceAuthorization") String serviceAuthorization,
         @RequestBody CourtNavCaseData inputData
     ) throws NotFoundException {
 
-        log.info("s2s token inside uploadDocument controller {}", serviceAuthorization);
-        log.info("auth token inside uploadDocument controller {}", authorisation);
+        log.info("s2s token inside case creation controller {}", serviceAuthorization);
+        log.info("auth token inside case creation controller {}", authorisation);
 
         if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
 
