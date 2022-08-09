@@ -28,7 +28,7 @@ java:
     IDAM_CLIENT_REDIRECT_URI: https://prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/oauth2/callback
     IDAM_API_URL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     IDAM_S2S_AUTH_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    CORE_CASE_DATA_API_URL: http://ccd-data-store-api-prl-ccd-definitions-pr-503.service.core-compute-preview.internal
+    CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-503-ccd-data-store-api
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     DOCMOSIS_SERVICE_BASE_URL: https://docmosis.aat.platform.hmcts.net
@@ -43,4 +43,4 @@ java:
     PRL_S2S_AUTHORISED_SERVICES: api_gw
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    ACA_SERVICE_API_BASEURL: http://aac-prl-ccd-definitions-pr-503.service.core-compute-preview.internal
+    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-503-aac-manage-case-assignment
