@@ -43,4 +43,4 @@ java:
     PRL_S2S_AUTHORISED_SERVICES: payment_app
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    ACA_SERVICE_API_BASEURL: http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-523-aac-manage-case-assignment.service.core-compute-preview.internal
