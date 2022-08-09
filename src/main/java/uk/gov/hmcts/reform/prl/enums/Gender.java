@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
-
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum Gender {
@@ -33,9 +31,9 @@ public enum Gender {
     }
 
     public static Gender getDisplayedValueFromEnumString(String enteredValue) {
-        if(enteredValue.equalsIgnoreCase("Female")){
+        if (enteredValue.equalsIgnoreCase("Female")) {
             return Gender.female;
-        } else if (enteredValue.equalsIgnoreCase("Male")){
+        } else if (enteredValue.equalsIgnoreCase("Male")) {
             return Gender.male;
         } else if ((enteredValue.equalsIgnoreCase("NonBinary"))
             || (enteredValue.equalsIgnoreCase("Transgender"))

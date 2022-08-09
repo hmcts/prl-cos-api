@@ -186,7 +186,6 @@ public class FL401ApplicationMapper {
 
     private String getCourtName(CaseData caseData) throws NotFoundException {
         caseData = caseData.toBuilder().caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE).build();
-        log.info(" Type of application: " +caseData.getCaseTypeOfApplication());
         court = courtFinderService.getNearestFamilyCourt(caseData);
         return court.getCourtName();
     }

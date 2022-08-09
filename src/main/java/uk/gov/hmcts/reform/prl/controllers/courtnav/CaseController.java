@@ -54,12 +54,9 @@ public class CaseController {
         @RequestHeader(value = "serviceAuthorization") String serviceAuthorization,
         @RequestBody CourtNavCaseData inputData
     ) throws NotFoundException {
-        log.info("s2s token inside controller {}", serviceAuthorization);
-        log.info("auth token inside controller {}", authorisation);
+
         CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
-        log.info("Court name: {}", caseData.getCourtName());
-        log.info("Court email address: {}", caseData.getCourtEmailAddress());
-        log.info("-======Case data after mapping: ==== ===== {}", caseData);
+
         if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
 
             CaseDetails caseDetails = caseService.createCourtNavCase(

@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
-
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ApplicantRelationshipEnum {
@@ -50,9 +48,9 @@ public enum ApplicantRelationshipEnum {
     }
 
     public static ApplicantRelationshipEnum getDisplayedValueFromEnumString(String enteredValue) {
-        if(enteredValue.equalsIgnoreCase("noneOfAbove")){
+        if (enteredValue.equalsIgnoreCase("noneOfAbove")) {
             return ApplicantRelationshipEnum.noneOfTheAbove;
-        } else if (enteredValue.equalsIgnoreCase("formerNotLiveTogether")){
+        } else if (enteredValue.equalsIgnoreCase("formerNotLiveTogether")) {
             return ApplicantRelationshipEnum.formerBfGfOrPartnerNotLivedTogether;
         } else if (enteredValue.equalsIgnoreCase("currentNotLiveTogether")) {
             return ApplicantRelationshipEnum.bfGfOrPartnerNotLivedTogether;
