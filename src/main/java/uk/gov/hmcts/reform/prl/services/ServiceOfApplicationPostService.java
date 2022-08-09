@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -147,16 +146,14 @@ public class ServiceOfApplicationPostService {
     }
 
     private List<GeneratedDocumentInfo> getSelectedOrders(CaseData caseData) {
-        List<String> orderNames = caseData.getServiceOfApplicationScreen1().getSelectedOrders().stream()
-            .map(CreateSelectOrderOptionsEnum::getDisplayedValueFromEnumString)
-            .collect(Collectors.toList());
+        List<String> orderNames = caseData.getServiceOfApplicationScreen1()
+            .getSelectedOrders();
 
         return caseData.getOrderCollection().stream()
             .map(Element::getValue)
-            .filter(i -> orderNames.contains(i.getOrderType()))
+            .filter(i -> orderNames.contains(i.getOrderTypeId()))
             .map(i -> toGeneratedDocumentInfo(i.getOrderDocument()))
             .collect(Collectors.toList());
-
     }
 
     private GeneratedDocumentInfo generateDocument(String authorisation, CaseData caseData, String documentName) throws Exception {

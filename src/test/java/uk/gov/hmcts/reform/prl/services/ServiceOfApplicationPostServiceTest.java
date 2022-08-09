@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.AmendDischargedVariedEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StandardDirectionsOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -127,8 +128,15 @@ public class ServiceOfApplicationPostServiceTest {
             .documentHash("finalWelshC1a")
             .build();
 
-        PartyDetails respondent = PartyDetails.builder()
+        PartyDetails respondent1 = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .solicitorEmail("test@gmail.com")
+            .build();
+
+        PartyDetails respondent2 = PartyDetails.builder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail("test@gmail.com")
             .isCurrentAddressKnown(YesOrNo.Yes)
             .build();
 
@@ -137,9 +145,11 @@ public class ServiceOfApplicationPostServiceTest {
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
             .finalWelshDocument(finalWelshDoc)
             .c1AWelshDocument(finalWelshC1a)
-            .serviceOfApplicationScreen1(OrdersToServeSA.builder().build())
+            .serviceOfApplicationScreen1(OrdersToServeSA.builder()
+                                             .amendDischargedVariedOption(List.of(
+                AmendDischargedVariedEnum.amendDischargedVaried)).build())
             .orderCollection(List.of(element(OrderDetails.builder().build())))
-            .respondents(List.of(element(respondent)))
+            .respondents(List.of(element(respondent1),element(respondent2)))
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
                                                 .pd36qLetter(Document.builder().build()).build())
             .build();
@@ -239,6 +249,7 @@ public class ServiceOfApplicationPostServiceTest {
 
         OrderDetails standardDirectionsOrderDetails = OrderDetails.builder()
             .orderType("Standard directions order")
+            .orderTypeId("standardDirectionsOrder")
             .orderDocument(standardDirectionsOrder)
             .build();
 
