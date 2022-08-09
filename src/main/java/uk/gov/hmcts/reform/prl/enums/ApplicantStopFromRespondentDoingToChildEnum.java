@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
-
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ApplicantStopFromRespondentDoingToChildEnum {
@@ -41,7 +39,7 @@ public enum ApplicantStopFromRespondentDoingToChildEnum {
     }
 
     public static ApplicantStopFromRespondentDoingToChildEnum getDisplayedValueFromEnumString(String enteredValue) {
-        if (enteredValue.equalsIgnoreCase("beingViolentOrThreatening")){
+        if (enteredValue.equalsIgnoreCase("beingViolentOrThreatening")) {
             return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
         } else if (enteredValue.equalsIgnoreCase("harrasingOrIntimidating")) {
             return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;

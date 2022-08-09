@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
-
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ReasonForOrderWithoutGivingNoticeEnum {
@@ -32,7 +30,7 @@ public enum ReasonForOrderWithoutGivingNoticeEnum {
     }
 
     public static ReasonForOrderWithoutGivingNoticeEnum getDisplayedValueFromEnumString(String enteredValue) {
-        if (enteredValue.equalsIgnoreCase("riskOfSignificantHarm")){
+        if (enteredValue.equalsIgnoreCase("riskOfSignificantHarm")) {
             return ReasonForOrderWithoutGivingNoticeEnum.harmToApplicantOrChild;
         } else if (enteredValue.equalsIgnoreCase("deterredFromPursuingApplication")) {
             return ReasonForOrderWithoutGivingNoticeEnum.deferringApplicationIfNotImmediate;
