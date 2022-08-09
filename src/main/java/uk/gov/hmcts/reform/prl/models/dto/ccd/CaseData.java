@@ -292,6 +292,7 @@ public class CaseData implements MappableObject {
     private final String specialArrangementsRequired;
     private final YesOrNo isIntermediaryNeeded;
     private final String reasonsForIntermediary;
+    private final String specialCourtName;
 
     /**
      * International element.

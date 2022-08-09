@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.courtnav;
 
+import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,7 +54,7 @@ public class CaseControllerTest {
     }
 
     @Test
-    public void shouldCreateCaseWhenCalled() {
+    public void shouldCreateCaseWhenCalled() throws NotFoundException {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
             .build();
@@ -69,7 +70,7 @@ public class CaseControllerTest {
     }
 
     @Test(expected = ResponseStatusException.class)
-    public void shouldNotCreateCaseWhenCalledWithInvalidS2SToken() {
+    public void shouldNotCreateCaseWhenCalledWithInvalidS2SToken() throws NotFoundException {
         CourtNavCaseData caseData = CourtNavCaseData.builder().courtNavCaseName("test").build();
         ResponseEntity response = caseController
             .createCase("Bearer:test", "s2s token", caseData);

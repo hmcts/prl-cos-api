@@ -4,13 +4,16 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import lombok.Getter;
+import lombok.Setter;
 import uk.gov.hmcts.reform.prl.models.Address;
 
 import java.time.LocalDate;
 
 @Data
 @Builder(toBuilder = true)
+@Getter
+@Setter
 @AllArgsConstructor
 public class RespondentDetails {
 
@@ -22,5 +25,5 @@ public class RespondentDetails {
     private String respondentPhoneNumber;
     private String respondentEmailAddress;
     private Address respondentAddress;
-    private final YesOrNo respondentLivesWithApplicant;
+    private final boolean respondentLivesWithApplicant;
 }
