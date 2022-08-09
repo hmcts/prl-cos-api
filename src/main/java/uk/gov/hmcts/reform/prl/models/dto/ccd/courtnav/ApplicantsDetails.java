@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -15,6 +17,8 @@ import java.time.LocalDate;
 
 @Data
 @Builder(toBuilder = true)
+@Getter
+@Setter
 @AllArgsConstructor
 public class ApplicantsDetails {
 
@@ -25,7 +29,7 @@ public class ApplicantsDetails {
     private final LocalDate applicantDateOfBirth;
     private final ApplicantGenderEnum applicantGender;
     private final String otherGender;
-    private final YesOrNo shareContactDetailsWithRespondent;
+    private final boolean shareContactDetailsWithRespondent;
     private final YesOrNo isAddressConfidential;
     private final YesOrNo isEmailAddressConfidential;
     private final YesOrNo isPhoneNumberConfidential;
@@ -40,7 +44,7 @@ public class ApplicantsDetails {
     private final String legalRepresentativeReference;
     private final String legalRepresentativeFirstName;
     private final String legalRepresentativeLastName;
-    private final YesOrNo applicantHasLegalRepresentative;
+    private final boolean applicantHasLegalRepresentative;
     private final String legalRepresentativeEmail;
     private final String legalRepresentativePhone;
 

@@ -41,9 +41,18 @@ public enum ApplicantStopFromRespondentDoingToChildEnum {
     }
 
     public static ApplicantStopFromRespondentDoingToChildEnum getDisplayedValueFromEnumString(String enteredValue) {
-        return Arrays.stream(ApplicantStopFromRespondentDoingToChildEnum.values())
-            .map(i -> ApplicantStopFromRespondentDoingToChildEnum.valueOf(enteredValue))
-            .findFirst().orElse(null);
+        if (enteredValue.equalsIgnoreCase("beingViolentOrThreatening")){
+            return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
+        } else if (enteredValue.equalsIgnoreCase("harrasingOrIntimidating")) {
+            return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
+        } else if (enteredValue.equalsIgnoreCase("publishingAboutChildren")) {
+            return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
+        } else if (enteredValue.equalsIgnoreCase("contactingDirectly")) {
+            return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
+        } else if (enteredValue.equalsIgnoreCase("goingNearSchoolNursery")) {
+            return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
+        }
+        return null;
     }
 
 }

@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEn
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.LivingSituationOutcomeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreviousOrIntendedResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SignatureEnum;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 
 import java.time.LocalDate;
@@ -52,10 +53,10 @@ public class CourtNavCaseData implements MappableObject {
     /**
      * without notice order.
      */
-    private final YesOrNo ordersAppliedWithoutNotice;
+    private final boolean ordersAppliedWithoutNotice;
     private final List<WithoutNoticeReasonEnum> ordersAppliedWithoutNoticeReason;
     private final String ordersAppliedWithoutNoticeReasonDetails;
-    private final YesOrNo bailConditionsOnRespondent;
+    private final boolean bailConditionsOnRespondent;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate bailConditionsEndDate;
     private final String additionalDetailsForCourt;
@@ -88,10 +89,12 @@ public class CourtNavCaseData implements MappableObject {
     private final LocalDate ceremonyDate;
     private final ApplicantRelationshipOptionsEnum respondentsRelationshipToApplicant;
     private final String relationshipToApplicantOther;
+    private final boolean anyChildren;
 
     /**
      * Respondent's Behaviour.
      */
+    private final boolean applyingForMonMolestationOrder;
     private final List<BehaviourTowardsApplicantEnum> stopBehaviourTowardsApplicant;
     private final List<BehaviourTowardsChildrenEnum> stopBehaviourTowardsChildren;
     private final String stopBehaviourAnythingElse;
@@ -99,26 +102,27 @@ public class CourtNavCaseData implements MappableObject {
     /**
      * Home.
      */
+    private final boolean applyingForOccupationOrder;
     private final Address occupationOrderAddress;
     private final List<CurrentResidentAtAddressEnum> currentlyLivesAtAddress;
     private final String currentlyLivesAtAddressOther;
     private final PreviousOrIntendedResidentAtAddressEnum previouslyLivedAtAddress;
     private final PreviousOrIntendedResidentAtAddressEnum intendedToLiveAtAddress;
     private final List<Element<ChildAtAddress>> childrenApplicantResponsibility;
-    private final YesOrNo propertySpeciallyAdapted;
+    private final boolean propertySpeciallyAdapted;
     private final String propertySpeciallyAdaptedDetails;
-    private final YesOrNo propertyHasMortgage;
+    private final boolean propertyHasMortgage;
     private final List<ContractEnum> namedOnMortgage;
     private final String namedOnMortgageOther;
     private final String mortgageNumber;
     private final String mortgageLenderName;
     private final Address mortgageLenderAddress;
-    private final YesOrNo propertyIsRented;
+    private final boolean propertyIsRented;
     private final List<ContractEnum> namedOnRentalAgreement;
     private final String namedOnRentalAgreementOther;
     private final String landlordName;
     private final Address landlordAddress;
-    private final YesOrNo haveHomeRights;
+    private final boolean haveHomeRights;
     private final List<LivingSituationOutcomeEnum> wantToHappenWithLivingSituation;
     private final List<FamilyHomeOutcomeEnum> wantToHappenWithFamilyHome;
     private final String anythingElseForCourtToConsider;
@@ -134,5 +138,22 @@ public class CourtNavCaseData implements MappableObject {
     private final String representativeFirmName;
     private final String representativePositionHeld;
 
+    /**
+     * Ongoing proceedings.
+     */
+
+    private final boolean anyOngoingCourtProceedings;
+    private final List<Element<CourtProceedings>> ongoingCourtProceedings;
+
+    /**
+     * Going to court.
+     */
+    private final boolean isInterpreterRequired;
+    private final String interpreterLanguage;
+    private final String interpreterDialect;
+    private final boolean anyDisabilityNeeds;
+    private final String disabilityNeedsDetails;
+    private final List<SpecialMeasuresEnum> anySpecialMeasures;
+    private final String courtSpecialRequirements;
 
 }

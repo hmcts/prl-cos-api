@@ -32,9 +32,14 @@ public enum ReasonForOrderWithoutGivingNoticeEnum {
     }
 
     public static ReasonForOrderWithoutGivingNoticeEnum getDisplayedValueFromEnumString(String enteredValue) {
-        return Arrays.stream(ReasonForOrderWithoutGivingNoticeEnum.values())
-            .map(i -> ReasonForOrderWithoutGivingNoticeEnum.valueOf(enteredValue))
-            .findFirst().orElse(null);
+        if (enteredValue.equalsIgnoreCase("riskOfSignificantHarm")){
+            return ReasonForOrderWithoutGivingNoticeEnum.harmToApplicantOrChild;
+        } else if (enteredValue.equalsIgnoreCase("deterredFromPursuingApplication")) {
+            return ReasonForOrderWithoutGivingNoticeEnum.deferringApplicationIfNotImmediate;
+        } else if (enteredValue.equalsIgnoreCase("respondentDeliberatelyEvadingService")) {
+            return ReasonForOrderWithoutGivingNoticeEnum.prejudiced;
+        }
+        return null;
     }
 
 }

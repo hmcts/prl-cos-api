@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers.courtnav;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -52,11 +53,15 @@ public class CaseController {
         @RequestHeader(value = "Authorization", required = false) String authorisation,
         @RequestHeader(value = "serviceAuthorization") String serviceAuthorization,
         @RequestBody CourtNavCaseData inputData
-    ) {
+    ) throws NotFoundException {
         log.info("s2s token inside controller {}", serviceAuthorization);
         log.info("auth token inside controller {}", authorisation);
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
+        log.info("Court name: {}", caseData.getCourtName());
+        log.info("Court email address: {}", caseData.getCourtEmailAddress());
+        log.info("-======Case data after mapping: ==== ===== {}", caseData);
         if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
-            CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
+
             CaseDetails caseDetails = caseService.createCourtNavCase(
                 authorisation,
                 caseData
