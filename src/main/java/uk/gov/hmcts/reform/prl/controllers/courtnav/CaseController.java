@@ -55,10 +55,12 @@ public class CaseController {
         @RequestBody CourtNavCaseData inputData
     ) throws NotFoundException {
 
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
+        log.info("s2s token inside uploadDocument controller {}", serviceAuthorization);
+        log.info("auth token inside uploadDocument controller {}", authorisation);
 
         if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
 
+            CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
             CaseDetails caseDetails = caseService.createCourtNavCase(
                 authorisation,
                 caseData
