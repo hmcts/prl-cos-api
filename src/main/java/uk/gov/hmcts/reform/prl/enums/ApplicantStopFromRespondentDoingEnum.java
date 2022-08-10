@@ -72,8 +72,9 @@ public enum ApplicantStopFromRespondentDoingEnum {
             return ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_8;
         } else if (enteredValue.equalsIgnoreCase("comingNearWork")) {
             return ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_9;
+        } else {
+            return null;
         }
-        return null;
     }
 
 }
