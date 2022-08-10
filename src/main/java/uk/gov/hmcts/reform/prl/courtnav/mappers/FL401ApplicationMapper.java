@@ -226,18 +226,19 @@ public class FL401ApplicationMapper {
 
     private List<Element<FL401Proceedings>> getOngoingProceedings(List<Element<CourtProceedings>> ongoingCourtProceedings) {
 
-        List<FL401Proceedings> proceedingsList = new ArrayList<>();
+        List<Element<FL401Proceedings>> proceedingsList = new ArrayList<>();
         for (Element<CourtProceedings> courtProceedingsElement : ongoingCourtProceedings) {
 
             CourtProceedings proceedings = courtProceedingsElement.getValue();
-            proceedingsList.add(FL401Proceedings.builder()
+            FL401Proceedings fl401Proceedings = FL401Proceedings.builder()
                                     .nameOfCourt(proceedings.getNameOfCourt())
                                     .caseNumber(proceedings.getCaseNumber())
                                     .typeOfCase(proceedings.getCaseType())
                                     .anyOtherDetails(proceedings.getCaseDetails())
-                                    .build());
+                                    .build();
+            proceedingsList.add(ElementUtils.element(fl401Proceedings));
         }
-        return ElementUtils.wrapElements(proceedingsList);
+        return proceedingsList;
 
     }
 
@@ -248,7 +249,9 @@ public class FL401ApplicationMapper {
             .otherAssistance(courtNavCaseData.getInterpreterDialect())
             .build();
 
-        return ElementUtils.wrapElements(interpreterNeed);
+        List<Element<InterpreterNeed>> interpreterNeedElement1 = List.of(
+            ElementUtils.element(interpreterNeed));
+        return interpreterNeedElement1;
     }
 
     private Home mapHomeDetails(CourtNavCaseData courtNavCaseData) {
@@ -361,19 +364,21 @@ public class FL401ApplicationMapper {
 
     private List<Element<ApplicantChild>> mapProtectedChild(List<Element<ProtectedChild>> protectedChildren) {
 
-        List<ApplicantChild> childList = new ArrayList<>();
+        List<Element<ApplicantChild>> childList = new ArrayList<>();
         for (Element<ProtectedChild> protectedChild : protectedChildren) {
 
             ProtectedChild value = protectedChild.getValue();
-            childList.add(ApplicantChild.builder()
+            ApplicantChild applicantChild = ApplicantChild.builder()
                 .fullName(value.getFullName())
                 .dateOfBirth(value.getDateOfBirth())
                 .applicantChildRelationship(value.getRelationship())
                 .applicantRespondentShareParental(value.isParentalResponsibility() ? YesOrNo.Yes : YesOrNo.No)
                 .respondentChildRelationship(value.getRespondentRelationship())
-                .build());
+                .build();
+            childList.add(ElementUtils.element(applicantChild));
         }
-        return ElementUtils.wrapElements(childList);
+
+        return childList;
     }
 
     private PartyDetails mapRespondent(RespondentDetails respondent) {
