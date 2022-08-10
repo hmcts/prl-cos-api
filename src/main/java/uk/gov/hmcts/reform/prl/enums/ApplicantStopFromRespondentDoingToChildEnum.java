@@ -42,13 +42,13 @@ public enum ApplicantStopFromRespondentDoingToChildEnum {
         if (enteredValue.equalsIgnoreCase("beingViolentOrThreatening")) {
             return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
         } else if (enteredValue.equalsIgnoreCase("harrasingOrIntimidating")) {
-            return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
+            return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_2;
         } else if (enteredValue.equalsIgnoreCase("publishingAboutChildren")) {
-            return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
+            return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_3;
         } else if (enteredValue.equalsIgnoreCase("contactingDirectly")) {
-            return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
+            return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_4;
         } else if (enteredValue.equalsIgnoreCase("goingNearSchoolNursery")) {
-            return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
+            return ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_5;
         }
         return null;
     }

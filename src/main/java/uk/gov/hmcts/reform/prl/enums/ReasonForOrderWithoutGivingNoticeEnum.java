@@ -36,8 +36,9 @@ public enum ReasonForOrderWithoutGivingNoticeEnum {
             return ReasonForOrderWithoutGivingNoticeEnum.deferringApplicationIfNotImmediate;
         } else if (enteredValue.equalsIgnoreCase("respondentDeliberatelyEvadingService")) {
             return ReasonForOrderWithoutGivingNoticeEnum.prejudiced;
+        } else {
+            return null;
         }
-        return null;
     }
 
 }
