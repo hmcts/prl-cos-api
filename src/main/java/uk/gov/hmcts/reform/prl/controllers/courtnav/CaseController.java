@@ -50,8 +50,8 @@ public class CaseController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity createCase(
-        @RequestHeader(value = "Authorization") String authorisation,
-        @RequestHeader(value = "serviceAuthorization") String serviceAuthorization,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @RequestBody CourtNavCaseData inputData
     ) throws NotFoundException {
 
