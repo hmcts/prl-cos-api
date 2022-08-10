@@ -69,6 +69,10 @@ xui:
 citizen_frontend:
   url: http://example.com
 
+aca:
+  api:
+    url: ${ACA_SERVICE_API_BASEURL:http://localhost:4454}
+
 uk:
   gov:
     notify:
