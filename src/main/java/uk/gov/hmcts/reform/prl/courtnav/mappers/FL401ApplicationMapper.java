@@ -163,10 +163,10 @@ public class FL401ApplicationMapper {
                                              .build())
             .build();
 
-        /*caseData.toBuilder()
+        caseData = caseData.toBuilder()
             .courtName(getCourtName(caseData))
             .courtEmailAddress(getCourtEmailAddress(court))
-            .build();*/
+            .build();
         return caseData;
 
     }

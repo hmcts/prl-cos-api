@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.courtnav;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +19,9 @@ import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.FL401CaseData;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,13 +37,13 @@ public class CaseService {
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
     private final AuthTokenGenerator authTokenGenerator;
+    private final ObjectMapper objectMapper;
 
     public CaseDetails createCourtNavCase(String authToken, CaseData testInput) {
         log.info("Roles of the calling user {}", idamClient.getUserInfo(authToken).getRoles());
         log.info("Name of the calling user {}", idamClient.getUserInfo(authToken).getName());
         log.info("ApplicantCaseName::::: {}", testInput.getApplicantCaseName());
-        Map<String, Object> inputMap = new HashMap<>();
-        inputMap.put("applicantCaseName", testInput.getApplicantCaseName());
+        Map<String, Object> caseDataMap = testInput.toMap(CcdObjectMapper.getObjectMapper());
         log.info("****************executing caseworker flow***************");
         StartEventResponse startEventResponse =
             coreCaseDataApi.startForCaseworker(
@@ -59,7 +60,7 @@ public class CaseService {
             .event(Event.builder()
                        .id(startEventResponse.getEventId())
                        .build())
-            .data(FL401CaseData.builder().applicantCaseName(testInput.getApplicantCaseName()).build()).build();
+            .data(caseDataMap).build();
 
         return coreCaseDataApi.submitForCaseworker(
             authToken,
