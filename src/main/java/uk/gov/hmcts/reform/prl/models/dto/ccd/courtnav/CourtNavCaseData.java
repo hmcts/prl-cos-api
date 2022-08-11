@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.FL401Consent;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -19,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantRelationshipDescriptionEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsChildrenEnum;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ConsentEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.CurrentResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEnum;
@@ -40,8 +40,6 @@ import java.util.List;
 public class CourtNavCaseData implements MappableObject {
 
     private final ApplicantAge applicantHowOld;
-
-    private final String courtNavCaseName;
 
 
     /**
@@ -130,7 +128,7 @@ public class CourtNavCaseData implements MappableObject {
     /**
      * Statement of truth.
      */
-    private final FL401Consent declaration;
+    private final List<ConsentEnum> declaration;
     private final String signature;
     private final SignatureEnum signatureType;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

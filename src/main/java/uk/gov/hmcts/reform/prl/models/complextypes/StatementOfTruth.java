@@ -9,13 +9,14 @@ import uk.gov.hmcts.reform.prl.enums.FL401Consent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SignatureEnum;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
 @Jacksonized
 public class StatementOfTruth {
     @JsonProperty("applicantConsent")
-    private final FL401Consent applicantConsent;
+    private final List<FL401Consent> applicantConsent;
     @JsonProperty("signature")
     private final String signature;
     private final SignatureEnum signatureType;
