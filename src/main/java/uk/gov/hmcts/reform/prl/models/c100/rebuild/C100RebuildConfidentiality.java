@@ -12,11 +12,11 @@ public class C100RebuildConfidentiality {
     @JsonProperty
     private final String doesRespondentKnowApplicantContactDetail;
     @JsonProperty
-    private final YesOrNo doesApplicantDetailKeptPrivateFromRespondent;
+    private final String doesApplicantDetailKeptPrivateFromRespondent;
     @JsonProperty
     private final String[] applicantDetailKeptPrivateFromRespondentList;
     @JsonProperty
-    private final YesOrNo doesApplicantDetailKeptPrivateFromOtherApplicant;
+    private final String doesApplicantDetailKeptPrivateFromOtherApplicant;
     @JsonProperty
     private final String[] applicantDetailKeptPrivateFromOtherApplicantList;
 
