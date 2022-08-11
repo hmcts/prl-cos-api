@@ -141,7 +141,7 @@ public class FL401ApplicationMapper {
             .fl401StmtOfTruth(StatementOfTruth.builder()
                                   //.applicantConsent(FL401Consent.getValue(String.valueOf(courtNavCaseData.getDeclaration())))
                                   .signature(courtNavCaseData.getSignature())
-                                  .signatureType(SignatureEnum.getValue(String.valueOf(courtNavCaseData.getSignature())))
+                                  .signatureType(SignatureEnum.getValue(String.valueOf(courtNavCaseData.getSignatureType())))
                                   .fullname(courtNavCaseData.getSignatureFullName())
                                   .date(courtNavCaseData.getSignatureDate())
                                   .nameOfFirm(courtNavCaseData.getRepresentativeFirmName())
