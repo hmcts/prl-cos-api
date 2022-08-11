@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
@@ -13,7 +14,9 @@ import java.time.LocalDate;
 @Builder
 @Jacksonized
 public class StatementOfTruth {
+    @JsonProperty("applicantConsent")
     private final FL401Consent applicantConsent;
+    @JsonProperty("signature")
     private final SignatureEnum signature;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate date;

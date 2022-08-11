@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
+import uk.gov.hmcts.reform.prl.enums.FL401Consent;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -50,12 +51,15 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.RespondentDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsChildrenEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.CurrentResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.LivingSituationOutcomeEnum;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SignatureEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
@@ -78,7 +82,7 @@ public class FL401ApplicationMapper {
 
         CaseData caseData = null;
         caseData =  CaseData.builder()
-            .applicantAge(courtNavCaseData.getApplicantHowOld())
+            .applicantAge(ApplicantAge.getValue(String.valueOf(courtNavCaseData.getApplicantHowOld())))
             .applicantCaseName(courtNavCaseData.getCourtNavCaseName())
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
                                          .orderType(courtNavCaseData.getOrdersAppliedFor())
@@ -135,8 +139,8 @@ public class FL401ApplicationMapper {
                                  .build()) : null)
             .home(courtNavCaseData.getOrdersAppliedFor().contains(FL401OrderTypeEnum.occupationOrder) ? mapHomeDetails(courtNavCaseData) : null)
             .fl401StmtOfTruth(StatementOfTruth.builder()
-                                  .applicantConsent(courtNavCaseData.getDeclaration())
-                                  .signature(courtNavCaseData.getSignature())
+                                  .applicantConsent(FL401Consent.getValue(String.valueOf(courtNavCaseData.getDeclaration())))
+                                  .signature(SignatureEnum.getValue(String.valueOf(courtNavCaseData.getSignature())))
                                   .fullname(courtNavCaseData.getSignatureFullName())
                                   .date(courtNavCaseData.getSignatureDate())
                                   .nameOfFirm(courtNavCaseData.getRepresentativeFirmName())
@@ -418,7 +422,7 @@ public class FL401ApplicationMapper {
             .isEmailAddressConfidential(!applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
             .phoneNumber(applicant.getApplicantPhoneNumber())
             .isPhoneNumberConfidential(!applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
-            .applicantPreferredContact(applicant.getApplicantPreferredContact())
+            .applicantPreferredContact(PreferredContactEnum.getValue(String.valueOf(applicant.getApplicantPreferredContact())))
             .applicantContactInstructions(applicant.getApplicantContactInstructions())
             .representativeFirstName(applicant.getLegalRepresentativeFirstName())
             .representativeLastName(applicant.getLegalRepresentativeLastName())

@@ -121,6 +121,7 @@ public class CaseData implements MappableObject {
      * Applicant's Age.
      *
      */
+    @JsonProperty("applicantAge")
     private final ApplicantAge applicantAge;
 
     /**
