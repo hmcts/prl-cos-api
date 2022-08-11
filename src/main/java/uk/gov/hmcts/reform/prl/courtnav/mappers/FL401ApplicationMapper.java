@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
+import uk.gov.hmcts.reform.prl.enums.FL401Consent;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -53,6 +54,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.RespondentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsChildrenEnum;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ConsentEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.CurrentResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEnum;
@@ -63,6 +65,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReason
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -78,8 +83,7 @@ public class FL401ApplicationMapper {
 
     public CaseData mapCourtNavData(CourtNavCaseData courtNavCaseData) throws NotFoundException {
 
-        CaseData caseData = null;
-        caseData = CaseData.builder()
+        CaseData caseData = CaseData.builder()
             .applicantAge(ApplicantAge.getValue(String.valueOf(courtNavCaseData.getApplicantHowOld())))
             .applicantCaseName(getCaseName(courtNavCaseData))
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
@@ -138,7 +142,10 @@ public class FL401ApplicationMapper {
             .home(courtNavCaseData.getOrdersAppliedFor().contains(FL401OrderTypeEnum.occupationOrder) ? mapHomeDetails(
                 courtNavCaseData) : null)
             .fl401StmtOfTruth(StatementOfTruth.builder()
-                                  //.applicantConsent(FL401Consent.getValue(String.valueOf(courtNavCaseData.getDeclaration())))
+                                  .applicantConsent(courtNavCaseData.getDeclaration().stream()
+                                                        .map(ConsentEnum::getId)
+                                                        .map(FL401Consent::getDisplayedValueFromEnumString)
+                                                        .collect(Collectors.toList()))
                                   .signature(courtNavCaseData.getSignature())
                                   .signatureType(SignatureEnum.getValue(String.valueOf(courtNavCaseData.getSignatureType())))
                                   .fullname(courtNavCaseData.getSignatureFullName())
@@ -166,19 +173,21 @@ public class FL401ApplicationMapper {
                                                                         ? getOngoingProceedings(courtNavCaseData.getOngoingCourtProceedings()) : null)
                                              .build())
             .build();
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
 
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
+            .dateSubmittedAndTime(DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa").format(zonedDateTime).toUpperCase())
             .build();
 
         caseData = caseData.toBuilder()
             .courtName(getCourtName(caseData))
             .courtEmailAddress(getCourtEmailAddress(court))
             .build();
+
         caseData = caseData.setDateSubmittedDate();
 
-        log.info("Applicant RelationShip: {}", caseData.getRespondentRelationObject().getApplicantRelationship());
-        log.info("Get Relation description from courtnav: {} ", courtNavCaseData.getRelationshipDescription());
         return caseData;
 
     }
