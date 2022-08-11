@@ -81,7 +81,7 @@ public class FL401ApplicationMapper {
         CaseData caseData = null;
         caseData = CaseData.builder()
             .applicantAge(ApplicantAge.getValue(String.valueOf(courtNavCaseData.getApplicantHowOld())))
-            .applicantCaseName(courtNavCaseData.getCourtNavCaseName())
+            .applicantCaseName(getCaseName(courtNavCaseData))
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
                                          .orderType(courtNavCaseData.getOrdersAppliedFor())
                                          .build())
@@ -169,12 +169,27 @@ public class FL401ApplicationMapper {
             .build();
 
         caseData = caseData.toBuilder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .build();
+
+        caseData = caseData.toBuilder()
             .courtName(getCourtName(caseData))
             .courtEmailAddress(getCourtEmailAddress(court))
             .build();
         caseData = caseData.setDateSubmittedDate();
         return caseData;
 
+    }
+
+    private String getCaseName(CourtNavCaseData courtNavCaseData) {
+
+        String applicantName = courtNavCaseData.getApplicantDetails().getApplicantFirstName() + " "
+            + courtNavCaseData.getApplicantDetails().getApplicantLastName();
+
+        String respondentName = courtNavCaseData.getRespondentDetails().getRespondentFirstName() + " "
+            + courtNavCaseData.getRespondentDetails().getRespondentLastName();
+
+        return applicantName + " & " + respondentName;
     }
 
     private List<ApplicantStopFromRespondentDoingToChildEnum> getBehaviourTowardsChildren(CourtNavCaseData courtNavCaseData) {
@@ -222,7 +237,6 @@ public class FL401ApplicationMapper {
     }
 
     private String getCourtName(CaseData caseData) throws NotFoundException {
-        caseData = caseData.toBuilder().caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE).build();
         court = courtFinderService.getNearestFamilyCourt(caseData);
         return court.getCourtName();
     }
