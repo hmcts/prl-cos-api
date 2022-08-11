@@ -131,7 +131,8 @@ public class CourtNavCaseData implements MappableObject {
      * Statement of truth.
      */
     private final FL401Consent declaration;
-    private final SignatureEnum signature;
+    private final String signature;
+    private final SignatureEnum signatureType;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate signatureDate;
     private final String signatureFullName;
