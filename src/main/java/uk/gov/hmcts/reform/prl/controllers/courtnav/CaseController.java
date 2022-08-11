@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers.courtnav;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -53,7 +52,7 @@ public class CaseController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @RequestBody CourtNavCaseData inputData
-    ) throws NotFoundException {
+    ) throws Exception {
 
         log.info("s2s token inside case creation controller {}", serviceAuthorization);
         log.info("auth token inside case creation controller {}", authorisation);
@@ -66,6 +65,8 @@ public class CaseController {
                 authorisation,
                 caseData
             );
+            log.info("Case has been created {}", caseDetails.getId());
+            caseService.generateDocsAndRefreshTabs(caseDetails.getData(), authorisation, caseDetails.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(new CaseCreationResponse(
                 String.valueOf(caseDetails.getId())));
         } else {

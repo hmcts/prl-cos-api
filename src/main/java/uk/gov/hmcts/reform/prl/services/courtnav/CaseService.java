@@ -22,6 +22,8 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -38,6 +40,8 @@ public class CaseService {
     private final CaseDocumentClient caseDocumentClient;
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
+    private final DocumentGenService documentGenService;
+    private final AllTabsService allTabsService;
 
     public CaseDetails createCourtNavCase(String authToken, CaseData testInput) {
         log.info("Roles of the calling user {}", idamClient.getUserInfo(authToken).getRoles());
@@ -136,5 +140,14 @@ public class CaseService {
         }
     }
 
+    public void generateDocsAndRefreshTabs(Map<String, Object> data, String authorisation, Long id) throws Exception {
+        log.info("Before document generation {}", data);
+        data.put("id",String.valueOf(id));
+        data.putAll(documentGenService.generateDocuments(authorisation, objectMapper.convertValue(data, CaseData.class)));
+        log.info("After generating the docs {}", data);
+        CaseData caseData = objectMapper.convertValue(data, CaseData.class);
+        log.info("After tab refresh {}", caseData);
+        allTabsService.updateAllTabs(caseData);
+    }
 }
 
