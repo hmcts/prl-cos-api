@@ -57,6 +57,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.CurrentResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.LivingSituationOutcomeEnum;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SignatureEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
@@ -139,8 +140,8 @@ public class FL401ApplicationMapper {
                 courtNavCaseData) : null)
             .fl401StmtOfTruth(StatementOfTruth.builder()
                                   //.applicantConsent(FL401Consent.getValue(String.valueOf(courtNavCaseData.getDeclaration())))
-                                  //.signature(courtNavCaseData.getSignature())
-                                  //.signatureType(SignatureEnum.getValue(String.valueOf(courtNavCaseData.getSignature())))
+                                  .signature(courtNavCaseData.getSignature())
+                                  .signatureType(SignatureEnum.getValue(String.valueOf(courtNavCaseData.getSignature())))
                                   .fullname(courtNavCaseData.getSignatureFullName())
                                   .date(courtNavCaseData.getSignatureDate())
                                   .nameOfFirm(courtNavCaseData.getRepresentativeFirmName())

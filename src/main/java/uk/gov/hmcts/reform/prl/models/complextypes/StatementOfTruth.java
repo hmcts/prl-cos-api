@@ -17,8 +17,8 @@ public class StatementOfTruth {
     @JsonProperty("applicantConsent")
     private final FL401Consent applicantConsent;
     @JsonProperty("signature")
-    private final SignatureEnum signature;
-    //private final SignatureEnum signatureType;
+    private final String signature;
+    private final SignatureEnum signatureType;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate date;
     private final String fullname;
