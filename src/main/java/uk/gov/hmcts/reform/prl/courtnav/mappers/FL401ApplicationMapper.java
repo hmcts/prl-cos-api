@@ -118,10 +118,9 @@ public class FL401ApplicationMapper {
             .respondentRelationObject(RespondentRelationObjectType.builder()
                                           .applicantRelationship(ApplicantRelationshipEnum
                                                                      .getDisplayedValueFromEnumString(courtNavCaseData.getRelationshipDescription()
-                                                                                                          .getDisplayedValue()))
+                                                                                                          .getId()))
                                           .build())
-            .respondentRelationDateInfoObject((!courtNavCaseData.getRelationshipDescription()
-                .getDisplayedValue()
+            .respondentRelationDateInfoObject((!courtNavCaseData.getRelationshipDescription().getId()
                 .equalsIgnoreCase("noneOfAbove"))
                                                   ? (RespondentRelationDateInfo.builder()
                 .relationStartAndEndComplexType(RelationshipDateComplex.builder()
@@ -130,7 +129,7 @@ public class FL401ApplicationMapper {
                                                     .build())
                 .applicantRelationshipDate(courtNavCaseData.getCeremonyDate())
                 .build()) : null)
-            .respondentRelationOptions((courtNavCaseData.getRelationshipDescription().getDisplayedValue().equalsIgnoreCase(
+            .respondentRelationOptions((courtNavCaseData.getRelationshipDescription().getId().equalsIgnoreCase(
                 "noneOfAbove"))
                                            ? (RespondentRelationOptionsInfo.builder()
                 .applicantRelationshipOptions(courtNavCaseData.getRespondentsRelationshipToApplicant())
@@ -177,6 +176,9 @@ public class FL401ApplicationMapper {
             .courtEmailAddress(getCourtEmailAddress(court))
             .build();
         caseData = caseData.setDateSubmittedDate();
+
+        log.info("Applicant RelationShip: {}", caseData.getRespondentRelationObject().getApplicantRelationship());
+        log.info("Get Relation description from courtnav: {} ", courtNavCaseData.getRelationshipDescription());
         return caseData;
 
     }
