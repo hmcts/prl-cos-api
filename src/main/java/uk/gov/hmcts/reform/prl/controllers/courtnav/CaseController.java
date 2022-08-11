@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.courtnav;
 
-import com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -60,17 +59,7 @@ public class CaseController {
         log.info("auth token inside case creation controller {}", authorisation);
         CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
         log.info("CaseData=== : {}", caseData);
-        //ObjectMapper mapper = new ObjectMapper();
 
-        Gson gson = new Gson();
-
-        try {
-            // convert user object to json string and return it
-            String json = gson.toJson(caseData);
-            log.info("Object mapper: {}", json);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
 
             CaseDetails caseDetails = caseService.createCourtNavCase(
