@@ -70,7 +70,7 @@ public class PartyDetails {
     private final YesOrNo respondentLivedWithApplicant;
 
     @JsonProperty("applicantPreferredContact")
-    private final PreferredContactEnum applicantPreferredContact;
+    private final List<PreferredContactEnum> applicantPreferredContact;
     private final String applicantContactInstructions;
 
     public boolean hasConfidentialInfo() {

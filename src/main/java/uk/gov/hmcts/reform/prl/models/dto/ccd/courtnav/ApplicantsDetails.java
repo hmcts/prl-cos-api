@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantGenderEnum
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 
 import java.time.LocalDate;
+import java.util.List;
 
 
 @Data
@@ -37,7 +38,7 @@ public class ApplicantsDetails {
     private String applicantEmailAddress;
     private String applicantContactInstructions;
     private Address applicantAddress;
-    private PreferredContactEnum applicantPreferredContact;
+    private List<PreferredContactEnum> applicantPreferredContact;
     private final Organisation legalRepresentativeFirm;
     private final Address legalRepresentativeAddress;
     private final String legalRepresentativeDx;
