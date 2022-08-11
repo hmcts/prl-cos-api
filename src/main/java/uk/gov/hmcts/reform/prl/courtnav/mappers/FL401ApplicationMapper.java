@@ -172,6 +172,7 @@ public class FL401ApplicationMapper {
             .courtName(getCourtName(caseData))
             .courtEmailAddress(getCourtEmailAddress(court))
             .build();
+        caseData = caseData.setDateSubmittedDate();
         return caseData;
 
     }
