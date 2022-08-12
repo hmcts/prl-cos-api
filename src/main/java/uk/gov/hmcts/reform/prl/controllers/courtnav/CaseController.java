@@ -58,7 +58,8 @@ public class CaseController {
         log.info("auth token inside case creation controller {}", authorisation);
         CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
 
-        if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
+        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+            authorisationService.authoriseService(serviceAuthorization))) {
 
             CaseDetails caseDetails = caseService.createCourtNavCase(
                 authorisation,
@@ -91,7 +92,7 @@ public class CaseController {
     ) {
         log.info("s2s token inside uploadDocument controller {}", serviceAuthorization);
         log.info("auth token inside uploadDocument controller {}", authorisation);
-        if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
+        if (Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorization))) {
             caseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
             return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
                                                                     + file.getOriginalFilename()));

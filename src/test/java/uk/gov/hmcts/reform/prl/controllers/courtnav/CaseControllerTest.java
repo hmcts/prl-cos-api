@@ -58,7 +58,8 @@ public class CaseControllerTest {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
             .build();
-        when(authorisationService.authorise(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
         CourtNavCaseData courtNavCaseData = CourtNavCaseData.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build();
@@ -78,7 +79,7 @@ public class CaseControllerTest {
 
     @Test
     public void shouldUploadDocWhenCalledWithCorrectParameters() {
-        when(authorisationService.authorise(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
         doNothing().when(caseService).uploadDocument(any(), any(), any(), any());
         ResponseEntity response = caseController
             .uploadDocument("Bearer:test", "s2s token",

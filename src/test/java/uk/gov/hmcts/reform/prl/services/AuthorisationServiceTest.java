@@ -32,20 +32,20 @@ public class AuthorisationServiceTest {
     public void authoriseWhenTheServiceIsCalledFromPayment() {
 
         when(serviceAuthorisationApi.getServiceName(any())).thenReturn("payment_api");
-        assertTrue(authorisationService.authorise("Bearer abcasda"));
+        assertTrue(authorisationService.authoriseService("Bearer abcasda"));
 
     }
 
     @Test
     public void doNotAuthoriseWhenTheServiceIsCalledFromUnknownApi() {
         when(serviceAuthorisationApi.getServiceName(any())).thenReturn("unknown_api");
-        assertFalse(authorisationService.authorise("Bearer abc"));
+        assertFalse(authorisationService.authoriseService("Bearer abc"));
 
     }
 
     @Test
     public void throwUnAuthorisedExceptionWhenS2sTokenIsMalformed() {
-        assertFalse(authorisationService.authorise("Bearer malformed"));
+        assertFalse(authorisationService.authoriseService("Bearer malformed"));
     }
 
 
