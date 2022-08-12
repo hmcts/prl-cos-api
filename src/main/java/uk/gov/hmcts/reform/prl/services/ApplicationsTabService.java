@@ -790,9 +790,10 @@ public class ApplicationsTabService implements TabService {
 
             if (caseData.getReasonForOrderWithoutGivingNotice() != null) {
                 ReasonForWithoutNoticeOrder reason = caseData.getReasonForOrderWithoutGivingNotice();
-                List<String> reasonForOrderWithoutNoticeEnum = reason.getReasonForOrderWithoutGivingNotice().stream()
+                List<String> reasonForOrderWithoutNoticeEnum = reason.getReasonForOrderWithoutGivingNotice() != null
+                    ? reason.getReasonForOrderWithoutGivingNotice().stream()
                     .map(ReasonForOrderWithoutGivingNoticeEnum::getDisplayedValue)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList()) : new ArrayList<String>();
                 builder.reasonForOrderWithoutGivingNotice(String.join(", ",
                     reasonForOrderWithoutNoticeEnum)).futherDetails(reason.getFutherDetails());
             }
