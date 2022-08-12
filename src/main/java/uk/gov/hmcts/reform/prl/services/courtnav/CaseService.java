@@ -43,12 +43,14 @@ public class CaseService {
     private final DocumentGenService documentGenService;
     private final AllTabsService allTabsService;
 
-    public CaseDetails createCourtNavCase(String authToken, CaseData testInput) {
+    public CaseDetails createCourtNavCase(String authToken, CaseData caseData) throws Exception {
         log.info("Roles of the calling user {}", idamClient.getUserInfo(authToken).getRoles());
         log.info("Name of the calling user {}", idamClient.getUserInfo(authToken).getName());
-        log.info("ApplicantCaseName::::: {}", testInput.getApplicantCaseName());
-        Map<String, Object> caseDataMap = testInput.toMap(CcdObjectMapper.getObjectMapper());
+        log.info("ApplicantCaseName::::: {}", caseData.getApplicantCaseName());
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        caseDataMap.putAll(documentGenService.generateDocuments(authToken, caseData));
         log.info("****************executing caseworker flow***************");
+        log.info("before case creation", caseDataMap);
         StartEventResponse startEventResponse =
             coreCaseDataApi.startForCaseworker(
                 authToken,
@@ -140,14 +142,13 @@ public class CaseService {
         }
     }
 
-    public void generateDocsAndRefreshTabs(Map<String, Object> data, String authorisation, Long id) throws Exception {
+    public void refreshTabs(Map<String, Object> data, Long id) {
         log.info("Before document generation {}", data);
-        data.put("id",String.valueOf(id));
-        data.putAll(documentGenService.generateDocuments(authorisation, objectMapper.convertValue(data, CaseData.class)));
-        log.info("After generating the docs {}", data);
+        data.put("id", String.valueOf(id));
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
         log.info("After tab refresh {}", caseData);
         allTabsService.updateAllTabs(caseData);
+        log.info("**********************Tab refresh and Courtnav case creation complete**************************");
     }
 }
 

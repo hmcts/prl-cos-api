@@ -23,7 +23,9 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +54,9 @@ public class CaseServiceTest {
     @Mock
     private CaseDocumentClient caseDocumentClient;
 
+    @Mock
+    private DocumentGenService documentGenService;
+
     @InjectMocks
     CaseService caseService;
 
@@ -76,7 +81,9 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldStartAndSubmitEventWithEventData() {
+    public void shouldStartAndSubmitEventWithEventData() throws Exception {
+        Map<String, Object> tempMap = new HashMap<>();
+        when(documentGenService.generateDocuments(any(), any())).thenReturn(tempMap);
         caseService.createCourtNavCase("Bearer abc", caseData);
         verify(coreCaseDataApi).startForCaseworker(authToken, s2sToken,
                                                    randomUserId, PrlAppsConstants.JURISDICTION,
@@ -93,7 +100,7 @@ public class CaseServiceTest {
             .event(Event.builder()
                        .id("eventId")
                        .build())
-            .data(Map.of("fl401Doc1",testDocument()))
+            .data(Map.of("fl401Doc1", testDocument()))
             .build();
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
         when(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any())
@@ -101,18 +108,23 @@ public class CaseServiceTest {
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(randomUserId).build());
-        when(coreCaseDataApi.submitEventForCaseWorker(authToken,
-                                                      s2sToken,
-                                                      randomUserId,
-                                                      PrlAppsConstants.JURISDICTION,
-                                                      PrlAppsConstants.CASE_TYPE,
-                                                      "1234567891234567",
-                                                      true,
-                                                      caseDataContent)
-        ).thenReturn(CaseDetails.builder().id(1234567891234567L).data(Map.of("typeOfDocument",
-                                                                             "fl401Doc1")).build());
+        when(coreCaseDataApi.submitEventForCaseWorker(
+            authToken,
+            s2sToken,
+            randomUserId,
+            PrlAppsConstants.JURISDICTION,
+            PrlAppsConstants.CASE_TYPE,
+            "1234567891234567",
+            true,
+            caseDataContent
+             )
+        ).thenReturn(CaseDetails.builder().id(1234567891234567L).data(Map.of(
+            "typeOfDocument",
+            "fl401Doc1"
+        )).build());
         caseService.uploadDocument("Bearer abc", file, "fl401Doc1",
-                                   "1234567891234567");
+                                   "1234567891234567"
+        );
         verify(coreCaseDataApi, times(1)).startForCaseworker(authToken, s2sToken,
                                                              randomUserId, PrlAppsConstants.JURISDICTION,
                                                              PrlAppsConstants.CASE_TYPE,
