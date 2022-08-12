@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAccessApi;
@@ -47,7 +48,6 @@ public class CaseService {
     @Autowired
     CaseAccessApi caseAccessApi;
 
-
     @Autowired
     IdamClient idamClient;
 
@@ -59,6 +59,12 @@ public class CaseService {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Value("${idam.systemupdate.username}")
+    private String systemUpdateUsername;
+
+    @Value("${idam.systemupdate.password}")
+    private String systemUpdatePassword;
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId) {
 
@@ -250,12 +256,12 @@ public class CaseService {
             .build();
     }
 
-    public String validateAccessCode(String userToken, String s2sToken, String caseId, String accessCode) {
+    public String validateAccessCode(String s2sToken, String caseId, String accessCode) {
         log.info("validateAccessCode");
         log.info("parameters are :" + caseId + " and " + accessCode);
-        String accessCodeStatus = "Invalid access code";
+        String accessCodeStatus = "invalid";
         CaseData caseData = objectMapper.convertValue(
-            coreCaseDataApi.getCase(userToken, s2sToken, caseId).getData(),
+            coreCaseDataApi.getCase(idamClient.getAccessToken(systemUpdateUsername, systemUpdatePassword), s2sToken, caseId).getData(),
             CaseData.class
         );
 
@@ -271,10 +277,10 @@ public class CaseService {
         if (matchingCaseInvite.size() > 0) {
             for (CaseInvite caseInvite : matchingCaseInvite) {
                 if ("Yes".equals(caseInvite.getHasLinked())) {
-                    accessCodeStatus = "Access code already linked";
+                    accessCodeStatus = "linked";
                 }
             }
-            accessCodeStatus = "Access code is valid";
+            accessCodeStatus = "valid";
         }
         log.info("accessCodeStatus" + accessCodeStatus);
         return accessCodeStatus;
