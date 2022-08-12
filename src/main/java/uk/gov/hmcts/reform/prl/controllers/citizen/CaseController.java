@@ -84,7 +84,7 @@ public class CaseController {
         caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
     }
 
-    @PostMapping(path = "/validate-access-code", produces = APPLICATION_JSON)
+    @GetMapping(path = "/validate-access-code", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
     public String validateAccessCode(
         @RequestHeader(value = "Authorization", required = false) String userToken,
