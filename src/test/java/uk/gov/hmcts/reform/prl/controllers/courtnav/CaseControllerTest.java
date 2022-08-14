@@ -112,6 +112,7 @@ public class CaseControllerTest {
     @Test
     public void shouldUploadDocWhenCalledWithCorrectParameters() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
         doNothing().when(caseService).uploadDocument(any(), any(), any(), any());
         ResponseEntity response = caseController
             .uploadDocument("Bearer:test", "s2s token",
@@ -119,6 +120,15 @@ public class CaseControllerTest {
             );
         assertEquals(200, response.getStatusCodeValue());
 
+    }
+
+    @Test(expected = ResponseStatusException.class)
+    public void shouldNotUploadDocWhenCalledWithInvalidAuthToken() {
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        ResponseEntity response = caseController
+            .uploadDocument("Bearer:invalid", "s2s token",
+                            "", file, "fl401Doc1"
+            );
     }
 
     @Test(expected = ResponseStatusException.class)
