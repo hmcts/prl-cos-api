@@ -8,6 +8,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+
+import java.util.UUID;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -22,6 +26,9 @@ public class AuthorisationServiceTest {
 
     @Mock
     ServiceAuthorisationApi serviceAuthorisationApi;
+
+    @Mock
+    IdamClient idamClient;
 
     @Before
     public void setup() {
@@ -48,5 +55,15 @@ public class AuthorisationServiceTest {
         assertFalse(authorisationService.authoriseService("Bearer malformed"));
     }
 
+    @Test
+    public void authoriseUserTheServiceIsCalledWithValidToken() {
+        when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(UUID.randomUUID().toString()).build());
+        assertTrue(authorisationService.authoriseUser("Bearer abcasda"));
+    }
+
+    @Test
+    public void doNotAuthoriseUserWhenCalledWithInvalidToken() {
+        assertFalse(authorisationService.authoriseUser("Bearer malformed"));
+    }
 
 }
