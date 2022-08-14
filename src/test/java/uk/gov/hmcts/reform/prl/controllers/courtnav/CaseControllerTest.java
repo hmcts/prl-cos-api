@@ -71,6 +71,38 @@ public class CaseControllerTest {
     }
 
     @Test(expected = ResponseStatusException.class)
+    public void shouldGetForbiddenWhenCalledWithInvalidToken() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .build();
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
+            1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+        CourtNavCaseData courtNavCaseData = CourtNavCaseData.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build();
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
+
+        ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
+        assertEquals(403, response.getStatusCodeValue());
+
+    }
+
+    @Test(expected = ResponseStatusException.class)
+    public void shouldGetForbiddenWhenCalledWithInvalidS2SToken() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .build();
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
+            1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+        CourtNavCaseData courtNavCaseData = CourtNavCaseData.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build();
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
+
+        ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
+        assertEquals(403, response.getStatusCodeValue());
+
+    }
+
+    @Test(expected = ResponseStatusException.class)
     public void shouldNotCreateCaseWhenCalledWithInvalidS2SToken() throws Exception {
         CourtNavCaseData caseData = CourtNavCaseData.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build();
         ResponseEntity response = caseController
@@ -83,7 +115,8 @@ public class CaseControllerTest {
         doNothing().when(caseService).uploadDocument(any(), any(), any(), any());
         ResponseEntity response = caseController
             .uploadDocument("Bearer:test", "s2s token",
-                            "", file, "fl401Doc1");
+                            "", file, "fl401Doc1"
+            );
         assertEquals(200, response.getStatusCodeValue());
 
     }
@@ -92,6 +125,7 @@ public class CaseControllerTest {
     public void shouldNotUploadDocWhenCalledWithInvalidS2SToken() {
         ResponseEntity response = caseController
             .uploadDocument("Bearer:test", "s2s token",
-                            "", file, "fl401Doc1");
+                            "", file, "fl401Doc1"
+            );
     }
 }

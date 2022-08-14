@@ -56,11 +56,10 @@ public class CaseController {
 
         log.info("s2s token inside case creation controller {}", serviceAuthorization);
         log.info("auth token inside case creation controller {}", authorisation);
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
 
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
-
+            CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
             CaseDetails caseDetails = caseService.createCourtNavCase(
                 authorisation,
                 caseData
