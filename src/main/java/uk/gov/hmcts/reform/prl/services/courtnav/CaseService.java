@@ -48,7 +48,6 @@ public class CaseService {
         log.info("Name of the calling user {}", idamClient.getUserInfo(authToken).getName());
         log.info("ApplicantCaseName::::: {}", caseData.getApplicantCaseName());
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        caseDataMap.putAll(documentGenService.generateDocuments(authToken, caseData));
         log.info("****************executing caseworker flow***************");
         log.info("before case creation", caseDataMap);
         StartEventResponse startEventResponse =
@@ -142,9 +141,10 @@ public class CaseService {
         }
     }
 
-    public void refreshTabs(Map<String, Object> data, Long id) {
+    public void refreshTabs(String authToken, Map<String, Object> data, Long id) throws Exception {
         log.info("Before document generation {}", data);
         data.put("id", String.valueOf(id));
+        data.putAll(documentGenService.generateDocuments(authToken, objectMapper.convertValue(data, CaseData.class)));
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
         log.info("After tab refresh {}", caseData);
         allTabService.updateAllTabsIncludingConfTab(caseData);

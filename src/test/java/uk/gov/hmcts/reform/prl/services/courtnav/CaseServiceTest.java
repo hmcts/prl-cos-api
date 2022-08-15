@@ -82,7 +82,6 @@ public class CaseServiceTest {
     @Test
     public void shouldStartAndSubmitEventWithEventData() throws Exception {
         Map<String, Object> tempMap = new HashMap<>();
-        when(documentGenService.generateDocuments(any(), any())).thenReturn(tempMap);
         caseService.createCourtNavCase("Bearer abc", caseData);
         verify(coreCaseDataApi).startForCaseworker(authToken, s2sToken,
                                                    randomUserId, PrlAppsConstants.JURISDICTION,
@@ -127,22 +126,24 @@ public class CaseServiceTest {
         caseService.uploadDocument("Bearer abc", file, "fl401Doc1",
                                    "1234567891234567"
         );
-        verify(coreCaseDataApi).startEventForCaseWorker("Bearer abc",
-                                                        "s2s token",
-                                                        "e3ceb507-0137-43a9-8bd3-85dd23720648",
-                                                        PrlAppsConstants.JURISDICTION,
-                                                        PrlAppsConstants.CASE_TYPE,
-                                                        "1234567891234567",
-                                                        "courtnav-document-upload"
+        verify(coreCaseDataApi).startEventForCaseWorker(
+            "Bearer abc",
+            "s2s token",
+            "e3ceb507-0137-43a9-8bd3-85dd23720648",
+            PrlAppsConstants.JURISDICTION,
+            PrlAppsConstants.CASE_TYPE,
+            "1234567891234567",
+            "courtnav-document-upload"
         );
-        verify(coreCaseDataApi).submitEventForCaseWorker("Bearer abc",
-                                                         "s2s token",
-                                                         "e3ceb507-0137-43a9-8bd3-85dd23720648",
-                                                         PrlAppsConstants.JURISDICTION,
-                                                         PrlAppsConstants.CASE_TYPE,
-                                                         "1234567891234567",
-                                                         true,
-                                                         caseDataContent
+        verify(coreCaseDataApi).submitEventForCaseWorker(
+            "Bearer abc",
+            "s2s token",
+            "e3ceb507-0137-43a9-8bd3-85dd23720648",
+            PrlAppsConstants.JURISDICTION,
+            PrlAppsConstants.CASE_TYPE,
+            "1234567891234567",
+            true,
+            caseDataContent
         );
     }
 

@@ -65,7 +65,7 @@ public class CaseController {
                 caseData
             );
             log.info("Case has been created {}", caseDetails.getId());
-            caseService.refreshTabs(caseDetails.getData(), caseDetails.getId());
+            caseService.refreshTabs(authorisation, caseDetails.getData(), caseDetails.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(new CaseCreationResponse(
                 String.valueOf(caseDetails.getId())));
         } else {
