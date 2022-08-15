@@ -12,44 +12,22 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLANK_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 
@@ -221,7 +199,7 @@ public class DocumentGenService {
             if (isConfidentialInformationPresentForC100(caseData)) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                    && isApplicantOrChildDetailsConfidential(caseData)) {
+                && isApplicantOrChildDetailsConfidential(caseData)) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
             } else {
                 updatedCaseData.put(DOCUMENT_FIELD_C8, null);
@@ -275,7 +253,7 @@ public class DocumentGenService {
 
     private boolean isConfidentialInformationPresentForC100(CaseData caseData) {
         return C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            &&  ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+            && ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
             && !caseData.getApplicantsConfidentialDetails().isEmpty()
             || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
             && !caseData.getChildrenConfidentialDetails().isEmpty();
@@ -287,7 +265,11 @@ public class DocumentGenService {
 
         caseData = fillOrgDetails(caseData);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("Selected Language for generating the docs English => {}, Welsh => {}", documentLanguage.isGenEng(), documentLanguage.isGenWelsh());
+        log.info(
+            "Selected Language for generating the docs English => {}, Welsh => {}",
+            documentLanguage.isGenEng(),
+            documentLanguage.isGenWelsh()
+        );
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put("isEngDocGen", Yes.toString());
             updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
@@ -308,6 +290,38 @@ public class DocumentGenService {
             generateDocument(authorisation, getTemplate(caseData, hint, isWelsh), caseData, isWelsh)
         );
     }
+
+    private Document getDocument(String authorisation, GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest, String hint)
+        throws Exception {
+        return generateDocumentField(
+            getCitizenUploadedStatementFileName(generateAndUploadDocumentRequest),
+            generateCitizenUploadedDocument(authorisation, prlCitizenUploadTemplate, generateAndUploadDocumentRequest)
+        );
+    }
+
+    private String getCitizenUploadedStatementFileName(GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest) {
+        if (generateAndUploadDocumentRequest.getValues() != null
+            && generateAndUploadDocumentRequest.getValues().containsKey("fileName")) {
+            return (String) generateAndUploadDocumentRequest.getValues().get("fileName");
+        }
+        return "FileNameNotProvided.pdf";
+    }
+
+    private GeneratedDocumentInfo generateCitizenUploadedDocument(String authorisation, String template, GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,)
+        throws Exception {
+        log.info("Generating the {} statement document from the text box for case id {} ", template, generateAndUploadDocumentRequest.getValues().get("caseId"));
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        generatedDocumentInfo = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+            template
+        );
+
+        log.info("Is the document generated for the template {} : {} ", template, caseData.getIsDocumentGenerated());
+        log.info("Generated the {} document for case id {} ", template, caseData.getId());
+        return generatedDocumentInfo;
+    }
+
 
     private Document generateDocumentField(String fileName, GeneratedDocumentInfo generatedDocumentInfo) {
         if (null == generatedDocumentInfo) {
@@ -356,7 +370,7 @@ public class DocumentGenService {
                 fileName = findC8Filename(isWelsh, caseTypeOfApp);
                 break;
             case C1A_HINT:
-                fileName =  !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
+                fileName = !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
                 break;
             case FINAL_HINT:
                 fileName = findFinalFilename(isWelsh, caseTypeOfApp);
@@ -378,9 +392,6 @@ public class DocumentGenService {
                 break;
             case DOCUMENT_PRIVACY_NOTICE_HINT:
                 fileName = privacyNoticeFilename;
-                break;
-            case CITIZEN_HINT:
-                fileName = prlCitizenUploadFileName;
                 break;
             default:
                 fileName = "";
@@ -496,7 +507,7 @@ public class DocumentGenService {
     }
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
-        return  !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
+        return !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
@@ -545,16 +556,15 @@ public class DocumentGenService {
     }
 
     public Document generateSingleDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh) throws Exception {
-        log.info(" *** Document generation initiated for {} *** ",hint);
+        log.info(" *** Document generation initiated for {} *** ", hint);
         return getDocument(authorisation, caseData, hint, isWelsh);
     }
 
-    public String generateCitizenStatementDocument(String authorisation, CaseData caseData) throws Exception {
-
-        Map<String, Object> updatedCaseData = new HashMap<>();
-        updatedCaseData.put(CITIZEN_UPLOADED_DOCUMENT, getDocument(authorisation, caseData, CITIZEN_HINT, false));
-
-        caseService.updateCase(
+    public String generateCitizenStatementDocument(String authorisation, GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest) throws Exception {
+        Document document = getDocument(authorisation, generateAndUploadDocumentRequest, CITIZEN_HINT);
+        CaseData.builder().citizenUploadedDocumentList(UploadedDocuments.builder()
+                                                           .parentDocumentType("Witness Statement")).
+            caseService.updateCase(
             caseData,
             authorisation,
             authTokenGenerator.generate(),
