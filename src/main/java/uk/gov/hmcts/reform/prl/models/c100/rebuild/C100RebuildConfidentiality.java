@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.models.c100.rebuild;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 @Data
 @Builder(toBuilder = true)
