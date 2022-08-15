@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +48,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZENT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -189,6 +191,11 @@ public class DocumentGenService {
 
     @Autowired
     OrganisationService organisationService;
+
+    @Autowired
+    CaseService caseService;
+
+    private AuthTokenGenerator authTokenGenerator;
 
     private CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
@@ -372,7 +379,7 @@ public class DocumentGenService {
             case DOCUMENT_PRIVACY_NOTICE_HINT:
                 fileName = privacyNoticeFilename;
                 break;
-            case CITIZENT_HINT:
+            case CITIZEN_HINT:
                 fileName = prlCitizenUploadFileName;
                 break;
             default:
@@ -449,7 +456,7 @@ public class DocumentGenService {
             case DOCUMENT_PRIVACY_NOTICE_HINT:
                 template = privacyNoticeTemplate;
                 break;
-            case CITIZENT_HINT:
+            case CITIZEN_HINT:
                 template = prlCitizenUploadTemplate;
                 break;
             default:
@@ -542,11 +549,18 @@ public class DocumentGenService {
         return getDocument(authorisation, caseData, hint, isWelsh);
     }
 
-    public String generateCitizenDocuments(String authorisation, CaseData caseData) throws Exception {
+    public String generateCitizenStatementDocument(String authorisation, CaseData caseData) throws Exception {
 
         Map<String, Object> updatedCaseData = new HashMap<>();
-        updatedCaseData.put(CITIZEN_UPLOADED_DOCUMENT, getDocument(authorisation, caseData, CITIZENT_HINT, false));
+        updatedCaseData.put(CITIZEN_UPLOADED_DOCUMENT, getDocument(authorisation, caseData, CITIZEN_HINT, false));
 
+        caseService.updateCase(
+            caseData,
+            authorisation,
+            authTokenGenerator.generate(),
+            String.valueOf(caseData.getId()),
+            CITIZEN_UPLOADED_DOCUMENT
+        );
         return "updatedCaseData";
     }
 
