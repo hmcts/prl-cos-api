@@ -15,7 +15,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class RespondentBehaviour {
+public class CourtNavRespondentBehaviour {
 
     private final boolean applyingForMonMolestationOrder;
     private final List<BehaviourTowardsApplicantEnum> stopBehaviourTowardsApplicant;
