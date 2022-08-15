@@ -61,7 +61,7 @@ public class CourtNavCaseData implements MappableObject {
     /**
      * Respondent's Behaviour.
      */
-    private final RespondentBehaviour respondentBehaviour;
+    private final CourtNavRespondentBehaviour respondentBehaviour;
 
     /**
      * Home.
