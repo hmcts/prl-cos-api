@@ -83,7 +83,10 @@ public class FL401ApplicationMapper {
 
     public CaseData mapCourtNavData(CourtNavCaseData courtNavCaseData) throws NotFoundException {
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseData = null;
+        caseData = CaseData.builder()
+            .isCourtNavCase(YesOrNo.Yes)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .applicantAge(ApplicantAge.getValue(String.valueOf(courtNavCaseData.getBeforeStart().getApplicantHowOld())))
             .applicantCaseName(getCaseName(courtNavCaseData))
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder()

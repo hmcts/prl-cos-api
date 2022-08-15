@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.courtnav;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -10,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -23,13 +23,13 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,6 +39,7 @@ public class CaseServiceTest {
     private final String authToken = "Bearer abc";
     private final String s2sToken = "s2s token";
     private final String randomUserId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
+    private static final String randomAlphaNumeric = "Abc123EFGH";
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
@@ -51,6 +52,9 @@ public class CaseServiceTest {
 
     @Mock
     private CaseDocumentClient caseDocumentClient;
+
+    @Mock
+    private DocumentGenService documentGenService;
 
     @InjectMocks
     CaseService caseService;
@@ -76,7 +80,8 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldStartAndSubmitEventWithEventData() {
+    public void shouldStartAndSubmitEventWithEventData() throws Exception {
+        Map<String, Object> tempMap = new HashMap<>();
         caseService.createCourtNavCase("Bearer abc", caseData);
         verify(coreCaseDataApi).startForCaseworker(authToken, s2sToken,
                                                    randomUserId, PrlAppsConstants.JURISDICTION,
@@ -84,16 +89,20 @@ public class CaseServiceTest {
         );
     }
 
-    @Ignore
     @Test
     public void shouldUploadDocumentWhenAllFieldsAreCorrect() {
+        uk.gov.hmcts.reform.prl.models.documents.Document tempDoc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("private-law.txt")
+            .documentUrl(randomAlphaNumeric)
+            .documentBinaryUrl(randomAlphaNumeric)
+            .build();
         Document document = testDocument();
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken("eventToken")
             .event(Event.builder()
-                       .id("eventId")
+                       .id("courtnav-document-upload")
                        .build())
-            .data(Map.of("fl401Doc1",testDocument()))
+            .data(Map.of("fl401Doc1", tempDoc))
             .build();
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
         when(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any())
@@ -101,31 +110,55 @@ public class CaseServiceTest {
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(randomUserId).build());
-        when(coreCaseDataApi.submitEventForCaseWorker(authToken,
-                                                      s2sToken,
-                                                      randomUserId,
-                                                      PrlAppsConstants.JURISDICTION,
-                                                      PrlAppsConstants.CASE_TYPE,
-                                                      "1234567891234567",
-                                                      true,
-                                                      caseDataContent)
-        ).thenReturn(CaseDetails.builder().id(1234567891234567L).data(Map.of("typeOfDocument",
-                                                                             "fl401Doc1")).build());
+        when(coreCaseDataApi.submitEventForCaseWorker(
+            authToken,
+            s2sToken,
+            randomUserId, PrlAppsConstants.JURISDICTION,
+            PrlAppsConstants.CASE_TYPE,
+            "1234567891234567",
+            true,
+            caseDataContent
+             )
+        ).thenReturn(CaseDetails.builder().id(1234567891234567L).data(Map.of(
+            "typeOfDocument",
+            "fl401Doc1"
+        )).build());
         caseService.uploadDocument("Bearer abc", file, "fl401Doc1",
-                                   "1234567891234567");
-        verify(coreCaseDataApi, times(1)).startForCaseworker(authToken, s2sToken,
-                                                             randomUserId, PrlAppsConstants.JURISDICTION,
-                                                             PrlAppsConstants.CASE_TYPE,
-                                                             "courtnav-document-upload"
+                                   "1234567891234567"
+        );
+        verify(coreCaseDataApi).startEventForCaseWorker(
+            "Bearer abc",
+            "s2s token",
+            "e3ceb507-0137-43a9-8bd3-85dd23720648",
+            PrlAppsConstants.JURISDICTION,
+            PrlAppsConstants.CASE_TYPE,
+            "1234567891234567",
+            "courtnav-document-upload"
+        );
+        verify(coreCaseDataApi).submitEventForCaseWorker(
+            "Bearer abc",
+            "s2s token",
+            "e3ceb507-0137-43a9-8bd3-85dd23720648",
+            PrlAppsConstants.JURISDICTION,
+            PrlAppsConstants.CASE_TYPE,
+            "1234567891234567",
+            true,
+            caseDataContent
         );
     }
 
+    @Test(expected = ResponseStatusException.class)
+    public void shouldThrowExceptionWhenInvalidTypeOfDocumentIsPassed() {
+        caseService.uploadDocument("Bearer abc", file, "fl401Doc3",
+                                   "1234567891234567"
+        );
+    }
 
     public static Document testDocument() {
         Document.Link binaryLink = new Document.Link();
-        binaryLink.href = randomAlphanumeric(10);
+        binaryLink.href = randomAlphaNumeric;
         Document.Link selfLink = new Document.Link();
-        selfLink.href = randomAlphanumeric(10);
+        selfLink.href = randomAlphaNumeric;
 
         Document.Links links = new Document.Links();
         links.binary = binaryLink;
@@ -133,7 +166,7 @@ public class CaseServiceTest {
 
         Document document = Document.builder().build();
         document.links = links;
-        document.originalDocumentName = randomAlphanumeric(10);
+        document.originalDocumentName = randomAlphaNumeric;
 
         return document;
     }

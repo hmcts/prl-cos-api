@@ -29,6 +29,10 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseControllerTest {
 
+    private static final String FILE_NAME = "fileName";
+    private static final String CONTENT_TYPE = "application/json";
+    private static final String AUTH = "auth";
+
     @InjectMocks
     private CaseController caseController;
 
@@ -45,12 +49,12 @@ public class CaseControllerTest {
 
     @Before
     public void setUp() {
-
-        file = new MockMultipartFile(
+        file
+            = new MockMultipartFile(
             "file",
-            "private-law.txt",
+            "hello.txt",
             MediaType.TEXT_PLAIN_VALUE,
-            "FL401 case".getBytes()
+            "Hello, World!".getBytes()
         );
     }
 
@@ -59,7 +63,8 @@ public class CaseControllerTest {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
             .build();
-        when(authorisationService.authorise(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
         CourtNavCaseData courtNavCaseData = CourtNavCaseData.builder()
@@ -68,6 +73,57 @@ public class CaseControllerTest {
 
         ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
         assertEquals(201, response.getStatusCodeValue());
+
+    }
+
+
+    @Test
+    public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken() throws Exception {
+
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        doNothing().when(caseService).uploadDocument(any(), any(), any(), any());
+
+        ResponseEntity response = caseController.uploadDocument(
+            AUTH,
+            "s2s token",
+            "1234567891234567",
+            file,
+            "fl401Doc1"
+        );
+        assertEquals(200, response.getStatusCodeValue());
+
+    }
+
+    @Test(expected = ResponseStatusException.class)
+    public void shouldGetForbiddenWhenCalledWithInvalidToken() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .build();
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
+            1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+        CourtNavCaseData courtNavCaseData = CourtNavCaseData.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build();
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
+
+        ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
+        assertEquals(403, response.getStatusCodeValue());
+
+    }
+
+    @Test(expected = ResponseStatusException.class)
+    public void shouldGetForbiddenWhenCalledWithInvalidS2SToken() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .build();
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
+            1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+        CourtNavCaseData courtNavCaseData = CourtNavCaseData.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build();
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
+
+        ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
+        assertEquals(403, response.getStatusCodeValue());
 
     }
 
@@ -81,19 +137,31 @@ public class CaseControllerTest {
 
     @Test
     public void shouldUploadDocWhenCalledWithCorrectParameters() {
-        when(authorisationService.authorise(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
         doNothing().when(caseService).uploadDocument(any(), any(), any(), any());
         ResponseEntity response = caseController
             .uploadDocument("Bearer:test", "s2s token",
-                            "", file, "fl401Doc1");
+                            "", file, "fl401Doc1"
+            );
         assertEquals(200, response.getStatusCodeValue());
 
+    }
+
+    @Test(expected = ResponseStatusException.class)
+    public void shouldNotUploadDocWhenCalledWithInvalidAuthToken() {
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        ResponseEntity response = caseController
+            .uploadDocument("Bearer:invalid", "s2s token",
+                            "", file, "fl401Doc1"
+            );
     }
 
     @Test(expected = ResponseStatusException.class)
     public void shouldNotUploadDocWhenCalledWithInvalidS2SToken() {
         ResponseEntity response = caseController
             .uploadDocument("Bearer:test", "s2s token",
-                            "", file, "fl401Doc1");
+                            "", file, "fl401Doc1"
+            );
     }
 }

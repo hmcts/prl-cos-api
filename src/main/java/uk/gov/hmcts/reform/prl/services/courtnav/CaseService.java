@@ -23,7 +23,7 @@ import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,14 +41,15 @@ public class CaseService {
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
     private final DocumentGenService documentGenService;
-    private final AllTabsService allTabsService;
+    private final AllTabServiceImpl allTabService;
 
-    public CaseDetails createCourtNavCase(String authToken, CaseData testInput) {
+    public CaseDetails createCourtNavCase(String authToken, CaseData caseData) throws Exception {
         log.info("Roles of the calling user {}", idamClient.getUserInfo(authToken).getRoles());
         log.info("Name of the calling user {}", idamClient.getUserInfo(authToken).getName());
-        log.info("ApplicantCaseName::::: {}", testInput.getApplicantCaseName());
-        Map<String, Object> caseDataMap = testInput.toMap(CcdObjectMapper.getObjectMapper());
+        log.info("ApplicantCaseName::::: {}", caseData.getApplicantCaseName());
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         log.info("****************executing caseworker flow***************");
+        log.info("before case creation", caseDataMap);
         StartEventResponse startEventResponse =
             coreCaseDataApi.startForCaseworker(
                 authToken,
@@ -140,14 +141,14 @@ public class CaseService {
         }
     }
 
-    public void generateDocsAndRefreshTabs(Map<String, Object> data, String authorisation, Long id) throws Exception {
+    public void refreshTabs(String authToken, Map<String, Object> data, Long id) throws Exception {
         log.info("Before document generation {}", data);
-        data.put("id",String.valueOf(id));
-        data.putAll(documentGenService.generateDocuments(authorisation, objectMapper.convertValue(data, CaseData.class)));
-        log.info("After generating the docs {}", data);
+        data.put("id", String.valueOf(id));
+        data.putAll(documentGenService.generateDocuments(authToken, objectMapper.convertValue(data, CaseData.class)));
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
         log.info("After tab refresh {}", caseData);
-        allTabsService.updateAllTabs(caseData);
+        allTabService.updateAllTabsIncludingConfTab(caseData);
+        log.info("**********************Tab refresh and Courtnav case creation complete**************************");
     }
 }
 
