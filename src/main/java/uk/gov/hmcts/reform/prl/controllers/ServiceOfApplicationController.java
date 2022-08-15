@@ -66,7 +66,7 @@ public class ServiceOfApplicationController {
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Serve Parties Email Notification")
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
