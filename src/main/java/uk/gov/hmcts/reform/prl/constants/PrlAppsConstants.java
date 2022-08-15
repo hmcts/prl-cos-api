@@ -111,4 +111,8 @@ public class PrlAppsConstants {
     public static final String PREVIOUS_OR_ONGOING_PROCEEDINGS = "previousOrOngoingProceedings";
 
     public static final String FORMAT = "%s %s";
+
+    public static final String CITIZEN_UPLOADED_DOCUMENT = "CITIZEN_UPLOADED_DOCUMENT";
+
+    public static final String CITIZENT_HINT = "CITIZENT";
 }
