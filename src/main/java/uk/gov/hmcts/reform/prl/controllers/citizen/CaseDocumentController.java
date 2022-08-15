@@ -22,15 +22,16 @@ public class CaseDocumentController {
     @Autowired
     private DocumentGenService documentGenService;
 
-    @PostMapping(path = "/generate-citizen-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Create citizen documents")
+    @PostMapping(path = "/generate-citizen-statement-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Generate a PDF for citizen as part of upload documents")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Application Submitted."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public String generateCitizenDocument(@RequestHeader("Authorization")
-                                                             String authorisation,
-                                                             @RequestBody CaseData caseData) throws Exception {
-        return documentGenService.generateCitizenDocuments(authorisation, caseData);
+        @ApiResponse(responseCode = "200", description = "Document generated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public String generateCitizenStatementDocument(@RequestHeader("Authorization")
+                                              String authorisation,
+                                          @RequestBody CaseData caseData) throws Exception {
+        return documentGenService.generateCitizenStatementDocument(authorisation, caseData);
     }
 
 }

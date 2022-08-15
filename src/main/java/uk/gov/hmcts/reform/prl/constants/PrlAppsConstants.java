@@ -112,7 +112,7 @@ public class PrlAppsConstants {
 
     public static final String FORMAT = "%s %s";
 
-    public static final String CITIZEN_UPLOADED_DOCUMENT = "CITIZEN_UPLOADED_DOCUMENT";
+    public static final String CITIZEN_UPLOADED_DOCUMENT = "Citizen uploaded Document";
 
-    public static final String CITIZENT_HINT = "CITIZENT";
+    public static final String CITIZEN_HINT = "CITIZEN";
 }
