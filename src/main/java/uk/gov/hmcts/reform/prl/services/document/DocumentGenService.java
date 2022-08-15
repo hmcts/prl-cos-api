@@ -46,6 +46,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZENT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 
@@ -172,6 +174,12 @@ public class DocumentGenService {
 
     @Value("${document.templates.common.prl_privacy_notice_filename}")
     protected String privacyNoticeFilename;
+
+    @Value("${document.templates.citizen.prl_citizen_upload_template}")
+    protected String prlCitizenUploadTemplate;
+
+    @Value("${document.templates.citizen.prl_citizen_upload_filename}")
+    protected String prlCitizenUploadFileName;
 
     @Autowired
     private DgsService dgsService;
@@ -364,6 +372,9 @@ public class DocumentGenService {
             case DOCUMENT_PRIVACY_NOTICE_HINT:
                 fileName = privacyNoticeFilename;
                 break;
+            case CITIZENT_HINT:
+                fileName = prlCitizenUploadFileName;
+                break;
             default:
                 fileName = "";
         }
@@ -437,6 +448,9 @@ public class DocumentGenService {
                 break;
             case DOCUMENT_PRIVACY_NOTICE_HINT:
                 template = privacyNoticeTemplate;
+                break;
+            case CITIZENT_HINT:
+                template = prlCitizenUploadTemplate;
                 break;
             default:
                 template = "";
@@ -527,4 +541,14 @@ public class DocumentGenService {
         log.info(" *** Document generation initiated for {} *** ",hint);
         return getDocument(authorisation, caseData, hint, isWelsh);
     }
+
+    public String generateCitizenDocuments(String authorisation, CaseData caseData) throws Exception {
+
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        updatedCaseData.put(CITIZEN_UPLOADED_DOCUMENT, getDocument(authorisation, caseData, CITIZENT_HINT, false));
+
+        return "updatedCaseData";
+    }
+
+
 }
