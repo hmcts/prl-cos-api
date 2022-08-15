@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -291,9 +292,9 @@ public class DocumentGenService {
         );
     }
 
-    private Document getDocument(String authorisation, GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest, String hint)
+    private UploadedDocuments getDocument(String authorisation, GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest, String hint)
         throws Exception {
-        return generateDocumentField(
+        return generateCitizenUploadDocument(
             getCitizenUploadedStatementFileName(generateAndUploadDocumentRequest),
             generateCitizenUploadedDocument(authorisation, prlCitizenUploadTemplate, generateAndUploadDocumentRequest)
         );
@@ -307,18 +308,20 @@ public class DocumentGenService {
         return "FileNameNotProvided.pdf";
     }
 
-    private GeneratedDocumentInfo generateCitizenUploadedDocument(String authorisation, String template, GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,)
+    private GeneratedDocumentInfo generateCitizenUploadedDocument(String authorisation, String template, GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest)
         throws Exception {
-        log.info("Generating the {} statement document from the text box for case id {} ", template, generateAndUploadDocumentRequest.getValues().get("caseId"));
+        String caseId = (String) generateAndUploadDocumentRequest.getValues().get("caseId");
+        log.info("Generating the {} statement document from the text box for case id {} ", template, caseId);
         GeneratedDocumentInfo generatedDocumentInfo = null;
-        generatedDocumentInfo = dgsService.generateDocument(
+
+        generatedDocumentInfo = dgsService.generateCitizenDocument(
             authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+            generateAndUploadDocumentRequest,
             template
         );
-
-        log.info("Is the document generated for the template {} : {} ", template, caseData.getIsDocumentGenerated());
-        log.info("Generated the {} document for case id {} ", template, caseData.getId());
+        boolean isDocumentGenerated = generatedDocumentInfo.getUrl() != null;
+        log.info("Is the document generated for the template {} : {} ", template, isDocumentGenerated);
+        log.info("Generated the {} document for case id {} ", template, caseId);
         return generatedDocumentInfo;
     }
 
@@ -561,17 +564,44 @@ public class DocumentGenService {
     }
 
     public String generateCitizenStatementDocument(String authorisation, GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest) throws Exception {
-        Document document = getDocument(authorisation, generateAndUploadDocumentRequest, CITIZEN_HINT);
-        CaseData.builder().citizenUploadedDocumentList(UploadedDocuments.builder()
-                                                           .parentDocumentType("Witness Statement")).
-            caseService.updateCase(
-            caseData,
-            authorisation,
-            authTokenGenerator.generate(),
-            String.valueOf(caseData.getId()),
-            CITIZEN_UPLOADED_DOCUMENT
-        );
+        List<Element<UploadedDocuments>> uploadedDocumentsList = new ArrayList<>();
+        UploadedDocuments uploadedDocument = getDocument(authorisation, generateAndUploadDocumentRequest, CITIZEN_HINT);
+
+        Element<UploadedDocuments> uploadedDocumentsElement
+            = Element.<UploadedDocuments>builder()
+            .value(uploadedDocument)
+            .build();
+        uploadedDocumentsList.add(uploadedDocumentsElement);
+
+        CaseData.builder().citizenUploadedDocumentList(uploadedDocumentsList).build();
+            /*caseService.updateCase(
+                caseData,
+                authorisation,
+                authTokenGenerator.generate(),
+                String.valueOf(caseData.getId()),
+                CITIZEN_UPLOADED_DOCUMENT
+            );*/
         return "updatedCaseData";
+    }
+
+    private UploadedDocuments generateCitizenUploadDocument(String fileName, GeneratedDocumentInfo generatedDocumentInfo) {
+        if (null == generatedDocumentInfo) {
+            return null;
+        }
+        return UploadedDocuments.builder()
+            .parentDocumentType("")
+            .documentType("")
+            .partyName("")
+            .isApplicant("")
+            .uploadedBy("")
+            .dateCreated(new Date())
+            .documentDetails(DocumentDetails.builder()
+                                 .documentName(fileName)
+                                 .documentUploadedDate("")
+                                 .build()).citizenDocument(generateDocumentField(
+                fileName,
+                generatedDocumentInfo
+            )).build();
     }
 
 

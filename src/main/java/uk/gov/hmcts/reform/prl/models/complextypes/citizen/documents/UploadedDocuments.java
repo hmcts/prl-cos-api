@@ -10,7 +10,7 @@ import java.util.Date;
 @Builder
 public class UploadedDocuments {
     private final String parentDocumentType;
-    private final String DocumentType;
+    private final String documentType;
     private final String partyName;
     private final String isApplicant;
     private final String uploadedBy;
