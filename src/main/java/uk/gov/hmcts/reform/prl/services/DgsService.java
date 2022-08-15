@@ -79,13 +79,15 @@ public class DgsService {
         return generatedDocumentInfo;
     }
 
-    public GeneratedDocumentInfo generateCitizenDocument(String authorisation, GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest, String templateName) throws Exception {
+    public GeneratedDocumentInfo generateCitizenDocument(String authorisation,
+                                                         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+                                                         String templateName) throws Exception {
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
         Object documentDetails = null;
         if (generateAndUploadDocumentRequest.getValues() != null
-            && generateAndUploadDocumentRequest.getValues().containsKey("uploadedDocumentDetails")) {
-            documentDetails = generateAndUploadDocumentRequest.getValues().get("uploadedDocumentDetails");
+            && generateAndUploadDocumentRequest.getValues().containsKey("freeTextStatements")) {
+            documentDetails = generateAndUploadDocumentRequest.getValues().get("freeTextStatements");
         }
         tempCaseDetails.put("caseDetails", AppObjectMapper.getObjectMapper().convertValue(documentDetails, Map.class));
         GeneratedDocumentInfo generatedDocumentInfo = null;
