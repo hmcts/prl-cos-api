@@ -1,10 +1,9 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,10 +20,9 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-@Api
 @RestController
 @Slf4j
-public class ResetAccessCodeController {
+public class ResetAccessCodeController extends AbstractCallbackController {
 
     @Autowired
     private CaseInviteManager caseInviteManager;
@@ -33,10 +31,10 @@ public class ResetAccessCodeController {
     private ObjectMapper objectMapper;
 
     @PostMapping(path = "/regenerate-access-code", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to regenerate and send access code")
+    @Operation(description = "Callback to regenerate and send access code")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Resubmission completed"),
-        @ApiResponse(code = 400, message = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "Resubmission completed"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse resetAccessCode(
         @RequestBody CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = new HashMap<>(callbackRequest.getCaseDetails().getData());
