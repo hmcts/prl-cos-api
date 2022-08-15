@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -61,7 +62,8 @@ public class CaseControllerTest {
         when(authorisationService.authorise(any())).thenReturn(true);
         when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
-        CourtNavCaseData courtNavCaseData = CourtNavCaseData.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build();
+        CourtNavCaseData courtNavCaseData = CourtNavCaseData.builder()
+            .beforeStart(BeforeStart.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build()).build();
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
 
         ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
@@ -71,7 +73,8 @@ public class CaseControllerTest {
 
     @Test(expected = ResponseStatusException.class)
     public void shouldNotCreateCaseWhenCalledWithInvalidS2SToken() throws Exception {
-        CourtNavCaseData caseData = CourtNavCaseData.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build();
+        CourtNavCaseData caseData = CourtNavCaseData.builder()
+            .beforeStart(BeforeStart.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build()).build();
         ResponseEntity response = caseController
             .createCase("Bearer:test", "s2s token", caseData);
     }
