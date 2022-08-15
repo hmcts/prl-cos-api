@@ -103,7 +103,8 @@ public class CaseControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
-        CourtNavCaseData courtNavCaseData = CourtNavCaseData.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build();
+        CourtNavCaseData courtNavCaseData = CourtNavCaseData.builder()
+            .beforeStart(BeforeStart.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build()).build();
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
 
         ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
@@ -119,7 +120,8 @@ public class CaseControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
-        CourtNavCaseData courtNavCaseData = CourtNavCaseData.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build();
+        CourtNavCaseData courtNavCaseData = CourtNavCaseData.builder()
+            .beforeStart(BeforeStart.builder().applicantHowOld(ApplicantAge.eighteenOrOlder).build()).build();
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
 
         ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
