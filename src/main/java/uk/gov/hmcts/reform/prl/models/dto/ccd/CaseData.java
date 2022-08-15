@@ -1,37 +1,8 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
-import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
-import uk.gov.hmcts.reform.prl.enums.ConfidentialityStatementDisclaimerEnum;
-import uk.gov.hmcts.reform.prl.enums.CourtDetailsPilotEnum;
-import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
-import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
-import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
-import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
-import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.WhoChildrenLiveWith;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import com.fasterxml.jackson.annotation.*;
+import lombok.*;
+import uk.gov.hmcts.reform.prl.enums.*;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
@@ -43,35 +14,9 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
-import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
-import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
-import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
-import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
-import uk.gov.hmcts.reform.prl.models.complextypes.GatekeeperEmail;
-import uk.gov.hmcts.reform.prl.models.complextypes.Home;
-import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
-import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
-import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
-import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
-import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
-import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
-import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
-import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.*;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
@@ -489,7 +434,7 @@ public class CaseData implements MappableObject {
     private final Map<String, Object> typeOfApplicationTable;
 
     /**
-     *  Withdraw Application.
+     * Withdraw Application.
      */
     private final WithdrawApplication withDrawApplicationData;
 
@@ -510,7 +455,7 @@ public class CaseData implements MappableObject {
     private final FL401OtherProceedingDetails fl401OtherProceedingDetails;
 
     /**
-     *  FL401 Statement Of truth and submit.
+     * FL401 Statement Of truth and submit.
      */
     @JsonProperty("fl401StmtOfTruth")
     private final StatementOfTruth fl401StmtOfTruth;
@@ -522,7 +467,7 @@ public class CaseData implements MappableObject {
 
 
     /**
-     *  FL401 submit status flags.
+     * FL401 submit status flags.
      */
     private String isCourtEmailFound;
     private String isDocumentGenerated;
@@ -531,7 +476,7 @@ public class CaseData implements MappableObject {
     private ChildArrangementOrdersEnum childArrangementOrders;
 
     /**
-     *  Manage Orders.
+     * Manage Orders.
      */
 
     private final List<Element<OrderDetails>> orderCollection;
@@ -602,13 +547,16 @@ public class CaseData implements MappableObject {
     }
 
     /**
-     *  Withdraw request flag.
+     * Withdraw request flag.
      */
     private String isWithdrawRequestSent;
 
     /**
-     *  Service Of Application.
+     * Service Of Application.
      */
     private OrdersToServeSA serviceOfApplicationScreen1;
     private ConfirmRecipients confirmRecipients;
+
+    @JsonProperty("citizenUploadedDocumentList")
+    private final List<Element<UploadedDocuments>> citizenUploadedDocumentList;
 }

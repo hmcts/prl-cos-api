@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -29,9 +29,9 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public String generateCitizenStatementDocument(@RequestHeader("Authorization")
-                                              String authorisation,
-                                          @RequestBody CaseData caseData) throws Exception {
-        return documentGenService.generateCitizenStatementDocument(authorisation, caseData);
+                                                       String authorisation,
+                                                   @RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest) throws Exception {
+        return documentGenService.generateCitizenStatementDocument(authorisation, generateAndUploadDocumentRequest);
     }
 
 }
