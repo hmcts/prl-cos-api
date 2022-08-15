@@ -35,7 +35,7 @@ public enum Gender {
             return Gender.female;
         } else if (enteredValue.equalsIgnoreCase("Male")) {
             return Gender.male;
-        } else if ((enteredValue.equalsIgnoreCase("NonBinary"))
+        } else if ((enteredValue.equalsIgnoreCase("Non-binary"))
             || (enteredValue.equalsIgnoreCase("Transgender"))
             || (enteredValue.equalsIgnoreCase("other"))) {
             return Gender.other;

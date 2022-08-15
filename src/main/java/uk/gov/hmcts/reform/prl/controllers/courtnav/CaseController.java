@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseCreationResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ResponseMessage;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CaseService;
 
@@ -51,7 +51,7 @@ public class CaseController {
     public ResponseEntity createCase(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
-        @RequestBody CourtNavCaseData inputData
+        @RequestBody CourtNavFl401 inputData
     ) throws Exception {
 
         log.info("s2s token inside case creation controller {}", serviceAuthorization);

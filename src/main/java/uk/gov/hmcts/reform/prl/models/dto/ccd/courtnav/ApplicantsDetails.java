@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +11,6 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantGenderEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 
-import java.time.LocalDate;
 import java.util.List;
 
 
@@ -26,9 +24,8 @@ public class ApplicantsDetails {
     private final String applicantFirstName;
     private final String applicantLastName;
     private final String applicantOtherNames;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate applicantDateOfBirth;
-    private final ApplicantGenderEnum applicantGender;
+    private final CourtNavDate applicantDateOfBirth;
+    private final CourtNavGender applicantGender;
     private final String otherGender;
     private final boolean shareContactDetailsWithRespondent;
     private final YesOrNo isAddressConfidential;

@@ -47,11 +47,12 @@ import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ApplicantsDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ChildAtAddress;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.RespondentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsChildrenEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ConsentEnum;
@@ -65,6 +66,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReason
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -81,100 +83,142 @@ public class FL401ApplicationMapper {
     private final CourtFinderService courtFinderService;
     private Court court = null;
 
-    public CaseData mapCourtNavData(CourtNavCaseData courtNavCaseData) throws NotFoundException {
+    public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData) throws NotFoundException {
 
         CaseData caseData = null;
         caseData = CaseData.builder()
             .isCourtNavCase(YesOrNo.Yes)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .applicantAge(ApplicantAge.getValue(String.valueOf(courtNavCaseData.getBeforeStart().getApplicantHowOld())))
+            .applicantAge(ApplicantAge.getValue(String.valueOf(courtNavCaseData.getFl401().getBeforeStart().getApplicantHowOld())))
             .applicantCaseName(getCaseName(courtNavCaseData))
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
-                                         .orderType(courtNavCaseData.getSituation().getOrdersAppliedFor())
+                                         .orderType(courtNavCaseData.getFl401().getSituation().getOrdersAppliedFor())
                                          .build())
             .orderWithoutGivingNoticeToRespondent(WithoutNoticeOrderDetails.builder()
-                                                      .orderWithoutGivingNotice(courtNavCaseData.getSituation().isOrdersAppliedWithoutNotice()
+                                                      .orderWithoutGivingNotice(courtNavCaseData
+                                                                                    .getFl401()
+                                                                                    .getSituation()
+                                                                                    .isOrdersAppliedWithoutNotice()
                                                                                     ? YesOrNo.Yes : YesOrNo.No)
                                                       .build())
-            .reasonForOrderWithoutGivingNotice(!courtNavCaseData.getSituation().isOrdersAppliedWithoutNotice() ? null
+            .reasonForOrderWithoutGivingNotice(!courtNavCaseData.getFl401().getSituation().isOrdersAppliedWithoutNotice() ? null
                                                    : (ReasonForWithoutNoticeOrder.builder()
                 .reasonForOrderWithoutGivingNotice(getReasonForWithOutOrderNotice(courtNavCaseData))
-                .futherDetails(courtNavCaseData.getSituation().getOrdersAppliedWithoutNoticeReasonDetails())
+                .futherDetails(courtNavCaseData.getFl401().getSituation().getOrdersAppliedWithoutNoticeReasonDetails())
                 .build()))
             .bailDetails(RespondentBailConditionDetails.builder()
-                             .isRespondentAlreadyInBailCondition(courtNavCaseData.getSituation().isBailConditionsOnRespondent()
+                             .isRespondentAlreadyInBailCondition(courtNavCaseData
+                                                                     .getFl401()
+                                                                     .getSituation().isBailConditionsOnRespondent()
                                                                      ? YesNoDontKnow.yes : YesNoDontKnow.no)
-                             .bailConditionEndDate(courtNavCaseData.getSituation().isBailConditionsOnRespondent()
-                                                       ? courtNavCaseData.getSituation().getBailConditionsEndDate() : null)
+                             .bailConditionEndDate(courtNavCaseData.getFl401().getSituation().isBailConditionsOnRespondent()
+                                                       ? LocalDate.parse(courtNavCaseData
+                                                                             .getFl401()
+                                                                             .getSituation()
+                                                                             .getBailConditionsEndDate()
+                                                                             .mergeDate()) : null)
                              .build())
             .anyOtherDtailsForWithoutNoticeOrder(OtherDetailsOfWithoutNoticeOrder.builder()
-                                                     .otherDetails(courtNavCaseData.getSituation().getAdditionalDetailsForCourt())
+                                                     .otherDetails(courtNavCaseData.getFl401().getSituation().getAdditionalDetailsForCourt())
                                                      .build())
-            .applicantsFL401(mapApplicant(courtNavCaseData.getApplicantDetails()))
-            .respondentsFL401(mapRespondent(courtNavCaseData.getRespondentDetails()))
+            .applicantsFL401(mapApplicant(courtNavCaseData.getFl401().getApplicantDetails()))
+            .respondentsFL401(mapRespondent(courtNavCaseData.getFl401().getRespondentDetails()))
             .applicantFamilyDetails(ApplicantFamilyDetails.builder()
-                                        .doesApplicantHaveChildren(courtNavCaseData.getFamily().getWhoApplicationIsFor())
+                                        .doesApplicantHaveChildren(courtNavCaseData.getFl401().getFamily()
+                                                                       .getWhoApplicationIsFor()
+                                                                       .equals(ApplicationCoverEnum.applicantOnly)
+                                        ? YesOrNo.No : YesOrNo.Yes)
                                         .build())
-            .applicantChildDetails(courtNavCaseData.getFamily().getWhoApplicationIsFor().getDisplayedValue().equals("Yes")
-                                       ? mapProtectedChild(courtNavCaseData.getFamily().getProtectedChildren()) : null)
-            .respondentBehaviourData(courtNavCaseData.getSituation().getOrdersAppliedFor().contains(FL401OrderTypeEnum.nonMolestationOrder)
+            .applicantChildDetails(courtNavCaseData.getFl401().getFamily()
+                                       .getWhoApplicationIsFor().getDisplayedValue().equals("Yes")
+                                       ? mapProtectedChild(courtNavCaseData.getFl401()
+                                                               .getFamily().getProtectedChildren()) : null)
+            .respondentBehaviourData(courtNavCaseData.getFl401().getSituation()
+                                         .getOrdersAppliedFor().contains(FL401OrderTypeEnum.nonMolestationOrder)
                                          ? (RespondentBehaviour.builder()
                 .applicantWantToStopFromRespondentDoing(getBehaviourTowardsApplicant(courtNavCaseData))
                 .applicantWantToStopFromRespondentDoingToChild(getBehaviourTowardsChildren(courtNavCaseData))
-                .otherReasonApplicantWantToStopFromRespondentDoing(courtNavCaseData.getRespondentBehaviour().getStopBehaviourAnythingElse())
+                .otherReasonApplicantWantToStopFromRespondentDoing(courtNavCaseData.getFl401()
+                                                                       .getRespondentBehaviour().getStopBehaviourAnythingElse())
                 .build()) : null)
             .respondentRelationObject(RespondentRelationObjectType.builder()
                                           .applicantRelationship(ApplicantRelationshipEnum
-                                                                     .getDisplayedValueFromEnumString(courtNavCaseData.getRelationshipDescription()
-                                                                                                          .getId()))
+                                                                     .getDisplayedValueFromEnumString(
+                                                                         courtNavCaseData.getFl401()
+                                                                             .getRelationshipWithRespondent()
+                                                                             .getRelationshipDescription()
+                                                                             .getId()))
                                           .build())
-            .respondentRelationDateInfoObject((!courtNavCaseData.getRelationshipDescription().getId()
+            .respondentRelationDateInfoObject((!courtNavCaseData.getFl401().getRelationshipWithRespondent()
+                .getRelationshipDescription().getId()
                 .equalsIgnoreCase("noneOfAbove"))
                                                   ? (RespondentRelationDateInfo.builder()
                 .relationStartAndEndComplexType(RelationshipDateComplex.builder()
-                                                    .relationshipDateComplexStartDate(courtNavCaseData.getRelationshipStartDate())
-                                                    .relationshipDateComplexEndDate(courtNavCaseData.getRelationshipEndDate())
+                                                    .relationshipDateComplexStartDate(LocalDate.parse(courtNavCaseData
+                                                                                                          .getFl401()
+                                                                                          .getRelationshipWithRespondent()
+                                                                                          .getRelationshipStartDate()
+                                                                                          .mergeDate()))
+                                                    .relationshipDateComplexEndDate(LocalDate.parse(courtNavCaseData
+                                                                                                        .getFl401()
+                                                                                        .getRelationshipWithRespondent()
+                                                                                        .getRelationshipEndDate()
+                                                                                        .mergeDate()))
                                                     .build())
-                .applicantRelationshipDate(courtNavCaseData.getCeremonyDate())
+                .applicantRelationshipDate(LocalDate.parse(courtNavCaseData
+                                                               .getFl401()
+                                                               .getRelationshipWithRespondent()
+                                                               .getCeremonyDate().mergeDate()))
                 .build()) : null)
-            .respondentRelationOptions((courtNavCaseData.getRelationshipDescription().getId().equalsIgnoreCase(
+            .respondentRelationOptions((courtNavCaseData
+                .getFl401()
+                .getRelationshipWithRespondent()
+                .getRelationshipDescription().getId().equalsIgnoreCase(
                 "noneOfAbove"))
                                            ? (RespondentRelationOptionsInfo.builder()
-                .applicantRelationshipOptions(courtNavCaseData.getRespondentsRelationshipToApplicant())
-                .relationOptionsOther(courtNavCaseData.getRelationshipToApplicantOther())
+                .applicantRelationshipOptions(courtNavCaseData.getFl401()
+                                                  .getRelationshipWithRespondent().getRespondentsRelationshipToApplicant())
+                .relationOptionsOther(courtNavCaseData.getFl401()
+                                          .getRelationshipWithRespondent().getRelationshipToApplicantOther())
                 .build()) : null)
-            .home(courtNavCaseData.getSituation().getOrdersAppliedFor().contains(FL401OrderTypeEnum.occupationOrder) ? mapHomeDetails(
-                courtNavCaseData) : null)
+            .home(courtNavCaseData.getFl401().getSituation()
+                      .getOrdersAppliedFor().contains(FL401OrderTypeEnum.occupationOrder)
+                      ? mapHomeDetails(courtNavCaseData) : null)
             .fl401StmtOfTruth(StatementOfTruth.builder()
-                                  .applicantConsent(courtNavCaseData.getStatementOfTruth().getDeclaration().stream()
+                                  .applicantConsent(courtNavCaseData.getFl401()
+                                                        .getStatementOfTruth()
+                                                        .getDeclaration().stream()
                                                         .map(ConsentEnum::getId)
                                                         .map(FL401Consent::getDisplayedValueFromEnumString)
                                                         .collect(Collectors.toList()))
-                                  .signature(courtNavCaseData.getStatementOfTruth().getSignature())
-                                  .signatureType(SignatureEnum.getValue(String.valueOf(courtNavCaseData.getStatementOfTruth().getSignatureType())))
-                                  .fullname(courtNavCaseData.getStatementOfTruth().getSignatureFullName())
-                                  .date(courtNavCaseData.getStatementOfTruth().getSignatureDate())
-                                  .nameOfFirm(courtNavCaseData.getStatementOfTruth().getRepresentativeFirmName())
-                                  .signOnBehalf(courtNavCaseData.getStatementOfTruth().getRepresentativePositionHeld())
+                                  .signature(courtNavCaseData.getFl401().getStatementOfTruth().getSignature())
+                                  .signatureType(SignatureEnum.getValue(String.valueOf(courtNavCaseData
+                                                                                           .getFl401()
+                                                                                           .getStatementOfTruth()
+                                                                                           .getSignatureType())))
+                                  .fullname(courtNavCaseData.getFl401().getStatementOfTruth().getSignatureFullName())
+                                  .date(LocalDate.parse(courtNavCaseData.getFl401().getStatementOfTruth().getSignatureDate().mergeDate()))
+                                  .nameOfFirm(courtNavCaseData.getFl401().getStatementOfTruth().getRepresentativeFirmName())
+                                  .signOnBehalf(courtNavCaseData.getFl401().getStatementOfTruth().getRepresentativePositionHeld())
                                   .build())
-            .isInterpreterNeeded(courtNavCaseData.getGoingToCourt().isInterpreterRequired() ? YesOrNo.Yes : YesOrNo.No)
+            .isInterpreterNeeded(courtNavCaseData.getFl401().getGoingToCourt().isInterpreterRequired() ? YesOrNo.Yes : YesOrNo.No)
             .interpreterNeeds(interpreterLanguageDetails(courtNavCaseData))
-            .isDisabilityPresent(courtNavCaseData.getGoingToCourt().isAnyDisabilityNeeds() ? YesOrNo.Yes : YesOrNo.No)
-            .adjustmentsRequired(courtNavCaseData.getGoingToCourt().isAnyDisabilityNeeds()
-                                     ? courtNavCaseData.getGoingToCourt().getDisabilityNeedsDetails() : null)
-            .isSpecialArrangementsRequired(!courtNavCaseData.getGoingToCourt().getAnySpecialMeasures().isEmpty()
+            .isDisabilityPresent(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds() ? YesOrNo.Yes : YesOrNo.No)
+            .adjustmentsRequired(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds()
+                                     ? courtNavCaseData.getFl401().getGoingToCourt().getDisabilityNeedsDetails() : null)
+            .isSpecialArrangementsRequired(!courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures().isEmpty()
                                                ? YesOrNo.Yes : YesOrNo.No)
-            .specialArrangementsRequired(!courtNavCaseData.getGoingToCourt().getAnySpecialMeasures().isEmpty()
-                                             ? (courtNavCaseData.getGoingToCourt().getAnySpecialMeasures()
+            .specialArrangementsRequired(!courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures().isEmpty()
+                                             ? (courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures()
                 .stream()
                 .map(SpecialMeasuresEnum::getDisplayedValue)
                 .collect(Collectors.joining(","))) : null)
-            .specialCourtName(courtNavCaseData.getGoingToCourt().getCourtSpecialRequirements())
+            .specialCourtName(courtNavCaseData.getFl401().getGoingToCourt().getCourtSpecialRequirements())
             .fl401OtherProceedingDetails(FL401OtherProceedingDetails.builder()
-                                             .hasPrevOrOngoingOtherProceeding(courtNavCaseData.getFamily().isAnyOngoingCourtProceedings()
+                                             .hasPrevOrOngoingOtherProceeding(courtNavCaseData.getFl401().getFamily().isAnyOngoingCourtProceedings()
                                                                                   ? YesNoDontKnow.yes : YesNoDontKnow.no)
-                                             .fl401OtherProceedings(courtNavCaseData.getFamily().isAnyOngoingCourtProceedings()
-                                                                        ? getOngoingProceedings(courtNavCaseData
+                                             .fl401OtherProceedings(courtNavCaseData.getFl401().getFamily().isAnyOngoingCourtProceedings()
+                                                                        ? getOngoingProceedings(courtNavCaseData.getFl401()
                                                                                                     .getFamily().getOngoingCourtProceedings()) : null)
                                              .build())
             .build();
@@ -197,20 +241,23 @@ public class FL401ApplicationMapper {
 
     }
 
-    private String getCaseName(CourtNavCaseData courtNavCaseData) {
+    private String getCaseName(CourtNavFl401 courtNavCaseData) {
 
-        String applicantName = courtNavCaseData.getApplicantDetails().getApplicantFirstName() + " "
-            + courtNavCaseData.getApplicantDetails().getApplicantLastName();
+        String applicantName = courtNavCaseData.getFl401().getApplicantDetails().getApplicantFirstName() + " "
+            + courtNavCaseData.getFl401().getApplicantDetails().getApplicantLastName();
 
-        String respondentName = courtNavCaseData.getRespondentDetails().getRespondentFirstName() + " "
-            + courtNavCaseData.getRespondentDetails().getRespondentLastName();
+        String respondentName = courtNavCaseData.getFl401().getRespondentDetails().getRespondentFirstName() + " "
+            + courtNavCaseData.getFl401().getRespondentDetails().getRespondentLastName();
 
         return applicantName + " & " + respondentName;
     }
 
-    private List<ApplicantStopFromRespondentDoingToChildEnum> getBehaviourTowardsChildren(CourtNavCaseData courtNavCaseData) {
+    private List<ApplicantStopFromRespondentDoingToChildEnum> getBehaviourTowardsChildren(CourtNavFl401 courtNavCaseData) {
 
-        List<BehaviourTowardsChildrenEnum> behaviourTowardsChildrenList = courtNavCaseData.getRespondentBehaviour().getStopBehaviourTowardsChildren();
+        List<BehaviourTowardsChildrenEnum> behaviourTowardsChildrenList = courtNavCaseData
+            .getFl401()
+            .getRespondentBehaviour()
+            .getStopBehaviourTowardsChildren();
         List<ApplicantStopFromRespondentDoingToChildEnum> applicantStopFromRespondentDoingToChildList = new ArrayList<>();
         for (BehaviourTowardsChildrenEnum behaviourTowardsChildren : behaviourTowardsChildrenList) {
 
@@ -223,9 +270,9 @@ public class FL401ApplicationMapper {
 
     }
 
-    private List<ApplicantStopFromRespondentDoingEnum> getBehaviourTowardsApplicant(CourtNavCaseData courtNavCaseData) {
+    private List<ApplicantStopFromRespondentDoingEnum> getBehaviourTowardsApplicant(CourtNavFl401 courtNavCaseData) {
 
-        List<BehaviourTowardsApplicantEnum> behaviourTowardsApplicantList = courtNavCaseData
+        List<BehaviourTowardsApplicantEnum> behaviourTowardsApplicantList = courtNavCaseData.getFl401()
             .getRespondentBehaviour().getStopBehaviourTowardsApplicant();
         List<ApplicantStopFromRespondentDoingEnum> applicantStopFromRespondentDoingList = new ArrayList<>();
         for (BehaviourTowardsApplicantEnum behaviourTowardsApplicant : behaviourTowardsApplicantList) {
@@ -238,9 +285,10 @@ public class FL401ApplicationMapper {
         return applicantStopFromRespondentDoingList;
     }
 
-    private List<ReasonForOrderWithoutGivingNoticeEnum> getReasonForWithOutOrderNotice(CourtNavCaseData courtNavCaseData) {
+    private List<ReasonForOrderWithoutGivingNoticeEnum> getReasonForWithOutOrderNotice(CourtNavFl401 courtNavCaseData) {
 
-        List<WithoutNoticeReasonEnum> withoutOrderReasonList = courtNavCaseData.getSituation().getOrdersAppliedWithoutNoticeReason();
+        List<WithoutNoticeReasonEnum> withoutOrderReasonList = courtNavCaseData.getFl401()
+            .getSituation().getOrdersAppliedWithoutNoticeReason();
         List<ReasonForOrderWithoutGivingNoticeEnum> reasonForOrderWithoutGivingNoticeList = new ArrayList<>();
         for (WithoutNoticeReasonEnum withoutOrderReason : withoutOrderReasonList) {
             reasonForOrderWithoutGivingNoticeList.add(ReasonForOrderWithoutGivingNoticeEnum
@@ -279,55 +327,63 @@ public class FL401ApplicationMapper {
 
     }
 
-    private List<Element<InterpreterNeed>> interpreterLanguageDetails(CourtNavCaseData courtNavCaseData) {
+    private List<Element<InterpreterNeed>> interpreterLanguageDetails(CourtNavFl401 courtNavCaseData) {
 
         InterpreterNeed interpreterNeed = InterpreterNeed.builder()
-            .language(courtNavCaseData.getGoingToCourt().getInterpreterLanguage())
-            .otherAssistance(courtNavCaseData.getGoingToCourt().getInterpreterDialect())
+            .language(courtNavCaseData.getFl401().getGoingToCourt().getInterpreterLanguage())
+            .otherAssistance(courtNavCaseData.getFl401().getGoingToCourt().getInterpreterDialect())
             .build();
 
-        List<Element<InterpreterNeed>> interpreterNeedElement1 = List.of(
+        return List.of(
             ElementUtils.element(interpreterNeed));
-        return interpreterNeedElement1;
     }
 
-    private Home mapHomeDetails(CourtNavCaseData courtNavCaseData) {
+    private Home mapHomeDetails(CourtNavFl401 courtNavCaseData) {
 
         return Home.builder()
-            .address(courtNavCaseData.getTheHome().getOccupationOrderAddress())
+            .address(courtNavCaseData.getFl401().getTheHome().getOccupationOrderAddress())
             .peopleLivingAtThisAddress(getPeopleLivingAtThisAddress(courtNavCaseData))
-            .textAreaSomethingElse(courtNavCaseData.getTheHome().getCurrentlyLivesAtAddressOther())
-            .everLivedAtTheAddress(YesNoBothEnum.valueOf(courtNavCaseData.getTheHome().getPreviouslyLivedAtAddress().getDisplayedValue()))
-            .intendToLiveAtTheAddress(YesNoBothEnum.valueOf(courtNavCaseData.getTheHome().getIntendedToLiveAtAddress().getDisplayedValue()))
-            .doAnyChildrenLiveAtAddress(YesOrNo.valueOf(null != courtNavCaseData.getTheHome().getChildrenApplicantResponsibility() ? "Yes" : "No"))
-            .children(mapHomeChildren(courtNavCaseData.getTheHome().getChildrenApplicantResponsibility()))
-            .isPropertyAdapted(courtNavCaseData.getTheHome().isPropertySpeciallyAdapted() ? YesOrNo.Yes : YesOrNo.No)
-            .howIsThePropertyAdapted(courtNavCaseData.getTheHome().getPropertySpeciallyAdaptedDetails())
-            .isThereMortgageOnProperty(courtNavCaseData.getTheHome().isPropertyHasMortgage() ? YesOrNo.Yes : YesOrNo.No)
-            .mortgages(courtNavCaseData.getTheHome().isPropertyHasMortgage() ? (Mortgage.builder()
+            .textAreaSomethingElse(courtNavCaseData.getFl401().getTheHome().getCurrentlyLivesAtAddressOther())
+            .everLivedAtTheAddress(YesNoBothEnum.valueOf(courtNavCaseData.getFl401()
+                                                             .getTheHome()
+                                                             .getPreviouslyLivedAtAddress().getDisplayedValue()))
+            .intendToLiveAtTheAddress(YesNoBothEnum.valueOf(courtNavCaseData.getFl401()
+                                                                .getTheHome()
+                                                                .getIntendedToLiveAtAddress().getDisplayedValue()))
+            .doAnyChildrenLiveAtAddress(YesOrNo.valueOf(null != courtNavCaseData.getFl401()
+                .getTheHome().getChildrenApplicantResponsibility() ? "Yes" : "No"))
+            .children(mapHomeChildren(courtNavCaseData.getFl401()
+                                          .getTheHome().getChildrenApplicantResponsibility()))
+            .isPropertyAdapted(courtNavCaseData.getFl401()
+                                   .getTheHome().isPropertySpeciallyAdapted() ? YesOrNo.Yes : YesOrNo.No)
+            .howIsThePropertyAdapted(courtNavCaseData.getFl401()
+                                         .getTheHome().getPropertySpeciallyAdaptedDetails())
+            .isThereMortgageOnProperty(courtNavCaseData.getFl401()
+                                           .getTheHome().isPropertyHasMortgage() ? YesOrNo.Yes : YesOrNo.No)
+            .mortgages(courtNavCaseData.getFl401().getTheHome().isPropertyHasMortgage() ? (Mortgage.builder()
                 .mortgageNamedAfter(getMortageDetails(courtNavCaseData))
-                .textAreaSomethingElse(courtNavCaseData.getTheHome().getNamedOnMortgageOther())
-                .mortgageLenderName(courtNavCaseData.getTheHome().getMortgageLenderName())
-                .mortgageNumber(courtNavCaseData.getTheHome().getMortgageNumber())
-                .address(courtNavCaseData.getTheHome().getLandlordAddress())
+                .textAreaSomethingElse(courtNavCaseData.getFl401().getTheHome().getNamedOnMortgageOther())
+                .mortgageLenderName(courtNavCaseData.getFl401().getTheHome().getMortgageLenderName())
+                .mortgageNumber(courtNavCaseData.getFl401().getTheHome().getMortgageNumber())
+                .address(courtNavCaseData.getFl401().getTheHome().getLandlordAddress())
                 .build()) : null)
-            .isPropertyRented(courtNavCaseData.getTheHome().isPropertyIsRented() ? YesOrNo.Yes : YesOrNo.No)
-            .landlords(courtNavCaseData.getTheHome().isPropertyIsRented() ? (Landlord.builder()
+            .isPropertyRented(courtNavCaseData.getFl401().getTheHome().isPropertyIsRented() ? YesOrNo.Yes : YesOrNo.No)
+            .landlords(courtNavCaseData.getFl401().getTheHome().isPropertyIsRented() ? (Landlord.builder()
                 .mortgageNamedAfterList(getLandlordDetails(courtNavCaseData))
-                .textAreaSomethingElse(courtNavCaseData.getTheHome().getNamedOnRentalAgreementOther())
-                .landlordName(courtNavCaseData.getTheHome().getLandlordName())
-                .address(courtNavCaseData.getTheHome().getLandlordAddress())
+                .textAreaSomethingElse(courtNavCaseData.getFl401().getTheHome().getNamedOnRentalAgreementOther())
+                .landlordName(courtNavCaseData.getFl401().getTheHome().getLandlordName())
+                .address(courtNavCaseData.getFl401().getTheHome().getLandlordAddress())
                 .build()) : null)
-            .doesApplicantHaveHomeRights(courtNavCaseData.getTheHome().isHaveHomeRights() ? YesOrNo.Yes : YesOrNo.No)
+            .doesApplicantHaveHomeRights(courtNavCaseData.getFl401().getTheHome().isHaveHomeRights() ? YesOrNo.Yes : YesOrNo.No)
             .livingSituation(getLivingSituationDetails(courtNavCaseData))
             .familyHome(getFamilyHomeDetails(courtNavCaseData))
             .build();
 
     }
 
-    private List<FamilyHomeEnum> getFamilyHomeDetails(CourtNavCaseData courtNavCaseData) {
+    private List<FamilyHomeEnum> getFamilyHomeDetails(CourtNavFl401 courtNavCaseData) {
 
-        List<FamilyHomeOutcomeEnum> familyHomeList = courtNavCaseData.getTheHome().getWantToHappenWithFamilyHome();
+        List<FamilyHomeOutcomeEnum> familyHomeList = courtNavCaseData.getFl401().getTheHome().getWantToHappenWithFamilyHome();
         List<FamilyHomeEnum> familyHomeEnumList = new ArrayList<>();
         for (FamilyHomeOutcomeEnum familyHome : familyHomeList) {
             familyHomeEnumList.add(FamilyHomeEnum
@@ -337,9 +393,9 @@ public class FL401ApplicationMapper {
     }
 
 
-    private List<LivingSituationEnum> getLivingSituationDetails(CourtNavCaseData courtNavCaseData) {
+    private List<LivingSituationEnum> getLivingSituationDetails(CourtNavFl401 courtNavCaseData) {
 
-        List<LivingSituationOutcomeEnum> livingSituationOutcomeList = courtNavCaseData.getTheHome().getWantToHappenWithLivingSituation();
+        List<LivingSituationOutcomeEnum> livingSituationOutcomeList = courtNavCaseData.getFl401().getTheHome().getWantToHappenWithLivingSituation();
         List<LivingSituationEnum> livingSituationList = new ArrayList<>();
         for (LivingSituationOutcomeEnum livingSituation : livingSituationOutcomeList) {
             livingSituationList.add(LivingSituationEnum
@@ -349,9 +405,9 @@ public class FL401ApplicationMapper {
 
     }
 
-    private List<MortgageNamedAfterEnum> getLandlordDetails(CourtNavCaseData courtNavCaseData) {
+    private List<MortgageNamedAfterEnum> getLandlordDetails(CourtNavFl401 courtNavCaseData) {
 
-        List<ContractEnum> contractList = courtNavCaseData.getTheHome().getNamedOnRentalAgreement();
+        List<ContractEnum> contractList = courtNavCaseData.getFl401().getTheHome().getNamedOnRentalAgreement();
         List<MortgageNamedAfterEnum> mortagageNameList = new ArrayList<>();
         for (ContractEnum contract : contractList) {
             mortagageNameList.add(MortgageNamedAfterEnum
@@ -360,9 +416,9 @@ public class FL401ApplicationMapper {
         return mortagageNameList;
     }
 
-    private List<MortgageNamedAfterEnum> getMortageDetails(CourtNavCaseData courtNavCaseData) {
+    private List<MortgageNamedAfterEnum> getMortageDetails(CourtNavFl401 courtNavCaseData) {
 
-        List<ContractEnum> contractList = courtNavCaseData.getTheHome().getNamedOnMortgage();
+        List<ContractEnum> contractList = courtNavCaseData.getFl401().getTheHome().getNamedOnMortgage();
         List<MortgageNamedAfterEnum> mortagageNameList = new ArrayList<>();
         for (ContractEnum contract : contractList) {
             mortagageNameList.add(MortgageNamedAfterEnum
@@ -371,9 +427,10 @@ public class FL401ApplicationMapper {
         return mortagageNameList;
     }
 
-    private List<PeopleLivingAtThisAddressEnum> getPeopleLivingAtThisAddress(CourtNavCaseData courtNavCaseData) {
+    private List<PeopleLivingAtThisAddressEnum> getPeopleLivingAtThisAddress(CourtNavFl401 courtNavCaseData) {
 
-        List<CurrentResidentAtAddressEnum> currentlyLivesAtAddressList = courtNavCaseData.getTheHome().getCurrentlyLivesAtAddress();
+        List<CurrentResidentAtAddressEnum> currentlyLivesAtAddressList = courtNavCaseData.getFl401()
+            .getTheHome().getCurrentlyLivesAtAddress();
         List<PeopleLivingAtThisAddressEnum> peopleLivingAtThisAddressList = new ArrayList<>();
         for (CurrentResidentAtAddressEnum currentlyLivesAtAddress : currentlyLivesAtAddressList) {
 
@@ -408,7 +465,7 @@ public class FL401ApplicationMapper {
             ProtectedChild value = protectedChild.getValue();
             ApplicantChild applicantChild = ApplicantChild.builder()
                 .fullName(value.getFullName())
-                .dateOfBirth(value.getDateOfBirth())
+                .dateOfBirth(LocalDate.parse(value.getDateOfBirth().mergeDate()))
                 .applicantChildRelationship(value.getRelationship())
                 .applicantRespondentShareParental(value.isParentalResponsibility() ? YesOrNo.Yes : YesOrNo.No)
                 .respondentChildRelationship(value.getRespondentRelationship())
@@ -424,7 +481,7 @@ public class FL401ApplicationMapper {
             .firstName(respondent.getRespondentFirstName())
             .lastName(respondent.getRespondentLastName())
             .previousName(respondent.getRespondentOtherNames())
-            .dateOfBirth(respondent.getRespondentDateOfBirth())
+            .dateOfBirth(LocalDate.parse(respondent.getRespondentDateOfBirth().mergeDate()))
             .isDateOfBirthKnown(YesOrNo.valueOf(null != respondent.getRespondentDateOfBirth() ? "Yes" : "No"))
             .email(respondent.getRespondentEmailAddress())
             .canYouProvideEmailAddress(YesOrNo.valueOf(null != respondent.getRespondentEmailAddress() ? "Yes" : "No"))
@@ -444,11 +501,11 @@ public class FL401ApplicationMapper {
             .firstName(applicant.getApplicantFirstName())
             .lastName(applicant.getApplicantLastName())
             .previousName(applicant.getApplicantOtherNames())
-            .dateOfBirth(applicant.getApplicantDateOfBirth())
-            .gender(Gender.getDisplayedValueFromEnumString(applicant.getApplicantGender().getDisplayedValue()))
-            .otherGender((!applicant.getApplicantGender().getDisplayedValue().equals("Male")
-                || !applicant.getApplicantGender().getDisplayedValue().equals("Female"))
-                             ? applicant.getApplicantGender().getDisplayedValue() : null)
+            .dateOfBirth(LocalDate.parse(applicant.getApplicantDateOfBirth().mergeDate()))
+            .gender(Gender.getDisplayedValueFromEnumString(applicant.getApplicantGender().getValue().getId()))
+            .otherGender((!applicant.getApplicantGender().getValue().getId().equals("Male")
+                || !applicant.getApplicantGender().getValue().getId().equals("Female"))
+                             ? applicant.getApplicantGender().getOther() : null)
             .address(applicant.getApplicantAddress())
             .isAddressConfidential(!applicant.isShareContactDetailsWithRespondent() ? YesOrNo.Yes : YesOrNo.No)
             .canYouProvideEmailAddress(YesOrNo.valueOf(null != applicant.getApplicantEmailAddress() ? "Yes" : "No"))
@@ -467,5 +524,4 @@ public class FL401ApplicationMapper {
             .dxNumber(applicant.getLegalRepresentativeDx())
             .build();
     }
-
 }
