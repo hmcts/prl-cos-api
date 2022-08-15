@@ -1,6 +1,10 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantGenderEnum;
 
 @Data
