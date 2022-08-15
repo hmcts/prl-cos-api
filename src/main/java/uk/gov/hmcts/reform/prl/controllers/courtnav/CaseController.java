@@ -56,16 +56,16 @@ public class CaseController {
 
         log.info("s2s token inside case creation controller {}", serviceAuthorization);
         log.info("auth token inside case creation controller {}", authorisation);
-        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
 
-        if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
-
+        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+            authorisationService.authoriseService(serviceAuthorization))) {
+            CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
             CaseDetails caseDetails = caseService.createCourtNavCase(
                 authorisation,
                 caseData
             );
             log.info("Case has been created {}", caseDetails.getId());
-            caseService.generateDocsAndRefreshTabs(caseDetails.getData(), authorisation, caseDetails.getId());
+            caseService.refreshTabs(authorisation, caseDetails.getData(), caseDetails.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(new CaseCreationResponse(
                 String.valueOf(caseDetails.getId())));
         } else {
@@ -91,7 +91,8 @@ public class CaseController {
     ) {
         log.info("s2s token inside uploadDocument controller {}", serviceAuthorization);
         log.info("auth token inside uploadDocument controller {}", authorisation);
-        if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
+        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+            authorisationService.authoriseService(serviceAuthorization))) {
             caseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
             return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
                                                                     + file.getOriginalFilename()));
