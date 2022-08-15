@@ -1,18 +1,13 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantRelationshipDescriptionEnum;
 
-import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -26,7 +21,6 @@ public class CourtNavCaseData implements MappableObject {
 
 
     private final Situation situation;
-
 
 
     /**
@@ -47,16 +41,8 @@ public class CourtNavCaseData implements MappableObject {
     /**
      * Relationship to Respondent.
      */
-    private final ApplicantRelationshipDescriptionEnum relationshipDescription;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate relationshipStartDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate relationshipEndDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate ceremonyDate;
-    private final ApplicantRelationshipOptionsEnum respondentsRelationshipToApplicant;
-    private final String relationshipToApplicantOther;
-    private final boolean anyChildren;
+    private final CourtNavRelationShipToRespondent relationshipWithRespondent;
+
 
     /**
      * Respondent's Behaviour.

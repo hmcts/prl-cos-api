@@ -9,18 +9,13 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum ApplicantGenderEnum {
+public enum ApplicationCoverEnum {
 
-    @JsonProperty("Female")
-    Female("Female", "Female"),
-    @JsonProperty("Male")
-    Male("Male", "Male"),
-    @JsonProperty("Non-binary")
-    NonBinary("Non-binary", "Non-binary"),
-    @JsonProperty("Transgender")
-    Transgender("Transgender", "Transgender"),
-    @JsonProperty("other")
-    other("other", "other");
+    @JsonProperty("applicantOnly")
+    applicantOnly("applicantOnly", "Applicant Only"),
+
+    @JsonProperty("applicantAndChildren")
+    applicantAndChildren("applicantAndChildren", "Applicant and children ");
 
     private final String id;
     private final String displayedValue;
@@ -35,7 +30,7 @@ public enum ApplicantGenderEnum {
     }
 
     @JsonCreator
-    public static ApplicantGenderEnum getValue(String key) {
-        return ApplicantGenderEnum.valueOf(key);
+    public static ApplicationCoverEnum getValue(String key) {
+        return ApplicationCoverEnum.valueOf(key);
     }
 }
