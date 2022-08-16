@@ -616,4 +616,10 @@ public class CaseData implements MappableObject {
     private Document fl401Doc2;
     private YesOrNo isCourtNavCase;
 
+    /**
+     * Courtnav.
+     */
+    private YesOrNo courtNavApproved;
+    private String caseOrigin;
+
 }
