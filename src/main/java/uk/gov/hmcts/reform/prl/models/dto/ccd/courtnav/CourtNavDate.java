@@ -16,11 +16,19 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 public class CourtNavDate {
 
-    private final String day;
-    private final String month;
-    private final String year;
+    private final Integer day;
+    private final Integer month;
+    private final Integer year;
 
     public String mergeDate() {
-        return getYear() + "-" + getMonth() + "-" + getDay();
+        String day1 = getDay().toString();
+        if (day1.length() < 2) {
+            day1 = "0" + day1;
+        }
+        String month1 = getMonth().toString();
+        if (month1.length() < 2) {
+            month1 = "0" + month1;
+        }
+        return getYear().toString() + "-" + month1 + "-" + day1;
     }
 }
