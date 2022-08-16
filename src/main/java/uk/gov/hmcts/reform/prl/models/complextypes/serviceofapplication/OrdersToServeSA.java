@@ -30,7 +30,6 @@ import java.util.stream.Stream;
 @Builder
 public class OrdersToServeSA {
 
-
     private final List<StandardDirectionsOrderEnum> standardDirectionsOrderOption;
     private final List<BlankOrderOrDirectionsEnum> blankOrderOrDirectionsOption;
     private final List<BlankOrderOrDirectionsWithdrawEnum> blankOrderOrDirectionsWithdrawOption;

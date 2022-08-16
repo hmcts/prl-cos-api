@@ -91,12 +91,13 @@ uk:
             WITHDRAW_AFTER_ISSUED_SOLICITOR: ba39a8e6-c553-457e-b526-3c241cd207f6
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
+            CAFCASS_OTHER: b77818d7-7756-4d83-8ecd-e2b54f512cf2
             APPLICANT_SOLICITOR_CA: 72e32651-a952-4063-8a85-5f28950fcc84
             APPLICANT_SOLICITOR_DA: 15152a49-ff8f-4b40-a061-f2ef7c95b699
             RESPONDENT_SOLICITOR: 8d3e5c9b-6fca-4c1c-8b31-40c2b9686251
             RESPONDENT_WITHOUT_SOLICITOR: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
             CASE_INVITE: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
-            CAFCASS_OTHER: b77818d7-7756-4d83-8ecd-e2b54f512cf2
+            APPLICANT_SOLICITOR: 72e32651-a952-4063-8a85-5f28950fcc84
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -107,18 +108,20 @@ notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
 
-payments:
-  api:
-    url: ${PAY_URL:}
-    callback-url: ${PAY_CALLBACK_URL:}
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
-
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
+
+payments:
+  api:
+    url: ${PAY_URL:}
+    callback-url: ${PAY_CALLBACK_URL:}
+
+private-law:
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw}
 
 fees-register:
   api:
@@ -272,6 +275,10 @@ document:
       prl_c43_draft_template: PRL-GOR-ENG-C43-Child-Arrangements-Draft.docx
       prl_c43_draft_filename: ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
       prl_c47a_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Final.docx
+      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
+      C43A_draft_filename: C43ADraftCreateOrder.pdf
+      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
+      C43A_final_filename: C43AFinalCreateOrder.pdf
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Draft.docx
       prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
@@ -289,14 +296,6 @@ document:
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
       prl_n117_filename: N117CreateOrder.pdf
-      prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
-      prl_c7_blank_filename: C7BlankDocument.pdf
-      prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
-      prl_c8_blank_filename: C8BlankDocument.pdf
-      prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
-      prl_c1a_blank_filename: C1ABlankDocument.pdf
-      prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
-      prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
       prl_fl404a_final_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Final.docx
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
       prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
@@ -305,6 +304,14 @@ document:
       prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
       prl_fl402_final_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
+      prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
+      prl_c7_blank_filename: C7BlankDocument.pdf
+      prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
+      prl_c8_blank_filename: C8BlankDocument.pdf
+      prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
+      prl_c1a_blank_filename: C1ABlankDocument.pdf
+      prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
+      prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf

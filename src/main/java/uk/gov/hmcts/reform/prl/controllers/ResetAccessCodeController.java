@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +30,9 @@ public class ResetAccessCodeController {
     private ObjectMapper objectMapper;
 
     @PostMapping(path = "/regenerate-access-code", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Resubmission completed"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse resetAccessCode(
         @RequestBody CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = new HashMap<>(callbackRequest.getCaseDetails().getData());
