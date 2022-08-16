@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -171,6 +172,9 @@ public class DocumentGenService {
     @Autowired
     OrganisationService organisationService;
 
+    @Autowired
+    private CourtSealFinderService courtSealFinderService;
+
     private CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -191,6 +195,13 @@ public class DocumentGenService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         if (documentLanguage.isGenEng()) {
+            String courtName = caseData.getSubmitCountyCourtSelection().getCourtName();
+
+            if (courtSealFinderService.isWelshSeal(courtName)) {
+                updatedCaseData.put("courtSeal", "[userImage:familycourtseal-bilingual.png]");
+            } else {
+                updatedCaseData.put("courtSeal", "[userImage:familycourtseal.png]");
+            }
             updatedCaseData.put("isEngDocGen", Yes.toString());
             if (isConfidentialInformationPresentForC100(caseData)) {
                 if (State.CASE_ISSUE.equals(caseData.getState())) {
