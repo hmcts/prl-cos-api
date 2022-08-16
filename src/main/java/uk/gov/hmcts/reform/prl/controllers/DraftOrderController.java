@@ -47,7 +47,7 @@ public class DraftOrderController {
     @Autowired
     private DgsService documentGenService;
 
-    @PostMapping(path = "/draft-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/draft-an-order-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public AboutToStartOrSubmitCallbackResponse draftOrder(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
