@@ -77,6 +77,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfiden
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
@@ -117,6 +118,13 @@ public class CaseData implements MappableObject {
      * Case Type Of Application.
      */
     private final String caseTypeOfApplication;
+
+    /**
+     * Applicant's Age.
+     *
+     */
+    @JsonProperty("applicantAge")
+    private final ApplicantAge applicantAge;
 
     /**
      * Case Type Of Application.
@@ -287,6 +295,7 @@ public class CaseData implements MappableObject {
     private final String specialArrangementsRequired;
     private final YesOrNo isIntermediaryNeeded;
     private final String reasonsForIntermediary;
+    private final String specialCourtName;
 
     /**
      * International element.
@@ -607,6 +616,13 @@ public class CaseData implements MappableObject {
     private String isWithdrawRequestSent;
 
     /**
+     *  Courtnav uploaded files.
+     */
+
+    private Document fl401Doc1;
+    private Document fl401Doc2;
+    private YesOrNo isCourtNavCase;
+
      *  Service Of Application.
      */
     private OrdersToServeSA serviceOfApplicationScreen1;

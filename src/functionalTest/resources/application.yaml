@@ -112,6 +112,9 @@ notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
 
+private-law:
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw}
+
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
   rpa:
