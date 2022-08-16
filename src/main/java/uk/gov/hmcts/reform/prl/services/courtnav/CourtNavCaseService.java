@@ -32,7 +32,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class CaseService {
+public class CourtNavCaseService {
 
     public static final String COURTNAV_DOCUMENT_UPLOAD_EVENT_ID = "courtnav-document-upload";
     private final CoreCaseDataApi coreCaseDataApi;

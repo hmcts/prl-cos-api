@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CaseServiceTest {
+public class CourtNavCaseServiceTest {
 
     private final String authToken = "Bearer abc";
     private final String s2sToken = "s2s token";
@@ -57,7 +57,7 @@ public class CaseServiceTest {
     private DocumentGenService documentGenService;
 
     @InjectMocks
-    CaseService caseService;
+    CourtNavCaseService courtNavCaseService;
 
 
     private CaseData caseData;
@@ -82,7 +82,7 @@ public class CaseServiceTest {
     @Test
     public void shouldStartAndSubmitEventWithEventData() throws Exception {
         Map<String, Object> tempMap = new HashMap<>();
-        caseService.createCourtNavCase("Bearer abc", caseData);
+        courtNavCaseService.createCourtNavCase("Bearer abc", caseData);
         verify(coreCaseDataApi).startForCaseworker(authToken, s2sToken,
                                                    randomUserId, PrlAppsConstants.JURISDICTION,
                                                    PrlAppsConstants.CASE_TYPE, "courtnav-case-creation"
@@ -123,8 +123,8 @@ public class CaseServiceTest {
             "typeOfDocument",
             "fl401Doc1"
         )).build());
-        caseService.uploadDocument("Bearer abc", file, "fl401Doc1",
-                                   "1234567891234567"
+        courtNavCaseService.uploadDocument("Bearer abc", file, "fl401Doc1",
+                                           "1234567891234567"
         );
         verify(coreCaseDataApi).startEventForCaseWorker(
             "Bearer abc",
@@ -149,8 +149,8 @@ public class CaseServiceTest {
 
     @Test(expected = ResponseStatusException.class)
     public void shouldThrowExceptionWhenInvalidTypeOfDocumentIsPassed() {
-        caseService.uploadDocument("Bearer abc", file, "fl401Doc3",
-                                   "1234567891234567"
+        courtNavCaseService.uploadDocument("Bearer abc", file, "fl401Doc3",
+                                           "1234567891234567"
         );
     }
 
