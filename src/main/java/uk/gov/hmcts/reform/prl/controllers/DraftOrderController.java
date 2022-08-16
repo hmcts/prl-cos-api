@@ -47,8 +47,8 @@ public class DraftOrderController {
     @Autowired
     private DgsService documentGenService;
 
-    @PostMapping(path = "/amend-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    public AboutToStartOrSubmitCallbackResponse populateOrderToAmendDownloadLink(
+    @PostMapping(path = "/draft-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    public AboutToStartOrSubmitCallbackResponse draftOrder(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
