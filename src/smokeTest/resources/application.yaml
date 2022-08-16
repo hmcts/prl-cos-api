@@ -116,18 +116,20 @@ notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
 
+payments:
+  api:
+    url: ${PAY_URL:}
+    callback-url: ${PAY_CALLBACK_URL:}
+
+private-law:
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw}
+
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
-
-payments:
-  api:
-    url: ${PAY_URL:}
-    callback-url: ${PAY_CALLBACK_URL:}
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
 
 fees-register:
   api:
@@ -160,9 +162,8 @@ idam:
     username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
     password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
-
+    username: ${IDAM_SOLICITOR_USERNAME:dummysolicitor@test.com}
+    password: ${IDAM_SOLICITOR_PASSWORD:dummy}
 
 security:
   oauth2:
@@ -313,6 +314,10 @@ document:
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
       prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
+      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
+      C43A_draft_filename: C43ADraftCreateOrder.pdf
+      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
+      C43A_final_filename: C43AFinalCreateOrder.pdf
 
 southampton:
   court:

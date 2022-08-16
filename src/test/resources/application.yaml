@@ -124,7 +124,6 @@ uk:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
 
-
 notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
@@ -140,7 +139,9 @@ payments:
   api:
     url: ${PAY_URL:}
     callback-url: ${PAY_CALLBACK_URL:}
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
+
+private-law:
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw}
 
 fees-register:
   api:
@@ -315,9 +316,14 @@ document:
       prl_fl402_final_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
       prl_n117_draft_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Draft.docx
+      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
+      C43A_draft_filename: C43ADraftCreateOrder.pdf
+      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
+      C43A_final_filename: C43AFinalCreateOrder.pdf
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
       prl_n117_filename: N117CreateOrder.pdf
+      prl_fl404b_final_template: PRL-GOR-ENG-FL404B-Common-Final.docx
       prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
       prl_c7_blank_filename: C7BlankDocument.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
@@ -326,7 +332,6 @@ document:
       prl_c1a_blank_filename: C1ABlankDocument.pdf
       prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
-      prl_fl404b_final_template: PRL-GOR-ENG-FL404B-Common-Final.docx
       prl_fl404b_final_filename: amended_discharged_or_varied_order_fl404b_final.pdf
       prl_fl404b_blank_final_filename: blank_order_fl404b_final.pdf
       prl_fl404b_draft_template: PRL-GOR-ENG-FL404B-Common-Draft.docx

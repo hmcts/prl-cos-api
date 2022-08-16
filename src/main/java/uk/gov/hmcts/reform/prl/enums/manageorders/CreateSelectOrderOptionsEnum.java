@@ -81,5 +81,4 @@ public enum CreateSelectOrderOptionsEnum {
             .map(i -> i.displayedValue)
             .findFirst().orElse("");
     }
-
 }

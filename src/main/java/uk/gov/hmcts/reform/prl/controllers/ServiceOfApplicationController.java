@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,12 +40,15 @@ public class ServiceOfApplicationController {
 
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
         @RequestBody CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseDataUpdated = serviceOfApplicationService.populateHeader(caseData,caseDataUpdated);
+
         if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
             List<String> createdOrders = caseData.getOrderCollection().stream()
                 .map(Element::getValue).map(OrderDetails::getOrderType)
@@ -55,8 +60,10 @@ public class ServiceOfApplicationController {
     }
 
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(@RequestBody CallbackRequest callbackRequest) throws Exception {
-
         CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         updatedCaseData.put("respondentCaseInvites", caseData.getRespondentCaseInvites());
