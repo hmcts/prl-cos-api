@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.courtnav.CaseService;
+import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
 import java.util.Map;
 
@@ -28,20 +28,20 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class CaseControllerTest {
+public class CourtNavCaseControllerTest {
 
     private static final String FILE_NAME = "fileName";
     private static final String CONTENT_TYPE = "application/json";
     private static final String AUTH = "auth";
 
     @InjectMocks
-    private CaseController caseController;
+    private CourtNavCaseController courtNavCaseController;
 
     @Mock
     private AuthorisationService authorisationService;
 
     @Mock
-    private CaseService caseService;
+    private CourtNavCaseService courtNavCaseService;
 
     @Mock
     private FL401ApplicationMapper fl401ApplicationMapper;
@@ -66,7 +66,7 @@ public class CaseControllerTest {
             .build();
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
+        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
@@ -75,7 +75,7 @@ public class CaseControllerTest {
             .build();
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
 
-        ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
+        ResponseEntity response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
         assertEquals(201, response.getStatusCodeValue());
 
     }
@@ -86,9 +86,9 @@ public class CaseControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        doNothing().when(caseService).uploadDocument(any(), any(), any(), any());
+        doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
 
-        ResponseEntity response = caseController.uploadDocument(
+        ResponseEntity response = courtNavCaseController.uploadDocument(
             AUTH,
             "s2s token",
             "1234567891234567",
@@ -105,7 +105,7 @@ public class CaseControllerTest {
             .applicantCaseName("test")
             .build();
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
+        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
@@ -114,7 +114,7 @@ public class CaseControllerTest {
             .build();
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
 
-        ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
+        ResponseEntity response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
         assertEquals(403, response.getStatusCodeValue());
 
     }
@@ -125,7 +125,7 @@ public class CaseControllerTest {
             .applicantCaseName("test")
             .build();
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(caseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
+        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
@@ -134,7 +134,7 @@ public class CaseControllerTest {
             .build();
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
 
-        ResponseEntity response = caseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
+        ResponseEntity response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
         assertEquals(403, response.getStatusCodeValue());
 
     }
@@ -146,7 +146,7 @@ public class CaseControllerTest {
                        .beforeStart(BeforeStart.builder().applicantHowOld(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
-        ResponseEntity response = caseController
+        ResponseEntity response = courtNavCaseController
             .createCase("Bearer:test", "s2s token", courtNavCaseData);
     }
 
@@ -154,8 +154,8 @@ public class CaseControllerTest {
     public void shouldUploadDocWhenCalledWithCorrectParameters() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
-        doNothing().when(caseService).uploadDocument(any(), any(), any(), any());
-        ResponseEntity response = caseController
+        doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
+        ResponseEntity response = courtNavCaseController
             .uploadDocument("Bearer:test", "s2s token",
                             "", file, "fl401Doc1"
             );
@@ -166,7 +166,7 @@ public class CaseControllerTest {
     @Test(expected = ResponseStatusException.class)
     public void shouldNotUploadDocWhenCalledWithInvalidAuthToken() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        ResponseEntity response = caseController
+        ResponseEntity response = courtNavCaseController
             .uploadDocument("Bearer:invalid", "s2s token",
                             "", file, "fl401Doc1"
             );
@@ -174,7 +174,7 @@ public class CaseControllerTest {
 
     @Test(expected = ResponseStatusException.class)
     public void shouldNotUploadDocWhenCalledWithInvalidS2SToken() {
-        ResponseEntity response = caseController
+        ResponseEntity response = courtNavCaseController
             .uploadDocument("Bearer:test", "s2s token",
                             "", file, "fl401Doc1"
             );
