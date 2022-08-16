@@ -458,21 +458,20 @@ public class FL401ApplicationMapper {
 
     private List<Element<ApplicantChild>> mapProtectedChild(List<Element<ProtectedChild>> protectedChildren) {
 
-        List<Element<ApplicantChild>> childList = new ArrayList<>();
+        List<ApplicantChild> childList = new ArrayList<>();
         for (Element<ProtectedChild> protectedChild : protectedChildren) {
 
             ProtectedChild value = protectedChild.getValue();
-            ApplicantChild applicantChild = ApplicantChild.builder()
+            childList.add(ApplicantChild.builder()
                 .fullName(value.getFullName())
                 .dateOfBirth(LocalDate.parse(value.getDateOfBirth().mergeDate()))
                 .applicantChildRelationship(value.getRelationship())
                 .applicantRespondentShareParental(value.isParentalResponsibility() ? YesOrNo.Yes : YesOrNo.No)
                 .respondentChildRelationship(value.getRespondentRelationship())
-                .build();
-            childList.add(ElementUtils.element(applicantChild));
+                .build());
         }
 
-        return childList;
+        return ElementUtils.wrapElements(childList);
     }
 
     private PartyDetails mapRespondent(RespondentDetails respondent) {
