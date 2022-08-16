@@ -623,6 +623,7 @@ public class CaseData implements MappableObject {
     private Document fl401Doc2;
     private YesOrNo isCourtNavCase;
 
+    /**
      *  Service Of Application.
      */
     private OrdersToServeSA serviceOfApplicationScreen1;
