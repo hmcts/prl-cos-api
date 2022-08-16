@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.models.complextypes;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -66,6 +68,10 @@ public class PartyDetails {
     @JsonIgnore
     private final String caseTypeOfApplication;
     private final YesOrNo respondentLivedWithApplicant;
+
+    @JsonProperty("applicantPreferredContact")
+    private final List<PreferredContactEnum> applicantPreferredContact;
+    private final String applicantContactInstructions;
 
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
