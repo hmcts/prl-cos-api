@@ -253,7 +253,7 @@ public class CaseService {
     public String validateAccessCode(String userToken, String s2sToken, String caseId, String accessCode) {
         log.info("validateAccessCode");
         log.info("parameters are :" + caseId + " and " + accessCode);
-        String accessCodeStatus = "Invalid access code";
+        String accessCodeStatus = "Invalid";
         CaseData caseData = objectMapper.convertValue(
             coreCaseDataApi.getCase(userToken, s2sToken, caseId).getData(),
             CaseData.class
@@ -269,12 +269,12 @@ public class CaseService {
 
         log.info("matchingCaseInvite testing::" + matchingCaseInvite);
         if (matchingCaseInvite.size() > 0) {
+            accessCodeStatus = "Valid";
             for (CaseInvite caseInvite : matchingCaseInvite) {
                 if ("Yes".equals(caseInvite.getHasLinked())) {
-                    accessCodeStatus = "Access code already linked";
+                    accessCodeStatus = "Linked";
                 }
             }
-            accessCodeStatus = "Access code is valid";
         }
         log.info("accessCodeStatus" + accessCodeStatus);
         return accessCodeStatus;

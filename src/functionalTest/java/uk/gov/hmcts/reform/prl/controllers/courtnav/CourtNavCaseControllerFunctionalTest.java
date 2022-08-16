@@ -21,7 +21,7 @@ import java.io.File;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class CaseControllerFunctionalTest {
+public class CourtNavCaseControllerFunctionalTest {
     private final String userToken = "Bearer testToken";
 
     @Autowired
