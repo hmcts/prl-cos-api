@@ -66,6 +66,10 @@ feature-toggle:
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
+aca:
+  api:
+    url: ${ACA_SERVICE_API_BASEURL:http://localhost:4454}
+
 uk:
   gov:
     notify:
@@ -110,7 +114,9 @@ payments:
   api:
     url: ${PAY_URL:}
     callback-url: ${PAY_CALLBACK_URL:}
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
+
+private-law:
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw}
 
 fees-register:
   api:

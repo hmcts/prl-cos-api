@@ -16,7 +16,9 @@ public class CaseInvite {
     private String caseInviteEmail;
     private String accessCode;
     private String invitedUserId;
+    private String hasLinked;
     private LocalDate expiryDate;
+
 
     @Builder()
     public CaseInvite() {

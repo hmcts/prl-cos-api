@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -40,7 +40,7 @@ public class C100IssueCaseController {
     private final C100JsonMapper c100JsonMapper;
 
     @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to Issue and send to local court")
+    @Operation(description = "Callback to Issue and send to local court")
     public AboutToStartOrSubmitCallbackResponse issueAndSendToLocalCourt(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {

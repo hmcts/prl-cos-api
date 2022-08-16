@@ -11,10 +11,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -27,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
@@ -51,7 +54,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
-import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -61,8 +63,11 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
+import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
@@ -83,6 +88,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -168,13 +175,25 @@ public class CallbackControllerTest {
     private CaseWorkerEmailService caseWorkerEmailService;
 
     @Mock
-    private AddCaseNoteService addCaseNoteService;
-
-    @Mock
     private DocumentGenService documentGenService;
 
     @Mock
+    private ServiceOfApplicationService serviceOfApplicationService;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
+
+    @Mock
     private  ConfidentialityTabService confidentialityTabService;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    private CcdDataStoreService ccdDataStoreService;
+
+    @Mock
+    private AssignCaseAccessClient assignCaseAccessClient;
 
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -863,17 +882,24 @@ public class CallbackControllerTest {
     @Test
     public void testCopyFL401CasenameToC100CaseName() throws Exception {
 
-        Map<String, Object> caseData = new HashMap<>();
-        Organisations org = Organisations.builder().name("testOrg").build();
-        caseData.put("applicantOrRespondentCaseName", "test");
+        Map<String, Object> caseDetails = new HashMap<>();
+        caseDetails.put("applicantOrRespondentCaseName", "test");
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+            .orgPolicyReference("jfljsd")
+                .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
+        caseDetails.put("applicantOrganisationPolicy",applicantOrganisationPolicy);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd").applicantOrganisationPolicy(applicantOrganisationPolicy).build();
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
-                             .data(caseData).build()).build();
+                             .data(caseDetails).build()).build();
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .aboutToSubmitCaseCreation(authToken, callbackRequest);
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
@@ -885,15 +911,25 @@ public class CallbackControllerTest {
     public void aboutToSubmitCaseCreationToC100ForNullCaseName() {
 
         Map<String, Object> caseData = new HashMap<>();
-        Organisations org = Organisations.builder().name("testOrg").build();
+        Organisations org = Organisations.builder().name("testOrg")
+            .organisationIdentifier("abcd")
+            .build();
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+            .orgPolicyReference("jfljsd")
+            .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
+        caseData.put("applicantOrganisationPolicy",applicantOrganisationPolicy);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
+        CaseData caseDataUpdated = CaseData.builder().id(123L)
+            .applicantCaseName("abcd").applicantOrganisationPolicy(applicantOrganisationPolicy).build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseDataUpdated);
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(false);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .aboutToSubmitCaseCreation(authToken, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
@@ -919,13 +955,28 @@ public class CallbackControllerTest {
     public void aboutToSubmitCaseCreationToC100ForNullCaseNameWithException() {
 
         Map<String, Object> caseData = new HashMap<>();
-        Organisations org = Organisations.builder().name("testOrg").build();
+        Organisations org = Organisations.builder().name("testOrg")
+            .organisationIdentifier("abcd")
+            .build();
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+            .orgPolicyReference("jfljsd")
+            .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(null);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
+        CaseData caseDataUpdated = CaseData.builder().id(123L)
+            .applicantCaseName("abcd").applicantOrganisationPolicy(applicantOrganisationPolicy).build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseDataUpdated);
+        UserDetails userDetails = new UserDetails();
+        when(userService.getUserDetails(anyString())).thenReturn(userDetails);
+        doNothing().when(ccdDataStoreService).removeCreatorRole(anyString(), anyString());
+        when(authTokenGenerator.generate()).thenReturn("Generate");
+        doNothing().when(assignCaseAccessClient)
+            .assignCaseAccess(anyString(), anyString(), anyBoolean(), any());
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .aboutToSubmitCaseCreation(authToken, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
@@ -1487,7 +1538,6 @@ public class CallbackControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
     }
 
-
     @Test
     public void testPrePopulateCourtDetails() throws NotFoundException {
 
@@ -1518,8 +1568,5 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController.prePopulateCourtDetails(callbackRequest);
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
-
     }
 }
-
-
