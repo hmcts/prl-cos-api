@@ -18,6 +18,7 @@ public class CaseInvite {
     private String invitedUserId;
     private LocalDate expiryDate;
 
+
     @Builder()
     public CaseInvite() {
 

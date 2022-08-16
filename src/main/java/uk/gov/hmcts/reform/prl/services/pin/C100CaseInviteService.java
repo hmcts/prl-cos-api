@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.pin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -21,6 +22,9 @@ public class C100CaseInviteService implements CaseInviteService {
 
     @Autowired
     CaseInviteEmailService caseInviteEmailService;
+
+    @Autowired
+    private LaunchDarklyClient launchDarklyClient;
 
     private CaseInvite generateRespondentCaseInvite(Element<PartyDetails> partyDetails) {
         return new CaseInvite().generateAccessCode(partyDetails.getValue().getEmail(), partyDetails.getId());
@@ -41,6 +45,20 @@ public class C100CaseInviteService implements CaseInviteService {
                 CaseInvite caseInvite = generateRespondentCaseInvite(respondent);
                 caseInvites.add(element(caseInvite));
                 sendCaseInvite(caseInvite, respondent.getValue(), caseData);
+            }
+        }
+        if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
+            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                CaseInvite caseInvite = generateRespondentCaseInvite(applicant);
+                caseInvites.add(element(caseInvite));
+                sendCaseInvite(caseInvite, applicant.getValue(), caseData);
+            }
+        }
+        if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
+            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                CaseInvite caseInvite = generateRespondentCaseInvite(applicant);
+                caseInvites.add(element(caseInvite));
+                sendCaseInvite(caseInvite, applicant.getValue(), caseData);
             }
         }
         return caseData.toBuilder().respondentCaseInvites(caseInvites).build();
