@@ -66,6 +66,9 @@ feature-toggle:
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
+citizen_frontend:
+  url: http://example.com
+
 uk:
   gov:
     notify:
@@ -89,6 +92,12 @@ uk:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
             CAFCASS_OTHER: b77818d7-7756-4d83-8ecd-e2b54f512cf2
+            APPLICANT_SOLICITOR_CA: 72e32651-a952-4063-8a85-5f28950fcc84
+            APPLICANT_SOLICITOR_DA: 15152a49-ff8f-4b40-a061-f2ef7c95b699
+            RESPONDENT_SOLICITOR: 8d3e5c9b-6fca-4c1c-8b31-40c2b9686251
+            RESPONDENT_WITHOUT_SOLICITOR: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
+            CASE_INVITE: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
+            APPLICANT_SOLICITOR: 72e32651-a952-4063-8a85-5f28950fcc84
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -238,6 +247,10 @@ document:
       fl401_fl406_welsh_filename: Power_of_arrest.pdf
     common:
       prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
+      doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
+      doc_cover_sheet_welsh_template: not_implemented
+      doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
+      doc_cover_sheet_welsh_filename: not_implemented
       prl_c21_filename: Blank_Order_Directions_C21.pdf
       prl_c21_welsh_template: PRL-GOR-WEL-C21-Blank-Order-Final.docx
       prl_c21_welsh_filename: Blank_Order_Directions_C21_Welsh.pdf
@@ -260,6 +273,10 @@ document:
       prl_c43_draft_template: PRL-GOR-ENG-C43-Child-Arrangements-Draft.docx
       prl_c43_draft_filename: ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
       prl_c47a_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Final.docx
+      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
+      C43A_draft_filename: C43ADraftCreateOrder.pdf
+      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
+      C43A_final_filename: C43AFinalCreateOrder.pdf
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Draft.docx
       prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
@@ -285,6 +302,14 @@ document:
       prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
       prl_fl402_final_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
+      prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
+      prl_c7_blank_filename: C7BlankDocument.pdf
+      prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
+      prl_c8_blank_filename: C8BlankDocument.pdf
+      prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
+      prl_c1a_blank_filename: C1ABlankDocument.pdf
+      prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
+      prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
 
 southampton:
   court:
