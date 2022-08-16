@@ -311,19 +311,18 @@ public class FL401ApplicationMapper {
 
     private List<Element<FL401Proceedings>> getOngoingProceedings(List<Element<CourtProceedings>> ongoingCourtProceedings) {
 
-        List<Element<FL401Proceedings>> proceedingsList = new ArrayList<>();
+        List<FL401Proceedings> proceedingsList = new ArrayList<>();
         for (Element<CourtProceedings> courtProceedingsElement : ongoingCourtProceedings) {
 
             CourtProceedings proceedings = courtProceedingsElement.getValue();
-            FL401Proceedings fl401Proceedings = FL401Proceedings.builder()
+            proceedingsList.add(FL401Proceedings.builder()
                 .nameOfCourt(proceedings.getNameOfCourt())
                 .caseNumber(proceedings.getCaseNumber())
                 .typeOfCase(proceedings.getCaseType())
                 .anyOtherDetails(proceedings.getCaseDetails())
-                .build();
-            proceedingsList.add(ElementUtils.element(fl401Proceedings));
+                .build());
         }
-        return proceedingsList;
+        return ElementUtils.wrapElements(proceedingsList);
 
     }
 
