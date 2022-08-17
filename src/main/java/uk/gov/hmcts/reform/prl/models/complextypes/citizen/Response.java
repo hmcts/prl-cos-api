@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.
 public class Response {
     private final YesOrNo legalRepresentation;
     private final Consent consent;
-    private final KeepDetailsPrivate confidentiality;
+    private final KeepDetailsPrivate keepDetailsPrivate;
     private final CitizenDetails citizenDetails;
     // TODO: Add support you need during your case here
     private final Miam miam;

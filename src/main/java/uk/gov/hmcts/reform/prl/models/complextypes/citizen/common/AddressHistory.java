@@ -14,5 +14,5 @@ import java.util.List;
 @AllArgsConstructor
 public class AddressHistory {
     private final YesOrNo isAtAddressLessThan5Years;
-    private List<Element<Address>> addressHistory;
+    private List<Element<Address>> previousAddressHistory;
 }

@@ -75,7 +75,7 @@ public class PartyDetails {
     private final List<PreferredContactEnum> applicantPreferredContact;
     private final String applicantContactInstructions;
 
-    private final User userDetails;
+    private final User user;
     private final Response response;
 
     public boolean hasConfidentialInfo() {
