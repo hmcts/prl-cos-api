@@ -23,7 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ResponseMessage;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.courtnav.CaseService;
+import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -32,11 +32,11 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class CaseController {
+public class CourtNavCaseController {
 
     private static final String SERVICE_AUTH = "ServiceAuthorization";
 
-    private final CaseService caseService;
+    private final CourtNavCaseService courtNavCaseService;
     private final AuthorisationService authorisationService;
     private final FL401ApplicationMapper fl401ApplicationMapper;
 
@@ -60,12 +60,12 @@ public class CaseController {
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
             CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
-            CaseDetails caseDetails = caseService.createCourtNavCase(
+            CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
                 authorisation,
                 caseData
             );
             log.info("Case has been created {}", caseDetails.getId());
-            caseService.refreshTabs(authorisation, caseDetails.getData(), caseDetails.getId());
+            courtNavCaseService.refreshTabs(authorisation, caseDetails.getData(), caseDetails.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(new CaseCreationResponse(
                 String.valueOf(caseDetails.getId())));
         } else {
@@ -93,7 +93,7 @@ public class CaseController {
         log.info("auth token inside uploadDocument controller {}", authorisation);
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
-            caseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+            courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
             return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
                                                                     + file.getOriginalFilename()));
         } else {
