@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +30,6 @@ public class ResetAccessCodeController extends AbstractCallbackController {
     private ObjectMapper objectMapper;
 
     @PostMapping(path = "/regenerate-access-code", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to regenerate and send access code")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Resubmission completed"),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
