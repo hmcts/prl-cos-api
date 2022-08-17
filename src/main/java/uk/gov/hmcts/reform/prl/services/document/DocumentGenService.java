@@ -195,13 +195,6 @@ public class DocumentGenService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         if (documentLanguage.isGenEng()) {
-            String courtName = caseData.getSubmitCountyCourtSelection().getCourtName();
-
-            if (courtSealFinderService.isWelshSeal(courtName)) {
-                updatedCaseData.put("courtSeal", "[userImage:familycourtseal-bilingual.png]");
-            } else {
-                updatedCaseData.put("courtSeal", "[userImage:familycourtseal.png]");
-            }
             updatedCaseData.put("isEngDocGen", Yes.toString());
             if (isConfidentialInformationPresentForC100(caseData)) {
                 if (State.CASE_ISSUE.equals(caseData.getState())) {

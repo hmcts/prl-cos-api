@@ -17,21 +17,21 @@ import javax.annotation.PostConstruct;
 public class CourtSealFinderService {
 
 
-    @Value("${welshCourts}")
-    protected String welshCourt;
+    @Value("${welshCourtIds}")
+    protected String welshCourtIds;
 
-    private List<String> welshCourts;
+    private List<String> welshCourtCodes;
 
 
     @PostConstruct
     public void init() {
-        welshCourts = Arrays.stream(welshCourt.split(",")).collect(Collectors.toList());
+        welshCourtCodes = Arrays.stream(welshCourtIds.split(",")).collect(Collectors.toList());
 
     }
 
 
     public boolean isWelshSeal(String courtName) {
-        return welshCourts.contains(courtName);
+        return welshCourtCodes.contains(courtName);
     }
 
 }

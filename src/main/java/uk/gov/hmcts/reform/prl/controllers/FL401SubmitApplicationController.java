@@ -127,7 +127,8 @@ public class FL401SubmitApplicationController {
 
         String courtName = caseData.getSubmitCountyCourtSelection().getCourtName();
 
-        caseData = caseData.toBuilder().issueDate(localDate).courtName(courtName).build();
+        caseData = caseData.toBuilder().issueDate(localDate).courtName(courtName).courtId(caseData
+            .getSubmitCountyCourtSelection().getCourtCode()).build();
         caseData = caseData.toBuilder().isCourtEmailFound("Yes").build();
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();

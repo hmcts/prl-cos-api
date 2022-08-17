@@ -125,6 +125,8 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .caseworkerEmailAddress(southamptonCourtEmailAddress)
                 .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
                 .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
+                .courtId((closestChildArrangementsCourt != null) ? String.valueOf(closestChildArrangementsCourt
+                    .getCountyLocationCode()) : "No Court Fetched")
                 .build();
 
             caseData = buildGeneratedDocumentCaseData(authorisation, callbackRequest, caseData, caseDataForOrgDetails);

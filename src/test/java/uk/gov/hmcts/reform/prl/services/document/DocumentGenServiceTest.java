@@ -86,6 +86,7 @@ public class DocumentGenServiceTest {
     @InjectMocks
     DocumentGenService documentGenService;
 
+
     private GeneratedDocumentInfo generatedDocumentInfo;
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -365,6 +366,7 @@ public class DocumentGenServiceTest {
         );
         when(organisationService.getApplicantOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
         when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
+
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseDataFinal);
 

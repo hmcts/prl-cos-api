@@ -26,6 +26,9 @@ public class DgsServiceTest {
     private DgsApiClient dgsApiClient;
 
     @Mock
+    private CourtSealFinderService courtSealFinderService;
+
+    @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -40,6 +43,7 @@ public class DgsServiceTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
+
 
     }
 
@@ -70,8 +74,25 @@ public class DgsServiceTest {
     public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
 
         CaseDetails caseDetails = CaseDetailsProvider.full();
+        when(courtSealFinderService.isWelshSeal(null)).thenReturn(Boolean.TRUE);
+        when(dgsService.generateDocument(authToken,caseDetails, PRL_DRAFT_TEMPLATE)).thenReturn(generatedDocumentInfo);
 
-        when(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE)).thenReturn(generatedDocumentInfo);
+
+        Throwable exception = assertThrows(Exception.class, () -> {
+            throw new Exception("Error generating and storing document for case");
+        });
+
+        assertEquals("Error generating and storing document for case", exception.getMessage());
+
+    }
+
+    @Test
+    public void testToGenerateDocumentWithEnglishSealNoDataExpectedException() throws Exception {
+
+        CaseDetails caseDetails = CaseDetailsProvider.full();
+        when(courtSealFinderService.isWelshSeal(null)).thenReturn(Boolean.FALSE);
+        when(dgsService.generateDocument(authToken,caseDetails, PRL_DRAFT_TEMPLATE)).thenReturn(generatedDocumentInfo);
+
 
         Throwable exception = assertThrows(Exception.class, () -> {
             throw new Exception("Error generating and storing document for case");
@@ -84,7 +105,7 @@ public class DgsServiceTest {
     @Test
     public void testToGenerateWelshDocument() throws Exception {
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseData = CaseData.builder().courtName("test")
             .build();
 
         CaseDetails caseDetails = CaseDetails.builder()
@@ -97,7 +118,6 @@ public class DgsServiceTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-
         when(dgsService.generateWelshDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE)).thenReturn(generatedDocumentInfo);
 
         assertEquals(dgsService.generateWelshDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE),generatedDocumentInfo);

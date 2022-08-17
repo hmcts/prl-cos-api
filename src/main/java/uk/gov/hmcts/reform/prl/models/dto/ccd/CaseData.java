@@ -579,6 +579,9 @@ public class CaseData implements MappableObject {
     private String selectedOrder;
 
 
+    private String courtSeal;
+
+
     /**
      * FL401 Court details for Pilot.
      */

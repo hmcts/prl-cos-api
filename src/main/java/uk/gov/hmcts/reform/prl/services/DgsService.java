@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 
 import java.util.HashMap;
@@ -25,10 +26,22 @@ public class DgsService {
 
     private final DgsApiClient dgsApiClient;
 
+    private final CourtSealFinderService courtSealFinderService;
+
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
 
+        CaseData caseData = caseDetails.getCaseData();
+        String courtCode = caseData.getCourtId();
+        // Added to populate Court Seal based on court name (FPET-47)
+        if (courtSealFinderService.isWelshSeal(courtCode)) {
+            caseData = caseData.toBuilder().courtSeal("[userImage:familycourtseal-bilingual.png]").build();
+        } else {
+            caseData = caseData.toBuilder().courtSeal("[userImage:familycourtseal.png]").build();
+        }
+
         Map<String, Object> tempCaseDetails = new HashMap<>();
-        tempCaseDetails.put("caseDetails", AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
+        tempCaseDetails.put("caseDetails", AppObjectMapper.getObjectMapper().convertValue(uk.gov.hmcts.reform.prl.models
+            .dto.ccd.CaseDetails.builder().caseData(caseData).build(), Map.class));
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
