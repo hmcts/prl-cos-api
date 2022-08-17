@@ -74,7 +74,13 @@ public class CaseService {
         searchCriteria.put("sortDirection", "desc");
         searchCriteria.put("page", "1");
 
-        return searchCasesWith(authToken, s2sToken, searchCriteria);
+        CaseData caseData1 = CaseData.builder().applicantCaseName("applicantName1").build();
+        CaseData caseData2 = CaseData.builder().applicantCaseName("applicantName2").build();
+        List<CaseData> caseDataList = new ArrayList<>();
+        caseDataList.add(caseData1);
+        caseDataList.add(caseData2);
+        //return searchCasesWith(authToken, s2sToken, searchCriteria);
+        return caseDataList;
     }
 
     private List<CaseData> searchCasesWith(String authToken, String s2sToken, Map<String, String> searchCriteria) {
