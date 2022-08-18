@@ -620,8 +620,8 @@ public class CaseData implements MappableObject {
      *  Courtnav uploaded files.
      */
 
-    private Document fl401Doc1;
-    private Document fl401Doc2;
+    @JsonProperty("courtNavUploadedDocs")
+    private final List<Element<UploadedDocuments>> courtNavUploadedDocs;
     private YesOrNo isCourtNavCase;
 
     /**
