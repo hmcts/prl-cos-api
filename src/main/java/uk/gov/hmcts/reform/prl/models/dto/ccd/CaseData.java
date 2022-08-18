@@ -588,7 +588,8 @@ public class CaseData implements MappableObject {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         this.toBuilder()
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
-            .dateSubmittedAndTime(DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa").format(zonedDateTime).toUpperCase())
+            .dateSubmittedAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime))
+            //.dateSubmittedAndTime(DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa").format(zonedDateTime).toUpperCase())
             .build();
 
         return this;
