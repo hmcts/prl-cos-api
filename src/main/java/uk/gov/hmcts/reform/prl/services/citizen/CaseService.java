@@ -74,8 +74,8 @@ public class CaseService {
         searchCriteria.put("sortDirection", "desc");
         searchCriteria.put("page", "1");
 
-        CaseData caseData1 = CaseData.builder().applicantCaseName("applicantName1").build();
-        CaseData caseData2 = CaseData.builder().applicantCaseName("applicantName2").build();
+        CaseData caseData1 = CaseData.builder().applicantCaseName("applicantName1").id(12345).build();
+        CaseData caseData2 = CaseData.builder().applicantCaseName("applicantName2").id(67890).build();
         List<CaseData> caseDataList = new ArrayList<>();
         caseDataList.add(caseData1);
         caseDataList.add(caseData2);
