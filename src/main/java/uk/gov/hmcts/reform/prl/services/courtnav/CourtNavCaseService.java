@@ -20,13 +20,18 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -35,6 +40,8 @@ import java.util.Map;
 public class CourtNavCaseService {
 
     public static final String COURTNAV_DOCUMENT_UPLOAD_EVENT_ID = "courtnav-document-upload";
+    public static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff","txt"};
+    public static final String[] ALLOWED_TYPE_OF_DOCS = {"FL401", "C8", "WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET"};
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
@@ -81,7 +88,14 @@ public class CourtNavCaseService {
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
 
         Map<String, Object> caseData = new HashMap<>();
-        if (typeOfDocument.equals("fl401Doc1") || typeOfDocument.equals("fl401Doc2")) {
+        if (checkFileFormat(document.getOriginalFilename()) && checkTypeOfDocument(typeOfDocument)) {
+            CaseDetails tempCaseDetails = coreCaseDataApi.getCase(
+                authorisation,
+                authTokenGenerator.generate(),
+                caseId
+            );
+
+            CaseData tempCaseData = CaseUtils.getCaseData(tempCaseDetails, objectMapper);
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -90,19 +104,13 @@ public class CourtNavCaseService {
                 Arrays.asList(document)
             );
             log.info("Document uploaded successfully through caseDocumentClient");
-            Document uploadedDocument = uploadResponse.getDocuments().get(0);
-            GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
-                .url(uploadedDocument.links.self.href)
-                .mimeType(uploadedDocument.mimeType)
-                .hashToken(uploadedDocument.hashToken)
-                .binaryUrl(uploadedDocument.links.binary.href)
-                .build();
-            caseData.put(typeOfDocument, uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(document.getOriginalFilename()).build());
-
+            CaseData updatedCaseData = addDocumentAndGetCaseData(
+                document.getOriginalFilename(),
+                typeOfDocument,
+                tempCaseData.getApplicantCaseName(),
+                tempCaseData,
+                uploadResponse.getDocuments().get(0)
+            );
 
             StartEventResponse startEventResponse =
                 coreCaseDataApi.startEventForCaseWorker(
@@ -120,7 +128,7 @@ public class CourtNavCaseService {
                 .event(Event.builder()
                            .id(startEventResponse.getEventId())
                            .build())
-                .data(caseData).build();
+                .data(updatedCaseData.toMap(CcdObjectMapper.getObjectMapper())).build();
 
             CaseDetails caseDetails = coreCaseDataApi.submitEventForCaseWorker(
                 authorisation,
@@ -139,6 +147,51 @@ public class CourtNavCaseService {
             log.error("Un acceptable type of document {}", typeOfDocument);
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
         }
+    }
+
+    private CaseData addDocumentAndGetCaseData(String fileName, String typeOfDocument, String partyName, CaseData tempCaseData, Document document) {
+
+        List<Element<UploadedDocuments>> uploadedDocumentsList;
+        Element<UploadedDocuments> uploadedDocumentsElement
+            = Element.<UploadedDocuments>builder()
+            .value(UploadedDocuments.builder()
+                       .dateCreated(new Date())
+                       .documentType(typeOfDocument)
+                       .partyName(partyName).isApplicant("NA_COURTNAV")
+                       .parentDocumentType("NA_COURTNAV")
+                       .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                                            .documentUrl(document.links.self.href)
+                                            .documentBinaryUrl(document.links.binary.href)
+                                            .documentHash(document.hashToken)
+                                            .documentFileName(fileName).build()).build()).build();
+
+        if (tempCaseData.getCourtNavUploadedDocs() != null) {
+            uploadedDocumentsList = tempCaseData.getCourtNavUploadedDocs();
+            uploadedDocumentsList.add(uploadedDocumentsElement);
+        } else {
+            uploadedDocumentsList = new ArrayList<>();
+            uploadedDocumentsList.add(uploadedDocumentsElement);
+        }
+
+        tempCaseData = tempCaseData.toBuilder().courtNavUploadedDocs(uploadedDocumentsList).build();
+        return tempCaseData;
+    }
+
+    private boolean checkTypeOfDocument(String typeOfDocument) {
+        if (typeOfDocument != null) {
+            return Arrays.stream(ALLOWED_TYPE_OF_DOCS).anyMatch(s -> s.equalsIgnoreCase(typeOfDocument));
+        }
+        return false;
+    }
+
+    private boolean checkFileFormat(String fileName) {
+        String format = "";
+        int i = fileName.lastIndexOf('.');
+        if (i >= 0) {
+            format = fileName.substring(i + 1);
+        }
+        String finalFormat = format;
+        return Arrays.stream(ALLOWED_FILE_TYPES).anyMatch(s -> s.equalsIgnoreCase(finalFormat));
     }
 
     public void refreshTabs(String authToken, Map<String, Object> data, Long id) throws Exception {
