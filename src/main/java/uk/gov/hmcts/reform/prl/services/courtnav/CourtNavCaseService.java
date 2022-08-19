@@ -130,6 +130,8 @@ public class CourtNavCaseService {
                            .build())
                 .data(updatedCaseData.toMap(CcdObjectMapper.getObjectMapper())).build();
 
+            log.info("Updated CaseData ****{}**** ", updatedCaseData);
+            log.info("Updated CaseData map -----{}--- ", updatedCaseData.toMap(CcdObjectMapper.getObjectMapper()));
             CaseDetails caseDetails = coreCaseDataApi.submitEventForCaseWorker(
                 authorisation,
                 authTokenGenerator.generate(),
