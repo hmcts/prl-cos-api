@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.courtnav;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -98,6 +100,9 @@ public class CourtNavCaseService {
                 caseId
             );
 
+            log.info("tempCaseDetails CaseData ****{}**** ", tempCaseDetails.getData());
+            Iterables.removeIf(tempCaseDetails.getData().values(), Objects::isNull);
+            log.info("After removing null tempCaseDetails CaseData ****{}**** ", tempCaseDetails.getData());
             CaseData tempCaseData = CaseUtils.getCaseData(tempCaseDetails, objectMapper);
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 authorisation,
