@@ -72,6 +72,23 @@ public class PostcodeLookupServiceTest {
     }
 
     @Test
+    public void shouldReturnFalseWhenPostCodeIsNotValidForUK() {
+
+        ResponseEntity<String> responseEntity =
+                new ResponseEntity<String>("Ok", HttpStatus.ACCEPTED);
+        when(postcodeLookupConfiguration.getUrl()).thenReturn("https://api.os.uk/search/places/v1");
+        when(postcodeLookupConfiguration.getAccessKey()).thenReturn("dummy");
+        when(restTemplate.exchange(
+                ArgumentMatchers.anyString(),
+                ArgumentMatchers.any(HttpMethod.class),
+                ArgumentMatchers.<HttpEntity<?>>any(),
+                ArgumentMatchers.<Class<String>>any()))
+                .thenReturn(responseEntity);
+
+        assertThat(postcodeLookupService.isValidNationalPostCode("FalseCode", ENGLAND_POSTCODE_COUNTRYCODE)).isFalse();
+    }
+
+    @Test
     public void shouldReturnFalseWhenCountryIsInvaldGivenPostCodeIsValid() {
 
         ResponseEntity<String> responseEntity =
