@@ -6,7 +6,6 @@ import lombok.Data;
 
 @Data
 @Builder
-@SuppressWarnings("PMD")
 public class PostcodeResult {
     @JsonProperty("DPA")
     private AddressDetails dpa;

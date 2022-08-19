@@ -599,3 +599,10 @@ pact {
     version = project.pactVersion
   }
 }
+
+bootRun {
+    doFirst() {
+        println("Loading secrets from vault")
+        systemProperty 'POST_CODE_LOOKUP_KEY', getVaultSecret('postcode-lookup-token')
+    }
+}
