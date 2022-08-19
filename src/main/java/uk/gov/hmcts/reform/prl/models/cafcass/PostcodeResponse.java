@@ -7,7 +7,6 @@ import java.util.List;
 
 @Data
 @Builder
-@SuppressWarnings("PMD")
 public class PostcodeResponse {
     private List<PostcodeResult> results;
 }
