@@ -111,7 +111,5 @@ public class PrlAppsConstants {
             "caseworker-privatelaw-la");
     public static final String PREVIOUS_OR_ONGOING_PROCEEDINGS = "previousOrOngoingProceedings";
 
-    public static final String ENGLAND_POSTCODE_COUNTRYCODE = "E";
-
     public static final String FORMAT = "%s %s";
 }
