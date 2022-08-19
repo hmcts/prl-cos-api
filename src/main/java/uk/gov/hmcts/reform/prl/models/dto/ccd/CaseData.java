@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
@@ -330,12 +331,20 @@ public class CaseData implements MappableObject {
     private final Document draftOrderDocWelsh;
     @JsonProperty("c8Document")
     private final Document c8Document;
+    @JsonProperty("c8DraftDocument")
+    private final Document c8DraftDocument;
     @JsonProperty("c8WelshDocument")
     private final Document c8WelshDocument;
+    @JsonProperty("c8WelshDraftDocument")
+    private final Document c8WelshDraftDocument;
     @JsonProperty("c1ADocument")
     private final Document c1ADocument;
+    @JsonProperty("c1ADraftDocument")
+    private final Document c1ADraftDocument;
     @JsonProperty("c1AWelshDocument")
     private final Document c1AWelshDocument;
+    @JsonProperty("c1AWelshDraftDocument")
+    private final Document c1AWelshDraftDocument;
 
     @JsonProperty("isEngDocGen")
     private final String isEngDocGen;
@@ -377,6 +386,9 @@ public class CaseData implements MappableObject {
     private final List<RejectReasonEnum> rejectReason;
     private final List<FL401RejectReasonEnum> fl401RejectReason;
     private final String returnMessage;
+
+    @JsonProperty("applicantOrganisationPolicy")
+    private OrganisationPolicy applicantOrganisationPolicy;
 
     /**
      * Without Notice Order.
