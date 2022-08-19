@@ -70,12 +70,13 @@ public class PostcodeLookupService {
 
             MultiValueMap<String, String> headers = new HttpHeaders();
             headers.set("Accept", "application/json");
+            HttpEntity<String> httpHeader = new HttpEntity<>(url, headers);
 
             HttpEntity<String> response =
                     restTemplate.exchange(
                             builder.toUriString(),
                             HttpMethod.GET,
-                            new HttpEntity(headers),
+                            httpHeader,
                             String.class);
 
             HttpStatus responseStatus = ((ResponseEntity) response).getStatusCode();
