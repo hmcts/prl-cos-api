@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -34,13 +35,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CourtNavCaseService {
 
     public static final String COURTNAV_DOCUMENT_UPLOAD_EVENT_ID = "courtnav-document-upload";
-    public static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff","txt"};
+    public static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff", "txt"};
     public static final String[] ALLOWED_TYPE_OF_DOCS = {"FL401", "C8", "WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET"};
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamClient idamClient;
@@ -154,25 +157,25 @@ public class CourtNavCaseService {
     private CaseData addDocumentAndGetCaseData(String fileName, String typeOfDocument, String partyName, CaseData tempCaseData, Document document) {
 
         List<Element<UploadedDocuments>> uploadedDocumentsList;
-        Element<UploadedDocuments> uploadedDocumentsElement
-            = Element.<UploadedDocuments>builder()
-            .value(UploadedDocuments.builder()
-                       .dateCreated(new Date())
-                       .documentType(typeOfDocument)
-                       .partyName(partyName).isApplicant("NA_COURTNAV")
-                       .parentDocumentType("NA_COURTNAV")
-                       .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                                            .documentUrl(document.links.self.href)
-                                            .documentBinaryUrl(document.links.binary.href)
-                                            .documentHash(document.hashToken)
-                                            .documentFileName(fileName).build()).build()).build();
-
+        Element<UploadedDocuments> uploadedDocsElement =
+            element(UploadedDocuments.builder().dateCreated(new Date())
+                        .documentType(typeOfDocument)
+                        .uploadedBy("COURNAV")
+                        .documentDetails(DocumentDetails.builder().documentName(fileName)
+                                             .documentUploadedDate(new Date().toString()).build())
+                        .partyName(partyName).isApplicant("NA_COURTNAV")
+                        .parentDocumentType("NA_COURTNAV")
+                        .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                                             .documentUrl(document.links.self.href)
+                                             .documentBinaryUrl(document.links.binary.href)
+                                             .documentHash(document.hashToken)
+                                             .documentFileName(fileName).build()).build());
         if (tempCaseData.getCourtNavUploadedDocs() != null) {
             uploadedDocumentsList = tempCaseData.getCourtNavUploadedDocs();
-            uploadedDocumentsList.add(uploadedDocumentsElement);
+            uploadedDocumentsList.add(uploadedDocsElement);
         } else {
             uploadedDocumentsList = new ArrayList<>();
-            uploadedDocumentsList.add(uploadedDocumentsElement);
+            uploadedDocumentsList.add(uploadedDocsElement);
         }
 
         tempCaseData = tempCaseData.toBuilder().courtNavUploadedDocs(uploadedDocumentsList).build();
