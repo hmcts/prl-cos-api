@@ -597,3 +597,13 @@ bootRun {
         systemProperty 'POST_CODE_LOOKUP_KEY', getVaultSecret('postcode-lookup-token')
     }
 }
+
+
+pact {
+    publish {
+        pactDirectory = 'pacts'
+        pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
+        tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
+        version = project.pactVersion
+    }
+}
