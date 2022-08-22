@@ -39,6 +39,7 @@ public class PostcodeLookupService {
         if (StringUtils.isEmpty(postcode) || StringUtils.isEmpty(countryCode)) {
             return false;
         }
+
         PostcodeResponse response = fetchNationalPostcodeBuildings(postcode.toUpperCase(Locale.UK));
 
         if (response == null || response.getResults() == null || response.getResults().isEmpty()) {
@@ -52,7 +53,7 @@ public class PostcodeLookupService {
                 .collect(Collectors.toList()).isEmpty();
     }
 
-    public PostcodeResponse fetchNationalPostcodeBuildings(String postcode) {
+    private PostcodeResponse fetchNationalPostcodeBuildings(String postcode) {
         PostcodeResponse results = null;
         try {
             Map<String, String> params = new HashMap<>();

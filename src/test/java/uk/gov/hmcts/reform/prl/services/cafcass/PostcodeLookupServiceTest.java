@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.services.cafcass.postcode;
+package uk.gov.hmcts.reform.prl.services.cafcass;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.config.cafcass.PostcodeLookupConfiguration;
 import uk.gov.hmcts.reform.prl.models.cafcass.AddressDetails;
 import uk.gov.hmcts.reform.prl.models.cafcass.PostcodeResponse;
 import uk.gov.hmcts.reform.prl.models.cafcass.PostcodeResult;
-import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,49 +53,31 @@ public class PostcodeLookupServiceTest {
     @DisplayName("Should generate False (Failure) when valid Postcode is given but no national code")
     @Test
     public void shouldReturnFailureWhenGivenPostCodeIsValidButNullNationalCode() {
-
         ResponseEntity<String> responseEntity =
                 new ResponseEntity<String>("Ok", HttpStatus.ACCEPTED);
-        when(restTemplate.exchange(
-                ArgumentMatchers.anyString(),
-                ArgumentMatchers.any(HttpMethod.class),
-                ArgumentMatchers.<HttpEntity<?>>any(),
-                ArgumentMatchers.<Class<String>>any()))
-                .thenReturn(responseEntity);
-
         assertThat(postcodeLookupService.isValidNationalPostCode("IG11 7YL", null)).isFalse();
+        assertThat(postcodeLookupService.isValidNationalPostCode("IG11 7YL", "")).isFalse();
     }
 
-    @DisplayName("Should generate False (Failure) when no Postcode is given but no national code")
+    @DisplayName("Should generate False (Failure) when null/empty Postcode is given but valid national code")
     @Test
     public void shouldReturnFailureWhenGivenPostCodeNullButValidNationalCode() {
 
         ResponseEntity<String> responseEntity =
                 new ResponseEntity<String>("Ok", HttpStatus.ACCEPTED);
-        when(restTemplate.exchange(
-                ArgumentMatchers.anyString(),
-                ArgumentMatchers.any(HttpMethod.class),
-                ArgumentMatchers.<HttpEntity<?>>any(),
-                ArgumentMatchers.<Class<String>>any()))
-                .thenReturn(responseEntity);
-
-        assertThat(postcodeLookupService.isValidNationalPostCode(null, "E")).isFalse();
+        assertThat(postcodeLookupService.isValidNationalPostCode(null, ENGLAND_POSTCODE_NATIONALCODE)).isFalse();
+        assertThat(postcodeLookupService.isValidNationalPostCode("", ENGLAND_POSTCODE_NATIONALCODE)).isFalse();
     }
 
-    @DisplayName("Should generate False (Failure) when no Postcode is given and null national code")
+    @DisplayName("Should generate False (Failure) when given null/empty Postcode and national code")
     @Test
-    public void shouldReturnFailureWhenGivenPostCodeIsNullAndNullNationalCode() {
+    public void shouldReturnFailureWhenGivenBothNullPostCodeAndNullNationalCode() {
 
         ResponseEntity<String> responseEntity =
                 new ResponseEntity<String>("Ok", HttpStatus.ACCEPTED);
-        when(restTemplate.exchange(
-                ArgumentMatchers.anyString(),
-                ArgumentMatchers.any(HttpMethod.class),
-                ArgumentMatchers.<HttpEntity<?>>any(),
-                ArgumentMatchers.<Class<String>>any()))
-                .thenReturn(responseEntity);
 
-        assertThat(postcodeLookupService.isValidNationalPostCode(null, "E")).isFalse();
+        assertThat(postcodeLookupService.isValidNationalPostCode(null, null)).isFalse();
+        assertThat(postcodeLookupService.isValidNationalPostCode("", "")).isFalse();
     }
 
     @DisplayName("Should generate False (Failure) when invalid Postcode is given for England nation")
