@@ -152,7 +152,8 @@ public class CourtNavCaseService {
         }
     }
 
-    private CaseData getCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument, CaseDetails tempCaseDetails, Document document) {
+    private CaseData getCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
+                                                 CaseDetails tempCaseDetails, Document document) {
         String partyName = tempCaseDetails.getData().get("applicantCaseName") != null ? tempCaseDetails.getData().get(
             "applicantCaseName").toString() : "COURTNAV";
         List<Element<UploadedDocuments>> uploadedDocumentsList;
