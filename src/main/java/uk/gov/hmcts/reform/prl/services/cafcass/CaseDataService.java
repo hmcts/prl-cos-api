@@ -26,8 +26,8 @@ public class CaseDataService {
         //TODO: Map ccd data to cafcass data
 
         //TODO: Filter data based on postcode
-        CafCassResponse  cafCassResponse = new CafCassResponse();
-        cafCassFilter.filterCasesByApplicationValidPostcode(cafCassResponse);
+        //CafCassResponse  cafCassResponse = new CafCassResponse();
+        //cafCassFilter.filterCasesByApplicationValidPostcode(cafCassResponse);
 
     }
 
