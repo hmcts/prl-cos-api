@@ -53,7 +53,7 @@ public class PostcodeLookupServiceTest {
 
     @DisplayName("Should generate False (Failure) when valid Postcode is given but no national code")
     @Test
-    public void shouldReturnFailureWhenGivenPostCodeIsValidButNoNationalCode() {
+    public void shouldReturnFailureWhenGivenPostCodeIsValidButNullNationalCode() {
 
         ResponseEntity<String> responseEntity =
                 new ResponseEntity<String>("Ok", HttpStatus.ACCEPTED);
@@ -65,6 +65,38 @@ public class PostcodeLookupServiceTest {
                 .thenReturn(responseEntity);
 
         assertThat(postcodeLookupService.isValidNationalPostCode("IG11 7YL", null)).isFalse();
+    }
+
+    @DisplayName("Should generate False (Failure) when no Postcode is given but no national code")
+    @Test
+    public void shouldReturnFailureWhenGivenPostCodeNullButValidNationalCode() {
+
+        ResponseEntity<String> responseEntity =
+                new ResponseEntity<String>("Ok", HttpStatus.ACCEPTED);
+        when(restTemplate.exchange(
+                ArgumentMatchers.anyString(),
+                ArgumentMatchers.any(HttpMethod.class),
+                ArgumentMatchers.<HttpEntity<?>>any(),
+                ArgumentMatchers.<Class<String>>any()))
+                .thenReturn(responseEntity);
+
+        assertThat(postcodeLookupService.isValidNationalPostCode(null, "E")).isFalse();
+    }
+
+    @DisplayName("Should generate False (Failure) when no Postcode is given and null national code")
+    @Test
+    public void shouldReturnFailureWhenGivenPostCodeIsNullAndNullNationalCode() {
+
+        ResponseEntity<String> responseEntity =
+                new ResponseEntity<String>("Ok", HttpStatus.ACCEPTED);
+        when(restTemplate.exchange(
+                ArgumentMatchers.anyString(),
+                ArgumentMatchers.any(HttpMethod.class),
+                ArgumentMatchers.<HttpEntity<?>>any(),
+                ArgumentMatchers.<Class<String>>any()))
+                .thenReturn(responseEntity);
+
+        assertThat(postcodeLookupService.isValidNationalPostCode(null, "E")).isFalse();
     }
 
     @DisplayName("Should generate False (Failure) when invalid Postcode is given for England nation")
