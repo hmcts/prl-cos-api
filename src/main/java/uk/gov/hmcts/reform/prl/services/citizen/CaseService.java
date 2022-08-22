@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.UserId;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -74,11 +75,17 @@ public class CaseService {
         searchCriteria.put("sortDirection", "desc");
         searchCriteria.put("page", "1");
 
-        CaseData caseData1 = CaseData.builder().applicantCaseName("applicantName1").id(12345).build();
-        CaseData caseData2 = CaseData.builder().applicantCaseName("applicantName2").id(67890).build();
+        CaseData caseData1 = CaseData.builder().applicantCaseName("applicantName1").id(12345).state(State.CASE_ISSUE).build();
+        CaseData caseData2 = CaseData.builder().applicantCaseName("applicantName2").id(67890).state(State.GATEKEEPING).build();
+        CaseData caseData3 = CaseData.builder().applicantCaseName("applicantName3").id(11123).state(State.CASE_HEARING).build();
+        CaseData caseData4 = CaseData.builder().applicantCaseName("applicantName4").id(22334).state(State.GATEKEEPING).build();
+        CaseData caseData5 = CaseData.builder().applicantCaseName("applicantName5").id(54321).state(State.ALL_FINAL_ORDERS_ISSUED).build();
         List<CaseData> caseDataList = new ArrayList<>();
         caseDataList.add(caseData1);
         caseDataList.add(caseData2);
+        caseDataList.add(caseData3);
+        caseDataList.add(caseData4);
+        caseDataList.add(caseData5);
         //return searchCasesWith(authToken, s2sToken, searchCriteria);
         return caseDataList;
     }
