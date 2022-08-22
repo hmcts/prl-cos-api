@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 
 @Service
 public class CafcassCcdDataStoreService {
@@ -18,12 +17,13 @@ public class CafcassCcdDataStoreService {
      *
      * @param authorisation Authorisation header
      * @param searchString json input for search
-     * @param serviceAuthorisation
-     * @return SearchResult object
+     * @param serviceAuthorisation S2S token
+     * @param  caseType e.g. PRLAPPS
+     * @return SearchResult object.
      */
-    public SearchResult searchCases(String authorisation, String searchString, String serviceAuthorisation) {
+    public SearchResult searchCases(String authorisation, String searchString, String serviceAuthorisation, String caseType) {
 
-        return coreCaseDataApi.searchCases(authorisation, serviceAuthorisation, PrlAppsConstants.CASE_TYPE,
+        return coreCaseDataApi.searchCases(authorisation, serviceAuthorisation, caseType,
                                            searchString);
 
     }
