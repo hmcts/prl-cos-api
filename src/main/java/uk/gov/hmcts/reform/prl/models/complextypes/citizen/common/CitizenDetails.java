@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.models.Address;
 
 import java.time.LocalDate;
 
@@ -19,6 +20,7 @@ public class CitizenDetails {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOfBirth;
     private final String placeOfBirth;
+    private final Address address;
     private AddressHistory addressHistory;
     private Contact contact;
 }
