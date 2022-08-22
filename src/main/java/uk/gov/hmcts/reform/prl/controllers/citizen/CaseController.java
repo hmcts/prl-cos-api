@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -15,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
@@ -38,10 +39,11 @@ public class CaseController {
     CaseService caseService;
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
-    @ApiOperation(value = "Frontend to fetch the data")
+    @Operation(description = "Frontend to fetch the data")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Case details returned", response = CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "Case details returned", content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
     public CaseData serviceRequestUpdate(
         @PathVariable("caseId") String caseId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String userToken,
@@ -54,7 +56,7 @@ public class CaseController {
     }
 
     @PostMapping(value = "{caseId}/{eventId}/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation("Updates case")
+    @Operation(description = "Updates case")
     public CaseData updateCase(
         @Valid @NotNull @RequestBody CaseData caseData,
         @PathVariable("caseId") String caseId,
@@ -62,19 +64,21 @@ public class CaseController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken
     ) {
-        return objectMapper.convertValue(caseService.updateCase(caseData,
-                                                                authorisation,
-                                                                s2sToken,
-                                                                caseId,
-                                                                eventId).getData(), CaseData.class);
+        return objectMapper.convertValue(caseService.updateCase(
+            caseData,
+            authorisation,
+            s2sToken,
+            caseId,
+            eventId
+        ).getData(), CaseData.class);
     }
 
     @PostMapping("/case/create")
-    @ApiOperation("Call CCD to create case")
+    @Operation(description = "Call CCD to create case")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "created"),
-            @ApiResponse(code = 401, message = "Provided Authorization token is missing or invalid"),
-            @ApiResponse(code = 500, message = "Internal Server Error")
+        @ApiResponse(responseCode = "201", description = "created"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     public CaseData createCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                @RequestHeader("serviceAuthorization") String s2sToken,
@@ -82,7 +86,7 @@ public class CaseController {
 
         CaseDetails caseDetails = caseService.createCase(caseData, authorisation, s2sToken);
         return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-                .toBuilder().id(caseDetails.getId()).build();
+            .toBuilder().id(caseDetails.getId()).build();
     }
 
 }
