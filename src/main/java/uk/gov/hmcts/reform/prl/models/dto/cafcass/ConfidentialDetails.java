@@ -7,15 +7,12 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @Setter
 @Builder(toBuilder = true)
-public class CafCassResponse {
-    public int total;
-    public List<CafCassCaseDetail> cases;
+public class ConfidentialDetails {
+    private String isConfidentialDetailsAvailable;
 }

@@ -15,7 +15,10 @@ import java.util.List;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-public class CafCassResponse {
-    public int total;
-    public List<CafCassCaseDetail> cases;
+public class HearingData {
+    private String hearingCourtName;
+    private List<String> hearingType;
+    private String hearingDate;
+    private String hearingTime;
+    private String hearingDuration;
 }
