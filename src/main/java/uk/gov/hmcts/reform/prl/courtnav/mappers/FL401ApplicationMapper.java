@@ -90,6 +90,7 @@ public class FL401ApplicationMapper {
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .caseOrigin(courtNavCaseData.getMetaData().getCaseOrigin())
             .courtNavApproved(courtNavCaseData.getMetaData().isCourtNavApproved() ? YesOrNo.Yes : YesOrNo.No)
+            .numberOfAttachments(String.valueOf(courtNavCaseData.getMetaData().getNumberOfAttachments()))
             .applicantAge(ApplicantAge.getValue(String.valueOf(courtNavCaseData.getFl401().getBeforeStart().getApplicantHowOld())))
             .applicantCaseName(getCaseName(courtNavCaseData))
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
