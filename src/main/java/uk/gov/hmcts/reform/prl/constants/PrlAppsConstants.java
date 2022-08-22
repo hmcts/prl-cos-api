@@ -115,4 +115,6 @@ public class PrlAppsConstants {
     public static final String CITIZEN_UPLOADED_DOCUMENT = "citizenUploadedDocumentList";
 
     public static final String CITIZEN_HINT = "CITIZEN";
+
+    public static final String  YOUR_POSITION_STATEMENTS = "Your position statements";
 }
