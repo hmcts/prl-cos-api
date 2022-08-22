@@ -4,11 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -73,7 +69,7 @@ public class PostcodeLookupService {
             }
 
             MultiValueMap<String, String> headers = new HttpHeaders();
-            headers.set("Accept", "application/json");
+            headers.set(HttpHeaders.ACCEPT , MediaType.APPLICATION_JSON_VALUE);
             HttpEntity<String> httpHeader = new HttpEntity<>(url, headers);
 
             HttpEntity<String> response =
@@ -87,10 +83,6 @@ public class PostcodeLookupService {
 
             if (responseStatus.value() == org.apache.http.HttpStatus.SC_OK) {
                 return objectMapper.readValue(response.getBody(), PostcodeResponse.class);
-            } else if (responseStatus.value() == org.apache.http.HttpStatus.SC_NOT_FOUND) {
-                log.info("Postcode " + postcode + " not found");
-            } else {
-                log.info("Postcode lookup failed with status {}", responseStatus.value());
             }
         } catch (Exception e) {
             log.error("Postcode Lookup Failed - ", e.getMessage());
