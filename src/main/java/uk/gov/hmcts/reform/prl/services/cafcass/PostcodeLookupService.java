@@ -36,6 +36,9 @@ public class PostcodeLookupService {
 
     public boolean isValidNationalPostCode(String postcode, String countryCode) {
 
+        if (StringUtils.isEmpty(postcode) || StringUtils.isEmpty(countryCode)) {
+            return false;
+        }
         PostcodeResponse response = fetchNationalPostcodeBuildings(postcode.toUpperCase(Locale.UK));
 
         if (response == null || response.getResults() == null || response.getResults().isEmpty()) {
