@@ -46,6 +46,8 @@ public class FeesAndPaymentCitizenController {
         try {
             if (Boolean.TRUE.equals(authorisationService.authorise(serviceAuthorization))) {
                 feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+            } else {
+                throw(new RuntimeException("Invalid Client"));
             }
         } catch (Exception e) {
             return FeeResponseForCitizen.builder()

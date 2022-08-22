@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.services.FeeService;
 
 import java.math.BigDecimal;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 public class FeesAndPaymentCitizenControllerTest {
@@ -44,8 +45,6 @@ public class FeesAndPaymentCitizenControllerTest {
         feeResponse = FeeResponse.builder()
             .amount(BigDecimal.valueOf(232.00))
             .build();
-
-
     }
 
     @Test
@@ -56,7 +55,21 @@ public class FeesAndPaymentCitizenControllerTest {
         when(authorisationService.authorise(s2sToken)).thenReturn(Boolean.TRUE);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
         feesAndPaymentCitizenController.fetchFeesAmount(authToken, s2sToken);
-        Assert.assertEquals(feeResponseForCitizen.getAmount(), feeResponse.getAmount());
+        Assert.assertEquals(feeResponseForCitizen.getAmount(), feeResponse.getAmount().toString());
+    }
+
+    @Test
+    public void fetchFeeDetailsWithInvalidClient() throws Exception {
+        feeResponseForCitizen = FeeResponseForCitizen.builder()
+            .amount(feeResponse.getAmount().toString()).build();
+
+        when(authorisationService.authorise(s2sToken)).thenReturn(Boolean.FALSE);
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        FeeResponseForCitizen feeResponseForCitizen = feesAndPaymentCitizenController.fetchFeesAmount(
+            authToken,
+            s2sToken
+        );
+        assertEquals("Invalid Client", feeResponseForCitizen.getErrorRetrievingResponse());
     }
 
 }
