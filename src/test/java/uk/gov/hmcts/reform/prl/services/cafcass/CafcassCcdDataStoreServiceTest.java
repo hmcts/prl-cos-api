@@ -47,13 +47,14 @@ public class CafcassCcdDataStoreServiceTest {
 
         String searchString = TestResourceUtil.readFileFrom("classpath:request/ccdsearchrequest.json");
 
-        SearchResult mockResult = SearchResult.builder().cases(Arrays.asList(CaseDetails.builder().caseTypeId(PRL_CASE_TYPE).build())).build();
+        SearchResult mockResult = SearchResult.builder().cases(Arrays.asList(CaseDetails.builder()
+                                                                                 .caseTypeId(PRL_CASE_TYPE).build())).build();
 
         when(coreCaseDataApi.searchCases(TEST_AUTHORIZATION, authTokenGenerator.generate(), PRL_CASE_TYPE, searchString))
             .thenReturn(mockResult);
         SearchResult searchResult = cafcassCcdDataStoreService.searchCases(TEST_AUTHORIZATION, searchString,
-                                                                           authTokenGenerator.generate()
-        );
+                                                                           authTokenGenerator.generate(),
+                                                                           PRL_CASE_TYPE);
         assertNotNull(searchResult);
         assertEquals(PRL_CASE_TYPE, mockResult.getCases().get(0).getCaseTypeId());
     }
