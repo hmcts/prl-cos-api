@@ -60,7 +60,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.CurrentResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.LivingSituationOutcomeEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SignatureEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
@@ -195,10 +194,6 @@ public class FL401ApplicationMapper {
                                                         .map(FL401Consent::getDisplayedValueFromEnumString)
                                                         .collect(Collectors.toList()))
                                   .signature(courtNavCaseData.getFl401().getStatementOfTruth().getSignature())
-                                  .signatureType(SignatureEnum.getValue(String.valueOf(courtNavCaseData
-                                                                                           .getFl401()
-                                                                                           .getStatementOfTruth()
-                                                                                           .getSignatureType())))
                                   .fullname(courtNavCaseData.getFl401().getStatementOfTruth().getSignatureFullName())
                                   .date(LocalDate.parse(courtNavCaseData.getFl401().getStatementOfTruth().getSignatureDate().mergeDate()))
                                   .nameOfFirm(courtNavCaseData.getFl401().getStatementOfTruth().getRepresentativeFirmName())
