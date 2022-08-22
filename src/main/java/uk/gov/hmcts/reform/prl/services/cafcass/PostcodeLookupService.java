@@ -36,7 +36,7 @@ public class PostcodeLookupService {
 
     public boolean isValidNationalPostCode(String postcode, String countryCode) {
 
-        PostcodeResponse response = fetchCountryFromPostCode(postcode.toUpperCase(Locale.UK));
+        PostcodeResponse response = fetchNationalPostcodeBuildings(postcode.toUpperCase(Locale.UK));
 
         if (response == null || response.getResults() == null || response.getResults().isEmpty()) {
             return false;
@@ -49,7 +49,7 @@ public class PostcodeLookupService {
                 .collect(Collectors.toList()).isEmpty();
     }
 
-    public PostcodeResponse fetchCountryFromPostCode(String postcode) {
+    public PostcodeResponse fetchNationalPostcodeBuildings(String postcode) {
         PostcodeResponse results = null;
         try {
             Map<String, String> params = new HashMap<>();
@@ -82,15 +82,12 @@ public class PostcodeLookupService {
             HttpStatus responseStatus = ((ResponseEntity) response).getStatusCode();
 
             if (responseStatus.value() == org.apache.http.HttpStatus.SC_OK) {
-                results = objectMapper.readValue(response.getBody(), PostcodeResponse.class);
-
-                return results;
+                return objectMapper.readValue(response.getBody(), PostcodeResponse.class);
             } else if (responseStatus.value() == org.apache.http.HttpStatus.SC_NOT_FOUND) {
                 log.info("Postcode " + postcode + " not found");
             } else {
                 log.info("Postcode lookup failed with status {}", responseStatus.value());
             }
-
         } catch (Exception e) {
             log.error("Postcode Lookup Failed - ", e.getMessage());
             throw new PostcodeValidationException(e.getMessage(), e);
