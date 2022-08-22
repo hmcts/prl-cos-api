@@ -107,6 +107,7 @@ public class CourtNavCaseService {
             );
             log.info("Document uploaded successfully through caseDocumentClient");
             CaseData caseData = getCaseDataWithUploadedDocs(
+                caseId,
                 document.getOriginalFilename(),
                 typeOfDocument,
                 tempCaseDetails,
@@ -151,7 +152,7 @@ public class CourtNavCaseService {
         }
     }
 
-    private CaseData getCaseDataWithUploadedDocs(String fileName, String typeOfDocument, CaseDetails tempCaseDetails, Document document) {
+    private CaseData getCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument, CaseDetails tempCaseDetails, Document document) {
         String partyName = tempCaseDetails.getData().get("applicantCaseName") != null ? tempCaseDetails.getData().get(
             "applicantCaseName").toString() : "COURTNAV";
         List<Element<UploadedDocuments>> uploadedDocumentsList;
@@ -175,7 +176,7 @@ public class CourtNavCaseService {
             uploadedDocumentsList = new ArrayList<>();
             uploadedDocumentsList.add(uploadedDocsElement);
         }
-        return CaseData.builder().courtNavUploadedDocs(uploadedDocumentsList).build();
+        return CaseData.builder().id(Long.valueOf(caseId)).courtNavUploadedDocs(uploadedDocumentsList).build();
     }
 
     //will be removed as part of courtnav clean up
