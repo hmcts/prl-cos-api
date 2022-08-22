@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.courtnav;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +28,12 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -92,7 +90,6 @@ public class CourtNavCaseService {
 
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
 
-        Map<String, Object> caseData = new HashMap<>();
         if (checkFileFormat(document.getOriginalFilename()) && checkTypeOfDocument(typeOfDocument)) {
             CaseDetails tempCaseDetails = coreCaseDataApi.getCase(
                 authorisation,
@@ -101,9 +98,6 @@ public class CourtNavCaseService {
             );
 
             log.info("tempCaseDetails CaseData ****{}**** ", tempCaseDetails.getData());
-            Iterables.removeIf(tempCaseDetails.getData().values(), Objects::isNull);
-            log.info("After removing null tempCaseDetails CaseData ****{}**** ", tempCaseDetails.getData());
-            CaseData tempCaseData = CaseUtils.getCaseData(tempCaseDetails, objectMapper);
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -112,11 +106,10 @@ public class CourtNavCaseService {
                 Arrays.asList(document)
             );
             log.info("Document uploaded successfully through caseDocumentClient");
-            CaseData updatedCaseData = addDocumentAndGetCaseData(
+            CaseData caseData = getCaseDataWithUploadedDocs(
                 document.getOriginalFilename(),
                 typeOfDocument,
-                tempCaseData.getApplicantCaseName(),
-                tempCaseData,
+                tempCaseDetails,
                 uploadResponse.getDocuments().get(0)
             );
 
@@ -136,10 +129,9 @@ public class CourtNavCaseService {
                 .event(Event.builder()
                            .id(startEventResponse.getEventId())
                            .build())
-                .data(updatedCaseData.toMap(CcdObjectMapper.getObjectMapper())).build();
+                .data(caseData).build();
 
-            log.info("Updated CaseData ****{}**** ", updatedCaseData);
-            log.info("Updated CaseData map -----{}--- ", updatedCaseData.toMap(CcdObjectMapper.getObjectMapper()));
+            log.info("Updated CaseData ****{}**** ", caseData);
             CaseDetails caseDetails = coreCaseDataApi.submitEventForCaseWorker(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -154,12 +146,40 @@ public class CourtNavCaseService {
             log.info("Document has been saved in caseData {}", caseDetails.getData().get(typeOfDocument));
 
         } else {
-            log.error("Un acceptable type of document {}", typeOfDocument);
+            log.error("Un acceptable format/type of document {}", typeOfDocument);
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
         }
     }
 
-    private CaseData addDocumentAndGetCaseData(String fileName, String typeOfDocument, String partyName, CaseData tempCaseData, Document document) {
+    private CaseData getCaseDataWithUploadedDocs(String fileName, String typeOfDocument, CaseDetails tempCaseDetails, Document document) {
+        String partyName = tempCaseDetails.getData().get("applicantCaseName") != null ? tempCaseDetails.getData().get(
+            "applicantCaseName").toString() : "COURTNAV";
+        List<Element<UploadedDocuments>> uploadedDocumentsList;
+        Element<UploadedDocuments> uploadedDocsElement =
+            element(UploadedDocuments.builder().dateCreated(LocalDate.now())
+                        .documentType(typeOfDocument)
+                        .uploadedBy("COURNAV")
+                        .documentDetails(DocumentDetails.builder().documentName(fileName)
+                                             .documentUploadedDate(new Date().toString()).build())
+                        .partyName(partyName).isApplicant("NA_COURTNAV")
+                        .parentDocumentType("NA_COURTNAV")
+                        .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                                             .documentUrl(document.links.self.href)
+                                             .documentBinaryUrl(document.links.binary.href)
+                                             .documentHash(document.hashToken)
+                                             .documentFileName(fileName).build()).build());
+        if (tempCaseDetails.getData().get("courtNavUploadedDocs") != null) {
+            uploadedDocumentsList = CaseUtils.getCaseData(tempCaseDetails, objectMapper).getCourtNavUploadedDocs();
+            uploadedDocumentsList.add(uploadedDocsElement);
+        } else {
+            uploadedDocumentsList = new ArrayList<>();
+            uploadedDocumentsList.add(uploadedDocsElement);
+        }
+        return CaseData.builder().courtNavUploadedDocs(uploadedDocumentsList).build();
+    }
+
+    //will be removed as part of courtnav clean up
+    /*private CaseData addDocumentAndGetCaseData(String fileName, String typeOfDocument, String partyName, CaseData tempCaseData, Document document) {
 
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         Element<UploadedDocuments> uploadedDocsElement =
@@ -185,7 +205,7 @@ public class CourtNavCaseService {
 
         tempCaseData = tempCaseData.toBuilder().courtNavUploadedDocs(uploadedDocumentsList).build();
         return tempCaseData;
-    }
+    }*/
 
     private boolean checkTypeOfDocument(String typeOfDocument) {
         if (typeOfDocument != null) {
