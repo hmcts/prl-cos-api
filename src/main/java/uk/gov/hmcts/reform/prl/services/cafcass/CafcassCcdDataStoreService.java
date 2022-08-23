@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
@@ -21,9 +22,9 @@ public class CafcassCcdDataStoreService {
      * @param serviceAuthorisation
      * @return SearchResult object
      */
-    public SearchResult searchCases(String authorisation, String searchString, String serviceAuthorisation) {
+    public SearchResult searchCases(String authorisation, String searchString, String serviceAuthorisation, String cafCassSearchCaseTypeId) {
 
-        return coreCaseDataApi.searchCases(authorisation, serviceAuthorisation, PrlAppsConstants.CASE_TYPE,
+        return coreCaseDataApi.searchCases(authorisation, serviceAuthorisation, cafCassSearchCaseTypeId,
                                            searchString);
 
     }

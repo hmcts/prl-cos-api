@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
 public class Range {
-    private LastModified lastModified;
+    private LastModified last_modified;
 }
