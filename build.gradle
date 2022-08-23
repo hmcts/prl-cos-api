@@ -591,14 +591,6 @@ def getCheckedOutGitCommitHash() {
   'git rev-parse --verify --short HEAD'.execute().text.trim()
 }
 
-bootRun {
-    doFirst() {
-        println("Loading secrets from vault")
-        systemProperty 'POST_CODE_LOOKUP_KEY', getVaultSecret('postcode-lookup-token')
-    }
-}
-
-
 pact {
     publish {
         pactDirectory = 'pacts'
