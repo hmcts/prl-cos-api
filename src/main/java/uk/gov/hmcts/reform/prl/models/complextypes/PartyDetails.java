@@ -74,7 +74,7 @@ public class PartyDetails {
     @JsonProperty("applicantPreferredContact")
     private final List<PreferredContactEnum> applicantPreferredContact;
     private final String applicantContactInstructions;
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private final User user;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private final Response response;
