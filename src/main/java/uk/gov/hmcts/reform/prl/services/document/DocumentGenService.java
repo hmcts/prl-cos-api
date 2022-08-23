@@ -55,6 +55,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import java.time.LocalDate;
 
 @Slf4j
 @Service
@@ -634,7 +635,7 @@ public class DocumentGenService {
             .partyName(partyName)
             .isApplicant("Yes")
             .uploadedBy("97be96a9-2db4-42e8-ba85-7b0d16e4f4f4")
-            .dateCreated(new Date())
+            .dateCreated(LocalDate.now())
             .documentDetails(DocumentDetails.builder()
                                  .documentName(documentName)
                                  .documentUploadedDate(dateFormat.format(new Date()))
