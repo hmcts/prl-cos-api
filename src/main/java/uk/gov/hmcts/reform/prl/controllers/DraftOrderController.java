@@ -64,7 +64,7 @@ public class DraftOrderController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/draft-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/draft-an-order-mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public AboutToStartOrSubmitCallbackResponse draftOrderMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
