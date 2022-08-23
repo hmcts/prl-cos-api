@@ -91,12 +91,10 @@ public class CourtNavCaseService {
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
 
         if (checkFileFormat(document.getOriginalFilename()) && checkTypeOfDocument(typeOfDocument)) {
-            CaseDetails tempCaseDetails = coreCaseDataApi.getCase(
-                authorisation,
-                authTokenGenerator.generate(),
-                caseId
-            );
-
+            CaseDetails tempCaseDetails = checkIfCasePresent(caseId, authorisation);
+            if (tempCaseDetails == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            }
             log.info("tempCaseDetails CaseData ****{}**** ", tempCaseDetails.getData());
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 authorisation,
@@ -150,6 +148,20 @@ public class CourtNavCaseService {
             log.error("Un acceptable format/type of document {}", typeOfDocument);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    public CaseDetails checkIfCasePresent(String caseId, String authorisation) {
+        try {
+            CaseDetails caseDetails = coreCaseDataApi.getCase(
+                authorisation,
+                authTokenGenerator.generate(),
+                caseId
+            );
+            return caseDetails;
+        } catch (Exception ex) {
+            log.error("Error while getting the case {} {}", caseId, ex.getMessage());
+        }
+        return null;
     }
 
     private CaseData getCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
