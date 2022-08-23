@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.
 
 @Data
 @Builder(toBuilder = true)
-@AllArgsConstructor
 public class Response {
     private final YesOrNo legalRepresentation;
     private final Consent consent;
