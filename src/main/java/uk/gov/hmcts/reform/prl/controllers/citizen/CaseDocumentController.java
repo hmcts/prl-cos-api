@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentReque
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,9 +67,8 @@ public class CaseDocumentController {
             } else {
                 uploadedDocumentsList = new ArrayList<>();
             }
-            uploadedDocumentsList.add(Element.<UploadedDocuments>builder()
-                                          .value(uploadedDocuments)
-                                          .build());
+            uploadedDocumentsList.add(ElementUtils.element(uploadedDocuments));
+
             CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
                 .citizenUploadedDocumentList(uploadedDocumentsList).build();
             caseService.updateCase(
