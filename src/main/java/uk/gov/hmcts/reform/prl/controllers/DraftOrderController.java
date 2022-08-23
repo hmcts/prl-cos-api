@@ -63,4 +63,21 @@ public class DraftOrderController {
         caseDataUpdated.put("previewDraftAnOrderDocument",document);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+    @PostMapping(path = "/draft-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    public AboutToStartOrSubmitCallbackResponse draftOrderMidEvent(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseDetails caseDetails = CaseDetails.builder().caseData(caseData).build();
+        GeneratedDocumentInfo generatedDocumentInfo = documentGenService.generateDocument(authorisation,caseDetails,draftAnOrder);
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(draftAnOrderFile).build();
+        caseDataUpdated.put("previewDraftAnOrderDocument",document);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
 }
