@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
@@ -22,15 +21,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.PRL_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTHORIZATION;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTHORIZATION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CafcassCcdDataStoreServiceTest {
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
-
-    @Mock
-    private AuthTokenGenerator authTokenGenerator;
 
     @InjectMocks
     private CafcassCcdDataStoreService cafcassCcdDataStoreService;
@@ -50,10 +47,10 @@ public class CafcassCcdDataStoreServiceTest {
         SearchResult mockResult = SearchResult.builder().cases(Arrays.asList(CaseDetails.builder()
                                                                                  .caseTypeId(PRL_CASE_TYPE).build())).build();
 
-        when(coreCaseDataApi.searchCases(TEST_AUTHORIZATION, authTokenGenerator.generate(), PRL_CASE_TYPE, searchString))
+        when(coreCaseDataApi.searchCases(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, PRL_CASE_TYPE, searchString))
             .thenReturn(mockResult);
         SearchResult searchResult = cafcassCcdDataStoreService.searchCases(TEST_AUTHORIZATION, searchString,
-                                                                           authTokenGenerator.generate(),
+                                                                           TEST_SERVICE_AUTHORIZATION,
                                                                            PRL_CASE_TYPE);
         assertNotNull(searchResult);
         assertEquals(PRL_CASE_TYPE, mockResult.getCases().get(0).getCaseTypeId());

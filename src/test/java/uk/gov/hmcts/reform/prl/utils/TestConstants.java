@@ -17,5 +17,6 @@ public class TestConstants {
 
     public static final String PRL_CASE_TYPE = "PRLAPPS";
     public static final String TEST_AUTHORIZATION = "testAuthorisation";
+    public static final String TEST_SERVICE_AUTHORIZATION = "testServiceAuthorisation";
 
 }
