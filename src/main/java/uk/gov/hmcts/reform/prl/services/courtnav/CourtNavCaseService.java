@@ -98,7 +98,7 @@ public class CourtNavCaseService {
             CaseData tempCaseData = CaseUtils.getCaseData(tempCaseDetails, objectMapper);
             if (tempCaseData.getNumberOfAttachments() != null && tempCaseData.getCourtNavUploadedDocs() != null
                 && Integer.valueOf(tempCaseData.getNumberOfAttachments())
-                >= tempCaseData.getCourtNavUploadedDocs().size()) {
+                <= tempCaseData.getCourtNavUploadedDocs().size()) {
                 log.error("Number of attachments size is reached {}", tempCaseData.getNumberOfAttachments());
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
             }

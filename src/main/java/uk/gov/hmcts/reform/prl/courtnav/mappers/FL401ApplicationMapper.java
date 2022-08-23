@@ -88,7 +88,7 @@ public class FL401ApplicationMapper {
         CaseData caseData = null;
         caseData = CaseData.builder()
             .isCourtNavCase(YesOrNo.Yes)
-            .state(State.ALL_FINAL_ORDERS_ISSUED)
+            .state(State.SUBMITTED_PAID)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .caseOrigin(courtNavCaseData.getMetaData().getCaseOrigin())
             .courtNavApproved(courtNavCaseData.getMetaData().isCourtNavApproved() ? YesOrNo.Yes : YesOrNo.No)
