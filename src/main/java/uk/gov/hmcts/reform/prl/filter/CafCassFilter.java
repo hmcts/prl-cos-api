@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.*;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,10 +31,14 @@ public class CafCassFilter {
     }
     public void filterCaseByApplicationCaseType(CafCassResponse cafCassResponse) {
         List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases().stream()
-            .filter(cafCassCaseDetail -> caseTypeList.contains(cafCassCaseDetail.getCaseTypeOfApplication())
-            && cafCassCaseDetail.getState().equalsIgnoreCase(""))
+            .filter(filterByCaseTypeAndState())
             .collect(Collectors.toList());
         cafCassResponse.setCases(cafCassCaseDetailList);
+    }
+
+    private Predicate<CafCassCaseDetail> filterByCaseTypeAndState() {
+        return cafCassCaseDetail -> caseTypeList.contains(cafCassCaseDetail.getCaseTypeOfApplication())
+            && caseStateList.contains(cafCassCaseDetail.getState());
     }
 
     public void filterCasesByApplicationValidPostcode(CafCassResponse cafCassResponse) {
