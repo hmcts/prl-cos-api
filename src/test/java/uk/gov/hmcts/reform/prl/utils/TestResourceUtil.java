@@ -8,7 +8,8 @@ import java.nio.file.Files;
 
 public final class TestResourceUtil {
 
-    private TestResourceUtil() {}
+    private TestResourceUtil() {
+    }
 
     public static String readFileFrom(final String resourcePath) throws IOException {
         return resourceAsString(resourcePath);
