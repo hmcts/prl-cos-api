@@ -58,7 +58,7 @@ public class CaseDocumentController {
         if (uploadedDocuments != null) {
             String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
             CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
-            log.info("Case Data retrieved for id : "+caseDetails.getId().toString());
+            log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
             CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             if (tempCaseData.getCitizenUploadedDocumentList() != null
                 && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
