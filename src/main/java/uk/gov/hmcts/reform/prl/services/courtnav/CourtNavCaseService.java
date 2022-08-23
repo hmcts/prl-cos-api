@@ -149,7 +149,7 @@ public class CourtNavCaseService {
                 caseDataContent
             );
 
-            log.info("Document has been saved in caseData {}", caseDetails.getData().get("typeOfDocument"));
+            log.info("Document has been saved in caseData {}", document.getOriginalFilename());
 
         } else {
             log.error("Un acceptable format/type of document {}", typeOfDocument);
