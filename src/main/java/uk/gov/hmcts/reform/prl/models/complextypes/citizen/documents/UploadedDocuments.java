@@ -5,7 +5,6 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Data
 @Builder

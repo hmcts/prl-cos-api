@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -55,7 +56,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import java.time.LocalDate;
 
 @Slf4j
 @Service
