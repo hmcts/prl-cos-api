@@ -307,8 +307,3 @@ document:
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
-
-postcodelookup:
-  api:
-    url: https://api.os.uk/search/places/v1
-    key: ${POST_CODE_LOOKUP_KEY:REPLACE_ME}
