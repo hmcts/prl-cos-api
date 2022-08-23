@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.courtnav;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -25,7 +26,9 @@ import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +52,9 @@ public class CourtNavCaseServiceTest {
     private IdamClient idamClient;
 
     @Mock
+    private CaseUtils caseUtils;
+
+    @Mock
     private AuthTokenGenerator authTokenGenerator;
 
     @Mock
@@ -56,6 +62,9 @@ public class CourtNavCaseServiceTest {
 
     @Mock
     private DocumentGenService documentGenService;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @InjectMocks
     CourtNavCaseService courtNavCaseService;
@@ -74,7 +83,7 @@ public class CourtNavCaseServiceTest {
         ).thenReturn(StartEventResponse.builder().eventId("courtnav-case-creation").token("eventToken").build());
         file = new MockMultipartFile(
             "file",
-            "private-law.txt",
+            "private-law.pdf",
             MediaType.TEXT_PLAIN_VALUE,
             "FL401 case".getBytes()
         );
@@ -93,8 +102,9 @@ public class CourtNavCaseServiceTest {
     @Ignore
     @Test
     public void shouldUploadDocumentWhenAllFieldsAreCorrect() {
-        uk.gov.hmcts.reform.prl.models.documents.Document tempDoc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-            .documentFileName("private-law.txt")
+        uk.gov.hmcts.reform.prl.models.documents.Document tempDoc = uk.gov.hmcts.reform.prl.models.documents
+            .Document.builder()
+            .documentFileName("private-law.pdf")
             .documentUrl(randomAlphaNumeric)
             .documentBinaryUrl(randomAlphaNumeric)
             .build();
@@ -104,9 +114,14 @@ public class CourtNavCaseServiceTest {
             .event(Event.builder()
                        .id("courtnav-document-upload")
                        .build())
-            .data(Map.of("fl401Doc1", tempDoc))
+            .data(Map.of("FL401", tempDoc))
             .build();
+        CaseDetails tempCaseDetails = CaseDetails.builder().data(Map.of("id", "1234567891234567")).state(
+            "SUBMITTED_PAID").createdDate(
+            LocalDateTime.now()).lastModified(LocalDateTime.now()).id(1234567891234567L).build();
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        when(coreCaseDataApi.getCase(authToken, s2sToken, "1234567891234567")).thenReturn(tempCaseDetails);
+        //when(caseUtils.).thenReturn(caseData);
         when(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any())
         ).thenReturn(StartEventResponse.builder().eventId("courtnav-document-upload").token("eventToken").build());
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
@@ -125,7 +140,7 @@ public class CourtNavCaseServiceTest {
             "typeOfDocument",
             "fl401Doc1"
         )).build());
-        courtNavCaseService.uploadDocument("Bearer abc", file, "fl401Doc1",
+        courtNavCaseService.uploadDocument("Bearer abc", file, "FL401",
                                            "1234567891234567"
         );
         verify(coreCaseDataApi).startEventForCaseWorker(
@@ -150,8 +165,28 @@ public class CourtNavCaseServiceTest {
     }
 
     @Test(expected = ResponseStatusException.class)
+    public void shouldNotUploadDocumentWhenInvalidDocumentTypeOfDocumentIsRequested() {
+        courtNavCaseService.uploadDocument("Bearer abc", file, "InvalidTypeOfDocument",
+                                           "1234567891234567"
+        );
+    }
+
+    @Test(expected = ResponseStatusException.class)
+    public void shouldNotUploadDocumentWhenInvalidDocumentFormatIsRequested() {
+        courtNavCaseService.uploadDocument("Bearer abc", file, "InvalidTypeOfDocument",
+                                           "1234567891234567"
+        );
+    }
+
+    @Test(expected = ResponseStatusException.class)
     public void shouldThrowExceptionWhenInvalidTypeOfDocumentIsPassed() {
-        courtNavCaseService.uploadDocument("Bearer abc", file, "fl401Doc3",
+        file = new MockMultipartFile(
+            "file",
+            "private-law.json",
+            MediaType.TEXT_PLAIN_VALUE,
+            "FL401 case".getBytes()
+        );
+        courtNavCaseService.uploadDocument("Bearer abc", file, "FL401",
                                            "1234567891234567"
         );
     }

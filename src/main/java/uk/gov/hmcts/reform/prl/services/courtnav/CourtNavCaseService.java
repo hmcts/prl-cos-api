@@ -115,7 +115,7 @@ public class CourtNavCaseService {
                 caseId,
                 document.getOriginalFilename(),
                 typeOfDocument,
-                tempCaseDetails,
+                tempCaseData,
                 uploadResponse.getDocuments().get(0)
             );
 
@@ -172,9 +172,9 @@ public class CourtNavCaseService {
     }
 
     private CaseData getCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
-                                                 CaseDetails tempCaseDetails, Document document) {
-        String partyName = tempCaseDetails.getData().get("applicantCaseName") != null ? tempCaseDetails.getData().get(
-            "applicantCaseName").toString() : "COURTNAV";
+                                                 CaseData tempCaseData, Document document) {
+        String partyName = tempCaseData.getApplicantCaseName() != null
+            ? tempCaseData.getApplicantCaseName() : "COURTNAV";
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         Element<UploadedDocuments> uploadedDocsElement =
             element(UploadedDocuments.builder().dateCreated(LocalDate.now())
@@ -189,8 +189,8 @@ public class CourtNavCaseService {
                                              .documentBinaryUrl(document.links.binary.href)
                                              .documentHash(document.hashToken)
                                              .documentFileName(fileName).build()).build());
-        if (tempCaseDetails.getData().get("courtNavUploadedDocs") != null) {
-            uploadedDocumentsList = CaseUtils.getCaseData(tempCaseDetails, objectMapper).getCourtNavUploadedDocs();
+        if (tempCaseData.getCourtNavUploadedDocs() != null) {
+            uploadedDocumentsList = tempCaseData.getCourtNavUploadedDocs();
             uploadedDocumentsList.add(uploadedDocsElement);
         } else {
             uploadedDocumentsList = new ArrayList<>();
