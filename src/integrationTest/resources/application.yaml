@@ -165,6 +165,12 @@ idam:
     id: prl-cos-api
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
     secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+  solicitor:
+    username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
+    password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
+    system-update:
+      username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
+      password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
 
 security:
   oauth2:
