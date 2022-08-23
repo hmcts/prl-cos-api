@@ -155,6 +155,9 @@ idam:
     secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
   user:
     genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
+  citizen:
+    username: XXXXXXX
+    password: XXXXXXX
   solicitor:
     username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
     password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
