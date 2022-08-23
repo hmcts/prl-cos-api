@@ -20,7 +20,6 @@ java:
         - southampton-court-email-address
         - idam-solicitor-username
         - idam-solicitor-password
-        - postcode-lookup-token
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
