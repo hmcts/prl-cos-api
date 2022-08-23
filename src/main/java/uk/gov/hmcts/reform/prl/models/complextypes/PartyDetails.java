@@ -76,7 +76,7 @@ public class PartyDetails {
     private final String applicantContactInstructions;
     @JsonIgnore
     private final User user;
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private final Response response;
 
     public boolean hasConfidentialInfo() {
