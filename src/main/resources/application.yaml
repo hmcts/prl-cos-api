@@ -26,6 +26,7 @@ prl:
 cafcaas:
   search-case-type-id: PRLAPPS
   caseTypeOfApplicationList: C100, A58
+  caseState: SUBMITTED_PAID
 
 management:
   endpoint:
