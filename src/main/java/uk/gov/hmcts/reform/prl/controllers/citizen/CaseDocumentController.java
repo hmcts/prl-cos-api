@@ -59,16 +59,18 @@ public class CaseDocumentController {
             String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
             CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
 
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            if (caseData.getCitizenUploadedDocumentList() != null && !caseData.getCitizenUploadedDocumentList().isEmpty()) {
-                uploadedDocumentsList = caseData.getCitizenUploadedDocumentList();
+            CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            if (tempCaseData.getCitizenUploadedDocumentList() != null
+                && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
+                uploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
             } else {
                 uploadedDocumentsList = new ArrayList<>();
             }
             uploadedDocumentsList.add(Element.<UploadedDocuments>builder()
                                           .value(uploadedDocuments)
                                           .build());
-            caseData = CaseData.builder().citizenUploadedDocumentList(uploadedDocumentsList).build();
+            CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
+                .citizenUploadedDocumentList(uploadedDocumentsList).build();
             caseService.updateCase(
                 caseData,
                 authorisation,
