@@ -148,7 +148,7 @@ public class CourtNavCaseService {
 
         } else {
             log.error("Un acceptable format/type of document {}", typeOfDocument);
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -160,7 +160,7 @@ public class CourtNavCaseService {
         Element<UploadedDocuments> uploadedDocsElement =
             element(UploadedDocuments.builder().dateCreated(LocalDate.now())
                         .documentType(typeOfDocument)
-                        .uploadedBy("COURNAV")
+                        .uploadedBy("COURTNAV")
                         .documentDetails(DocumentDetails.builder().documentName(fileName)
                                              .documentUploadedDate(new Date().toString()).build())
                         .partyName(partyName).isApplicant("NA_COURTNAV")
