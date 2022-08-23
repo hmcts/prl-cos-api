@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
@@ -20,12 +19,15 @@ public class CaseDataServiceTest {
 
     @Test
     public void customBuilderShouldWork() throws IOException {
-        caseDataService.getCaseData("01/01/2022", "01/01/2023");
+        String searchString = TestResourceUtil.readFileFrom("classpath:request/ccdsearchrequest.json");
+        caseDataService.getCaseData(null, null, searchString);
+
+        /*caseDataService.getCaseData("01/01/2022", "01/01/2023");
         CafCassResponse cafCassResponse = objectMapper.readValue(
             TestResourceUtil.readFileFrom(jsonInString),
             CafCassResponse.class
         );
-        System.out.println(cafCassResponse);
+        System.out.println(cafCassResponse);*/
     }
 
 }

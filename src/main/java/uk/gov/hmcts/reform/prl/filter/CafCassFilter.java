@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.prl.filter;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.*;
 
@@ -7,33 +10,57 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class CafCassFilter {
+    @Value("#{'${cafcaas.caseTypeOfApplicationList}'.split(',')}")
+    private List<String> caseTypeList;
 
-    public void filterCasesByApplicationValidPostcode(CafCassResponse cafCassResponse) {
-        List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases()
-            .stream().map(cafCassCaseDetail ->
-                              updateCafCassCaseDetails(cafCassCaseDetail)).collect(Collectors.toList());
+    @Value("#{'${cafcaas.caseState}'.split(',')}")
+    private List<String> caseStateList;
+
+    public void filer(CafCassResponse cafCassResponse) {
+        caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
+        caseStateList = caseStateList.stream().map(String::trim).collect(Collectors.toList());
+        if(caseTypeList != null && !caseTypeList.isEmpty()) {
+            filterCaseByApplicationCaseType(cafCassResponse);
+            filterCasesByApplicationValidPostcode(cafCassResponse);
+        } else {
+            log.error("cafcaas.caseTypeOfApplicationList not configured");
+        }
+    }
+    public void filterCaseByApplicationCaseType(CafCassResponse cafCassResponse) {
+        List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases().stream()
+            .filter(cafCassCaseDetail -> caseTypeList.contains(cafCassCaseDetail.getCaseTypeOfApplication())
+            && cafCassCaseDetail.getState().equalsIgnoreCase(""))
+            .collect(Collectors.toList());
         cafCassResponse.setCases(cafCassCaseDetailList);
     }
 
-    private CafCassCaseDetail updateCafCassCaseDetails(CafCassCaseDetail cafCassCaseDetail) {
-        cafCassCaseDetail.setCases(filterByApplicantValidPostcode(cafCassCaseDetail.getCases()));
-        return cafCassCaseDetail;
+    public void filterCasesByApplicationValidPostcode(CafCassResponse cafCassResponse) {
+        List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases()
+            .stream().filter(cafCassCaseDetail -> {
+                if (!ObjectUtils.isEmpty(cafCassCaseDetail.getCaseData().getApplicants())) {
+                    return hasApplicantValidPostcode(cafCassCaseDetail.getCaseData());
+                } else {
+                    return false;
+                }
+            }).collect(Collectors.toList());
+        cafCassResponse.setCases(cafCassCaseDetailList);
     }
 
-    private CaseData filterByApplicantValidPostcode(CaseData caseData) {
-        List<Applicant> applicantList = caseData
-            .getApplicants()
-            .stream()
-            .filter(applicant ->
-                        isAddressValid(applicant.getMValue().getMAddress())).collect(Collectors.toList());
-        caseData.setApplicants(applicantList);
-        return caseData;
+    private boolean hasApplicantValidPostcode(CafCassCaseData cafCassCaseData) {
+        for(Element<ApplicantDetails> applicantDetails: cafCassCaseData.getApplicants()) {
+            if(isAddressValid(applicantDetails))
+                return true;
+        }
+        return false;
     }
 
-    private boolean isAddressValid(Address mAddress) {
+    private boolean isAddressValid(Element<ApplicantDetails> applicationDetails) {
         //TODO: call the postcode api
-        String mPostCode = mAddress.getMPostCode();
+        if(ObjectUtils.isEmpty(applicationDetails.getValue())) {
+            Address address = applicationDetails.getValue().getAddress();
+        }
         return true;
     }
 }
