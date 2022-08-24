@@ -27,8 +27,9 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -340,27 +341,28 @@ public class DocumentGenService {
             && generateAndUploadDocumentRequest.getValues().containsKey("partyName")
             && generateAndUploadDocumentRequest.getValues().containsKey("documentType")) {
             fileName = generateAndUploadDocumentRequest.getValues().get("partyName").replace(" ", "_");
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+            String currentDate = LocalDate.now().format(DateTimeFormatter
+                             .ofLocalizedDate(FormatStyle.MEDIUM));
             switch (generateAndUploadDocumentRequest.getValues().get("documentType")) {
                 case YOUR_POSITION_STATEMENTS:
-                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex) + "_position_satement_" + dateFormat.format(
-                        LocalDate.now()) + "_submitted.pdf";
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_position_satement_" + currentDate + "_submitted.pdf";
                     break;
                 case YOUR_WITNESS_STATEMENTS:
-                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex) + "_witness_satement_" + dateFormat.format(
-                        LocalDate.now()) + "_submitted.pdf";
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_witness_satement_" + currentDate + "_submitted.pdf";
                     break;
                 case OTHER_WITNESS_STATEMENTS:
-                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex) + "_other_witness_satement_" + dateFormat.format(
-                        LocalDate.now()) + "_submitted.pdf";
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_other_witness_satement_" + currentDate + "_submitted.pdf";
                     break;
                 case MEDICAL_RECORDS:
-                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex) + "_medical_records_" + dateFormat.format(
-                        LocalDate.now()) + "_submitted.pdf";
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_medical_records_" + currentDate + "_submitted.pdf";
                     break;
                 case MAIL_SCREENSHOTS_MEDIA_FILES:
-                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex) + "_media_files_" + dateFormat.format(
-                        LocalDate.now()) + "_submitted.pdf";
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_media_files_" + currentDate + "_submitted.pdf";
                     break;
                 default:
                     fileName = "";
@@ -645,7 +647,9 @@ public class DocumentGenService {
         String documentType = "";
         String partyName = "";
         String documentName = "";
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy");
+        LocalDate today = LocalDate.now();
+        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yy"));
+
         if (generateAndUploadDocumentRequest.getValues() != null) {
             if (generateAndUploadDocumentRequest.getValues().containsKey("parentDocumentType")) {
                 parentDocumentType = generateAndUploadDocumentRequest.getValues().get("parentDocumentType");
@@ -668,7 +672,7 @@ public class DocumentGenService {
             .dateCreated(LocalDate.now())
             .documentDetails(DocumentDetails.builder()
                                  .documentName(documentName)
-                                 .documentUploadedDate(dateFormat.format(LocalDate.now()))
+                                 .documentUploadedDate(formattedCurrentDate)
                                  .build()).citizenDocument(generateDocumentField(
                 fileName,
                 generatedDocumentInfo
