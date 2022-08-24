@@ -31,6 +31,7 @@ public class C100CaseInviteService implements CaseInviteService {
     }
 
     private void sendCaseInvite(CaseInvite caseInvite, PartyDetails partyDetails, CaseData caseData) {
+        log.info(" **** Party Details **** {}",partyDetails);
         caseInviteEmailService.sendCaseInviteEmail(caseInvite, partyDetails, caseData);
     }
 
