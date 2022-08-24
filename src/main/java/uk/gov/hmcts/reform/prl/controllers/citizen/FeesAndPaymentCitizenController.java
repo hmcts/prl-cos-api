@@ -29,7 +29,7 @@ public class FeesAndPaymentCitizenController {
     @Autowired
     private FeeService feeService;
 
-    @GetMapping(path = "/getC100ApplicationFees", produces = APPLICATION_JSON)
+    @GetMapping(path = "/getC100ApplicationFees", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the Fees Details for C100 Application Submission")
     public ResponseEntity fetchFeesAmount(
         @RequestHeader(value = "Authorization") String authorisation,
