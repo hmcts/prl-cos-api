@@ -27,6 +27,7 @@ public class C100CaseInviteService implements CaseInviteService {
     private LaunchDarklyClient launchDarklyClient;
 
     private CaseInvite generateRespondentCaseInvite(Element<PartyDetails> partyDetails) {
+        log.info("***Partydetails when returning case invite *** {}", partyDetails);
         return new CaseInvite().generateAccessCode(partyDetails.getValue().getEmail(), partyDetails.getId());
     }
 
@@ -47,13 +48,6 @@ public class C100CaseInviteService implements CaseInviteService {
                 CaseInvite caseInvite = generateRespondentCaseInvite(respondent);
                 caseInvites.add(element(caseInvite));
                 sendCaseInvite(caseInvite, respondent.getValue(), caseData);
-            }
-        }
-        if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
-            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
-                CaseInvite caseInvite = generateRespondentCaseInvite(applicant);
-                caseInvites.add(element(caseInvite));
-                sendCaseInvite(caseInvite, applicant.getValue(), caseData);
             }
         }
         if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
