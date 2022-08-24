@@ -24,23 +24,20 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequiredArgsConstructor
 public class FeesAndPaymentCitizenController {
 
-
-    private final String serviceAuth = "ServiceAuthorization";
-
     @Autowired
     private AuthorisationService authorisationService;
 
     @Autowired
     private FeeService feeService;
 
-    @GetMapping(path = "/getC100ApplicationFees", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Frontend to fetch the Fees data")
+    @GetMapping(path = "/getC100ApplicationFees", produces = APPLICATION_JSON)
+    @Operation(description = "Frontend to fetch the Fees Details for C100 Application Submission")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Fee amount returned"),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public FeeResponseForCitizen fetchFeesAmount(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestHeader(serviceAuth) String serviceAuthorization
+        @RequestHeader("serviceAuthorization") String serviceAuthorization
     ) {
         FeeResponse feeResponse = null;
         try {
