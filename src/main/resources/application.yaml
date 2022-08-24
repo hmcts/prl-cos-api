@@ -308,3 +308,8 @@ springdoc:
       enabled: true
     polymorphic-converter:
       enabled: true
+
+postcodelookup:
+  api:
+    url: https://api.os.uk/search/places/v1
+    key: ${POST_CODE_LOOKUP_KEY:REPLACE_ME}
