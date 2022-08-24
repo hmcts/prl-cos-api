@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
@@ -57,6 +58,7 @@ public class FeesAndPaymentCitizenControllerTest {
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
         feesAndPaymentCitizenController.fetchFeesAmount(authToken, s2sToken);
         Assert.assertEquals(feeResponseForCitizen.getAmount(), feeResponse.getAmount().toString());
+        Assert.assertEquals(feeResponseForCitizen.getAmount(), feeResponse.getAmount().toString());
     }
 
     @Test
@@ -66,11 +68,11 @@ public class FeesAndPaymentCitizenControllerTest {
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.FALSE);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
-        FeeResponseForCitizen feeResponseForCitizen = feesAndPaymentCitizenController.fetchFeesAmount(
+        ResponseEntity responseEntity = feesAndPaymentCitizenController.fetchFeesAmount(
             authToken,
             s2sToken
         );
-        assertEquals("Invalid Client", feeResponseForCitizen.getErrorRetrievingResponse());
+        assertEquals("Invalid Client", ((FeeResponseForCitizen) responseEntity.getBody()).getErrorRetrievingResponse());
     }
 
 }

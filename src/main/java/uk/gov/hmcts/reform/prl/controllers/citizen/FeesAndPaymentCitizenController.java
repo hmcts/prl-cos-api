@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,7 +37,7 @@ public class FeesAndPaymentCitizenController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Fee amount returned"),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public FeeResponseForCitizen fetchFeesAmount(
+    public ResponseEntity fetchFeesAmount(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader("serviceAuthorization") String serviceAuthorization
     ) {
@@ -48,11 +50,11 @@ public class FeesAndPaymentCitizenController {
                 throw (new RuntimeException("Invalid Client"));
             }
         } catch (Exception e) {
-            return FeeResponseForCitizen.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(FeeResponseForCitizen.builder()
                 .errorRetrievingResponse(e.getMessage())
-                .build();
+                .build());
         }
-        return FeeResponseForCitizen.builder()
-            .amount(feeResponse.getAmount().toString()).build();
+        return ResponseEntity.status(HttpStatus.OK).body(FeeResponseForCitizen.builder()
+            .amount(feeResponse.getAmount().toString()).build());
     }
 }
