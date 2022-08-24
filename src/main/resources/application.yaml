@@ -108,18 +108,20 @@ notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
 
-payments:
-  api:
-    url: ${PAY_URL:}
-    callback-url: ${PAY_CALLBACK_URL:}
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
-
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
+
+payments:
+  api:
+    url: ${PAY_URL:}
+    callback-url: ${PAY_CALLBACK_URL:}
+
+private-law:
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw}
 
 fees-register:
   api:
@@ -246,11 +248,11 @@ document:
       fl401_fl406_welsh_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_welsh_filename: Power_of_arrest.pdf
     common:
-      prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
       doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
       doc_cover_sheet_welsh_template: not_implemented
       doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
       doc_cover_sheet_welsh_filename: not_implemented
+      prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf
       prl_c21_welsh_template: PRL-GOR-WEL-C21-Blank-Order-Final.docx
       prl_c21_welsh_filename: Blank_Order_Directions_C21_Welsh.pdf
@@ -310,6 +312,9 @@ document:
       prl_c1a_blank_filename: C1ABlankDocument.pdf
       prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
+    citizen:
+      prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
+      prl_citizen_upload_filename: Self_created.pdf
 
 southampton:
   court:
