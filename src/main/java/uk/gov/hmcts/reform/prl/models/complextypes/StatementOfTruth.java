@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.prl.enums.FL401Consent;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SignatureEnum;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +18,7 @@ public class StatementOfTruth {
     private final List<FL401Consent> applicantConsent;
     @JsonProperty("signature")
     private final String signature;
-    private final SignatureEnum signatureType;
+    //private final SignatureEnum signatureType;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate date;
     private final String fullname;
