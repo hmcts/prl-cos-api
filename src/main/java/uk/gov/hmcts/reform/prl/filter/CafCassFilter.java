@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.prl.filter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.*;
+import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -18,6 +20,9 @@ public class CafCassFilter {
 
     @Value("#{'${cafcaas.caseState}'.split(',')}")
     private List<String> caseStateList;
+
+    @Autowired
+    private PostcodeLookupService postcodeLookupService;
 
     public void filer(CafCassResponse cafCassResponse) {
         caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
@@ -62,10 +67,11 @@ public class CafCassFilter {
     }
 
     private boolean isAddressValid(Element<ApplicantDetails> applicationDetails) {
-        //TODO: call the postcode api
-        if(ObjectUtils.isEmpty(applicationDetails.getValue())) {
+        if(ObjectUtils.isEmpty(applicationDetails.getValue())
+            && ObjectUtils.isEmpty(applicationDetails.getValue().getAddress())) {
             Address address = applicationDetails.getValue().getAddress();
+            return postcodeLookupService.isValidNationalPostCode(address.getPostCode(), "E");
         }
-        return true;
+        return false;
     }
 }
