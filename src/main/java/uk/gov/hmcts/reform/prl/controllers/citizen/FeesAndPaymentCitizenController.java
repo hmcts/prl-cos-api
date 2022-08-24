@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RestController
 @RequestMapping("/fees-and-payment-apis")
 public class FeesAndPaymentCitizenController {
+    private static final String SERVICE_AUTH = "ServiceAuthorization";
 
     @Autowired
     private AuthorisationService authorisationService;
@@ -36,8 +38,8 @@ public class FeesAndPaymentCitizenController {
     @GetMapping(path = "/getC100ApplicationFees", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the Fees Details for C100 Application Submission")
     public ResponseEntity fetchFeesAmount(
-        @RequestHeader(value = "Authorization") String authorisation,
-        @RequestHeader("serviceAuthorization") String serviceAuthorization
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(SERVICE_AUTH) String serviceAuthorization
     ) {
         FeeResponse feeResponse = null;
         try {
