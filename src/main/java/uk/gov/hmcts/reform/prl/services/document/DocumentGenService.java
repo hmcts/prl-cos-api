@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -341,8 +340,7 @@ public class DocumentGenService {
             && generateAndUploadDocumentRequest.getValues().containsKey("partyName")
             && generateAndUploadDocumentRequest.getValues().containsKey("documentType")) {
             fileName = generateAndUploadDocumentRequest.getValues().get("partyName").replace(" ", "_");
-            String currentDate = LocalDate.now().format(DateTimeFormatter
-                             .ofLocalizedDate(FormatStyle.MEDIUM));
+            String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
             switch (generateAndUploadDocumentRequest.getValues().get("documentType")) {
                 case YOUR_POSITION_STATEMENTS:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
@@ -648,7 +646,7 @@ public class DocumentGenService {
         String partyName = "";
         String documentName = "";
         LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yy"));
+        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
 
         if (generateAndUploadDocumentRequest.getValues() != null) {
             if (generateAndUploadDocumentRequest.getValues().containsKey("parentDocumentType")) {
