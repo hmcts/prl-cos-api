@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 public class NumberToWords {
     private static final String[] NUMBERS = {
+        "zero",
         "first",
         "second",
         "third",
