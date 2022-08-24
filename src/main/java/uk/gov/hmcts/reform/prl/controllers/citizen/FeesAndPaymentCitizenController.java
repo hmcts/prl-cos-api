@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,10 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 
 @Slf4j
-@RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "feesAndPayment")
+@Tag(name = "fees-and-payment-controller")
+@RestController
+@RequestMapping("/fees-and-payment-apis")
 public class FeesAndPaymentCitizenController {
 
     @Autowired
