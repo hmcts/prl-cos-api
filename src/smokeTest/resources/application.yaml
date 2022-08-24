@@ -116,18 +116,20 @@ notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
 
+payments:
+  api:
+    url: ${PAY_URL:}
+    callback-url: ${PAY_CALLBACK_URL:}
+
+private-law:
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw}
+
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
-
-payments:
-  api:
-    url: ${PAY_URL:}
-    callback-url: ${PAY_CALLBACK_URL:}
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
 
 fees-register:
   api:
@@ -252,6 +254,10 @@ document:
       fl401_fl406_welsh_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_welsh_filename: Power_of_arrest.pdf
     common:
+      doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
+      doc_cover_sheet_welsh_template: not_implemented
+      doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
+      doc_cover_sheet_welsh_filename: not_implemented
       prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf
       prl_c21_welsh_template: PRL-GOR-WEL-C21-Blank-Order-Final.docx
@@ -277,16 +283,15 @@ document:
       prl_c47a_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Final.docx
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Draft.docx
+      prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
       prl_c45a_template: PRL-GOR-ENG-C45A-Parental-Responsibility-Order-Final.docx
       prl_c45a_filename: C45ACreateOrder.pdf
       prl_c45a_draft_template: PRL-GOR-ENG-C45A-Parental-Responsibility-Order-Draft.docx
       prl_c45a_draft_filename: C45ACreateOrderDraft.pdf
       prl_n117_draft_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Draft.docx
-      prl_c47a_draft_filename: AppointmentOfaGuardian(C47A)Draft.pdf
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
       prl_n117_filename: N117CreateOrder.pdf
-      prl_fl402_draft_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
       prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
       prl_c7_blank_filename: C7BlankDocument.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
@@ -295,6 +300,7 @@ document:
       prl_c1a_blank_filename: C1ABlankDocument.pdf
       prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
+      prl_fl402_draft_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
       prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
       prl_fl402_final_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
@@ -308,10 +314,6 @@ document:
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
       prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
-      doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
-      doc_cover_sheet_welsh_template: not_implemented
-      doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
-      doc_cover_sheet_welsh_filename: not_implemented
       C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
       C43A_draft_filename: C43ADraftCreateOrder.pdf
       C43A_final_template: PRL-ORDER-C43A-FINAL.docx

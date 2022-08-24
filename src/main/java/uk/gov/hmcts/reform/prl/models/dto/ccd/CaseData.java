@@ -72,11 +72,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
@@ -117,6 +119,13 @@ public class CaseData implements MappableObject {
      * Case Type Of Application.
      */
     private final String caseTypeOfApplication;
+
+    /**
+     * Applicant's Age.
+     *
+     */
+    @JsonProperty("applicantAge")
+    private final ApplicantAge applicantAge;
 
     /**
      * Case Type Of Application.
@@ -287,6 +296,7 @@ public class CaseData implements MappableObject {
     private final String specialArrangementsRequired;
     private final YesOrNo isIntermediaryNeeded;
     private final String reasonsForIntermediary;
+    private final String specialCourtName;
 
     /**
      * International element.
@@ -489,7 +499,7 @@ public class CaseData implements MappableObject {
     private final Map<String, Object> typeOfApplicationTable;
 
     /**
-     *  Withdraw Application.
+     * Withdraw Application.
      */
     private final WithdrawApplication withDrawApplicationData;
 
@@ -510,7 +520,7 @@ public class CaseData implements MappableObject {
     private final FL401OtherProceedingDetails fl401OtherProceedingDetails;
 
     /**
-     *  FL401 Statement Of truth and submit.
+     * FL401 Statement Of truth and submit.
      */
     @JsonProperty("fl401StmtOfTruth")
     private final StatementOfTruth fl401StmtOfTruth;
@@ -522,7 +532,7 @@ public class CaseData implements MappableObject {
 
 
     /**
-     *  FL401 submit status flags.
+     * FL401 submit status flags.
      */
     private String isCourtEmailFound;
     private String isDocumentGenerated;
@@ -531,7 +541,7 @@ public class CaseData implements MappableObject {
     private ChildArrangementOrdersEnum childArrangementOrders;
 
     /**
-     *  Manage Orders.
+     * Manage Orders.
      */
 
     private final List<Element<OrderDetails>> orderCollection;
@@ -602,13 +612,24 @@ public class CaseData implements MappableObject {
     }
 
     /**
-     *  Withdraw request flag.
+     * Withdraw request flag.
      */
     private String isWithdrawRequestSent;
 
     /**
-     *  Service Of Application.
+     *  Courtnav uploaded files.
+     */
+
+    private Document fl401Doc1;
+    private Document fl401Doc2;
+    private YesOrNo isCourtNavCase;
+
+    /**
+     * Service Of Application.
      */
     private OrdersToServeSA serviceOfApplicationScreen1;
     private ConfirmRecipients confirmRecipients;
+
+    @JsonProperty("citizenUploadedDocumentList")
+    private final List<Element<UploadedDocuments>> citizenUploadedDocumentList;
 }
