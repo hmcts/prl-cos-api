@@ -8,10 +8,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -45,6 +49,8 @@ public class CaseDocumentController {
     @Autowired
     CaseService caseService;
 
+    Integer fileIndex;
+
     @PostMapping(path = "/generate-citizen-statement-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Generate a PDF for citizen as part of upload documents")
     @ApiResponses(value = {
@@ -54,13 +60,32 @@ public class CaseDocumentController {
     public String generateCitizenStatementDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
                                                    @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                    @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
-        UploadedDocuments uploadedDocuments = documentGenService.generateCitizenStatementDocument(authorisation, generateAndUploadDocumentRequest);
+        fileIndex = 0;
+        String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
+        CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
+        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
+        CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        if (generateAndUploadDocumentRequest.getValues() != null
+            && generateAndUploadDocumentRequest.getValues().containsKey("documentType")) {
+            final String documentType = generateAndUploadDocumentRequest.getValues().get("documentType");
+            if (tempCaseData.getCitizenUploadedDocumentList() != null
+                && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
+                tempCaseData.getCitizenUploadedDocumentList()
+                    .stream().forEach((document) -> {
+                        if (documentType.equals(document.getValue().getDocumentType())) {
+                            fileIndex++;
+                        }
+                    });
+            }
+        }
+        UploadedDocuments uploadedDocuments =
+            documentGenService.generateCitizenStatementDocument(
+                authorisation,
+                generateAndUploadDocumentRequest,
+                fileIndex + 1
+            );
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         if (uploadedDocuments != null) {
-            String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
-            CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
-            log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
-            CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             if (tempCaseData.getCitizenUploadedDocumentList() != null
                 && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
                 uploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
@@ -84,6 +109,22 @@ public class CaseDocumentController {
         }
 
     }
+
+
+    @PostMapping(path = "/upload-citizen-statement-document", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON)
+    @Operation(description = "Call CDAM to upload document")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad Request while uploading the document"),
+        @ApiResponse(responseCode = "401", description = "Provided Authroization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public ResponseEntity<?> uploadDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                            @RequestParam("file") MultipartFile file) {
+
+        return ResponseEntity.ok(documentGenService.uploadDocument(authorisation, file));
+    }
+
 
 }
 
