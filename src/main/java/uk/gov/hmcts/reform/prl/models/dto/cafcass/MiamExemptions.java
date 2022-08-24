@@ -1,17 +1,25 @@
 package uk.gov.hmcts.reform.prl.models.dto.cafcass;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder(toBuilder = true)
 public class MiamExemptions {
 
-    private final String reasonsForMiamExemption;
-    private final String domesticViolenceEvidence;
-    private final String urgencyEvidence;
-    private final String childProtectionEvidence;
-    private final String previousAttendenceEvidence;
-    private final String otherGroundsEvidence;
+    private String reasonsForMiamExemption;
+    private String domesticViolenceEvidence;
+    private String urgencyEvidence;
+    private String childProtectionEvidence;
+    private String previousAttendenceEvidence;
+    private String otherGroundsEvidence;
 
 }
