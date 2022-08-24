@@ -5,6 +5,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.*;
 import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class CafCassFilter {
+    public static final String CAFCAAS_CASE_TYPE_OF_APPLICATION_LIST_NOT_CONFIGURED = "cafcaas.caseTypeOfApplicationList not configured";
     @Value("#{'${cafcaas.caseTypeOfApplicationList}'.split(',')}")
     private List<String> caseTypeList;
 
@@ -24,17 +26,17 @@ public class CafCassFilter {
     @Autowired
     private PostcodeLookupService postcodeLookupService;
 
-    public void filer(CafCassResponse cafCassResponse) {
+    public void filter(CafCassResponse cafCassResponse) {
         caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
         caseStateList = caseStateList.stream().map(String::trim).collect(Collectors.toList());
         if(caseTypeList != null && !caseTypeList.isEmpty()) {
             filterCaseByApplicationCaseType(cafCassResponse);
             filterCasesByApplicationValidPostcode(cafCassResponse);
         } else {
-            log.error("cafcaas.caseTypeOfApplicationList not configured");
+            log.error(CAFCAAS_CASE_TYPE_OF_APPLICATION_LIST_NOT_CONFIGURED);
         }
     }
-    public void filterCaseByApplicationCaseType(CafCassResponse cafCassResponse) {
+    private void filterCaseByApplicationCaseType(CafCassResponse cafCassResponse) {
         List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases().stream()
             .filter(filterByCaseTypeAndState())
             .collect(Collectors.toList());
@@ -42,11 +44,11 @@ public class CafCassFilter {
     }
 
     private Predicate<CafCassCaseDetail> filterByCaseTypeAndState() {
-        return cafCassCaseDetail -> caseTypeList.contains(cafCassCaseDetail.getCaseTypeOfApplication())
+        return cafCassCaseDetail -> caseTypeList.contains(cafCassCaseDetail.getCaseData().getCaseTypeOfApplication())
             && caseStateList.contains(cafCassCaseDetail.getState());
     }
 
-    public void filterCasesByApplicationValidPostcode(CafCassResponse cafCassResponse) {
+    private void filterCasesByApplicationValidPostcode(CafCassResponse cafCassResponse) {
         List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases()
             .stream().filter(cafCassCaseDetail -> {
                 if (!ObjectUtils.isEmpty(cafCassCaseDetail.getCaseData().getApplicants())) {
@@ -67,10 +69,12 @@ public class CafCassFilter {
     }
 
     private boolean isAddressValid(Element<ApplicantDetails> applicationDetails) {
-        if(ObjectUtils.isEmpty(applicationDetails.getValue())
-            && ObjectUtils.isEmpty(applicationDetails.getValue().getAddress())) {
+        if(!ObjectUtils.isEmpty(applicationDetails.getValue())
+            && !ObjectUtils.isEmpty(applicationDetails.getValue().getAddress())) {
             Address address = applicationDetails.getValue().getAddress();
-            return postcodeLookupService.isValidNationalPostCode(address.getPostCode(), "E");
+            System.out.println("calling post code look service for: " + address.getPostCode());
+            return postcodeLookupService.isValidNationalPostCode(address.getPostCode(),
+                                                                 CafcassAppConstants.ENGLAND_POSTCODE_NATIONALCODE);
         }
         return false;
     }

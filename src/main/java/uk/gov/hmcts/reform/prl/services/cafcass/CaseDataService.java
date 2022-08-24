@@ -32,7 +32,6 @@ public class CaseDataService {
     private CafCassFilter cafCassFilter;
 
     public CafCassResponse getCaseData(String authorisation, String serviceAuthorisation, String startDate, String endDate) throws IOException {
-        //TODO: Call the ccd api to get ccd data (parvez)
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
         SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
@@ -41,13 +40,10 @@ public class CaseDataService {
             serviceAuthorisation,
             cafCassSearchCaseTypeId
         );
-
-        //TODO: Map ccd data to cafcass data (SARAVANA)
+        objectMapper.writeValueAsString(searchResult);
         CafCassResponse cafCassResponse = objectMapper.convertValue(searchResult,
                                                              CafCassResponse.class);
-        System.out.println(searchResult);
-        //TODO: Filter data based on postcode (Adetola)
-        cafCassFilter.filterCasesByApplicationValidPostcode(cafCassResponse);
+        cafCassFilter.filter(cafCassResponse);
         return cafCassResponse;
     }
 
