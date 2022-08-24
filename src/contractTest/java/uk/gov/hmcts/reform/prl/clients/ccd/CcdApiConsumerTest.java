@@ -50,27 +50,28 @@ public class CcdApiConsumerTest {
     @Pact(provider = "ccd", consumer = "prl_cos")
     private RequestResponsePact createCaseInCcd(PactDslWithProvider builder) throws JsonProcessingException {
         return builder
-                .given("A request to create a case in CCD")
-                .uponReceiving("a request to create a case in CCD with valid authorization")
-                .method("POST")
-                .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
-                .headers("Authorization", BEARER_TOKEN)
-                .headers("Content-Type","application/json")
-                .path("/citizens/UserID/jurisdictions/jurisdictionId/case-types/caseType/cases")
-                .matchQuery("ignore-warning", "true")
-                .body(new ObjectMapper().writeValueAsString(buildCaseDataContent()), "application/json")
-                .willRespondWith()
-                .status(HttpStatus.SC_OK)
-                .body(createCaseResponse())
-                .toPact();
+            .given("A request to create a case in CCD")
+            .uponReceiving("a request to create a case in CCD with valid authorization")
+            .method("POST")
+            .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
+            .headers("Authorization", BEARER_TOKEN)
+            .headers("Content-Type", "application/json")
+            .path("/citizens/UserID/jurisdictions/jurisdictionId/case-types/caseType/cases")
+            .matchQuery("ignore-warning", "true")
+            .body(new ObjectMapper().writeValueAsString(buildCaseDataContent()), "application/json")
+            .willRespondWith()
+            .status(HttpStatus.SC_OK)
+            .body(createCaseResponse())
+            .toPact();
     }
 
     @Test
     @PactTestFor(pactMethod = "createCaseInCcd")
     public void verifyCreateCaseInCcd() {
         CaseDetails caseDetails = coreCaseDataApi.submitForCitizen(BEARER_TOKEN, SERVICE_AUTHORIZATION_HEADER, "UserID",
-                "jurisdictionId", "caseType",
-                true, buildCaseDataContent());
+                                                                   "jurisdictionId", "caseType",
+                                                                   true, buildCaseDataContent()
+        );
         assertNotNull(caseDetails);
         assertEquals("DRAFT", caseDetails.getState());
         assertEquals("PRLAPPS", caseDetails.getCaseTypeId());
@@ -80,16 +81,16 @@ public class CcdApiConsumerTest {
 
     private PactDslJsonBody createCaseResponse() {
         return new PactDslJsonBody()
-                .stringType("id", "1658508917240231")
-                .stringType("case_type", "PRLAPPS")
-                .stringType("callbackResponseStatus", "Success")
-                .stringType("state", "DRAFT")
-                .integerType("securityLevel",23)
-                .date("createdDate","dd/mm/yyyy")
-                .date("lastModified","dd/mm/yyyy")
-                .object("data")
-                .stringType("caseTypeOfApplication", "C100")
-                .closeObject().asBody();
+            .stringType("id", "1658508917240231")
+            .stringType("case_type", "PRLAPPS")
+            .stringType("callbackResponseStatus", "Success")
+            .stringType("state", "DRAFT")
+            .integerType("securityLevel", 23)
+            .date("createdDate", "dd/mm/yyyy")
+            .date("lastModified", "dd/mm/yyyy")
+            .object("data")
+            .stringType("caseTypeOfApplication", "C100")
+            .closeObject().asBody();
     }
 
     private CaseDataContent buildCaseDataContent() {
