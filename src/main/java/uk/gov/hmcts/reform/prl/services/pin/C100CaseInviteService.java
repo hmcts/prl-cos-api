@@ -42,6 +42,7 @@ public class C100CaseInviteService implements CaseInviteService {
 
         for (Element<PartyDetails> respondent : caseData.getRespondents()) {
             if (!respondentHasLegalRepresentation(respondent.getValue()) && Yes.equals(respondent.getValue().getCanYouProvideEmailAddress())) {
+                log.info("Respondent data {}", respondent);
                 CaseInvite caseInvite = generateRespondentCaseInvite(respondent);
                 caseInvites.add(element(caseInvite));
                 sendCaseInvite(caseInvite, respondent.getValue(), caseData);
