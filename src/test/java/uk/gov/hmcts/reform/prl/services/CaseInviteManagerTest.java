@@ -65,14 +65,14 @@ public class CaseInviteManagerTest {
                                                 UUID.randomUUID());
         CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2",
                                                 UUID.randomUUID());
-        List<Element<CaseInvite>> respondentCaseInvites = List.of(element(caseInvite1), element(caseInvite2));
+        List<Element<CaseInvite>> caseInvites = List.of(element(caseInvite1), element(caseInvite2));
 
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(launchDarklyClient.isFeatureEnabled("generate-pin")).thenReturn(true);
         when(c100CaseInviteService.generateAndSendRespondentCaseInvite(any()))
-            .thenReturn(CaseData.builder().respondentCaseInvites(respondentCaseInvites).build());
+            .thenReturn(CaseData.builder().caseInvites(caseInvites).build());
         when(fl401CaseInviteService.generateAndSendRespondentCaseInvite(any()))
-            .thenReturn(CaseData.builder().respondentCaseInvites(respondentCaseInvites).build());
+            .thenReturn(CaseData.builder().caseInvites(caseInvites).build());
     }
 
     @Test
@@ -80,10 +80,10 @@ public class CaseInviteManagerTest {
 
         CaseData actualCaseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
 
-        assertEquals(2, actualCaseData.getRespondentCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
+        assertEquals(2, actualCaseData.getCaseInvites().size());
+        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
             .getCaseInviteEmail());
-        assertEquals("abc2@de.com", actualCaseData.getRespondentCaseInvites().get(1).getValue()
+        assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
 
     }
@@ -94,10 +94,10 @@ public class CaseInviteManagerTest {
         CaseData actualCaseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData.toBuilder().caseTypeOfApplication(
             "FL401").build());
 
-        assertEquals(2, actualCaseData.getRespondentCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
+        assertEquals(2, actualCaseData.getCaseInvites().size());
+        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
             .getCaseInviteEmail());
-        assertEquals("abc2@de.com", actualCaseData.getRespondentCaseInvites().get(1).getValue()
+        assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
 
     }
@@ -107,10 +107,10 @@ public class CaseInviteManagerTest {
 
         CaseData actualCaseData = caseInviteManager.reGeneratePinAndSendNotificationEmail(caseData);
 
-        assertEquals(2, actualCaseData.getRespondentCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
+        assertEquals(2, actualCaseData.getCaseInvites().size());
+        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
             .getCaseInviteEmail());
-        assertEquals("abc2@de.com", actualCaseData.getRespondentCaseInvites().get(1).getValue()
+        assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
 
     }
@@ -120,10 +120,10 @@ public class CaseInviteManagerTest {
         CaseData actualCaseData = caseInviteManager.reGeneratePinAndSendNotificationEmail(caseData.toBuilder().caseTypeOfApplication(
             "FL401").build());
 
-        assertEquals(2, actualCaseData.getRespondentCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
+        assertEquals(2, actualCaseData.getCaseInvites().size());
+        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
             .getCaseInviteEmail());
-        assertEquals("abc2@de.com", actualCaseData.getRespondentCaseInvites().get(1).getValue()
+        assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
 
     }

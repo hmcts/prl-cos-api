@@ -261,7 +261,7 @@ public class CaseService {
 
         log.info("caseData testing::" + caseData);
 
-        List<CaseInvite> matchingCaseInvite = caseData.getRespondentCaseInvites()
+        List<CaseInvite> matchingCaseInvite = caseData.getCaseInvites()
             .stream()
             .map(Element::getValue)
             .filter(x -> accessCode.equals(x.getAccessCode()))
