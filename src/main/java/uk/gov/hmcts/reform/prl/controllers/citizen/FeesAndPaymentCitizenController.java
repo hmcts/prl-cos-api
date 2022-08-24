@@ -34,27 +34,33 @@ public class FeesAndPaymentCitizenController {
 
     @GetMapping(path = "/getC100ApplicationFees", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the Fees Details for C100 Application Submission")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Fee amount returned"),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
     public ResponseEntity fetchFeesAmount(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader("serviceAuthorization") String serviceAuthorization
     ) {
         FeeResponse feeResponse = null;
         try {
+            System.out.println("Inside try block");
             if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorization))) {
+                System.out.println("Inside if block");
+
                 feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
             } else {
+                System.out.println("Inside else block");
+
                 throw (new RuntimeException("Invalid Client"));
             }
         } catch (Exception e) {
+            System.out.println("Inside exce;ption block");
+
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(FeeResponseForCitizen.builder()
-                .errorRetrievingResponse(e.getMessage())
-                .build());
+                                                                          .errorRetrievingResponse(e.getMessage())
+                                                                          .build());
         }
+        System.out.println("Inside return response block");
+
         return ResponseEntity.status(HttpStatus.OK).body(FeeResponseForCitizen.builder()
-            .amount(feeResponse.getAmount().toString()).build());
+                                                             .amount(feeResponse.getAmount().toString()).build());
     }
 }
