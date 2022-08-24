@@ -7,8 +7,6 @@ import lombok.*;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.MiamExemptions;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 
