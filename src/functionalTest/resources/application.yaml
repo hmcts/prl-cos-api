@@ -311,4 +311,4 @@ southampton:
 postcodelookup:
   api:
     url: https://api.os.uk/search/places/v1
-    key: ${POST_CODE_LOOKUP_KEY:REPLACE_ME}
+    key: ${POST_CODE_LOOKUP_KEY:XXXXXXXXXXXXXXXX}

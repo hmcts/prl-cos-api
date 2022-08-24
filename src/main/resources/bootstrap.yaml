@@ -33,3 +33,4 @@ spring:
         prl.southampton-court-email-address: SOUTHAMPTON_COURT_EMAIL_ADDRESS
         prl.idam-solicitor-username: IDAM_SOLICITOR_USERNAME
         prl.idam-solicitor-password: IDAM_SOLICITOR_PASSWORD
+        prl.postcode-lookup-token: POST_CODE_LOOKUP_KEY

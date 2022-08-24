@@ -8,6 +8,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
@@ -36,7 +37,11 @@ public class PostcodeLookupService {
 
     public boolean isValidNationalPostCode(String postcode, String countryCode) {
 
-        PostcodeResponse response = fetchCountryFromPostCode(postcode.toUpperCase(Locale.UK));
+        if (StringUtils.isEmpty(postcode) || StringUtils.isEmpty(countryCode)) {
+            return false;
+        }
+
+        PostcodeResponse response = fetchNationalPostcodeBuildings(postcode.toUpperCase(Locale.UK));
 
         if (response == null || response.getResults() == null || response.getResults().isEmpty()) {
             return false;
@@ -49,7 +54,7 @@ public class PostcodeLookupService {
                 .collect(Collectors.toList()).isEmpty();
     }
 
-    public PostcodeResponse fetchCountryFromPostCode(String postcode) {
+    private PostcodeResponse fetchNationalPostcodeBuildings(String postcode) {
         PostcodeResponse results = null;
         try {
             Map<String, String> params = new HashMap<>();
@@ -69,7 +74,7 @@ public class PostcodeLookupService {
             }
 
             MultiValueMap<String, String> headers = new HttpHeaders();
-            headers.set("Accept", "application/json");
+            headers.set(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
             HttpEntity<String> httpHeader = new HttpEntity<>(url, headers);
 
             HttpEntity<String> response =
@@ -82,15 +87,8 @@ public class PostcodeLookupService {
             HttpStatus responseStatus = ((ResponseEntity) response).getStatusCode();
 
             if (responseStatus.value() == org.apache.http.HttpStatus.SC_OK) {
-                results = objectMapper.readValue(response.getBody(), PostcodeResponse.class);
-
-                return results;
-            } else if (responseStatus.value() == org.apache.http.HttpStatus.SC_NOT_FOUND) {
-                log.info("Postcode " + postcode + " not found");
-            } else {
-                log.info("Postcode lookup failed with status {}", responseStatus.value());
+                return objectMapper.readValue(response.getBody(), PostcodeResponse.class);
             }
-
         } catch (Exception e) {
             log.error("Postcode Lookup Failed - ", e.getMessage());
             throw new PostcodeValidationException(e.getMessage(), e);
