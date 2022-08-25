@@ -77,17 +77,17 @@ public class CaseController {
 
     @PostMapping(path = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Linking case to citizen account with access code")
-    public void linkCitizenToCase(@RequestHeader(value = "Authorization", required = true) String authorisation,
-                                     @RequestHeader(value = "serviceAuthorization", required = true) String s2sToken,
-                                     @RequestHeader(value = "caseId", required = true) String caseId,
-                                     @RequestHeader(value = "accessCode", required = true) String accessCode) {
+    public void linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                  @RequestHeader("serviceAuthorization") String s2sToken,
+                                  @RequestHeader(value = "caseId", required = true) String caseId,
+                                  @RequestHeader(value = "accessCode", required = true) String accessCode) {
         caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
     }
 
     @GetMapping(path = "/validate-access-code", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
-    public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                     @RequestHeader("serviceAuthorization") String s2sToken,
+    public String validateAccessCode(@RequestHeader(value = "Authorization", required = true) String authorisation,
+                                     @RequestHeader(value = "serviceAuthorization", required = true) String s2sToken,
                                      @RequestHeader(value = "caseId", required = true) String caseId,
                                      @RequestHeader(value = "accessCode", required = true) String accessCode) {
         return caseService.validateAccessCode(authorisation, s2sToken, caseId, accessCode);
