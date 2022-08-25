@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -57,7 +59,7 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "200", description = "Document generated"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
-    public String generateCitizenStatementDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+    public ResponseEntity generateCitizenStatementDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
                                                    @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                    @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
         fileIndex = 0;
@@ -95,7 +97,8 @@ public class CaseDocumentController {
             } else {
                 uploadedDocumentsList = new ArrayList<>();
             }
-            uploadedDocumentsList.add(ElementUtils.element(uploadedDocuments));
+            Element<UploadedDocuments> uploadDocumentElement = ElementUtils.element(uploadedDocuments);
+            uploadedDocumentsList.add(uploadDocumentElement);
 
             CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
                 .citizenUploadedDocumentList(uploadedDocumentsList).build();
@@ -106,9 +109,12 @@ public class CaseDocumentController {
                 caseId,
                 CITIZEN_UPLOADED_DOCUMENT
             );
-            return uploadedDocuments.getCitizenDocument().getDocumentFileName();
+            //return uploadedDocuments.getCitizenDocument().getDocumentFileName();
+            return ResponseEntity.status(HttpStatus.OK).body(
+                DocumentDetails.builder().doumentId(uploadDocumentElement.getId().toString())
+                    .docuemntName(uploadedDocuments.getCitizenDocument().getDocumentFileName()).build());
         } else {
-            return "FAILED";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.ordinal()).body(new DocumentDetails());
         }
 
     }
