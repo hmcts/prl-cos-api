@@ -632,4 +632,6 @@ public class CaseData implements MappableObject {
 
     @JsonProperty("citizenUploadedDocumentList")
     private final List<Element<UploadedDocuments>> citizenUploadedDocumentList;
+
+    private String previewDraftAnOrder;
 }
