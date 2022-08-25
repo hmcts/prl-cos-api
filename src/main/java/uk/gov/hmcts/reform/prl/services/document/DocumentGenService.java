@@ -24,8 +24,8 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -627,7 +627,7 @@ public class DocumentGenService {
             .partyName("Sam Richards")
             .isApplicant("Yes")
             .uploadedBy("97be96a9-2db4-42e8-ba85-7b0d16e4f4f4")
-            .dateCreated(new Date())
+            .dateCreated(LocalDate.now())
             .documentDetails(DocumentDetails.builder()
                                  .documentName(fileName)
                                  .documentUploadedDate("20 July 2022")
