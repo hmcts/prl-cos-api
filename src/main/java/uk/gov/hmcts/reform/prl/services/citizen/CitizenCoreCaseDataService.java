@@ -21,8 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class CoreCaseDataService {
-
+public class CitizenCoreCaseDataService {
 
     private static final String LINK_CASE_TO_CITIZEN_SUMMARY = "Link case to Citizen account";
     private static final String LINK_CASE_TO_CITIZEN_DESCRIPTION = "Link case to Citizen account with access code";
