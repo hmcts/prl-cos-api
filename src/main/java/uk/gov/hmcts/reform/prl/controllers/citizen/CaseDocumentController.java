@@ -66,13 +66,16 @@ public class CaseDocumentController {
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (generateAndUploadDocumentRequest.getValues() != null
-            && generateAndUploadDocumentRequest.getValues().containsKey("documentType")) {
+            && generateAndUploadDocumentRequest.getValues().containsKey("documentType")
+            && generateAndUploadDocumentRequest.getValues().containsKey("partyName")) {
             final String documentType = generateAndUploadDocumentRequest.getValues().get("documentType");
+            final String partyName = generateAndUploadDocumentRequest.getValues().get("partyName");
             if (tempCaseData.getCitizenUploadedDocumentList() != null
                 && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
                 tempCaseData.getCitizenUploadedDocumentList()
                     .stream().forEach((document) -> {
-                        if (documentType.equals(document.getValue().getDocumentType())) {
+                        if (documentType.equalsIgnoreCase(document.getValue().getDocumentType())
+                            && partyName.equalsIgnoreCase(document.getValue().getPartyName())) {
                             fileIndex++;
                         }
                     });
