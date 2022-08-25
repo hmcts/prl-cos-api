@@ -75,16 +75,16 @@ public class CaseService {
         searchCriteria.put("sortDirection", "desc");
         searchCriteria.put("page", "1");
 
-        CaseData caseData1 = CaseData.builder().applicantCaseName("John Smith").id(1234567891)
+        CaseData caseData1 = CaseData.builder().applicantCaseName("John Smith").id(1234567890)
             .state(State.CASE_ISSUE).caseTypeOfApplication("C100").build();
-        CaseData caseData2 = CaseData.builder().applicantCaseName("Robert Walker").id(1234567892)
+        CaseData caseData2 = CaseData.builder().applicantCaseName("Robert Walker").id(2345678901L)
             .state(State.GATEKEEPING).caseTypeOfApplication("C100").build();
-        CaseData caseData3 = CaseData.builder().applicantCaseName("Elon Musk").id(1234567893)
+        CaseData caseData3 = CaseData.builder().applicantCaseName("Elon Musk").id(3456789012L)
             .state(State.CASE_HEARING).caseTypeOfApplication("C100").build();
-        CaseData caseData4 = CaseData.builder().applicantCaseName("Warren Buffet").id(1234567894)
+        CaseData caseData4 = CaseData.builder().applicantCaseName("Warren Buffet").id(4567890123L)
             .state(State.GATEKEEPING).caseTypeOfApplication("FL401").build();
-        CaseData caseData5 = CaseData.builder().applicantCaseName("Jonny Wilko").id(1234567895)
-            .state(State.ALL_FINAL_ORDERS_ISSUED).caseTypeOfApplication("FL401").build();
+        CaseData caseData5 = CaseData.builder().applicantCaseName("Jonny Wilko").id(5678901234L)
+            .state(State.CASE_ISSUE).caseTypeOfApplication("FL401").build();
         List<CaseData> caseDataList = new ArrayList<>();
         caseDataList.add(caseData1);
         caseDataList.add(caseData2);
