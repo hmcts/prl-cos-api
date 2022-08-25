@@ -87,11 +87,11 @@ public class CaseController {
     @GetMapping(path = "/validate-access-code", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
     public String validateAccessCode(
-        @RequestHeader(value = "Authorization", required = false) String userToken,
+        @RequestHeader(value = "Authorization", required = false) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken,
         @RequestHeader(value = "caseId", required = true) String caseId,
         @RequestHeader(value = "accessCode", required = true) String accessCode
     ) {
-        return caseService.validateAccessCode(userToken, s2sToken, caseId, accessCode);
+        return caseService.validateAccessCode(authorisation, s2sToken, caseId, accessCode);
     }
 }
