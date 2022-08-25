@@ -79,8 +79,8 @@ public class CaseController {
     @Operation(description = "Linking case to citizen account with access code")
     public void linkCitizenToCase(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorisation,
                                   @RequestHeader(value = "serviceAuthorization", required = false) String s2sToken,
-                                  @RequestHeader(value = "caseId", required = true) String caseId,
-                                  @RequestHeader(value = "accessCode", required = true) String accessCode) {
+                                  @RequestHeader(value = "caseId", required = false) String caseId,
+                                  @RequestHeader(value = "accessCode", required = false) String accessCode) {
         caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
     }
 
