@@ -85,14 +85,15 @@ public class DgsService {
                                                          String templateName) throws Exception {
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
-        String documentDetails = null;
+        String freeTextUploadStatements = null;
         if (generateAndUploadDocumentRequest.getValues() != null
-            && generateAndUploadDocumentRequest.getValues().containsKey("freeTextStatements")) {
-            documentDetails = generateAndUploadDocumentRequest.getValues().get("freeTextStatements");
+            && generateAndUploadDocumentRequest.getValues().containsKey("freeTextUploadStatements")) {
+            freeTextUploadStatements = generateAndUploadDocumentRequest.getValues().get("freeTextUploadStatements");
         }
         String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = CaseDetails.builder().caseId(caseId).state("ISSUE")
-                                        .caseData(CaseData.builder().id(Long.valueOf(caseId)).build()).build();
+                                        .caseData(CaseData.builder().id(Long.valueOf(caseId))
+                                                      .previewDraftAnOrder(freeTextUploadStatements).build()).build();
         tempCaseDetails.put("caseDetails", AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
 
 
