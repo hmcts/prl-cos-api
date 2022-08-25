@@ -55,11 +55,19 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVAC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -362,6 +370,38 @@ public class DocumentGenService {
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_media_files_" + currentDate + "_submitted.pdf";
                     break;
+                case LETTERS_FROM_SCHOOL:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_letter_from_school_" + currentDate + "_submitted.pdf";
+                    break;
+                case TENANCY_MORTGAGE_AGREEMENTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_tenancy_mortgage_agreements_" + currentDate + "_submitted.pdf";
+                    break;
+                case PREVIOUS_ORDERS_SUBMITTED:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_previous_orders_submitted_" + currentDate + "_submitted.pdf";
+                    break;
+                case MEDICAL_REPORTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_medical_reports_" + currentDate + "_submitted.pdf";
+                    break;
+                case PATERNITY_TEST_REPORTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_paternity_test_reports_" + currentDate + "_submitted.pdf";
+                    break;
+                case DRUG_AND_ALCOHOL_TESTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_drug_and_alcohol_tests_" + currentDate + "_submitted.pdf";
+                    break;
+                case POLICE_REPORTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_police_reports_" + currentDate + "_submitted.pdf";
+                    break;
+                case OTHER_DOCUMENTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_other_documents_" + currentDate + "_submitted.pdf";
+                    break;
                 default:
                     fileName = "";
             }
@@ -645,6 +685,7 @@ public class DocumentGenService {
         String documentType = "";
         String partyName = "";
         String documentName = "";
+        String partyId = "";
         LocalDate today = LocalDate.now();
         String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
 
@@ -652,10 +693,14 @@ public class DocumentGenService {
             if (generateAndUploadDocumentRequest.getValues().containsKey("parentDocumentType")) {
                 parentDocumentType = generateAndUploadDocumentRequest.getValues().get("parentDocumentType");
             }
+            if (generateAndUploadDocumentRequest.getValues().containsKey("partyId")) {
+                partyId = generateAndUploadDocumentRequest.getValues().get("partyId");
+            }
             if (generateAndUploadDocumentRequest.getValues().containsKey("documentType")) {
                 documentType = generateAndUploadDocumentRequest.getValues().get("documentType");
                 if (generateAndUploadDocumentRequest.getValues().containsKey("partyName")) {
-                    documentName = documentType.replace("Your", generateAndUploadDocumentRequest.getValues().get("partyName") + "'s");
+                    partyName = generateAndUploadDocumentRequest.getValues().get("partyName");
+                    documentName = documentType.replace("Your", partyName + "'s");
                 }
             }
 
@@ -666,7 +711,7 @@ public class DocumentGenService {
             .documentType(documentType)
             .partyName(partyName)
             .isApplicant("Yes")
-            .uploadedBy("97be96a9-2db4-42e8-ba85-7b0d16e4f4f4")
+            .uploadedBy(partyId)
             .dateCreated(LocalDate.now())
             .documentDetails(DocumentDetails.builder()
                                  .documentName(documentName)
