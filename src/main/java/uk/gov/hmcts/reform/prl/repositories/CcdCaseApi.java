@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.citizen.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenCoreCaseDataService;
 
 @Slf4j
 @Service
@@ -28,7 +28,7 @@ public class CcdCaseApi {
     CaseAccessApi caseAccessApi;
 
     @Autowired
-    CoreCaseDataService coreCaseDataService;
+    CitizenCoreCaseDataService citizenCoreCaseDataService;
 
     @Autowired
     IdamClient idamClient;
@@ -86,7 +86,7 @@ public class CcdCaseApi {
         CaseData caseData
     ) {
         LOGGER.info("<----updateCitizenIdAndEmail---->", caseId);
-        return coreCaseDataService.linkDefendant(
+        return citizenCoreCaseDataService.linkDefendant(
             authorisation,
             Long.valueOf(caseId),
             caseData,
