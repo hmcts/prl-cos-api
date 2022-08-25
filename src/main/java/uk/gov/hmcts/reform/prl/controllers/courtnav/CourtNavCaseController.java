@@ -91,6 +91,7 @@ public class CourtNavCaseController {
     ) {
         log.info("s2s token inside uploadDocument controller {}", serviceAuthorization);
         log.info("auth token inside uploadDocument controller {}", authorisation);
+        log.info("Document name {} and Type of document {}", file.getOriginalFilename(), typeOfDocument);
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
             courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);

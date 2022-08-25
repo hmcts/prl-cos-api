@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ConsentEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SignatureEnum;
 
 import java.util.List;
 
@@ -18,7 +17,6 @@ import java.util.List;
 public class CourtNavStmtOfTruth {
     private final List<ConsentEnum> declaration;
     private final String signature;
-    private final SignatureEnum signatureType;
     private final CourtNavDate signatureDate;
     private final String signatureFullName;
     private final String representativeFirmName;
