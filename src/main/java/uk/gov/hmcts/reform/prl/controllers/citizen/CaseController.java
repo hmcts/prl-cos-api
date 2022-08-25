@@ -8,7 +8,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -76,8 +75,9 @@ public class CaseController {
         return caseService.retrieveCases(authorisation, s2sToken, role, userId);
     }
 
-    @PutMapping("/citizen/link")
-    public void linkDefendantToClaim(@RequestHeader(value = "Authorization", required = true) String authorisation,
+    @PostMapping(path = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Linking case to citizen account with access code")
+    public void linkCitizenToCase(@RequestHeader(value = "Authorization", required = true) String authorisation,
                                      @RequestHeader(value = "serviceAuthorization", required = true) String s2sToken,
                                      @RequestHeader(value = "caseId", required = true) String caseId,
                                      @RequestHeader(value = "accessCode", required = true) String accessCode) {
