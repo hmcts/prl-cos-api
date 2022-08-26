@@ -54,15 +54,24 @@ public class CaseController {
         @PathVariable("caseId") String caseId,
         @PathVariable("eventId") String eventId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestHeader("serviceAuthorization") String s2sToken
+        @RequestHeader("serviceAuthorization") String s2sToken,
+        @RequestHeader("accessCode") String accessCode
     ) {
-        return objectMapper.convertValue(caseService.updateCase(
-            caseData,
-            authorisation,
-            s2sToken,
-            caseId,
-            eventId
-        ).getData(), CaseData.class);
+        if("linkCase".equalsIgnoreCase(eventId)) {
+            caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
+            return objectMapper.convertValue(
+                coreCaseDataApi.getCase(authorisation, s2sToken, caseId).getData(),
+                CaseData.class
+            );
+        } else {
+            return objectMapper.convertValue(caseService.updateCase(
+                caseData,
+                authorisation,
+                s2sToken,
+                caseId,
+                eventId
+            ).getData(), CaseData.class);
+        }
     }
 
     @GetMapping(path = "/citizen/{role}/retrieve-cases/{userId}", produces = APPLICATION_JSON)
