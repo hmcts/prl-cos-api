@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
@@ -156,9 +155,15 @@ public class CaseDocumentController {
             final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
             log.info("Document to be deleted with id : " + documenIdToBeDeleted);
             tempUploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
-            uploadedDocumentsList = tempUploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(
+            for (Element<UploadedDocuments> element : tempUploadedDocumentsList) {
+                if (!documenIdToBeDeleted.equalsIgnoreCase(
+                    element.getId().toString())) {
+                    uploadedDocumentsList.add(element);
+                }
+            }
+            /*uploadedDocumentsList = tempUploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(
                     element.getId().toString()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());*/
         }
         CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
             .citizenUploadedDocumentList(uploadedDocumentsList).build();
