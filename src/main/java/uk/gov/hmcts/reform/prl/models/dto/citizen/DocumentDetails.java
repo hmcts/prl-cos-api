@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder(toBuilder = true)
 public class DocumentDetails {
-    @JsonProperty("doumentId")
-    private String doumentId;
+    @JsonProperty("documentId")
+    private String documentId;
 
     @JsonProperty("docuemntName")
     private String docuemntName;
