@@ -32,6 +32,7 @@ public class CafCassFilter {
         if(caseTypeList != null && !caseTypeList.isEmpty()) {
             filterCaseByApplicationCaseType(cafCassResponse);
             filterCasesByApplicationValidPostcode(cafCassResponse);
+            cafCassResponse.setTotal(cafCassResponse.getCases().size());
         } else {
             log.error(CAFCAAS_CASE_TYPE_OF_APPLICATION_LIST_NOT_CONFIGURED);
         }
@@ -72,7 +73,6 @@ public class CafCassFilter {
         if(!ObjectUtils.isEmpty(applicationDetails.getValue())
             && !ObjectUtils.isEmpty(applicationDetails.getValue().getAddress())) {
             Address address = applicationDetails.getValue().getAddress();
-            System.out.println("calling post code look service for: " + address.getPostCode());
             return postcodeLookupService.isValidNationalPostCode(address.getPostCode(),
                                                                  CafcassAppConstants.ENGLAND_POSTCODE_NATIONALCODE);
         }
