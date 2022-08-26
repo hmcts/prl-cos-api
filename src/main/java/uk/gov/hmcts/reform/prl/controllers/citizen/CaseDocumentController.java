@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
@@ -128,10 +130,44 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "401", description = "Provided Authroization token is missing or invalid"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    public ResponseEntity<?> uploadDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+    public ResponseEntity<?> uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                             @RequestParam("file") MultipartFile file) {
 
         return ResponseEntity.ok(documentGenService.uploadDocument(authorisation, file));
+    }
+
+    @PostMapping(path = "/delete-citizen-statement-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Delete a PDF for citizen as part of upload documents")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Document generated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public String deleteCitizenStatementDocument(@RequestBody DeleteDocumentRequest deleteDocumentRequest,
+                                                           @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                           @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+        List<Element<UploadedDocuments>> uploadedDocumentsList = null;
+        String caseId = deleteDocumentRequest.getValues().get("caseId");
+        CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
+        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
+        CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        if (deleteDocumentRequest.getValues() != null
+            && deleteDocumentRequest.getValues().containsKey("documentId")) {
+            final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
+            log.info("Dcouemnt to be deleted with id : " + caseDetails.getId().toString());
+            uploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
+            uploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(element.getId().toString()))
+                .collect(Collectors.toList());
+        }
+        CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
+            .citizenUploadedDocumentList(uploadedDocumentsList).build();
+        caseService.updateCase(
+            caseData,
+            authorisation,
+            s2sToken,
+            caseId,
+            CITIZEN_UPLOADED_DOCUMENT
+        );
+        return "SUCCESS";
     }
 
 
