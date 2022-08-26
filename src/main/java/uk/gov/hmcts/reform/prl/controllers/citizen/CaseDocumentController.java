@@ -165,6 +165,7 @@ public class CaseDocumentController {
                     element.getId().toString()))
                 .collect(Collectors.toList());*/
         }
+        log.info("uploadedDocumentsList::" + uploadedDocumentsList.size());
         CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
             .citizenUploadedDocumentList(uploadedDocumentsList).build();
         caseService.updateCase(
