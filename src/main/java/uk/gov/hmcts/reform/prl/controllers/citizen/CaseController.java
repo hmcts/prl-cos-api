@@ -77,10 +77,10 @@ public class CaseController {
 
     @PostMapping(path = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Linking case to citizen account with access code")
-    public void linkCitizenToCase(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorisation,
-                                  @RequestHeader(value = "serviceAuthorization", required = false) String s2sToken,
-                                  @RequestHeader(value = "caseId", required = false) String caseId,
-                                  @RequestHeader(value = "accessCode", required = false) String accessCode) {
+    public void linkCitizenToCase(@RequestHeader("caseId") String caseId,
+                                  @RequestHeader("accessCode") String accessCode,
+                                  @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                  @RequestHeader("serviceAuthorization") String s2sToken) {
         caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
     }
 
