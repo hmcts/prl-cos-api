@@ -145,7 +145,8 @@ public class CaseDocumentController {
     public String deleteCitizenStatementDocument(@RequestBody DeleteDocumentRequest deleteDocumentRequest,
                                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
-        List<Element<UploadedDocuments>> uploadedDocumentsList = null;
+        List<Element<UploadedDocuments>> uploadedDocumentsList;
+        List<Element<UploadedDocuments>> updateduploadedDocumentsList = null;
         String caseId = deleteDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
@@ -153,13 +154,13 @@ public class CaseDocumentController {
         if (deleteDocumentRequest.getValues() != null
             && deleteDocumentRequest.getValues().containsKey("documentId")) {
             final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
-            log.info("Dcouemnt to be deleted with id : " + caseDetails.getId().toString());
+            log.info("Dcouemnt to be deleted with id : " + documenIdToBeDeleted);
             uploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
-            uploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(element.getId().toString()))
+            updateduploadedDocumentsList = uploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(element.getId().toString()))
                 .collect(Collectors.toList());
         }
         CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
-            .citizenUploadedDocumentList(uploadedDocumentsList).build();
+            .citizenUploadedDocumentList(updateduploadedDocumentsList).build();
         caseService.updateCase(
             caseData,
             authorisation,
@@ -169,7 +170,6 @@ public class CaseDocumentController {
         );
         return "SUCCESS";
     }
-
 
 }
 
