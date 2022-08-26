@@ -18,8 +18,8 @@ public class DocumentDetails {
     @JsonProperty("documentId")
     private String documentId;
 
-    @JsonProperty("docuemntName")
-    private String docuemntName;
+    @JsonProperty("documentName")
+    private String documentName;
 }
 
 
