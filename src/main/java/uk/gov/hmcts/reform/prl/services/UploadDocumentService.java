@@ -39,4 +39,21 @@ public class UploadDocumentService {
 
         return document;
     }
+
+    public Document uploadDocument(MultipartFile file, String fileName, String contentType, String authorisation) {
+
+        UploadResponse response = caseDocumentClient.uploadDocuments(authorisation, authTokenGenerator.generate(),
+                                                                     CASE_TYPE, JURISDICTION, newArrayList(file));
+
+        Document document = response.getDocuments().stream()
+            .findFirst()
+            .orElseThrow(() ->
+                             new RuntimeException("Document upload failed due to empty result"));
+
+        log.debug("Document upload resulted with links: {}, {}", document.links.self.href, document.links.binary.href);
+
+        return document;
+    }
+
+
 }

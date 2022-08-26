@@ -85,11 +85,11 @@ public class ResetAccessCodeControllerTest {
             .build();
         CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1", UUID.randomUUID());
         CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2", UUID.randomUUID());
-        List<Element<CaseInvite>> respondentCaseInvites = List.of(element(caseInvite1), element(caseInvite2));
+        List<Element<CaseInvite>> caseInvites = List.of(element(caseInvite1), element(caseInvite2));
 
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
-        when(caseInviteManager.reGeneratePinAndSendNotificationEmail(any())).thenReturn(CaseData.builder().respondentCaseInvites(
-            respondentCaseInvites).build());
+        when(caseInviteManager.reGeneratePinAndSendNotificationEmail(any())).thenReturn(CaseData.builder().caseInvites(
+            caseInvites).build());
 
     }
 
@@ -101,10 +101,10 @@ public class ResetAccessCodeControllerTest {
                              .data(caseData).build()).build();
         CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1", UUID.randomUUID());
         CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2", UUID.randomUUID());
-        List<Element<CaseInvite>> respondentCaseInvites = List.of(element(caseInvite1), element(caseInvite2));
+        List<Element<CaseInvite>> caseInvites = List.of(element(caseInvite1), element(caseInvite2));
 
         AboutToStartOrSubmitCallbackResponse response = resetAccessCodeController
             .resetAccessCode(callbackRequest);
-        assertTrue(response.getData().containsKey("respondentCaseInvites"));
+        assertTrue(response.getData().containsKey("caseInvites"));
     }
 }
