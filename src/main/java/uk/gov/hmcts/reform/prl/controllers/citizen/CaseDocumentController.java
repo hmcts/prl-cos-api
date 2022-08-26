@@ -113,8 +113,8 @@ public class CaseDocumentController {
             );
             //return uploadedDocuments.getCitizenDocument().getDocumentFileName();
             return ResponseEntity.status(HttpStatus.OK).body(
-                DocumentDetails.builder().doumentId(uploadDocumentElement.getId().toString())
-                    .docuemntName(uploadedDocuments.getCitizenDocument().getDocumentFileName()).build());
+                DocumentDetails.builder().documentId(uploadDocumentElement.getId().toString())
+                    .documentName(uploadedDocuments.getCitizenDocument().getDocumentFileName()).build());
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.ordinal()).body(new DocumentDetails());
         }
