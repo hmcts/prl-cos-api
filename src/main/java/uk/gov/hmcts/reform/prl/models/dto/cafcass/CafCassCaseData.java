@@ -26,8 +26,9 @@ public class CafCassCaseData {
     public void setSubmitAndPayDownloadApplicationLink(CafCassDocument submitAndPayDownloadApplicationLink) {
         try {
             if(submitAndPayDownloadApplicationLink != null) {
-                URL url = new URL(submitAndPayDownloadApplicationLink.getDocumentId());
+                URL url = new URL(submitAndPayDownloadApplicationLink.getDocumentUrl());
                 submitAndPayDownloadApplicationLink.setDocumentId(getDocumentId(url));
+                submitAndPayDownloadApplicationLink.setDocumentUrl(null);
             }
         } catch (Exception e) {}
         this.submitAndPayDownloadApplicationLink = submitAndPayDownloadApplicationLink;
@@ -40,8 +41,9 @@ public class CafCassCaseData {
     public void setC8Document(CafCassDocument c8Document) {
         try {
             if(c8Document != null) {
-                URL url = new URL(c8Document.getDocumentId());
+                URL url = new URL(c8Document.getDocumentUrl());
                 c8Document.setDocumentId(getDocumentId(url));
+                c8Document.setDocumentUrl(null);
             }
         } catch (Exception e) {}
         this.c8Document = c8Document;
@@ -78,8 +80,9 @@ public class CafCassCaseData {
     public void setDraftConsentOrderFile(CafCassDocument draftConsentOrderFile) {
         try {
             if(draftConsentOrderFile != null) {
-                URL url = new URL(draftConsentOrderFile.getDocumentId());
+                URL url = new URL(draftConsentOrderFile.getDocumentUrl());
                 draftConsentOrderFile.setDocumentId(getDocumentId(url));
+                draftConsentOrderFile.setDocumentUrl(null);
             }
         } catch (Exception e) {}
         this.draftConsentOrderFile =draftConsentOrderFile;
@@ -124,8 +127,9 @@ public class CafCassCaseData {
     public void setFinalDocument(CafCassDocument finalDocument) {
         try {
             if(finalDocument != null) {
-                URL url = new URL(finalDocument.getDocumentId());
+                URL url = new URL(finalDocument.getDocumentUrl());
                 finalDocument.setDocumentId(getDocumentId(url));
+                finalDocument.setDocumentUrl(null);
             }
         } catch (Exception e) {}
         this.finalDocument =finalDocument;
@@ -141,8 +145,9 @@ public class CafCassCaseData {
     public void setMiamCertificationDocumentUpload1(CafCassDocument miamCertificationDocumentUpload1) {
         try {
             if(miamCertificationDocumentUpload1 != null) {
-                URL url = new URL(miamCertificationDocumentUpload1.getDocumentId());
+                URL url = new URL(miamCertificationDocumentUpload1.getDocumentUrl());
                 miamCertificationDocumentUpload1.setDocumentId(getDocumentId(url));
+                miamCertificationDocumentUpload1.setDocumentUrl(null);
             }
         } catch (Exception e) {}
         this.miamCertificationDocumentUpload1 =miamCertificationDocumentUpload1;
@@ -174,8 +179,9 @@ public class CafCassCaseData {
     public void setOrdersNonMolestationDocument(CafCassDocument ordersNonMolestationDocument) {
         try {
             if(ordersNonMolestationDocument != null) {
-                URL url = new URL(ordersNonMolestationDocument.getDocumentId());
+                URL url = new URL(ordersNonMolestationDocument.getDocumentUrl());
                 ordersNonMolestationDocument.setDocumentId(getDocumentId(url));
+                ordersNonMolestationDocument.setDocumentUrl(null);
             }
         } catch (Exception e) {}
         this.ordersNonMolestationDocument =ordersNonMolestationDocument;
@@ -187,8 +193,9 @@ public class CafCassCaseData {
     public void setHearingOutComeDocument(CafCassDocument hearingOutComeDocument) {
         try {
             if(hearingOutComeDocument != null) {
-                URL url = new URL(hearingOutComeDocument.getDocumentId());
+                URL url = new URL(hearingOutComeDocument.getDocumentUrl());
                 hearingOutComeDocument.setDocumentId(getDocumentId(url));
+                hearingOutComeDocument.setDocumentUrl(null);
             }
         } catch (Exception e) {}
         this.hearingOutComeDocument =hearingOutComeDocument;
