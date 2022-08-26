@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.filter;
+package uk.gov.hmcts.reform.prl.filter.cafcaas;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -6,7 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.*;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.Address;
 import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 
 import java.util.List;
@@ -29,7 +34,7 @@ public class CafCassFilter {
     public void filter(CafCassResponse cafCassResponse) {
         caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
         caseStateList = caseStateList.stream().map(String::trim).collect(Collectors.toList());
-        if(caseTypeList != null && !caseTypeList.isEmpty()) {
+        if (caseTypeList != null && !caseTypeList.isEmpty()) {
             filterCaseByApplicationCaseType(cafCassResponse);
             filterCasesByApplicationValidPostcode(cafCassResponse);
             cafCassResponse.setTotal(cafCassResponse.getCases().size());
@@ -37,6 +42,7 @@ public class CafCassFilter {
             log.error(CAFCAAS_CASE_TYPE_OF_APPLICATION_LIST_NOT_CONFIGURED);
         }
     }
+
     private void filterCaseByApplicationCaseType(CafCassResponse cafCassResponse) {
         List<CafCassCaseDetail> cafCassCaseDetailList = cafCassResponse.getCases().stream()
             .filter(filterByCaseTypeAndState())
@@ -63,7 +69,7 @@ public class CafCassFilter {
 
     private boolean hasApplicantValidPostcode(CafCassCaseData cafCassCaseData) {
         for(Element<ApplicantDetails> applicantDetails: cafCassCaseData.getApplicants()) {
-            if(isAddressValid(applicantDetails))
+            if (isAddressValid(applicantDetails))
                 return true;
         }
         return false;

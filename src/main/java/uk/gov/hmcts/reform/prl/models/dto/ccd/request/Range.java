@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,5 +13,6 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
 public class Range {
-    private LastModified last_modified;
+    @JsonProperty("last_modified")
+    private LastModified lastModified;
 }

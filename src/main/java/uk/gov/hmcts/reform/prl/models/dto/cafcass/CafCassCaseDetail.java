@@ -40,7 +40,7 @@ public class CafCassCaseDetail {
 
     private String state;
 
-    private String caseTypeOfApplication;
+    private String caseTypeOfApplication = "C100";
 
     @JsonProperty("case_data")
     private CafCassCaseData caseData;

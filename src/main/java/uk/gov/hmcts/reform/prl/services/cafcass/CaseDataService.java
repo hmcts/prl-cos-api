@@ -4,11 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
-import uk.gov.hmcts.reform.prl.filter.CafCassFilter;
+import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
-import uk.gov.hmcts.reform.prl.mapper.cafcass.CcdToCafcassObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Query;
@@ -54,7 +52,7 @@ public class CaseDataService {
 
     private QueryParam buildCcdQueryParam(String startDate, String endDate) {
         LastModified lastModified = LastModified.builder().gte(startDate).lte(endDate).boost(ccdElasticSearchApiBoost).build();
-        Range range = Range.builder().last_modified(lastModified).build();
+        Range range = Range.builder().lastModified(lastModified).build();
         Query query = Query.builder().range(range).build();
         return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize).build();
     }

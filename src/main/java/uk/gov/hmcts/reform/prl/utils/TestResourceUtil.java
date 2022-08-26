@@ -15,7 +15,10 @@ import java.nio.file.Paths;
 public final class TestResourceUtil {
     public static final String RESOURCE_CHARSET_UTF8 = "utf-8";
     public static final String TEST_RESOURCE_NOT_FOUND = "Could not find resource in path ";
-    private TestResourceUtil() {}
+
+    private TestResourceUtil() {
+
+    }
 
     public static String readFileFrom(final String resourcePath) throws IOException {
         return resourceAsString(resourcePath);

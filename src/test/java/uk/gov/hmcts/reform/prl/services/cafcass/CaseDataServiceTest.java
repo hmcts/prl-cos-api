@@ -4,15 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.Mock;
+import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
+import org.mockito.ArgumentMatchers;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
-import uk.gov.hmcts.reform.prl.filter.CafCassFilter;
+import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class CaseDataServiceTest {
     @Mock
     CafcassCcdDataStoreService cafcassCcdDataStoreService;
 
-    @Autowired
+    @Mock
     private CafCassFilter cafCassFilter;
 
     @InjectMocks
@@ -38,11 +39,10 @@ public class CaseDataServiceTest {
     @org.junit.Test
     public void getCaseData() throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-        String searchResultJson = TestResourceUtil.readFileFrom("classpath:response/CCDResponse.json");
         String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
-        SearchResult searchResult = objectMapper.readValue(searchResultJson,
+        SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
                                                                     SearchResult.class);
-        CafCassResponse cafCassResponse = objectMapper.convertValue(searchResult, CafCassResponse.class);
+        CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
 
         Mockito.doReturn(searchResult).when(cafcassCcdDataStoreService).searchCases(
             ArgumentMatchers.anyString(),  ArgumentMatchers.anyString(),  ArgumentMatchers.anyString(),  ArgumentMatchers.any()
@@ -51,7 +51,7 @@ public class CaseDataServiceTest {
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation", "serviceAuthorisation",
                                                                "start", "end"
         );
-        Assertions.assertEquals(expectedCafCassResponse, objectMapper.writeValueAsString(realCafCassResponse));
+        Assertions.assertEquals(objectMapper.writeValueAsString(cafCassResponse), objectMapper.writeValueAsString(realCafCassResponse));
 
 
     }

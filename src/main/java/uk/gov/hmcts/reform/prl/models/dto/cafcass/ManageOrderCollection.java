@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.prl.models.dto.cafcass;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
-
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Builder;
 import java.util.List;
 
 @Data
