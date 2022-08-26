@@ -145,8 +145,8 @@ public class CaseDocumentController {
     public String deleteCitizenStatementDocument(@RequestBody DeleteDocumentRequest deleteDocumentRequest,
                                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
-        List<Element<UploadedDocuments>> uploadedDocumentsList;
-        List<Element<UploadedDocuments>> updateduploadedDocumentsList = null;
+        List<Element<UploadedDocuments>> tempUploadedDocumentsList;
+        List<Element<UploadedDocuments>> uploadedDocumentsList = new ArrayList<>();
         String caseId = deleteDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
@@ -154,14 +154,14 @@ public class CaseDocumentController {
         if (deleteDocumentRequest.getValues() != null
             && deleteDocumentRequest.getValues().containsKey("documentId")) {
             final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
-            log.info("Dcouemnt to be deleted with id : " + documenIdToBeDeleted);
-            uploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
-            updateduploadedDocumentsList = uploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(
+            log.info("Document to be deleted with id : " + documenIdToBeDeleted);
+            tempUploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
+            uploadedDocumentsList = tempUploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(
                     element.getId().toString()))
                 .collect(Collectors.toList());
         }
         CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
-            .citizenUploadedDocumentList(updateduploadedDocumentsList).build();
+            .citizenUploadedDocumentList(uploadedDocumentsList).build();
         caseService.updateCase(
             caseData,
             authorisation,
