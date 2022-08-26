@@ -57,7 +57,7 @@ public class CaseController {
         @RequestHeader("serviceAuthorization") String s2sToken,
         @RequestHeader("accessCode") String accessCode
     ) {
-        if("linkCase".equalsIgnoreCase(eventId)) {
+        if ("linkCase".equalsIgnoreCase(eventId)) {
             caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
             return objectMapper.convertValue(
                 coreCaseDataApi.getCase(authorisation, s2sToken, caseId).getData(),
