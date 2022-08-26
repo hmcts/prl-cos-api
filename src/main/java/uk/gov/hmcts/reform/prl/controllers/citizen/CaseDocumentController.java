@@ -156,7 +156,8 @@ public class CaseDocumentController {
             final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
             log.info("Dcouemnt to be deleted with id : " + documenIdToBeDeleted);
             uploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
-            updateduploadedDocumentsList = uploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(element.getId().toString()))
+            updateduploadedDocumentsList = uploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(
+                    element.getId().toString()))
                 .collect(Collectors.toList());
         }
         CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
