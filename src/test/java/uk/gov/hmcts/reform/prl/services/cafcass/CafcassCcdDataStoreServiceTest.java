@@ -9,19 +9,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
-import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.utils.TestConstants.PRL_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTHORIZATION;
-import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTHORIZATION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CafcassCcdDataStoreServiceTest {

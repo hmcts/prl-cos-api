@@ -15,5 +15,5 @@ import lombok.NoArgsConstructor;
 public class Applicant {
 
     @JsonProperty("value")
-    private Value mValue;
+    private Value mvalue;
 }

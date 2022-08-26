@@ -14,5 +14,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Value {
     @JsonProperty("address")
-    private Address mAddress;
+    private Address maddress;
 }

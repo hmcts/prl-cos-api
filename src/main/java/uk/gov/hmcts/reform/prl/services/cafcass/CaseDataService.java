@@ -15,11 +15,10 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 
 import java.io.IOException;
-import java.util.List;
 
 @Service
 public class CaseDataService {
-    @Value("${cafcaas.search-case-type-id}")
+    @Value("${cafcass.search-case-type-id}")
     private String cafCassSearchCaseTypeId;
 
     @Autowired
@@ -49,7 +48,7 @@ public class CaseDataService {
 
     private QueryParam buildCcdQueryParam(String startDate, String endDate) {
         LastModified lastModified = LastModified.builder().gte(startDate).lte(endDate).build();
-        Range range = Range.builder().last_modified(lastModified).build();
+        Range range = Range.builder().lastModified(lastModified).build();
         Query query = Query.builder().range(range).build();
         return QueryParam.builder().query(query).build();
     }

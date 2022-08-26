@@ -8,7 +8,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.prl.enums.*;
+import uk.gov.hmcts.reform.prl.enums.DontKnow;
+import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+
 import java.time.LocalDate;
 import java.util.List;
 

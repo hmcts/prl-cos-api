@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
@@ -20,7 +19,7 @@ public class CaseDataServiceTest {
     @Test
     public void customBuilderShouldWork() throws IOException {
         String searchString = TestResourceUtil.readFileFrom("classpath:request/ccdsearchrequest.json");
-        caseDataService.getCaseData(null, null, searchString);
+        caseDataService.getCaseData(null, null, searchString, searchString);
 
         /*caseDataService.getCaseData("01/01/2022", "01/01/2023");
         CafCassResponse cafCassResponse = objectMapper.readValue(
