@@ -1,12 +1,12 @@
 {
-  "query": {
-    "range": {
-      "last_modified": {
-        "gte": "2022-02-08",
-        "lte": "2022-02-20",
-        "boost": 2.0
+  "query":{
+    "range":{
+      "last_modified":{
+        "gte":"start",
+        "lte":"end",
+        "boost":null
       }
     }
   },
-  "size":100
+  "size":null
 }

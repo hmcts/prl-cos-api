@@ -14,5 +14,5 @@ import lombok.NoArgsConstructor;
 public class LastModified {
   private String gte;
   private String lte;
-  private final String boost = "2.0";
+  private String boost = "2.0";
 }

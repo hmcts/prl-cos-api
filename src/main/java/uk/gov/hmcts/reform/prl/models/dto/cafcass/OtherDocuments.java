@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 

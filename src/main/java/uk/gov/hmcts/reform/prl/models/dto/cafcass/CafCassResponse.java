@@ -12,6 +12,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
+@ToString
 public class CafCassResponse {
     public int total;
     public List<CafCassCaseDetail> cases;
