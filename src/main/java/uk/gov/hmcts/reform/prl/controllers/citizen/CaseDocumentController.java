@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
@@ -145,7 +144,8 @@ public class CaseDocumentController {
     public String deleteCitizenStatementDocument(@RequestBody DeleteDocumentRequest deleteDocumentRequest,
                                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
-        List<Element<UploadedDocuments>> uploadedDocumentsList = null;
+        List<Element<UploadedDocuments>> tempUploadedDocumentsList;
+        List<Element<UploadedDocuments>> uploadedDocumentsList = new ArrayList<>();
         String caseId = deleteDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
@@ -153,11 +153,19 @@ public class CaseDocumentController {
         if (deleteDocumentRequest.getValues() != null
             && deleteDocumentRequest.getValues().containsKey("documentId")) {
             final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
-            log.info("Dcouemnt to be deleted with id : " + caseDetails.getId().toString());
-            uploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
-            uploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(element.getId().toString()))
-                .collect(Collectors.toList());
+            log.info("Document to be deleted with id : " + documenIdToBeDeleted);
+            tempUploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
+            for (Element<UploadedDocuments> element : tempUploadedDocumentsList) {
+                if (!documenIdToBeDeleted.equalsIgnoreCase(
+                    element.getId().toString())) {
+                    uploadedDocumentsList.add(element);
+                }
+            }
+            /*uploadedDocumentsList = tempUploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(
+                    element.getId().toString()))
+                .collect(Collectors.toList());*/
         }
+        log.info("uploadedDocumentsList::" + uploadedDocumentsList.size());
         CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
             .citizenUploadedDocumentList(uploadedDocumentsList).build();
         caseService.updateCase(
@@ -169,7 +177,6 @@ public class CaseDocumentController {
         );
         return "SUCCESS";
     }
-
 
 }
 
