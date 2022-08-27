@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 
 import java.util.ArrayList;
@@ -50,6 +51,9 @@ public class CaseService {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    SystemUserService systemUserService;
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId) {
 
@@ -131,11 +135,12 @@ public class CaseService {
 
     public void linkCitizenToCase(String authorisation, String s2sToken, String accessCode, String caseId) {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
+        String anonymousUserToken = systemUserService.getSysUserToken();
         String userId = userDetails.getId();
         String emailId = userDetails.getEmail();
 
         CaseData caseData = objectMapper.convertValue(
-            coreCaseDataApi.getCase(authorisation, s2sToken, caseId).getData(),
+            coreCaseDataApi.getCase(anonymousUserToken, s2sToken, caseId).getData(),
             CaseData.class
         );
 
@@ -164,7 +169,7 @@ public class CaseService {
             }
 
             log.info("Updated caseData testing::" + caseData);
-            caseRepository.linkDefendant(authorisation, caseId, caseData);
+            caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData);
             log.info("Case is now linked" + caseData);
         }
     }

@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCoreCaseDataService;
 
 @Slf4j
@@ -32,13 +31,10 @@ public class CcdCaseApi {
 
     @Autowired
     IdamClient idamClient;
-    @Autowired
-    SystemUserService systemUserService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CcdCaseApi.class);
 
-    public void linkCitizenToCase(String authorisation, String caseId, CaseData caseData) {
-        String anonymousUserToken = systemUserService.getSysUserToken();
+    public void linkCitizenToCase(String authorisation, String anonymousUserToken, String caseId, CaseData caseData) {
         linkToCase(authorisation, anonymousUserToken, caseId, caseData);
     }
 
@@ -50,7 +46,7 @@ public class CcdCaseApi {
 
         // LOGGER.debug("Revoking access to case {} ", caseId);
         // this.revokeAccessToCase(userDetails, anonymousUserToken, caseId);
-        this.linkCitizen(authorisation, userDetails, caseId, caseData);
+        this.linkCitizen(anonymousUserToken, userDetails, caseId, caseData);
         LOGGER.info("case is now linked " + caseId);
     }
 
@@ -80,14 +76,14 @@ public class CcdCaseApi {
     }
 
     private CaseDetails linkCitizen(
-        String authorisation,
+        String anonymousUserToken,
         UserDetails citizenUser,
         String caseId,
         CaseData caseData
     ) {
         LOGGER.info("<----updateCitizenIdAndEmail---->", caseId);
         return citizenCoreCaseDataService.linkDefendant(
-            authorisation,
+            anonymousUserToken,
             Long.valueOf(caseId),
             caseData,
             CaseEvent.LINK_CITIZEN
