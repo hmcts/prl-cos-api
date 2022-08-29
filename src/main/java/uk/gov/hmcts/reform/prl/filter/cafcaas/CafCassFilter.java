@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Address;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 
 import java.util.List;
@@ -68,15 +68,16 @@ public class CafCassFilter {
     }
 
     private boolean hasApplicantValidPostcode(CafCassCaseData cafCassCaseData) {
-        for(Element<ApplicantDetails> applicantDetails: cafCassCaseData.getApplicants()) {
-            if (isAddressValid(applicantDetails))
+        for (Element<ApplicantDetails> applicantDetails: cafCassCaseData.getApplicants()) {
+            if (isAddressValid(applicantDetails)) {
                 return true;
+            }
         }
         return false;
     }
 
     private boolean isAddressValid(Element<ApplicantDetails> applicationDetails) {
-        if(!ObjectUtils.isEmpty(applicationDetails.getValue())
+        if (!ObjectUtils.isEmpty(applicationDetails.getValue())
             && !ObjectUtils.isEmpty(applicationDetails.getValue().getAddress())) {
             Address address = applicationDetails.getValue().getAddress();
             return postcodeLookupService.isValidNationalPostCode(address.getPostCode(),
