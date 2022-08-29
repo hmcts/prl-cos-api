@@ -121,13 +121,6 @@ public class CaseData implements MappableObject {
     private final String caseTypeOfApplication;
 
     /**
-     * Applicant's Age.
-     *
-     */
-    @JsonProperty("applicantAge")
-    private final ApplicantAge applicantAge;
-
-    /**
      * Case Type Of Application.
      */
     private final String selectedCaseTypeID;
@@ -296,7 +289,6 @@ public class CaseData implements MappableObject {
     private final String specialArrangementsRequired;
     private final YesOrNo isIntermediaryNeeded;
     private final String reasonsForIntermediary;
-    private final String specialCourtName;
 
     /**
      * International element.
@@ -528,7 +520,7 @@ public class CaseData implements MappableObject {
     @JsonProperty("viewPDFlinkLabelText")
     private String viewPdfLinkLabelText;
 
-    private List<Element<CaseInvite>> respondentCaseInvites;
+    private List<Element<CaseInvite>> caseInvites;
 
 
     /**
@@ -620,8 +612,8 @@ public class CaseData implements MappableObject {
      *  Courtnav uploaded files.
      */
 
-    private Document fl401Doc1;
-    private Document fl401Doc2;
+    @JsonProperty("courtNavUploadedDocs")
+    private final List<Element<UploadedDocuments>> courtNavUploadedDocs;
     private YesOrNo isCourtNavCase;
 
     /**
@@ -632,4 +624,17 @@ public class CaseData implements MappableObject {
 
     @JsonProperty("citizenUploadedDocumentList")
     private final List<Element<UploadedDocuments>> citizenUploadedDocumentList;
+
+    /**
+     * Courtnav.
+     */
+    @JsonProperty("applicantAge")
+    private final ApplicantAge applicantAge;
+    private final String specialCourtName;
+    private YesOrNo courtNavApproved;
+    private String caseOrigin;
+    private String numberOfAttachments;
+
+    private String previewDraftAnOrder;
+
 }

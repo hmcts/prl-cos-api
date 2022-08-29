@@ -17,5 +17,5 @@ public class CourtNavMetaData {
 
     private final String caseOrigin;
     private final boolean courtNavApproved;
-    private final boolean exParte;
+    private final int numberOfAttachments;
 }

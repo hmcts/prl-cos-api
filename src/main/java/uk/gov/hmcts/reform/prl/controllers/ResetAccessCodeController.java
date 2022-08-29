@@ -39,7 +39,7 @@ public class ResetAccessCodeController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("Regenerating access code for case {}", caseData.getId());
         caseData = caseInviteManager.reGeneratePinAndSendNotificationEmail(caseData);
-        caseDataUpdated.put("respondentCaseInvites",caseData.getRespondentCaseInvites());
+        caseDataUpdated.put("caseInvites",caseData.getCaseInvites());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
