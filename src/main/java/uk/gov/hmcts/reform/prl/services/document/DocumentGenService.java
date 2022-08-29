@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -22,9 +24,11 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
+import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,9 +55,21 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVAC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -196,6 +212,9 @@ public class DocumentGenService {
     @Autowired
     OrganisationService organisationService;
 
+    @Autowired
+    UploadDocumentService uploadService;
+
     private CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -321,16 +340,67 @@ public class DocumentGenService {
         );
     }
 
-    private String getCitizenUploadedStatementFileName(GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest) {
+    private String getCitizenUploadedStatementFileName(GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+                                                       Integer fileIndex) {
         String fileName = "";
+
         if (generateAndUploadDocumentRequest.getValues() != null
             && generateAndUploadDocumentRequest.getValues().containsKey("partyName")
             && generateAndUploadDocumentRequest.getValues().containsKey("documentType")) {
             fileName = generateAndUploadDocumentRequest.getValues().get("partyName").replace(" ", "_");
-            Date today = new Date();
+            String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
             switch (generateAndUploadDocumentRequest.getValues().get("documentType")) {
                 case YOUR_POSITION_STATEMENTS:
-                    fileName = fileName + "_position_satement_" + today.toString() + "_submitted.pdf";
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_position_satement_" + currentDate + "_submitted.pdf";
+                    break;
+                case YOUR_WITNESS_STATEMENTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_witness_satement_" + currentDate + "_submitted.pdf";
+                    break;
+                case OTHER_WITNESS_STATEMENTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_other_witness_satement_" + currentDate + "_submitted.pdf";
+                    break;
+                case MEDICAL_RECORDS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_medical_records_" + currentDate + "_submitted.pdf";
+                    break;
+                case MAIL_SCREENSHOTS_MEDIA_FILES:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_media_files_" + currentDate + "_submitted.pdf";
+                    break;
+                case LETTERS_FROM_SCHOOL:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_letter_from_school_" + currentDate + "_submitted.pdf";
+                    break;
+                case TENANCY_MORTGAGE_AGREEMENTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_tenancy_mortgage_agreements_" + currentDate + "_submitted.pdf";
+                    break;
+                case PREVIOUS_ORDERS_SUBMITTED:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_previous_orders_submitted_" + currentDate + "_submitted.pdf";
+                    break;
+                case MEDICAL_REPORTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_medical_reports_" + currentDate + "_submitted.pdf";
+                    break;
+                case PATERNITY_TEST_REPORTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_paternity_test_reports_" + currentDate + "_submitted.pdf";
+                    break;
+                case DRUG_AND_ALCOHOL_TESTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_drug_and_alcohol_tests_" + currentDate + "_submitted.pdf";
+                    break;
+                case POLICE_REPORTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_police_reports_" + currentDate + "_submitted.pdf";
+                    break;
+                case OTHER_DOCUMENTS:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_other_documents_" + currentDate + "_submitted.pdf";
                     break;
                 default:
                     fileName = "";
@@ -600,8 +670,9 @@ public class DocumentGenService {
     }
 
     public UploadedDocuments generateCitizenStatementDocument(String authorisation,
-                                                              GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest) throws Exception {
-        String fileName = getCitizenUploadedStatementFileName(generateAndUploadDocumentRequest);
+                                                              GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+                                                              Integer fileIndex) throws Exception {
+        String fileName = getCitizenUploadedStatementFileName(generateAndUploadDocumentRequest, fileIndex);
         return getDocument(authorisation, generateAndUploadDocumentRequest, fileName);
     }
 
@@ -614,16 +685,27 @@ public class DocumentGenService {
         String documentType = "";
         String partyName = "";
         String documentName = "";
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy");
+        String partyId = "";
+        LocalDate today = LocalDate.now();
+        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
+        String isApplicant = "";
+
         if (generateAndUploadDocumentRequest.getValues() != null) {
             if (generateAndUploadDocumentRequest.getValues().containsKey("parentDocumentType")) {
                 parentDocumentType = generateAndUploadDocumentRequest.getValues().get("parentDocumentType");
             }
+            if (generateAndUploadDocumentRequest.getValues().containsKey("partyId")) {
+                partyId = generateAndUploadDocumentRequest.getValues().get("partyId");
+            }
             if (generateAndUploadDocumentRequest.getValues().containsKey("documentType")) {
                 documentType = generateAndUploadDocumentRequest.getValues().get("documentType");
                 if (generateAndUploadDocumentRequest.getValues().containsKey("partyName")) {
-                    documentName = documentType.replace("Your", generateAndUploadDocumentRequest.getValues().get("partyName") + "'s");
+                    partyName = generateAndUploadDocumentRequest.getValues().get("partyName");
+                    documentName = documentType.replace("Your", partyName + "'s");
                 }
+            }
+            if (generateAndUploadDocumentRequest.getValues().containsKey("isApplicant")) {
+                isApplicant = generateAndUploadDocumentRequest.getValues().get("isApplicant");
             }
 
         }
@@ -632,16 +714,33 @@ public class DocumentGenService {
             .parentDocumentType(parentDocumentType)
             .documentType(documentType)
             .partyName(partyName)
-            .isApplicant("Yes")
-            .uploadedBy("97be96a9-2db4-42e8-ba85-7b0d16e4f4f4")
-            .dateCreated(new Date())
+            .isApplicant(isApplicant)
+            .uploadedBy(partyId)
+            .dateCreated(LocalDate.now())
             .documentDetails(DocumentDetails.builder()
                                  .documentName(documentName)
-                                 .documentUploadedDate(dateFormat.format(new Date()))
+                                 .documentUploadedDate(formattedCurrentDate)
                                  .build()).citizenDocument(generateDocumentField(
                 fileName,
                 generatedDocumentInfo
             )).build();
+    }
+
+    public DocumentResponse uploadDocument(String authorization, MultipartFile file) {
+        try {
+            uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument
+                = uploadService.uploadDocument(file, file.getOriginalFilename(), file.getContentType(), authorization);
+            log.info("Stored Doc Detail: " + stampedDocument.toString());
+            return DocumentResponse.builder().status("Success").document(Document.builder()
+                                                                             .documentBinaryUrl(stampedDocument.links.binary.href)
+                                                                             .documentUrl(stampedDocument.links.self.href)
+                                                                             .documentFileName(stampedDocument.originalDocumentName)
+                                                                             .build()).build();
+
+        } catch (Exception e) {
+            log.error("Error while uploading document ." + e.getMessage());
+            throw e;
+        }
     }
 
 

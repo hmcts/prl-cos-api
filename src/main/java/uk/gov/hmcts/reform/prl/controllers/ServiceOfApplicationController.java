@@ -66,7 +66,7 @@ public class ServiceOfApplicationController {
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(@RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        updatedCaseData.put("respondentCaseInvites", caseData.getRespondentCaseInvites());
+        updatedCaseData.put("caseInvites", caseData.getCaseInvites());
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
