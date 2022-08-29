@@ -3,11 +3,19 @@ package uk.gov.hmcts.reform.prl.models.dto.cafcass;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,14 +31,13 @@ public class CafCassCaseData {
     @JsonProperty("submitAndPayDownloadApplicationLink")
     private CafCassDocument submitAndPayDownloadApplicationLink;
 
-    public void setSubmitAndPayDownloadApplicationLink(CafCassDocument submitAndPayDownloadApplicationLink) {
-        try {
-            if(submitAndPayDownloadApplicationLink != null) {
-                URL url = new URL(submitAndPayDownloadApplicationLink.getDocumentUrl());
-                submitAndPayDownloadApplicationLink.setDocumentId(getDocumentId(url));
-                submitAndPayDownloadApplicationLink.setDocumentUrl(null);
-            }
-        } catch (Exception e) {}
+    public void setSubmitAndPayDownloadApplicationLink(CafCassDocument submitAndPayDownloadApplicationLink) throws MalformedURLException {
+        if (submitAndPayDownloadApplicationLink != null
+            && StringUtils.hasText(submitAndPayDownloadApplicationLink.getDocumentUrl())) {
+            URL url = new URL(submitAndPayDownloadApplicationLink.getDocumentUrl());
+            submitAndPayDownloadApplicationLink.setDocumentId(getDocumentId(url));
+            submitAndPayDownloadApplicationLink.setDocumentUrl(null);
+        }
         this.submitAndPayDownloadApplicationLink = submitAndPayDownloadApplicationLink;
     }
 
@@ -38,14 +45,13 @@ public class CafCassCaseData {
     @JsonProperty("c8Document")
     private CafCassDocument c8Document;
 
-    public void setC8Document(CafCassDocument c8Document) {
-        try {
-            if(c8Document != null) {
-                URL url = new URL(c8Document.getDocumentUrl());
-                c8Document.setDocumentId(getDocumentId(url));
-                c8Document.setDocumentUrl(null);
-            }
-        } catch (Exception e) {}
+    public void setC8Document(CafCassDocument c8Document) throws MalformedURLException {
+        if (c8Document != null
+            && StringUtils.hasText(c8Document.getDocumentUrl())) {
+            URL url = new URL(c8Document.getDocumentUrl());
+            c8Document.setDocumentId(getDocumentId(url));
+            c8Document.setDocumentUrl(null);
+        }
         this.c8Document = c8Document;
     }
 
@@ -54,14 +60,13 @@ public class CafCassCaseData {
     @JsonProperty("c1ADocument")
     private Document c1ADocument;
 
-    public void setC1ADocument(Document c1ADocument) {
-        try {
-            if(c1ADocument != null) {
-                URL url = new URL(c1ADocument.getDocumentUrl());
-                c1ADocument.setDocumentUrl(getDocumentId(url));
-            }
-        } catch (Exception e) {}
-        this.c1ADocument =c1ADocument;
+    public void setC1ADocument(Document c1ADocument) throws MalformedURLException {
+        if (c1ADocument != null
+            && StringUtils.hasText(c1ADocument.getDocumentUrl())) {
+            URL url = new URL(c1ADocument.getDocumentUrl());
+            c1ADocument.setDocumentUrl(getDocumentId(url));
+        }
+        this.c1ADocument = c1ADocument;
     }
 
     private String getDocumentId(URL url) {
@@ -77,15 +82,14 @@ public class CafCassCaseData {
     @Setter(AccessLevel.NONE)
     private CafCassDocument draftConsentOrderFile;
 
-    public void setDraftConsentOrderFile(CafCassDocument draftConsentOrderFile) {
-        try {
-            if(draftConsentOrderFile != null) {
-                URL url = new URL(draftConsentOrderFile.getDocumentUrl());
-                draftConsentOrderFile.setDocumentId(getDocumentId(url));
-                draftConsentOrderFile.setDocumentUrl(null);
-            }
-        } catch (Exception e) {}
-        this.draftConsentOrderFile =draftConsentOrderFile;
+    public void setDraftConsentOrderFile(CafCassDocument draftConsentOrderFile) throws MalformedURLException {
+        if (draftConsentOrderFile != null
+            && StringUtils.hasText(draftConsentOrderFile.getDocumentUrl())) {
+            URL url = new URL(draftConsentOrderFile.getDocumentUrl());
+            draftConsentOrderFile.setDocumentId(getDocumentId(url));
+            draftConsentOrderFile.setDocumentUrl(null);
+        }
+        this.draftConsentOrderFile = draftConsentOrderFile;
     }
 
     private ConfidentialDetails confidentialDetails;
@@ -97,19 +101,22 @@ public class CafCassCaseData {
 
     public void setOtherDocuments(List<Element<OtherDocuments>> otherDocuments) {
         try {
-            if(otherDocuments != null) {
+            if (otherDocuments != null) {
                 List<Element<OtherDocuments>> updatedOtherDocumentList = otherDocuments.stream()
                     .map(otherDocumentsElement -> updateElementDocumentId(otherDocumentsElement)).collect(Collectors.toList());
                 this.otherDocuments = updatedOtherDocumentList;
             }
         } catch (Exception e) {
-            this.otherDocuments =otherDocuments;
+            this.otherDocuments = otherDocuments;
         }
     }
 
     private Element<OtherDocuments> updateElementDocumentId(Element<OtherDocuments> otherDocumentsElement) {
         try {
-            if(otherDocumentsElement != null) {
+            if (otherDocumentsElement != null
+                && !ObjectUtils.isEmpty(otherDocumentsElement.getValue())
+                && !ObjectUtils.isEmpty(otherDocumentsElement.getValue().getDocumentOther())
+                && StringUtils.hasText(otherDocumentsElement.getValue().getDocumentOther().getDocumentUrl())) {
                 Document documentOther = otherDocumentsElement.getValue().getDocumentOther();
                 URL url = new URL(documentOther.getDocumentUrl());
                 documentOther.setDocumentUrl(getDocumentId(url));
@@ -124,15 +131,14 @@ public class CafCassCaseData {
     @Setter(AccessLevel.NONE)
     private List<Element<OtherDocuments>> otherDocuments;
 
-    public void setFinalDocument(CafCassDocument finalDocument) {
-        try {
-            if(finalDocument != null) {
-                URL url = new URL(finalDocument.getDocumentUrl());
-                finalDocument.setDocumentId(getDocumentId(url));
-                finalDocument.setDocumentUrl(null);
-            }
-        } catch (Exception e) {}
-        this.finalDocument =finalDocument;
+    public void setFinalDocument(CafCassDocument finalDocument) throws MalformedURLException {
+        if (finalDocument != null
+            && StringUtils.hasText(finalDocument.getDocumentUrl())) {
+            URL url = new URL(finalDocument.getDocumentUrl());
+            finalDocument.setDocumentId(getDocumentId(url));
+            finalDocument.setDocumentUrl(null);
+        }
+        this.finalDocument = finalDocument;
     }
 
     @Setter(AccessLevel.NONE)
@@ -142,15 +148,14 @@ public class CafCassCaseData {
 
     private List<Element<Child>> children;
 
-    public void setMiamCertificationDocumentUpload1(CafCassDocument miamCertificationDocumentUpload1) {
-        try {
-            if(miamCertificationDocumentUpload1 != null) {
-                URL url = new URL(miamCertificationDocumentUpload1.getDocumentUrl());
-                miamCertificationDocumentUpload1.setDocumentId(getDocumentId(url));
-                miamCertificationDocumentUpload1.setDocumentUrl(null);
-            }
-        } catch (Exception e) {}
-        this.miamCertificationDocumentUpload1 =miamCertificationDocumentUpload1;
+    public void setMiamCertificationDocumentUpload1(CafCassDocument miamCertificationDocumentUpload1) throws MalformedURLException {
+        if (miamCertificationDocumentUpload1 != null
+            && StringUtils.hasText(miamCertificationDocumentUpload1.getDocumentUrl())) {
+            URL url = new URL(miamCertificationDocumentUpload1.getDocumentUrl());
+            miamCertificationDocumentUpload1.setDocumentId(getDocumentId(url));
+            miamCertificationDocumentUpload1.setDocumentUrl(null);
+        }
+        this.miamCertificationDocumentUpload1 = miamCertificationDocumentUpload1;
     }
 
     @Setter(AccessLevel.NONE)
@@ -176,29 +181,27 @@ public class CafCassCaseData {
 
     private List<Element<OtherPersonInTheCase>> otherPeopleInTheCaseTable;
 
-    public void setOrdersNonMolestationDocument(CafCassDocument ordersNonMolestationDocument) {
-        try {
-            if(ordersNonMolestationDocument != null) {
-                URL url = new URL(ordersNonMolestationDocument.getDocumentUrl());
-                ordersNonMolestationDocument.setDocumentId(getDocumentId(url));
-                ordersNonMolestationDocument.setDocumentUrl(null);
-            }
-        } catch (Exception e) {}
-        this.ordersNonMolestationDocument =ordersNonMolestationDocument;
+    public void setOrdersNonMolestationDocument(CafCassDocument ordersNonMolestationDocument) throws MalformedURLException {
+        if (ordersNonMolestationDocument != null
+            && StringUtils.hasText(ordersNonMolestationDocument.getDocumentUrl())) {
+            URL url = new URL(ordersNonMolestationDocument.getDocumentUrl());
+            ordersNonMolestationDocument.setDocumentId(getDocumentId(url));
+            ordersNonMolestationDocument.setDocumentUrl(null);
+        }
+        this.ordersNonMolestationDocument = ordersNonMolestationDocument;
     }
 
     @Setter(AccessLevel.NONE)
     private CafCassDocument ordersNonMolestationDocument;
 
-    public void setHearingOutComeDocument(CafCassDocument hearingOutComeDocument) {
-        try {
-            if(hearingOutComeDocument != null) {
-                URL url = new URL(hearingOutComeDocument.getDocumentUrl());
-                hearingOutComeDocument.setDocumentId(getDocumentId(url));
-                hearingOutComeDocument.setDocumentUrl(null);
-            }
-        } catch (Exception e) {}
-        this.hearingOutComeDocument =hearingOutComeDocument;
+    public void setHearingOutComeDocument(CafCassDocument hearingOutComeDocument) throws MalformedURLException {
+        if (hearingOutComeDocument != null
+            && StringUtils.hasText(hearingOutComeDocument.getDocumentUrl())) {
+            URL url = new URL(hearingOutComeDocument.getDocumentUrl());
+            hearingOutComeDocument.setDocumentId(getDocumentId(url));
+            hearingOutComeDocument.setDocumentUrl(null);
+        }
+        this.hearingOutComeDocument = hearingOutComeDocument;
     }
 
     @Setter(AccessLevel.NONE)

@@ -16,8 +16,6 @@ import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CafCassControllerTest {
     @Mock
@@ -26,10 +24,10 @@ public class CafCassControllerTest {
     @InjectMocks
     private CafCassController cafCassController;
     private static final String jsonInString =
-        "classpath:request/CafcaasResponse.json";
+        "classpath:response/CafcaasResponse.json";
 
     @org.junit.Test
-    public void shouldRemoveAllCaseDetailsWhenCalled() throws IOException {
+    public void getCaseDataTest() throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         CafCassResponse expectedCafCassResponse = objectMapper.readValue(
             TestResourceUtil.readFileFrom(jsonInString),
