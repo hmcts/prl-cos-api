@@ -65,24 +65,26 @@ public class ServiceOfApplicationPostService {
     }
 
     public List<GeneratedDocumentInfo> sendDocs(CaseData caseData, String authorisation) {
-        // Sends post to the respondents who are not represented by a solicitor
+        // Sends post to other parties
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         CaseData blankCaseData = CaseData.builder().build();
-        caseData.getOthersToNotify().stream()
-                .map(Element::getValue)
-                    .filter(partyDetails -> YesOrNo.Yes.getDisplayedValue()
-                        .equalsIgnoreCase(partyDetails.getIsCurrentAddressKnown().getDisplayedValue()))
-                        .forEach(partyDetails -> {
-                            List<GeneratedDocumentInfo> docs = null;
-                            docs = getUploadedDocumentsServiceOfApplication(caseData);
-                            try {
-                                docs.add(generateDocument(authorisation, blankCaseData,DOCUMENT_PRIVACY_NOTICE_HINT));
-                            } catch (Exception e) {
-                                log.info("*** Error while generating privacy notice to be served ***");
-                            }
-                            sentDocs.addAll(sendBulkPrint(String.valueOf(caseData.getId()),authorisation,docs));
-                        }
-        );
+        Optional<List<Element<PartyDetails>>> otherPeopleToNotify = Optional.ofNullable(caseData.getOthersToNotify());
+        otherPeopleToNotify.ifPresent(elements -> elements
+            .stream()
+            .map(Element::getValue)
+            .filter(partyDetails -> YesOrNo.Yes.getDisplayedValue()
+                .equalsIgnoreCase(partyDetails.getIsCurrentAddressKnown().getDisplayedValue()))
+            .forEach(partyDetails -> {
+                List<GeneratedDocumentInfo> docs = null;
+                docs = getUploadedDocumentsServiceOfApplication(caseData);
+                try {
+                    docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
+                } catch (Exception e) {
+                    log.info("*** Error while generating privacy notice to be served ***");
+                }
+                sentDocs.addAll(sendBulkPrint(String.valueOf(caseData.getId()), authorisation, docs));
+            }
+            ));
         return sentDocs;
     }
 
