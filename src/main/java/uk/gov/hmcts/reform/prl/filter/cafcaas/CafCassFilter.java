@@ -32,9 +32,9 @@ public class CafCassFilter {
     private PostcodeLookupService postcodeLookupService;
 
     public void filter(CafCassResponse cafCassResponse) {
-        caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
-        caseStateList = caseStateList.stream().map(String::trim).collect(Collectors.toList());
         if (caseTypeList != null && !caseTypeList.isEmpty()) {
+            caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
+            caseStateList = caseStateList.stream().map(String::trim).collect(Collectors.toList());
             filterCaseByApplicationCaseType(cafCassResponse);
             filterCasesByApplicationValidPostcode(cafCassResponse);
             cafCassResponse.setTotal(cafCassResponse.getCases().size());

@@ -25,7 +25,7 @@ prl:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
 cafcaas:
   search-case-type-id: PRLAPPS
-  caseTypeOfApplicationList: C100, A58
+  caseTypeOfApplicationList: C100
   caseState: SUBMITTED_PAID
 
 management:
