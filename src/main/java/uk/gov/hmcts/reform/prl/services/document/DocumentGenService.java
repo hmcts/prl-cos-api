@@ -688,6 +688,7 @@ public class DocumentGenService {
         String partyId = "";
         LocalDate today = LocalDate.now();
         String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
+        String isApplicant = "";
 
         if (generateAndUploadDocumentRequest.getValues() != null) {
             if (generateAndUploadDocumentRequest.getValues().containsKey("parentDocumentType")) {
@@ -703,6 +704,9 @@ public class DocumentGenService {
                     documentName = documentType.replace("Your", partyName + "'s");
                 }
             }
+            if (generateAndUploadDocumentRequest.getValues().containsKey("isApplicant")) {
+                isApplicant = partyName = generateAndUploadDocumentRequest.getValues().get("isApplicant");
+            }
 
         }
 
@@ -710,7 +714,7 @@ public class DocumentGenService {
             .parentDocumentType(parentDocumentType)
             .documentType(documentType)
             .partyName(partyName)
-            .isApplicant("Yes")
+            .isApplicant(isApplicant)
             .uploadedBy(partyId)
             .dateCreated(LocalDate.now())
             .documentDetails(DocumentDetails.builder()
