@@ -24,7 +24,7 @@ public class CafCassControllerTest {
     @InjectMocks
     private CafCassController cafCassController;
     private static final String jsonInString =
-        "classpath:response/CafcaasResponse.json";
+        "classpath:response/CafCaasResponse.json";
 
     @org.junit.Test
     public void getCaseDataTest() throws IOException {
