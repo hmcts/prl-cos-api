@@ -166,11 +166,7 @@ public class FL401ApplicationMapper {
                                                                                                           .getRelationshipWithRespondent()
                                                                                                           .getRelationshipStartDate()
                                                                                                           .mergeDate()))
-                                                    .relationshipDateComplexEndDate(LocalDate.parse(courtNavCaseData
-                                                                                                        .getFl401()
-                                                                                                        .getRelationshipWithRespondent()
-                                                                                                        .getRelationshipEndDate()
-                                                                                                        .mergeDate()))
+                                                    .relationshipDateComplexEndDate(getRelationShipEndDate(courtNavCaseData))
                                                     .build())
                 .applicantRelationshipDate(LocalDate.parse(courtNavCaseData
                                                                .getFl401()
@@ -242,6 +238,19 @@ public class FL401ApplicationMapper {
 
         return caseData;
 
+    }
+
+    private LocalDate getRelationShipEndDate(CourtNavFl401 courtNavCaseData) {
+        LocalDate endDate = null;
+
+        if (null != courtNavCaseData.getFl401().getRelationshipWithRespondent().getRelationshipEndDate()) {
+            endDate = LocalDate.parse(courtNavCaseData
+                                          .getFl401()
+                                          .getRelationshipWithRespondent()
+                                          .getRelationshipEndDate()
+                                          .mergeDate());
+        }
+        return endDate;
     }
 
     private String getCaseName(CourtNavFl401 courtNavCaseData) {
