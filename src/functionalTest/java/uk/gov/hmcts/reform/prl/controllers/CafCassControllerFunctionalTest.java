@@ -48,10 +48,10 @@ public class CafCassControllerFunctionalTest {
                 .header("Authorization", userToken)
                 .contentType(CONTENT_TYPE_JSON)
                 .given()
-                .pathParams("start_date",
-                        "22-02-2022 14:00",
+                .queryParams("start_date",
+                        "2022-08-22T10:39:43.49",
                         "end_date",
-                        "22-02-2022 14:15")
+                        "2022-08-26T10:44:54.055")
                 .when()
                 .get("/searchCases");
 

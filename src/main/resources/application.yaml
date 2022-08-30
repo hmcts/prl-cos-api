@@ -18,8 +18,8 @@ case:
 
 prl:
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
   document:
     generate:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
@@ -164,7 +164,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    url: ${CORE_CASE_DATA_API_URL:http://localhost:4452}
+    url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
 
 auth:
   idam:
