@@ -84,6 +84,14 @@ public class CaseController {
         return caseService.retrieveCases(authorisation, s2sToken, role, userId);
     }
 
+    @GetMapping(path = "/cases", produces = APPLICATION_JSON)
+    public List<CaseData> retrieveCitizenCases(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader("serviceAuthorization") String s2sToken
+    ) {
+        return caseService.retrieveCases(authorisation, s2sToken);
+    }
+
     @PostMapping(path = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Linking case to citizen account with access code")
     public void linkCitizenToCase(@RequestHeader("caseId") String caseId,

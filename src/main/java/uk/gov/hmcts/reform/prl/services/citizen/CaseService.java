@@ -72,6 +72,15 @@ public class CaseService {
         return searchCasesWith(authToken, s2sToken, searchCriteria);
     }
 
+    public List<CaseData> retrieveCases(String authToken, String s2sToken) {
+        Map<String, String> searchCriteria = new HashMap<>();
+
+        searchCriteria.put("sortDirection", "desc");
+        searchCriteria.put("page", "1");
+
+        return searchCasesLinkedToCitizen(authToken, s2sToken, searchCriteria);
+    }
+
     private List<CaseData> searchCasesWith(String authToken, String s2sToken, Map<String, String> searchCriteria) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
@@ -80,6 +89,17 @@ public class CaseService {
         return caseDetails
             .stream()
             .map(caseDetailsConverter::extractCase)
+            .collect(Collectors.toList());
+    }
+
+    private List<CaseData> searchCasesLinkedToCitizen(String authToken, String s2sToken, Map<String, String> searchCriteria) {
+
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        List<CaseDetails> caseDetails = new ArrayList<>();
+        caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
+        return caseDetails
+            .stream()
+            .map(caseDetailsConverter::extractCaseData)
             .collect(Collectors.toList());
     }
 
