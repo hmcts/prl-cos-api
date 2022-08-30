@@ -312,8 +312,8 @@ document:
       prl_fl402_final_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
     citizen:
-      prl_citizen_upload_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
-      prl_citizen_upload_filename: Self_created.pdf
+      prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
+      prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
 
 southampton:
   court:

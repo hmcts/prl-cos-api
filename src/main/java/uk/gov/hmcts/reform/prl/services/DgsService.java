@@ -93,7 +93,7 @@ public class DgsService {
         String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = CaseDetails.builder().caseId(caseId).state("ISSUE")
                                         .caseData(CaseData.builder().id(Long.valueOf(caseId))
-                                                      .previewDraftAnOrder(freeTextUploadStatements).build()).build();
+                                                      .citizenUploadedStatement(freeTextUploadStatements).build()).build();
         tempCaseDetails.put("caseDetails", AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
 
 
