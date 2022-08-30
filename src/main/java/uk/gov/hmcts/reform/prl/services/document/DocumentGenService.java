@@ -705,7 +705,7 @@ public class DocumentGenService {
                 }
             }
             if (generateAndUploadDocumentRequest.getValues().containsKey("isApplicant")) {
-                isApplicant = partyName = generateAndUploadDocumentRequest.getValues().get("isApplicant");
+                isApplicant = generateAndUploadDocumentRequest.getValues().get("isApplicant");
             }
 
         }
