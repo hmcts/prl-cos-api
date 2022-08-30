@@ -40,6 +40,10 @@ spring:
     import: "optional:configtree:/mnt/secrets/"
   application:
     name: Prl cos api
+  servlet:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 30MB
 
 azure:
   application-insights:
