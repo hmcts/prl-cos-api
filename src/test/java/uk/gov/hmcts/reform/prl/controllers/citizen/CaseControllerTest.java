@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -54,8 +53,6 @@ public class CaseControllerTest {
     @Test
     public void testGetCase() {
 
-        String caseId = "1234567891234567";
-
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
@@ -68,6 +65,7 @@ public class CaseControllerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
 
+        String caseId = "1234567891234567";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(coreCaseDataApi.getCase(authToken, servAuthToken, caseId)).thenReturn(caseDetails);
         CaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
@@ -78,9 +76,6 @@ public class CaseControllerTest {
     @Test
     public void testCitizenUpdateCase() {
 
-        String caseId = "1234567891234567";
-        String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
-
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
@@ -92,6 +87,10 @@ public class CaseControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
+
+
+        String caseId = "1234567891234567";
+        String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(caseService.updateCase(caseData, authToken, servAuthToken, caseId, eventId)).thenReturn(caseDetails);
@@ -103,13 +102,8 @@ public class CaseControllerTest {
     @Test
     public void testCitizenRetrieveCases() {
 
-        String userId = "12345";
-        String role = "test role";
-
         List<CaseData> caseDataList = new ArrayList<>();
-        List<CaseData> caseDataList1 = new ArrayList<>();
 
-        List<CaseDetails> caseDetails = new ArrayList<>();
 
         caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -124,9 +118,16 @@ public class CaseControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
 
+        List<CaseDetails> caseDetails = new ArrayList<>();
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         caseDetails.add(CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build());
+
+        String userId = "12345";
+        String role = "test role";
+
+        List<CaseData> caseDataList1 = new ArrayList<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(caseService.retrieveCases(role, userId, authToken, servAuthToken)).thenReturn(caseDataList);
@@ -138,9 +139,6 @@ public class CaseControllerTest {
     @Test
     public void testCitizenLinkDefendantToClaim() {
 
-        String caseId = "1234567891234567";
-        String accessCode = "e3ceb507";
-
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
@@ -152,6 +150,9 @@ public class CaseControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
+
+        String caseId = "1234567891234567";
+        String accessCode = "e3ceb507";
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         doNothing().when(caseService).linkCitizenToCase(authToken, servAuthToken, caseId, accessCode);
@@ -163,9 +164,6 @@ public class CaseControllerTest {
     @Test
     public void testCitizenValidateAccessCode() {
 
-        String caseId = "1234567891234567";
-        String accessCode = "e3ceb507";
-
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
@@ -178,6 +176,8 @@ public class CaseControllerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
 
+        String caseId = "1234567891234567";
+        String accessCode = "e3ceb507";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(caseService.validateAccessCode(authToken, servAuthToken, caseId, accessCode)).thenReturn("test");
         String data = caseController.validateAccessCode(authToken, servAuthToken, caseId, accessCode);
