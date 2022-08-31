@@ -40,7 +40,9 @@ public class PrlAppsConstants {
     public static final String NO_SMALL = "no";
 
     public static final String DOCUMENT_FIELD_C1A = "c1ADocument";
+    public static final String DOCUMENT_FIELD_DRAFT_C1A = "c1ADraftDocument";
     public static final String DOCUMENT_FIELD_C8 = "c8Document";
+    public static final String DOCUMENT_FIELD_DRAFT_C8 = "c8DraftDocument";
     public static final String DOCUMENT_FIELD_FINAL = "finalDocument";
     public static final String DRAFT_DOCUMENT_FIELD = "draftOrderDoc";
     public static final String DRAFT_DOCUMENT_WELSH_FIELD = "draftOrderDocWelsh";
@@ -61,7 +63,9 @@ public class PrlAppsConstants {
     public static final String DOMESTIC_ABUSE_POSTCODE_URL = SEARCH_RESULTS_POSTCODE_POSTCODE_SERVICE_AREA + "domestic-abuse";
 
     public static final String DOCUMENT_FIELD_C1A_WELSH = "c1AWelshDocument";
+    public static final String DOCUMENT_FIELD_C1A_DRAFT_WELSH = "c1AWelshDraftDocument";
     public static final String DOCUMENT_FIELD_C8_WELSH = "c8WelshDocument";
+    public static final String DOCUMENT_FIELD_C8_DRAFT_WELSH = "c8WelshDraftDocument";
     public static final String DOCUMENT_FIELD_FINAL_WELSH = "finalWelshDocument";
 
     public static final String CHILD_ARRANGEMENT_CASE = "CHILD ARRANGEMENT CASE";
@@ -82,6 +86,8 @@ public class PrlAppsConstants {
 
     public static final String C8_HINT = "C8";
     public static final String C1A_HINT = "C1A";
+    public static final String C8_DRAFT_HINT = "C8_DRAFT";
+    public static final String C1A_DRAFT_HINT = "C1A_DRAFT";
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
     public static final String DOCUMENT_COVER_SHEET_HINT = "DOC_COVER_SHEET";
