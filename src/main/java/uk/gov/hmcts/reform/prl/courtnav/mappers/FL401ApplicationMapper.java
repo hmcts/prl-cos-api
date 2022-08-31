@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
 import uk.gov.hmcts.reform.prl.enums.MortgageNamedAfterEnum;
 import uk.gov.hmcts.reform.prl.enums.PeopleLivingAtThisAddressEnum;
 import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -60,7 +61,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ContractEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.CurrentResidentAtAddressEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.FamilyHomeOutcomeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.LivingSituationOutcomeEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SignatureEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.SpecialMeasuresEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.WithoutNoticeReasonEnum;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
@@ -75,6 +75,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -88,7 +90,11 @@ public class FL401ApplicationMapper {
         CaseData caseData = null;
         caseData = CaseData.builder()
             .isCourtNavCase(YesOrNo.Yes)
+           .state(State.SUBMITTED_PAID)
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseOrigin(courtNavCaseData.getMetaData().getCaseOrigin())
+            .courtNavApproved(courtNavCaseData.getMetaData().isCourtNavApproved() ? YesOrNo.Yes : YesOrNo.No)
+            .numberOfAttachments(String.valueOf(courtNavCaseData.getMetaData().getNumberOfAttachments()))
             .applicantAge(ApplicantAge.getValue(String.valueOf(courtNavCaseData.getFl401().getBeforeStart().getApplicantHowOld())))
             .applicantCaseName(getCaseName(courtNavCaseData))
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder()
@@ -127,10 +133,11 @@ public class FL401ApplicationMapper {
                                         .doesApplicantHaveChildren(courtNavCaseData.getFl401().getFamily()
                                                                        .getWhoApplicationIsFor()
                                                                        .equals(ApplicationCoverEnum.applicantOnly)
-                                        ? YesOrNo.No : YesOrNo.Yes)
+                                                                       ? YesOrNo.No : YesOrNo.Yes)
                                         .build())
-            .applicantChildDetails(courtNavCaseData.getFl401().getFamily()
-                                       .getWhoApplicationIsFor().getDisplayedValue().equals("Yes")
+            .applicantChildDetails(!courtNavCaseData.getFl401().getFamily()
+                .getWhoApplicationIsFor()
+                .equals(ApplicationCoverEnum.applicantOnly)
                                        ? mapProtectedChild(courtNavCaseData.getFl401()
                                                                .getFamily().getProtectedChildren()) : null)
             .respondentBehaviourData(courtNavCaseData.getFl401().getSituation()
@@ -156,14 +163,14 @@ public class FL401ApplicationMapper {
                 .relationStartAndEndComplexType(RelationshipDateComplex.builder()
                                                     .relationshipDateComplexStartDate(LocalDate.parse(courtNavCaseData
                                                                                                           .getFl401()
-                                                                                          .getRelationshipWithRespondent()
-                                                                                          .getRelationshipStartDate()
-                                                                                          .mergeDate()))
+                                                                                                          .getRelationshipWithRespondent()
+                                                                                                          .getRelationshipStartDate()
+                                                                                                          .mergeDate()))
                                                     .relationshipDateComplexEndDate(LocalDate.parse(courtNavCaseData
                                                                                                         .getFl401()
-                                                                                        .getRelationshipWithRespondent()
-                                                                                        .getRelationshipEndDate()
-                                                                                        .mergeDate()))
+                                                                                                        .getRelationshipWithRespondent()
+                                                                                                        .getRelationshipEndDate()
+                                                                                                        .mergeDate()))
                                                     .build())
                 .applicantRelationshipDate(LocalDate.parse(courtNavCaseData
                                                                .getFl401()
@@ -174,7 +181,7 @@ public class FL401ApplicationMapper {
                 .getFl401()
                 .getRelationshipWithRespondent()
                 .getRelationshipDescription().getId().equalsIgnoreCase(
-                "noneOfAbove"))
+                    "noneOfAbove"))
                                            ? (RespondentRelationOptionsInfo.builder()
                 .applicantRelationshipOptions(courtNavCaseData.getFl401()
                                                   .getRelationshipWithRespondent().getRespondentsRelationshipToApplicant())
@@ -192,10 +199,6 @@ public class FL401ApplicationMapper {
                                                         .map(FL401Consent::getDisplayedValueFromEnumString)
                                                         .collect(Collectors.toList()))
                                   .signature(courtNavCaseData.getFl401().getStatementOfTruth().getSignature())
-                                  .signatureType(SignatureEnum.getValue(String.valueOf(courtNavCaseData
-                                                                                           .getFl401()
-                                                                                           .getStatementOfTruth()
-                                                                                           .getSignatureType())))
                                   .fullname(courtNavCaseData.getFl401().getStatementOfTruth().getSignatureFullName())
                                   .date(LocalDate.parse(courtNavCaseData.getFl401().getStatementOfTruth().getSignatureDate().mergeDate()))
                                   .nameOfFirm(courtNavCaseData.getFl401().getStatementOfTruth().getRepresentativeFirmName())
@@ -309,20 +312,19 @@ public class FL401ApplicationMapper {
         return String.valueOf(courtEmailAddress);
     }
 
-    private List<Element<FL401Proceedings>> getOngoingProceedings(List<Element<CourtProceedings>> ongoingCourtProceedings) {
+    private List<Element<FL401Proceedings>> getOngoingProceedings(List<CourtProceedings> ongoingCourtProceedings) {
 
-        List<FL401Proceedings> proceedingsList = new ArrayList<>();
-        for (Element<CourtProceedings> courtProceedingsElement : ongoingCourtProceedings) {
-
-            CourtProceedings proceedings = courtProceedingsElement.getValue();
-            proceedingsList.add(FL401Proceedings.builder()
-                .nameOfCourt(proceedings.getNameOfCourt())
-                .caseNumber(proceedings.getCaseNumber())
-                .typeOfCase(proceedings.getCaseType())
-                .anyOtherDetails(proceedings.getCaseDetails())
-                .build());
+        List<Element<FL401Proceedings>> fl401ProceedingList = new ArrayList<>();
+        for (CourtProceedings courtProceedings : ongoingCourtProceedings) {
+            FL401Proceedings f = FL401Proceedings.builder()
+                .nameOfCourt(courtProceedings.getNameOfCourt())
+                .caseNumber(courtProceedings.getCaseNumber())
+                .typeOfCase(courtProceedings.getCaseType())
+                .anyOtherDetails(courtProceedings.getCaseDetails())
+                .build();
+            fl401ProceedingList.add(element(f));
         }
-        return ElementUtils.wrapElements(proceedingsList);
+        return fl401ProceedingList;
 
     }
 
@@ -456,22 +458,22 @@ public class FL401ApplicationMapper {
         return ElementUtils.wrapElements(childList);
     }
 
-    private List<Element<ApplicantChild>> mapProtectedChild(List<Element<ProtectedChild>> protectedChildren) {
+    private List<Element<ApplicantChild>> mapProtectedChild(List<ProtectedChild> protectedChildren) {
 
-        List<ApplicantChild> childList = new ArrayList<>();
-        for (Element<ProtectedChild> protectedChild : protectedChildren) {
+        List<Element<ApplicantChild>> applicantChild = new ArrayList<>();
 
-            ProtectedChild value = protectedChild.getValue();
-            childList.add(ApplicantChild.builder()
-                .fullName(value.getFullName())
-                .dateOfBirth(LocalDate.parse(value.getDateOfBirth().mergeDate()))
-                .applicantChildRelationship(value.getRelationship())
-                .applicantRespondentShareParental(value.isParentalResponsibility() ? YesOrNo.Yes : YesOrNo.No)
-                .respondentChildRelationship(value.getRespondentRelationship())
-                .build());
+        for (ProtectedChild protectedChild : protectedChildren) {
+            ApplicantChild a = ApplicantChild.builder()
+                .fullName(protectedChild.getFullName())
+                .dateOfBirth(LocalDate.parse(protectedChild.getDateOfBirth().mergeDate()))
+                .applicantChildRelationship(protectedChild.getRelationship())
+                .applicantRespondentShareParental(protectedChild.isParentalResponsibility() ? YesOrNo.Yes : YesOrNo.No)
+                .respondentChildRelationship(protectedChild.getRespondentRelationship())
+                .build();
+            applicantChild.add(element(a));
         }
 
-        return ElementUtils.wrapElements(childList);
+        return applicantChild;
     }
 
     private PartyDetails mapRespondent(RespondentDetails respondent) {
