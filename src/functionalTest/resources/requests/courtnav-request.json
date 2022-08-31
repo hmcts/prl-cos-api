@@ -1,6 +1,6 @@
 {
   "metaData": {
-    "caseOrigin": "string",
+    "caseOrigin": "CourtNav",
     "courtNavApproved": true,
     "numberOfAttachments": 12
   },
@@ -12,229 +12,123 @@
       "ordersAppliedFor": [
         "nonMolestationOrder"
       ],
-      "ordersAppliedWithoutNotice": true,
-      "ordersAppliedWithoutNoticeReason": [
-        "riskOfSignificantHarm"
-      ],
-      "ordersAppliedWithoutNoticeReasonDetails": "string",
-      "bailConditionsOnRespondent": true,
-      "bailConditionsEndDate": {
-        "day": 11,
-        "month": 8,
-        "year": 1998
-      },
-      "additionalDetailsForCourt": "string"
+      "ordersAppliedWithoutNotice": false,
+      "bailConditionsOnRespondent": false,
+      "additionalDetailsForCourt": "Iusto ea dolor voluptatem ut. In necessitatibus omnis iste assumenda nam. Minima vel et qui sed. Distinctio est consequatur magni laudantium blanditiis et blanditiis."
     },
     "applicantDetails": {
-      "applicantFirstName": "courtnav",
-      "applicantLastName": "fl401",
-      "applicantOtherNames": "string",
-      "applicantDateOfBirth": {
-        "day": 11,
-        "month": 8,
-        "year": 1978
-      },
+      "applicantFirstName": "Linda",
+      "applicantLastName": "Stewart",
       "applicantGender": {
-        "value": "Female",
-        "other": "string"
+        "value": "other",
+        "other": "Male; Transgender; "
       },
-      "otherGender": "string",
-      "shareContactDetailsWithRespondent": true,
-      "isAddressConfidential": "Yes",
-      "isEmailAddressConfidential": "Yes",
-      "isPhoneNumberConfidential": "Yes",
-      "applicantPhoneNumber": "string",
-      "applicantEmailAddress": "string",
-      "applicantContactInstructions": "string",
+      "applicantDateOfBirth": {
+        "day": 26,
+        "month": 8,
+        "year": 2001
+      },
+      "shareContactDetailsWithRespondent": false,
       "applicantAddress": {
-        "AddressLine1": "string",
-        "AddressLine2": "string",
-        "AddressLine3": "string",
-        "PostTown": "string",
-        "County": "string",
-        "Country": "string",
-        "PostCode": "BN3 2BE"
+        "addressUKLine1": "velit aut",
+        "addressUKLine2": "rem fugit",
+        "addressUKLine3": "eos eveniet",
+        "postTown": "alias deleniti",
+        "postCode": "BN3 2BE"
       },
+      "applicantEmailAddress": "bailey.ethan+faker_generated@example.net",
+      "applicantPhoneNumber": "+44(0)7344 63054",
       "applicantPreferredContact": [
-        "phone"
-      ]
+        "phone",
+        "email"
+      ],
+      "applicantContactInstructions": "Occaecati illum reiciendis dolor ut consectetur. Ipsum vel et laudantium tenetur voluptate qui. Perspiciatis eos fugiat quae occaecati aut perferendis sint.",
+      "applicantHasLegalRepresentative": true
     },
     "respondentDetails": {
-      "respondentFirstName": "first",
-      "respondentLastName": "test",
-      "respondentOtherNames": "string",
+      "respondentFirstName": "dolorem sed",
+      "respondentLastName": "dicta ut",
+      "respondentOtherNames": "reprehenderit veniam",
       "respondentDateOfBirth": {
-        "day": 9,
+        "day": 26,
         "month": 8,
-        "year": 1980
+        "year": 1976
       },
-      "respondentPhoneNumber": "1212121212",
-      "respondentEmailAddress": "test@respondent.com",
+      "respondentLivesWithApplicant": true,
       "respondentAddress": {
-        "AddressLine1": "string",
-        "AddressLine2": "string",
-        "AddressLine3": "string",
-        "PostTown": "string",
-        "County": "string",
-        "Country": "string",
-        "PostCode": "string"
+        "addressUKLine1": "aliquid tenetur",
+        "addressUKLine2": "quia nostrum",
+        "addressUKLine3": "repudiandae sit",
+        "postTown": "vitae modi",
+        "postCode": "dolor id"
       },
-      "respondentLivesWithApplicant": true
-    },
-    "family": {
-      "whoApplicationIsFor": "applicantAndChildren",
-      "protectedChildren": [
-        {
-          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "value": {
-            "fullName": "string",
-            "dateOfBirth": {
-              "day": 0,
-              "month": 0,
-              "year": 0
-            },
-            "relationship": "string",
-            "parentalResponsibility": true,
-            "respondentRelationship": "string"
-          }
-        }
-      ],
-      "anyOngoingCourtProceedings": true,
-      "ongoingCourtProceedings": [
-        {
-          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "value": {
-            "nameOfCourt": "string",
-            "caseNumber": "string",
-            "caseType": "string",
-            "caseDetails": "string"
-          }
-        }
-      ]
+      "respondentPhoneNumber": "06868 42087",
+      "respondentEmailAddress": "jake.murphy@example.net"
     },
     "relationshipWithRespondent": {
       "relationshipDescription": "marriedOrCivil",
       "relationshipStartDate": {
-        "day": 0,
-        "month": 0,
-        "year": 0
-      },
-      "relationshipEndDate": {
-        "day": 0,
-        "month": 0,
-        "year": 0
+        "day": 26,
+        "month": 8,
+        "year": 1941
       },
       "ceremonyDate": {
-        "day": 0,
-        "month": 0,
-        "year": 0
+        "day": 26,
+        "month": 8,
+        "year": 1953
       },
-      "respondentsRelationshipToApplicant": "father",
-      "relationshipToApplicantOther": "string",
-      "anyChildren": true
+      "anyChildren": false
+    },
+    "family": {
+      "whoApplicationIsFor": "applicantOnly",
+      "anyOngoingCourtProceedings": false,
+      "ongoingCourtProceedings": [
+
+      ]
     },
     "respondentBehaviour": {
       "applyingForMonMolestationOrder": true,
       "stopBehaviourTowardsApplicant": [
-        "harrasingOrIntimidating"
+        "beingViolentOrThreatening",
+        "damagingPossessions"
       ],
       "stopBehaviourTowardsChildren": [
-        "beingViolentOrThreatening"
-      ],
-      "stopBehaviourAnythingElse": "string"
+        "beingViolentOrThreatening",
+        "publishingAboutChildren"
+      ]
     },
     "theHome": {
-      "applyingForOccupationOrder": true,
-      "occupationOrderAddress": {
-        "AddressLine1": "string",
-        "AddressLine2": "string",
-        "AddressLine3": "string",
-        "PostTown": "string",
-        "County": "string",
-        "Country": "string",
-        "PostCode": "string"
-      },
-      "currentlyLivesAtAddress": [
-        "applicant"
+      "applyingForOccupationOrder": false,
+      "propertySpeciallyAdapted": false,
+      "propertyHasMortgage": false,
+      "propertyIsRented": false,
+      "haveHomeRights": false
+    },
+    "goingToCourt": {
+      "isInterpreterRequired": true,
+      "interpreterLanguage": "aut porro",
+      "interpreterDialect": "eum adipisci",
+      "anyDisabilityNeeds": false,
+      "anySpecialMeasures": [
+        "separateWaitingRoom",
+        "seperateEntranceExit",
+        "shieldedByScreen"
       ],
-      "currentlyLivesAtAddressOther": "string",
-      "previouslyLivedAtAddress": "applicantAndRespondent",
-      "intendedToLiveAtAddress": "applicantAndRespondent",
-      "childrenApplicantResponsibility": [
-        {
-          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-          "value": {
-            "fullName": "string",
-            "age": 0
-          }
-        }
-      ],
-      "propertySpeciallyAdapted": true,
-      "propertySpeciallyAdaptedDetails": "string",
-      "propertyHasMortgage": true,
-      "namedOnMortgage": [
-        "applicant"
-      ],
-      "namedOnMortgageOther": "string",
-      "mortgageNumber": "string",
-      "mortgageLenderName": "string",
-      "mortgageLenderAddress": {
-        "AddressLine1": "string",
-        "AddressLine2": "string",
-        "AddressLine3": "string",
-        "PostTown": "string",
-        "County": "string",
-        "Country": "string",
-        "PostCode": "string"
-      },
-      "propertyIsRented": true,
-      "namedOnRentalAgreement": [
-        "applicant"
-      ],
-      "namedOnRentalAgreementOther": "string",
-      "landlordName": "string",
-      "landlordAddress": {
-        "AddressLine1": "string",
-        "AddressLine2": "string",
-        "AddressLine3": "string",
-        "PostTown": "string",
-        "County": "string",
-        "Country": "string",
-        "PostCode": "string"
-      },
-      "haveHomeRights": true,
-      "wantToHappenWithLivingSituation": [
-        "stayInHome"
-      ],
-      "wantToHappenWithFamilyHome": [
-        "respondentToPayRepairsMaintenance"
-      ],
-      "anythingElseForCourtToConsider": "string"
+      "courtSpecialRequirements": "et blanditiis"
     },
     "statementOfTruth": {
       "declaration": [
         "applicantConfirm"
       ],
-      "signature": "string",
+      "signature": "Linda Stewart",
+      "signatureFullName": "Linda Stewart",
       "signatureDate": {
-        "day": 0,
-        "month": 0,
-        "year": 0
+        "day": 30,
+        "month": 8,
+        "year": 2022
       },
-      "signatureFullName": "string",
-      "representativeFirmName": "string",
-      "representativePositionHeld": "string"
-    },
-    "goingToCourt": {
-      "interpreterLanguage": "string",
-      "interpreterDialect": "string",
-      "anyDisabilityNeeds": true,
-      "disabilityNeedsDetails": "string",
-      "anySpecialMeasures": [
-        "separateWaitingRoom"
-      ],
-      "courtSpecialRequirements": "string",
-      "interpreterRequired": true
+      "representativeFirmName": "courtnav_application",
+      "representativePositionHeld": "courtnav_application"
     }
   }
 }
