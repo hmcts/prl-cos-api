@@ -12,18 +12,23 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum PreviousOrIntendedResidentAtAddressEnum {
 
     @JsonProperty("applicantAndRespondent")
-    applicantAndRespondent("Yes, both of them"),
+    applicantAndRespondent("applicantAndRespondent", "Yes, both of them"),
 
     @JsonProperty("applicant")
-    applicant("Yes, the applicant"),
+    applicant("applicant", "Yes, the applicant"),
 
     @JsonProperty("respondent")
-    respondent("Yes, the respondent"),
+    respondent("respondent","Yes, the respondent"),
 
     @JsonProperty("neither")
-    neither("No");
+    neither("neither","No");
 
+    private final String id;
     private final String displayedValue;
+
+    public String getId() {
+        return id;
+    }
 
     @JsonValue
     public String getDisplayedValue() {
