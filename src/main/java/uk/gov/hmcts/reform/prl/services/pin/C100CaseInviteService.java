@@ -27,12 +27,10 @@ public class C100CaseInviteService implements CaseInviteService {
     private LaunchDarklyClient launchDarklyClient;
 
     private CaseInvite generateRespondentCaseInvite(Element<PartyDetails> partyDetails) {
-        log.info("***Partydetails when returning case invite *** {}", partyDetails);
         return new CaseInvite().generateAccessCode(partyDetails.getValue().getEmail(), partyDetails.getId());
     }
 
     private void sendCaseInvite(CaseInvite caseInvite, PartyDetails partyDetails, CaseData caseData) {
-        log.info(" **** Party Details **** {}",partyDetails);
         caseInviteEmailService.sendCaseInviteEmail(caseInvite, partyDetails, caseData);
     }
 
@@ -44,7 +42,6 @@ public class C100CaseInviteService implements CaseInviteService {
 
         for (Element<PartyDetails> respondent : caseData.getRespondents()) {
             if (!respondentHasLegalRepresentation(respondent.getValue()) && Yes.equals(respondent.getValue().getCanYouProvideEmailAddress())) {
-                log.info("Respondent data {}", respondent);
                 CaseInvite caseInvite = generateRespondentCaseInvite(respondent);
                 caseInvites.add(element(caseInvite));
                 sendCaseInvite(caseInvite, respondent.getValue(), caseData);
