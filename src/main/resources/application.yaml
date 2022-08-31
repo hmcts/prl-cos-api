@@ -220,6 +220,14 @@ document:
       c100_c8_filename: C8Document.pdf
       c100_c1a_template: PRL-C1A.docx
       c100_c1a_filename: C1A_Document.pdf
+      c100_c8_draft_template: FL-PRL-CON-ENG-01118.docx
+      c100_c8_draft_filename: C8DocumentDraft.pdf
+      c100_c1a_draft_template: FL-PRL-APP-ENG-01119.docx
+      c100_c1a_draft_filename: C1A_DocumentDraft.pdf
+      c100_c8_draft_welsh_template: FL-PRL-CON-WEL-01122.docx
+      c100_c8_draft_welsh_filename: C8Document_Draft_Welsh.pdf
+      c100_c1a_draft_welsh_template: FL-PRL-APP-WEL-01121.docx
+      c100_c1a_draft_welsh_filename: C1A_Document_Draft_Welsh.pdf
       c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
       c100_final_welsh_filename: C100FinalDocumentWelsh.pdf
       c100_draft_welsh_template: PRL-C100-R1-Draft-WelshLang.docx
