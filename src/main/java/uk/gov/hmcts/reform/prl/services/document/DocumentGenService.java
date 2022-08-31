@@ -35,7 +35,9 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
@@ -44,9 +46,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_DRAFT_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_DRAFT_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_DRAFT_C1A;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_DRAFT_C8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
@@ -76,14 +82,26 @@ public class DocumentGenService {
     @Value("${document.templates.c100.c100_c8_template}")
     protected String c100C8Template;
 
+    @Value("${document.templates.c100.c100_c8_draft_template}")
+    protected String c100C8DraftTemplate;
+
     @Value("${document.templates.c100.c100_c8_filename}")
     protected String c100C8Filename;
+
+    @Value("${document.templates.c100.c100_c8_draft_filename}")
+    protected String c100C8DraftFilename;
 
     @Value("${document.templates.c100.c100_c1a_template}")
     protected String c100C1aTemplate;
 
+    @Value("${document.templates.c100.c100_c1a_draft_template}")
+    protected String c100C1aDraftTemplate;
+
     @Value("${document.templates.c100.c100_c1a_filename}")
     protected String c100C1aFilename;
+
+    @Value("${document.templates.c100.c100_c1a_draft_filename}")
+    protected String c100C1aDraftFilename;
 
     @Value("${document.templates.c100.c100_final_welsh_template}")
     protected String c100FinalWelshTemplate;
@@ -100,14 +118,26 @@ public class DocumentGenService {
     @Value("${document.templates.c100.c100_c8_welsh_template}")
     protected String c100C8WelshTemplate;
 
+    @Value("${document.templates.c100.c100_c8_draft_welsh_template}")
+    protected String c100C8DraftWelshTemplate;
+
     @Value("${document.templates.c100.c100_c8_welsh_filename}")
     protected String c100C8WelshFilename;
+
+    @Value("${document.templates.c100.c100_c8_draft_welsh_filename}")
+    protected String c100C8DraftWelshFilename;
 
     @Value("${document.templates.c100.c100_c1a_welsh_template}")
     protected String c100C1aWelshTemplate;
 
     @Value("${document.templates.c100.c100_c1a_welsh_filename}")
     protected String c100C1aWelshFilename;
+
+    @Value("${document.templates.c100.c100_c1a_draft_welsh_template}")
+    protected String c100C1aDraftWelshTemplate;
+
+    @Value("${document.templates.c100.c100_c1a_draft_welsh_filename}")
+    protected String c100C1aDraftWelshFilename;
 
     @Value("${document.templates.fl401.fl401_draft_filename}")
     protected String fl401DraftFilename;
@@ -223,7 +253,14 @@ public class DocumentGenService {
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put("isEngDocGen", Yes.toString());
             if (isConfidentialInformationPresentForC100(caseData)) {
-                updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
+                if (State.CASE_ISSUE.equals(caseData.getState())) {
+                    updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
+                } else {
+                    updatedCaseData.put(
+                        DOCUMENT_FIELD_DRAFT_C8,
+                        getDocument(authorisation, caseData, C8_DRAFT_HINT, false)
+                    );
+                }
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                 && isApplicantOrChildDetailsConfidential(caseData)) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
@@ -233,7 +270,15 @@ public class DocumentGenService {
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                 && caseData.getAllegationOfHarm() != null
                 && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
-                updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
+                if (State.CASE_ISSUE.equals(caseData.getState())) {
+                    updatedCaseData.put(DOCUMENT_FIELD_C1A, getDocument(authorisation, caseData, C1A_HINT, false));
+                } else {
+                    updatedCaseData.put(
+                        DOCUMENT_FIELD_DRAFT_C1A,
+                        getDocument(authorisation, caseData, C1A_DRAFT_HINT, false)
+                    );
+
+                }
             } else {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
             }
@@ -245,7 +290,14 @@ public class DocumentGenService {
         if (documentLanguage.isGenWelsh()) {
             updatedCaseData.put("isWelshDocGen", Yes.toString());
             if (isConfidentialInformationPresentForC100(caseData)) {
-                updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
+                if (State.CASE_ISSUE.equals(caseData.getState())) {
+                    updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
+                } else {
+                    updatedCaseData.put(
+                        DOCUMENT_FIELD_C8_DRAFT_WELSH,
+                        getDocument(authorisation, caseData, C8_DRAFT_HINT, true)
+                    );
+                }
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                 && isApplicantOrChildDetailsConfidential(caseData)) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, getDocument(authorisation, caseData, C8_HINT, true));
@@ -253,16 +305,27 @@ public class DocumentGenService {
                 updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, null);
             }
 
+
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                 && caseData.getAllegationOfHarm() != null
                 && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
-                updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(authorisation, caseData, C1A_HINT, true));
+                if (State.CASE_ISSUE.equals(caseData.getState())) {
+                    updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(authorisation, caseData, C1A_HINT, true));
+                } else {
+                    updatedCaseData.put(
+                        DOCUMENT_FIELD_C1A_DRAFT_WELSH,
+                        getDocument(authorisation, caseData, C1A_DRAFT_HINT, true)
+                    );
+                }
             } else {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, null);
             }
             if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUE.equals(
                 caseData.getState())) {
-                updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, getDocument(authorisation, caseData, FINAL_HINT, true));
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_FINAL_WELSH,
+                    getDocument(authorisation, caseData, FINAL_HINT, true)
+                );
             }
         }
         if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
@@ -276,6 +339,7 @@ public class DocumentGenService {
         }
         return updatedCaseData;
     }
+
 
     private boolean isConfidentialInformationPresentForC100(CaseData caseData) {
         return C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
@@ -377,6 +441,7 @@ public class DocumentGenService {
                 template
             );
         } else {
+            log.info("Generating document for {} ",template);
             generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
@@ -399,8 +464,14 @@ public class DocumentGenService {
             case C8_HINT:
                 fileName = findC8Filename(isWelsh, caseTypeOfApp);
                 break;
+            case C8_DRAFT_HINT:
+                fileName = !isWelsh ? c100C8DraftFilename : c100C8DraftWelshFilename;
+                break;
             case C1A_HINT:
                 fileName = !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
+                break;
+            case C1A_DRAFT_HINT:
+                fileName =  !isWelsh ? c100C1aDraftFilename : c100C1aDraftWelshFilename;
                 break;
             case FINAL_HINT:
                 fileName = findFinalFilename(isWelsh, caseTypeOfApp);
@@ -473,8 +544,14 @@ public class DocumentGenService {
             case C8_HINT:
                 template = findC8Template(isWelsh, caseTypeOfApp);
                 break;
+            case C8_DRAFT_HINT:
+                template = !isWelsh ? c100C8DraftTemplate : c100C8DraftWelshTemplate;
+                break;
             case C1A_HINT:
                 template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
+                break;
+            case C1A_DRAFT_HINT:
+                template = !isWelsh ? c100C1aDraftTemplate : c100C1aDraftWelshTemplate;
                 break;
             case FINAL_HINT:
                 template = findFinalTemplate(isWelsh, caseTypeOfApp);
