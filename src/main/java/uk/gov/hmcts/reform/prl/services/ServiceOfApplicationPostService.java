@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
@@ -167,12 +168,13 @@ public class ServiceOfApplicationPostService {
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         try {
             log.info("*** Initiating request to Bulk print service ***");
-            bulkPrintService.send(
+            UUID bulkPrintId = bulkPrintService.send(
                 id,
                 authorisation,
                 LETTER_TYPE,
                 docs
             );
+            log.info("ID in the queue from bulk print service : {}",bulkPrintId);
             sentDocs.addAll(docs);
         } catch (Exception e) {
             log.info("The bulk print service has failed: " + e);
