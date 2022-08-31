@@ -22,7 +22,7 @@ java:
         - courtnav-functional-test-pwd
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    PAY_URL: https://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_CALLBACK_URL: https://prl-cos-pr-486.service.core-compute-preview.internal/service-request
     FEE_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
@@ -40,7 +40,7 @@ java:
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS: 900
     IDAM_S2S_AUTH_MICROSERVICE: prl_cos_api
-    PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    PRL_DGS_API_URL: http://prl-dgs-aat.service.core-compute-aat.internal
     FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PRL_S2S_AUTHORISED_SERVICES: api_gw
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal

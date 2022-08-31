@@ -42,14 +42,18 @@ public class FL401CaseInviteService implements CaseInviteService {
         if (!respondentHasLegalRepresentation(respondent) && Yes.equals(respondent.getCanYouProvideEmailAddress())) {
             CaseInvite caseInvite = generateCaseInvite(respondent);
             caseInvites.add(element(caseInvite));
-            sendCaseInvite(caseInvite, respondent, caseData);
+            if (Yes.equals(respondent.getCanYouProvideEmailAddress())) {
+                sendCaseInvite(caseInvite, respondent, caseData);
+            }
         }
 
         if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
             PartyDetails applicant = caseData.getApplicantsFL401();
             CaseInvite caseInvite = generateCaseInvite(applicant);
             caseInvites.add(element(caseInvite));
-            sendCaseInvite(caseInvite, applicant, caseData);
+            if (Yes.equals(applicant.getCanYouProvideEmailAddress())) {
+                sendCaseInvite(caseInvite, applicant, caseData);
+            }
         }
         return caseData.toBuilder().respondentCaseInvites(caseInvites).build();
     }

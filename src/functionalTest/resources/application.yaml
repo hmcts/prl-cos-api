@@ -3,6 +3,27 @@ server:
 
 runs-locally: ${RUNS_LOCALLY:true}
 
+env: ${test_environment:local}
+TEST_URL: https://localhost:4044
+
+case:
+  orchestration:
+    service:
+      base:
+        uri: '#{environment["TEST_URL"].replaceFirst("https://", "http://")}'
+    prepopulate:
+      uri: ${case.orchestration.service.base.uri}/getSolicitorAndFeeDetails
+    documentgenerate:
+      uri: ${case.orchestration.service.base.uri}/generate-save-draft-document
+
+prl:
+  system-update:
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
+  document:
+    generate:
+      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
+
 management:
   endpoint:
     health:
@@ -19,27 +40,6 @@ spring:
     import: "optional:configtree:/mnt/secrets/"
   application:
     name: Prl cos api
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
-#    username: ${DB_USER_NAME}
-#    password: ${DB_PASSWORD}
-#    properties:
-#      charSet: UTF-8
-#    hikari:
-#      minimumIdle: 2
-#      maximumPoolSize: 10
-#      idleTimeout: 10000
-#      poolName: {to-be-defined}HikariCP
-#      maxLifetime: 7200000
-#      connectionTimeout: 30000
-#  jpa:
-#    properties:
-#      hibernate:
-#        jdbc:
-#          lob:
-#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
-#            non_contextual_creation: true
 
 azure:
   application-insights:
@@ -69,10 +69,6 @@ xui:
 citizen_frontend:
   url: http://example.com
 
-aca:
-  api:
-    url: ${ACA_SERVICE_API_BASEURL:http://localhost:4454}
-
 uk:
   gov:
     notify:
@@ -95,12 +91,12 @@ uk:
             WITHDRAW_AFTER_ISSUED_SOLICITOR: ba39a8e6-c553-457e-b526-3c241cd207f6
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
+            CAFCASS_OTHER: b77818d7-7756-4d83-8ecd-e2b54f512cf2
             APPLICANT_SOLICITOR_CA: 72e32651-a952-4063-8a85-5f28950fcc84
             APPLICANT_SOLICITOR_DA: 15152a49-ff8f-4b40-a061-f2ef7c95b699
             RESPONDENT_SOLICITOR: 8d3e5c9b-6fca-4c1c-8b31-40c2b9686251
             RESPONDENT_WITHOUT_SOLICITOR: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
             CASE_INVITE: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
-            CAFCASS_OTHER: b77818d7-7756-4d83-8ecd-e2b54f512cf2
             APPLICANT_SOLICITOR: 72e32651-a952-4063-8a85-5f28950fcc84
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
@@ -111,9 +107,6 @@ uk:
 notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
-
-private-law:
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw}
 
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
@@ -126,7 +119,9 @@ payments:
   api:
     url: ${PAY_URL:}
     callback-url: ${PAY_CALLBACK_URL:}
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:payment_app}
+
+private-law:
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw}
 
 fees-register:
   api:
@@ -146,13 +141,19 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:GT2V6PLQ34XGPTPM}
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
+    baseUrl: https://idam-api.aat.platform.hmcts.net
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:W7supXKMJgcEWKBS}
+    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    clientId: xuiwebapp
+    authorize:
+      context-path: /oauth2/authorize
+    token:
+      context-path: /oauth2/token
   user:
     genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
   solicitor:
@@ -162,26 +163,17 @@ idam:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
   apigateway:
-    username: ${COURTNAV_USERNAME:courtnav@mailinator.com}
-    password: ${COURTNAV_PASSWORD:Nagoya0102}
+    username: ${COURTNAV_USERNAME:xxxxxx}
+    password: ${COURTNAV_PASSWORD:xxxxxx}
   api_gw:
     microservice: api_gw
 
-prl:
-  system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+aca:
+  api:
+    url: ${ACA_SERVICE_API_BASEURL:http://localhost:4454}
 
-security:
-  oauth2:
-    client:
-      provider:
-        oidc:
-          issuer-uri: ${idam.web.url}/o
-      registration:
-        oidc:
-          client-id: internal
-          client-secret: internal
+test-url: ${TEST_URL:http://localhost:4044}
+
 core_case_data:
   api:
     url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
@@ -206,7 +198,7 @@ send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
 
 case_document_am:
-  url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
+  url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
 
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
@@ -216,7 +208,7 @@ courtfinder:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
 launchdarkly:
-  sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
+  sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
 
 rd_professional:
   api:
@@ -234,6 +226,14 @@ document:
       c100_c1a_template: PRL-C1A.docx
       c100_c1a_filename: C1A_Document.pdf
       c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
+      c100_c8_draft_template: FL-PRL-CON-ENG-01118.docx
+      c100_c8_draft_filename: C8DocumentDraft.pdf
+      c100_c1a_draft_template: FL-PRL-APP-ENG-01119.docx
+      c100_c1a_draft_filename: C1A_DocumentDraft.pdf
+      c100_c8_draft_welsh_template: FL-PRL-CON-WEL-01122.docx
+      c100_c8_draft_welsh_filename: C8Document_Draft_Welsh.pdf
+      c100_c1a_draft_welsh_template: PRL-C1A-Draft-WelshLang.docx
+      c100_c1a_draft_welsh_filename: FL-PRL-APP-WEL-01121.pdf
       c100_final_welsh_filename: C100FinalDocumentWelsh.pdf
       c100_draft_welsh_template: PRL-C100-R1-Draft-WelshLang.docx
       c100_draft_welsh_filename: Draft_C100_application_welsh.pdf
@@ -279,7 +279,6 @@ document:
       prl_fl404_filename: occupation_order_FL404_final.pdf
       prl_fl404_draft_template: PRL-GOR-ENG-FL404-Occupation-Order-Draft.docx
       prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
-      prl_c47a_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Final.docx
       prl_c49_draft_template: PRL-GOR-ENG-C49-Transfer-Of-Case-Draft.docx
       prl_c49_draft_filename: C49ADraftCreateOrder.pdf
       prl_c49_template: PRL-GOR-ENG-C49-Transfer-Of-Case-Final.docx
@@ -288,6 +287,7 @@ document:
       prl_c43_filename: ChildArrangements_Specific_Prohibited_Steps_C43.pdf
       prl_c43_draft_template: PRL-GOR-ENG-C43-Child-Arrangements-Draft.docx
       prl_c43_draft_filename: ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
+      prl_c47a_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Final.docx
       C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
       C43A_draft_filename: C43ADraftCreateOrder.pdf
       C43A_final_template: PRL-ORDER-C43A-FINAL.docx
@@ -332,3 +332,14 @@ document:
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
+
+springdoc:
+  swagger-ui:
+    operationsSorter: alpha
+    tagsSorter : alpha
+    doc-expansion : none
+  model-converters:
+    pageable-converter:
+      enabled: true
+    polymorphic-converter:
+      enabled: true
