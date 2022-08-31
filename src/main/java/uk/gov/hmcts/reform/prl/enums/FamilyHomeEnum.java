@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
-
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum FamilyHomeEnum {
@@ -35,8 +33,14 @@ public enum FamilyHomeEnum {
     }
 
     public static FamilyHomeEnum getDisplayedValueFromEnumString(String enteredValue) {
-        return Arrays.stream(FamilyHomeEnum.values())
-            .map(i -> FamilyHomeEnum.valueOf(enteredValue))
-            .findFirst().orElse(null);
+        if (enteredValue.equalsIgnoreCase("respondentToPayRepairsMaintenance")) {
+            return FamilyHomeEnum.payForRepairs;
+        } else if (enteredValue.equalsIgnoreCase("respondentToPayRentMortgage")) {
+            return FamilyHomeEnum.payOrContributeRent;
+        } else if (enteredValue.equalsIgnoreCase("useOfFurnitureOrContents")) {
+            return FamilyHomeEnum.useHouseholdContents;
+        } else {
+            return null;
+        }
     }
 }
