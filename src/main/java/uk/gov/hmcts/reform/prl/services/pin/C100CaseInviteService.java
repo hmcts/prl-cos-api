@@ -50,15 +50,6 @@ public class C100CaseInviteService implements CaseInviteService {
                 sendCaseInvite(caseInvite, respondent.getValue(), caseData);
             }
         }
-        if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
-            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
-                if (Yes.equals(applicant.getValue().getCanYouProvideEmailAddress())) {
-                    CaseInvite caseInvite = generateRespondentCaseInvite(applicant);
-                    caseInvites.add(element(caseInvite));
-                    sendCaseInvite(caseInvite, applicant.getValue(), caseData);
-                }
-            }
-        }
         return caseData.toBuilder().respondentCaseInvites(caseInvites).build();
     }
 
