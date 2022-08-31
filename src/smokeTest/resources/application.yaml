@@ -3,6 +3,27 @@ server:
 
 runs-locally: ${RUNS_LOCALLY:true}
 
+env: ${test_environment:local}
+TEST_URL: https://localhost:4044
+
+case:
+  orchestration:
+    service:
+      base:
+        uri: '#{environment["TEST_URL"].replaceFirst("https://", "http://")}'
+    prepopulate:
+      uri: ${case.orchestration.service.base.uri}/getSolicitorAndFeeDetails
+    documentgenerate:
+      uri: ${case.orchestration.service.base.uri}/generate-save-draft-document
+
+prl:
+  system-update:
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
+  document:
+    generate:
+      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
+
 management:
   endpoint:
     health:
@@ -19,27 +40,10 @@ spring:
     import: "optional:configtree:/mnt/secrets/"
   application:
     name: Prl cos api
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
-#    username: ${DB_USER_NAME}
-#    password: ${DB_PASSWORD}
-#    properties:
-#      charSet: UTF-8
-#    hikari:
-#      minimumIdle: 2
-#      maximumPoolSize: 10
-#      idleTimeout: 10000
-#      poolName: {to-be-defined}HikariCP
-#      maxLifetime: 7200000
-#      connectionTimeout: 30000
-#  jpa:
-#    properties:
-#      hibernate:
-#        jdbc:
-#          lob:
-#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
-#            non_contextual_creation: true
+  servlet:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 30MB
 
 azure:
   application-insights:
@@ -53,11 +57,6 @@ logging:
   pattern:
     console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
 
-prl:
-  system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
-
 pba:
   validation:
     service:
@@ -67,10 +66,6 @@ pba:
 feature-toggle:
   toggle:
     example: ${FEATURE_EXAMPLE:false}
-
-aca:
-  api:
-    url: ${ACA_SERVICE_API_BASEURL:http://localhost:4454}
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
@@ -100,12 +95,13 @@ uk:
             WITHDRAW_AFTER_ISSUED_SOLICITOR: ba39a8e6-c553-457e-b526-3c241cd207f6
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
+            CAFCASS_OTHER: b77818d7-7756-4d83-8ecd-e2b54f512cf2
             APPLICANT_SOLICITOR_CA: 72e32651-a952-4063-8a85-5f28950fcc84
             APPLICANT_SOLICITOR_DA: 15152a49-ff8f-4b40-a061-f2ef7c95b699
             RESPONDENT_SOLICITOR: 8d3e5c9b-6fca-4c1c-8b31-40c2b9686251
             RESPONDENT_WITHOUT_SOLICITOR: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
             CASE_INVITE: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
-
+            APPLICANT_SOLICITOR: 72e32651-a952-4063-8a85-5f28950fcc84
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -116,6 +112,13 @@ notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
 
+send-grid:
+  api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
+  rpa:
+    email:
+      to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
+      from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
+
 payments:
   api:
     url: ${PAY_URL:}
@@ -123,13 +126,6 @@ payments:
 
 private-law:
   authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw}
-
-send-grid:
-  api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
-  rpa:
-    email:
-      to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
-      from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
 
 fees-register:
   api:
@@ -154,30 +150,32 @@ idam:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
+    baseUrl: https://idam-api.aat.platform.hmcts.net
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
     secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    clientId: xuiwebapp
+    authorize:
+      context-path: /oauth2/authorize
+    token:
+      context-path: /oauth2/token
   user:
     genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
   solicitor:
     username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
     password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
   system-update:
-    username: ${IDAM_SOLICITOR_USERNAME:dummysolicitor@test.com}
-    password: ${IDAM_SOLICITOR_PASSWORD:dummy}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
 
-security:
-  oauth2:
-    client:
-      provider:
-        oidc:
-          issuer-uri: ${idam.web.url}/o
-      registration:
-        oidc:
-          client-id: internal
-          client-secret: internal
+aca:
+  api:
+    url: ${ACA_SERVICE_API_BASEURL:http://localhost:4454}
+
+test-url: ${TEST_URL:http://localhost:4044}
+
 core_case_data:
   api:
-    url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
+    url: ${CORE_CASE_DATA_API_URL:http://localhost:4452}
 
 auth:
   idam:
@@ -199,7 +197,7 @@ send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
 
 case_document_am:
-  url: http://ccd-case-document-am-api-aat.service.core-compute-aat.internal
+  url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
 
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
@@ -209,7 +207,7 @@ courtfinder:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
 launchdarkly:
-  sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
+  sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
 
 rd_professional:
   api:
@@ -268,6 +266,10 @@ document:
       prl_c43a_draft_filename: Special_Guardianship_Order_C43A_Draft.pdf
       prl_c43a_final_template: PRL-GOR-ENG-C43A-Special-Guardianship-Order-Final.docx
       prl_c43a_final_filename: Special_Guardianship_Order_C43A.pdf
+      prl_fl404_template: PRL-GOR-ENG-FL404-Occupation-Order-Final.docx
+      prl_fl404_filename: occupation_order_FL404_final.pdf
+      prl_fl404_draft_template: PRL-GOR-ENG-FL404-Occupation-Order-Draft.docx
+      prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
       prl_c49_draft_template: PRL-GOR-ENG-C49-Transfer-Of-Case-Draft.docx
       prl_c49_draft_filename: C49ADraftCreateOrder.pdf
       prl_c49_template: PRL-GOR-ENG-C49-Transfer-Of-Case-Final.docx
@@ -276,22 +278,36 @@ document:
       prl_c43_filename: ChildArrangements_Specific_Prohibited_Steps_C43.pdf
       prl_c43_draft_template: PRL-GOR-ENG-C43-Child-Arrangements-Draft.docx
       prl_c43_draft_filename: ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
-      prl_fl404_template: PRL-GOR-ENG-FL404-Occupation-Order-Final.docx
-      prl_fl404_filename: occupation_order_FL404_final.pdf
-      prl_fl404_draft_template: PRL-GOR-ENG-FL404-Occupation-Order-Draft.docx
-      prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
       prl_c47a_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Final.docx
+      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
+      C43A_draft_filename: C43ADraftCreateOrder.pdf
+      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
+      C43A_final_filename: C43AFinalCreateOrder.pdf
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Draft.docx
       prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
       prl_c45a_template: PRL-GOR-ENG-C45A-Parental-Responsibility-Order-Final.docx
-      prl_c45a_filename: C45ACreateOrder.pdf
+      prl_c45a_filename: Parental_Responsibility_Order_C45A.pdf
       prl_c45a_draft_template: PRL-GOR-ENG-C45A-Parental-Responsibility-Order-Draft.docx
-      prl_c45a_draft_filename: C45ACreateOrderDraft.pdf
+      prl_c45a_draft_filename: Parental_Responsibility_Order_C45A_draft.pdf
+      prl_fl404b_final_template: PRL-GOR-ENG-FL404B-Common-Final.docx
+      prl_fl404b_final_filename: amended_discharged_or_varied_order_fl404b_final.pdf
+      prl_fl404b_blank_final_filename: blank_order_fl404b_final.pdf
+      prl_fl404b_draft_template: PRL-GOR-ENG-FL404B-Common-Draft.docx
+      prl_fl404b_draft_filename: amended_discharged_or_varied_order_fl404b_draft.pdf
+      prl_fl404b_blank_draft_filename: blank_order_fl404b_draft.pdf
       prl_n117_draft_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Draft.docx
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
       prl_n117_filename: N117CreateOrder.pdf
+      prl_fl404a_final_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Final.docx
+      prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
+      prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
+      prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
+      prl_fl402_draft_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
+      prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
+      prl_fl402_final_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
+      prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
       prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
       prl_c7_blank_filename: C7BlankDocument.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
@@ -300,26 +316,21 @@ document:
       prl_c1a_blank_filename: C1ABlankDocument.pdf
       prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
-      prl_fl402_draft_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
-      prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
-      prl_fl402_final_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
-      prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
-      prl_fl404b_final_template: PRL-GOR-ENG-FL404B-Common-Final.docx
-      prl_fl404b_final_filename: amended_discharged_or_varied_order_fl404b_final.pdf
-      prl_fl404b_blank_final_filename: blank_order_fl404b_final.pdf
-      prl_fl404b_draft_template: PRL-GOR-ENG-FL404B-Common-Draft.docx
-      prl_fl404b_draft_filename: amended_discharged_or_varied_order_fl404b_draft.pdf
-      prl_fl404b_blank_draft_filename: blank_order_fl404b_draft.pdf
-      prl_fl404a_final_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Final.docx
-      prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
-      prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
-      prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
-      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
-      C43A_draft_filename: C43ADraftCreateOrder.pdf
-      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
-      C43A_final_filename: C43AFinalCreateOrder.pdf
+    citizen:
+      prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
+      prl_citizen_upload_filename: Self_created.pdf
 
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
 
+springdoc:
+  swagger-ui:
+    operationsSorter: alpha
+    tagsSorter : alpha
+    doc-expansion : none
+  model-converters:
+    pageable-converter:
+      enabled: true
+    polymorphic-converter:
+      enabled: true
