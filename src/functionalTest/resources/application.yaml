@@ -161,6 +161,11 @@ idam:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+  apigateway:
+    username: ${COURTNAV_USERNAME:xxxxxxx}
+    password: ${COURTNAV_PASSWORD:xxxxxxx}
+  api_gw:
+    microservice: api_gw
 
 prl:
   system-update:
@@ -320,6 +325,9 @@ document:
       prl_c1a_blank_filename: C1ABlankDocument.pdf
       prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
+    citizen:
+      prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
+      prl_citizen_upload_filename: Self_created.pdf
 
 southampton:
   court:

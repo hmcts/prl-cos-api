@@ -2,27 +2,35 @@ package uk.gov.hmcts.reform.prl.controllers.courtnav;
 
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import java.io.File;
 
-@Slf4j
-@SpringBootTest
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 @RunWith(SpringRunner.class)
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class CourtNavCaseControllerFunctionalTest {
+
     private final String userToken = "Bearer testToken";
+
+    private MockMvc mockMvc;
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -38,6 +46,11 @@ public class CourtNavCaseControllerFunctionalTest {
             "http://localhost:4044"
         );
 
+    @Before
+    public void setUp() {
+        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
+
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
@@ -45,16 +58,15 @@ public class CourtNavCaseControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header(
-                "Authorization",
-                idamTokenGenerator.generateIdamTokenForSystem(),
-                "ServiceAuthorization",
-                serviceAuthenticationGenerator.generate()
+                "Authorization", idamTokenGenerator.generateIdamTokenForCourtNav(),
+                "ServiceAuthorization", serviceAuthenticationGenerator.generateApiGwServiceAuth()
             )
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/case")
-            .then().assertThat().statusCode(200);
+            .then().assertThat().statusCode(201);
+
     }
 
 
@@ -74,9 +86,9 @@ public class CourtNavCaseControllerFunctionalTest {
         request
             .header(
                 "Authorization",
-                idamTokenGenerator.generateIdamTokenForSystem(),
+                idamTokenGenerator.generateIdamTokenForCourtNav(),
                 "ServiceAuthorization",
-                serviceAuthenticationGenerator.generate()
+                serviceAuthenticationGenerator.generateApiGwServiceAuth()
             )
             .multiPart("file",new File("courtnav/Dummy_pdf_file.pdf"))
             .pathParam("caseId","1647520545879276")
