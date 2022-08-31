@@ -362,8 +362,10 @@ public class FL401ApplicationMapper {
                                                                                         .getIntendedToLiveAtAddress().getId()))
             .doAnyChildrenLiveAtAddress(YesOrNo.valueOf(null != courtNavCaseData.getFl401()
                 .getTheHome().getChildrenApplicantResponsibility() ? "Yes" : "No"))
-            .children(mapHomeChildren(courtNavCaseData.getFl401()
-                                          .getTheHome().getChildrenApplicantResponsibility()))
+            .children(null != courtNavCaseData.getFl401()
+                .getTheHome().getChildrenApplicantResponsibility() ?
+                          mapHomeChildren(courtNavCaseData.getFl401()
+                                              .getTheHome().getChildrenApplicantResponsibility()) : null)
             .isPropertyAdapted(courtNavCaseData.getFl401()
                                    .getTheHome().isPropertySpeciallyAdapted() ? YesOrNo.Yes : YesOrNo.No)
             .howIsThePropertyAdapted(courtNavCaseData.getFl401()
