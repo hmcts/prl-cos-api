@@ -75,10 +75,11 @@ public class CourtNavCaseControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header("Authorization", "Bearer xyz", "ServiceAuthorization", "abc")
+            .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/case")
-            .then().assertThat().statusCode(500);
+            .then().assertThat().statusCode(403);
     }
 
     @Test
