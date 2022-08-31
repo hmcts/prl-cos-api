@@ -42,8 +42,8 @@ spring:
     name: Prl cos api
   servlet:
     multipart:
-      max-file-size: 30MB
-      max-request-size: 30MB
+      max-file-size: 1024MB
+      max-request-size: 1024MB
 
 azure:
   application-insights:
