@@ -637,4 +637,6 @@ public class CaseData implements MappableObject {
 
     private String previewDraftAnOrder;
 
+    private String citizenUploadedStatement;
+
 }

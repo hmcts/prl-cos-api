@@ -27,7 +27,7 @@ public class CitizenCoreCaseDataService {
     private static final String LINK_CASE_TO_CITIZEN_DESCRIPTION = "Link case to Citizen account with access code";
 
     private static final String CCD_UPDATE_FAILURE_MESSAGE
-        = "Failed updating claim in CCD store for case id %s on event %s";
+        = "Failed linking case in CCD store for case id %s on event %s";
 
     @Autowired
     IdamClient idamClient;
@@ -37,29 +37,29 @@ public class CitizenCoreCaseDataService {
     AuthTokenGenerator authTokenGenerator;
 
     public CaseDetails linkDefendant(
-        String authorisation,
+        String anonymousUserToken,
         Long caseId,
         CaseData caseData,
         CaseEvent caseEvent
     ) {
         try {
-            UserDetails userDetails = idamClient.getUserDetails(authorisation);
+            UserDetails userDetails = idamClient.getUserDetails(anonymousUserToken);
             EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
 
             StartEventResponse startEventResponse = startUpdate(
-                authorisation,
+                anonymousUserToken,
                 eventRequestData,
                 caseId,
-                false
+                true
             );
 
             CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
             return submitUpdate(
-                authorisation,
+                anonymousUserToken,
                 eventRequestData,
                 caseDataContent,
                 caseId,
-                false
+                true
             );
         } catch (Exception exception) {
             throw new CoreCaseDataStoreException(
