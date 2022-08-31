@@ -12,12 +12,14 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 
 import java.util.ArrayList;
@@ -30,7 +32,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 
@@ -53,6 +54,9 @@ public class CaseService {
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    SystemUserService systemUserService;
+
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
@@ -70,6 +74,15 @@ public class CaseService {
         return searchCasesWith(authToken, s2sToken, searchCriteria);
     }
 
+    public List<CaseData> retrieveCases(String authToken, String s2sToken) {
+        Map<String, String> searchCriteria = new HashMap<>();
+
+        searchCriteria.put("sortDirection", "desc");
+        searchCriteria.put("page", "1");
+
+        return searchCasesLinkedToCitizen(authToken, s2sToken, searchCriteria);
+    }
+
     private List<CaseData> searchCasesWith(String authToken, String s2sToken, Map<String, String> searchCriteria) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
@@ -81,8 +94,18 @@ public class CaseService {
             .collect(Collectors.toList());
     }
 
-    private List<CaseDetails> performSearch(String authToken, UserDetails user, Map<String, String> searchCriteria,
-                                            String serviceAuthToken) {
+    private List<CaseData> searchCasesLinkedToCitizen(String authToken, String s2sToken, Map<String, String> searchCriteria) {
+
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        List<CaseDetails> caseDetails = new ArrayList<>();
+        caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
+        return caseDetails
+            .stream()
+            .map(caseDetailsConverter::extractCaseData)
+            .collect(Collectors.toList());
+    }
+
+    private List<CaseDetails> performSearch(String authToken, UserDetails user, Map<String, String> searchCriteria, String serviceAuthToken) {
         List<CaseDetails> result;
 
         result = coreCaseDataApi.searchForCitizen(
@@ -134,11 +157,12 @@ public class CaseService {
 
     public void linkCitizenToCase(String authorisation, String s2sToken, String accessCode, String caseId) {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
+        String anonymousUserToken = systemUserService.getSysUserToken();
         String userId = userDetails.getId();
         String emailId = userDetails.getEmail();
 
         CaseData caseData = objectMapper.convertValue(
-            coreCaseDataApi.getCase(authorisation, s2sToken, caseId).getData(),
+            coreCaseDataApi.getCase(anonymousUserToken, s2sToken, caseId).getData(),
             CaseData.class
         );
 
@@ -167,7 +191,7 @@ public class CaseService {
             }
 
             log.info("Updated caseData testing::" + caseData);
-            caseRepository.linkDefendant(authorisation, caseId, caseData);
+            caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData);
             log.info("Case is now linked" + caseData);
         }
     }
@@ -231,8 +255,8 @@ public class CaseService {
         Iterables.removeIf(caseDataMap.values(), Objects::isNull);
         return CaseDataContent.builder()
             .data(caseDataMap)
-            .event(Event.builder().id(CITIZEN_PRL_CREATE_EVENT).build())
-            .eventToken(getEventToken(authorization, s2sToken, userId, CITIZEN_PRL_CREATE_EVENT))
+            .event(Event.builder().id(PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT).build())
+            .eventToken(getEventToken(authorization, s2sToken, userId, PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT))
             .build();
     }
 
