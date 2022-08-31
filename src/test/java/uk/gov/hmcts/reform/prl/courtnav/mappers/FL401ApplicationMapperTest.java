@@ -58,7 +58,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -76,7 +79,6 @@ public class FL401ApplicationMapperTest {
     private Court court;
 
     private CourtNavFl401 courtNavFl401;
-    private CourtNavFl401 courtNavFl4011;
 
     private Situation situation;
     private Situation situation1;
@@ -713,11 +715,8 @@ public class FL401ApplicationMapperTest {
 
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
-        assertEquals(
-            "None of the above",
-            courtNavFl401.getFl401().getRelationshipWithRespondent().getRelationshipDescription()
-                .getDisplayedValue());
-
+        assertEquals(YesOrNo.Yes, caseData1.getIsInterpreterNeeded());
+        assertEquals(YesOrNo.Yes, caseData1.getIsDisabilityPresent());
     }
 
     @Test
