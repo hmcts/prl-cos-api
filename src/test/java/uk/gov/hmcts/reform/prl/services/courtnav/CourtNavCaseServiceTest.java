@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
@@ -34,10 +36,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class CourtNavCaseServiceTest {
 
     private final String authToken = "Bearer abc";
@@ -69,6 +70,8 @@ public class CourtNavCaseServiceTest {
     @InjectMocks
     CourtNavCaseService courtNavCaseService;
 
+    @Mock
+    private AllTabServiceImpl allTabService;
 
     private CaseData caseData;
 
@@ -99,7 +102,6 @@ public class CourtNavCaseServiceTest {
         );
     }
 
-    @Ignore
     @Test
     public void shouldUploadDocumentWhenAllFieldsAreCorrect() {
         uk.gov.hmcts.reform.prl.models.documents.Document tempDoc = uk.gov.hmcts.reform.prl.models.documents
@@ -122,11 +124,13 @@ public class CourtNavCaseServiceTest {
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
         when(coreCaseDataApi.getCase(authToken, s2sToken, "1234567891234567")).thenReturn(tempCaseDetails);
         //when(caseUtils.).thenReturn(caseData);
-        when(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any())
+        when(coreCaseDataApi.startEventForCaseWorker(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                                                     Mockito.any(), Mockito.any(), Mockito.any())
         ).thenReturn(StartEventResponse.builder().eventId("courtnav-document-upload").token("eventToken").build());
-        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(caseDocumentClient.uploadDocuments(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                                                Mockito.any())).thenReturn(uploadResponse);
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-        when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(randomUserId).build());
+        when(idamClient.getUserInfo(Mockito.any())).thenReturn(UserInfo.builder().uid(randomUserId).build());
         when(coreCaseDataApi.submitEventForCaseWorker(
             authToken,
             s2sToken,
@@ -140,27 +144,33 @@ public class CourtNavCaseServiceTest {
             "typeOfDocument",
             "fl401Doc1"
         )).build());
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1234567891234567L).data(stringObjectMap).build();
+
+        when(objectMapper.convertValue(tempCaseDetails.getData(), CaseData.class)).thenReturn(caseData);
         courtNavCaseService.uploadDocument("Bearer abc", file, "FL401",
                                            "1234567891234567"
         );
-        verify(coreCaseDataApi).startEventForCaseWorker(
+        verify(coreCaseDataApi, times(1)).startEventForCaseWorker(
             "Bearer abc",
             "s2s token",
             "e3ceb507-0137-43a9-8bd3-85dd23720648",
-            PrlAppsConstants.JURISDICTION,
-            PrlAppsConstants.CASE_TYPE,
+            "PRIVATELAW",
+            "PRLAPPS",
             "1234567891234567",
             "courtnav-document-upload"
         );
-        verify(coreCaseDataApi).submitEventForCaseWorker(
-            "Bearer abc",
-            "s2s token",
-            "e3ceb507-0137-43a9-8bd3-85dd23720648",
-            PrlAppsConstants.JURISDICTION,
-            PrlAppsConstants.CASE_TYPE,
-            "1234567891234567",
-            true,
-            caseDataContent
+        verify(coreCaseDataApi, times(1)).submitEventForCaseWorker(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.anyBoolean(),
+            Mockito.any(CaseDataContent.class)
         );
     }
 
@@ -189,6 +199,22 @@ public class CourtNavCaseServiceTest {
         courtNavCaseService.uploadDocument("Bearer abc", file, "FL401",
                                            "1234567891234567"
         );
+    }
+
+    @Test
+    public void testRefreshTabs() throws Exception {
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(documentGenService.generateDocuments(authToken, caseData)).thenReturn(stringObjectMap);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(caseData);
+
+        courtNavCaseService.refreshTabs(authToken,stringObjectMap, 1234567891234567L);
+        verify(documentGenService, times(1))
+            .generateDocuments(authToken,
+                               caseData);
+        verify(allTabService, times(1))
+            .updateAllTabsIncludingConfTab(caseData);
+
     }
 
     public static Document testDocument() {
