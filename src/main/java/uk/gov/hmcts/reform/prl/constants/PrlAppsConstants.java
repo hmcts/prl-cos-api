@@ -52,7 +52,6 @@ public class PrlAppsConstants {
     public static final String FINAL_DOCUMENT_FIELD = "finalDocument";
     public static final String ISSUE_DATE_FIELD = "issueDate";
     public static final String DATE_SUBMITTED_FIELD = "dateSubmitted";
-    public static final String DATE_AND_TIME_SUBMITTED_FIELD = "dateSubmittedAndTime";
     public static final String CASE_DATE_AND_TIME_SUBMITTED_FIELD = "caseSubmittedTimeStamp";
     public static final String STATE_FIELD = "state";
 
