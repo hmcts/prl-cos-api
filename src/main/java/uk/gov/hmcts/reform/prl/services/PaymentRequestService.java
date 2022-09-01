@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CasePaymentRequestDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeDto;
+import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 
@@ -29,6 +31,8 @@ public class PaymentRequestService {
     private final AuthTokenGenerator authTokenGenerator;
     private final FeeService feeService;
     private final ObjectMapper objectMapper;
+    public static final String GBP_CURRENCY = "GBP";
+    public static final String ENG_LANGUAGE = "ENGLISH";
 
     @Value("${payments.api.callback-url}")
     String callBackUrl;
@@ -58,5 +62,19 @@ public class PaymentRequestService {
              })
              .build()
         );
+    }
+
+    public PaymentResponse createServicePayment(String serviceRequestReference, String authorization,
+                                                String returnUrl) throws Exception {
+        FeeResponse feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+        return paymentApi
+                .createPaymentRequest(serviceRequestReference, authorization, authTokenGenerator.generate(),
+                        OnlineCardPaymentRequest.builder()
+                                .amount(feeResponse.getAmount())
+                                .currency(GBP_CURRENCY)
+                                .language(ENG_LANGUAGE)
+                                .returnUrl(returnUrl)
+                                .build()
+                );
     }
 }
