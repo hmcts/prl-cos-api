@@ -86,7 +86,9 @@ public class CourtNavCaseService {
 
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
 
-        if (checkFileFormat(document.getOriginalFilename()) && checkTypeOfDocument(typeOfDocument)) {
+        if (null != document && null != document.getOriginalFilename()
+            && checkFileFormat(document.getOriginalFilename())
+            && checkTypeOfDocument(typeOfDocument)) {
             CaseDetails tempCaseDetails = checkIfCasePresent(caseId, authorisation);
             if (tempCaseDetails == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
