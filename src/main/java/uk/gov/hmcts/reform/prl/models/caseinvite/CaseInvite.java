@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.caseinvite;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import uk.gov.hmcts.reform.prl.utils.AccessCodeGenerator;
 
 import java.time.LocalDate;
@@ -10,6 +9,10 @@ import java.util.UUID;
 
 
 @Data
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
 public class CaseInvite {
 
     private UUID partyId;
