@@ -538,11 +538,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/utils/ElementUtils.java',
   '**uk/gov/hmcts/reform/prl/services/validators/EventsChecker.java',
-  '**uk/gov/hmcts/reform/prl/services/pin/*',
-  '**uk/gov/hmcts/reform/prl/controllers/citizen/*',
-  '**uk/gov/hmcts/reform/prl/services/**/*',
   '**uk/gov/hmcts/reform/prl/services/citizen/*',
-  '**uk/gov/hmcts/reform/prl/courtnav/mappers/FL401ApplicationMapper.java',
 ]
 
 sonarqube {
