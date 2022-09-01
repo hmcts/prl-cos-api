@@ -1,6 +1,10 @@
 package uk.gov.hmcts.reform.prl.models.caseinvite;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import uk.gov.hmcts.reform.prl.utils.AccessCodeGenerator;
 
 import java.time.LocalDate;
