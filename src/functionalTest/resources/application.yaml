@@ -141,14 +141,14 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:GT2V6PLQ34XGPTPM}
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
     baseUrl: https://idam-api.aat.platform.hmcts.net
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:W7supXKMJgcEWKBS}
+    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
     clientId: xuiwebapp
     authorize:
       context-path: /oauth2/authorize
@@ -163,8 +163,8 @@ idam:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
   apigateway:
-    username: ${COURTNAV_USERNAME:courtnav@mailinator.com}
-    password: ${COURTNAV_PASSWORD:Nagoya0102}
+    username: ${COURTNAV_USERNAME:xxxxxx}
+    password: ${COURTNAV_PASSWORD:xxxxxx}
   api_gw:
     microservice: api_gw
 

@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.ccd.client.CaseAccessApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -87,14 +86,6 @@ public class CaseServiceTest {
     @Test
     public void testUpdateCase()  {
 
-        String caseId = "1234567891234567";
-        String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
-
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .eventToken("eventToken")
-            .data(Map.of("applicantCaseName", "test"))
-            .build();
-
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -103,7 +94,15 @@ public class CaseServiceTest {
                                                      Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(StartEventResponse.builder().token("eventToken").build());;
 
+        String caseId = "1234567891234567";
+        String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
+
         when(idamClient.getUserInfo(Mockito.any())).thenReturn(UserInfo.builder().uid(eventId).build());
+
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .eventToken("eventToken")
+            .data(Map.of("applicantCaseName", "test"))
+            .build();
 
         when(coreCaseDataApi.submitEventForCaseWorker(
                  authToken,
