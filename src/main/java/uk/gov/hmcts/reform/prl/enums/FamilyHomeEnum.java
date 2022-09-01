@@ -31,4 +31,16 @@ public enum FamilyHomeEnum {
     public static FamilyHomeEnum getValue(String key) {
         return FamilyHomeEnum.valueOf(key);
     }
+
+    public static FamilyHomeEnum getDisplayedValueFromEnumString(String enteredValue) {
+        if (enteredValue.equalsIgnoreCase("respondentToPayRepairsMaintenance")) {
+            return FamilyHomeEnum.payForRepairs;
+        } else if (enteredValue.equalsIgnoreCase("respondentToPayRentMortgage")) {
+            return FamilyHomeEnum.payOrContributeRent;
+        } else if (enteredValue.equalsIgnoreCase("useOfFurnitureOrContents")) {
+            return FamilyHomeEnum.useHouseholdContents;
+        } else {
+            return null;
+        }
+    }
 }
