@@ -41,7 +41,6 @@ public class CafCassCaseDetail {
 
     private String state;
 
-    @JsonIgnore
     private final String caseTypeOfApplication = "C100";
 
     @JsonProperty("case_data")
