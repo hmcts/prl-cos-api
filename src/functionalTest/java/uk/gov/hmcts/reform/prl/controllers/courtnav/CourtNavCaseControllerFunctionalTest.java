@@ -68,9 +68,6 @@ public class CourtNavCaseControllerFunctionalTest {
     @Test
     public void givenCourtNavCaseCreationData_then200Response() throws Exception {
 
-        log.info("Request: {}", request);
-
-
         String randomServerPort = "4044";
         final String baseUrl = "http://localhost:" + randomServerPort + "/case";
         URI uri = new URI(baseUrl);

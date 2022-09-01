@@ -19,7 +19,7 @@ public class ServiceAuthenticationGenerator {
     @Value("${idam.s2s-auth.microservice}")
     private String microservice;
 
-    @Value("${idam.api_gw.microservice}")
+    @Value("${private-law.authorised-services}")
     private String apiGatewayMicroservice;
 
     @Value("${idam.s2s-auth.url}")

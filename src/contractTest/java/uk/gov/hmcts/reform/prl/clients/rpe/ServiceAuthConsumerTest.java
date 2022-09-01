@@ -63,7 +63,7 @@ public class ServiceAuthConsumerTest {
             .method(HttpMethod.POST.toString())
             .body(buildJsonPayload())
             .willRespondWith()
-            .headers(Map.of(HttpHeaders.CONTENT_TYPE, "application/json"))
+            .headers(Map.of(HttpHeaders.CONTENT_TYPE, "applica"))
             .status(HttpStatus.OK.value())
             .body(PactDslRootValue.stringType(SOME_MICRO_SERVICE_TOKEN))
             .toPact();
