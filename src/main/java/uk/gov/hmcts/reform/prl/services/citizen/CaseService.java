@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.UserId;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -106,7 +107,7 @@ public class CaseService {
     private CaseDetails updateCaseDetails(CaseData caseData, String authToken, String s2sToken, String caseId,
                                           String eventId, UserDetails userDetails) {
         log.info("Input casedata, applicantcaseName :::: {}", caseData.getApplicantCaseName());
-        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         Iterables.removeIf(caseDataMap.values(), Objects::isNull);
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             authToken,
