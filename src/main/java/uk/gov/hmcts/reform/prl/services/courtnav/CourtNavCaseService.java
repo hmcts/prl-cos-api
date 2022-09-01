@@ -86,7 +86,9 @@ public class CourtNavCaseService {
 
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
 
-        if (checkFileFormat(document.getOriginalFilename()) && checkTypeOfDocument(typeOfDocument)) {
+        if (null != document && null != document.getOriginalFilename()
+            && checkFileFormat(document.getOriginalFilename())
+            && checkTypeOfDocument(typeOfDocument)) {
             CaseDetails tempCaseDetails = checkIfCasePresent(caseId, authorisation);
             if (tempCaseDetails == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -202,12 +204,16 @@ public class CourtNavCaseService {
 
     private boolean checkFileFormat(String fileName) {
         String format = "";
-        int i = fileName.lastIndexOf('.');
-        if (i >= 0) {
-            format = fileName.substring(i + 1);
+        if (null != fileName) {
+            int i = fileName.lastIndexOf('.');
+            if (i >= 0) {
+                format = fileName.substring(i + 1);
+            }
+            String finalFormat = format;
+            return Arrays.stream(ALLOWED_FILE_TYPES).anyMatch(s -> s.equalsIgnoreCase(finalFormat));
+        } else {
+            return false;
         }
-        String finalFormat = format;
-        return Arrays.stream(ALLOWED_FILE_TYPES).anyMatch(s -> s.equalsIgnoreCase(finalFormat));
     }
 
     public void refreshTabs(String authToken, Map<String, Object> data, Long id) throws Exception {
