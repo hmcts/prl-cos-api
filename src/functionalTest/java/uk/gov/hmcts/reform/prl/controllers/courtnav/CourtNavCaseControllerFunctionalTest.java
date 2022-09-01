@@ -38,7 +38,7 @@ public class CourtNavCaseControllerFunctionalTest {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-    private static final String VALID_REQUEST_BODY = "requests/courtnav-request.json";
+    private static final String VALID_REQUEST_BODY = "requests/fl401-submit-application-controller-validation.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -46,22 +46,23 @@ public class CourtNavCaseControllerFunctionalTest {
             "http://localhost:4044"
         );
 
+    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
     public void givenCourtNavCaseCreationData_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header(
-                "Authorization", idamTokenGenerator.generateIdamTokenForCourtNav(),
+                "Authorization", idamTokenGenerator.generateIdamTokenForSystem(),
                 "ServiceAuthorization", serviceAuthenticationGenerator.generateApiGwServiceAuth()
             )
-            .body(requestBody)
+            .body("requestBody")
             .when()
             .contentType("application/json")
             .post("/case")
@@ -71,15 +72,15 @@ public class CourtNavCaseControllerFunctionalTest {
 
 
     @Test
-    public void givenNoCaseDataInRequestBody_then500Response() throws Exception {
+    public void givenNoCaseDataInRequestBody_then400Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
-            .header("Authorization", "Bearer xyz", "ServiceAuthorization", "abc")
-            .body(requestBody)
+            .header("Authorization", "Bearer xyz")
+            .body("requestBody")
             .when()
             .contentType("application/json")
             .post("/case")
-            .then().assertThat().statusCode(403);
+            .then().assertThat().statusCode(400);
     }
 
     @Test

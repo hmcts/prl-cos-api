@@ -141,14 +141,14 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:GT2V6PLQ34XGPTPM}
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
     baseUrl: https://idam-api.aat.platform.hmcts.net
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    secret: ${IDAM_CLIENT_SECRET:W7supXKMJgcEWKBS}
     clientId: xuiwebapp
     authorize:
       context-path: /oauth2/authorize
@@ -163,8 +163,8 @@ idam:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
   apigateway:
-    username: ${COURTNAV_USERNAME:xxxxxx}
-    password: ${COURTNAV_PASSWORD:xxxxxx}
+    username: ${COURTNAV_USERNAME:courtnav@mailinator.com}
+    password: ${COURTNAV_PASSWORD:Nagoya0102}
   api_gw:
     microservice: api_gw
 
@@ -208,7 +208,7 @@ courtfinder:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
 launchdarkly:
-  sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
+  sdk-key: "${LAUNCH_DARKLY_SDK_KEY:}"
 
 rd_professional:
   api:
@@ -225,15 +225,15 @@ document:
       c100_c8_filename: C8Document.pdf
       c100_c1a_template: PRL-C1A.docx
       c100_c1a_filename: C1A_Document.pdf
-      c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
       c100_c8_draft_template: FL-PRL-CON-ENG-01118.docx
       c100_c8_draft_filename: C8DocumentDraft.pdf
       c100_c1a_draft_template: FL-PRL-APP-ENG-01119.docx
       c100_c1a_draft_filename: C1A_DocumentDraft.pdf
       c100_c8_draft_welsh_template: FL-PRL-CON-WEL-01122.docx
       c100_c8_draft_welsh_filename: C8Document_Draft_Welsh.pdf
-      c100_c1a_draft_welsh_template: PRL-C1A-Draft-WelshLang.docx
-      c100_c1a_draft_welsh_filename: FL-PRL-APP-WEL-01121.pdf
+      c100_c1a_draft_welsh_template: FL-PRL-APP-WEL-01121.docx
+      c100_c1a_draft_welsh_filename: C1A_Document_Draft_Welsh.pdf
+      c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
       c100_final_welsh_filename: C100FinalDocumentWelsh.pdf
       c100_draft_welsh_template: PRL-C100-R1-Draft-WelshLang.docx
       c100_draft_welsh_filename: Draft_C100_application_welsh.pdf
@@ -332,14 +332,3 @@ document:
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
-
-springdoc:
-  swagger-ui:
-    operationsSorter: alpha
-    tagsSorter : alpha
-    doc-expansion : none
-  model-converters:
-    pageable-converter:
-      enabled: true
-    polymorphic-converter:
-      enabled: true
