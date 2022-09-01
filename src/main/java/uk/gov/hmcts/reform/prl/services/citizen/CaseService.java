@@ -105,7 +105,6 @@ public class CaseService {
 
     private CaseDetails updateCaseDetails(CaseData caseData, String authToken, String s2sToken, String caseId,
                                           String eventId, UserDetails userDetails) {
-        log.info("Input casedata, applicantcaseName :::: {}", caseData.getApplicantCaseName());
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         Iterables.removeIf(caseDataMap.values(), Objects::isNull);
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
@@ -252,14 +251,11 @@ public class CaseService {
 
     public String validateAccessCode(String userToken, String s2sToken, String caseId, String accessCode) {
         log.info("validateAccessCode");
-        log.info("parameters are :" + caseId + " and " + accessCode);
         String accessCodeStatus = "Invalid";
         CaseData caseData = objectMapper.convertValue(
             coreCaseDataApi.getCase(userToken, s2sToken, caseId).getData(),
             CaseData.class
         );
-
-        log.info("caseData testing::" + caseData);
 
         List<CaseInvite> matchingCaseInvite = caseData.getRespondentCaseInvites()
             .stream()
@@ -267,7 +263,6 @@ public class CaseService {
             .filter(x -> accessCode.equals(x.getAccessCode()))
             .collect(Collectors.toList());
 
-        log.info("matchingCaseInvite testing::" + matchingCaseInvite);
         if (matchingCaseInvite.size() > 0) {
             accessCodeStatus = "Valid";
             for (CaseInvite caseInvite : matchingCaseInvite) {
