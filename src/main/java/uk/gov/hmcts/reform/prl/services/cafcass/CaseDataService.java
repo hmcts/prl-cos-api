@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 
 import java.io.IOException;
 
+@Slf4j
 @Service
 public class CaseDataService {
     @Value("${cafcaas.search-case-type-id}")
@@ -43,6 +45,7 @@ public class CaseDataService {
             serviceAuthorisation,
             cafCassSearchCaseTypeId
         );
+        log.info("CCD response: " + objectMapper.writeValueAsString(searchResult));
 
         CafCassResponse cafCassResponse = objectMapper.convertValue(searchResult,
                                                              CafCassResponse.class);
