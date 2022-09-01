@@ -65,6 +65,7 @@ public class CourtNavCaseControllerFunctionalTest {
     }
 
 
+    @Ignore
     @Test
     public void givenCourtNavCaseCreationData_then200Response() throws Exception {
 
@@ -86,6 +87,7 @@ public class CourtNavCaseControllerFunctionalTest {
     }
 
 
+    @Ignore
     @Test
     public void givenNoCaseDataInRequestBody_then400Response() throws Exception {
         String randomServerPort = "4044";
@@ -103,9 +105,6 @@ public class CourtNavCaseControllerFunctionalTest {
         ResponseEntity<String> result = this.restTemplate.postForEntity(uri, request, String.class);
 
         Assert.assertEquals(403, result.getStatusCodeValue());
-        Assert.assertEquals(true, result.getBody().contains("Missing request header"));
-
-
 
     }
 
