@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
+
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ApplicantStopFromRespondentDoingEnum {
@@ -51,5 +52,29 @@ public enum ApplicantStopFromRespondentDoingEnum {
         return ApplicantStopFromRespondentDoingEnum.valueOf(key);
     }
 
+
+    public static ApplicantStopFromRespondentDoingEnum getDisplayedValueFromEnumString(String enteredValue) {
+        if (enteredValue.equalsIgnoreCase("beingViolentOrThreatening")) {
+            return ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_1;
+        } else if (enteredValue.equalsIgnoreCase("harrasingOrIntimidating")) {
+            return ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_2;
+        } else if (enteredValue.equalsIgnoreCase("publishingAboutApplicant")) {
+            return ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_3;
+        } else if (enteredValue.equalsIgnoreCase("contactingApplicant")) {
+            return ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_4;
+        } else if (enteredValue.equalsIgnoreCase("damagingPossessions")) {
+            return ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_5;
+        } else if (enteredValue.equalsIgnoreCase("damagingHome")) {
+            return ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_6;
+        } else if (enteredValue.equalsIgnoreCase("enteringHome")) {
+            return ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_7;
+        } else if (enteredValue.equalsIgnoreCase("comingNearHome")) {
+            return ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_8;
+        } else if (enteredValue.equalsIgnoreCase("comingNearWork")) {
+            return ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_9;
+        } else {
+            return null;
+        }
+    }
 
 }

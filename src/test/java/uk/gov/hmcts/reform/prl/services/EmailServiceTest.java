@@ -120,6 +120,6 @@ public class EmailServiceTest {
             .toBuilder()
             .id(caseDetails.getId())
             .build();
-        assertEquals(emailService.getCaseData(caseDetails),caseData1);
+        assertEquals(emailService.getCaseData(caseDetails), caseData1);
     }
 }
