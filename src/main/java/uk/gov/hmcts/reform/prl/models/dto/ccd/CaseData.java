@@ -335,12 +335,20 @@ public class CaseData implements MappableObject {
     private final Document draftOrderDocWelsh;
     @JsonProperty("c8Document")
     private final Document c8Document;
+    @JsonProperty("c8DraftDocument")
+    private final Document c8DraftDocument;
     @JsonProperty("c8WelshDocument")
     private final Document c8WelshDocument;
+    @JsonProperty("c8WelshDraftDocument")
+    private final Document c8WelshDraftDocument;
     @JsonProperty("c1ADocument")
     private final Document c1ADocument;
+    @JsonProperty("c1ADraftDocument")
+    private final Document c1ADraftDocument;
     @JsonProperty("c1AWelshDocument")
     private final Document c1AWelshDocument;
+    @JsonProperty("c1AWelshDraftDocument")
+    private final Document c1AWelshDraftDocument;
 
     @JsonProperty("isEngDocGen")
     private final String isEngDocGen;
@@ -520,7 +528,7 @@ public class CaseData implements MappableObject {
     @JsonProperty("viewPDFlinkLabelText")
     private String viewPdfLinkLabelText;
 
-    private List<Element<CaseInvite>> caseInvites;
+    private List<Element<CaseInvite>> respondentCaseInvites;
 
 
     /**

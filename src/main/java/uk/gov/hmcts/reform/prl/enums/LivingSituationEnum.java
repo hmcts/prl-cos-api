@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
-
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum LivingSituationEnum {
@@ -41,8 +39,18 @@ public enum LivingSituationEnum {
     }
 
     public static LivingSituationEnum getDisplayedValueFromEnumString(String enteredValue) {
-        return Arrays.stream(LivingSituationEnum.values())
-            .map(i -> LivingSituationEnum.valueOf(enteredValue))
-            .findFirst().orElse(null);
+        if (enteredValue.equalsIgnoreCase("stayInHome")) {
+            return LivingSituationEnum.ableToStayInHome;
+        } else if (enteredValue.equalsIgnoreCase("returnToHome")) {
+            return LivingSituationEnum.ableToReturnHome;
+        } else if (enteredValue.equalsIgnoreCase("respondentNotEnterHome")) {
+            return LivingSituationEnum.restrictFromEnteringHome;
+        } else if (enteredValue.equalsIgnoreCase("respondentAwayFromSurroundingArea")) {
+            return LivingSituationEnum.awayFromHome;
+        } else if (enteredValue.equalsIgnoreCase("respondentLimitInHome")) {
+            return LivingSituationEnum.limitRespondentInHome;
+        } else {
+            return null;
+        }
     }
 }

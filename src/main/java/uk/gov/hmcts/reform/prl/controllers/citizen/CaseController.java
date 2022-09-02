@@ -92,7 +92,7 @@ public class CaseController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken
     ) {
-        return caseService.retrieveCases(authorisation, s2sToken, role, userId);
+        return caseService.retrieveCases(authorisation, s2sToken);
     }
 
     @GetMapping(path = "/cases", produces = APPLICATION_JSON)

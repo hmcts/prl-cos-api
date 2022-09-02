@@ -21,7 +21,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @RestController
 @Slf4j
-public class ResetAccessCodeController {
+public class ResetAccessCodeController extends AbstractCallbackController {
 
     @Autowired
     private CaseInviteManager caseInviteManager;
@@ -39,7 +39,7 @@ public class ResetAccessCodeController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("Regenerating access code for case {}", caseData.getId());
         caseData = caseInviteManager.reGeneratePinAndSendNotificationEmail(caseData);
-        caseDataUpdated.put("caseInvites",caseData.getCaseInvites());
+        caseDataUpdated.put("caseInvites",caseData.getRespondentCaseInvites());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();

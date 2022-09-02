@@ -105,7 +105,7 @@ public class ServiceOfApplicationControllerTest {
     @Test
     public void testHandleAboutToSubmit() throws Exception {
         CaseData cd = CaseData.builder()
-            .caseInvites(Collections.emptyList())
+            .respondentCaseInvites(Collections.emptyList())
             .build();
 
         Map<String, Object> caseData = new HashMap<>();
@@ -117,7 +117,7 @@ public class ServiceOfApplicationControllerTest {
 
         when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
         when(serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails())).thenReturn(cd);
-        serviceOfApplicationController.handleAboutToSubmit(callbackRequest);
+        serviceOfApplicationController.handleAboutToSubmit("test auth",callbackRequest);
         verify(serviceOfApplicationService).sendEmail(callbackRequest.getCaseDetails());
 
     }

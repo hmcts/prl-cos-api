@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.services;
+package uk.gov.hmcts.reform.prl.services.pin;
 
 
 import org.junit.Before;
@@ -70,9 +70,9 @@ public class CaseInviteManagerTest {
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(launchDarklyClient.isFeatureEnabled("generate-pin")).thenReturn(true);
         when(c100CaseInviteService.generateAndSendRespondentCaseInvite(any()))
-            .thenReturn(CaseData.builder().caseInvites(caseInvites).build());
+            .thenReturn(CaseData.builder().respondentCaseInvites(caseInvites).build());
         when(fl401CaseInviteService.generateAndSendRespondentCaseInvite(any()))
-            .thenReturn(CaseData.builder().caseInvites(caseInvites).build());
+            .thenReturn(CaseData.builder().respondentCaseInvites(caseInvites).build());
     }
 
     @Test
@@ -80,10 +80,10 @@ public class CaseInviteManagerTest {
 
         CaseData actualCaseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
 
-        assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals(2, actualCaseData.getRespondentCaseInvites().size());
+        assertEquals("abc1@de.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
             .getCaseInviteEmail());
-        assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
+        assertEquals("abc2@de.com", actualCaseData.getRespondentCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
 
     }
@@ -94,10 +94,10 @@ public class CaseInviteManagerTest {
         CaseData actualCaseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData.toBuilder().caseTypeOfApplication(
             "FL401").build());
 
-        assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals(2, actualCaseData.getRespondentCaseInvites().size());
+        assertEquals("abc1@de.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
             .getCaseInviteEmail());
-        assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
+        assertEquals("abc2@de.com", actualCaseData.getRespondentCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
 
     }
@@ -107,10 +107,10 @@ public class CaseInviteManagerTest {
 
         CaseData actualCaseData = caseInviteManager.reGeneratePinAndSendNotificationEmail(caseData);
 
-        assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals(2, actualCaseData.getRespondentCaseInvites().size());
+        assertEquals("abc1@de.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
             .getCaseInviteEmail());
-        assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
+        assertEquals("abc2@de.com", actualCaseData.getRespondentCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
 
     }
@@ -120,10 +120,10 @@ public class CaseInviteManagerTest {
         CaseData actualCaseData = caseInviteManager.reGeneratePinAndSendNotificationEmail(caseData.toBuilder().caseTypeOfApplication(
             "FL401").build());
 
-        assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals(2, actualCaseData.getRespondentCaseInvites().size());
+        assertEquals("abc1@de.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
             .getCaseInviteEmail());
-        assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
+        assertEquals("abc2@de.com", actualCaseData.getRespondentCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
 
     }

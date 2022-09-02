@@ -88,7 +88,7 @@ public class ResetAccessCodeControllerTest {
         List<Element<CaseInvite>> caseInvites = List.of(element(caseInvite1), element(caseInvite2));
 
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
-        when(caseInviteManager.reGeneratePinAndSendNotificationEmail(any())).thenReturn(CaseData.builder().caseInvites(
+        when(caseInviteManager.reGeneratePinAndSendNotificationEmail(any())).thenReturn(CaseData.builder().respondentCaseInvites(
             caseInvites).build());
 
     }
