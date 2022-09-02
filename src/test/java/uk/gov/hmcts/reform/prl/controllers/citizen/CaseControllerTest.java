@@ -94,7 +94,7 @@ public class CaseControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(caseService.updateCase(caseData, authToken, servAuthToken, caseId, eventId)).thenReturn(caseDetails);
-        CaseData caseData1 = caseController.updateCase(caseData, caseId, eventId, authToken, servAuthToken);
+        CaseData caseData1 = caseController.updateCase(caseData, caseId, eventId, authToken, servAuthToken, "testAccessCode");
         assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
 
     }
@@ -156,7 +156,7 @@ public class CaseControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         doNothing().when(caseService).linkCitizenToCase(authToken, servAuthToken, caseId, accessCode);
-        caseController.linkDefendantToClaim(authToken, caseId, servAuthToken, accessCode);
+        caseController.linkCitizenToCase(authToken, caseId, servAuthToken, accessCode);
         assertNotNull(caseData);
 
     }
