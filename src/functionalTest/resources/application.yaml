@@ -165,6 +165,9 @@ idam:
   apigateway:
     username: ${COURTNAV_USERNAME:xxxxxx}
     password: ${COURTNAV_PASSWORD:xxxxxx}
+  citizen:
+    username: XXXXXXX
+    password: XXXXXXX
   api_gw:
     microservice: api_gw
 
