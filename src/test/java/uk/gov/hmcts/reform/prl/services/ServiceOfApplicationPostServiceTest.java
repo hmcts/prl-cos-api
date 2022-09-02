@@ -4,10 +4,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.AmendDischargedVariedEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StandardDirectionsOrderEnum;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -95,7 +98,7 @@ public class ServiceOfApplicationPostServiceTest {
 
         when(documentGenService.generateSingleDocument(any(String.class), any(CaseData.class), any(String.class), any(boolean.class)))
             .thenReturn(coverSheet);
-
+        when(bulkPrintService.send(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(null);
         List<GeneratedDocumentInfo> sentDocs = postService.send(caseData, AUTH);
         assertTrue(sentDocs.containsAll(List.of(toGeneratedDocumentInfo(finalDoc), toGeneratedDocumentInfo(coverSheet))));
     }
@@ -125,8 +128,15 @@ public class ServiceOfApplicationPostServiceTest {
             .documentHash("finalWelshC1a")
             .build();
 
-        PartyDetails respondent = PartyDetails.builder()
+        PartyDetails respondent1 = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .solicitorEmail("test@gmail.com")
+            .build();
+
+        PartyDetails respondent2 = PartyDetails.builder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail("test@gmail.com")
             .isCurrentAddressKnown(YesOrNo.Yes)
             .build();
 
@@ -135,9 +145,11 @@ public class ServiceOfApplicationPostServiceTest {
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
             .finalWelshDocument(finalWelshDoc)
             .c1AWelshDocument(finalWelshC1a)
-            .serviceOfApplicationScreen1(OrdersToServeSA.builder().build())
+            .serviceOfApplicationScreen1(OrdersToServeSA.builder()
+                                             .amendDischargedVariedOption(List.of(
+                AmendDischargedVariedEnum.amendDischargedVaried)).build())
             .orderCollection(List.of(element(OrderDetails.builder().build())))
-            .respondents(List.of(element(respondent)))
+            .respondents(List.of(element(respondent1),element(respondent2)))
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
                                                 .pd36qLetter(Document.builder().build()).build())
             .build();
@@ -237,6 +249,7 @@ public class ServiceOfApplicationPostServiceTest {
 
         OrderDetails standardDirectionsOrderDetails = OrderDetails.builder()
             .orderType("Standard directions order")
+            .orderTypeId("standardDirectionsOrder")
             .orderDocument(standardDirectionsOrder)
             .build();
 
@@ -262,5 +275,44 @@ public class ServiceOfApplicationPostServiceTest {
                                                 toGeneratedDocumentInfo(coverSheet),
                                                 toGeneratedDocumentInfo(finalC1a),
                                                 toGeneratedDocumentInfo(standardDirectionsOrder))));
+    }
+
+    @Test
+    public void givenPeopleInTheCaseWithAddress() throws Exception {
+
+        Document privacyNotice = Document.builder()
+            .documentUrl("privacyNotice")
+            .documentBinaryUrl("privacyNotice")
+            .documentHash("privacyNotice")
+            .build();
+
+        when(documentGenService.generateSingleDocument(any(String.class), any(CaseData.class), any(String.class), any(boolean.class)))
+            .thenReturn(privacyNotice);
+
+        PartyDetails otherPeopleInTheCase = PartyDetails.builder()
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .address(Address.builder().addressLine1("test").postCode("test").build())
+            .build();
+
+
+        OrdersToServeSA orders = OrdersToServeSA.builder()
+            .standardDirectionsOrderOption(List.of(StandardDirectionsOrderEnum.standardDirectionsOrder))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
+            .othersToNotify(List.of(element(otherPeopleInTheCase)))
+            .serviceOfApplicationScreen1(OrdersToServeSA.builder().build())
+            .orderCollection(List.of(element(OrderDetails.builder().build())))
+            .serviceOfApplicationScreen1(orders)
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
+                                                .pd36qLetter(Document.builder().build()).build())
+            .build();
+
+        List<GeneratedDocumentInfo> sentDocs = postService.sendDocs(caseData, AUTH);
+        assertTrue(sentDocs.containsAll(List.of(
+                                                toGeneratedDocumentInfo(privacyNotice)
+                                                )));
     }
 }

@@ -166,11 +166,7 @@ public class FL401ApplicationMapper {
                                                                                                           .getRelationshipWithRespondent()
                                                                                                           .getRelationshipStartDate()
                                                                                                           .mergeDate()))
-                                                    .relationshipDateComplexEndDate(LocalDate.parse(courtNavCaseData
-                                                                                                        .getFl401()
-                                                                                                        .getRelationshipWithRespondent()
-                                                                                                        .getRelationshipEndDate()
-                                                                                                        .mergeDate()))
+                                                    .relationshipDateComplexEndDate(getRelationShipEndDate(courtNavCaseData))
                                                     .build())
                 .applicantRelationshipDate(LocalDate.parse(courtNavCaseData
                                                                .getFl401()
@@ -242,6 +238,19 @@ public class FL401ApplicationMapper {
 
         return caseData;
 
+    }
+
+    private LocalDate getRelationShipEndDate(CourtNavFl401 courtNavCaseData) {
+        LocalDate endDate = null;
+
+        if (null != courtNavCaseData.getFl401().getRelationshipWithRespondent().getRelationshipEndDate()) {
+            endDate = LocalDate.parse(courtNavCaseData
+                                          .getFl401()
+                                          .getRelationshipWithRespondent()
+                                          .getRelationshipEndDate()
+                                          .mergeDate());
+        }
+        return endDate;
     }
 
     private String getCaseName(CourtNavFl401 courtNavCaseData) {
@@ -345,16 +354,18 @@ public class FL401ApplicationMapper {
             .address(courtNavCaseData.getFl401().getTheHome().getOccupationOrderAddress())
             .peopleLivingAtThisAddress(getPeopleLivingAtThisAddress(courtNavCaseData))
             .textAreaSomethingElse(courtNavCaseData.getFl401().getTheHome().getCurrentlyLivesAtAddressOther())
-            .everLivedAtTheAddress(YesNoBothEnum.valueOf(courtNavCaseData.getFl401()
-                                                             .getTheHome()
-                                                             .getPreviouslyLivedAtAddress().getDisplayedValue()))
-            .intendToLiveAtTheAddress(YesNoBothEnum.valueOf(courtNavCaseData.getFl401()
-                                                                .getTheHome()
-                                                                .getIntendedToLiveAtAddress().getDisplayedValue()))
+            .everLivedAtTheAddress(YesNoBothEnum.getDisplayedValueFromEnumString(courtNavCaseData.getFl401()
+                                                                                     .getTheHome()
+                                                                                     .getPreviouslyLivedAtAddress().getId()))
+            .intendToLiveAtTheAddress(YesNoBothEnum.getDisplayedValueFromEnumString(courtNavCaseData.getFl401()
+                                                                                        .getTheHome()
+                                                                                        .getIntendedToLiveAtAddress().getId()))
             .doAnyChildrenLiveAtAddress(YesOrNo.valueOf(null != courtNavCaseData.getFl401()
                 .getTheHome().getChildrenApplicantResponsibility() ? "Yes" : "No"))
-            .children(mapHomeChildren(courtNavCaseData.getFl401()
-                                          .getTheHome().getChildrenApplicantResponsibility()))
+            .children(null != courtNavCaseData.getFl401()
+                .getTheHome().getChildrenApplicantResponsibility()
+                          ? mapHomeChildren(courtNavCaseData.getFl401()
+                                              .getTheHome().getChildrenApplicantResponsibility()) : null)
             .isPropertyAdapted(courtNavCaseData.getFl401()
                                    .getTheHome().isPropertySpeciallyAdapted() ? YesOrNo.Yes : YesOrNo.No)
             .howIsThePropertyAdapted(courtNavCaseData.getFl401()
@@ -481,7 +492,8 @@ public class FL401ApplicationMapper {
             .firstName(respondent.getRespondentFirstName())
             .lastName(respondent.getRespondentLastName())
             .previousName(respondent.getRespondentOtherNames())
-            .dateOfBirth(LocalDate.parse(respondent.getRespondentDateOfBirth().mergeDate()))
+            .dateOfBirth(null != respondent.getRespondentDateOfBirth()
+                        ? LocalDate.parse(respondent.getRespondentDateOfBirth().mergeDate()) : null)
             .isDateOfBirthKnown(YesOrNo.valueOf(null != respondent.getRespondentDateOfBirth() ? "Yes" : "No"))
             .email(respondent.getRespondentEmailAddress())
             .canYouProvideEmailAddress(YesOrNo.valueOf(null != respondent.getRespondentEmailAddress() ? "Yes" : "No"))

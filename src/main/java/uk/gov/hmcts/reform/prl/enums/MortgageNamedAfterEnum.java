@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
-
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum MortgageNamedAfterEnum {
@@ -35,8 +33,14 @@ public enum MortgageNamedAfterEnum {
     }
 
     public static MortgageNamedAfterEnum getDisplayedValueFromEnumString(String enteredValue) {
-        return Arrays.stream(MortgageNamedAfterEnum.values())
-            .map(i -> MortgageNamedAfterEnum.valueOf(enteredValue))
-            .findFirst().orElse(null);
+        if (enteredValue.equalsIgnoreCase("applicant")) {
+            return MortgageNamedAfterEnum.applicant;
+        } else if (enteredValue.equalsIgnoreCase("respondent")) {
+            return MortgageNamedAfterEnum.respondent;
+        } else if (enteredValue.equalsIgnoreCase("other")) {
+            return MortgageNamedAfterEnum.someoneElse;
+        } else {
+            return null;
+        }
     }
 }
