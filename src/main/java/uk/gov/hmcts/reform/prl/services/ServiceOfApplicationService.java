@@ -28,6 +28,9 @@ public class ServiceOfApplicationService {
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
 
     @Autowired
+    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
+
+    @Autowired
     private final CaseInviteManager caseInviteManager;
 
     @Autowired
@@ -66,6 +69,15 @@ public class ServiceOfApplicationService {
         } else {
             serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
         }
-        return caseInviteManager.generatePinAndSendNotificationEmail(caseData);
+        return caseData;
+    }
+
+    public CaseData sendPost(CaseDetails caseDetails, String authorization) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        log.info(" Sending post to the parties involved ");
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            serviceOfApplicationPostService.sendDocs(caseData,authorization);
+        }
+        return caseData;
     }
 }

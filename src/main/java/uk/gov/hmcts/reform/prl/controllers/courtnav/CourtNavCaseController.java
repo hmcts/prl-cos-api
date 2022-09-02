@@ -54,9 +54,6 @@ public class CourtNavCaseController {
         @RequestBody CourtNavFl401 inputData
     ) throws Exception {
 
-        log.info("s2s token inside case creation controller {}", serviceAuthorization);
-        log.info("auth token inside case creation controller {}", authorisation);
-
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
             CaseData caseData = fl401ApplicationMapper.mapCourtNavData(inputData);
@@ -89,8 +86,6 @@ public class CourtNavCaseController {
         @RequestParam MultipartFile file,
         @RequestParam String typeOfDocument
     ) {
-        log.info("s2s token inside uploadDocument controller {}", serviceAuthorization);
-        log.info("auth token inside uploadDocument controller {}", authorisation);
         log.info("Document name {} and Type of document {}", file.getOriginalFilename(), typeOfDocument);
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -17,6 +16,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
@@ -62,6 +62,30 @@ public class ServiceOfApplicationPostService {
                     log.info("The bulk print service has failed: " + e);
                 }
             });
+        return sentDocs;
+    }
+
+    public List<GeneratedDocumentInfo> sendDocs(CaseData caseData, String authorisation) {
+        // Sends post to other parties
+        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
+        CaseData blankCaseData = CaseData.builder().build();
+        Optional<List<Element<PartyDetails>>> otherPeopleToNotify = Optional.ofNullable(caseData.getOthersToNotify());
+        otherPeopleToNotify.ifPresent(elements -> elements
+            .stream()
+            .map(Element::getValue)
+            .filter(partyDetails -> YesOrNo.Yes.getDisplayedValue()
+                .equalsIgnoreCase(partyDetails.getIsCurrentAddressKnown().getDisplayedValue()))
+            .forEach(partyDetails -> {
+                List<GeneratedDocumentInfo> docs = null;
+                docs = getUploadedDocumentsServiceOfApplication(caseData);
+                try {
+                    docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
+                } catch (Exception e) {
+                    log.info("*** Error while generating privacy notice to be served ***");
+                }
+                sentDocs.addAll(sendBulkPrint(String.valueOf(caseData.getId()), authorisation, docs));
+            }
+            ));
         return sentDocs;
     }
 
@@ -125,20 +149,36 @@ public class ServiceOfApplicationPostService {
     }
 
     private List<GeneratedDocumentInfo> getSelectedOrders(CaseData caseData) {
-        List<String> orderNames = caseData.getServiceOfApplicationScreen1().getSelectedOrders().stream()
-            .map(CreateSelectOrderOptionsEnum::getDisplayedValueFromEnumString)
-            .collect(Collectors.toList());
+        List<String> orderNames = caseData.getServiceOfApplicationScreen1()
+            .getSelectedOrders();
 
         return caseData.getOrderCollection().stream()
             .map(Element::getValue)
-            .filter(i -> orderNames.contains(i.getOrderType()))
+            .filter(i -> orderNames.contains(i.getOrderTypeId()))
             .map(i -> toGeneratedDocumentInfo(i.getOrderDocument()))
             .collect(Collectors.toList());
-
     }
 
     private GeneratedDocumentInfo generateDocument(String authorisation, CaseData caseData, String documentName) throws Exception {
         return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation, caseData,
                                                                       documentName, welshCase(caseData)));
+    }
+
+    private List<GeneratedDocumentInfo> sendBulkPrint(String id,String authorisation, List<GeneratedDocumentInfo> docs) {
+        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
+        try {
+            log.info("*** Initiating request to Bulk print service ***");
+            UUID bulkPrintId = bulkPrintService.send(
+                id,
+                authorisation,
+                LETTER_TYPE,
+                docs
+            );
+            log.info("ID in the queue from bulk print service : {}",bulkPrintId);
+            sentDocs.addAll(docs);
+        } catch (Exception e) {
+            log.info("The bulk print service has failed: " + e);
+        }
+        return sentDocs;
     }
 }
