@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -10,8 +11,6 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentReque
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseDocumentControllerTest {
@@ -32,9 +31,11 @@ public class CaseDocumentControllerTest {
             .build();
     }
 
+    //Commented out this test case as suggested by Yogendra
     @Test
+    @Ignore
     public void testGenerateCitizenStatementDocumentReturnsFileName() throws Exception {
 
-        assertEquals("test.docx", "test.docx");
+        //assertEquals("test.docx", "test.docx");
     }
 }
