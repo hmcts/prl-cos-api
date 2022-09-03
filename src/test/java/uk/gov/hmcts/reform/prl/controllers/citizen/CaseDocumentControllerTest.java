@@ -32,14 +32,4 @@ public class CaseDocumentControllerTest {
             .values(Map.of("fileName", "test.docx"))
             .build();
     }
-
-    @Test
-    public void testGenerateCitizenStatementDocumentReturnsFileName() throws Exception {
-
-
-        when(documentGenService.generateCitizenStatementDocument("test auth", generateAndUploadDocumentRequest)).thenReturn("test.docx");
-
-        String filename = caseDocumentController.generateCitizenStatementDocument("test auth", generateAndUploadDocumentRequest);
-        assertEquals("test.docx", filename);
-    }
 }
