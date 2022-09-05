@@ -23,11 +23,11 @@ public interface PaymentApi {
         @RequestBody PaymentServiceRequest paymentRequest
     );
 
-    @PostMapping(value = "/service-request/{service_request_reference}/card-payments", consumes = "application/json")
+    @PostMapping(value = "/service-request/{service-request-reference}/card-payments", consumes = "application/json")
     PaymentResponse createPaymentRequest(
-            @PathVariable("service_request_reference") String serviceRequestReference,
-            @RequestHeader("authorization") String authorization,
-            @RequestHeader("service_authorization") String serviceAuthorization,
+            @PathVariable("service-request-reference") String serviceRequestReference,
+            @RequestHeader("Authorization") String authorization,
+            @RequestHeader("ServiceAuthorization") String serviceAuthorization,
             @RequestBody OnlineCardPaymentRequest onlineCardPaymentRequest
     );
 }
