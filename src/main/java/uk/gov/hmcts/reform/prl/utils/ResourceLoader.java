@@ -23,7 +23,7 @@ public class ResourceLoader {
                 allBytes = io.readAllBytes();
             }
         } finally {
-                io.close();
+            io.close();
         }
 
         return allBytes;
