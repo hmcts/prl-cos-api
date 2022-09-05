@@ -1,0 +1,384 @@
+{
+  "total": 2,
+  "cases": [
+    {
+      "id": 1661164783455399,
+      "jurisdiction": "PRIVATELAW",
+      "state": "SUBMITTED_PAID",
+      "case_type_id": "PRLAPPS",
+      "created_date": "2022-08-22T10:39:43.49",
+      "last_modified": "2022-08-22T10:44:54.055",
+      "case_data": {
+        "dateSubmitted": "2022-08-22",
+        "caseTypeOfApplication": "C100",
+        "confidentialDetails": {
+          "isConfidentialDetailsAvailable": "No"
+        },
+        "childrenKnownToLocalAuthority": "no",
+        "ordersApplyingFor": [
+          "childArrangementsOrder"
+        ],
+        "children": [
+          {
+            "id": "e1866c81-f3d3-484e-b13a-aad0f9dab468",
+            "value": {
+              "firstName": "fgfdg",
+              "lastName": "gdgffd",
+              "dateOfBirth": "1990-11-12",
+              "gender": "male",
+              "orderAppliedFor": [
+                "childArrangementsOrder"
+              ],
+              "applicantsRelationshipToChild": "stepFather",
+              "respondentsRelationshipToChild": "mother",
+              "childLiveWith": [
+                "applicant"
+              ],
+              "personWhoLivesWithChild": [],
+              "parentalResponsibilityDetails": "adw"
+            }
+          }
+        ],
+        "miamExemptionsTable": {
+          "reasonsForMiamExemption": "Urgency",
+          "domesticViolenceEvidence": "",
+          "urgencyEvidence": "Any delay caused by MIAM would cause unreasonable hardship to the prospective applicant",
+          "childProtectionEvidence": "",
+          "previousAttendenceEvidence": "",
+          "otherGroundsEvidence": ""
+        },
+        "summaryTabForOrderAppliedFor": {
+          "ordersApplyingFor": "Child Arrangements Order",
+          "typeOfChildArrangementsOrder": "Live with order"
+        },
+        "applicants": [
+          {
+            "id": "f03aff33-42ca-4b44-9dd9-c414294f87d5",
+            "value": {
+              "firstName": "sdfdsf",
+              "lastName": "sdf",
+              "previousName": "sdf",
+              "dateOfBirth": "2007-12-12",
+              "gender": "male",
+              "placeOfBirth": "Harrow",
+              "isAddressConfidential": "No",
+              "isAtAddressLessThan5Years": "No",
+              "canYouProvideEmailAddress": "No",
+              "isPhoneNumberConfidential": "No",
+              "otherPersonRelationshipToChildren": [],
+              "solicitorOrg": {
+                "OrganisationID": "V4031UM",
+                "OrganisationName": "AutoTestt43tdf4af7d"
+              },
+              "solicitorAddress": {
+                "AddressLine1": "29 Radnor Road",
+                "AddressLine2": "",
+                "AddressLine3": "",
+                "PostTown": "Harrow",
+                "County": "",
+                "Country": "United Kingdom",
+                "PostCode": "HA1 1SA"
+              },
+              "representativeFirstName": "Ayansh",
+              "representativeLastName": "Aman",
+              "solicitorEmail": "aa@gmail.com",
+              "phoneNumber": "07442772347",
+              "address": {
+                "AddressLine1": "29 Radnor Road",
+                "AddressLine2": "",
+                "AddressLine3": "",
+                "PostTown": "Harrow",
+                "County": "",
+                "Country": "United Kingdom",
+                "PostCode": "HA11SA"
+              }
+            }
+          }
+        ],
+        "respondents": [
+          {
+            "id": "5581032c-1333-4bf2-9651-9d2433351c1a",
+            "value": {
+              "firstName": "sad",
+              "lastName": "sdf",
+              "gender": "male",
+              "canYouProvideEmailAddress": "No",
+              "isDateOfBirthKnown": "No",
+              "isCurrentAddressKnown": "No",
+              "canYouProvidePhoneNumber": "No",
+              "isPlaceOfBirthKnown": "No",
+              "otherPersonRelationshipToChildren": [],
+              "solicitorOrg": {},
+              "solicitorAddress": {},
+              "isAtAddressLessThan5YearsWithDontKnow": "no",
+              "doTheyHaveLegalRepresentation": "no",
+              "address": {}
+            }
+          }
+        ],
+        "applicantsConfidentialDetails": [],
+        "applicantSolicitorEmailAddress": "prl-e2etestsolicitor@mailinator.com",
+        "solicitorName": "E2E Test Solicitor",
+        "courtName": "West London Family Court",
+        "otherPeopleInTheCaseTable": [
+          {
+            "id": "a5d86587-ba06-4db0-8620-10ef472af3e5",
+            "value": {
+              "address": {},
+              "relationshipToChild": []
+            }
+          }
+        ],
+        "submitAndPayDownloadApplicationLink": {
+          "document_filename": "Draft_C100_application.pdf"
+        }
+      }
+    },
+    {
+      "id": 1660043120096788,
+      "jurisdiction": "PRIVATELAW",
+      "state": "SUBMITTED_PAID",
+      "case_type_id": "PRLAPPS",
+      "created_date": "2022-08-09T11:05:20.089",
+      "last_modified": "2022-08-23T14:12:07.264",
+      "case_data": {
+        "dateSubmitted": "2022-08-23",
+        "caseTypeOfApplication": "C100",
+        "draftConsentOrderFile": {
+          "document_filename": "dummy.pdf"
+        },
+        "confidentialDetails": {
+          "isConfidentialDetailsAvailable": "Yes"
+        },
+        "isInterpreterNeeded": "Yes",
+        "interpreterNeeds": [
+          {
+            "id": "50c7fac2-8bae-44c0-86bb-713dcecdd673",
+            "value": {
+              "party": [
+                "applicant",
+                "respondent",
+                "other"
+              ],
+              "name": "Person One",
+              "language": "Polish",
+              "otherAssistance": "None"
+            }
+          }
+        ],
+        "childrenKnownToLocalAuthority": "yes",
+        "ordersApplyingFor": [
+          "childArrangementsOrder",
+          "prohibitedStepsOrder",
+          "specificIssueOrder"
+        ],
+        "children": [
+          {
+            "id": "9c42f96d-6cab-4422-93cc-68dc0b79d38e",
+            "value": {
+              "firstName": "Test Firstname",
+              "lastName": "Test Lastname",
+              "dateOfBirth": "2005-11-11",
+              "gender": "male",
+              "orderAppliedFor": [
+                "childArrangementsOrder"
+              ],
+              "applicantsRelationshipToChild": "stepFather",
+              "respondentsRelationshipToChild": "mother",
+              "childLiveWith": [
+                "applicant"
+              ],
+              "personWhoLivesWithChild": [],
+              "parentalResponsibilityDetails": "Text area field Test"
+            }
+          },
+          {
+            "id": "729291e5-1b02-447b-9f74-485cf435dfbd",
+            "value": {
+              "firstName": "Test Firstname2",
+              "lastName": "Test Lastname2",
+              "dateOfBirth": "2005-11-22",
+              "gender": "female",
+              "orderAppliedFor": [
+                "childArrangementsOrder"
+              ],
+              "applicantsRelationshipToChild": "stepFather",
+              "respondentsRelationshipToChild": "mother",
+              "childLiveWith": [
+                "applicant"
+              ],
+              "personWhoLivesWithChild": [],
+              "parentalResponsibilityDetails": "Text area field Test"
+            }
+          }
+        ],
+        "miamCertificationDocumentUpload1": {
+          "document_filename": "dummy.pdf"
+        },
+        "miamExemptionsTable": {
+          "reasonsForMiamExemption": "Domestic violence, Child Protection Concern, Urgency, Previous MIAM attendance or previous MIAM exemption, Other",
+          "domesticViolenceEvidence": "Evidence which demonstrates that a prospective party has been, or is at risk of being, the victim of domestic violence by another prospective party in the form of abuse which relates to financial matters.\nA letter from the Secretary of State for the Home Department confirming that a prospective party has been granted leave to remain in the United Kingdom under paragraph 289B of the Rules made by the Home Secretary under section 3(2) of the Immigration Act 1971, which can be found at https://www. gov.uk/guidance/immigration-rules/immigration-rules-index;\nA letter from a public authority confirming that a person with whom a prospective party is or was in a family relationship, was assessed as being, or at risk of being, a victim of domestic violence by that prospective party (or a copy of that assessment);\nA letter or report from an organisation providing domestic violence support services in the United Kingdom confirming- \r\n(i) that a person with whom a prospective party is or was in a family relationship was refused admission to a refuge; \r\n(ii) the date on which they were refused admission to the refuge; and \r\n(iii)they sought admission to the refuge because of allegations of domestic violence by the prospective party referred to in paragraph (i);\nA letter which- \r\n(i) is from an organisation providing domestic violence support services, or a registered charity, which letter confirms that it- \r\n(a) is situated in England and Wales, \r\n(b) has been operating for an uninterrupted period of six months or more; and \r\n(c) provided a prospective party with support in relation to that person’s needs as a victim, or a person at risk, of domestic violence; and \r\n(ii) contains- \r\n(a) a statement to the effect that, in the reasonable professional judgment of the author of the letter, the prospective party is, or is at risk of being, a victim of domestic violence; \r\n(b) a description of the specific matters relied upon to support that judgment; \r\n(c) a description of the support provided to the prospective party; and \r\n(d) a statement of the reasons why the prospective party needed that support;\nA letter from an officer employed by a local authority or housing association (or their equivalent in Scotland or Northern Ireland) for the purpose of supporting tenants containing- \r\n(i)  a statement to the effect that, in their reasonable professional judgment, a person with whom a prospective party is or has been in a family relationship is, or is at risk of being, a victim of domestic violence by that prospective party; (ii)  a description of the specific matters relied upon to support that judgment; and (iii) a description of the support they provided to the victim of domestic violence or the person at risk of domestic violence by that prospective party;\nA letter from an independent sexual violence advisor confirming that they are providing support to a prospective party relating to sexual violence by another prospective party;\nA letter from an independent domestic violence advisor confirming that they are providing support to a prospective party;\nA letter from any person who is a member of a multi-agency risk assessment conference (or other suitable local safeguarding forum) confirming that a prospective party, or a person with whom that prospective party is in a family relationship, is or has been at risk of harm from domestic violence by another prospective party;\nA letter or report from- \r\n(i) the appropriate health professional who made the referral described below; \r\n(ii) an appropriate health professional who has access to the medical records of the prospective party referred to below; or \r\n(iii) the person to whom the referral described below was made; \r\nconfirming that there was a referral by an appropriate health professional of a prospective party to a person who provides specialist support or assistance for victims of, or those at risk of, domestic violence;\nA letter or report from an appropriate health professional confirming that- \r\n(i)  that professional,or another appropriate health professional, has examined a prospective party in person; and (ii)  in the reasonable professional judgment of the author or the examining appropriate health professional, that prospective party has, or has had, injuries or a condition consistent with being a victim of domestic violence;\nAn expert report produced as evidence in proceedings in the United Kingdom for the benefit of a court or tribunal confirming that a person with whom a prospective party is or was in a family relationship, was assessed as being, or at risk of being, a victim of domestic violence by that prospective party;\nA copy of a finding of fact, made in proceedings in the United Kingdom, that there has been domestic violence by a prospective party;\nAn undertaking given in England and Wales under section 46 or 63E of the Family Law Act 1996 (or given in Scotland or Northern Ireland in place of a protective injunction) by a prospective party, provided that a cross- undertaking relating to domestic violence was not given by another prospective party;\nA relevant protective injunction;\nA domestic violence protection notice issued under section 24 of the Crime and Security Act 2010 against a prospective party;\nA court order binding a prospective party over in connection with a domestic violence offence;\nEvidence of a relevant conviction for a domestic violence offence;\nEvidence of relevant criminal proceedings for a domestic violence offence which have not concluded;\nEvidence of a relevant police caution for a domestic violence offence;\nEvidence that a prospective party has been arrested for a relevant domestic violence offence;",
+          "urgencyEvidence": "There  is a significant risk that in the period necessary to schedule and attend a MIAM, proceedings relating to the dispute will be brought in another state in which a valid claim to jurisdiction may exist, such that a court in that other State would be seized of the dispute before a court in England and Wales.\nAny delay caused by MIAM would cause irretrievable problems in dealing with the dispute (including the irretrievable loss of significant evidence)\nAny delay caused by MIAM would cause unreasonable hardship to the prospective applicant\nAny delay caused by MIAM would cause significant risk of a miscarriage of justice\nThere is risk to the life, liberty or physical safety of the prospective applicant or his or her family or his or her home; or",
+          "childProtectionEvidence": "The subject of enquiries by a local authority under section 47 of the Children Act 1989 Act\nThe subject of a child protection plan put in place by a local authority",
+          "previousAttendenceEvidence": "In the 4 months prior to making the application, the person filed a relevant family application confirming that a MIAM exemption applied and that application related to the same or substantially the same dispute",
+          "otherGroundsEvidence": "(i) the prospective applicant is or all of the prospective respondents are subject to a disability or other inability that would prevent attendance at a MIAM unless appropriate facilities can be offered by an authorised mediator; (ii) the prospective applicant has contacted as many authorised family mediators as have an office within fifteen miles of his or her home (or three of them if there are three or more), and all have stated that they are unable to provide such facilities; and (iii)the names, postal addresses and telephone numbers or e-mail addresses for such authorised family mediators, and the dates of contact, can be provided to the court if requested."
+        },
+        "summaryTabForOrderAppliedFor": {
+          "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
+          "typeOfChildArrangementsOrder": "Both live with and spend time with order"
+        },
+        "applicants": [
+          {
+            "id": "2aecd842-4b99-4d64-8277-ef614c972be3",
+            "value": {
+              "firstName": "Applicant Firstname",
+              "lastName": "Applicant Lastname",
+              "dateOfBirth": "1990-10-10",
+              "gender": "male",
+              "placeOfBirth": "London",
+              "isAddressConfidential": "Yes",
+              "isAtAddressLessThan5Years": "Yes",
+              "addressLivedLessThan5YearsDetails": "Same address for last 5 years",
+              "canYouProvideEmailAddress": "Yes",
+              "isEmailAddressConfidential": "Yes",
+              "isPhoneNumberConfidential": "Yes",
+              "otherPersonRelationshipToChildren": [],
+              "solicitorOrg": {
+                "OrganisationID": "6M8BF5D",
+                "OrganisationName": "Divorce-AAT-2"
+              },
+              "solicitorAddress": {},
+              "representativeFirstName": "Ted",
+              "representativeLastName": "Robinson",
+              "solicitorEmail": "test@example.com",
+              "phoneNumber": "44646456456",
+              "email": "applicant@gmail.com",
+              "address": {
+                "AddressLine1": "Apartment 1",
+                "AddressLine2": "Westside One",
+                "AddressLine3": "22 Suffolk Street Queensway",
+                "PostTown": "Birmingham",
+                "County": "",
+                "Country": "United Kingdom",
+                "PostCode": "B1 1LS"
+              }
+            }
+          }
+        ],
+        "respondents": [
+          {
+            "id": "eb899bc1-ea93-44b0-9cfb-a5fc5ebac7d8",
+            "value": {
+              "firstName": "Respondent Firstname",
+              "lastName": "Respondent Lastname",
+              "dateOfBirth": "1995-11-10",
+              "gender": "male",
+              "placeOfBirth": "Birmingham",
+              "addressLivedLessThan5YearsDetails": "Text area",
+              "canYouProvideEmailAddress": "Yes",
+              "isDateOfBirthKnown": "Yes",
+              "isCurrentAddressKnown": "Yes",
+              "canYouProvidePhoneNumber": "Yes",
+              "isPlaceOfBirthKnown": "Yes",
+              "otherPersonRelationshipToChildren": [],
+              "solicitorOrg": {
+                "OrganisationID": "6M8BF5D",
+                "OrganisationName": "Divorce-AAT-2"
+              },
+              "solicitorAddress": {},
+              "representativeFirstName": "Ted",
+              "representativeLastName": "Robinson",
+              "isAtAddressLessThan5YearsWithDontKnow": "yes",
+              "doTheyHaveLegalRepresentation": "yes",
+              "solicitorEmail": "test@example.com",
+              "phoneNumber": "0712234667",
+              "email": "respondent@email.com",
+              "address": {
+                "AddressLine1": "Apartment 1",
+                "AddressLine2": "Westside One",
+                "AddressLine3": "22 Suffolk Street Queensway",
+                "PostTown": "Birmingham",
+                "County": "",
+                "Country": "United Kingdom",
+                "PostCode": "B1 1LS"
+              }
+            }
+          }
+        ],
+        "applicantsConfidentialDetails": [
+          {
+            "id": "6595bc4a-e617-41a5-9da2-408f2e4fb5d0",
+            "value": {
+              "firstName": "Applicant Firstname",
+              "lastName": "Applicant Lastname",
+              "email": "applicant@gmail.com",
+              "phoneNumber": "44646456456",
+              "address": {
+                "AddressLine1": "Apartment 1",
+                "AddressLine2": "Westside One",
+                "AddressLine3": "22 Suffolk Street Queensway",
+                "PostTown": "Birmingham",
+                "County": "",
+                "Country": "United Kingdom",
+                "PostCode": "B1 1LS"
+              }
+            }
+          }
+        ],
+        "applicantSolicitorEmailAddress": "prl-e2etestsolicitor@mailinator.com",
+        "solicitorName": "E2E Test Solicitor",
+        "courtName": "Wolverhampton Combined Court Centre",
+        "otherPeopleInTheCaseTable": [
+          {
+            "id": "f5b02db9-0c83-4177-b6a0-0127d9da0e80",
+            "value": {
+              "firstName": "Other Firstname",
+              "lastName": "Other Lastname",
+              "previousName": "Other PreviousName",
+              "isDateOfBirthKnown": "Yes",
+              "dateOfBirth": "2007-11-12",
+              "gender": "male",
+              "isPlaceOfBirthKnown": "Yes",
+              "placeOfBirth": "Testing text area",
+              "isCurrentAddressKnown": "Yes",
+              "address": {
+                "AddressLine1": "Apartment 1",
+                "AddressLine2": "Westside One",
+                "AddressLine3": "22 Suffolk Street Queensway",
+                "PostTown": "Birmingham",
+                "County": "",
+                "Country": "United Kingdom",
+                "PostCode": "B1 1LS"
+              },
+              "canYouProvideEmailAddress": "Yes",
+              "email": "otherstonotify@email.com",
+              "canYouProvidePhoneNumber": "Yes",
+              "phoneNumber": "07122884667",
+              "relationshipToChild": [
+                {
+                  "id": "25bf3522-f5f8-4a5d-90f3-6f6757c5eb64",
+                  "value": {
+                    "personRelationshipToChild": "Testing text area"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "ordersNonMolestationDocument": {
+          "document_filename": "dummy.pdf"
+        },
+        "submitAndPayDownloadApplicationLink": {
+          "document_filename": "Draft_C100_application.pdf"
+        },
+        "c8Document": {
+          "document_filename": "C8Document.pdf"
+        },
+        "c1ADocument": {
+          "document_url": "http://localhost:8090/bbde63bc-1625-419e-b15a-66dfd0596f6e",
+          "document_filename": "C1A_Document.pdf"
+        }
+      }
+    }
+  ]
+}
