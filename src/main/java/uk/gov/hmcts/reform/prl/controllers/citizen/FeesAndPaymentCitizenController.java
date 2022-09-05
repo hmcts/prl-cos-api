@@ -90,9 +90,9 @@ public class FeesAndPaymentCitizenController {
             @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
             @RequestBody CreatePaymentRequest createPaymentRequest
     ) throws Exception {
-        if (!isAuthorized(authorization, serviceAuthorization)) {
-            throw (new RuntimeException("Invalid Client"));
-        }
+        //        if (!isAuthorized(authorization, serviceAuthorization)) {
+        //            throw (new RuntimeException("Invalid Client"));
+        //        }
         CallbackRequest request = buildCallBackRequest(createPaymentRequest);
         PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequest(request, authorization);
         return paymentRequestService.createServicePayment(paymentServiceResponse.getServiceRequestReference(),
