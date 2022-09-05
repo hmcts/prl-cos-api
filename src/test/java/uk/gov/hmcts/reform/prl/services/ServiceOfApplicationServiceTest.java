@@ -6,11 +6,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.util.HashMap;
@@ -19,6 +22,10 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUE;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationServiceTest {
@@ -38,6 +45,15 @@ public class ServiceOfApplicationServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private ServiceOfApplicationPostService serviceOfApplicationPostService;
+
+    @Mock
+    private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
+
+    @Mock
+    private CaseInviteManager caseInviteManager;
 
     @Test
     public void testListOfOrdersCreated() {
@@ -82,4 +98,93 @@ public class ServiceOfApplicationServiceTest {
 
     }
 
+    @Test
+    public void testSendViaPost() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTyoeOfApplication","C100");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails
+            .builder()
+            .id(123L)
+            .state(CASE_ISSUE.getValue())
+            .data(casedata)
+            .build();
+        CaseData caseData1 = serviceOfApplicationService.sendPost(caseDetails,"test auth");
+        verify(serviceOfApplicationPostService).sendDocs(Mockito.any(CaseData.class),Mockito.anyString());
+    }
+
+    @Test
+    public void testSendViaPostNotInvoked() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTyoeOfApplication","C100");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails
+            .builder()
+            .id(123L)
+            .state(CASE_ISSUE.getValue())
+            .data(casedata)
+            .build();
+        CaseData caseData1 = serviceOfApplicationService.sendPost(caseDetails,"test auth");
+        verifyNoInteractions(serviceOfApplicationPostService);
+    }
+
+    @Test
+    public void testSendViaEmailC100() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTyoeOfApplication","C100");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails
+            .builder()
+            .id(123L)
+            .state(CASE_ISSUE.getValue())
+            .data(casedata)
+            .build();
+        CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
+        verify(serviceOfApplicationEmailService).sendEmailC100(Mockito.any(CaseDetails.class));
+    }
+
+    @Test
+    public void testSendViaEmailFl401() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTyoeOfApplication","C100");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails
+            .builder()
+            .id(123L)
+            .state(CASE_ISSUE.getValue())
+            .data(casedata)
+            .build();
+        CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
+        verify(serviceOfApplicationEmailService).sendEmailFL401(Mockito.any(CaseDetails.class));
+    }
 }
