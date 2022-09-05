@@ -29,4 +29,16 @@ public enum ReasonForOrderWithoutGivingNoticeEnum {
         return ReasonForOrderWithoutGivingNoticeEnum.valueOf(key);
     }
 
+    public static ReasonForOrderWithoutGivingNoticeEnum getDisplayedValueFromEnumString(String enteredValue) {
+        if (enteredValue.equalsIgnoreCase("riskOfSignificantHarm")) {
+            return ReasonForOrderWithoutGivingNoticeEnum.harmToApplicantOrChild;
+        } else if (enteredValue.equalsIgnoreCase("deterredFromPursuingApplication")) {
+            return ReasonForOrderWithoutGivingNoticeEnum.deferringApplicationIfNotImmediate;
+        } else if (enteredValue.equalsIgnoreCase("respondentDeliberatelyEvadingService")) {
+            return ReasonForOrderWithoutGivingNoticeEnum.prejudiced;
+        } else {
+            return null;
+        }
+    }
+
 }

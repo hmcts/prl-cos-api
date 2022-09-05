@@ -37,4 +37,20 @@ public enum LivingSituationEnum {
     public static LivingSituationEnum getValue(String key) {
         return LivingSituationEnum.valueOf(key);
     }
+
+    public static LivingSituationEnum getDisplayedValueFromEnumString(String enteredValue) {
+        if (enteredValue.equalsIgnoreCase("stayInHome")) {
+            return LivingSituationEnum.ableToStayInHome;
+        } else if (enteredValue.equalsIgnoreCase("returnToHome")) {
+            return LivingSituationEnum.ableToReturnHome;
+        } else if (enteredValue.equalsIgnoreCase("respondentNotEnterHome")) {
+            return LivingSituationEnum.restrictFromEnteringHome;
+        } else if (enteredValue.equalsIgnoreCase("respondentAwayFromSurroundingArea")) {
+            return LivingSituationEnum.awayFromHome;
+        } else if (enteredValue.equalsIgnoreCase("respondentLimitInHome")) {
+            return LivingSituationEnum.limitRespondentInHome;
+        } else {
+            return null;
+        }
+    }
 }
