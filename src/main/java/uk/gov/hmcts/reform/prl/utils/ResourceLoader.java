@@ -12,13 +12,21 @@ public class ResourceLoader {
     }
 
     public static byte[] loadResource(final String filePath) throws Exception {
-        InputStream io = ResourceLoader.class.getClassLoader().getResourceAsStream(filePath);
+        InputStream io = null;
+        byte[] allBytes = null;
+        try {
+            io = ResourceLoader.class.getClassLoader().getResourceAsStream(filePath);
 
-        if (io == null) {
-            throw new IllegalArgumentException(String.format("Could not find resource in path %s", filePath));
+            if (io == null) {
+                throw new IllegalArgumentException(String.format("Could not find resource in path %s", filePath));
+            } else {
+                allBytes = io.readAllBytes();
+            }
+        } finally {
+                io.close();
         }
 
-        return io.readAllBytes();
+        return allBytes;
     }
 
     public static <T> T loadJsonToObject(String filePath, Class<T> type) {
