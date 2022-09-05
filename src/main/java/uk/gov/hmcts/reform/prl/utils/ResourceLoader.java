@@ -18,7 +18,12 @@ public class ResourceLoader {
             throw new IllegalArgumentException(String.format("Could not find resource in path %s", filePath));
         }
 
-        return io.readAllBytes();
+        byte[] returnValue =  io.readAllBytes();
+
+        if (io != null) {
+            io.close();
+        }
+        return returnValue;
     }
 
     public static <T> T loadJsonToObject(String filePath, Class<T> type) {
