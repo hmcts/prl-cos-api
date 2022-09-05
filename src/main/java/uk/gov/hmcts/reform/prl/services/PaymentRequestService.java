@@ -32,7 +32,7 @@ public class PaymentRequestService {
     private final FeeService feeService;
     private final ObjectMapper objectMapper;
     public static final String GBP_CURRENCY = "GBP";
-    public static final String ENG_LANGUAGE = "ENGLISH";
+    public static final String ENG_LANGUAGE = "English";
 
     @Value("${payments.api.callback-url}")
     String callBackUrl;
