@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 public class CaseInitiationController extends AbstractCallbackController {
 
 
-    private  final AssignCaseAccessService assignCaseAccessService;
+    private final AssignCaseAccessService assignCaseAccessService;
 
     @Autowired
     UserService userService;
@@ -41,9 +41,8 @@ public class CaseInitiationController extends AbstractCallbackController {
 
         if (!userService.getUserDetails(authorisation).getRoles().contains(CITIZEN_ROLE)) {
             assignCaseAccessService.assignCaseAccess(caseDetails.getId().toString(), authorisation);
+            publishEvent(new CaseDataChanged(caseData));
         }
-
-        publishEvent(new CaseDataChanged(caseData));
 
     }
 }

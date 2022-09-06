@@ -96,12 +96,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -210,6 +212,7 @@ public class CallbackControllerTest {
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
             .surname("Solicitor")
+            .roles(ROLES)
             .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -971,7 +974,8 @@ public class CallbackControllerTest {
             .applicantCaseName("abcd").applicantOrganisationPolicy(applicantOrganisationPolicy).build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseDataUpdated);
         UserDetails userDetails = new UserDetails();
-        when(userService.getUserDetails(anyString())).thenReturn(userDetails);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(List.of(
+            CITIZEN_ROLE)).build());
         doNothing().when(ccdDataStoreService).removeCreatorRole(anyString(), anyString());
         when(authTokenGenerator.generate()).thenReturn("Generate");
         doNothing().when(assignCaseAccessClient)
