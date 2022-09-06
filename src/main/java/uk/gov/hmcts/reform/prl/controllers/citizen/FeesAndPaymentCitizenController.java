@@ -96,9 +96,13 @@ public class FeesAndPaymentCitizenController {
         //            throw (new RuntimeException("Invalid Client"));
         //        }
         CallbackRequest request = buildCallBackRequest(createPaymentRequest);
-        PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequest(request, authorization);
+        PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequest(
+            request,
+            authorization
+        );
         return paymentRequestService.createServicePayment(paymentServiceResponse.getServiceRequestReference(),
-                                                          authorization, createPaymentRequest.getReturnUrl());
+                                                          authorization, createPaymentRequest.getReturnUrl()
+        );
     }
 
     private CallbackRequest buildCallBackRequest(CreatePaymentRequest createPaymentRequest) {
@@ -120,7 +124,8 @@ public class FeesAndPaymentCitizenController {
             authorisationService.authoriseService(serviceAuthorization));
     }
 
-    @GetMapping(path = "/retrievePaymentStatus/{paymentReference}/{caseId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @GetMapping(path = "/retrievePaymentStatus/{paymentReference}/{caseId}", consumes = APPLICATION_JSON, produces =
+        APPLICATION_JSON)
     @Operation(description = "Endpoint to retrieve the payment status")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Payment created"),
@@ -134,12 +139,11 @@ public class FeesAndPaymentCitizenController {
         @PathVariable String paymentReference,
         @PathVariable String caseId
     ) throws Exception {
-       // if (!isAuthorized(authorization, serviceAuthorization)) {
-          //  throw (new RuntimeException("Invalid Client"));
-       // }
-        log.info("Payment Reference: {} for the Case id :{}", paymentReference,caseId);
-        return paymentRequestService.fetchPaymentStatus(authorization,paymentReference);
-
+        /*if (!isAuthorized(authorization, serviceAuthorization)) {
+            throw (new RuntimeException("Invalid Client"));
+        }*/
+        log.info("Payment Reference: {} for the Case id :{}", paymentReference, caseId);
+        return paymentRequestService.fetchPaymentStatus(authorization, paymentReference);
 
 
     }
