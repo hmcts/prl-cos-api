@@ -10,21 +10,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
-import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.*;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
@@ -116,6 +108,30 @@ public class FeesAndPaymentCitizenController {
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
         return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization));
+    }
+
+    @GetMapping(path = "/retrievePaymentStatus/{paymentReference}/{caseId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Endpoint to retrieve the payment status")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Payment created"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "404", description = "Payment not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public PaymentStatusForCitizen retrievePaymentStatus(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
+        @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+        @PathVariable String paymentReference,
+        @PathVariable String caseId
+    ) throws Exception {
+        if (!isAuthorized(authorization, serviceAuthorization)) {
+            throw (new RuntimeException("Invalid Client"));
+        }
+        log.info("Payment Reference: {} for the Case id :{}", paymentReference,caseId);
+        return paymentRequestService.fetchPaymentStatus(authorization,paymentReference);
+
+
+
     }
 
 }
