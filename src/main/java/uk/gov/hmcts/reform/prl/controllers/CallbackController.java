@@ -72,6 +72,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -388,19 +389,22 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        if (!userService.getUserDetails(authorisation).getRoles().contains(CITIZEN_ROLE)) {
 
-        // Updating the case name for FL401
-        if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
-            caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+            // Updating the case name for FL401
+            if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
+                caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
+            }
+            if (caseDataUpdated.get("caseTypeOfApplication") != null) {
+                caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
+            }
+
+
+            // Saving the logged-in Solicitor and Org details for the docs..
+            caseDataUpdated = getSolicitorDetails(authorisation,caseDataUpdated,caseData);
         }
-        if (caseDataUpdated.get("caseTypeOfApplication") != null) {
-            caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
-        }
-
-
-        // Saving the logged-in Solicitor and Org details for the docs..
-        caseDataUpdated = getSolicitorDetails(authorisation,caseDataUpdated,caseData);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
