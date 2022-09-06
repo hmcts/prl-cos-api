@@ -41,9 +41,8 @@ public class CaseInitiationController extends AbstractCallbackController {
 
         if (!userService.getUserDetails(authorisation).getRoles().contains(CITIZEN_ROLE)) {
             assignCaseAccessService.assignCaseAccess(caseDetails.getId().toString(), authorisation);
+            publishEvent(new CaseDataChanged(caseData));
         }
-
-        publishEvent(new CaseDataChanged(caseData));
 
     }
 }
