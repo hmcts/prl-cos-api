@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PaymentStatusForCitizen {
+public class PaymentStatusResponse {
 
     @JsonProperty(value = "amount")
     private String amount;
