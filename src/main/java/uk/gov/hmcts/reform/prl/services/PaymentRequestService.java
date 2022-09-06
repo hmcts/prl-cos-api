@@ -82,7 +82,7 @@ public class PaymentRequestService {
     public PaymentStatusForCitizen fetchPaymentStatus(String authorization,
                                                 String paymentReference) throws Exception {
         return paymentApi
-            .fetchPaymentStatus(authorization, "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwcmxfY29zX2FwaSIsImV4cCI6MTY2MjQ3NjMyMn0.RILJJQ59ju32FAqW1Sm4CAMDejubnpSZhdobDwjw29d5SVnEmEsi9zx3VVfsdk6ABIFQ7Lq5zzwD95ET-hO1MQ",
+            .fetchPaymentStatus(authorization, authTokenGenerator.generate(),
                                 paymentReference
             );
     }

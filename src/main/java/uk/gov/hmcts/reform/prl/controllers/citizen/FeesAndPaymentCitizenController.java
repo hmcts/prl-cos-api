@@ -117,9 +117,9 @@ public class FeesAndPaymentCitizenController {
         @PathVariable String paymentReference,
         @PathVariable String caseId
     ) throws Exception {
-        /*if (!isAuthorized(authorization, serviceAuthorization)) {
+        if (!isAuthorized(authorization, serviceAuthorization)) {
             throw (new RuntimeException("Invalid Client"));
-        }*/
+        }
         log.info("Payment Reference: {} for the Case id :{}", paymentReference,caseId);
         return paymentRequestService.fetchPaymentStatus(authorization,paymentReference);
 
