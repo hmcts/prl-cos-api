@@ -133,8 +133,6 @@ public class CaseController {
                                @RequestBody CaseData caseData) {
         CaseDetails caseDetails = null;
 
-        //ADDED FOR TESTING
-        caseDetails = caseService.createCase(caseData, authorisation, authTokenGenerator.generate());
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(s2sToken))) {
             caseDetails = caseService.createCase(caseData, authorisation, authTokenGenerator.generate());
