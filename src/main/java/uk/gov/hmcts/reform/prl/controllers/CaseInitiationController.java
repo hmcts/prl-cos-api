@@ -29,7 +29,8 @@ public class CaseInitiationController extends AbstractCallbackController {
 
     private final AssignCaseAccessService assignCaseAccessService;
 
-    private final UserService userService;
+    @Autowired
+    UserService userService;
 
     @PostMapping("/submitted")
     public void handleSubmitted(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -37,7 +38,6 @@ public class CaseInitiationController extends AbstractCallbackController {
 
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         final CaseData caseData = getCaseData(caseDetails);
-
 
         if (!userService.getUserDetails(authorisation).getRoles().contains(CITIZEN_ROLE)) {
             assignCaseAccessService.assignCaseAccess(caseDetails.getId().toString(), authorisation);
