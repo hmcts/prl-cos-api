@@ -14,7 +14,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 
 @Tag(name = "case-initiation-controller")
 @RestController
@@ -26,6 +29,9 @@ public class CaseInitiationController extends AbstractCallbackController {
 
     private  final AssignCaseAccessService assignCaseAccessService;
 
+    @Autowired
+    UserService userService;
+
     @PostMapping("/submitted")
     public void handleSubmitted(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                 @RequestBody CallbackRequest callbackRequest) {
@@ -33,7 +39,9 @@ public class CaseInitiationController extends AbstractCallbackController {
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         final CaseData caseData = getCaseData(caseDetails);
 
-        assignCaseAccessService.assignCaseAccess(caseDetails.getId().toString(),authorisation);
+        if (!userService.getUserDetails(authorisation).getRoles().contains(CITIZEN_ROLE)) {
+            assignCaseAccessService.assignCaseAccess(caseDetails.getId().toString(), authorisation);
+        }
 
         publishEvent(new CaseDataChanged(caseData));
 
