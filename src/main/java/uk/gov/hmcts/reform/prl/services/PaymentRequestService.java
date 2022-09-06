@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusForCitizen;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 
@@ -76,5 +77,13 @@ public class PaymentRequestService {
                                 .returnUrl(returnUrl)
                                 .build()
                 );
+    }
+
+    public PaymentStatusForCitizen fetchPaymentStatus(String authorization,
+                                                String paymentReference) throws Exception {
+        return paymentApi
+            .fetchPaymentStatus(authorization, "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwcmxfY29zX2FwaSIsImV4cCI6MTY2MjQ3NjMyMn0.RILJJQ59ju32FAqW1Sm4CAMDejubnpSZhdobDwjw29d5SVnEmEsi9zx3VVfsdk6ABIFQ7Lq5zzwD95ET-hO1MQ",
+                                paymentReference
+            );
     }
 }

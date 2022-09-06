@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.clients;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusForCitizen;
 
 @ConditionalOnProperty(prefix = "payments", name = "api.url")
 @FeignClient(name = "payments", url = "${payments.api.url}")
@@ -29,5 +31,12 @@ public interface PaymentApi {
             @RequestHeader("authorization") String authorization,
             @RequestHeader("service_authorization") String serviceAuthorization,
             @RequestBody OnlineCardPaymentRequest onlineCardPaymentRequest
+    );
+
+    @GetMapping(value = "/card-payments/{reference}", consumes = "application/json")
+    PaymentStatusForCitizen fetchPaymentStatus(
+        @RequestHeader("authorization") String authorization,
+        @RequestHeader("serviceAuthorization") String serviceAuthorization,
+        @PathVariable("reference") String paymentReference
     );
 }
