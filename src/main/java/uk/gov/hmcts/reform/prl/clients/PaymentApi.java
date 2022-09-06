@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusForCitizen;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 
 @ConditionalOnProperty(prefix = "payments", name = "api.url")
 @FeignClient(name = "payments", url = "${payments.api.url}")
@@ -34,9 +34,9 @@ public interface PaymentApi {
     );
 
     @GetMapping(value = "/card-payments/{reference}", consumes = "application/json")
-    PaymentStatusForCitizen fetchPaymentStatus(
-        @RequestHeader("authorization") String authorization,
-        @RequestHeader("serviceAuthorization") String serviceAuthorization,
+    PaymentStatusResponse fetchPaymentStatus(
+        @RequestHeader("Authorization") String authorization,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @PathVariable("reference") String paymentReference
     );
 }
