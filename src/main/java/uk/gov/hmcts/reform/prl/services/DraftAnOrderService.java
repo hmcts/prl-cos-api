@@ -47,7 +47,7 @@ public class DraftAnOrderService {
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(caseData.getCreateSelectOrderOptions().getDisplayedValue()).build();
+                .documentFileName(caseData.getCreateSelectOrderOptions().getDisplayedValue() + ".pdf").build();
             return document;
         }
         return null;
