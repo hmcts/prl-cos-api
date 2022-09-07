@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusForCitizen;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -97,6 +99,32 @@ public class FeesAndPaymentCitizenController {
         PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequest(request, authorization);
         return paymentRequestService.createServicePayment(paymentServiceResponse.getServiceRequestReference(),
                 authorization, createPaymentRequest.getReturnUrl());
+    }
+
+
+
+    @GetMapping(path = "/retrievePaymentStatus/{paymentReference}/{caseId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Endpoint to retrieve the payment status")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Payment created"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "404", description = "Payment not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public PaymentStatusForCitizen retrievePaymentStatus(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
+        @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+        @PathVariable String paymentReference,
+        @PathVariable String caseId
+    ) throws Exception {
+        if (!isAuthorized(authorization, serviceAuthorization)) {
+            throw (new RuntimeException("Invalid Client"));
+        }
+        log.info("Payment Reference: {} for the Case id :{}", paymentReference,caseId);
+        return paymentRequestService.fetchPaymentStatus(authorization,paymentReference);
+
+
+
     }
 
     private CallbackRequest buildCallBackRequest(CreatePaymentRequest createPaymentRequest) {
