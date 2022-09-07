@@ -14,8 +14,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CasePaymentRequestDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeDto;
+import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusForCitizen;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 
@@ -24,7 +27,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PaymentRequestService {
 
-
+    public static final String GBP_CURRENCY = "GBP";
+    public static final String ENG_LANGUAGE = "English";
     private final PaymentApi paymentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final FeeService feeService;
@@ -58,5 +62,27 @@ public class PaymentRequestService {
              })
              .build()
         );
+    }
+
+    public PaymentResponse createServicePayment(String serviceRequestReference, String authorization,
+                                                String returnUrl) throws Exception {
+        FeeResponse feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+        return paymentApi
+            .createPaymentRequest(serviceRequestReference, authorization, authTokenGenerator.generate(),
+                                  OnlineCardPaymentRequest.builder()
+                                      .amount(feeResponse.getAmount())
+                                      .currency(GBP_CURRENCY)
+                                      .language(ENG_LANGUAGE)
+                                      .returnUrl(returnUrl)
+                                      .build()
+            );
+    }
+
+    public PaymentStatusForCitizen fetchPaymentStatus(String authorization,
+                                                      String paymentReference) throws Exception {
+        return paymentApi
+            .fetchPaymentStatus(authorization, authTokenGenerator.generate(),
+                                paymentReference
+            );
     }
 }

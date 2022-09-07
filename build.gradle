@@ -539,6 +539,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/utils/ElementUtils.java',
   '**uk/gov/hmcts/reform/prl/services/validators/EventsChecker.java',
   '**uk/gov/hmcts/reform/prl/services/citizen/*',
+  '**uk/gov/hmcts/reform/prl/services/PaymentRequestService.java',
+  '**uk/gov/hmcts/reform/prl/controllers/citizen/FeesAndPaymentCitizenController.java',
 ]
 
 sonarqube {

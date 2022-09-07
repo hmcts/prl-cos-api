@@ -72,6 +72,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -110,10 +111,13 @@ public class CallbackController {
 
     private final LaunchDarklyClient launchDarklyClient;
 
-    @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
+    @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces =
+        APPLICATION_JSON)
+    @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if "
+        + "validation fails.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",content = @Content(mediaType = "application/json",
+        @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType =
+            "application/json",
             schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public ResponseEntity<uk.gov.hmcts.reform.ccd.client.model.CallbackResponse> validateApplicationConsiderationTimetable(
@@ -128,11 +132,14 @@ public class CallbackController {
         );
     }
 
-    @PostMapping(path = "/validate-miam-application-or-exemption", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to confirm that a MIAM has been attended or applicant is exempt. Returns error message if confirmation fails")
+    @PostMapping(path = "/validate-miam-application-or-exemption", consumes = APPLICATION_JSON, produces =
+        APPLICATION_JSON)
+    @Operation(description = "Callback to confirm that a MIAM has been attended or applicant is exempt. Returns error"
+        + " message if confirmation fails")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public ResponseEntity<uk.gov.hmcts.reform.ccd.client.model.CallbackResponse> validateMiamApplicationOrExemption(
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
@@ -193,20 +200,22 @@ public class CallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Court closestChildArrangementsCourt = courtLocatorService
             .getNearestFamilyCourt(caseData);
-        Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() : courtLocatorService
-            .getEmailAddress(closestChildArrangementsCourt);
+        Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() :
+            courtLocatorService
+                .getEmailAddress(closestChildArrangementsCourt);
         if (courtEmailAddress.isPresent()) {
-            log.info("Found court email for case id {}",caseData.getId());
-            caseDataUpdated.put("localCourtAdmin",List.of(
+            log.info("Found court email for case id {}", caseData.getId());
+            caseDataUpdated.put("localCourtAdmin", List.of(
                 Element.<LocalCourtAdminEmail>builder().value(LocalCourtAdminEmail.builder().email(courtEmailAddress.get().getAddress()).build())
                     .build()));
         } else {
-            log.info("Court email not found for case id {}",caseData.getId());
+            log.info("Court email not found for case id {}", caseData.getId());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/generate-document-submit-application", consumes = APPLICATION_JSON, produces =
+        APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")
     public AboutToStartOrSubmitCallbackResponse generateDocumentSubmitApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -215,20 +224,24 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         caseData = caseData.toBuilder().applicantsConfidentialDetails(confidentialityTabService
-                .getConfidentialApplicantDetails(caseData.getApplicants().stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList())))
+                                                                          .getConfidentialApplicantDetails(caseData.getApplicants().stream()
+                                                                                                               .map(
+                                                                                                                   Element::getValue)
+                                                                                                               .collect(
+                                                                                                                   Collectors.toList())))
             .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(caseData.getChildren()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList()))).build();
+                                                                                                      .stream()
+                                                                                                      .map(Element::getValue)
+                                                                                                      .collect(
+                                                                                                          Collectors.toList()))).build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         caseDataUpdated.put(
             DATE_AND_TIME_SUBMITTED_FIELD,
-            DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa", Locale.UK).format(zonedDateTime).toUpperCase());
+            DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa", Locale.UK).format(zonedDateTime).toUpperCase()
+        );
 
-        Map<String,Object> map = documentGenService.generateDocuments(authorisation, caseData);
+        Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData);
 
         caseDataUpdated.putAll(map);
 
@@ -250,7 +263,8 @@ public class CallbackController {
     @Operation(description = "Send Email Notification on Case Withdraw")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse sendEmailNotificationOnCaseWithdraw(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -278,10 +292,12 @@ public class CallbackController {
                 log.info("Case is updated as WithdrawRequestSent");
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                     solicitorEmailService.sendWithDrawEmailToSolicitorAfterIssuedState(caseDetails, userDetails);
-                    Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin = ofNullable(caseData.getLocalCourtAdmin());
+                    Optional<List<Element<LocalCourtAdminEmail>>> localCourtAdmin =
+                        ofNullable(caseData.getLocalCourtAdmin());
                     if (localCourtAdmin.isPresent()) {
-                        Optional<LocalCourtAdminEmail> localCourtAdminEmail = localCourtAdmin.get().stream().map(Element::getValue)
-                            .findFirst();
+                        Optional<LocalCourtAdminEmail> localCourtAdminEmail =
+                            localCourtAdmin.get().stream().map(Element::getValue)
+                                .findFirst();
                         if (localCourtAdminEmail.isPresent()) {
                             String email = localCourtAdminEmail.get().getEmail();
                             caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, email);
@@ -289,8 +305,10 @@ public class CallbackController {
                     }
                 } else {
                     solicitorEmailService.sendWithDrawEmailToFl401SolicitorAfterIssuedState(caseDetails, userDetails);
-                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails,
-                                                                                    caseData.getCourtEmailAddress());
+                    caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(
+                        caseDetails,
+                        caseData.getCourtEmailAddress()
+                    );
                 }
             } else {
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -322,7 +340,8 @@ public class CallbackController {
     @Operation(description = "Send Email Notification on Send to gatekeeper ")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse sendEmailForSendToGatekeeper(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -345,7 +364,8 @@ public class CallbackController {
     @Operation(description = "Resend case data json to RPA")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse resendNotificationtoRpa(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -363,7 +383,8 @@ public class CallbackController {
     @Operation(description = "Resend case data json to RPA")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse updateApplicantAndChildNames(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -381,27 +402,29 @@ public class CallbackController {
     @Operation(description = "Copy fl401 case name to C100 Case name")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse aboutToSubmitCaseCreation(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        if (!userService.getUserDetails(authorisation).getRoles().contains(CITIZEN_ROLE)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        // Updating the case name for FL401
-        if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
-            caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
+            // Updating the case name for FL401
+            if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
+                caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
+            }
+            if (caseDataUpdated.get("caseTypeOfApplication") != null) {
+                caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
+            }
+
+
+            // Saving the logged-in Solicitor and Org details for the docs..
+            caseDataUpdated = getSolicitorDetails(authorisation, caseDataUpdated, caseData);
         }
-        if (caseDataUpdated.get("caseTypeOfApplication") != null) {
-            caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
-        }
-
-
-        // Saving the logged-in Solicitor and Org details for the docs..
-        caseDataUpdated = getSolicitorDetails(authorisation,caseDataUpdated,caseData);
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -409,7 +432,8 @@ public class CallbackController {
     @Operation(description = "Callback for add case number submit event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse addCaseNumberSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -434,7 +458,8 @@ public class CallbackController {
     @Operation(description = "Copy manage docs for tabs")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation =
+                AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse copyManageDocsForTabs(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -447,7 +472,7 @@ public class CallbackController {
         List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
         if (furtherEvidencesList != null) {
             List<Element<FurtherEvidence>> furtherEvidences = furtherEvidencesList.stream()
-                    .filter(element -> element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
+                .filter(element -> element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
                 .collect(Collectors.toList());
             caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
 
@@ -484,7 +509,8 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    private Map<String, Object> getSolicitorDetails(String authorisation,Map<String, Object> caseDataUpdated,CaseData caseData) {
+    private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated,
+                                                    CaseData caseData) {
 
         log.info("Fetching the user and Org Details ");
         try {
@@ -503,7 +529,7 @@ public class CallbackController {
                         .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
                         .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
                         .build();
-                    caseDataUpdated.put("applicantOrganisationPolicy",applicantOrganisationPolicy);
+                    caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
                 }
             }
             log.info("SUCCESSFULLY fetched user and Org Details ");
