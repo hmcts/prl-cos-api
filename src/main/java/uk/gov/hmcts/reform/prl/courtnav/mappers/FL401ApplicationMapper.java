@@ -420,15 +420,6 @@ public class FL401ApplicationMapper {
 
     }
 
-    private boolean isChildrenResponsibility(TheHome theHome) {
-        boolean childrenResponsibility = false;
-        if (null != theHome.getChildrenApplicantResponsibility()
-            && null != theHome.getChildrenSharedResponsibility()) {
-            childrenResponsibility = true;
-        }
-        return childrenResponsibility;
-    }
-
     private Address getAddress(CourtnavAddress courtnavAddress) {
 
         return Address.builder()
@@ -581,7 +572,7 @@ public class FL401ApplicationMapper {
             .previousName(applicant.getApplicantOtherNames())
             .dateOfBirth(LocalDate.parse(applicant.getApplicantDateOfBirth().mergeDate()))
             .gender(Gender.getDisplayedValueFromEnumString(applicant.getApplicantGender().getId()))
-            .otherGender(applicant.getApplicantGender().getId().equals(ApplicantGenderEnum.other)
+            .otherGender(applicant.getApplicantGender().getDisplayedValue().equals("other")
                              ? applicant.getApplicantGenderOther() : null)
             .address(null != applicant.getApplicantAddress()
                          ? getAddress(applicant.getApplicantAddress()) : null)
