@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
-@PactTestFor(providerName = "payments", port = "5002")
+@PactTestFor(providerName = "payment_api", port = "5002")
 @TestPropertySource(properties = {"payments.api.url=http://localhost:5002"})
 @PactFolder("pacts")
 @SpringBootTest
@@ -52,7 +52,7 @@ public class PaymentApiConsumerTest {
     @Autowired
     PaymentApi paymentApi;
 
-    @Pact(provider = "payments", consumer = "prl_cos")
+    @Pact(provider = "payment_api", consumer = "prl_cos")
     private RequestResponsePact createPayment(PactDslWithProvider builder) throws JsonProcessingException {
         return builder
             .given("A request to create a payment in payments api")
