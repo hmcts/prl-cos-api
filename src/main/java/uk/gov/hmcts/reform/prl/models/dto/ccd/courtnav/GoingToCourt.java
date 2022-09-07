@@ -15,7 +15,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class GoingToCourt {
-    private final boolean isInterpreterRequired;
+    private final Boolean isInterpreterRequired;
     private final String interpreterLanguage;
     private final String interpreterDialect;
     private final boolean anyDisabilityNeeds;
