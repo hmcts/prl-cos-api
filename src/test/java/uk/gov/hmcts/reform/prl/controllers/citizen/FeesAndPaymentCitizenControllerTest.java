@@ -9,13 +9,21 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
+import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 
 import java.math.BigDecimal;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
 public class FeesAndPaymentCitizenControllerTest {
@@ -32,10 +40,17 @@ public class FeesAndPaymentCitizenControllerTest {
     @Mock
     private FeeResponse feeResponse;
 
+    @Mock
+    private PaymentRequestService paymentRequestService;
+
     private FeeResponseForCitizen feeResponseForCitizen;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "TestS2sToken";
+    public static final String PAYMENT_REFERENCE = "RC-1599-4778-4711-5958";
+    public static final String REDIRECT_URL = "https://www.gov.uk";
+    public static final String TEST_CASE_ID = "1656350492135029";
+    public static final String APPLICANT_NAME = "APPLICANT_NAME";
 
     @Before
     public void setUp() {
@@ -71,6 +86,56 @@ public class FeesAndPaymentCitizenControllerTest {
             s2sToken
         );
         assertEquals("Invalid Client", feeResponseForCitizen.getErrorRetrievingResponse());
+    }
+
+    @Test
+    public void createPaymentRequestSuccessfully() throws Exception {
+        //Given
+        CreatePaymentRequest createPaymentRequest = CreatePaymentRequest
+                .builder().caseId(TEST_CASE_ID).applicantCaseName(APPLICANT_NAME).returnUrl(REDIRECT_URL)
+                .build();
+        CallbackRequest callbackRequest = CallbackRequest
+                .builder()
+                .caseDetails(CaseDetails
+                        .builder()
+                        .caseId(TEST_CASE_ID)
+                        .caseData(CaseData
+                                .builder()
+                                .id(Long.parseLong(TEST_CASE_ID))
+                                .applicantCaseName(APPLICANT_NAME)
+                                .build()).build())
+                .build();
+        PaymentServiceResponse paymentServiceResponse = PaymentServiceResponse.builder()
+                .serviceRequestReference(PAYMENT_REFERENCE).build();
+        PaymentResponse paymentResponse = PaymentResponse.builder()
+                .paymentReference(PAYMENT_REFERENCE).build();
+
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+        when(paymentRequestService.createServiceRequest(callbackRequest, authToken)).thenReturn(paymentServiceResponse);
+        when(paymentRequestService.createServicePayment(paymentServiceResponse.getServiceRequestReference(),
+                authToken, createPaymentRequest.getReturnUrl())).thenReturn(paymentResponse);
+
+        //When
+        PaymentResponse actualPaymentResponse = feesAndPaymentCitizenController
+                .createPaymentRequest(authToken, s2sToken, createPaymentRequest);
+        //Then
+        assertEquals(paymentResponse, actualPaymentResponse);
+    }
+
+    @Test
+    public void createPaymentRequestWithInvalidClient() throws Exception {
+        //Given
+        CreatePaymentRequest createPaymentRequest = CreatePaymentRequest
+                .builder().caseId(TEST_CASE_ID).applicantCaseName(APPLICANT_NAME).returnUrl(REDIRECT_URL)
+                .build();
+
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+
+        //Then
+        assertThrows(RuntimeException.class, () -> feesAndPaymentCitizenController
+                .createPaymentRequest(authToken, s2sToken, createPaymentRequest));
     }
 
 }
