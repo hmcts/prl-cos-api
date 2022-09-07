@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.DeleteDocumentService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -214,6 +215,9 @@ public class DocumentGenService {
 
     @Autowired
     UploadDocumentService uploadService;
+
+    @Autowired
+    DeleteDocumentService deleteDocumentService;
 
     private CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
@@ -739,6 +743,18 @@ public class DocumentGenService {
 
         } catch (Exception e) {
             log.error("Error while uploading document ." + e.getMessage());
+            throw e;
+        }
+    }
+
+    public DocumentResponse deleteDocument(String authorization, String documentId) {
+        try {
+            deleteDocumentService.deleteDocument(authorization, documentId);
+            log.info("document deleted successfully..");
+            return DocumentResponse.builder().status("Success").build();
+
+        } catch (Exception e) {
+            log.error("Error while deleting  document ." + e.getMessage());
             throw e;
         }
     }
