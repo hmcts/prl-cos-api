@@ -31,13 +31,11 @@ public enum Gender {
     }
 
     public static Gender getDisplayedValueFromEnumString(String enteredValue) {
-        if (enteredValue.equalsIgnoreCase("Female")) {
+        if (enteredValue.equalsIgnoreCase("female")) {
             return Gender.female;
-        } else if (enteredValue.equalsIgnoreCase("Male")) {
+        } else if (enteredValue.equalsIgnoreCase("fale")) {
             return Gender.male;
-        } else if ((enteredValue.equalsIgnoreCase("Non-binary"))
-            || (enteredValue.equalsIgnoreCase("Transgender"))
-            || (enteredValue.equalsIgnoreCase("other"))) {
+        } else if (enteredValue.equalsIgnoreCase("other")) {
             return Gender.other;
         }
         return null;

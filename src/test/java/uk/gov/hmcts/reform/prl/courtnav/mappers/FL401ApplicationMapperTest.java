@@ -12,8 +12,6 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -23,12 +21,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ChildAtAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavDate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavGender;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavMetaData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRelationShipToRespondent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavRespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavStmtOfTruth;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtProceedings;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtnavAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.Family;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.GoingToCourt;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
@@ -55,7 +53,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -154,15 +151,12 @@ public class FL401ApplicationMapperTest {
                                       .month(9)
                                       .year(1992)
                                       .build())
-            .applicantGender(CourtNavGender.builder()
-                                 .value(ApplicantGenderEnum.Female)
-                                 .other(null)
-                                 .build())
+            .applicantGender(ApplicantGenderEnum.female)
             .shareContactDetailsWithRespondent(false)
             .applicantEmailAddress("test@courtNav.com")
             .applicantPhoneNumber("12345678907")
             .applicantHasLegalRepresentative(false)
-            .applicantAddress(Address.builder()
+            .applicantAddress(CourtnavAddress.builder()
                                   .addressLine1("55 Test Street")
                                   .postTown("Town")
                                   .postCode("LU1 5ET")
@@ -178,7 +172,7 @@ public class FL401ApplicationMapperTest {
                                        .year(1989)
                                        .build())
             .respondentEmailAddress("test@resp.com")
-            .respondentAddress(Address.builder()
+            .respondentAddress(CourtnavAddress.builder()
                                    .addressLine1("55 Test Street")
                                    .postTown("Town")
                                    .postCode("LU1 5ET")
@@ -231,7 +225,7 @@ public class FL401ApplicationMapperTest {
                                        .year(1998)
                                        .build())
             .respondentsRelationshipToApplicant(null)
-            .relationshipToApplicantOther(null)
+            .respondentsRelationshipToApplicantOther(null)
             .anyChildren(false)
             .build();
 
@@ -263,9 +257,8 @@ public class FL401ApplicationMapperTest {
         List<ContractEnum> contractEnum = new ArrayList<>();
         contractEnum.add(ContractEnum.other);
 
-        Element<ChildAtAddress> wrappedchild = Element.<ChildAtAddress>builder().value(childAtAddress).build();
-        List<Element<ChildAtAddress>> children = Collections.singletonList(wrappedchild);
-
+        List<ChildAtAddress> children = new ArrayList<>();
+        children.add(childAtAddress);
         List<LivingSituationOutcomeEnum> livingSituationOutcomeEnum = new ArrayList<>();
         livingSituationOutcomeEnum.add(LivingSituationOutcomeEnum.stayInHome);
 
@@ -275,7 +268,7 @@ public class FL401ApplicationMapperTest {
 
         home1 = TheHome.builder()
             .applyingForOccupationOrder(true)
-            .occupationOrderAddress(Address.builder()
+            .occupationOrderAddress(CourtnavAddress.builder()
                                         .addressLine1("55 Test Street")
                                         .postTown("Town")
                                         .postCode("N12 3BH")
@@ -291,12 +284,14 @@ public class FL401ApplicationMapperTest {
             .namedOnMortgageOther("test")
             .mortgageNumber("2345678")
             .mortgageLenderName("test mort")
-            .mortgageLenderAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .mortgageLenderAddress(CourtnavAddress.builder()
+                                       .addressLine1("ABC").postCode("AB1 2MN").build())
             .propertyIsRented(true)
             .namedOnRentalAgreement(contractEnum)
             .namedOnRentalAgreementOther("test")
             .landlordName("landlord")
-            .landlordAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .landlordAddress(CourtnavAddress.builder()
+                                 .addressLine1("ABC").postCode("AB1 2MN").build())
             .haveHomeRights(true)
             .wantToHappenWithLivingSituation(livingSituationOutcomeEnum)
             .wantToHappenWithFamilyHome(familyHomeOutcomeEnum)
@@ -621,7 +616,7 @@ public class FL401ApplicationMapperTest {
             .relationshipEndDate(null)
             .relationshipStartDate(null)
             .respondentsRelationshipToApplicant(ApplicantRelationshipOptionsEnum.cousin)
-            .relationshipToApplicantOther(null)
+            .respondentsRelationshipToApplicantOther(null)
             .anyChildren(false)
             .build();
 
@@ -898,12 +893,9 @@ public class FL401ApplicationMapperTest {
     public void testCourtnavApplicantDetailsHasNoConfidentialInfo() throws NotFoundException {
 
         applicantsDetails = applicantsDetails.toBuilder()
-            .applicantGender(CourtNavGender.builder()
-                                 .value(ApplicantGenderEnum.Female)
-                                 .other("test")
-                                 .build())
+            .applicantGender(ApplicantGenderEnum.female)
             .shareContactDetailsWithRespondent(true)
-            .applicantAddress(Address.builder()
+            .applicantAddress(CourtnavAddress.builder()
                                   .addressLine1("55 Test Street")
                                   .postTown("Town")
                                   .postCode("LU1 5ET")
@@ -1024,7 +1016,7 @@ public class FL401ApplicationMapperTest {
                                        .year(1998)
                                        .build())
             .respondentsRelationshipToApplicant(null)
-            .relationshipToApplicantOther(null)
+            .respondentsRelationshipToApplicantOther(null)
             .anyChildren(false)
             .build();
 
