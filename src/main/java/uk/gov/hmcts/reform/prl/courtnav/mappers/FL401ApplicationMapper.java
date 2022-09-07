@@ -57,7 +57,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.ProtectedChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.RespondentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.TheHome;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantGenderEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicationCoverEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsApplicantEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.BehaviourTowardsChildrenEnum;
