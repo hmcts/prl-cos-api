@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusForCitizen;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 
@@ -79,8 +79,8 @@ public class PaymentRequestService {
                 );
     }
 
-    public PaymentStatusForCitizen fetchPaymentStatus(String authorization,
-                                                String paymentReference) throws Exception {
+    public PaymentStatusResponse fetchPaymentStatus(String authorization,
+                                                    String paymentReference) throws Exception {
         return paymentApi
             .fetchPaymentStatus(authorization, authTokenGenerator.generate(),
                                 paymentReference

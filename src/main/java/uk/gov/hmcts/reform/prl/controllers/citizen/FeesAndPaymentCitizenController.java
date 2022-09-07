@@ -26,10 +26,10 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusForCitizen;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -111,7 +111,7 @@ public class FeesAndPaymentCitizenController {
         @ApiResponse(responseCode = "404", description = "Payment not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public PaymentStatusForCitizen retrievePaymentStatus(
+    public PaymentStatusResponse retrievePaymentStatus(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @PathVariable String paymentReference,
