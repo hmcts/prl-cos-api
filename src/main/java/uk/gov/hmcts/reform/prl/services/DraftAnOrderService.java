@@ -35,7 +35,7 @@ public class DraftAnOrderService {
     public Document generateSolicitorDraftOrder(String authorisation, CaseData caseData) throws Exception {
 
         String draftOrderString = getTheOrderDraftString(caseData);
-       if (draftOrderString != null) {
+        if (draftOrderString != null) {
             caseData = caseData.toBuilder().previewDraftAnOrder(draftOrderString).build();
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
