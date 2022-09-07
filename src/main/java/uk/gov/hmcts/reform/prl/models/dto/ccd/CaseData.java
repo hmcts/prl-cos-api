@@ -643,4 +643,6 @@ public class CaseData implements MappableObject {
     private String caseOrigin;
     private String numberOfAttachments;
 
+    private String solicitorDraftOrderText;
+    private Document solicitorDraftOrderDoc;
 }

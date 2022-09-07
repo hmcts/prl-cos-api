@@ -60,7 +60,8 @@ def versions = [
   tomcat                       : '9.0.63',
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.7.3',
-  pdfbox                       : '2.0.24'
+  pdfbox                       : '2.0.24',
+  commonsText                  : '1.9'
 ]
 
 allprojects {
@@ -295,6 +296,8 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '3.0.3'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
+  implementation group: 'org.apache.commons', name: 'commons-text', version: versions.commonsText
+
 
   compile group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '2.2.0'
   compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '5.7.1'

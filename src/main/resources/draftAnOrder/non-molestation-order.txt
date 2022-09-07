@@ -1,0 +1,71 @@
+Ordered on ${orderDate} by ${judgeOrMagistrateTitle}  {{fill lastName based on the selection of title}} ${judgeOrMagistratesLastName} and Justice’s Legal Adviser ${justiceLegalAdviserFullName}
+
+Family court sitting at: ${familyCourtName}
+
+People in the case
+
+Applicant: ${fl401ApplicantName}
+Applicant reference: ${fl404bApplicantReference}
+
+Respondent: ${fl404bRespondentName} born ${fl404bRespondentDob}
+Respondent: ${fl404bRespondentReference}
+
+${applicantChildNameDob}
+
+Important notice to the respondent,
+${fl404bRespondentName} born on ${fl404bRespondentDob} , of ${fl404bRespondentAddress}
+
+
+You must obey this order. You should read it carefully.
+
+If you do not understand anything in this order, you should go to a solicitor, legal advice centre or Citizens Advice.
+
+You have a right to apply to the court to change or cancel the order.
+Warning: If, without reasonable excuse, you do anything which you are forbidden from doing by this order, you will be committing a criminal offence and liable on conviction to a term of imprisonment not exceeding 5 years or to a fine or to both.
+Alternatively, if you do not obey this order, you will be guilty of contempt of court and you may be sent to prison, be fined, or have your assets seized.
+
+
+
+<<cs_{fl404CustomFields.fl404bMentionedProperty=’Yes’}>>The property in this order is:
+**{{fl404bAddressOfProperty}}**<<es_>>
+
+${recitalsOrPreamble}
+
+${isTheOrderByConsent}
+
+The court orders:
+
+******Add this logic after understanding template :D *****
+
+${furtherDirectionsIfRequired}
+
+This order applies to the respondent once it is personally served on them or once they have been made aware of it.
+
+This order applies until: ${dateOrderEnds} At ${dateOrderEndTime}.
+
+The respondent has the right to apply to the court at any time to change or cancel this order. If the respondent intends to rely on any evidence to support their application, this must be provided in writing to the applicant or applicant’s solicitors in advance.
+
+<<cs_{fl404CustomFields.fl404bIsNoticeGiven =’WithoutNotice’}>> ***** need to check on this notice condition
+If the respondent intends to oppose to the order at the next hearing, they must notify the court in advance that they intend to attend the hearing and oppose the order. If the respondent does not notify the court, the court may decide that the applicant or applicant’s solicitor does not need to attend the next hearing, and at the next hearing may make an order to extend the injunction.
+<<es_>>
+
+*****need to check on this: court details will not be populated
+A further hearing will take place on **{{fl404bDateOfNextHearing}}** **{{fl404bTimeOfNextHearing}}** at **{{fl404bCourtName1}}**,
+**{{fl404bOtherCourtAddress.AddressLine1}}**
+**{{fl404bOtherCourtAddress.PostTown}}**
+**{{fl404bOtherCourtAddress.PostCode}}**.
+It is estimated the hearing will last: **{{fl404bOtherCourtAddress.fl404bTimeEstimate}}**
+If the respondent does not attend this hearing at this time, the court may make an order in their absence.
+
+**{{fl404bCostOfApplication}}** *****need to check on this : cost
+
+The order is made **{{fl404bIsNoticeGiven}}** if(’WithoutNotice’) Without notice else if(’WithNotice’)With notice  end if to the respondent.
+
+
+Where the court has made a non-molestation order, a copy of the order must be delivered to the officer in charge of the police station for the applicant’s address, or such other police station as the court may specify, and must be accompanied by a statement showing that the respondent has been served with the order or informed of its terms: see FPR 2010, rule 10.10
+
+
+Note to the arresting officer
+Under section 42A of the Family Law Act 1996, breach of a non-molestation order is a criminal offence punishable by up to 5 years’ imprisonment. It is an arrestable offence and it is not necessary to obtain a warrant.
+A person who without reasonable excuse does anything that they are prohibited from doing by a non-molestation order is guilty of an offence.
+Family Law Act 1996, section 42A(1).
