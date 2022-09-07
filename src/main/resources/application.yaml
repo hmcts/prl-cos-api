@@ -114,8 +114,8 @@ notify:
 
 payments:
   api:
-    url: ${PAY_URL:}
-    callback-url: ${PAY_CALLBACK_URL:}
+    url: http://payment-api-demo.service.core-compute-demo.internal
+    callback-url: http://prl-cos-demo.service.core-compute-demo.internal/service-request-update
 private-law:
     authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend}
 
@@ -142,7 +142,7 @@ fees-register:
 
 idam:
   s2s-auth:
-    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
+    url: ${AUTH_PROVIDER_SERVICE_CLIENT_BASEURL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
     microservice: prl_cos_api
     totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:

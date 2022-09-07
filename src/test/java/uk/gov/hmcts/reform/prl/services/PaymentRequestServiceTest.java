@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CasePaymentRequestDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeDto;
+import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 
@@ -28,6 +30,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.FeesAndPaymentCitizenControllerTest.PAYMENT_REFERENCE;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.FeesAndPaymentCitizenControllerTest.REDIRECT_URL;
+import static uk.gov.hmcts.reform.prl.services.PaymentRequestService.ENG_LANGUAGE;
+import static uk.gov.hmcts.reform.prl.services.PaymentRequestService.GBP_CURRENCY;
 
 @RunWith(SpringRunner.class)
 public class PaymentRequestServiceTest {
@@ -163,6 +169,32 @@ public class PaymentRequestServiceTest {
         assertThrows(NullPointerException.class, () -> {
             PaymentServiceResponse psr = paymentRequestService.createServiceRequest(callbackRequest, "");
         });
+    }
+
+    @Test
+    public void shouldReturnPaymentCreateResponse() throws Exception {
+        //Given
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        OnlineCardPaymentRequest onlineCardPaymentRequest = OnlineCardPaymentRequest
+                .builder().returnUrl(REDIRECT_URL).amount(feeResponse.getAmount())
+                .currency(GBP_CURRENCY).language(ENG_LANGUAGE).build();
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        PaymentResponse paymentResponse = PaymentResponse.builder()
+                .paymentReference(PAYMENT_REFERENCE)
+                .dateCreated("2020-09-07T11:24:07.160+0000")
+                .externalReference("vnahehn9rlv17e5kel03pugd7j")
+                .nextUrl("https://www.payments.service.gov.uk/secure/7a85745f-9485-47e4-ae12-e7d659a40299")
+                .paymentStatus("Initiated")
+                .build();
+        when(paymentApi.createPaymentRequest(PAYMENT_REFERENCE, serviceAuthToken,
+                serviceAuthToken, onlineCardPaymentRequest)).thenReturn(paymentResponse);
+
+        //When
+        PaymentResponse actualPaymentResponse = paymentRequestService
+                .createServicePayment(PAYMENT_REFERENCE, serviceAuthToken, REDIRECT_URL);
+
+        //Then
+        assertEquals(paymentResponse, actualPaymentResponse);
     }
 }
 
