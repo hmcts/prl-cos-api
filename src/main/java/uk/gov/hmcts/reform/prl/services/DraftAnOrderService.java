@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.prl.utils.ResourceReader.readString;
 @RequiredArgsConstructor
 public class DraftAnOrderService {
 
-    @Value("${document.templates.citizen.prl_citizen_upload_template}")
+    @Value("${document.templates.common.prl_solicitor_draft_an_order_template}")
     String solicitorDraftAnOrder;
 
     private final DgsService dgsService;
