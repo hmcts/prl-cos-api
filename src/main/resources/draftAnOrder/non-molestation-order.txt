@@ -1,30 +1,33 @@
-Ordered on ${orderDate} by ${judgeOrMagistrateTitle}  {{fill lastName based on the selection of title}} ${judgeOrMagistratesLastName} and Justice’s Legal Adviser ${justiceLegalAdviserFullName}
-
+<h1>Non-molestation order</h1></br>
+Section 42 Family Law Act 1996</br></br>
+Ordered on ${orderDate} by ${judgeOrMagistrateTitle} ${judgeOrMagistratesLastName} and Justice’s Legal Adviser ${justiceLegalAdviserFullName}</br></br>
 Family court sitting at: ${familyCourtName}
 
-People in the case
+<h3>People in the case</h3>
 
-Applicant: ${fl401ApplicantName}
-Applicant reference: ${fl404bApplicantReference}
+Applicant: ${fl401ApplicantName}</br>
+Applicant reference: ${fl404bApplicantReference}</br></br></br>
 
-Respondent: ${fl404bRespondentName} born ${fl404bRespondentDob}
-Respondent: ${fl404bRespondentReference}
+Respondent: ${fl404bRespondentName} born ${fl404bRespondentDob}</br>
+Respondent: ${fl404bRespondentReference}</br></br>
 
-${applicantChildNameDob}
+<hr>
+</br>
 
-Important notice to the respondent,
-${fl404bRespondentName} born on ${fl404bRespondentDob} , of ${fl404bRespondentAddress}
+${applicantChildNameDob}</br></br>
 
+<h3> Important notice to the respondent,
+${fl404bRespondentName} born on ${fl404bRespondentDob} , of ${fl404bRespondentAddress} </h3>
+</br>
+You must obey this order. You should read it carefully.</br></br></br>
+If you do not understand anything in this order, you should go to a solicitor, legal advice centre or Citizens Advice.</br></br></br>
+You have a right to apply to the court to change or cancel the order.</br></br>
 
-You must obey this order. You should read it carefully.
-
-If you do not understand anything in this order, you should go to a solicitor, legal advice centre or Citizens Advice.
-
-You have a right to apply to the court to change or cancel the order.
-Warning: If, without reasonable excuse, you do anything which you are forbidden from doing by this order, you will be committing a criminal offence and liable on conviction to a term of imprisonment not exceeding 5 years or to a fine or to both.
-Alternatively, if you do not obey this order, you will be guilty of contempt of court and you may be sent to prison, be fined, or have your assets seized.
-
-
+<b>Warning: If, without reasonable excuse, you do anything which you are forbidden from doing by this order, you will be committing a criminal offence and liable on conviction to a term of imprisonment not exceeding 5 years or to a fine or to both.
+Alternatively, if you do not obey this order, you will be guilty of contempt of court and you may be sent to prison, be fined, or have your assets seized.</b>
+</br>
+<hr>
+</br>
 
 <<cs_{fl404CustomFields.fl404bMentionedProperty=’Yes’}>>The property in this order is:
 **{{fl404bAddressOfProperty}}**<<es_>>
