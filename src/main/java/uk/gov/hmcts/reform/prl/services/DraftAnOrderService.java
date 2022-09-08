@@ -76,7 +76,8 @@ public class DraftAnOrderService {
             );
             nonMolestationPlaceHoldersMap.put(
                 "judgeOrMagistrateTitle",
-                caseData.getManageOrders().getJudgeOrMagistrateTitle().getDisplayedValue()
+                caseData.getManageOrders().getJudgeOrMagistrateTitle() != null
+                    ? caseData.getManageOrders().getJudgeOrMagistrateTitle().getDisplayedValue() : " "
             );
             nonMolestationPlaceHoldersMap.put("judgeOrMagistratesLastName", caseData.getJudgeOrMagistratesLastName());
             nonMolestationPlaceHoldersMap.put("justiceLegalAdviserFullName", caseData.getJusticeLegalAdviserFullName());
