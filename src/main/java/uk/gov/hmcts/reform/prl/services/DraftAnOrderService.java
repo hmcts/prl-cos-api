@@ -131,6 +131,7 @@ public class DraftAnOrderService {
             nonMolestationPlaceHoldersMap.put(
                 "fl404bMentionedProperty", (caseData.getManageOrders().getFl404CustomFields() != null
                     && caseData.getManageOrders().getFl404CustomFields()
+                    .getFl404bMentionedProperty() != null && caseData.getManageOrders().getFl404CustomFields()
                     .getFl404bMentionedProperty().equalsIgnoreCase("Yes"))
                     ? "The property in this order is: " : " ");
             nonMolestationPlaceHoldersMap.put(
