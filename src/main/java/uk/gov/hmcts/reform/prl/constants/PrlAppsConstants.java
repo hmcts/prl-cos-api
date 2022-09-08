@@ -8,6 +8,7 @@ import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PrlAppsConstants {
+    public static final String CITIZEN_PRL_CREATE_EVENT = "solicitorCreate";
     public static final String JURISDICTION = "PRIVATELAW";
     public static final String CASE_TYPE = "PRLAPPS";
 
