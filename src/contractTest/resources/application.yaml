@@ -68,7 +68,7 @@ xui:
 
 citizen:
   url: ${CITIZEN_URL:https://privatelaw.aat.platform.hmcts.net}
-
+  dashboardUrl: ${CITIZEN_URL:https://wwww.example.com}
 aca:
   api:
     url: ${ACA_SERVICE_API_BASEURL:http://localhost:4454}
@@ -118,9 +118,6 @@ send-grid:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
-
-citizen:
-  dashboardUrl: ${CITIZEN_URL:https://wwww.example.com}
 
 payments:
   api:
