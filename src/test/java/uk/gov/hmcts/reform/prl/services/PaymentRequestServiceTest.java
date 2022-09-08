@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 
 import java.math.BigDecimal;
 
@@ -59,6 +60,9 @@ public class PaymentRequestServiceTest {
 
     @Mock
     private PaymentServiceResponse paymentServiceResponse;
+
+    @Mock
+    private PaymentStatusResponse paymentStatusResponse;
 
     private CallbackRequest callbackRequest;
 
@@ -191,10 +195,34 @@ public class PaymentRequestServiceTest {
 
         //When
         PaymentResponse actualPaymentResponse = paymentRequestService
-                .createServicePayment(PAYMENT_REFERENCE, serviceAuthToken, REDIRECT_URL);
+            .createServicePayment(PAYMENT_REFERENCE, serviceAuthToken, REDIRECT_URL);
 
         //Then
         assertEquals(paymentResponse, actualPaymentResponse);
+    }
+
+    @Test
+    public void shouldReturnPaymentStatus() throws Exception {
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+
+        paymentStatusResponse = PaymentStatusResponse.builder()
+            .amount("232").reference(PAYMENT_REFERENCE)
+            .ccdcaseNumber("1647959867368635").caseReference("1647959867368635")
+            .channel("online").method("card").status("Success")
+            .externalReference("uau4i1elcbmf36kshfp6f33npv")
+            .paymentGroupReference("2022-1662471461349")
+            .build();
+        when(paymentApi.fetchPaymentStatus(serviceAuthToken,serviceAuthToken,PAYMENT_REFERENCE))
+            .thenReturn(paymentStatusResponse);
+
+        //When
+        PaymentStatusResponse actualPaymentStatusResponse = paymentRequestService
+            .fetchPaymentStatus(serviceAuthToken,PAYMENT_REFERENCE);
+
+        //Then
+        assertEquals(paymentStatusResponse,actualPaymentStatusResponse);
+
     }
 }
 

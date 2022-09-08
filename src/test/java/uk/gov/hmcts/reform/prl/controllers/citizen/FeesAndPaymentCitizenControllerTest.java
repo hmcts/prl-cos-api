@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
@@ -51,6 +52,7 @@ public class FeesAndPaymentCitizenControllerTest {
     public static final String REDIRECT_URL = "https://www.gov.uk";
     public static final String TEST_CASE_ID = "1656350492135029";
     public static final String APPLICANT_NAME = "APPLICANT_NAME";
+
 
     @Before
     public void setUp() {
@@ -137,5 +139,42 @@ public class FeesAndPaymentCitizenControllerTest {
         assertThrows(RuntimeException.class, () -> feesAndPaymentCitizenController
                 .createPaymentRequest(authToken, s2sToken, createPaymentRequest));
     }
+
+
+    @Test
+    public void retrievePaymentStatusSuccessfully() throws Exception {
+
+        PaymentStatusResponse paymentStatusResponse = PaymentStatusResponse.builder()
+            .amount("232").reference(PAYMENT_REFERENCE)
+            .ccdcaseNumber("1647959867368635").caseReference("1647959867368635")
+            .channel("online").method("card").status("Success")
+            .externalReference("uau4i1elcbmf36kshfp6f33npv")
+            .paymentGroupReference("2022-1662471461349")
+            .build();
+
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+
+        when(paymentRequestService.fetchPaymentStatus(authToken,PAYMENT_REFERENCE))
+            .thenReturn(paymentStatusResponse);
+
+        PaymentStatusResponse actualPaymentStatusResponse = feesAndPaymentCitizenController
+            .retrievePaymentStatus(authToken,s2sToken,PAYMENT_REFERENCE,TEST_CASE_ID);
+
+        assertEquals(paymentStatusResponse,actualPaymentStatusResponse);
+    }
+
+    @Test
+    public void retrievePaymentStatusWithInvalidClient() throws Exception {
+
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+
+        //Then
+        assertThrows(RuntimeException.class, () -> feesAndPaymentCitizenController
+            .retrievePaymentStatus(authToken, s2sToken, PAYMENT_REFERENCE,TEST_CASE_ID));
+    }
+
+
 
 }
