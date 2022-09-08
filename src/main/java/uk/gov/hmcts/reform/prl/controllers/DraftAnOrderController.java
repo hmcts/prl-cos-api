@@ -34,9 +34,9 @@ public class DraftAnOrderController {
     private final DgsService dgsService;
     private final DraftAnOrderService draftAnOrderService;
 
-    @PostMapping(path = "/solicitor-prepopulate-draft-order-text", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/solicitor-prepopulate-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Generate text for draft an order")
-    public AboutToStartOrSubmitCallbackResponse solicitorDraftAnOrder(
+    public AboutToStartOrSubmitCallbackResponse prePopulateFields(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -73,6 +73,23 @@ public class DraftAnOrderController {
         );
         callbackRequest.getCaseDetails().getData().putAll(caseData.toMap(objectMapper));
         log.info("*** caseDataUpdated {} ***", callbackRequest.getCaseDetails().getData());
+        return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
+    }
+
+
+    @PostMapping(path = "/solicitor-prepopulate-draft-order-text", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to Generate text for draft an order")
+    public AboutToStartOrSubmitCallbackResponse prepopulateSolicitorDraftAnOrder(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("*** inside prepopulateSolicitorDraftAnOrder() {} ***", callbackRequest.getCaseDetails().getData());
+        callbackRequest.getCaseDetails().getData().put(
+            "previewDraftAnOrder",
+            draftAnOrderService.getTheOrderDraftString(caseData)
+        );
+        //callbackRequest.getCaseDetails().getData().putAll(caseData.toMap(objectMapper));
+        log.info("*** before returning {} ***", callbackRequest.getCaseDetails().getData());
         return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
     }
 
