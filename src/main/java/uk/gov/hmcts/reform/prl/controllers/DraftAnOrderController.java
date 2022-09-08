@@ -83,7 +83,7 @@ public class DraftAnOrderController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("*** inside prepopulateSolicitorDraftAnOrder() {} ***", callbackRequest.getCaseDetails().getData());
+        log.info("*** inside prepopulateSolicitorDraftAnOrder() {} ***", caseData);
         callbackRequest.getCaseDetails().getData().put(
             "previewDraftAnOrder",
             draftAnOrderService.getTheOrderDraftString(caseData)
