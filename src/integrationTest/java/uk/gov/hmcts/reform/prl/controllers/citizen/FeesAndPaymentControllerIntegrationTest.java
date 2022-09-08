@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -29,6 +30,8 @@ public class FeesAndPaymentControllerIntegrationTest {
 
     private final String createPaymentEndpoint = "/fees-and-payment-apis/create-payment";
 
+    private final String getPaymentStatusEndpoint = "/fees-and-payment-apis/retrievePaymentStatus/RC-1599-4778-4711-5958/1656350492135029";
+
     private final String validBody = "requests/create-payment-input.json";
 
     @Value("${payments.api.url}")
@@ -51,5 +54,16 @@ public class FeesAndPaymentControllerIntegrationTest {
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testRetrievePaymentStatus() throws Exception {
+        HttpGet httpGet = new HttpGet(serviceUrl +  getPaymentStatusEndpoint);
+        httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpGet.addHeader("ServiceAuthorization", serviceAuthenticationGenerator.generate());
+        httpGet.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);
+        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+
     }
 }
