@@ -70,8 +70,11 @@ feature-toggle:
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
+citizen:
+  dashboardUrl: ${CITIZEN_URL:https://wwww.example.com}
+
 citizen_frontend:
-  url: http://example.com
+  url: ${CITIZEN_URL:https://wwww.example.com}
 
 uk:
   gov:
@@ -102,6 +105,9 @@ uk:
             RESPONDENT_WITHOUT_SOLICITOR: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
             CASE_INVITE: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
             APPLICANT_SOLICITOR: 72e32651-a952-4063-8a85-5f28950fcc84
+            CA_APPLICANT_SOLICITOR_RES_NOTIFICATION: a08975e3-6438-4f58-a0f6-827c0dcab291
+            CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION: b6224e6a-f55c-46f8-bfc7-631d273070a4
+            CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
