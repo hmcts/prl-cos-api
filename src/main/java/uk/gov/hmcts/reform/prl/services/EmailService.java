@@ -66,7 +66,7 @@ public class EmailService {
         return emailTemplatesConfig.getTemplates().get(languagePreference).get(templateName);
     }
 
-    protected CaseData getCaseData(CaseDetails caseDetails) {
+    public CaseData getCaseData(CaseDetails caseDetails) {
 
         return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
