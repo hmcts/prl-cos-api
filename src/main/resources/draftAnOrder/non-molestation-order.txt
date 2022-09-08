@@ -46,29 +46,22 @@ This order applies to the respondent once it is personally served on them or onc
 
 This order applies until: ${dateOrderEnds} At ${dateOrderEndTime}.
 
-The respondent has the right to apply to the court at any time to change or cancel this order. If the respondent intends to rely on any evidence to support their application, this must be provided in writing to the applicant or applicant’s solicitors in advance.
+The respondent has the right to apply to the court at any time to change or cancel this order. If the respondent intends to rely on any evidence to support their application, this must be provided in writing to the applicant or applicant’s solicitors in advance. </br>
 
-<<cs_{fl404CustomFields.fl404bIsNoticeGiven =’WithoutNotice’}>> ***** need to check on this notice condition
-If the respondent intends to oppose to the order at the next hearing, they must notify the court in advance that they intend to attend the hearing and oppose the order. If the respondent does not notify the court, the court may decide that the applicant or applicant’s solicitor does not need to attend the next hearing, and at the next hearing may make an order to extend the injunction.
-<<es_>>
+${WithoutNotice} </br>
 
-*****need to check on this: court details will not be populated
-A further hearing will take place on **{{fl404bDateOfNextHearing}}** **{{fl404bTimeOfNextHearing}}** at **{{fl404bCourtName1}}**,
-**{{fl404bOtherCourtAddress.AddressLine1}}**
-**{{fl404bOtherCourtAddress.PostTown}}**
-**{{fl404bOtherCourtAddress.PostCode}}**.
-It is estimated the hearing will last: **{{fl404bOtherCourtAddress.fl404bTimeEstimate}}**
-If the respondent does not attend this hearing at this time, the court may make an order in their absence.
+A further hearing will take place on ${fl404bDateOfNextHearing} ${fl404bTimeOfNextHearing} at ${fl404bOtherCourtName1} ${fl404bOtherCourtAddress} </br></br>
+It is estimated the hearing will last: ${fl404bTimeEstimate} </br>
+If the respondent does not attend this hearing at this time, the court may make an order in their absence.</br>
+${fl404bCostOfApplication} </br>
+The order is made With${fl404bWithoutNotice} notice to the respondent.</br>
+<hr>
+</br>
+Where the court has made a non-molestation order, a copy of the order must be delivered to the officer in charge of the police station for the applicant’s address, or such other police station as the court may specify, and must be accompanied by a statement showing that the respondent has been served with the order or informed of its terms: see FPR 2010, rule 10.10 </br></br>
+<hr>
+</br>
+<b> Note to the arresting officer</b></br>
+Under section 42A of the Family Law Act 1996, breach of a non-molestation order is a criminal offence punishable by up to 5 years’ imprisonment. It is an arrestable offence and it is not necessary to obtain a warrant. </br>
+A person who without reasonable excuse does anything that they are prohibited from doing by a non-molestation order is guilty of an offence.</br>
+Family Law Act 1996, section 42A(1).</br>
 
-**{{fl404bCostOfApplication}}** *****need to check on this : cost
-
-The order is made **{{fl404bIsNoticeGiven}}** if(’WithoutNotice’) Without notice else if(’WithNotice’)With notice  end if to the respondent.
-
-
-Where the court has made a non-molestation order, a copy of the order must be delivered to the officer in charge of the police station for the applicant’s address, or such other police station as the court may specify, and must be accompanied by a statement showing that the respondent has been served with the order or informed of its terms: see FPR 2010, rule 10.10
-
-
-Note to the arresting officer
-Under section 42A of the Family Law Act 1996, breach of a non-molestation order is a criminal offence punishable by up to 5 years’ imprisonment. It is an arrestable offence and it is not necessary to obtain a warrant.
-A person who without reasonable excuse does anything that they are prohibited from doing by a non-molestation order is guilty of an offence.
-Family Law Act 1996, section 42A(1).

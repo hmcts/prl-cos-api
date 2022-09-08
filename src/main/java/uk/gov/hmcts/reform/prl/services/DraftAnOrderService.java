@@ -25,6 +25,10 @@ import static uk.gov.hmcts.reform.prl.utils.ResourceReader.readString;
 @RequiredArgsConstructor
 public class DraftAnOrderService {
 
+    private static final String NOTICE_TEXT = "If the respondent intends to oppose to the order at the next hearing, "
+        + "they must notify the court in advance that they intend to attend the hearing and oppose the order.If the "
+        + "respondent does not notify the court, the court may decide that the applicant or applicant’s solicitor does"
+        + "not need to attend the next hearing, and at the next hearing may make an order to extend the injunction.";
     @Value("${document.templates.common.prl_solicitor_draft_an_order_template}")
     String solicitorDraftAnOrder;
 
@@ -83,32 +87,39 @@ public class DraftAnOrderService {
             nonMolestationPlaceHoldersMap.put("justiceLegalAdviserFullName", caseData.getJusticeLegalAdviserFullName());
             nonMolestationPlaceHoldersMap.put(
                 "familyCourtName",
-                caseData.getCourtName() != null ? caseData.getCourtName() : " "
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bCourtName() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bCourtName() : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "fl401ApplicantName",
-                caseData.getApplicantsFL401() != null
-                    ? caseData.getApplicantsFL401().getFirstName() + caseData.getApplicantsFL401().getFirstName() : " "
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bApplicantName() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bApplicantName() : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "fl404bApplicantReference",
-                caseData.getApplicantsFL401() != null ? caseData.getApplicantsFL401().getSolicitorReference() : " "
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bApplicantReference() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bApplicantReference() : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "fl404bRespondentName",
-                caseData.getRespondentsFL401() != null
-                    ? caseData.getRespondentsFL401().getFirstName() + caseData.getRespondentsFL401().getLastName() : " "
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bRespondentName() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bRespondentName() : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "fl404bRespondentDob",
-                (caseData.getRespondentsFL401() != null && caseData.getRespondentsFL401().getDateOfBirth() != null)
-                    ? caseData.getRespondentsFL401().getDateOfBirth().toString() : " "
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bRespondentDob() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bRespondentDob().toString() : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "fl404bRespondentReference",
-                (caseData.getRespondentsFL401() != null
-                    && caseData.getRespondentsFL401().getSolicitorReference() != null)
-                    ? caseData.getRespondentsFL401().getSolicitorReference() : " "
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bRespondentReference() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bRespondentReference() : " "
             );
 
             nonMolestationPlaceHoldersMap.put(
@@ -132,13 +143,70 @@ public class DraftAnOrderService {
             );
             nonMolestationPlaceHoldersMap.put(
                 "dateOrderEnds",
-                caseData.getManageOrders().getDateOrderEnds() != null
-                    ? caseData.getManageOrders().getDateOrderEnds().toString() : " "
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bDateOrderEnd() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bDateOrderEnd() : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "dateOrderEndTime",
-                caseData.getManageOrders().getDateOrderEndsTime() != null
-                    ? caseData.getManageOrders().getDateOrderEndsTime() : " "
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bDateOrderEndTime() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bDateOrderEndTime() : " "
+            );
+
+            nonMolestationPlaceHoldersMap.put(
+                "WithoutNotice",
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bIsNoticeGiven().equalsIgnoreCase(
+                    "WithoutNotice"))
+                    ? NOTICE_TEXT : " "
+            );
+            nonMolestationPlaceHoldersMap.put(
+                "fl404bDateOfNextHearing",
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bDateOfNextHearing() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bDateOfNextHearing() : " "
+            );
+            nonMolestationPlaceHoldersMap.put(
+                "fl404bTimeOfNextHearing",
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bTimeOfNextHearing() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bTimeOfNextHearing() : " "
+            );
+
+            nonMolestationPlaceHoldersMap.put(
+                "fl404bOtherCourtName1",
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bCourtName1() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bCourtName1() : " "
+            );
+
+            nonMolestationPlaceHoldersMap.put(
+                "fl404bOtherCourtAddress",
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bOtherCourtAddress() != null)
+                    ? getAddress(caseData.getManageOrders().getFl404CustomFields().getFl404bOtherCourtAddress()) : " "
+            );
+
+            nonMolestationPlaceHoldersMap.put(
+                "fl404bTimeEstimate",
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bTimeEstimate() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bTimeEstimate() : " "
+            );
+
+            nonMolestationPlaceHoldersMap.put(
+                "fl404bCostOfApplication",
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bCostOfApplication() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bCostOfApplication() : " "
+            );
+
+            nonMolestationPlaceHoldersMap.put(
+                "fl404bWithoutNotice",
+                (caseData.getManageOrders().getFl404CustomFields().getFl404bIsNoticeGiven().equalsIgnoreCase(
+                    "WithoutNotice"))
+                    ? "out" : ""
             );
 
             StringSubstitutor substitutor = new StringSubstitutor(nonMolestationPlaceHoldersMap);
