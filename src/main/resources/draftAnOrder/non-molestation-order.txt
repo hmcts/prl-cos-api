@@ -23,28 +23,28 @@ You must obey this order. You should read it carefully.</br></br></br>
 If you do not understand anything in this order, you should go to a solicitor, legal advice centre or Citizens Advice.</br></br></br>
 You have a right to apply to the court to change or cancel the order.</br></br>
 
-<b>Warning: If, without reasonable excuse, you do anything which you are forbidden from doing by this order, you will be committing a criminal offence and liable on conviction to a term of imprisonment not exceeding 5 years or to a fine or to both.
+<b>Warning: If, without reasonable excuse, you do anything which you are forbidden from doing by this order, you will be committing a criminal offence and liable on conviction to a term of imprisonment not exceeding 5 years or to a fine or to both.</br>
 Alternatively, if you do not obey this order, you will be guilty of contempt of court and you may be sent to prison, be fined, or have your assets seized.</b>
 </br>
 <hr>
 </br>
 
-<<cs_{fl404CustomFields.fl404bMentionedProperty=’Yes’}>>The property in this order is:
-**{{fl404bAddressOfProperty}}**<<es_>>
+${fl404bMentionedProperty} </br>
+${fl404bAddressOfProperty} </br>
 
-${recitalsOrPreamble}
+${recitalsOrPreamble} </br></br>
 
-${isTheOrderByConsent}
+${isTheOrderByConsent} </br></br>
 
-The court orders:
+The court orders:</br></br>
 
 ******Add this logic after understanding template :D *****
 
-${furtherDirectionsIfRequired}
+${furtherDirectionsIfRequired} </br></br>
 
-This order applies to the respondent once it is personally served on them or once they have been made aware of it.
+This order applies to the respondent once it is personally served on them or once they have been made aware of it.</br>
 
-This order applies until: ${dateOrderEnds} At ${dateOrderEndTime}.
+This order applies until: ${dateOrderEnds} At ${dateOrderEndTime}. </br></br>
 
 The respondent has the right to apply to the court at any time to change or cancel this order. If the respondent intends to rely on any evidence to support their application, this must be provided in writing to the applicant or applicant’s solicitors in advance. </br>
 
@@ -52,15 +52,15 @@ ${WithoutNotice} </br>
 
 A further hearing will take place on ${fl404bDateOfNextHearing} ${fl404bTimeOfNextHearing} at ${fl404bOtherCourtName1} ${fl404bOtherCourtAddress} </br></br>
 It is estimated the hearing will last: ${fl404bTimeEstimate} </br>
-If the respondent does not attend this hearing at this time, the court may make an order in their absence.</br>
-${fl404bCostOfApplication} </br>
-The order is made With${fl404bWithoutNotice} notice to the respondent.</br>
+If the respondent does not attend this hearing at this time, the court may make an order in their absence.</br></br>
+${fl404bCostOfApplication} </br></br>
+The order is made With${fl404bWithoutNotice} notice to the respondent.</br></br>
 <hr>
 </br>
 Where the court has made a non-molestation order, a copy of the order must be delivered to the officer in charge of the police station for the applicant’s address, or such other police station as the court may specify, and must be accompanied by a statement showing that the respondent has been served with the order or informed of its terms: see FPR 2010, rule 10.10 </br></br>
 <hr>
 </br>
-<b> Note to the arresting officer</b></br>
+<b> Note to the arresting officer</b></br> </br>
 Under section 42A of the Family Law Act 1996, breach of a non-molestation order is a criminal offence punishable by up to 5 years’ imprisonment. It is an arrestable offence and it is not necessary to obtain a warrant. </br>
 A person who without reasonable excuse does anything that they are prohibited from doing by a non-molestation order is guilty of an offence.</br>
 Family Law Act 1996, section 42A(1).</br>

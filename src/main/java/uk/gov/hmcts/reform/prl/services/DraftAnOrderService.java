@@ -129,7 +129,18 @@ public class DraftAnOrderService {
                 "fl404bRespondentAddress", getAddress(caseData.getRespondentsFL401().getAddress())
             );
             nonMolestationPlaceHoldersMap.put(
-                "recitalsOrPreamble", caseData.getManageOrders().getRecitalsOrPreamble()
+                "fl404bMentionedProperty", (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields()
+                    .getFl404bMentionedProperty().equalsIgnoreCase("Yes"))
+                    ? "The property in this order is: " : " ");
+            nonMolestationPlaceHoldersMap.put(
+                "fl404bAddressOfProperty", (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bAddressOfProperty() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bAddressOfProperty() : " "
+            );
+            nonMolestationPlaceHoldersMap.put(
+                "recitalsOrPreamble", caseData.getManageOrders().getRecitalsOrPreamble() != null
+                    ? caseData.getManageOrders().getRecitalsOrPreamble() : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "isTheOrderByConsent",
@@ -139,7 +150,8 @@ public class DraftAnOrderService {
                 )
             );
             nonMolestationPlaceHoldersMap.put(
-                "furtherDirectionsIfRequired", caseData.getManageOrders().getFurtherDirectionsIfRequired()
+                "furtherDirectionsIfRequired", caseData.getManageOrders().getFurtherDirectionsIfRequired() != null
+                    ? caseData.getManageOrders().getFurtherDirectionsIfRequired() : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "dateOrderEnds",
