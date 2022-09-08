@@ -113,6 +113,9 @@ send-grid:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
 
+citizen:
+  dashboardUrl: ${CITIZEN_URL:https://wwww.example.com}
+
 payments:
   api:
     url: ${PAY_URL:}
