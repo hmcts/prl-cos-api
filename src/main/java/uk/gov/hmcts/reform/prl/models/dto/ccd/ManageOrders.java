@@ -127,6 +127,7 @@ public class ManageOrders {
     private final YesOrNo underTakingFormSign;
 
     private final YesOrNo isTheOrderByConsent;
+    @JsonProperty("judgeOrMagistrateTitle")
     private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
 
     private Document manageOrdersDocumentToAmend;
