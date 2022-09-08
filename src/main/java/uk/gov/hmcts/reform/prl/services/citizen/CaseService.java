@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -55,11 +56,32 @@ public class CaseService {
     @Autowired
     SystemUserService systemUserService;
 
+    @Autowired
+    CitizenCoreCaseDataService citizenCoreCaseDataService;
+
+    public CaseDetails getCase(String authToken, String s2sToken, String caseId) {
+        return coreCaseDataApi.getCase(authToken, s2sToken, caseId);
+
+    }
+
+    public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId, String accessCode) {
+
+        CaseDetails caseDetails = null;
+        if ("linkCase".equalsIgnoreCase(eventId)) {
+            this.linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
+            caseDetails = coreCaseDataApi.getCase(authToken, s2sToken, caseId);
+
+        } else {
+            caseDetails = this.updateCase(caseData, authToken, s2sToken, caseId, eventId);
+        }
+
+        return caseDetails;
+    }
+
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId) {
 
-        UserDetails userDetails = idamClient.getUserDetails(authToken);
-
-        return updateCaseDetails(caseData, authToken, s2sToken, caseId, eventId, userDetails);
+        //Invoking case update for citizen
+        return citizenCoreCaseDataService.updateCaseData(authToken, s2sToken, Long.parseLong(caseId), caseData, CaseEvent.valueOf(eventId));
 
     }
 
@@ -189,7 +211,7 @@ public class CaseService {
             }
 
             log.info("Updated caseData testing::" + caseData);
-            caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData);
+            caseRepository.linkDefendant(authorisation, anonymousUserToken, s2sToken, caseId, caseData);
             log.info("Case is now linked" + caseData);
         }
     }

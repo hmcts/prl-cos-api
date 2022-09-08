@@ -136,4 +136,6 @@ public class PrlAppsConstants {
     public static final String DRUG_AND_ALCOHOL_TESTS = "Drug and alcohol tests (toxicology)";
     public static final String POLICE_REPORTS = "Police reports";
     public static final String OTHER_DOCUMENTS = "Other documents";
+
+    public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
 }

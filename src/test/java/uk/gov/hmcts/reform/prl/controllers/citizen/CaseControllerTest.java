@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -36,10 +36,10 @@ public class CaseControllerTest {
     private AuthorisationService authorisationService;
 
     @Mock
-    private CoreCaseDataApi coreCaseDataApi;
+    private ObjectMapper objectMapper;
 
     @Mock
-    private ObjectMapper objectMapper;
+    private AuthTokenGenerator authTokenGenerator;
 
     private CaseData caseData;
     public static final String authToken = "Bearer TestAuthToken";
@@ -60,6 +60,7 @@ public class CaseControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
@@ -67,7 +68,7 @@ public class CaseControllerTest {
 
         String caseId = "1234567891234567";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(coreCaseDataApi.getCase(authToken, servAuthToken, caseId)).thenReturn(caseDetails);
+        when(caseService.getCase(authToken, servAuthToken, caseId)).thenReturn(caseDetails);
         CaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
         assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
 
@@ -83,6 +84,7 @@ public class CaseControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
@@ -91,10 +93,11 @@ public class CaseControllerTest {
 
         String caseId = "1234567891234567";
         String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
+        String accessCode = "12345678";
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.updateCase(caseData, authToken, servAuthToken, caseId, eventId)).thenReturn(caseDetails);
-        CaseData caseData1 = caseController.updateCase(caseData, caseId, eventId, authToken, servAuthToken, "testAccessCode");
+        when(caseService.updateCase(caseData, authToken, servAuthToken, caseId, eventId, accessCode)).thenReturn(caseDetails);
+        CaseData caseData1 = caseController.updateCase(caseData, caseId, eventId, authToken, servAuthToken, accessCode);
         assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
 
     }
@@ -117,6 +120,7 @@ public class CaseControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
 
         List<CaseDetails> caseDetails = new ArrayList<>();
 
@@ -171,6 +175,7 @@ public class CaseControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(

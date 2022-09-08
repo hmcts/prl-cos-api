@@ -34,11 +34,11 @@ public class CcdCaseApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CcdCaseApi.class);
 
-    public void linkCitizenToCase(String authorisation, String anonymousUserToken, String caseId, CaseData caseData) {
-        linkToCase(authorisation, anonymousUserToken, caseId, caseData);
+    public void linkCitizenToCase(String authorisation, String anonymousUserToken, String s2sToken, String caseId, CaseData caseData) {
+        linkToCase(authorisation, anonymousUserToken, s2sToken, caseId, caseData);
     }
 
-    private void linkToCase(String authorisation, String anonymousUserToken, String caseId, CaseData caseData) {
+    private void linkToCase(String authorisation, String anonymousUserToken, String s2sToken, String caseId, CaseData caseData) {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
         LOGGER.info("<--linkToCase-> Linking the case " + caseId);
         LOGGER.debug("Granting access to case {} for citizen {}", caseId, userDetails.getId());
@@ -46,7 +46,7 @@ public class CcdCaseApi {
 
         // LOGGER.debug("Revoking access to case {} ", caseId);
         // this.revokeAccessToCase(userDetails, anonymousUserToken, caseId);
-        this.linkCitizen(anonymousUserToken, userDetails, caseId, caseData);
+        this.linkCitizen(anonymousUserToken, s2sToken, userDetails, caseId, caseData);
         LOGGER.info("case is now linked " + caseId);
     }
 
@@ -77,13 +77,15 @@ public class CcdCaseApi {
 
     private CaseDetails linkCitizen(
         String anonymousUserToken,
+        String s2sToken,
         UserDetails citizenUser,
         String caseId,
         CaseData caseData
     ) {
         LOGGER.info("<----updateCitizenIdAndEmail---->", caseId);
-        return citizenCoreCaseDataService.linkDefendant(
+        return citizenCoreCaseDataService.updateCaseData(
             anonymousUserToken,
+            s2sToken,
             Long.valueOf(caseId),
             caseData,
             CaseEvent.LINK_CITIZEN

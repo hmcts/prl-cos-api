@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.prl.enums;
 import java.util.Arrays;
 
 public enum CaseEvent {
-    LINK_CITIZEN("linkCitizenAccount");
+    LINK_CITIZEN("linkCitizenAccount"),
+    CITIZEN_CASE_UPDATE("citizen-case-update"),
+    CITIZEN_UPLOADED_DOCUMENT("citizenUploadedDocument");
 
     private final String value;
 

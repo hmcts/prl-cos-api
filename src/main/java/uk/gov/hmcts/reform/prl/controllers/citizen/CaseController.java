@@ -11,8 +11,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
 import java.util.List;
@@ -26,25 +29,32 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class CaseController {
 
     @Autowired
-    CoreCaseDataApi coreCaseDataApi;
-
-    @Autowired
     ObjectMapper objectMapper;
 
     @Autowired
     CaseService caseService;
+    @Autowired
+    AuthorisationService authorisationService;
+    @Autowired
+    AuthTokenGenerator authTokenGenerator;
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
     public CaseData getCase(
         @PathVariable("caseId") String caseId,
-        @RequestHeader(value = "Authorization", required = false) String userToken,
-        @RequestHeader("serviceAuthorization") String s2sToken
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        return objectMapper.convertValue(
-            coreCaseDataApi.getCase(userToken, s2sToken, caseId).getData(),
-            CaseData.class
-        );
+        CaseDetails caseDetails = null;
+        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authToken))
+            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+            caseDetails = caseService.getCase(authToken, authTokenGenerator.generate(), caseId);
+        } else {
+            throw (new RuntimeException("Invalid Client"));
+        }
+
+        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            .toBuilder().id(caseDetails.getId()).build();
     }
 
     @PostMapping(value = "{caseId}/{eventId}/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -54,24 +64,19 @@ public class CaseController {
         @PathVariable("caseId") String caseId,
         @PathVariable("eventId") String eventId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestHeader("serviceAuthorization") String s2sToken,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader("accessCode") String accessCode
     ) {
-        if ("linkCase".equalsIgnoreCase(eventId)) {
-            caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
-            return objectMapper.convertValue(
-                coreCaseDataApi.getCase(authorisation, s2sToken, caseId).getData(),
-                CaseData.class
-            );
+        CaseDetails caseDetails = null;
+        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
+            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+            caseDetails = caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, eventId, accessCode);
         } else {
-            return objectMapper.convertValue(caseService.updateCase(
-                caseData,
-                authorisation,
-                s2sToken,
-                caseId,
-                eventId
-            ).getData(), CaseData.class);
+            throw (new RuntimeException("Invalid Client"));
         }
+
+        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            .toBuilder().id(caseDetails.getId()).build();
     }
 
     @GetMapping(path = "/citizen/{role}/retrieve-cases/{userId}", produces = APPLICATION_JSON)
@@ -79,17 +84,32 @@ public class CaseController {
         @PathVariable("role") String role,
         @PathVariable("userId") String userId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestHeader("serviceAuthorization") String s2sToken
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        return caseService.retrieveCases(authorisation, s2sToken, role, userId);
+        List<CaseData> caseDataList;
+        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
+            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+            caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate(), role, userId);
+        } else {
+            throw (new RuntimeException("Invalid Client"));
+        }
+
+        return caseDataList;
     }
 
     @GetMapping(path = "/cases", produces = APPLICATION_JSON)
     public List<CaseData> retrieveCitizenCases(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestHeader("serviceAuthorization") String s2sToken
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        return caseService.retrieveCases(authorisation, s2sToken);
+        List<CaseData> caseDataList;
+        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
+            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+            caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate());
+        } else {
+            throw (new RuntimeException("Invalid Client"));
+        }
+        return caseDataList;
     }
 
     @PostMapping(path = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -97,16 +117,28 @@ public class CaseController {
     public void linkCitizenToCase(@RequestHeader("caseId") String caseId,
                                   @RequestHeader("accessCode") String accessCode,
                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                  @RequestHeader("serviceAuthorization") String s2sToken) {
-        caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
+                                  @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
+        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
+            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+            caseService.linkCitizenToCase(authorisation, authTokenGenerator.generate(), accessCode, caseId);
+        } else {
+            throw (new RuntimeException("Invalid Client"));
+        }
     }
 
     @GetMapping(path = "/validate-access-code", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
     public String validateAccessCode(@RequestHeader(value = "Authorization", required = true) String authorisation,
-                                     @RequestHeader(value = "serviceAuthorization", required = true) String s2sToken,
+                                     @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                      @RequestHeader(value = "caseId", required = true) String caseId,
                                      @RequestHeader(value = "accessCode", required = true) String accessCode) {
-        return caseService.validateAccessCode(authorisation, s2sToken, caseId, accessCode);
+        String accessCodeStatus;
+        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
+            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+            accessCodeStatus = caseService.validateAccessCode(authorisation, authTokenGenerator.generate(), caseId, accessCode);
+        } else {
+            throw (new RuntimeException("Invalid Client"));
+        }
+        return accessCodeStatus;
     }
 }

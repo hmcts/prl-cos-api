@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -17,6 +16,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.UserService;
 
 @Slf4j
 @Service
@@ -34,32 +34,40 @@ public class CitizenCoreCaseDataService {
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
     @Autowired
-    AuthTokenGenerator authTokenGenerator;
+    UserService userService;
 
-    public CaseDetails linkDefendant(
-        String anonymousUserToken,
+    public CaseDetails updateCaseData(
+        String authToken,
+        String s2sToken,
         Long caseId,
         CaseData caseData,
         CaseEvent caseEvent
     ) {
+        boolean isRepresented = true;
         try {
-            UserDetails userDetails = idamClient.getUserDetails(anonymousUserToken);
+            UserDetails userDetails = idamClient.getUserDetails(authToken);
             EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
 
+            //Added for citizen case update
+            if (userService.getUserDetails(authToken).getRoles().contains("citizen")) {
+                isRepresented = false;
+            }
             StartEventResponse startEventResponse = startUpdate(
-                anonymousUserToken,
+                authToken,
+                s2sToken,
                 eventRequestData,
                 caseId,
-                true
+                isRepresented
             );
 
             CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
             return submitUpdate(
-                anonymousUserToken,
+                authToken,
+                s2sToken,
                 eventRequestData,
                 caseDataContent,
                 caseId,
-                true
+                isRepresented
             );
         } catch (Exception exception) {
             throw new CoreCaseDataStoreException(
@@ -97,6 +105,7 @@ public class CitizenCoreCaseDataService {
 
     private StartEventResponse startUpdate(
         String authorisation,
+        String s2sToken,
         EventRequestData eventRequestData,
         Long caseId,
         boolean isRepresented
@@ -104,7 +113,7 @@ public class CitizenCoreCaseDataService {
         if (isRepresented) {
             return coreCaseDataApi.startEventForCaseWorker(
                 authorisation,
-                authTokenGenerator.generate(),
+                s2sToken,
                 eventRequestData.getUserId(),
                 eventRequestData.getJurisdictionId(),
                 eventRequestData.getCaseTypeId(),
@@ -114,7 +123,7 @@ public class CitizenCoreCaseDataService {
         } else {
             return coreCaseDataApi.startEventForCitizen(
                 authorisation,
-                authTokenGenerator.generate(),
+                s2sToken,
                 eventRequestData.getUserId(),
                 eventRequestData.getJurisdictionId(),
                 eventRequestData.getCaseTypeId(),
@@ -126,6 +135,7 @@ public class CitizenCoreCaseDataService {
 
     private CaseDetails submitUpdate(
         String authorisation,
+        String s2sToken,
         EventRequestData eventRequestData,
         CaseDataContent caseDataContent,
         Long caseId,
@@ -134,7 +144,7 @@ public class CitizenCoreCaseDataService {
         if (isRepresented) {
             return coreCaseDataApi.submitEventForCaseWorker(
                 authorisation,
-                authTokenGenerator.generate(),
+                s2sToken,
                 eventRequestData.getUserId(),
                 eventRequestData.getJurisdictionId(),
                 eventRequestData.getCaseTypeId(),
@@ -145,7 +155,7 @@ public class CitizenCoreCaseDataService {
         } else {
             return coreCaseDataApi.submitEventForCitizen(
                 authorisation,
-                authTokenGenerator.generate(),
+                s2sToken,
                 eventRequestData.getUserId(),
                 eventRequestData.getJurisdictionId(),
                 eventRequestData.getCaseTypeId(),
