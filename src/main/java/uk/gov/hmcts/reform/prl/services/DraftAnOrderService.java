@@ -205,7 +205,9 @@ public class DraftAnOrderService {
 
             nonMolestationPlaceHoldersMap.put(
                 "fl404bWithoutNotice",
-                (caseData.getManageOrders().getFl404CustomFields().getFl404bIsNoticeGiven().equalsIgnoreCase(
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bIsNoticeGiven() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bIsNoticeGiven().equalsIgnoreCase(
                     "WithoutNotice"))
                     ? "out" : ""
             );
