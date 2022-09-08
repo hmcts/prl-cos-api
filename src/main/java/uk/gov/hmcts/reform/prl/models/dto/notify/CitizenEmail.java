@@ -15,10 +15,19 @@ public class CitizenEmail extends EmailTemplateVars {
     @JsonProperty("respondentName")
     private final String respondentName;
 
+    @JsonProperty("dashboardLink")
+    private final String dashboardLink;
+
+    @JsonProperty("caseName")
+    private final String caseName;
+
     @Builder
-    public CitizenEmail(String caseReference, String petitionerName, String respondentName) {
+    public CitizenEmail(String caseReference, String petitionerName, String respondentName,String dashboardLink,
+                        String caseName) {
         super(caseReference);
         this.petitionerName = petitionerName;
         this.respondentName = respondentName;
+        this.dashboardLink = dashboardLink;
+        this.caseName = caseName;
     }
 }
