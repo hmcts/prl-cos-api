@@ -18,6 +18,7 @@ spring:
         auth-idam-client-baseurl: AUTH_IDAM_CLIENT_BASEURL
         idam-client-id: IDAM_CLIENT_ID
         xui-url: XUI_URL
+        citizen-Url: CITIZEN_URL
         fees-register-api-url: FEE_URL
         prl.microservicekey-prl-cos-api: IDAM_S2S_AUTH_TOTP_SECRET
         prl.system-update-user-password: PRL_SYSTEM_UPDATE_PASSWORD
