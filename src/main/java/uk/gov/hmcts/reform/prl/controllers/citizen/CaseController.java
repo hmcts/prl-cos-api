@@ -46,8 +46,7 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         CaseDetails caseDetails = null;
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authToken))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+        if (isAuthorized(authToken, s2sToken)) {
             caseDetails = caseService.getCase(authToken, authTokenGenerator.generate(), caseId);
         } else {
             throw (new RuntimeException("Invalid Client"));
@@ -68,8 +67,7 @@ public class CaseController {
         @RequestHeader("accessCode") String accessCode
     ) {
         CaseDetails caseDetails = null;
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+        if (isAuthorized(authorisation, s2sToken)) {
             caseDetails = caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, eventId, accessCode);
         } else {
             throw (new RuntimeException("Invalid Client"));
@@ -87,8 +85,7 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         List<CaseData> caseDataList;
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+        if (isAuthorized(authorisation, s2sToken)) {
             caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate(), role, userId);
         } else {
             throw (new RuntimeException("Invalid Client"));
@@ -103,8 +100,7 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         List<CaseData> caseDataList;
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+        if (isAuthorized(authorisation, s2sToken)) {
             caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate());
         } else {
             throw (new RuntimeException("Invalid Client"));
@@ -118,8 +114,7 @@ public class CaseController {
                                   @RequestHeader("accessCode") String accessCode,
                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                   @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+        if (isAuthorized(authorisation, s2sToken)) {
             caseService.linkCitizenToCase(authorisation, authTokenGenerator.generate(), accessCode, caseId);
         } else {
             throw (new RuntimeException("Invalid Client"));
@@ -133,12 +128,16 @@ public class CaseController {
                                      @RequestHeader(value = "caseId", required = true) String caseId,
                                      @RequestHeader(value = "accessCode", required = true) String accessCode) {
         String accessCodeStatus;
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+        if (isAuthorized(authorisation, s2sToken)) {
             accessCodeStatus = caseService.validateAccessCode(authorisation, authTokenGenerator.generate(), caseId, accessCode);
         } else {
             throw (new RuntimeException("Invalid Client"));
         }
         return accessCodeStatus;
+    }
+
+    private boolean isAuthorized(String authorisation, String s2sToken) {
+        return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
+            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken));
     }
 }
