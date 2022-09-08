@@ -135,6 +135,9 @@ notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
 
+citizen:
+  dashboardUrl: ${CITIZEN_URL:https://wwww.example.com}
+
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
   rpa:
