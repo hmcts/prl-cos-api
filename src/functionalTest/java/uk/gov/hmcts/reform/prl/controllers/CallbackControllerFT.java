@@ -46,6 +46,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(SpringRunner.class)
@@ -281,7 +282,7 @@ public class CallbackControllerFT {
     public void givenFl401Case_whenAboutToSubmitCaseCreation_then200ResponseAndApplicantNameUpdated() throws Exception {
         String requestBody = ResourceLoader.loadJson(FL401_ABOUT_TO_SUBMIT_CREATION);
 
-        UserDetails userDetails = UserDetails.builder().forename("test").build();
+        UserDetails userDetails = UserDetails.builder().forename("test").roles(ROLES).build();
 
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
 
