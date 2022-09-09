@@ -34,7 +34,7 @@ public class DraftAnOrderService {
 
     private final DgsService dgsService;
 
-    private static final String NON_MOLESTATION_ORDER = "draftAnOrder/non-molestation-order.txt";
+    private static final String NON_MOLESTATION_ORDER = "draftAnOrder/non-molestation-order.html";
 
     public Document generateSolicitorDraftOrder(String authorisation, CaseData caseData) throws Exception {
 
@@ -74,6 +74,13 @@ public class DraftAnOrderService {
     private String getNonMolestationString(String nonMolestationOrderString, CaseData caseData) {
         Map<String, String> nonMolestationPlaceHoldersMap = new HashMap<>();
         if (nonMolestationOrderString != null) {
+
+            nonMolestationPlaceHoldersMap.put(
+                "familyManNumber", caseData.getFamilymanCaseNumber() != null ? caseData.getFamilymanCaseNumber() : " "
+            );
+
+            nonMolestationPlaceHoldersMap.put("ccdId", String.valueOf(caseData.getId()));
+
             nonMolestationPlaceHoldersMap.put(
                 "orderDate",
                 caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().toString() : " "
