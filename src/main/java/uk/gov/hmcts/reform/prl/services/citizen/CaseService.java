@@ -73,7 +73,7 @@ public class CaseService {
             caseDetails = coreCaseDataApi.getCase(authToken, s2sToken, caseId);
 
         } else {
-            caseDetails = this.updateCase(caseData, authToken, s2sToken, caseId, eventId);
+            caseDetails = this.updateCase(caseData, systemUserService.getSysUserToken(), s2sToken, caseId, eventId);
         }
 
         return caseDetails;
