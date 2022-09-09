@@ -852,9 +852,12 @@ public class ApplicationsTabService implements TabService {
             .map(ApplicantStopFromRespondentDoingEnum::getDisplayedValue)
             .collect(Collectors.toList());
 
-        List<String> applicantStopFromRespondentDoingToChildEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild().stream()
-            .map(ApplicantStopFromRespondentDoingToChildEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+        List<String> applicantStopFromRespondentDoingToChildEnum = new ArrayList<>();
+        if (respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild() != null) {
+            applicantStopFromRespondentDoingToChildEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild().stream()
+                .map(ApplicantStopFromRespondentDoingToChildEnum::getDisplayedValue)
+                .collect(Collectors.toList());
+        }
 
         rs.applicantWantToStopFromRespondentDoing(String.join(", ", applicantStopFromRespondentDoingEnum))
             .applicantWantToStopFromRespondentDoingToChild(String.join(", ", applicantStopFromRespondentDoingToChildEnum))
