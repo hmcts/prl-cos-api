@@ -117,13 +117,13 @@ public class CaseController {
                                @RequestHeader("serviceAuthorization") String s2sToken,
                                @RequestBody CaseData caseData) {
         CaseDetails caseDetails = null;
-
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+        caseDetails = caseService.createCase(caseData, authorisation, authTokenGenerator.generate());
+        /*if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(s2sToken))) {
             caseDetails = caseService.createCase(caseData, authorisation, authTokenGenerator.generate());
         } else {
             throw (new RuntimeException("Invalid Client"));
-        }
+        }*/
         return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder().id(caseDetails.getId()).build();
     }
