@@ -98,9 +98,9 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse draftAnOrderMidEventCallback(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-
+        log.info("request prop {}", callbackRequest.getCaseDetails().getData());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
+        log.info("caseData {}", caseData);
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(
             "solicitorDraftOrderDoc",
