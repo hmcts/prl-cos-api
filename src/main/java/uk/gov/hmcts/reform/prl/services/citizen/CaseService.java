@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,7 +74,11 @@ public class CaseService {
             caseDetails = coreCaseDataApi.getCase(authToken, s2sToken, caseId);
 
         } else {
-            caseDetails = this.updateCase(caseData, systemUserService.getSysUserToken(), s2sToken, caseId, eventId);
+            CaseDetails newCaseDetails = getCase(authToken, s2sToken, caseId);
+            CaseData newCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            newCaseData = newCaseData.toBuilder()
+                .applicantCaseName("Test").build();
+            caseDetails = this.updateCase(newCaseData, systemUserService.getSysUserToken(), s2sToken, caseId, eventId);
         }
 
         return caseDetails;
