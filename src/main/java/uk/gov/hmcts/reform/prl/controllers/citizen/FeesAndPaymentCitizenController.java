@@ -65,11 +65,12 @@ public class FeesAndPaymentCitizenController {
     ) {
         FeeResponse feeResponse = null;
         try {
-            if (isAuthorized(authorisation, serviceAuthorization)) {
+            /*if (isAuthorized(authorisation, serviceAuthorization)) {
                 feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
             } else {
                 throw (new RuntimeException("Invalid Client"));
-            }
+            }*/
+            feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
         } catch (Exception e) {
             return FeeResponseForCitizen.builder()
                 .errorRetrievingResponse(e.getMessage())

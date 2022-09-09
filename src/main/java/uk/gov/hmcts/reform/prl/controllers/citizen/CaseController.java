@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -12,8 +14,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
 import java.util.List;
@@ -34,6 +39,12 @@ public class CaseController {
 
     @Autowired
     CaseService caseService;
+
+    @Autowired
+    AuthorisationService authorisationService;
+
+    @Autowired
+    AuthTokenGenerator authTokenGenerator;
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
@@ -93,5 +104,27 @@ public class CaseController {
         @RequestHeader(value = "accessCode", required = true) String accessCode
     ) {
         return caseService.validateAccessCode(userToken, s2sToken, caseId, accessCode);
+    }
+
+    @PostMapping("/case/create")
+    @Operation(description = "Call CCD to create case")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "created"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public CaseData createCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                               @RequestHeader("serviceAuthorization") String s2sToken,
+                               @RequestBody CaseData caseData) {
+        CaseDetails caseDetails = null;
+        caseDetails = caseService.createCase(caseData, authorisation, authTokenGenerator.generate());
+        /*if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+            authorisationService.authoriseService(s2sToken))) {
+            caseDetails = caseService.createCase(caseData, authorisation, authTokenGenerator.generate());
+        } else {
+            throw (new RuntimeException("Invalid Client"));
+        }*/
+        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            .toBuilder().id(caseDetails.getId()).build();
     }
 }
