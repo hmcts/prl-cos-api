@@ -44,7 +44,7 @@ public class CitizenCoreCaseDataService {
         CaseEvent caseEvent
     ) {
         log.info("Inside CitizenCoreCaseDataService::updateCaseData");
-        log.info("CaseEvent "+caseEvent);
+        log.info("CaseEvent "  + caseEvent);
         boolean isRepresented = true;
         try {
             UserDetails userDetails = idamClient.getUserDetails(authToken);
@@ -54,8 +54,8 @@ public class CitizenCoreCaseDataService {
             if (userService.getUserDetails(authToken).getRoles().contains("citizen")) {
                 isRepresented = false;
             }
-            log.info("isRepresented "+isRepresented);
-            log.info("isRepresented "+eventRequestData);
+            log.info("isRepresented " + isRepresented);
+            log.info("isRepresented " + eventRequestData);
             StartEventResponse startEventResponse = startUpdate(
                 authToken,
                 s2sToken,

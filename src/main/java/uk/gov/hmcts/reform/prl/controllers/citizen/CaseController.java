@@ -69,7 +69,7 @@ public class CaseController {
         @RequestHeader("accessCode") String accessCode
     ) {
         log.info("Inside CaseController::updateCase");
-        log.info("eventId "+eventId);
+        log.info("eventId " + eventId);
         CaseDetails caseDetails = null;
         if (isAuthorized(authorisation, s2sToken)) {
             caseDetails = caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, eventId, accessCode);
