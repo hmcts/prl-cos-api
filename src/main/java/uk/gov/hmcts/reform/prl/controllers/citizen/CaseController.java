@@ -45,8 +45,10 @@ public class CaseController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
+        log.info("Inside CaseController::getCase");
         CaseDetails caseDetails = null;
         if (isAuthorized(authToken, s2sToken)) {
+            log.info("Authorization successful, invoking caseService::getCase");
             caseDetails = caseService.getCase(authToken, authTokenGenerator.generate(), caseId);
         } else {
             throw (new RuntimeException("Invalid Client"));
@@ -66,6 +68,8 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader("accessCode") String accessCode
     ) {
+        log.info("Inside CaseController::updateCase");
+        log.info("eventId "+eventId);
         CaseDetails caseDetails = null;
         if (isAuthorized(authorisation, s2sToken)) {
             caseDetails = caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, eventId, accessCode);

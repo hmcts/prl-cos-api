@@ -66,6 +66,7 @@ public class CaseService {
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId, String accessCode) {
 
+        log.info("Inside CaseService::updateCase");
         CaseDetails caseDetails = null;
         if ("linkCase".equalsIgnoreCase(eventId)) {
             this.linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
@@ -79,7 +80,7 @@ public class CaseService {
     }
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId) {
-
+        log.info("Inside CaseService::updateCase for citizen");
         //Invoking case update for citizen
         return citizenCoreCaseDataService.updateCaseData(authToken, s2sToken, Long.parseLong(caseId), caseData, CaseEvent.fromValue(eventId));
 

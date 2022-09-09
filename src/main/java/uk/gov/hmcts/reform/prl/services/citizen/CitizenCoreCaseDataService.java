@@ -43,6 +43,8 @@ public class CitizenCoreCaseDataService {
         CaseData caseData,
         CaseEvent caseEvent
     ) {
+        log.info("Inside CitizenCoreCaseDataService::updateCaseData");
+        log.info("CaseEvent "+caseEvent);
         boolean isRepresented = true;
         try {
             UserDetails userDetails = idamClient.getUserDetails(authToken);
@@ -52,6 +54,8 @@ public class CitizenCoreCaseDataService {
             if (userService.getUserDetails(authToken).getRoles().contains("citizen")) {
                 isRepresented = false;
             }
+            log.info("isRepresented "+isRepresented);
+            log.info("isRepresented "+eventRequestData);
             StartEventResponse startEventResponse = startUpdate(
                 authToken,
                 s2sToken,
@@ -81,6 +85,7 @@ public class CitizenCoreCaseDataService {
     }
 
     private CaseDataContent caseDataContent(StartEventResponse startEventResponse, Object content) {
+        log.info("Inside CitizenCoreCaseDataService::caseDataContent");
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
@@ -110,6 +115,7 @@ public class CitizenCoreCaseDataService {
         Long caseId,
         boolean isRepresented
     ) {
+        log.info("Inside CitizenCoreCaseDataService::startUpdate");
         if (isRepresented) {
             return coreCaseDataApi.startEventForCaseWorker(
                 authorisation,
@@ -141,6 +147,7 @@ public class CitizenCoreCaseDataService {
         Long caseId,
         boolean isRepresented
     ) {
+        log.info("Inside CitizenCoreCaseDataService::submitUpdate");
         if (isRepresented) {
             return coreCaseDataApi.submitEventForCaseWorker(
                 authorisation,
