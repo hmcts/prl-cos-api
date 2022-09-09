@@ -38,23 +38,19 @@ public class DraftAnOrderService {
 
     public Document generateSolicitorDraftOrder(String authorisation, CaseData caseData) throws Exception {
 
-        String draftOrderString = getTheOrderDraftString(caseData);
-        if (draftOrderString != null) {
-            caseData = caseData.toBuilder().previewDraftAnOrder(draftOrderString).build();
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails
-                    .builder().caseData(caseData).build(),
-                solicitorDraftAnOrder
-            );
-            Document document = Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(caseData.getCreateSelectOrderOptions().getDisplayedValue() + ".pdf").build();
-            return document;
-        }
-        return null;
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails
+                .builder().caseData(caseData).build(),
+            solicitorDraftAnOrder
+        );
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(caseData.getCreateSelectOrderOptions().getDisplayedValue() + ".pdf").build();
+        return document;
+
     }
 
     public String getTheOrderDraftString(CaseData caseData) {
