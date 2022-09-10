@@ -899,6 +899,7 @@ public class ApplicationsTabService implements TabService {
         HomeDetails.HomeDetailsBuilder builder = HomeDetails.builder();
         Home home = caseData.getHome();
 
+        //todo null checks need to add here
         List<String> peopleLivingAtThisAddressEnum = home.getPeopleLivingAtThisAddress().stream()
             .map(PeopleLivingAtThisAddressEnum::getDisplayedValue)
             .collect(Collectors.toList());
