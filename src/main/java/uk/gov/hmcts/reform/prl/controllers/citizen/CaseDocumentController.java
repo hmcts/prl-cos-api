@@ -14,17 +14,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ResponseMessage;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -43,6 +46,12 @@ public class CaseDocumentController {
 
     @Autowired
     private DocumentGenService documentGenService;
+
+    @Autowired
+    private UploadDocumentService uploadService;
+
+    @Autowired
+    private AuthorisationService authorisationService;
 
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
@@ -130,10 +139,28 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "401", description = "Provided Authroization token is missing or invalid"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    public ResponseEntity<?> uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                            @RequestParam("file") MultipartFile file) {
+    public ResponseEntity uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                             @RequestHeader("serviceAuthorization") String s2sToken,
+                                                            @RequestBody UploadedDocumentRequest uploadedDocumentRequest) {
 
-        return ResponseEntity.ok(documentGenService.uploadDocument(authorisation, file));
+        log.info("Uploaded doc request: {}", uploadedDocumentRequest);
+        String caseId = uploadedDocumentRequest.getValues().get("caseId").toString();
+        CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
+        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
+        CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        uploadService.uploadCitizenDocument(authorisation, uploadedDocumentRequest, caseId);
+
+        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+            authorisationService.authoriseService(s2sToken))) {
+            log.info("=====trying to upload document=====");
+
+            uploadService.uploadCitizenDocument(authorisation, uploadedDocumentRequest, caseId);
+            return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
+                                                                    + uploadedDocumentRequest
+                .getValues().get("file")));
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
     }
 
     @PostMapping(path = "/delete-citizen-statement-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

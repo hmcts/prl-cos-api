@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -16,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -802,23 +800,5 @@ public class DocumentGenService {
                 generatedDocumentInfo
             )).build();
     }
-
-    public DocumentResponse uploadDocument(String authorization, MultipartFile file) {
-        try {
-            uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument
-                = uploadService.uploadDocument(file, file.getOriginalFilename(), file.getContentType(), authorization);
-            log.info("Stored Doc Detail: " + stampedDocument.toString());
-            return DocumentResponse.builder().status("Success").document(Document.builder()
-                                                                             .documentBinaryUrl(stampedDocument.links.binary.href)
-                                                                             .documentUrl(stampedDocument.links.self.href)
-                                                                             .documentFileName(stampedDocument.originalDocumentName)
-                                                                             .build()).build();
-
-        } catch (Exception e) {
-            log.error("Error while uploading document ." + e.getMessage());
-            throw e;
-        }
-    }
-
 
 }
