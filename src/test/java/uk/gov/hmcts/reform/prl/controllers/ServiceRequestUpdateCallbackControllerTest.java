@@ -64,7 +64,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
 
         FeeType feeType = null;
 
-        when(authorisationService.authorise(any())).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceRequestUpdateDto);
@@ -80,7 +80,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
-        when(authorisationService.authorise(any())).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceRequestUpdateDto);
