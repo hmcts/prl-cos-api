@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
@@ -20,9 +19,10 @@ import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.client.S2sClient;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
-import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -47,6 +47,12 @@ public class CafCassControllerFunctionalTest {
     @MockBean
     private CaseDataService caseDataService;
 
+    @Autowired
+    ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+
+    @Autowired
+    IdamTokenGenerator idamTokenGenerator;
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
@@ -64,6 +70,8 @@ public class CafCassControllerFunctionalTest {
 
     @Test
     public void givenDatetimeWindow_whenGetRequestToSearchCasesByCafCassController_then200Response() throws Exception {
+        String accessToken = idamTokenGenerator.generateIdamTokenForUser("prl-system-update@mailinator.com", "w6:j9NcYZ6");
+        String serviceToken = serviceAuthenticationGenerator.generate();
         Response response =
                 request.header("serviceauthorization", s2sClient.serviceAuthTokenGenerator())
                         .queryParam("start_date",
