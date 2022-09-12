@@ -70,10 +70,6 @@ public class DraftAnOrderController {
                                                          .build())
             .selectedOrder(caseData.getCreateSelectOrderOptions().getDisplayedValue()).build();
         log.info("*** caseData before sending to text area {} ***", caseData);
-        callbackRequest.getCaseDetails().getData().put(
-            "previewDraftAnOrder",
-            draftAnOrderService.getTheOrderDraftString(caseData)
-        );
         callbackRequest.getCaseDetails().getData().putAll(caseData.toMap(objectMapper));
         log.info("*** caseDataUpdated {} ***", callbackRequest.getCaseDetails().getData());
         return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
