@@ -242,10 +242,10 @@ public class DraftAnOrderService {
     private String getRespondentMustNotOrders(FL404 fl404CustomFields) {
         StringBuilder builder = new StringBuilder();
         if (fl404CustomFields != null) {
-            builder.append("<ul>");
+            builder.append("<ol>");
             if (fl404CustomFields.getFl404bRespondentNotToThreat().size() > 0) {
                 builder.append("<li>");
-                builder.append("The respondent"
+                builder.append("The respondent "
                                    + fl404CustomFields.getFl404bRespondentName()
                                    + " must not use or threaten violence against the applicant "
                                    + fl404CustomFields.getFl404bApplicantName() + ", and must not instruct, encourage "
@@ -254,24 +254,26 @@ public class DraftAnOrderService {
             }
             if (fl404CustomFields.getFl404bRespondentNotIntimidate().size() > 0) {
                 builder.append("<li>");
-                builder.append("The respondent" + fl404CustomFields.getFl404bRespondentName()
-                                   + "must not intimidate, harass or pester the applicant"
+                builder.append("The respondent " + fl404CustomFields.getFl404bRespondentName()
+                                   + " must not intimidate, harass or pester the applicant"
                                    + fl404CustomFields.getFl404bApplicantName() + ", and must not instruct, "
                                    + "encourage or in any way suggest that any other person should do so.");
                 builder.append("</li>");
             }
             if (fl404CustomFields.getFl404bRespondentNotToTelephone().size() > 0) {
                 builder.append("<li>");
-                builder.append("The respondent" + fl404CustomFields.getFl404bRespondentName()
-                                   + "must not telephone, text, email or otherwise contact or attempt to contact the "
+                builder.append("The respondent " + fl404CustomFields.getFl404bRespondentName()
+                                   + " must not telephone, text, email or otherwise contact or attempt to contact the "
                                    + "applicant " + fl404CustomFields.getFl404bApplicantName() + ".");
-                builder.append(fl404CustomFields.getFl404bAddMoreDetailsTelephone());
+                if (fl404CustomFields.getFl404bAddMoreDetailsTelephone() != null) {
+                    builder.append(fl404CustomFields.getFl404bAddMoreDetailsTelephone());
+                }
                 builder.append("</li>");
             }
             if (fl404CustomFields.getFl404bRespondentNotToDamageOrThreat().size() > 0) {
                 builder.append("<li>");
-                builder.append("The respondent" + fl404CustomFields.getFl404bRespondentName()
-                                   + "must not damage, attempt to damage or threaten to damage any property owned by "
+                builder.append("The respondent " + fl404CustomFields.getFl404bRespondentName()
+                                   + " must not damage, attempt to damage or threaten to damage any property owned by "
                                    + "or in the possession or control of the applicant "
                                    + fl404CustomFields.getFl404bApplicantName() + ", and must not instruct, "
                                    + "encourage or in any way suggest that any other person should do so");
@@ -279,8 +281,8 @@ public class DraftAnOrderService {
             }
             if (fl404CustomFields.getFl404bRespondentNotToDamage().size() > 0) {
                 builder.append("<li>");
-                builder.append("The respondent" + fl404CustomFields.getFl404bRespondentName()
-                                   + "must not damage, attempt to damage or threaten to damage the property or "
+                builder.append("The respondent " + fl404CustomFields.getFl404bRespondentName()
+                                   + " must not damage, attempt to damage or threaten to damage the property or "
                                    + "contents of the property at " + fl404CustomFields.getFl404bAddressOfProperty()
                                    + " , and must not instruct, encourage or in any way suggest that any other "
                                    + "person should do so.");
@@ -288,43 +290,43 @@ public class DraftAnOrderService {
             }
             if (fl404CustomFields.getFl404bRespondentNotToEnterProperty().size() > 0) {
                 builder.append("<li>");
-                builder.append("The respondent" + fl404CustomFields.getFl404bRespondentName()
-                                   + "must not go to, enter or attempt to enter the property at "
+                builder.append("The respondent " + fl404CustomFields.getFl404bRespondentName()
+                                   + " must not go to, enter or attempt to enter the property at "
                                    + fl404CustomFields.getFl404bAddressOfProperty() + " ,"
                                    + fl404CustomFields.getFl404bAddMoreDetailsProperty() + " .");
                 builder.append("</li>");
             }
             if (fl404CustomFields.getFl404bRespondentNotToThreatChild().size() > 0) {
                 builder.append("<li>");
-                builder.append("The respondent" + fl404CustomFields.getFl404bRespondentName()
-                                   + "must not use or threaten violence against the relevant children, and must not "
+                builder.append("The respondent " + fl404CustomFields.getFl404bRespondentName()
+                                   + " must not use or threaten violence against the relevant children, and must not "
                                    + "instruct, encourage or in any way suggest that any other person should do so.");
                 builder.append("</li>");
             }
             if (fl404CustomFields.getFl404bRespondentNotHarassOrIntimidate().size() > 0) {
                 builder.append("<li>");
-                builder.append("The respondent" + fl404CustomFields.getFl404bRespondentName()
-                                   + "must not intimidate, harass or pester the relevant children, and"
+                builder.append("The respondent " + fl404CustomFields.getFl404bRespondentName()
+                                   + " must not intimidate, harass or pester the relevant children, and"
                                    + " must not instruct, encourage or in any way suggest that any "
                                    + "other person should do so.");
                 builder.append("</li>");
             }
             if (fl404CustomFields.getFl404bRespondentNotToTelephoneChild().size() > 0) {
                 builder.append("<li>");
-                builder.append("The respondent" + fl404CustomFields.getFl404bRespondentName()
-                                   + "must not telephone, text, email or otherwise contact or attempt to contact the "
+                builder.append("The respondent " + fl404CustomFields.getFl404bRespondentName()
+                                   + " must not telephone, text, email or otherwise contact or attempt to contact the "
                                    + "relevant children " + fl404CustomFields.getFl404bAddMoreDetailsPhoneChild());
                 builder.append("</li>");
             }
             if (fl404CustomFields.getFl404bRespondentNotToEnterSchool().size() > 0) {
                 builder.append("<li>");
-                builder.append("The respondent" + fl404CustomFields.getFl404bRespondentName()
-                                   + "must not go to, enter or attempt to the school known as "
+                builder.append("The respondent " + fl404CustomFields.getFl404bRespondentName()
+                                   + " must not go to, enter or attempt to the school known as "
                                    + fl404CustomFields.getFl404bAddSchool() + " and "
                                    + fl404CustomFields.getFl404bAddMoreDetailsSchool());
                 builder.append("</li>");
             }
-            builder.append("</ul>");
+            builder.append("</ol>");
         }
         return builder.toString();
     }
