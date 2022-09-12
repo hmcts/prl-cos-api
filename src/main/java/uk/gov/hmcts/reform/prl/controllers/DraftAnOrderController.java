@@ -39,7 +39,10 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse prePopulateFields(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
         log.info("*** callback req properties before logic {} ***", callbackRequest.getCaseDetails().getData());
         FL404 orderData = FL404.builder()
             .fl404bCaseNumber(String.valueOf(caseData.getId()))

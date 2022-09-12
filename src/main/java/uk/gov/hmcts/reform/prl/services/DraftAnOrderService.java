@@ -143,8 +143,8 @@ public class DraftAnOrderService {
                     ? caseData.getManageOrders().getFl404CustomFields().getFl404bAddressOfProperty() : " "
             );
             nonMolestationPlaceHoldersMap.put(
-                "recitalsOrPreamble", caseData.getManageOrders().getRecitalsOrPreamble() != null
-                    ? caseData.getManageOrders().getRecitalsOrPreamble() : " "
+                "recitalsOrPreamble", caseData.getRecitalsOrPreamble() != null
+                    ? caseData.getRecitalsOrPreamble() : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "isTheOrderByConsent",

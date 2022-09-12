@@ -645,4 +645,5 @@ public class CaseData implements MappableObject {
 
     private String previewDraftAnOrder;
     private Document solicitorDraftOrderDoc;
+    private String recitalsOrPreamble;
 }
