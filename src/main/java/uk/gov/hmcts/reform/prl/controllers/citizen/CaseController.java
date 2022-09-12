@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -72,7 +74,14 @@ public class CaseController {
         log.info("eventId " + eventId);
         CaseDetails caseDetails = null;
         if (isAuthorized(authorisation, s2sToken)) {
-            caseDetails = caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, eventId, accessCode);
+            caseDetails = caseService.updateCase(
+                caseData,
+                authorisation,
+                authTokenGenerator.generate(),
+                caseId,
+                eventId,
+                accessCode
+            );
         } else {
             throw (new RuntimeException("Invalid Client"));
         }
@@ -133,7 +142,12 @@ public class CaseController {
                                      @RequestHeader(value = "accessCode", required = true) String accessCode) {
         String accessCodeStatus;
         if (isAuthorized(authorisation, s2sToken)) {
-            accessCodeStatus = caseService.validateAccessCode(authorisation, authTokenGenerator.generate(), caseId, accessCode);
+            accessCodeStatus = caseService.validateAccessCode(
+                authorisation,
+                authTokenGenerator.generate(),
+                caseId,
+                accessCode
+            );
         } else {
             throw (new RuntimeException("Invalid Client"));
         }
@@ -143,5 +157,26 @@ public class CaseController {
     private boolean isAuthorized(String authorisation, String s2sToken) {
         return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
             && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken));
+    }
+
+    @PostMapping("/case/create")
+    @Operation(description = "Call CCD to create case")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "created"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public CaseData createCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                               @RequestHeader("serviceAuthorization") String s2sToken,
+                               @RequestBody CaseData caseData) {
+        CaseDetails caseDetails = null;
+
+        if (isAuthorized(authorisation, s2sToken)) {
+            caseDetails = caseService.createCase(caseData, authorisation, authTokenGenerator.generate());
+        } else {
+            throw (new RuntimeException("Invalid Client"));
+        }
+        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            .toBuilder().id(caseDetails.getId()).build();
     }
 }

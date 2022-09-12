@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +30,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
@@ -65,7 +65,8 @@ public class CaseService {
 
     }
 
-    public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId, String accessCode) {
+    public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId,
+                                  String eventId, String accessCode) {
 
         log.info("Inside CaseService::updateCase");
         CaseDetails caseDetails = null;
@@ -74,21 +75,62 @@ public class CaseService {
             caseDetails = coreCaseDataApi.getCase(authToken, s2sToken, caseId);
 
         } else {
-            CaseDetails newCaseDetails = getCase(authToken, s2sToken, caseId);
-            CaseData newCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            newCaseData = newCaseData.toBuilder()
-                .applicantCaseName("Test").build();
-            caseDetails = this.updateCase(newCaseData, systemUserService.getSysUserToken(), s2sToken, caseId, eventId);
+
+            caseData = caseData.toBuilder()
+                .manageOrders(null)
+                .allegationOfHarm(null)
+                .serviceOfApplicationUploadDocs(null)
+                .build();
+
+            caseDetails = this.updateCase(caseData, authToken, s2sToken, caseId, eventId);
         }
 
         return caseDetails;
     }
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId) {
-        log.info("Inside CaseService::updateCase for citizen");
-        //Invoking case update for citizen
-        return citizenCoreCaseDataService.updateCaseData(authToken, s2sToken, Long.parseLong(caseId), caseData, CaseEvent.fromValue(eventId));
+        String userId = systemUserService.getUserId(authToken);
 
+        return coreCaseDataApi.submitEventForCitizen(
+            authToken,
+            s2sToken,
+            userId,
+            PrlAppsConstants.JURISDICTION,
+            CASE_TYPE,
+            String.valueOf(caseId),
+            true,
+            getCaseDataContentForCreateCase(authToken, caseData, s2sToken, userId,
+                                            String.valueOf(caseId), eventId
+            )
+        );
+
+    }
+
+    private CaseDataContent getCaseDataContentForCreateCase(String authorization, CaseData caseData, String s2sToken,
+                                                            String userId, String caseId, String eventId) {
+        CaseDataContent.CaseDataContentBuilder builder = CaseDataContent.builder().data(caseData);
+        builder.event(Event.builder().id(eventId).build())
+            .eventToken(getEventToken(authorization, userId, eventId,
+                                      caseId, s2sToken
+            ));
+
+
+        return builder.build();
+    }
+
+    public String getEventToken(String authorization, String userId, String eventId, String caseId,
+                                String s2sToken) {
+        StartEventResponse res = coreCaseDataApi.startEventForCitizen(
+            authorization,
+            s2sToken,
+            userId,
+            JURISDICTION,
+            CASE_TYPE,
+            caseId,
+            eventId
+        );
+
+        return nonNull(res) ? res.getToken() : null;
     }
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken, String role, String userId) {
@@ -120,7 +162,8 @@ public class CaseService {
             .collect(Collectors.toList());
     }
 
-    private List<CaseData> searchCasesLinkedToCitizen(String authToken, String s2sToken, Map<String, String> searchCriteria) {
+    private List<CaseData> searchCasesLinkedToCitizen(String authToken, String s2sToken,
+                                                      Map<String, String> searchCriteria) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
         List<CaseDetails> caseDetails = new ArrayList<>();
@@ -131,7 +174,8 @@ public class CaseService {
             .collect(Collectors.toList());
     }
 
-    private List<CaseDetails> performSearch(String authToken, UserDetails user, Map<String, String> searchCriteria, String serviceAuthToken) {
+    private List<CaseDetails> performSearch(String authToken, UserDetails user, Map<String, String> searchCriteria,
+                                            String serviceAuthToken) {
         List<CaseDetails> result;
 
         result = coreCaseDataApi.searchForCitizen(
@@ -255,5 +299,52 @@ public class CaseService {
         }
         log.info("accessCodeStatus" + accessCodeStatus);
         return accessCodeStatus;
+    }
+
+    public CaseDetails createCase(CaseData caseData, String authToken, String s2sToken) {
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+
+        return createCase(caseData, authToken, s2sToken, userDetails);
+    }
+
+    private CaseDetails createCase(CaseData caseData, String authToken, String s2sToken, UserDetails userDetails) {
+        return coreCaseDataApi.submitForCitizen(
+            authToken,
+            s2sToken,
+            userDetails.getId(),
+            JURISDICTION,
+            CASE_TYPE,
+            true,
+            getCaseDataContent(authToken, s2sToken, caseData, userDetails.getId())
+        );
+    }
+
+    private CaseDataContent getCaseDataContent(String authorization, String s2sToken, CaseData caseData,
+                                               String userId) {
+        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+        Iterables.removeIf(caseDataMap.values(), Objects::isNull);
+        return CaseDataContent.builder()
+            .data(caseDataMap)
+            .event(Event.builder().id(PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT).build())
+            .eventToken(getEventTokenForUpdateCase(
+                authorization,
+                s2sToken,
+                userId,
+                PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT
+            ))
+            .build();
+    }
+
+    public String getEventTokenForUpdateCase(String authorization, String s2sToken, String userId, String eventId) {
+        StartEventResponse res = coreCaseDataApi.startForCitizen(
+            authorization,
+            s2sToken,
+            userId,
+            JURISDICTION,
+            CASE_TYPE,
+            eventId
+        );
+
+        return nonNull(res) ? res.getToken() : null;
     }
 }
