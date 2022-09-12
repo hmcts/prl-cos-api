@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,6 +30,9 @@ public class CafCassControllerIntegrationTest {
     @Autowired
     private AuthTokenGenerator authTokenGenerator;
 
+    @Autowired
+    private IdamTokenGenerator idamTokenGenerator;
+
     @Test
     public void givenValidDatetimeRangeSearchCasesByCafCassControllerReturnOkStatus() throws Exception {
         String authGenerate = authTokenGenerator.generate();
@@ -36,8 +40,8 @@ public class CafCassControllerIntegrationTest {
         mockMvc.perform(
                         get("/searchCases")
                                 .contentType(APPLICATION_JSON)
-                                .header("authorisation", "authorisationKey")
-                                .header("serviceauthorisation", "serviceauthorisationKey")
+                                .header("authorisation", "Bearer " + idamTokenGenerator.generateIdamTokenForSystem())
+                                .header("serviceauthorisation", authTokenGenerator.generate())
                                 .queryParam("start_date", "2022-08-22T10:39:43.49")
                                 .queryParam("end_date", "2022-08-26T10:44:54.055"))
                 .andExpect(status().isOk())
