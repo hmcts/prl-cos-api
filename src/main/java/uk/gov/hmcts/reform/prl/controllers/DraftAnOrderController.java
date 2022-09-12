@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,15 +40,26 @@ public class DraftAnOrderController {
     public AboutToStartOrSubmitCallbackResponse populateSelectedOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(
-            "selectedOrder",
-            callbackRequest.getCaseDetails().getData().get("createSelectOrderOptions")
+            "selectedOrderLabel",
+            caseData.getCreateSelectOrderOptions().getDisplayedValue()
         );
-        log.info("selected order is {}", callbackRequest.getCaseDetails().getData().get("createSelectOrderOptions"));
+        log.info("selected order is {}", caseData.getCreateSelectOrderOptions().getDisplayedValue());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+    @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to Generate text for draft an order")
+    public AboutToStartOrSubmitCallbackResponse resetFields(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        return AboutToStartOrSubmitCallbackResponse.builder().data(Collections.emptyMap()).build();
+    }
 
     @PostMapping(path = "/solicitor-prepopulate-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Generate text for draft an order")
