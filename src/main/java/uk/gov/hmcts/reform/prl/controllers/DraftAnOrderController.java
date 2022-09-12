@@ -34,6 +34,21 @@ public class DraftAnOrderController {
     private final DgsService dgsService;
     private final DraftAnOrderService draftAnOrderService;
 
+    @PostMapping(path = "/populate-selected-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to Generate text for draft an order")
+    public AboutToStartOrSubmitCallbackResponse populateSelectedOrder(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put(
+            "selectedOrder",
+            callbackRequest.getCaseDetails().getData().get("createSelectOrderOptions")
+        );
+        log.info("selected order is {}", callbackRequest.getCaseDetails().getData().get("createSelectOrderOptions"));
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+
     @PostMapping(path = "/solicitor-prepopulate-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Generate text for draft an order")
     public AboutToStartOrSubmitCallbackResponse prePopulateFields(
@@ -87,7 +102,6 @@ public class DraftAnOrderController {
             "previewDraftAnOrder",
             draftAnOrderService.getTheOrderDraftString(caseData)
         );
-        //callbackRequest.getCaseDetails().getData().putAll(caseData.toMap(objectMapper));
         log.info("*** before returning {} ***", callbackRequest.getCaseDetails().getData());
         return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
     }
