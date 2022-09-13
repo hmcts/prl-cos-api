@@ -36,7 +36,7 @@ public class DraftAnOrderController {
     private final DraftAnOrderService draftAnOrderService;
 
     @PostMapping(path = "/populate-selected-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to Generate text for draft an order")
+    @Operation(description = "Callback to populate selected order")
     public AboutToStartOrSubmitCallbackResponse populateSelectedOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
@@ -54,7 +54,7 @@ public class DraftAnOrderController {
     }
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to Generate text for draft an order")
+    @Operation(description = "Callback to reset fields")
     public AboutToStartOrSubmitCallbackResponse resetFields(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
@@ -62,7 +62,7 @@ public class DraftAnOrderController {
     }
 
     @PostMapping(path = "/solicitor-prepopulate-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to Generate text for draft an order")
+    @Operation(description = "Callback to populate custom fields")
     public AboutToStartOrSubmitCallbackResponse prePopulateFields(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
@@ -116,6 +116,17 @@ public class DraftAnOrderController {
         );
         log.info("*** before returning {} ***", callbackRequest.getCaseDetails().getData());
         return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
+    }
+
+    @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to generate draft order collection")
+    public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData updatedCaseData = draftAnOrderService.generateDraftOrderCollection(caseData);
+        log.info("*** before returning {} ***", updatedCaseData);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData.toMap(objectMapper)).build();
     }
 
     @PostMapping(path = "/generate-draft-an-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

@@ -4,22 +4,31 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.time.Time;
 
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ResourceReader.readString;
 
 @Service
@@ -34,6 +43,7 @@ public class DraftAnOrderService {
     String solicitorDraftAnOrder;
 
     private final DgsService dgsService;
+    private final Time dateTime;
 
     private static final String NON_MOLESTATION_ORDER = "draftAnOrder/non-molestation-order.html";
 
@@ -364,4 +374,39 @@ public class DraftAnOrderService {
         return builder.toString();
     }
 
+    public CaseData generateDraftOrderCollection(CaseData caseData) {
+        List<Element<OrderDetails>> uploadedDraftOrderList;
+        Element<OrderDetails> orderDetails = element(getCurrentOrderDetails(caseData));
+        if (caseData.getDraftOrderCollection() != null) {
+            uploadedDraftOrderList = caseData.getDraftOrderCollection();
+            uploadedDraftOrderList.add(orderDetails);
+        } else {
+            uploadedDraftOrderList = new ArrayList<>();
+            uploadedDraftOrderList.add(orderDetails);
+        }
+        uploadedDraftOrderList.sort(Comparator.comparing(
+            m -> m.getValue().getDateCreated(),
+            Comparator.reverseOrder()
+        ));
+        return CaseData.builder().draftOrderCollection(uploadedDraftOrderList).build();
+    }
+
+    private OrderDetails getCurrentOrderDetails(CaseData caseData) {
+        return OrderDetails.builder().orderType(caseData.getSelectedOrder())
+            .orderTypeId(caseData.getCreateSelectOrderOptions().name())
+            .orderDocument(caseData.getSolicitorDraftOrderDoc())
+            .otherDetails(OtherOrderDetails.builder()
+                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
+                                  PrlAppsConstants.D_MMMM_YYYY,
+                                  Locale.UK
+                              )))
+                              .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
+                                  PrlAppsConstants.D_MMMM_YYYY,
+                                  Locale.UK
+                              )))
+                              .orderRecipients("NA").build())
+            .dateCreated(dateTime.now())
+            .build();
+    }
 }

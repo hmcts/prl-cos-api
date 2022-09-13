@@ -617,7 +617,7 @@ public class CaseData implements MappableObject {
     private String isWithdrawRequestSent;
 
     /**
-     *  Courtnav uploaded files.
+     * Courtnav uploaded files.
      */
 
     @JsonProperty("courtNavUploadedDocs")
@@ -647,4 +647,5 @@ public class CaseData implements MappableObject {
     private Document solicitorDraftOrderDoc;
     private String recitalsOrPreamble;
     private YesOrNo isTheOrderByConsent;
+    private final List<Element<OrderDetails>> draftOrderCollection;
 }
