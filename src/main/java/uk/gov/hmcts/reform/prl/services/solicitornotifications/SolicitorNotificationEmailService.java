@@ -106,8 +106,7 @@ public class SolicitorNotificationEmailService {
         }
     }
 
-    private EmailTemplateVars buildApplicantSolicitorEmail(CaseDetails caseDetails, String solicitorName)
-        throws Exception {
+    private EmailTemplateVars buildApplicantSolicitorEmail(CaseDetails caseDetails, String solicitorName) {
         CaseData caseData = emailService.getCaseData(caseDetails);
         return ApplicantSolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
@@ -118,8 +117,7 @@ public class SolicitorNotificationEmailService {
             .build();
     }
 
-    private EmailTemplateVars buildRespondentEmail(CaseDetails caseDetails, PartyDetails partyDetails)
-        throws Exception {
+    private EmailTemplateVars buildRespondentEmail(CaseDetails caseDetails, PartyDetails partyDetails) {
         CaseData caseData = emailService.getCaseData(caseDetails);
         return CitizenEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
@@ -130,8 +128,7 @@ public class SolicitorNotificationEmailService {
     }
 
     private EmailTemplateVars buildRespondentSolicitorEmail(CaseDetails caseDetails, String solicitorName,
-                                                            String respondentName) throws Exception {
-
+                                                            String respondentName) {
         CaseData caseData = emailService.getCaseData(caseDetails);
 
         return RespondentSolicitorEmail.builder()
@@ -141,7 +138,6 @@ public class SolicitorNotificationEmailService {
             .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .respondentName(respondentName)
             .issueDate(caseData.getIssueDate())
-            .respondentName(respondentName)
             .build();
     }
 }
