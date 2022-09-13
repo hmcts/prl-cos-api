@@ -90,7 +90,10 @@ public class DraftAnOrderService {
 
             nonMolestationPlaceHoldersMap.put(
                 "orderDate",
-                caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().toString() : " "
+                caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
+                    PrlAppsConstants.D_MMMM_YYYY,
+                    Locale.UK
+                )) : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "judgeOrMagistrateTitle",
@@ -127,7 +130,11 @@ public class DraftAnOrderService {
                 "fl404bRespondentDob",
                 (caseData.getManageOrders().getFl404CustomFields() != null
                     && caseData.getManageOrders().getFl404CustomFields().getFl404bRespondentDob() != null)
-                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bRespondentDob().toString() : " "
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bRespondentDob().format(
+                    DateTimeFormatter.ofPattern(
+                        PrlAppsConstants.D_MMMM_YYYY,
+                        Locale.UK
+                    )) : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "fl404bRespondentReference",
@@ -176,7 +183,11 @@ public class DraftAnOrderService {
                 "dateOrderEnds",
                 (caseData.getManageOrders().getFl404CustomFields() != null
                     && caseData.getManageOrders().getFl404CustomFields().getFl404bDateOrderEnd() != null)
-                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bDateOrderEnd() : " "
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bDateOrderEnd().format(String.valueOf(
+                    DateTimeFormatter.ofPattern(
+                        PrlAppsConstants.D_MMMM_YYYY,
+                        Locale.UK
+                    ))) : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "dateOrderEndTime",
@@ -197,7 +208,11 @@ public class DraftAnOrderService {
                 "fl404bDateOfNextHearing",
                 (caseData.getManageOrders().getFl404CustomFields() != null
                     && caseData.getManageOrders().getFl404CustomFields().getFl404bDateOfNextHearing() != null)
-                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bDateOfNextHearing() : " "
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bDateOfNextHearing()
+                    .format(String.valueOf(DateTimeFormatter.ofPattern(
+                        PrlAppsConstants.D_MMMM_YYYY,
+                        Locale.UK
+                    ))) : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "fl404bTimeOfNextHearing",
@@ -366,7 +381,10 @@ public class DraftAnOrderService {
                 builder.append(String.format(
                     "Child : %s  born %s",
                     child.getFullName(),
-                    child.getDateOfBirth().toString()
+                    child.getDateOfBirth() != null ? child.getDateOfBirth().format(DateTimeFormatter.ofPattern(
+                        PrlAppsConstants.D_MMMM_YYYY,
+                        Locale.UK
+                    )) : " "
                 ));
                 builder.append("\n");
             }
