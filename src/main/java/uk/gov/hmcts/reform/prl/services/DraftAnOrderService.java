@@ -183,11 +183,7 @@ public class DraftAnOrderService {
                 "dateOrderEnds",
                 (caseData.getManageOrders().getFl404CustomFields() != null
                     && caseData.getManageOrders().getFl404CustomFields().getFl404bDateOrderEnd() != null)
-                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bDateOrderEnd().format(String.valueOf(
-                    DateTimeFormatter.ofPattern(
-                        PrlAppsConstants.D_MMMM_YYYY,
-                        Locale.UK
-                    ))) : " "
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bDateOrderEnd() : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "dateOrderEndTime",
@@ -208,11 +204,7 @@ public class DraftAnOrderService {
                 "fl404bDateOfNextHearing",
                 (caseData.getManageOrders().getFl404CustomFields() != null
                     && caseData.getManageOrders().getFl404CustomFields().getFl404bDateOfNextHearing() != null)
-                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bDateOfNextHearing()
-                    .format(String.valueOf(DateTimeFormatter.ofPattern(
-                        PrlAppsConstants.D_MMMM_YYYY,
-                        Locale.UK
-                    ))) : " "
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bDateOfNextHearing() : " "
             );
             nonMolestationPlaceHoldersMap.put(
                 "fl404bTimeOfNextHearing",
