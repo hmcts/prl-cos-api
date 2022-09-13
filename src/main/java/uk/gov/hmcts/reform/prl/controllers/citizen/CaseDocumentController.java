@@ -149,19 +149,12 @@ public class CaseDocumentController {
         String caseId = uploadedDocumentRequest.getValues().get("caseId").toString();
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
-        CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper
+        uploadService.uploadCitizenDocument(authorisation, uploadedDocumentRequest, caseId);
+        return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
+                                                                + uploadedDocumentRequest
+            .getValues().get("file")));
 
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
-            authorisationService.authoriseService(s2sToken))) {
-            log.info("=====trying to upload document=====");
-
-            uploadService.uploadCitizenDocument(authorisation, uploadedDocumentRequest, caseId);
-            return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
-                                                                    + uploadedDocumentRequest
-                .getValues().get("file")));
-        } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
     }
 
     @PostMapping(path = "/delete-citizen-statement-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
