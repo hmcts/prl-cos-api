@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 
 
 @Slf4j
@@ -60,13 +62,15 @@ public class CaseService {
     @Autowired
     CitizenCoreCaseDataService citizenCoreCaseDataService;
 
+    @Autowired
+    AssignCaseAccessService assignCaseAccessService;
+
     public CaseDetails getCase(String authToken, String s2sToken, String caseId) {
         return coreCaseDataApi.getCase(authToken, s2sToken, caseId);
 
     }
 
-    public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId,
-                                  String eventId, String accessCode) {
+    public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId, String accessCode) {
 
         log.info("Inside CaseService::updateCase");
         CaseDetails caseDetails = null;
@@ -89,6 +93,8 @@ public class CaseService {
     }
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId) {
+        log.info("Inside CaseService::updateCase for citizen");
+
         String userId = systemUserService.getUserId(authToken);
 
         return coreCaseDataApi.submitEventForCitizen(
@@ -99,27 +105,27 @@ public class CaseService {
             CASE_TYPE,
             String.valueOf(caseId),
             true,
-            getCaseDataContentForCreateCase(authToken, caseData, s2sToken, userId,
-                                            String.valueOf(caseId), eventId
+            getCaseDataContent(authToken, caseData, s2sToken, userId,
+                               String.valueOf(caseId)
             )
         );
 
     }
 
-    private CaseDataContent getCaseDataContentForCreateCase(String authorization, CaseData caseData, String s2sToken,
-                                                            String userId, String caseId, String eventId) {
+    private CaseDataContent getCaseDataContent(String authorization, CaseData caseData, String s2sToken,
+                                               String userId, String caseId) {
         CaseDataContent.CaseDataContentBuilder builder = CaseDataContent.builder().data(caseData);
-        builder.event(Event.builder().id(eventId).build())
-            .eventToken(getEventToken(authorization, userId, eventId,
-                                      caseId, s2sToken
+        builder.event(Event.builder().id(CITIZEN_CASE_UPDATE.getValue()).build())
+            .eventToken(getEventTokenForUpdate(authorization, userId, CITIZEN_CASE_UPDATE.getValue(),
+                                               caseId, s2sToken
             ));
 
 
         return builder.build();
     }
 
-    public String getEventToken(String authorization, String userId, String eventId, String caseId,
-                                String s2sToken) {
+    public String getEventTokenForUpdate(String authorization, String userId, String eventId, String caseId,
+                                         String s2sToken) {
         StartEventResponse res = coreCaseDataApi.startEventForCitizen(
             authorization,
             s2sToken,
@@ -130,8 +136,13 @@ public class CaseService {
             eventId
         );
 
+        //This has to be removed
+        log.info("Response of update event token: " + res.getToken());
+
         return nonNull(res) ? res.getToken() : null;
     }
+
+    // end of copy
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken, String role, String userId) {
         Map<String, String> searchCriteria = new HashMap<>();
@@ -315,27 +326,22 @@ public class CaseService {
             JURISDICTION,
             CASE_TYPE,
             true,
-            getCaseDataContent(authToken, s2sToken, caseData, userDetails.getId())
+            getCaseDataContentForCreateCase(authToken, s2sToken, caseData, userDetails.getId())
         );
     }
 
-    private CaseDataContent getCaseDataContent(String authorization, String s2sToken, CaseData caseData,
+    private CaseDataContent getCaseDataContentForCreateCase(String authorization, String s2sToken, CaseData caseData,
                                                String userId) {
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         Iterables.removeIf(caseDataMap.values(), Objects::isNull);
         return CaseDataContent.builder()
             .data(caseDataMap)
             .event(Event.builder().id(PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT).build())
-            .eventToken(getEventTokenForUpdateCase(
-                authorization,
-                s2sToken,
-                userId,
-                PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT
-            ))
+            .eventToken(getEventToken(authorization, s2sToken, userId, PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT))
             .build();
     }
 
-    public String getEventTokenForUpdateCase(String authorization, String s2sToken, String userId, String eventId) {
+    public String getEventToken(String authorization, String s2sToken, String userId, String eventId) {
         StartEventResponse res = coreCaseDataApi.startForCitizen(
             authorization,
             s2sToken,
@@ -348,3 +354,4 @@ public class CaseService {
         return nonNull(res) ? res.getToken() : null;
     }
 }
+
