@@ -374,7 +374,7 @@ public class DraftAnOrderService {
         return builder.toString();
     }
 
-    public CaseData generateDraftOrderCollection(CaseData caseData) {
+    public Map<String, Object> generateDraftOrderCollection(CaseData caseData) {
         List<Element<OrderDetails>> uploadedDraftOrderList;
         Element<OrderDetails> orderDetails = element(getCurrentOrderDetails(caseData));
         if (caseData.getDraftOrderCollection() != null) {
@@ -388,7 +388,7 @@ public class DraftAnOrderService {
             m -> m.getValue().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        return CaseData.builder().draftOrderCollection(uploadedDraftOrderList).build();
+        return Map.of("draftOrderCollection", uploadedDraftOrderList);
     }
 
     private OrderDetails getCurrentOrderDetails(CaseData caseData) {

@@ -124,9 +124,10 @@ public class DraftAnOrderController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        CaseData updatedCaseData = draftAnOrderService.generateDraftOrderCollection(caseData);
-        log.info("*** before returning {} ***", updatedCaseData);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData.toMap(objectMapper)).build();
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData));
+        log.info("*** before returning {} ***", caseDataUpdated);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/generate-draft-an-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
