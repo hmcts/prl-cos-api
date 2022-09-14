@@ -639,4 +639,7 @@ public class CaseData implements MappableObject {
 
     private String citizenUploadedStatement;
 
+    // C100 Rebuild
+    private String c100RebuildConfidentiality;
+    private String c100RebuildInternationalElements;
 }
