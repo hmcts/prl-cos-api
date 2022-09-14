@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -83,8 +84,8 @@ public class ResetAccessCodeControllerTest {
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                                              .build())))
             .build();
-        CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1", UUID.randomUUID());
-        CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2", UUID.randomUUID());
+        CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1", UUID.randomUUID(), YesOrNo.Yes);
+        CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2", UUID.randomUUID(), YesOrNo.No);
         List<Element<CaseInvite>> caseInvites = List.of(element(caseInvite1), element(caseInvite2));
 
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
@@ -99,8 +100,8 @@ public class ResetAccessCodeControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-        CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1", UUID.randomUUID());
-        CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2", UUID.randomUUID());
+        CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1", UUID.randomUUID(), YesOrNo.Yes);
+        CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2", UUID.randomUUID(), YesOrNo.No);
         List<Element<CaseInvite>> caseInvites = List.of(element(caseInvite1), element(caseInvite2));
 
         AboutToStartOrSubmitCallbackResponse response = resetAccessCodeController
