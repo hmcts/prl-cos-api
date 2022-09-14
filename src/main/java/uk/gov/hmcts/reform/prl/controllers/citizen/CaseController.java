@@ -53,7 +53,7 @@ public class CaseController {
         @RequestHeader("serviceAuthorization") String s2sToken
     ) {
         return objectMapper.convertValue(
-            coreCaseDataApi.getCase(userToken, s2sToken, caseId).getData(),
+            coreCaseDataApi.getCase(userToken, authTokenGenerator.generate(), caseId).getData(),
             CaseData.class
         );
     }
@@ -78,7 +78,7 @@ public class CaseController {
             return objectMapper.convertValue(caseService.updateCase(
                 caseData,
                 authorisation,
-                s2sToken,
+                authTokenGenerator.generate(),
                 caseId,
                 eventId
             ).getData(), CaseData.class);

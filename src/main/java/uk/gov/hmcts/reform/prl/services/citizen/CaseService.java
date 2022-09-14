@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 
 
 @Slf4j
@@ -59,10 +60,67 @@ public class CaseService {
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId) {
 
-        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        String userId = systemUserService.getUserId(authToken);
 
-        return updateCaseDetails(caseData, authToken, s2sToken, caseId, eventId, userDetails);
+        caseData = caseData.toBuilder()
+            .manageOrders(null)
+            .allegationOfHarm(null)
+            .serviceOfApplicationUploadDocs(null)
+            .build();
 
+        return coreCaseDataApi.submitEventForCitizen(
+            authToken,
+            s2sToken,
+            userId,
+            PrlAppsConstants.JURISDICTION,
+            CASE_TYPE,
+            String.valueOf(caseId),
+            true,
+            getCaseDataContent(authToken, caseData, s2sToken, userId,
+                               String.valueOf(caseId)
+            )
+        );
+    }
+
+    private CaseDataContent getCaseDataContent(String authorization, CaseData caseData, String s2sToken,
+                                               String userId, String caseId) {
+        CaseDataContent.CaseDataContentBuilder builder = CaseDataContent.builder().data(caseData);
+        builder.event(Event.builder().id(CITIZEN_CASE_UPDATE.getValue()).build())
+            .eventToken(getEventTokenForUpdate(authorization, userId, CITIZEN_CASE_UPDATE.getValue(),
+                                               caseId, s2sToken
+            ));
+
+
+        return builder.build();
+    }
+
+    private CaseDataContent getCaseDataContent(String authorization, String s2sToken, CaseData caseData,
+                                               String userId) {
+        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+        Iterables.removeIf(caseDataMap.values(), Objects::isNull);
+        return CaseDataContent.builder()
+            .data(caseDataMap)
+            .event(Event.builder().id(PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT).build())
+            .eventToken(getEventToken(authorization, s2sToken, userId, PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT))
+            .build();
+    }
+
+    public String getEventTokenForUpdate(String authorization, String userId, String eventId, String caseId,
+                                         String s2sToken) {
+        StartEventResponse res = coreCaseDataApi.startEventForCitizen(
+            authorization,
+            s2sToken,
+            userId,
+            JURISDICTION,
+            CASE_TYPE,
+            caseId,
+            eventId
+        );
+
+        //This has to be removed
+        log.info("Response of update event token: " + res.getToken());
+
+        return nonNull(res) ? res.getToken() : null;
     }
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken, String role, String userId) {
@@ -247,17 +305,6 @@ public class CaseService {
             true,
             getCaseDataContent(authToken, s2sToken, caseData, userDetails.getId())
         );
-    }
-
-    private CaseDataContent getCaseDataContent(String authorization, String s2sToken, CaseData caseData,
-                                               String userId) {
-        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-        Iterables.removeIf(caseDataMap.values(), Objects::isNull);
-        return CaseDataContent.builder()
-            .data(caseDataMap)
-            .event(Event.builder().id(PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT).build())
-            .eventToken(getEventToken(authorization, s2sToken, userId, PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT))
-            .build();
     }
 
     public String getEventToken(String authorization, String s2sToken, String userId, String eventId) {
