@@ -24,8 +24,7 @@ public class Response {
     // TODO: Add support you need during your case here
     private final Miam miam;
     private final CurrentOrPreviousProceedings currentOrPreviousProceedings;
-    // TODO: Add safety Concerns here
+    private final SafetyConcerns respondentSafetyConcerns;
     private final CitizenInternationalElements citizenInternationalElements;
-
     private final CitizenFlags citizenFlags;
 }
