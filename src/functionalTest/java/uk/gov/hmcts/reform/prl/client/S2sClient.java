@@ -22,6 +22,6 @@ public class S2sClient {
         if (!StringUtils.hasText(this.s2sToken)) {
             this.s2sToken = authTokenGenerator.generate();
         }
-        return this.s2sToken;
+        return "Bearer " + this.s2sToken;
     }
 }

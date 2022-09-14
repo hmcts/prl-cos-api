@@ -70,10 +70,8 @@ public class CafCassControllerFunctionalTest {
 
     @Test
     public void givenDatetimeWindow_whenGetRequestToSearchCasesByCafCassController_then200Response() throws Exception {
-        String accessToken = idamTokenGenerator.generateIdamTokenForUser("prl-system-update@mailinator.com", "w6:j9NcYZ6");
-        String serviceToken = serviceAuthenticationGenerator.generate();
         Response response =
-                request.header("serviceauthorization", s2sClient.serviceAuthTokenGenerator())
+                request.header("serviceauthorization", "ser")
                         .queryParam("start_date",
                                 "2022-08-22T10:39:43.49")
                         .queryParam("end_date",
