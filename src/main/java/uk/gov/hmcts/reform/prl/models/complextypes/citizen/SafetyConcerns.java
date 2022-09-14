@@ -12,7 +12,7 @@ public class SafetyConcerns {
 
     private final YesOrNo domesticAbuseDetails;
     private final YesOrNo isSexuallyAbused;
-    private final AbuseDetails sexualAbuseDescription ;
+    private final AbuseDetails sexualAbuseDescription;
     private final YesOrNo isPhysicallyAbused;
     private final AbuseDetails physicalAbuseDescription;
     private final YesOrNo isFinanciallyAbused;
