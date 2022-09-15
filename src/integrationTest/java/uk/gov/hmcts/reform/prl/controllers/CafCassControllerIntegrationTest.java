@@ -34,17 +34,4 @@ public class CafCassControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
     }
-
-//    @Test
-//    public void givenNullStartDateTimeWithValidEndDateSearchCasesByCafCassControllerReturnsErrorStatus() throws Exception {
-//        mockMvc.perform(
-//                        get("/searchCases")
-//                                .contentType(APPLICATION_JSON)
-//                                .header("authorisation", "authorisationKey")
-//                                .header("serviceauthorisation", "serviceauthorisationKey")
-//                                .queryParam("start_date", null)
-//                                .queryParam("end_date", "2022-08-26T10:44:54.055"))
-//                .andExpect(status().isBadRequest())
-//                .andReturn();
-//    }
 }

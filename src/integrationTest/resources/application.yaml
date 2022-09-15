@@ -162,9 +162,17 @@ idam:
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
-    id: prl-cos-api
-    redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    id: prl_cos_api
+    baseUrl: https://idam-api.demo.platform.hmcts.net
+    redirect_uri: https://manage-case.demo.platform.hmcts.net/oauth2/callback
+    secret: ${IDAM_CLIENT_SECRET:W7supXKMJgcEWKBS}
+    clientId: xuiwebapp
+    authorize:
+      context-path: /oauth2/authorize
+    token:
+      context-path: /oauth2/token
+  user:
+    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
   solicitor:
     username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
     password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
@@ -277,6 +285,12 @@ document:
       fl401_draft_welsh_filename: Draft_DA_Welsh_application
       fl401_c8_welsh_template: FL401-c8-welsh.docx
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
+      fl401_fl406_draft_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Draft.docx
+      fl401_fl406_draft_filename: Power_of_arrest.pdf
+      fl401_fl406_english_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Final.docx
+      fl401_fl406_engllish_filename: Power_of_arrest.pdf
+      fl401_fl406_welsh_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Final.docx
+      fl401_fl406_welsh_filename: Power_of_arrest.pdf
     common:
       prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf

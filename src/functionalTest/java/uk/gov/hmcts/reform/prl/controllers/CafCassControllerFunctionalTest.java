@@ -1,40 +1,37 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import org.apache.commons.lang3.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.prl.Application;
-import uk.gov.hmcts.reform.prl.client.S2sClient;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
-import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
-import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
-import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
+import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
-import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-
+@Slf4j
+@SpringBootTest
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@ContextConfiguration
 public class CafCassControllerFunctionalTest {
-
-    @Autowired
-    S2sClient s2sClient;
 
     private MockMvc mockMvc;
 
@@ -42,85 +39,37 @@ public class CafCassControllerFunctionalTest {
     private WebApplicationContext webApplicationContext;
 
     @MockBean
-    private CafcassCcdDataStoreService cafcassCcdDataStoreService;
-
-    @MockBean
     private CaseDataService caseDataService;
 
-    @Autowired
-    ServiceAuthenticationGenerator serviceAuthenticationGenerator;
-
-    @Autowired
-    IdamTokenGenerator idamTokenGenerator;
+    private static final String CREATE_SERVICE_RESPONSE = "classpath:response/cafcass-search-response.json";
 
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-    private static final String CONTENT_TYPE_JSON = "application/json";
-
-    private final String targetInstance =
-            StringUtils.defaultIfBlank(
-                    System.getenv("TEST_URL"),
-                    "http://localhost:4044"
-            );
-
-    private final RequestSpecification request = given().relaxedHTTPSValidation().baseUri(targetInstance);
-
     @Test
     public void givenDatetimeWindow_whenGetRequestToSearchCasesByCafCassController_then200Response() throws Exception {
-        Response response =
-                request.header("serviceauthorization", "ser")
-                        .queryParam("start_date",
-                                "2022-08-22T10:39:43.49")
-                        .queryParam("end_date",
-                                "2022-08-26T18:44:54.055")
-                        .when()
-                        .contentType("application/json")
-                        .get("/searchCases");
-
-        response.then().assertThat().statusCode(HttpStatus.OK.value());
-
-    }
-
-    @Test
-    public void givenDatetimeWindowSearchCasesByCafCassController_thenCheckMandatoryFields() throws Exception {
-        Response response = request
-                .header("Authorization", "Bearer Token")
-                .contentType(CONTENT_TYPE_JSON)
-                .given()
-                .queryParams("start_date",
-                        "2022-08-22T10:39:43.49",
-                        "end_date",
-                        "2022-08-26T10:44:54.055")
-                .when()
-                .get("/searchCases");
-
-        CafCassResponse cafcassResponse = (CafCassResponse) response.getBody();
+        String cafcassResponseStr = TestResourceUtil.readFileFrom(CREATE_SERVICE_RESPONSE);
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-        String jsonResponseStr = objectMapper.writeValueAsString(cafcassResponse);
 
-        JSONObject json = new JSONObject(cafcassResponse);
-        assertNotNull(json.getString("cases.state").toString());
-        assertNotNull(json.getString("cases.case_type_id").toString());
-        assertNotNull(json.getString("cases.caseTypeofApplication").toString());
+        CafCassResponse expectedCafcassResponse = objectMapper.readValue(cafcassResponseStr, CafCassResponse.class);
 
-    }
+        Mockito.when(caseDataService.getCaseData(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedCafcassResponse);
 
-    @Test
-    public void givenNullDateWindow_whenGetRequestToSearchCasesByCafCassController_then400Response() throws Exception {
-        request
-                .header("Authorization", "Bearer Token")
-                .contentType(CONTENT_TYPE_JSON)
-                .given()
-                .pathParams("start_date",
-                        null,
-                        "end_date",
-                        "22-02-2022 14:15")
-                .when()
-                .get("/searchCases")
-                .then().assertThat().statusCode(400);
+        mockMvc.perform(get("/searchCases")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("authorisation", "authorisation")
+                        .header("serviceAuthorisation", "serviceauthorisation")
+                        .queryParam("start_date", "2022-08-22T10:44:43.49")
+                        .queryParam("end_date", "2022-08-26T11:00:54.055")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
 
+        JSONObject json = new JSONObject(expectedCafcassResponse);
+        assertEquals(expectedCafcassResponse.getTotal(), json.getJSONArray("cases").length());
+        assertEquals(2, json.getJSONArray("cases").length());
+        assertNotNull(json.getJSONArray("cases").get(0));
     }
 }
