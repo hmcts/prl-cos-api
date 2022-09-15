@@ -33,4 +33,18 @@ public enum YesNoBothEnum {
     public static YesNoBothEnum getValue(String key) {
         return YesNoBothEnum.valueOf(key);
     }
+
+    public static YesNoBothEnum getDisplayedValueFromEnumString(String enteredValue) {
+        if (enteredValue.equalsIgnoreCase("applicantAndRespondent")) {
+            return YesNoBothEnum.yesBothOfThem;
+        } else if (enteredValue.equalsIgnoreCase("applicant")) {
+            return YesNoBothEnum.yesApplicant;
+        } else if (enteredValue.equalsIgnoreCase("respondent")) {
+            return YesNoBothEnum.yesRespondent;
+        } else if (enteredValue.equalsIgnoreCase("neither")) {
+            return YesNoBothEnum.No;
+        } else {
+            return null;
+        }
+    }
 }

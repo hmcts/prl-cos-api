@@ -7,53 +7,56 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
+import java.util.Arrays;
+
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("standardDirectionsOrder")
-    standardDirectionsOrder("standardDirectionsOrder", "Standard directions order"),
+    standardDirectionsOrder("standardDirectionsOrder", "Standard directions order","1"),
     @JsonProperty("blankOrderOrDirections")
-    blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)"),
+    blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)","2"),
     @JsonProperty("blankOrderOrDirectionsWithdraw")
-    blankOrderOrDirectionsWithdraw("blankOrderOrDirectionsWithdraw", "Blank order or directions (C21)"),
+    blankOrderOrDirectionsWithdraw("blankOrderOrDirectionsWithdraw", "Blank order or directions (C21) - to withdraw application","3"),
     @JsonProperty("childArrangementsSpecificProhibitedOrder")
     childArrangementsSpecificProhibitedOrder(
         "childArrangementsSpecificProhibitedOrder",
-         "Child arrangements, specific issue or prohibited steps order (C43)"),
+         "Child arrangements, specific issue or prohibited steps order (C43)","4"),
     @JsonProperty("parentalResponsibility")
-    parentalResponsibility("parentalResponsibility", "Parental responsibility order (C45A)"),
+    parentalResponsibility("parentalResponsibility", "Parental responsibility order (C45A)","5"),
     @JsonProperty("specialGuardianShip")
-    specialGuardianShip("specialGuardianShip", "Special guardianship order (C43A)"),
+    specialGuardianShip("specialGuardianShip", "Special guardianship order (C43A)","6"),
     @JsonProperty("noticeOfProceedingsParties")
     noticeOfProceedingsParties("noticeOfProceedingsParties",
-                                  "Notice of proceedings (C6) (Notice to parties)"),
+                                  "Notice of proceedings (C6) (Notice to parties)","7"),
     @JsonProperty("noticeOfProceedingsNonParties")
     noticeOfProceedingsNonParties("noticeOfProceedingsNonParties",
-                                  "Notice of proceedings (C6a) (Notice to non-parties)"),
+                                  "Notice of proceedings (C6a) (Notice to non-parties)","8"),
     @JsonProperty("transferOfCaseToAnotherCourt")
     transferOfCaseToAnotherCourt("transferOfCaseToAnotherCourt",
-                                  "Transfer of case to another court (C49)"),
+                                  "Transfer of case to another court (C49)","9"),
     @JsonProperty("appointmentOfGuardian")
-    appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian (C47A)"),
+    appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian (C47A)","10"),
     @JsonProperty("nonMolestation")
-    nonMolestation("nonMolestation", "Non-molestation order (FL404A)"),
+    nonMolestation("nonMolestation", "Non-molestation order (FL404A)","11"),
     @JsonProperty("occupation")
-    occupation("occupation", "Occupation order (FL404)"),
+    occupation("occupation", "Occupation order (FL404)","12"),
     @JsonProperty("powerOfArrest")
-    powerOfArrest("powerOfArrest", "Power of arrest (FL406)"),
+    powerOfArrest("powerOfArrest", "Power of arrest (FL406)","13"),
     @JsonProperty("amendDischargedVaried")
-    amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order (FL404B)"),
+    amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order (FL404B)","14"),
     @JsonProperty("blank")
-    blank("blank", "Blank order (FL404B)"),
+    blank("blank", "Blank order (FL404B)","15"),
     @JsonProperty("generalForm")
-    generalForm("generalForm", "General form of undertaking (N117)"),
+    generalForm("generalForm", "General form of undertaking (N117)","16"),
     @JsonProperty("noticeOfProceedings")
-    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)"),
+    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)","17"),
     @JsonProperty("other")
-    other("other", "Other (upload an order)");
+    other("other", "Other (upload an order)","18");
 
     private final String id;
     private final String displayedValue;
+    private final String optionValue;
 
     @JsonValue
     public String getDisplayedValue() {
@@ -63,5 +66,19 @@ public enum CreateSelectOrderOptionsEnum {
     @JsonCreator
     public static CreateSelectOrderOptionsEnum getValue(String key) {
         return CreateSelectOrderOptionsEnum.valueOf(key);
+    }
+
+    public static String mapOptionFromDisplayedValue(String enteredValue) {
+        return Arrays.stream(CreateSelectOrderOptionsEnum.values())
+            .filter(i -> i.getDisplayedValue().equals(enteredValue))
+            .map(i -> "option" + i.optionValue)
+            .findFirst().orElse("");
+    }
+
+    public static String getDisplayedValueFromEnumString(String enteredValue) {
+        return Arrays.stream(CreateSelectOrderOptionsEnum.values())
+            .map(i -> CreateSelectOrderOptionsEnum.valueOf(enteredValue))
+            .map(i -> i.displayedValue)
+            .findFirst().orElse("");
     }
 }

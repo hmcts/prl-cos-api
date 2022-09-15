@@ -34,3 +34,5 @@ spring:
         prl.idam-solicitor-username: IDAM_SOLICITOR_USERNAME
         prl.idam-solicitor-password: IDAM_SOLICITOR_PASSWORD
         prl.postcode-lookup-token: POST_CODE_LOOKUP_KEY
+        prl.courtnav-functional-test-user: COURTNAV_USERNAME
+        prl.courtnav-functional-test-pwd: COURTNAV_PASSWORD
