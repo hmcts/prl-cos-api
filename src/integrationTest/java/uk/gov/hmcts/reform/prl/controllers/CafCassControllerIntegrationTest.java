@@ -35,8 +35,6 @@ public class CafCassControllerIntegrationTest {
     @MockBean
     private CaseDataService caseDataService;
 
-    private static final String CREATE_SERVICE_RESPONSE = "classpath:response/cafcass-search-response.json";
-
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
