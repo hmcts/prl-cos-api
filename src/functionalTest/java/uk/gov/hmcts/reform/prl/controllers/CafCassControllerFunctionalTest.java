@@ -79,13 +79,18 @@ public class CafCassControllerFunctionalTest {
         assertEquals(expectedCafcassResponse.getTotal(), actualCafcassResponse.getCases().size());
 
         if (0 != expectedCafcassResponse.getTotal() && 0 != actualCafcassResponse.getTotal()) {
-            assertNotNull(actualCafcassResponse.getCases().get(0).getState());
-            assertNotNull(actualCafcassResponse.getCases().get(0).getCaseTypeId());
-            assertNotNull(actualCafcassResponse.getCases().get(0).getCaseTypeOfApplication());
+            for (int responseCaseCnt = 0; responseCaseCnt < actualCafcassResponse.getTotal(); responseCaseCnt++) {
+                assertNotNull(actualCafcassResponse.getCases().get(responseCaseCnt).getState());
+                assertNotNull(actualCafcassResponse.getCases().get(responseCaseCnt).getCaseTypeId());
+                assertNotNull(actualCafcassResponse.getCases().get(responseCaseCnt).getCaseTypeOfApplication());
 
-            assertEquals(actualCafcassResponse.getCases().get(0).getCaseTypeId(), expectedCafcassResponse.getCases().get(0).getCaseTypeId());
-            assertEquals(CASE_TYPE, actualCafcassResponse.getCases().get(0).getCaseTypeId());
-            assertEquals(C100_CASE_TYPE, actualCafcassResponse.getCases().get(0).getCaseTypeOfApplication());
+                assertEquals(actualCafcassResponse.getCases().get(responseCaseCnt).getCaseTypeId(),
+                        expectedCafcassResponse.getCases().get(responseCaseCnt).getCaseTypeId());
+                assertEquals(CASE_TYPE, actualCafcassResponse.getCases().get(responseCaseCnt).getCaseTypeId());
+                assertEquals(C100_CASE_TYPE, actualCafcassResponse.getCases()
+                        .get(responseCaseCnt)
+                        .getCaseTypeOfApplication());
+            }
         }
     }
 }
