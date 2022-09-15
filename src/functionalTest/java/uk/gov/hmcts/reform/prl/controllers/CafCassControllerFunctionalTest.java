@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
@@ -26,6 +27,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 
 @Slf4j
 @SpringBootTest
@@ -57,7 +60,7 @@ public class CafCassControllerFunctionalTest {
 
         Mockito.when(caseDataService.getCaseData(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedCafcassResponse);
 
-        mockMvc.perform(get("/searchCases")
+        MvcResult mvcResult = mockMvc.perform(get("/searchCases")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("authorisation", "authorisation")
                         .header("serviceAuthorisation", "serviceauthorisation")
@@ -67,9 +70,22 @@ public class CafCassControllerFunctionalTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        JSONObject json = new JSONObject(expectedCafcassResponse);
-        assertEquals(expectedCafcassResponse.getTotal(), json.getJSONArray("cases").length());
-        assertEquals(2, json.getJSONArray("cases").length());
-        assertNotNull(json.getJSONArray("cases").get(0));
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+
+        CafCassResponse actualCafcassResponse = objectMapper.readValue(contentAsString, CafCassResponse.class);
+
+        assertEquals(expectedCafcassResponse.getTotal(), actualCafcassResponse.getTotal());
+        assertEquals(expectedCafcassResponse.getCases().size(), actualCafcassResponse.getCases().size());
+        assertEquals(expectedCafcassResponse.getTotal(), actualCafcassResponse.getCases().size());
+
+        if (0 != expectedCafcassResponse.getTotal() && 0 != actualCafcassResponse.getTotal()) {
+            assertNotNull(actualCafcassResponse.getCases().get(0).getState());
+            assertNotNull(actualCafcassResponse.getCases().get(0).getCaseTypeId());
+            assertNotNull(actualCafcassResponse.getCases().get(0).getCaseTypeOfApplication());
+
+            assertEquals(actualCafcassResponse.getCases().get(0).getCaseTypeId(), expectedCafcassResponse.getCases().get(0).getCaseTypeId());
+            assertEquals(CASE_TYPE, actualCafcassResponse.getCases().get(0).getCaseTypeId());
+            assertEquals(C100_CASE_TYPE, actualCafcassResponse.getCases().get(0).getCaseTypeOfApplication());
+        }
     }
 }

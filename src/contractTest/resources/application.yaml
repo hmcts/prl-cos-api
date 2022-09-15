@@ -147,6 +147,15 @@ prl:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
 
+cafcaas:
+  search-case-type-id: PRLAPPS
+  caseTypeOfApplicationList: C100
+  caseState: SUBMITTED_PAID
+
+ccd:
+  elastic-search-api:
+    result-size: 100
+    boost: 2.0
 
 security:
   oauth2:
