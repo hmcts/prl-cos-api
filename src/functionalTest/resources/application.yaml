@@ -66,6 +66,9 @@ feature-toggle:
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
+citizen:
+  dashboardUrl: ${CITIZEN_URL:https://wwww.example.com}s
+
 citizen_frontend:
   url: http://example.com
 

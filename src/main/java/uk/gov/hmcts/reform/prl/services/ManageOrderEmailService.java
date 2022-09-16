@@ -18,7 +18,9 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -41,6 +43,9 @@ public class ManageOrderEmailService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
+    @Value("${citizen.dashboardUrl}")
+    private String citizenDashboardUrl;
+
     private static final String URL_STRING = "/";
     private static final String URGENT_CASE = "Urgent ";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
@@ -61,6 +66,78 @@ public class ManageOrderEmailService {
             LanguagePreference.english
         ));
 
+    }
+
+    public void sendEmailToApplicantAndRespondent(CaseDetails caseDetails) {
+        log.info("Sending the new manage order emails for Applicant/Respondent {}",caseDetails.getId());
+        CaseData caseData = emailService.getCaseData(caseDetails);
+
+        if(caseData.getCaseTypeOfApplication().equalsIgnoreCase( "C100")) {
+            Map<String, String> applicantsMap = getEmailPartyWithName(caseData
+                                                                         .getApplicants());
+            Map<String, String> respondentMap = getEmailPartyWithName(caseData
+                                                                         .getRespondents());
+            for (Map.Entry<String, String> appValues : applicantsMap.entrySet()) {
+
+                emailService.send(
+                    appValues.getKey(),
+                    EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
+                    buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
+                    LanguagePreference.english
+                );
+            }
+
+            for (Map.Entry<String, String> appValues : respondentMap.entrySet()) {
+
+                emailService.send(
+                    appValues.getKey(),
+                    EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
+                    buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
+                    LanguagePreference.english
+                );
+            }
+        } else {
+            emailService.send(
+                caseData.getApplicantsFL401().getEmail(),
+                EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
+                buildApplicantRespondentEmail(caseDetails, caseData.getApplicantsFL401().getFirstName()
+                    +" "+caseData.getApplicantsFL401().getFirstName()),
+                LanguagePreference.english
+            );
+            emailService.send(
+                caseData.getRespondentsFL401().getEmail(),
+                EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
+                buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
+                    +" "+caseData.getRespondentsFL401().getFirstName()),
+                LanguagePreference.english
+            );
+        }
+
+
+    }
+
+    private Map<String, String> getEmailPartyWithName(List<Element<PartyDetails>> party) {
+        return party
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toMap(
+                PartyDetails::getEmail,
+                i -> i.getFirstName() + " " + i.getLastName()
+            ));
+    }
+
+    private EmailTemplateVars buildApplicantRespondentEmail(CaseDetails caseDetails,String name) {
+
+        CaseData caseData = emailService.getCaseData(caseDetails);
+
+
+        return ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .applicantName(name)
+            .courtName(caseData.getCourtName())
+            .dashboardLink(citizenDashboardUrl)
+            .build();
     }
 
 
@@ -88,6 +165,15 @@ public class ManageOrderEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
     }
+
+    private List<PartyDetails> getRespondents(CaseData caseData) {
+        return caseData
+            .getRespondents()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+    }
+
 
 
     private List<String> getEmailAddress(List<Element<PartyDetails>> partyDetails) {

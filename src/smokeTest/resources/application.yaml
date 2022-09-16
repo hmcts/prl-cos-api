@@ -73,6 +73,9 @@ xui:
 citizen_frontend:
   url: http://example.com
 
+citizen:
+  dashboardUrl: ${CITIZEN_URL:https://wwww.example.com}
+
 uk:
   gov:
     notify:
