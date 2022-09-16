@@ -215,6 +215,7 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,
                                                                                                 caseData));
+            manageOrderEmailService.sendEmailToApplicantAndRespondent(callbackRequest.getCaseDetails());
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
