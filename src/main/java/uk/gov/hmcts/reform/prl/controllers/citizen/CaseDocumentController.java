@@ -11,6 +11,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -25,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -41,6 +44,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADE
 @RestController
 public class CaseDocumentController {
 
+    private static final String SERVICE_AUTH = "ServiceAuthorization";
+
     @Autowired
     private DocumentGenService documentGenService;
 
@@ -52,6 +57,9 @@ public class CaseDocumentController {
 
     @Autowired
     CaseService caseService;
+
+    @Autowired
+    private AuthorisationService authorisationService;
 
     Integer fileIndex;
 
@@ -131,8 +139,12 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     public ResponseEntity<?> uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                            @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
                                             @RequestParam("file") MultipartFile file) {
 
+        if (!isAuthorized(authorisation, serviceAuthorization)) {
+            throw (new RuntimeException("Invalid Client"));
+        }
         return ResponseEntity.ok(documentGenService.uploadDocument(authorisation, file));
     }
 
@@ -177,6 +189,28 @@ public class CaseDocumentController {
             CITIZEN_UPLOADED_DOCUMENT
         );
         return "SUCCESS";
+    }
+
+    @DeleteMapping("/{documentId}/delete")
+    @Operation(description = "Delete a document from client document api")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Deleted document successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad Request while deleting the document"),
+            @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+            @ApiResponse(responseCode = "404", description = "Document not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public ResponseEntity<?> deleteDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                            @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+                                            @PathVariable("documentId") String documentId) {
+        if (!isAuthorized(authorisation, serviceAuthorization)) {
+            throw (new RuntimeException("Invalid Client"));
+        }
+        return ResponseEntity.ok(documentGenService.deleteDocument(authorisation, documentId));
+    }
+
+    private boolean isAuthorized(String authorisation, String serviceAuthorization) {
+        return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+                authorisationService.authoriseService(serviceAuthorization));
     }
 
 }
