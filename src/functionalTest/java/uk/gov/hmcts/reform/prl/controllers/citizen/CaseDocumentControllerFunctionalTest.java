@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
@@ -28,7 +27,6 @@ import java.io.File;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@TestPropertySource("classpath:application.yaml")
 @SuppressWarnings("PMD")
 public class CaseDocumentControllerFunctionalTest {
 
@@ -56,6 +54,7 @@ public class CaseDocumentControllerFunctionalTest {
 
     @Test
     public void shouldSuccessfullyUploadDocument() throws Exception {
+        //TODO Replace with citizen auth token once secrets added
         Response response = request
                 .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                 .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
@@ -74,6 +73,7 @@ public class CaseDocumentControllerFunctionalTest {
 
     @Test
     public void shouldSuccessfullyDeleteDocument() throws Exception {
+        //TODO Replace with citizen auth token once secrets added
         Response response = request
                 .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                 .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
