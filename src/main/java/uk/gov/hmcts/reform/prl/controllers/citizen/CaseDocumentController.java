@@ -16,12 +16,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ResponseMessage;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -31,7 +35,6 @@ import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +43,16 @@ import java.util.stream.Collectors;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RestController
 public class CaseDocumentController {
+
+    public static final String CITIZEN_DOCUMENT_UPLOAD_EVENT_ID = "citizenUploadedDocument";
 
     @Autowired
     private DocumentGenService documentGenService;
@@ -60,6 +68,12 @@ public class CaseDocumentController {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    private AuthTokenGenerator authTokenGenerator;
+
+    @Autowired
+    private IdamClient idamClient;
 
     @Autowired
     CaseService caseService;
@@ -110,7 +124,7 @@ public class CaseDocumentController {
             } else {
                 uploadedDocumentsList = new ArrayList<>();
             }
-            Element<UploadedDocuments> uploadDocumentElement = ElementUtils.element(uploadedDocuments);
+            Element<UploadedDocuments> uploadDocumentElement = element(uploadedDocuments);
             uploadedDocumentsList.add(uploadDocumentElement);
 
             CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
@@ -147,15 +161,61 @@ public class CaseDocumentController {
 
         log.info("Uploaded doc request: {}", uploadedDocumentRequest);
         String caseId = uploadedDocumentRequest.getValues().get("caseId").toString();
+        CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
+        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
+        CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(s2sToken))) {
             log.info("=====trying to upload document=====");
 
-            uploadService.uploadCitizenDocument(authorisation, uploadedDocumentRequest, caseId);
-            return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
-                                                                    + uploadedDocumentRequest
-                .getValues().get("file")));
+            UploadedDocuments uploadedDocuments = uploadService.uploadCitizenDocument(authorisation, uploadedDocumentRequest, caseId);
+            List<Element<UploadedDocuments>> uploadedDocumentsList;
+            Element<UploadedDocuments> uploadedDocsElement = element(uploadedDocuments);
+            if (tempCaseData.getCitizenUploadedDocumentList() != null
+                && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
+                uploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
+                uploadedDocumentsList.add(uploadedDocsElement);
+            } else {
+                uploadedDocumentsList = new ArrayList<>();
+                uploadedDocumentsList.add(uploadedDocsElement);
+            }
+            CaseData caseData = CaseData.builder()
+                .id(Long.parseLong(caseId))
+                .citizenUploadedDocumentList(uploadedDocumentsList)
+                .build();
+
+            StartEventResponse startEventResponse =
+                coreCaseDataApi.startEventForCaseWorker(
+                    authorisation,
+                    authTokenGenerator.generate(),
+                    idamClient.getUserInfo(authorisation).getUid(),
+                    JURISDICTION,
+                    CASE_TYPE,
+                    caseId,
+                    CITIZEN_DOCUMENT_UPLOAD_EVENT_ID
+                );
+
+            CaseDataContent caseDataContent = CaseDataContent.builder()
+                .eventToken(startEventResponse.getToken())
+                .event(Event.builder()
+                           .id(startEventResponse.getEventId())
+                           .build())
+                .data(caseData).build();
+
+            CaseDetails caseDetails1 = coreCaseDataApi.submitEventForCaseWorker(
+                authorisation,
+                authTokenGenerator.generate(),
+                idamClient.getUserInfo(authorisation).getUid(),
+                JURISDICTION,
+                CASE_TYPE,
+                caseId,
+                true,
+                caseDataContent
+            );
+            return ResponseEntity.ok().body(
+                DocumentDetails.builder().documentId(uploadedDocsElement.getId().toString())
+                    .documentName(uploadedDocuments.getCitizenDocument().getDocumentFileName()).build());
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
