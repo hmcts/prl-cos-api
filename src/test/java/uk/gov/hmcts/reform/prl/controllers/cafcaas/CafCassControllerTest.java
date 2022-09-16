@@ -1,13 +1,14 @@
-package uk.gov.hmcts.reform.prl.controllers;
+package uk.gov.hmcts.reform.prl.controllers.cafcaas;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
-import uk.gov.hmcts.reform.prl.controllers.cafcaas.CafCassController;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -16,11 +17,12 @@ import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class CafCassControllerTest {
+public  class CafCassControllerTest {
 
     @InjectMocks
     private CafCassController cafCassController;
@@ -28,13 +30,13 @@ public class CafCassControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
-     @Mock
+    @Mock
     private CaseDataService caseDataService;
 
     private static final String jsonInString =
         "classpath:response/CafCaasResponse.json";
 
-    @org.junit.Test
+    @Test
     public void getCaseDataTest() throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         CafCassResponse expectedCafCassResponse = objectMapper.readValue(
@@ -42,8 +44,8 @@ public class CafCassControllerTest {
             CafCassResponse.class
         );
 
-       when(authorisationService.authoriseService(any())).thenReturn(true);
-       when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseDataService.getCaseData("authorisation", "serviceAuthorisation", "startDate", "endDate"))
             .thenReturn(expectedCafCassResponse);
         ResponseEntity responseEntity = cafCassController.searcCasesByDates(
@@ -53,9 +55,25 @@ public class CafCassControllerTest {
             "endDate"
         );
         CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
-        Assertions.assertEquals(objectMapper.writeValueAsString(expectedCafCassResponse),
-                                objectMapper.writeValueAsString(realCafCassResponse));
-        Assertions.assertEquals(realCafCassResponse.getTotal(), 2);
-        Assertions.assertEquals(realCafCassResponse.getCases().size(), 2);
+        assertEquals(objectMapper.writeValueAsString(expectedCafCassResponse),
+                     objectMapper.writeValueAsString(realCafCassResponse));
+        assertEquals(realCafCassResponse.getTotal(), 2);
+        assertEquals(realCafCassResponse.getCases().size(), 2);
+    }
+
+    @Test
+    public void testExpectedException() {
+        when(authorisationService.authoriseService(any())).thenReturn(false);
+        when(authorisationService.authoriseUser(any())).thenReturn(false);
+        Assertions.assertThrows(ResponseStatusException.class, () -> {
+            cafCassController.searcCasesByDates(
+                 "authorisation",
+                 "serviceAuthorisation",
+                 "startDate",
+                 "endDate"
+            );
+        });
+
     }
 }
+

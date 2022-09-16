@@ -22,6 +22,7 @@ public class AuthorisationService {
     @Value("${payments.authorised-services}")
     private String s2sAuthorisedServices;
     private final IdamClient idamClient;
+
     public Boolean authorise(String serviceAuthHeader) {
         String callingService;
         callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
@@ -32,6 +33,7 @@ public class AuthorisationService {
             throw new AuthorisationException("Request not authorised");
         }
     }
+
     public Boolean authoriseService(String serviceAuthHeader) {
         String callingService;
         try {
@@ -46,6 +48,7 @@ public class AuthorisationService {
         }
         return false;
     }
+
     public Boolean authoriseUser(String authorisation) {
         try {
             UserInfo userInfo = idamClient.getUserInfo(authorisation);
