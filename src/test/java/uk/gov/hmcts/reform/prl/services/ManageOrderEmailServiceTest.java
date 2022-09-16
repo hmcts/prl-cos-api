@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 
@@ -690,12 +689,12 @@ public class ManageOrderEmailServiceTest {
             .caseTypeOfApplication("FL401")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
-            .applicantsFL401(PartyDetails.builder().
-                                 lastName("test")
+            .applicantsFL401(PartyDetails.builder()
+                    .lastName("test")
                                  .firstName("test1").build())
             .respondents(listOfRespondents)
-            .respondentsFL401(PartyDetails.builder().
-                                  lastName("test")
+            .respondentsFL401(PartyDetails.builder()
+                    .lastName("test")
                                   .firstName("test1").build())
             .children(listOfChildren)
             .courtName("testcourt")
