@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -72,7 +71,7 @@ public class ManageOrderEmailService {
         log.info("Sending the new manage order emails for Applicant/Respondent {}",caseDetails.getId());
         CaseData caseData = emailService.getCaseData(caseDetails);
 
-        if(caseData.getCaseTypeOfApplication().equalsIgnoreCase( "C100")) {
+        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase("C100")) {
             Map<String, String> applicantsMap = getEmailPartyWithName(caseData
                                                                          .getApplicants());
             Map<String, String> respondentMap = getEmailPartyWithName(caseData
@@ -101,14 +100,14 @@ public class ManageOrderEmailService {
                 caseData.getApplicantsFL401().getEmail(),
                 EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
                 buildApplicantRespondentEmail(caseDetails, caseData.getApplicantsFL401().getFirstName()
-                    +" "+caseData.getApplicantsFL401().getFirstName()),
+                    + " " + caseData.getApplicantsFL401().getFirstName()),
                 LanguagePreference.english
             );
             emailService.send(
                 caseData.getRespondentsFL401().getEmail(),
                 EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
                 buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
-                    +" "+caseData.getRespondentsFL401().getFirstName()),
+                    + " " + caseData.getRespondentsFL401().getFirstName()),
                 LanguagePreference.english
             );
         }
