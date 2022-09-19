@@ -43,9 +43,13 @@ import java.util.stream.Collectors;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -90,15 +94,15 @@ public class CaseDocumentController {
                                                    @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                    @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
         fileIndex = 0;
-        String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
+        String caseId = generateAndUploadDocumentRequest.getValues().get(CASE_ID);
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (generateAndUploadDocumentRequest.getValues() != null
-            && generateAndUploadDocumentRequest.getValues().containsKey("documentType")
-            && generateAndUploadDocumentRequest.getValues().containsKey("partyName")) {
-            final String documentType = generateAndUploadDocumentRequest.getValues().get("documentType");
-            final String partyName = generateAndUploadDocumentRequest.getValues().get("partyName");
+            && generateAndUploadDocumentRequest.getValues().containsKey(DOCUMENT_TYPE)
+            && generateAndUploadDocumentRequest.getValues().containsKey(PARTY_NAME)) {
+            final String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
+            final String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
             if (tempCaseData.getCitizenUploadedDocumentList() != null
                 && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
                 tempCaseData.getCitizenUploadedDocumentList()
@@ -232,13 +236,13 @@ public class CaseDocumentController {
                                                            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
         List<Element<UploadedDocuments>> tempUploadedDocumentsList;
         List<Element<UploadedDocuments>> uploadedDocumentsList = new ArrayList<>();
-        String caseId = deleteDocumentRequest.getValues().get("caseId");
+        String caseId = deleteDocumentRequest.getValues().get(CASE_ID);
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (deleteDocumentRequest.getValues() != null
-            && deleteDocumentRequest.getValues().containsKey("documentId")) {
-            final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
+            && deleteDocumentRequest.getValues().containsKey(DOCUMENT_ID)) {
+            final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get(DOCUMENT_ID);
             log.info("Document to be deleted with id : " + documenIdToBeDeleted);
             tempUploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
             /*for (Element<UploadedDocuments> element : tempUploadedDocumentsList) {

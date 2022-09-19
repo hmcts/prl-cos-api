@@ -136,4 +136,13 @@ public class PrlAppsConstants {
     public static final String DRUG_AND_ALCOHOL_TESTS = "Drug and alcohol tests (toxicology)";
     public static final String POLICE_REPORTS = "Police reports";
     public static final String OTHER_DOCUMENTS = "Other documents";
+
+    public static final String CASE_ID = "caseId";
+    public static final String DOCUMENT_TYPE = "documentType";
+    public static final String PARTY_NAME = "partyName";
+    public static final String DOCUMENT_ID = "documentId";
+    public static final String SUBMITTED_PDF = "_submitted.pdf";
+    public static final String PARENT_DOCUMENT_TYPE = "parentDocumentType";
+    public static final String PARTY_ID = "partyId";
+    public static final String IS_APPLICANT = "isApplicant";
 }
