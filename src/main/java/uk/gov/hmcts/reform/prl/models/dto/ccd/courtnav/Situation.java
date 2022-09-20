@@ -24,28 +24,14 @@ public class Situation {
     /**
      * type of application.
      */
-
-    @Valid
-    @NotNull
-    @NotEmpty
     private final List<FL401OrderTypeEnum> ordersAppliedFor;
 
     /**
      * without notice order.
      */
-
-    @NotNull
-    @NotEmpty
     private final boolean ordersAppliedWithoutNotice;
-
-
-    @NotEmpty
     private final List<WithoutNoticeReasonEnum> ordersAppliedWithoutNoticeReason;
-    @NotBlank
     private final String ordersAppliedWithoutNoticeReasonDetails;
-
-    @NotNull
-    @NotEmpty
     private final boolean bailConditionsOnRespondent;
     private final CourtNavDate bailConditionsEndDate;
     private final String additionalDetailsForCourt;
