@@ -21,5 +21,4 @@ public class GoingToCourt {
     private final boolean anyDisabilityNeeds;
     private final String disabilityNeedsDetails;
     private final List<SpecialMeasuresEnum> anySpecialMeasures;
-    private final String courtSpecialRequirements;
 }
