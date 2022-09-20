@@ -63,7 +63,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -72,7 +71,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_STATE;
@@ -223,11 +222,9 @@ public class CallbackController {
                 .map(Element::getValue)
                 .collect(Collectors.toList()))).build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        caseDataUpdated.put(
-            DATE_AND_TIME_SUBMITTED_FIELD,
-            DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa", Locale.UK).format(zonedDateTime).toUpperCase());
 
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
         Map<String,Object> map = documentGenService.generateDocuments(authorisation, caseData);
 
         caseDataUpdated.putAll(map);
