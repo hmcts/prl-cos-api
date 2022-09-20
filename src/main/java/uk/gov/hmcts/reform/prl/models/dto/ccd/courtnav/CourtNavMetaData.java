@@ -5,7 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 
 @Data
 @AllArgsConstructor
@@ -15,9 +19,14 @@ import lombok.Setter;
 @Builder(toBuilder = true)
 public class CourtNavMetaData {
 
+    @Valid
+    @NonNull
     private final String caseOrigin;
     private final boolean courtNavApproved;
     private final boolean hasDraftOrder;
+    @Valid
+    @NonNull
+    @NotBlank
     private final int numberOfAttachments;
     private final String courtSpecialRequirements;
 
