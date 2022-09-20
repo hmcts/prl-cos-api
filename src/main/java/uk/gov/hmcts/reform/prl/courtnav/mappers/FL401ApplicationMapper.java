@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.CourtNavDataValidationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -76,6 +77,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -90,6 +92,19 @@ public class FL401ApplicationMapper {
     private Court court = null;
 
     public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData) throws NotFoundException {
+
+        if (courtNavCaseData.getFl401().getSituation().isOrdersAppliedWithoutNotice()
+            && courtNavCaseData.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason().isEmpty()) {
+            throw new CourtNavDataValidationException("isOrdersAppliedWithoutNotice is true, "
+                                                          + "but no value is provided for OrdersAppliedWithoutNoticeReason");
+        }
+
+        if (courtNavCaseData.getFl401().getSituation().isBailConditionsOnRespondent()
+            && courtNavCaseData.getFl401().getSituation().getBailConditionsEndDate().mergeDate().isEmpty()) {
+            throw new CourtNavDataValidationException("isBailConditionsOnRespondent is true, "
+                                                          + "but no value is provided for BailConditionsEndDate");
+
+        }
 
         CaseData caseData = null;
         caseData = CaseData.builder()
@@ -369,7 +384,6 @@ public class FL401ApplicationMapper {
     }
 
     private Home mapHomeDetails(CourtNavFl401 courtNavCaseData) {
-
         return Home.builder()
             .address(getAddress(courtNavCaseData.getFl401().getTheHome().getOccupationOrderAddress()))
             .peopleLivingAtThisAddress(getPeopleLivingAtThisAddress(courtNavCaseData))
@@ -608,7 +622,9 @@ public class FL401ApplicationMapper {
     }
 
     private PartyDetails mapApplicant(ApplicantsDetails applicant) {
-
+        if (Objects.equals(applicant.getApplicantGender(), "other") && applicant.getApplicantGenderOther().isEmpty()) {
+            throw new CourtNavDataValidationException("Application gender is other, but no value is provided for applicantGenderOther option");
+        }
         return PartyDetails.builder()
             .firstName(applicant.getApplicantFirstName())
             .lastName(applicant.getApplicantLastName())
