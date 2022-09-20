@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -44,9 +46,14 @@ public enum State {
             .findFirst();
     }
 
+    @JsonValue
     public String getLabel() {
         return label;
     }
 
+    @JsonCreator
+    public static State getValue(String key) {
+        return State.valueOf(key);
+    }
 
 }
