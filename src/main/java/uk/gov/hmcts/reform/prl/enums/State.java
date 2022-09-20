@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,6 +10,7 @@ import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Getter
+@JsonSerialize(using = CustomEnumSerializer.class)
 public enum State {
 
     AWAITING_SUBMISSION_TO_HMCTS("AWAITING_SUBMISSION_TO_HMCTS", "Draft"),
