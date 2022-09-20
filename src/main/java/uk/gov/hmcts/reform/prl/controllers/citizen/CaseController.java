@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
@@ -41,12 +42,10 @@ public class CaseController {
         @RequestHeader(value = "Authorization", required = false) String userToken,
         @RequestHeader("serviceAuthorization") String s2sToken
     ) {
-        log.info("Case Sate ======> " + objectMapper.convertValue(
-            coreCaseDataApi.getCase(userToken, s2sToken, caseId).getData(),
-            CaseData.class
-        ).getState());
+        CaseDetails caseDetails = coreCaseDataApi.getCase(userToken, s2sToken, caseId);
+        caseDetails.getData().put("state", caseDetails.getState());
         return objectMapper.convertValue(
-            coreCaseDataApi.getCase(userToken, s2sToken, caseId).getData(),
+            caseDetails.getData(),
             CaseData.class
         );
     }
