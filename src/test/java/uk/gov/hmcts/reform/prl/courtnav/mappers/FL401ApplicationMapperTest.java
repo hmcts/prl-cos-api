@@ -324,13 +324,14 @@ public class FL401ApplicationMapperTest {
             .anyDisabilityNeeds(false)
             .disabilityNeedsDetails(null)
             .anySpecialMeasures(specialMeasuresEnum)
-            .courtSpecialRequirements("test special court")
             .build();
 
         courtNavMetaData = CourtNavMetaData.builder()
             .courtNavApproved(true)
             .caseOrigin("courtnav")
             .numberOfAttachments(4)
+            .courtSpecialRequirements("test special court")
+            .hasDraftOrder(false)
             .build();
 
 
@@ -674,7 +675,6 @@ public class FL401ApplicationMapperTest {
             .anyDisabilityNeeds(true)
             .disabilityNeedsDetails("test")
             .anySpecialMeasures(specialMeasuresEnum)
-            .courtSpecialRequirements("test special court")
             .build();
 
         courtNavFl401 = CourtNavFl401.builder()
