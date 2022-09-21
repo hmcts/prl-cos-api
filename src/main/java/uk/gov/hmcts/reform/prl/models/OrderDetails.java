@@ -38,7 +38,7 @@ public class OrderDetails {
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
-        log.info("orderType {}, orderTypeId {},dateCreated {}",this.orderType,this.orderTypeId,this.dateCreated);
+        log.info("orderType {}, orderTypeId {},dateCreated {}", this.orderType, this.orderTypeId, this.dateCreated);
         return String.format(
             "%s - %s",
             this.orderType,
