@@ -46,7 +46,7 @@ public class CafcassCdamServiceTest {
 
     @Test
     @DisplayName("test case for Case document API.")
-    public void testGetDocumentBinary(){
+    public void testGetDocumentBinary() {
 
         when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, uuid)).thenReturn(new ResponseEntity<Resource>(
             HttpStatus.OK));
@@ -59,7 +59,7 @@ public class CafcassCdamServiceTest {
 
     @Test
     @DisplayName("test case for Case document API when document id is incorrect.")
-    public void testGetDocumentBinaryNotFound(){
+    public void testGetDocumentBinaryNotFound() {
 
         when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, uuid)).thenReturn(new ResponseEntity<Resource>(
             HttpStatus.NOT_FOUND));

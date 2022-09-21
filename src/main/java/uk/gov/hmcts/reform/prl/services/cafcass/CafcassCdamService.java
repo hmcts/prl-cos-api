@@ -18,9 +18,9 @@ public class CafcassCdamService {
     /**
      * This method will call CDAM getDocument API
      * and return the result.
-     * @param authToken
-     * @param s2sToken
-     * @param documentId
+     * @param authToken Authorisation token
+     * @param s2sToken s2s token
+     * @param documentId document id
      * @return
      */
     public ResponseEntity<Resource> getDocument(String authToken, String s2sToken, UUID documentId) {
