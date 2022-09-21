@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.CourtNavDataValidationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -90,6 +91,13 @@ public class FL401ApplicationMapper {
     private Court court = null;
 
     public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData) throws NotFoundException {
+
+        if (courtNavCaseData.getFl401().getSituation().isOrdersAppliedWithoutNotice()
+            && (courtNavCaseData.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason() == null
+            || courtNavCaseData.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason().isEmpty())) {
+            throw new CourtNavDataValidationException("isOrdersAppliedWithoutNotice is true, "
+                                                              + "then we need to provide OrdersAppliedWithoutNoticeReason");
+        }
 
         CaseData caseData = null;
         caseData = CaseData.builder()
