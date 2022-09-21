@@ -157,7 +157,7 @@ public class CaseDocumentController {
     })
     public ResponseEntity uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                              @RequestHeader("serviceAuthorization") String s2sToken,
-                                                            @ModelAttribute UploadedDocumentRequest uploadedDocumentRequest) {
+                                                            @RequestBody UploadedDocumentRequest uploadedDocumentRequest) {
 
         log.info("Uploaded doc request: {}", uploadedDocumentRequest);
         String caseId = uploadedDocumentRequest.getValues().get("caseId").toString();
