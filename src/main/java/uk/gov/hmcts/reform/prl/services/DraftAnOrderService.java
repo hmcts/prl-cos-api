@@ -1,15 +1,13 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
-import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.*;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -32,6 +30,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ResourceReader.readString;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DraftAnOrderService {
@@ -386,20 +385,37 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData) {
-        List<Element<OrderDetails>> uploadedDraftOrderList;
+
+        log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
+        log.info(" ************SolicitorDraftOrderDoc {}", caseData.getSolicitorDraftOrderDoc());
+        List<Element<OrderDetails>> draftOrderList;
         Element<OrderDetails> orderDetails = element(getCurrentOrderDetails(caseData));
         if (caseData.getDraftOrderCollection() != null) {
-            uploadedDraftOrderList = caseData.getDraftOrderCollection();
-            uploadedDraftOrderList.add(orderDetails);
+            draftOrderList = caseData.getDraftOrderCollection();
+            draftOrderList.add(orderDetails);
         } else {
-            uploadedDraftOrderList = new ArrayList<>();
-            uploadedDraftOrderList.add(orderDetails);
+            draftOrderList = new ArrayList<>();
+            draftOrderList.add(orderDetails);
         }
-        uploadedDraftOrderList.sort(Comparator.comparing(
+        draftOrderList.sort(Comparator.comparing(
             m -> m.getValue().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        return Map.of("draftOrderCollection", uploadedDraftOrderList);
+        return Map.of("draftOrderCollection", draftOrderList,
+                      "draftOrderDetailsWithTextCollection", getDraftOrderDetailsWithTextList(caseData)
+        );
+    }
+
+    private List<Element<DraftOrderDetails>> getDraftOrderDetailsWithTextList(CaseData caseData) {
+        List<Element<DraftOrderDetails>> tempList;
+        Element<DraftOrderDetails> draftOrderDetails = element(getCurrentOrderDetailsWithText(caseData));
+        if (caseData.getDraftOrderDetailsWithTextCollection() != null) {
+            tempList = caseData.getDraftOrderDetailsWithTextCollection();
+        } else {
+            tempList = new ArrayList<>();
+        }
+        tempList.add(draftOrderDetails);
+        return tempList;
     }
 
     private OrderDetails getCurrentOrderDetails(CaseData caseData) {
@@ -419,6 +435,15 @@ public class DraftAnOrderService {
                               .orderRecipients("NA").build())
             .dateCreated(dateTime.now())
             .build();
+    }
+
+
+    private DraftOrderDetails getCurrentOrderDetailsWithText(CaseData caseData) {
+        return DraftOrderDetails.builder()
+            .orderTypeId(caseData.getCreateSelectOrderOptions().name())
+            .orderDocument(caseData.getSolicitorDraftOrderDoc())
+            .orderText(caseData.getPreviewDraftAnOrder())
+            .dateCreated(dateTime.now()).build();
     }
 
     public Map<String, Object> getDraftOrderDynamicList(List<Element<OrderDetails>> draftOrderCollection) {
