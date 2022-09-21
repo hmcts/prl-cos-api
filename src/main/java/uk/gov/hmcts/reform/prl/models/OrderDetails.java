@@ -33,4 +33,14 @@ public class OrderDetails {
             this.getOtherDetails().getOrderCreatedDate()
         );
     }
+
+    @JsonIgnore
+    public String getLabelForOrdersDynamicList() {
+
+        return String.format(
+            "%s - %s",
+            this.orderType,
+            this.orderDocument.getDocumentFileName()
+        );
+    }
 }

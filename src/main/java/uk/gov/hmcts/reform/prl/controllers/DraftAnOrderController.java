@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
-import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -32,7 +31,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class DraftAnOrderController {
 
     private final ObjectMapper objectMapper;
-    private final DgsService dgsService;
     private final DraftAnOrderService draftAnOrderService;
 
     @PostMapping(path = "/populate-selected-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

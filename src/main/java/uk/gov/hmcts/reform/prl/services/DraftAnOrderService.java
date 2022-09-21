@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -418,5 +419,16 @@ public class DraftAnOrderService {
                               .orderRecipients("NA").build())
             .dateCreated(dateTime.now())
             .build();
+    }
+
+    public Map<String, Object> getDraftOrderDynamicList(List<Element<OrderDetails>> draftOrderCollection) {
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+            draftOrderCollection,
+            null,
+            OrderDetails::getLabelForOrdersDynamicList
+        ));
+        return caseDataMap;
     }
 }
