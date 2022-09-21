@@ -52,24 +52,20 @@ import static uk.gov.hmcts.reform.prl.clients.util.TestConstants.CCD_STORE_SEARC
 @ContextConfiguration(
         classes = {CafcassSearchCaseApiConsumerApplication.class}
 )
-public class CafcassApiConsumerTest {
+public class CafcassApiConsumerCcdSearchCaseApiTest {
     @BeforeEach
     public void setupEachTest() {
-        //System.setProperty("pact.verifier.publishResults", "true");
+        System.setProperty("pact.verifier.publishResults", "true");
     }
 
     @MockBean
     private IdamClient idamClient;
-
-    @MockBean
-    private CoreCaseDataApi coreCaseDataApi;
 
     @After
     void tearDown() {
         Executor.closeIdleConnections();
     }
 
-    //GET
     @Pact(provider = CAFCASS_SEARCH_CASE_PROVIDER, consumer = CAFCASS_PACT_CONSUMER_NAME)
     public RequestResponsePact executeGetSearchCases(PactDslWithProvider builder) {
         return
