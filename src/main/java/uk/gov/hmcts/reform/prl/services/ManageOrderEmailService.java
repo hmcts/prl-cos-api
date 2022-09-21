@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -70,7 +71,7 @@ public class ManageOrderEmailService {
     public void sendEmailToApplicantAndRespondent(CaseDetails caseDetails) {
         log.info("Sending the new manage order emails for Applicant/Respondent {}",caseDetails.getId());
         CaseData caseData = emailService.getCaseData(caseDetails);
-
+        SelectTypeOfOrderEnum isFinalOrder = caseData.getSelectTypeOfOrder();
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase("C100")) {
             Map<String, String> applicantsMap = getEmailPartyWithName(caseData
                                                                          .getApplicants());
@@ -80,7 +81,8 @@ public class ManageOrderEmailService {
 
                 emailService.send(
                     appValues.getKey(),
-                    EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
+                    (isFinalOrder == SelectTypeOfOrderEnum.finl) ? EmailTemplateNames.CA_DA_FINAL_ORDER_EMAIL
+                        : EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
                     buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
                     LanguagePreference.english
                 );
@@ -90,26 +92,33 @@ public class ManageOrderEmailService {
 
                 emailService.send(
                     appValues.getKey(),
-                    EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
+                    (isFinalOrder == SelectTypeOfOrderEnum.finl) ? EmailTemplateNames.CA_DA_FINAL_ORDER_EMAIL
+                        : EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
                     buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
                     LanguagePreference.english
                 );
             }
         } else {
-            emailService.send(
-                caseData.getApplicantsFL401().getEmail(),
-                EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
-                buildApplicantRespondentEmail(caseDetails, caseData.getApplicantsFL401().getFirstName()
-                    + " " + caseData.getApplicantsFL401().getFirstName()),
-                LanguagePreference.english
-            );
-            emailService.send(
-                caseData.getRespondentsFL401().getEmail(),
-                EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
-                buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
-                    + " " + caseData.getRespondentsFL401().getFirstName()),
-                LanguagePreference.english
-            );
+            if (caseData.getApplicantsFL401().getEmail() != null) {
+                emailService.send(
+                    caseData.getApplicantsFL401().getEmail(),
+                    (isFinalOrder == SelectTypeOfOrderEnum.finl) ? EmailTemplateNames.CA_DA_FINAL_ORDER_EMAIL :
+                        EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
+                    buildApplicantRespondentEmail(caseDetails, caseData.getApplicantsFL401().getFirstName()
+                        + " " + caseData.getApplicantsFL401().getFirstName()),
+                    LanguagePreference.english
+                );
+            }
+            if (caseData.getRespondentsFL401().getEmail() != null) {
+                emailService.send(
+                    caseData.getRespondentsFL401().getEmail(),
+                    (isFinalOrder == SelectTypeOfOrderEnum.finl) ? EmailTemplateNames.CA_DA_FINAL_ORDER_EMAIL :
+                        EmailTemplateNames.CA_DA_MANAGE_ORDER_EMAIL,
+                    buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
+                        + " " + caseData.getRespondentsFL401().getFirstName()),
+                    LanguagePreference.english
+                );
+            }
         }
 
 
