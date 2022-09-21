@@ -852,9 +852,12 @@ public class ApplicationsTabService implements TabService {
             .map(ApplicantStopFromRespondentDoingEnum::getDisplayedValue)
             .collect(Collectors.toList());
 
-        List<String> applicantStopFromRespondentDoingToChildEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild().stream()
-            .map(ApplicantStopFromRespondentDoingToChildEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+        List<String> applicantStopFromRespondentDoingToChildEnum = new ArrayList<>();
+        if (respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild() != null) {
+            applicantStopFromRespondentDoingToChildEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild().stream()
+                .map(ApplicantStopFromRespondentDoingToChildEnum::getDisplayedValue)
+                .collect(Collectors.toList());
+        }
 
         rs.applicantWantToStopFromRespondentDoing(String.join(", ", applicantStopFromRespondentDoingEnum))
             .applicantWantToStopFromRespondentDoingToChild(String.join(", ", applicantStopFromRespondentDoingToChildEnum))
@@ -896,6 +899,7 @@ public class ApplicationsTabService implements TabService {
         HomeDetails.HomeDetailsBuilder builder = HomeDetails.builder();
         Home home = caseData.getHome();
 
+        //todo null checks need to add here
         List<String> peopleLivingAtThisAddressEnum = home.getPeopleLivingAtThisAddress().stream()
             .map(PeopleLivingAtThisAddressEnum::getDisplayedValue)
             .collect(Collectors.toList());
