@@ -28,6 +28,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.ENGLAND_POSTCODE_NATIONALCODE;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
+import static uk.gov.hmcts.reform.prl.util.TestConstants.CAFCASS_END_DATE_PARAM;
+import static uk.gov.hmcts.reform.prl.util.TestConstants.CAFCASS_END_DATE_PARAM_VALUE;
+import static uk.gov.hmcts.reform.prl.util.TestConstants.CAFCASS_START_DATE_PARAM;
+import static uk.gov.hmcts.reform.prl.util.TestConstants.CAFCASS_START_DATE_PARAM_VALUE;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.CREATE_SERVICE_RESPONSE;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.SEARCH_CASE_ENDPOINT;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.SERVICE_AUTHORISATION_HEADER;
@@ -71,8 +75,8 @@ public class CafCassControllerIntegrationTest {
                                 .contentType(APPLICATION_JSON)
                                 .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
                                 .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
-                                .queryParam("start_date", "2022-08-22T10:39:43.49")
-                                .queryParam("end_date", "2022-08-26T10:44:54.055")
+                                .queryParam(CAFCASS_START_DATE_PARAM, CAFCASS_START_DATE_PARAM_VALUE)
+                                .queryParam(CAFCASS_END_DATE_PARAM, CAFCASS_END_DATE_PARAM_VALUE)
                                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
