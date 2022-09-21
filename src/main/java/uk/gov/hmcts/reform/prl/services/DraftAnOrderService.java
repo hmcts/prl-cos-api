@@ -410,7 +410,7 @@ public class DraftAnOrderService {
             Comparator.reverseOrder()
         ));
         return Map.of("draftOrderCollection", draftOrderList,
-                      "draftOrderDetailsWithTextCollection", getDraftOrderDetailsWithTextList(caseData)
+                      "draftOrderWithTextCollection", getDraftOrderDetailsWithTextList(caseData)
         );
     }
 
