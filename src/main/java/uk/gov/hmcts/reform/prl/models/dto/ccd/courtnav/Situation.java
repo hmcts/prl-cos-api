@@ -38,7 +38,6 @@ public class Situation {
     @NotEmpty
     private final boolean ordersAppliedWithoutNotice;
 
-
     @NotEmpty
     private final List<WithoutNoticeReasonEnum> ordersAppliedWithoutNoticeReason;
     @NotBlank
