@@ -31,11 +31,16 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.AUTHORISATION_HEADER;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_END_DATE_PARAM;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_END_DATE_PARAM_VALUE;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_START_DATE_PARAM;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_START_DATE_PARAM_VALUE;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CREATE_SERVICE_RESPONSE;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.SEARCH_CASE_ENDPOINT;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.SERVICE_AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTH_TOKEN;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTH_TOKEN;
+
 
 @Slf4j
 @SpringBootTest
@@ -73,8 +78,8 @@ public class CafCassControllerFunctionalTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
                         .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
-                        .queryParam("start_date", "2022-08-22T10:44:43.49")
-                        .queryParam("end_date", "2022-08-26T11:00:54.055")
+                        .queryParam(CAFCASS_START_DATE_PARAM, CAFCASS_END_DATE_PARAM_VALUE)
+                        .queryParam(CAFCASS_END_DATE_PARAM, CAFCASS_START_DATE_PARAM_VALUE)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
