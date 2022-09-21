@@ -8,6 +8,9 @@ import lombok.Setter;
 import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 @Data
 @Builder(toBuilder = true)
 @Getter
@@ -15,6 +18,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 @AllArgsConstructor
 @Jacksonized
 public class BeforeStart {
+
+    @Valid
+    @NotNull(message = "Applicant age should be provided")
     private final ApplicantAge applicantHowOld;
 
 }
