@@ -342,15 +342,15 @@ public class FL401ApplicationMapperTest {
 
         courtNavFl401 = CourtNavFl401.builder()
             .metaData(CourtNavMetaData.builder()
-                          .caseOrigin(" ")
+                          .caseOrigin(null)
                           .build())
             .build();
         CaseData caseData = CaseData.builder()
-            .caseOrigin(" ")
+            .caseOrigin(null)
             .build();
 
         assertEquals(courtNavFl401.getMetaData().getCaseOrigin(), caseData.getCaseOrigin());
-        assertNotNull(courtNavFl401.getMetaData().getCaseOrigin());
+        assertNull(courtNavFl401.getMetaData().getCaseOrigin());
 
     }
 
