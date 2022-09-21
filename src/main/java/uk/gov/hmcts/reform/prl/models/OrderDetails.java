@@ -6,11 +6,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import lombok.extern.slf4j.XSlf4j;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
 
-
+@Slf4j
 @Data
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -36,7 +38,7 @@ public class OrderDetails {
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
-
+        log.info("orderType {}, orderTypeId {},dateCreated {}",this.orderType,this.orderTypeId,this.dateCreated);
         return String.format(
             "%s - %s",
             this.orderType,
