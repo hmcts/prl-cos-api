@@ -7,7 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.*;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.DraftOrderDetails;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -409,8 +413,8 @@ public class DraftAnOrderService {
     private List<Element<DraftOrderDetails>> getDraftOrderDetailsWithTextList(CaseData caseData) {
         List<Element<DraftOrderDetails>> tempList;
         Element<DraftOrderDetails> draftOrderDetails = element(getCurrentOrderDetailsWithText(caseData));
-        if (caseData.getDraftOrderDetailsWithTextCollection() != null) {
-            tempList = caseData.getDraftOrderDetailsWithTextCollection();
+        if (caseData.getDraftOrderWithTextCollection() != null) {
+            tempList = caseData.getDraftOrderWithTextCollection();
         } else {
             tempList = new ArrayList<>();
         }
