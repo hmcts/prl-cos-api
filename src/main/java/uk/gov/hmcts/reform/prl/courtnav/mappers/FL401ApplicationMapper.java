@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.courtnav.mappers;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -93,21 +92,6 @@ public class FL401ApplicationMapper {
     private Court court = null;
 
     public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData) throws NotFoundException {
-
-        if (courtNavCaseData.getFl401().getSituation().isOrdersAppliedWithoutNotice()) {
-            if (StringUtils.isEmpty(courtNavCaseData.getFl401().getSituation().getOrdersAppliedWithoutNoticeReason().toString())) {
-                throw new CourtNavDataValidationException("isOrdersAppliedWithoutNotice is true, "
-                                                              + "but no value is provided for OrdersAppliedWithoutNoticeReason");
-            }
-        }
-
-        if (courtNavCaseData.getFl401().getSituation().isBailConditionsOnRespondent()) {
-            if (StringUtils.isEmpty(courtNavCaseData.getFl401().getSituation().getBailConditionsEndDate().toString())) {
-                throw new CourtNavDataValidationException("isBailConditionsOnRespondent is true, "
-                                                          + "but no value is provided for BailConditionsEndDate");
-
-            }
-        }
 
         CaseData caseData = null;
         caseData = CaseData.builder()

@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantGenderEnum
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 
 import java.util.List;
+import javax.validation.Valid;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -19,6 +21,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @AllArgsConstructor
+@Valid
 public class ApplicantsDetails {
 
     @NotNull
@@ -38,9 +41,14 @@ public class ApplicantsDetails {
     private final boolean shareContactDetailsWithRespondent;
     @NotBlank
     private String applicantPhoneNumber;
+    @NotNull
+    @Email
     private String applicantEmailAddress;
+
+    @NotEmpty
     private String applicantContactInstructions;
     private CourtnavAddress applicantAddress;
+    @NotNull
     private List<PreferredContactEnum> applicantPreferredContact;
     private final String legalRepresentativeFirm;
     private final CourtnavAddress legalRepresentativeAddress;
