@@ -42,4 +42,23 @@ public class EditAndApproveDraftOrderController {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
         }
     }
+
+    @PostMapping(path = "/populate-draft-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Populate draft order dropdown")
+    public AboutToStartOrSubmitCallbackResponse populateDraftOrderDetails(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        if (caseData.getDraftOrderWithTextCollection() != null
+            && !caseData.getDraftOrderWithTextCollection().isEmpty()) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(draftAnOrderService.populateSelectedOrder(
+                    caseData.getDraftOrderWithTextCollection())).build();
+        } else {
+            return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
+        }
+    }
 }

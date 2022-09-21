@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -48,6 +50,8 @@ public class DraftAnOrderService {
 
     private final DgsService dgsService;
     private final Time dateTime;
+    private final ElementUtils elementUtils;
+    private final ObjectMapper objectMapper;
 
     private static final String NON_MOLESTATION_ORDER = "draftAnOrder/non-molestation-order.html";
 
@@ -459,5 +463,30 @@ public class DraftAnOrderService {
             OrderDetails::getLabelForOrdersDynamicList
         ));
         return caseDataMap;
+    }
+
+    public Map<String, Object> populateSelectedOrder(List<Element<DraftOrderDetails>> draftOrderWithTextCollection) {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("previewDraftOrder", getDraftOrderDocument(draftOrderWithTextCollection));
+        log.info("inside populateSelectedOrder {}", caseDataMap);
+        return caseDataMap;
+    }
+
+    private Document getDraftOrderDocument(List<Element<DraftOrderDetails>> draftOrderWithTextCollection) {
+
+        UUID orderId = elementUtils.getDynamicListSelectedValue(
+            draftOrderWithTextCollection, objectMapper);
+
+        log.info("inside getDraftOrderDocument orderId {}", orderId);
+        DraftOrderDetails selectedOrder = draftOrderWithTextCollection.stream()
+            .filter(element -> element.getId().equals(orderId))
+            .map(Element::getValue)
+            .findFirst()
+            .orElseThrow(() -> new UnsupportedOperationException(String.format(
+                "Could not find order")));
+
+        log.info("inside getDraftOrderDocument selectedOrder {}", selectedOrder.getOrderDocument());
+
+        return selectedOrder.getOrderDocument();
     }
 }
