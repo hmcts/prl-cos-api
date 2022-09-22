@@ -4,12 +4,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCdamService;
 
@@ -21,12 +20,7 @@ public class CafcassDocumentManagementController {
     @Autowired
     CafcassCdamService cafcassCdamService;
 
-    @RequestMapping(
-            value = "/documents/{documentId}/binary",
-            method = RequestMethod.GET,
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @GetMapping(path = "/documents/{documentId}/binary")
     @Operation(description = "Call CDAM to download document")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
@@ -34,7 +28,7 @@ public class CafcassDocumentManagementController {
             @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    public ResponseEntity<?> downloadDocument(@RequestHeader("authorisation") String authorisation,
+    public ResponseEntity downloadDocument(@RequestHeader("authorisation") String authorisation,
                                               @RequestHeader("serviceAuthorisation") String serviceAuthorisation,
                                               @PathVariable UUID documentId) {
 
