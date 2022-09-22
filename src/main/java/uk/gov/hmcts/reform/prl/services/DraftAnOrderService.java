@@ -476,7 +476,7 @@ public class DraftAnOrderService {
 
         UUID orderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
-        log.info("draftOrderdynamicList {}", caseData.getReplyMessageDynamicList());
+        log.info("draftOrderdynamicList {}", caseData.getDraftOrdersDynamicList());
         log.info("DraftOrderWithTextCollection() {}", caseData.getDraftOrderWithTextCollection());
         log.info("inside getDraftOrderDocument orderId {}", orderId);
         DraftOrderDetails selectedOrder = caseData.getDraftOrderWithTextCollection().stream()

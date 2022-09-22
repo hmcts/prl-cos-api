@@ -62,4 +62,14 @@ public class EditAndApproveDraftOrderController {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
         }
     }
+
+
+    @PostMapping(path = "/remove-temp-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Remove dynamic list from the caseData")
+    public AboutToStartOrSubmitCallbackResponse removeTempFields(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        callbackRequest.getCaseDetails().getData().remove("draftOrdersDynamicList");
+        return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
+    }
 }
