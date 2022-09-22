@@ -72,4 +72,21 @@ public class EditAndApproveDraftOrderController {
         callbackRequest.getCaseDetails().getData().remove("draftOrdersDynamicList");
         return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
     }
+
+
+    @PostMapping(path = "/judge-populate-draft-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Remove dynamic list from the caseData")
+    public AboutToStartOrSubmitCallbackResponse populateJudgeDraftOrder(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(draftAnOrderService.populateSelectedOrderText(
+                caseData)).build();
+
+    }
 }

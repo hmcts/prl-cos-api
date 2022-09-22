@@ -472,6 +472,37 @@ public class DraftAnOrderService {
         return caseDataMap;
     }
 
+
+    public Map<String, Object> populateSelectedOrderText(CaseData caseData) {
+        log.info("inside populateSelectedOrderText caseData {}", caseData);
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("previewDraftAnOrder", getDraftOrderText(caseData));
+        log.info("inside populateSelectedOrderText {}", caseDataMap);
+        return caseDataMap;
+    }
+
+    private String getDraftOrderText(CaseData caseData) {
+
+        UUID orderId = elementUtils.getDynamicListSelectedValue(
+            caseData.getDraftOrdersDynamicList(), objectMapper);
+        log.info("inside getDraftOrderText draftOrderdynamicList {}", caseData.getDraftOrdersDynamicList());
+        log.info(
+            "inside getDraftOrderText DraftOrderWithTextCollection() {}",
+            caseData.getDraftOrderWithTextCollection()
+        );
+        log.info("inside getDraftOrderText orderId {}", orderId);
+        DraftOrderDetails selectedOrder = caseData.getDraftOrderWithTextCollection().stream()
+            .filter(element -> element.getId().equals(orderId))
+            .map(Element::getValue)
+            .findFirst()
+            .orElseThrow(() -> new UnsupportedOperationException(String.format(
+                "Could not find order")));
+
+        log.info("inside getDraftOrderDocument selectedOrder {}", selectedOrder.getOrderText());
+        return selectedOrder.getOrderText();
+
+    }
+
     private Document getDraftOrderDocument(CaseData caseData) {
 
         UUID orderId = elementUtils.getDynamicListSelectedValue(
