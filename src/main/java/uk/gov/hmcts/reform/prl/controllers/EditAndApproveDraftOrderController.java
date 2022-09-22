@@ -56,7 +56,7 @@ public class EditAndApproveDraftOrderController {
             && !caseData.getDraftOrderWithTextCollection().isEmpty()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.populateSelectedOrder(
-                    caseData.getDraftOrderWithTextCollection())).build();
+                    caseData)).build();
         } else {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
         }

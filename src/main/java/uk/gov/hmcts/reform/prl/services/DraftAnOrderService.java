@@ -465,20 +465,20 @@ public class DraftAnOrderService {
         return caseDataMap;
     }
 
-    public Map<String, Object> populateSelectedOrder(List<Element<DraftOrderDetails>> draftOrderWithTextCollection) {
+    public Map<String, Object> populateSelectedOrder(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("previewDraftOrder", getDraftOrderDocument(draftOrderWithTextCollection));
+        caseDataMap.put("previewDraftOrder", getDraftOrderDocument(caseData));
         log.info("inside populateSelectedOrder {}", caseDataMap);
         return caseDataMap;
     }
 
-    private Document getDraftOrderDocument(List<Element<DraftOrderDetails>> draftOrderWithTextCollection) {
+    private Document getDraftOrderDocument(CaseData caseData) {
 
         UUID orderId = elementUtils.getDynamicListSelectedValue(
-            draftOrderWithTextCollection, objectMapper);
+            caseData.getDraftOrdersDynamicList(), objectMapper);
 
         log.info("inside getDraftOrderDocument orderId {}", orderId);
-        DraftOrderDetails selectedOrder = draftOrderWithTextCollection.stream()
+        DraftOrderDetails selectedOrder = caseData.getDraftOrderWithTextCollection().stream()
             .filter(element -> element.getId().equals(orderId))
             .map(Element::getValue)
             .findFirst()
