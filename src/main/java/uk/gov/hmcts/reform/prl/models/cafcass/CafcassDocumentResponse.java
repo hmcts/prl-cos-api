@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.prl.models.cafcass;
 
-import org.springframework.core.io.Resource;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.core.io.Resource;
 
 @Data
 @Builder(toBuilder = true)
