@@ -14,7 +14,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -87,6 +89,25 @@ public class EditAndApproveDraftOrderController {
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(draftAnOrderService.populateSelectedOrderText(
                 caseData)).build();
+
+    }
+
+    @PostMapping(path = "/judge-generate-draft-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Remove dynamic list from the caseData")
+    public AboutToStartOrSubmitCallbackResponse generateJudgeDraftOrder(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put(
+            "solicitorOrJudgeDraftOrderDoc",
+            draftAnOrderService.generateJudgeDraftOrder(authorisation, caseData)
+        );
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated).build();
 
     }
 }

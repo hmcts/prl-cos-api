@@ -645,7 +645,7 @@ public class CaseData implements MappableObject {
     private String numberOfAttachments;
 
     private String previewDraftAnOrder;
-    private Document solicitorDraftOrderDoc;
+    private Document solicitorOrJudgeDraftOrderDoc;
     private String recitalsOrPreamble;
     private YesOrNo isTheOrderByConsent;
     private Document previewDraftOrder;
