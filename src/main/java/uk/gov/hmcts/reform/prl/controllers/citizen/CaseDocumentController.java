@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -42,13 +43,9 @@ import java.util.stream.Collectors;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_ID;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -90,18 +87,20 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public ResponseEntity generateCitizenStatementDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
-                                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                                   @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+                                                           @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                           @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+        log.info("User roles: {} ", idamClient.getUserDetails(authorisation).getRoles());
+        log.info("User details: {} ", idamClient.getUserDetails(authorisation));
         fileIndex = 0;
-        String caseId = generateAndUploadDocumentRequest.getValues().get(CASE_ID);
+        String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (generateAndUploadDocumentRequest.getValues() != null
-            && generateAndUploadDocumentRequest.getValues().containsKey(DOCUMENT_TYPE)
-            && generateAndUploadDocumentRequest.getValues().containsKey(PARTY_NAME)) {
-            final String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-            final String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
+            && generateAndUploadDocumentRequest.getValues().containsKey("documentType")
+            && generateAndUploadDocumentRequest.getValues().containsKey("partyName")) {
+            final String documentType = generateAndUploadDocumentRequest.getValues().get("documentType");
+            final String partyName = generateAndUploadDocumentRequest.getValues().get("partyName");
             if (tempCaseData.getCitizenUploadedDocumentList() != null
                 && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
                 tempCaseData.getCitizenUploadedDocumentList()
@@ -159,8 +158,8 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     public ResponseEntity uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                                             @RequestHeader("serviceAuthorization") String s2sToken,
-                                                            @RequestBody UploadedDocumentRequest uploadedDocumentRequest) {
+                                                         @RequestHeader("serviceAuthorization") String s2sToken,
+                                                         @ModelAttribute UploadedDocumentRequest uploadedDocumentRequest) {
 
         log.info("Uploaded doc request: {}", uploadedDocumentRequest);
         String caseId = uploadedDocumentRequest.getValues().get("caseId").toString();
@@ -172,7 +171,11 @@ public class CaseDocumentController {
             authorisationService.authoriseService(s2sToken))) {
             log.info("=====trying to upload document=====");
 
-            UploadedDocuments uploadedDocuments = uploadService.uploadCitizenDocument(authorisation, uploadedDocumentRequest, caseId);
+            UploadedDocuments uploadedDocuments = uploadService.uploadCitizenDocument(
+                authorisation,
+                uploadedDocumentRequest,
+                caseId
+            );
             List<Element<UploadedDocuments>> uploadedDocumentsList;
             Element<UploadedDocuments> uploadedDocsElement = element(uploadedDocuments);
             if (tempCaseData.getCitizenUploadedDocumentList() != null
@@ -231,17 +234,17 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public String deleteCitizenStatementDocument(@RequestBody DeleteDocumentRequest deleteDocumentRequest,
-                                                           @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                                           @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+                                                 @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                 @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
         List<Element<UploadedDocuments>> tempUploadedDocumentsList;
         List<Element<UploadedDocuments>> uploadedDocumentsList = new ArrayList<>();
-        String caseId = deleteDocumentRequest.getValues().get(CASE_ID);
+        String caseId = deleteDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (deleteDocumentRequest.getValues() != null
-            && deleteDocumentRequest.getValues().containsKey(DOCUMENT_ID)) {
-            final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get(DOCUMENT_ID);
+            && deleteDocumentRequest.getValues().containsKey("documentId")) {
+            final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
             log.info("Document to be deleted with id : " + documenIdToBeDeleted);
             tempUploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
             /*for (Element<UploadedDocuments> element : tempUploadedDocumentsList) {
