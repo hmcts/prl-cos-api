@@ -34,10 +34,11 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        if (caseData.getDraftOrderCollection() != null && !caseData.getDraftOrderCollection().isEmpty()) {
+        if (caseData.getDraftOrderWithTextCollection() != null
+            && !caseData.getDraftOrderWithTextCollection().isEmpty()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.getDraftOrderDynamicList(
-                    caseData.getDraftOrderCollection())).build();
+                    caseData.getDraftOrderWithTextCollection())).build();
         } else {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
         }
