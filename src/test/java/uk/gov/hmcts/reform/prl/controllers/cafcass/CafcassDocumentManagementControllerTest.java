@@ -53,7 +53,6 @@ public class CafcassDocumentManagementControllerTest {
                 CAFCASS_TEST_AUTHORISATION_TOKEN,
                 CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN,
                 TEST_CAFCASS_FILE_ID);
-        responseEntity.getBody();
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
