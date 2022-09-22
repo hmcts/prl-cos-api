@@ -11,18 +11,18 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDocumentManagementService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCdamService;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/cases/documents/{documentId}/binary")
+@RequestMapping("/cases")
 public class CafcassDocumentManagementController {
     @Autowired
-    CafcassDocumentManagementService cafcassDocumentManagementService;
+    CafcassCdamService cafcassCdamService;
 
     @RequestMapping(
-            value = "/download",
+            value = "/documents/{documentId}/binary",
             method = RequestMethod.GET,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -38,6 +38,6 @@ public class CafcassDocumentManagementController {
                                               @RequestHeader("serviceAuthorisation") String serviceAuthorisation,
                                               @PathVariable UUID documentId) {
 
-        return ResponseEntity.ok(cafcassDocumentManagementService.downloadDocument(authorisation, serviceAuthorisation, documentId));
+        return ResponseEntity.ok(cafcassCdamService.getDocument(authorisation, serviceAuthorisation, documentId));
     }
 }
