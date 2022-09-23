@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
-import uk.gov.hmcts.reform.prl.exception.AuthorisationException;
 
 import java.util.Arrays;
 
@@ -19,20 +18,10 @@ public class AuthorisationService {
 
     private final ServiceAuthorisationApi serviceAuthorisationApi;
 
-    @Value("${payments.authorised-services}")
+    @Value("${private-law.authorised-services}")
     private String s2sAuthorisedServices;
-    private final IdamClient idamClient;
 
-    public Boolean authorise(String serviceAuthHeader) {
-        String callingService;
-        callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
-        if (callingService != null && Arrays.asList(s2sAuthorisedServices.split(","))
-            .contains(callingService)) {
-            return true;
-        } else {
-            throw new AuthorisationException("Request not authorised");
-        }
-    }
+    private final IdamClient idamClient;
 
     public Boolean authoriseService(String serviceAuthHeader) {
         String callingService;
@@ -56,6 +45,7 @@ public class AuthorisationService {
                 return true;
             }
         } catch (Exception ex) {
+            //do nothing
             log.error("User token is invalid");
         }
         return false;
