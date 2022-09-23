@@ -69,13 +69,13 @@ public class CafcassDocumentManagementControllerFunctionalTest {
     public void givenInvalidUuidDownloadFileWith400Response() throws Exception {
         final UUID documentId = UUID.randomUUID();
         Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
-                .thenReturn(new ResponseEntity<Resource>(HttpStatus.NOT_FOUND));
+                .thenReturn(new ResponseEntity<Resource>(HttpStatus.BAD_REQUEST));
 
-        MvcResult mvcResult = mockMvc.perform(get("/cases/documents/{documentId}/binary", documentId)
+        MvcResult mvcResult = mockMvc.perform(get(CAFCASS_DOCUMENT_DOWNLOAD_ENDPOINT, documentId)
                         .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
                         .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andReturn();
 
     }
