@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.pin;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -19,8 +20,16 @@ public class CaseInviteEmailService {
     @Autowired
     EmailService emailService;
 
+    @Value("${xui.url}")
+    private String manageCaseUrl;
+
+    @Value("${citizen_frontend.url}")
+    private String citizenSignUpLink;
+
+
     public EmailTemplateVars buildCaseInviteEmail(CaseInvite caseInvite, PartyDetails partyDetails, CaseData caseData) {
-        return new CaseInviteEmail(caseInvite, String.valueOf(caseData.getId()), partyDetails);
+        return new CaseInviteEmail(caseInvite, String.valueOf(caseData.getId()),
+            partyDetails, manageCaseUrl, citizenSignUpLink, caseData);
     }
 
     public void sendEmail(String address, EmailTemplateVars email) {

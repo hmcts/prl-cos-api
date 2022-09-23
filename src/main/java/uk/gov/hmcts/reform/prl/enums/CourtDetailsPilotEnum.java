@@ -19,7 +19,8 @@ public enum CourtDetailsPilotEnum {
     kingstonuponhullCountyCourt("hull.private.filing@justice.gov.uk","Kingston upon Hull County Court","239"),
     newcastlecivilandfamilycourtsandTribunalCentre("newcastle.c100applications@justice.gov.uk",
                                                    "Newcastle Civil and Family Courts and Tribunal Centre","278"),
-    medwayCountyCourtandFamilyCourt("KentPRL@justice.gov.uk","Medway County Court and Family Court","267");
+    medwayCountyCourtandFamilyCourt("KentPRL@justice.gov.uk","Medway County Court and Family Court","267"),
+    peterboroughCountyCourtandFamilyCourt("family.peterborough.countycourt@justice.gov.uk","Peterborough County Court and Family Court","294");
 
     private final String courtEmail;
     private final String courtName;

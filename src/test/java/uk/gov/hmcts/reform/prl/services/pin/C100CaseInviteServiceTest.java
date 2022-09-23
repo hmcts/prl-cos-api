@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -27,6 +28,9 @@ public class C100CaseInviteServiceTest {
 
     @Mock
     CaseInviteEmailService caseInviteEmailService;
+
+    @Mock
+    LaunchDarklyClient launchDarklyClient;
 
     private CaseData caseDataWithRespondentsAndEmailsNoRepresentation;
 
