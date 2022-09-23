@@ -47,6 +47,7 @@ public class CafCassController extends AbstractCallbackController {
 
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorisation))) {
+            log.info("processing  request after authorization");
             return ResponseEntity.ok(caseDataService.getCaseData(authorisation, serviceAuthorisation, startDate, endDate));
 
         } else {
