@@ -125,12 +125,13 @@ public class CaseService {
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         Iterables.removeIf(caseDataMap.values(), Objects::isNull);
         log.info("======Calling start event for Citizen========");
-        StartEventResponse startEventResponse = coreCaseDataApi.startForCitizen(
+        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCitizen(
             authToken,
             s2sToken,
             userDetails.getId(),
             JURISDICTION,
             CASE_TYPE,
+            caseId,
             eventId
         );
 
@@ -143,12 +144,13 @@ public class CaseService {
             .build();
 
         log.info("-------Calling Submit event for Citizen------  ");
-        return coreCaseDataApi.submitForCitizen(
+        return coreCaseDataApi.submitEventForCitizen(
             authToken,
             s2sToken,
             userDetails.getId(),
             JURISDICTION,
             CASE_TYPE,
+            caseId,
             true,
             caseDataContent
         );
