@@ -50,7 +50,7 @@ public class CafcassDocumentManagementControllerIntegrationTest {
     }
 
     @Test
-    public void givenValidDatetimeRangeSearchCasesByCafCassControllerReturnOkStatus() throws Exception {
+    public void givenValidDocumentIdDocumentManagementControllerReturnsOkStatus() throws Exception {
         final UUID documentId = UUID.randomUUID();
 
         Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
@@ -62,6 +62,22 @@ public class CafcassDocumentManagementControllerIntegrationTest {
                                 .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
                                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Test
+    public void givenInvalidDocumentIdDocumentManagementControllerReturnsBadRequestStatus() throws Exception {
+        final UUID documentId = UUID.randomUUID();
+
+        Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
+                .thenReturn(new ResponseEntity<Resource>(HttpStatus.BAD_REQUEST));
+
+        mockMvc.perform(
+                        get(CAFCASS_DOCUMENT_DOWNLOAD_ENDPOINT, documentId)
+                                .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                                .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
                 .andReturn();
     }
 }

@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,8 +34,6 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CAFCASS_DOWNLOAD_
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CafcassDocumentManagementControllerTest {
-    private static final UUID TEST_CAFCASS_FILE_ID = UUID.nameUUIDFromBytes("3254348".getBytes(StandardCharsets.UTF_8));
-
     @Mock
     private CaseDocumentClient caseDocumentClient;
 
@@ -75,7 +72,7 @@ public class CafcassDocumentManagementControllerTest {
 
         Mockito.when(cafcassCdamService.getDocument(CAFCASS_TEST_AUTHORISATION_TOKEN, CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN, documentId))
                 .thenReturn(new ResponseEntity<Resource>(
-                        HttpStatus.NOT_FOUND));
+                        HttpStatus.BAD_REQUEST));
 
         ResponseEntity responseEntity = cafcassDocumentManagementController.downloadDocument(
                 CAFCASS_TEST_AUTHORISATION_TOKEN,
@@ -83,7 +80,7 @@ public class CafcassDocumentManagementControllerTest {
                 documentId);
 
         assertNull(responseEntity.getBody());
-        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
 
     }
 
