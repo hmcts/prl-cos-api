@@ -244,6 +244,7 @@ dependencyCheck {
     assemblyEnabled = false
   }
 }
+ext['snakeyaml.version'] = '1.31'
 
 dependencies {
   implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.9'
@@ -534,11 +535,11 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/exception/*',
   '**uk/gov/hmcts/reform/prl/enums/**/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
+  '**uk/gov/hmcts/reform/prl/utils/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**uk/gov/hmcts/reform/prl/utils/ElementUtils.java',
   '**uk/gov/hmcts/reform/prl/services/validators/EventsChecker.java',
-  '**uk/gov/hmcts/reform/prl/services/pin/*'
-
+  '**uk/gov/hmcts/reform/prl/services/citizen/*',
 ]
 
 sonarqube {
