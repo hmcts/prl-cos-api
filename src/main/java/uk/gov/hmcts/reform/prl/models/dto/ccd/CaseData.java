@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.DraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -649,7 +650,7 @@ public class CaseData implements MappableObject {
     private String recitalsOrPreamble;
     private YesOrNo isTheOrderByConsent;
     private Document previewDraftOrder;
-    private final List<Element<OrderDetails>> draftOrderCollection;
+    private final List<Element<DraftOrder>> draftOrderCollection;
     private final List<Element<DraftOrderDetails>> draftOrderWithTextCollection;
     private Object draftOrdersDynamicList;
 }

@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.DraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
-import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -414,8 +414,8 @@ public class DraftAnOrderService {
 
         log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
         log.info(" ************solicitorOrJudgeDraftOrderDoc {}", caseData.getSolicitorOrJudgeDraftOrderDoc());
-        List<Element<OrderDetails>> draftOrderList;
-        Element<OrderDetails> orderDetails = element(getCurrentOrderDetails(caseData));
+        List<Element<DraftOrder>> draftOrderList;
+        Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData));
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList = caseData.getDraftOrderCollection();
             draftOrderList.add(orderDetails);
@@ -424,7 +424,7 @@ public class DraftAnOrderService {
             draftOrderList.add(orderDetails);
         }
         draftOrderList.sort(Comparator.comparing(
-            m -> m.getValue().getDateCreated(),
+            m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
         return Map.of("draftOrderCollection", draftOrderList,
@@ -444,22 +444,15 @@ public class DraftAnOrderService {
         return tempList;
     }
 
-    private OrderDetails getCurrentOrderDetails(CaseData caseData) {
-        return OrderDetails.builder().orderType(caseData.getSelectedOrder())
+    private DraftOrder getCurrentOrderDetails(CaseData caseData) {
+        return DraftOrder.builder().orderType(caseData.getSelectedOrder())
             .orderTypeId(caseData.getCreateSelectOrderOptions().name())
             .orderDocument(caseData.getSolicitorOrJudgeDraftOrderDoc())
-            .otherDetails(OtherOrderDetails.builder()
+            .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
-                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                  PrlAppsConstants.D_MMMM_YYYY,
-                                  Locale.UK
-                              )))
-                              .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
-                                  PrlAppsConstants.D_MMMM_YYYY,
-                                  Locale.UK
-                              )))
-                              .orderRecipients("NA").build())
-            .dateCreated(dateTime.now())
+                              .dateCreated(dateTime.now())
+            .status("Draft").build())
+            .orderText(caseData.getPreviewDraftAnOrder())
             .build();
     }
 
