@@ -739,6 +739,7 @@ public class DocumentGenService {
                                                                              .documentBinaryUrl(stampedDocument.links.binary.href)
                                                                              .documentUrl(stampedDocument.links.self.href)
                                                                              .documentFileName(stampedDocument.originalDocumentName)
+                                                                             .documentCreatedOn(stampedDocument.createdOn)
                                                                              .build()).build();
 
         } catch (Exception e) {
