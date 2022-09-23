@@ -23,10 +23,6 @@ prl:
   document:
     generate:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
-cafcaas:
-  search-case-type-id: PRLAPPS
-  caseTypeOfApplicationList: C100
-  caseState: SUBMITTED_PAID
 
 management:
   endpoint:
@@ -351,7 +347,10 @@ postcodelookup:
   api:
     url: https://api.os.uk/search/places/v1
     key: ${POST_CODE_LOOKUP_KEY:TcDHoU6gWt4GaAd6JU0TSendKdGHhaGT}
-
+cafcaas:
+  search-case-type-id: PRLAPPS
+  caseTypeOfApplicationList: C100
+  caseState: SUBMITTED_PAID
 ccd:
   elastic-search-api:
     result-size: 100
