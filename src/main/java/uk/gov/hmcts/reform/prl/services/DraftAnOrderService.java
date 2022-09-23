@@ -453,6 +453,7 @@ public class DraftAnOrderService {
                               .dateCreated(dateTime.now())
             .status("Draft").build())
             .orderText(caseData.getPreviewDraftAnOrder())
+            .notes(caseData.getCourtAdminMessage())
             .build();
     }
 

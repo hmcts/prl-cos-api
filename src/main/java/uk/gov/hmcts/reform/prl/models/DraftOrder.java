@@ -19,4 +19,5 @@ public class DraftOrder {
     private final Document orderDocument;
     private final OtherDraftOrderDetails otherDetails;
     private final String orderText;
+    private final String notes;
 }
