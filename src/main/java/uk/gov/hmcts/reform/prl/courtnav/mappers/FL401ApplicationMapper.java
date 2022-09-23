@@ -226,7 +226,7 @@ public class FL401ApplicationMapper {
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
-            .dateSubmittedAndTime(DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa").format(zonedDateTime).toUpperCase())
+            .caseSubmittedTimeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime))
             .build();
 
         caseData = caseData.toBuilder()

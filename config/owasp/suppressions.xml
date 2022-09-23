@@ -13,14 +13,13 @@
         <notes><![CDATA[
       spring-core-5.3.20.jar ]]></notes>
         <cve>CVE-2016-1000027</cve>
-        <cve>CVE-2022-25857</cve>
     </suppress>
     <suppress>
         <notes><![CDATA[
       snakeyaml_project:snakeyaml ]]></notes>
         <cve>CVE-2022-25857</cve>
-        <cve>CVE-2022-38751</cve>
-        <cve>CVE-2022-38750</cve>
         <cve>CVE-2022-38749</cve>
+        <cve>CVE-2022-38750</cve>
+        <cve>CVE-2022-38751</cve>
     </suppress>
 </suppressions>
