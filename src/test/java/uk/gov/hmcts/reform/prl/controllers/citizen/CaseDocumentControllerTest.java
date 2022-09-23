@@ -56,7 +56,7 @@ public class CaseDocumentControllerTest {
 
         //When
         ResponseEntity<?> response = caseDocumentController
-                .uploadCitizenStatementDocument(authToken, s2sToken, mockFile);
+                .uploadCitizenDocument(authToken, s2sToken, mockFile);
         //Then
         assertEquals(documentResponse, response.getBody());
     }

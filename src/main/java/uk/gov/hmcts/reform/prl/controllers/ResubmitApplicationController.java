@@ -39,14 +39,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
@@ -125,8 +124,7 @@ public class ResubmitApplicationController {
                 ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
                 caseData = caseData.setDateSubmittedDate();
                 caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
-                caseDataUpdated.put(DATE_AND_TIME_SUBMITTED_FIELD,
-                                    DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa", Locale.UK).format(zonedDateTime).toUpperCase());
+                caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
                 caseWorkerEmailService.sendEmail(caseDetails);
                 solicitorEmailService.sendEmail(caseDetails);
             }
@@ -179,10 +177,7 @@ public class ResubmitApplicationController {
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
             caseData = caseData.setDateSubmittedDate();
             caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
-            caseDataUpdated.put(
-                DATE_AND_TIME_SUBMITTED_FIELD,
-                DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)
-            );
+            caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
         }
         if (previousStates.isPresent() && State.CASE_ISSUE.getValue().equalsIgnoreCase(previousStates.get())) {
             caseData = caseData.toBuilder().state(State. CASE_ISSUE).build();
