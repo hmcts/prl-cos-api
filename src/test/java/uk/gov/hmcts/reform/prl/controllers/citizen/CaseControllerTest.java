@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,7 +83,7 @@ public class CaseControllerTest {
     }
 
     @Test
-    public void testCitizenUpdateCase() {
+    public void testCitizenUpdateCase() throws JsonProcessingException {
 
         caseData = CaseData.builder()
             .id(1234567891234567L)

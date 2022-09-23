@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.controllers.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -34,7 +36,7 @@ import java.util.stream.Collectors;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 
 
 @Slf4j
@@ -59,7 +61,11 @@ public class CaseService {
     @Autowired
     SystemUserService systemUserService;
 
-    public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId) {
+    @Autowired
+    CaseDataMapper caseDataMapper;
+
+    public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId,
+                                  String eventId) throws JsonProcessingException {
 
         String userId = systemUserService.getUserId(authToken);
 
@@ -78,16 +84,20 @@ public class CaseService {
             String.valueOf(caseId),
             true,
             getCaseDataContent(authToken, caseData, s2sToken, userId,
-                               String.valueOf(caseId)
+                               String.valueOf(caseId), eventId
             )
         );
     }
 
     private CaseDataContent getCaseDataContent(String authorization, CaseData caseData, String s2sToken,
-                                               String userId, String caseId) {
-        CaseDataContent.CaseDataContentBuilder builder = CaseDataContent.builder().data(caseData);
-        builder.event(Event.builder().id(CITIZEN_CASE_UPDATE.getValue()).build())
-            .eventToken(getEventTokenForUpdate(authorization, userId, CITIZEN_CASE_UPDATE.getValue(),
+                                               String userId, String caseId, String eventId) throws JsonProcessingException {
+        CaseData updatedCaseData = caseData;
+        if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)) {
+            updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData);
+        }
+        CaseDataContent.CaseDataContentBuilder builder = CaseDataContent.builder().data(updatedCaseData);
+        builder.event(Event.builder().id(eventId).build())
+            .eventToken(getEventTokenForUpdate(authorization, userId, eventId,
                                                caseId, s2sToken
             ));
 

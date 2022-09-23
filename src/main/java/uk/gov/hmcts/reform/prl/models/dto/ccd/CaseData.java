@@ -182,9 +182,9 @@ public class CaseData implements MappableObject {
     /**
      * Type of application.
      */
-    private final List<OrderTypeEnum> ordersApplyingFor;
-    private final ChildArrangementOrderTypeEnum typeOfChildArrangementsOrder;
-    private final String natureOfOrder;
+    private List<OrderTypeEnum> ordersApplyingFor;
+    private ChildArrangementOrderTypeEnum typeOfChildArrangementsOrder;
+    private String natureOfOrder;
     private final YesOrNo consentOrder;
     private final Document draftConsentOrderFile;
     private final PermissionRequiredEnum applicationPermissionRequired;
@@ -197,10 +197,10 @@ public class CaseData implements MappableObject {
     private final YesOrNo isCaseUrgent;
     private final String caseUrgencyTimeAndReason;
     private final String effortsMadeWithRespondents;
-    private final YesOrNo doYouNeedAWithoutNoticeHearing;
-    private final String reasonsForApplicationWithoutNotice;
-    private final YesOrNo doYouRequireAHearingWithReducedNotice;
-    private final String setOutReasonsBelow;
+    private YesOrNo doYouNeedAWithoutNoticeHearing;
+    private String reasonsForApplicationWithoutNotice;
+    private YesOrNo doYouRequireAHearingWithReducedNotice;
+    private String setOutReasonsBelow;
     private final YesOrNo areRespondentsAwareOfProceedings;
 
     /**
@@ -294,12 +294,12 @@ public class CaseData implements MappableObject {
     /**
      * International element.
      */
-    private final YesOrNo habitualResidentInOtherState;
-    private final String habitualResidentInOtherStateGiveReason;
-    private final YesOrNo jurisdictionIssue;
-    private final String jurisdictionIssueGiveReason;
-    private final YesOrNo requestToForeignAuthority;
-    private final String requestToForeignAuthorityGiveReason;
+    private YesOrNo habitualResidentInOtherState;
+    private String habitualResidentInOtherStateGiveReason;
+    private YesOrNo jurisdictionIssue;
+    private String jurisdictionIssueGiveReason;
+    private YesOrNo requestToForeignAuthority;
+    private String requestToForeignAuthorityGiveReason;
 
     /**
      * Litigation capacity.
