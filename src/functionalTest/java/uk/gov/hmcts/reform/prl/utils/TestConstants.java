@@ -15,4 +15,5 @@ public class TestConstants {
     public static final String SERVICE_AUTHORISATION_HEADER = "serviceauthorisation";
     public static final String TEST_AUTH_TOKEN = "authorisation";
     public static final String TEST_SERVICE_AUTH_TOKEN = "serviceauthorisation";
+    public static final String CAFCASS_DOCUMENT_DOWNLOAD_ENDPOINT = "/cases/documents/{documentId}/binary";
 }
