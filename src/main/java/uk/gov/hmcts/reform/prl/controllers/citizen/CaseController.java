@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -69,7 +70,7 @@ public class CaseController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken,
         @RequestHeader("accessCode") String accessCode
-    ) {
+    ) throws JsonProcessingException {
         if ("linkCase".equalsIgnoreCase(eventId)) {
             caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
             return objectMapper.convertValue(
