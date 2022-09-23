@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE
 @RestController
 @RequestMapping("/update-task-list")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@SecurityRequirement(name = "Bearer Authentication")
+
 public class TaskListController extends AbstractCallbackController {
 
     @Autowired
@@ -48,7 +52,8 @@ public class TaskListController extends AbstractCallbackController {
 
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,
-                                                                @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation) {
+                                                                @RequestHeader(HttpHeaders.AUTHORIZATION)
+                                                                @Parameter(hidden = true) String authorisation) {
 
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
