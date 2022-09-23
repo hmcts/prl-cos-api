@@ -20,7 +20,7 @@ public class TestConstants {
     public static final String CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN = "serviceAuthorisationToken";
     public static final String EMPTY_STRING = "";
     public static final String TEST_AUTHORIZATION = "testAuthorisation";
-    public static final String TEST_CAFCASS_DOWNLOAD_FILE = "CafcassDownloadFile.doc";
+    public static final String TEST_CAFCASS_DOWNLOAD_FILENAME = "CafcassDownloadFile.doc";
     public static final String TEST_SERVICE_AUTHORIZATION = "testServiceAuthorisation";
 
 }

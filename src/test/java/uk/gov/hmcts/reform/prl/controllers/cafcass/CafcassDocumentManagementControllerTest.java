@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.cafcass;
 
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.controllers.cafcaas.CafcassDocumentManagementController;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCdamService;
 
@@ -23,15 +25,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_TEST_AUTHORISATION_TOKEN;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.EMPTY_STRING;
-import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CAFCASS_DOWNLOAD_FILE;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CAFCASS_DOWNLOAD_FILENAME;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CafcassDocumentManagementControllerTest {
     private static final UUID TEST_CAFCASS_FILE_ID = UUID.nameUUIDFromBytes("3254348".getBytes(StandardCharsets.UTF_8));
+
+    @Mock
+    private CaseDocumentClient caseDocumentClient;
 
     @Mock
     private CafcassCdamService cafcassCdamService;
@@ -42,18 +49,42 @@ public class CafcassDocumentManagementControllerTest {
     private static final int TEST_DOWNLOAD_FILE_CONTENT_LENGTH = 10000;
 
     @Test
-    public void testCdamDocumentDownloadServiceResponseStatusOk() throws IOException {
+    @DisplayName("Successful download of document through CDAM Service")
+    public void testCdamDocumentDownloadServiceResponseStatusOk() {
         Resource documentResource = createNewResource();
 
         ResponseEntity<Resource> expectedResponse = ResponseEntity.status(HttpStatus.OK).body(documentResource);
 
-        Mockito.when(cafcassCdamService.getDocument(CAFCASS_TEST_AUTHORISATION_TOKEN, CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN, TEST_CAFCASS_FILE_ID))
+        final UUID documentId = UUID.randomUUID();
+
+        Mockito.when(cafcassCdamService.getDocument(CAFCASS_TEST_AUTHORISATION_TOKEN, CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN, documentId))
                 .thenReturn(expectedResponse);
-        ResponseEntity<?> responseEntity = cafcassDocumentManagementController.downloadDocument(
+        ResponseEntity responseEntity = cafcassDocumentManagementController.downloadDocument(
                 CAFCASS_TEST_AUTHORISATION_TOKEN,
                 CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN,
-                TEST_CAFCASS_FILE_ID);
+                documentId);
+
+        assertNotNull(responseEntity.getBody());
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Failed download of document through CDAM Service")
+    public void testGetDocumentBinary() {
+        final UUID documentId = UUID.randomUUID();
+
+        Mockito.when(cafcassCdamService.getDocument(CAFCASS_TEST_AUTHORISATION_TOKEN, CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN, documentId))
+                .thenReturn(new ResponseEntity<Resource>(
+                        HttpStatus.NOT_FOUND));
+
+        ResponseEntity responseEntity = cafcassDocumentManagementController.downloadDocument(
+                CAFCASS_TEST_AUTHORISATION_TOKEN,
+                CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN,
+                documentId);
+
+        assertNull(responseEntity.getBody());
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+
     }
 
     private Resource createNewResource() {
@@ -105,7 +136,7 @@ public class CafcassDocumentManagementControllerTest {
 
             @Override
             public String getFilename() {
-                return TEST_CAFCASS_DOWNLOAD_FILE;
+                return TEST_CAFCASS_DOWNLOAD_FILENAME;
             }
 
             @Override
