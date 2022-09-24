@@ -94,6 +94,18 @@ public class SolicitorEmailService {
 
     }
 
+    public void sendReSubmitEmail(CaseDetails caseDetails) {
+        log.info("Sending case resubmission email to solicitor for caseId {}", caseDetails.getId());
+        String applicantSolicitorEmailAddress = caseDetails.getData().get("applicantSolicitorEmailAddress").toString();
+        emailService.send(
+            applicantSolicitorEmailAddress,
+            EmailTemplateNames.SOLICITOR_RESUBMIT_EMAIL,
+            buildEmail(caseDetails),
+            LanguagePreference.english
+        );
+
+    }
+
     private EmailTemplateVars buildCaseWithdrawEmail(CaseDetails caseDetails) {
 
         return SolicitorEmail.builder()

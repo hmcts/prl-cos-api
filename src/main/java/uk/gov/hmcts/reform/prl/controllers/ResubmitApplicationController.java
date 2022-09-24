@@ -128,7 +128,7 @@ public class ResubmitApplicationController {
                 caseDataUpdated.put(DATE_AND_TIME_SUBMITTED_FIELD,
                                     DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa", Locale.UK).format(zonedDateTime).toUpperCase());
                 caseWorkerEmailService.sendEmail(caseDetails);
-                solicitorEmailService.sendEmail(caseDetails);
+                solicitorEmailService.sendReSubmitEmail(caseDetails);
             }
             if (State.CASE_ISSUE.getValue().equalsIgnoreCase(previousStates.get())) {
                 caseData = organisationService.getApplicantOrganisationDetails(caseData);
