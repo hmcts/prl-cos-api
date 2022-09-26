@@ -74,7 +74,7 @@ public class EditAndApproveDraftOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData));
+        caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
         log.info("*** before returning {} ***", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
