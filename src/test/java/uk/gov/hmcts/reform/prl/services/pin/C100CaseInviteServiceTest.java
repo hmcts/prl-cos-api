@@ -66,6 +66,7 @@ public class C100CaseInviteServiceTest {
 
         caseDataWithRespondentsAndEmailsNoRepresentation = CaseData.builder()
             .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
             .respondents(respondentsWithEmailsNoRepresentation).build();
 
         PartyDetails respondentTwoWithEmailAndRepresentation = PartyDetails.builder()
@@ -82,6 +83,7 @@ public class C100CaseInviteServiceTest {
 
         caseDataWithRespondentsAndEmailsOnePartyNoRepresentation = CaseData.builder()
             .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.Yes).build())))
             .respondents(respondentsWithEmailsOneNoRepresentation).build();
 
         PartyDetails respondentOneNoEmail = PartyDetails.builder()
@@ -103,6 +105,7 @@ public class C100CaseInviteServiceTest {
 
         getCaseDataWithRespondentsNoEmails = CaseData.builder()
             .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
             .respondents(respondentsNoEmailsNoRepresentation).build();
 
         PartyDetails respondentOneWithEmailAndRepresentation = PartyDetails.builder()
@@ -126,6 +129,7 @@ public class C100CaseInviteServiceTest {
 
         caseDataWithRespondentsAllWithRepresentation = CaseData.builder()
             .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
             .respondents(respondentsWithEmailsAndRepresentation).build();
 
 
@@ -155,7 +159,7 @@ public class C100CaseInviteServiceTest {
             .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAndEmailsOnePartyNoRepresentation);
 
         //two respondents but only one should have a case invite generated
-        assertEquals(1, actualCaseData.getCaseInvites().size());
+        assertEquals(2, actualCaseData.getCaseInvites().size());
         assertEquals("respondentOne@email.com", actualCaseData.getCaseInvites().get(0).getValue()
             .getCaseInviteEmail());
     }
@@ -180,6 +184,4 @@ public class C100CaseInviteServiceTest {
             .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAllWithRepresentation);
         assertTrue(actualCaseData.getCaseInvites().isEmpty());
     }
-
-
 }
