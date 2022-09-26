@@ -139,7 +139,7 @@ public class DraftAnOrderController {
         log.info("caseData {}", caseData);
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(
-            "solicitorDraftOrderDoc",
+            "solicitorOrJudgeDraftOrderDoc",
             draftAnOrderService.generateSolicitorDraftOrder(authorisation, caseData)
         );
         log.info("*** caseDataUpdated {} ***", caseDataUpdated);

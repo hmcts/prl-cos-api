@@ -38,13 +38,12 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.DraftOrderDetails;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -646,11 +645,11 @@ public class CaseData implements MappableObject {
     private String numberOfAttachments;
 
     private String previewDraftAnOrder;
-    private Document solicitorDraftOrderDoc;
+    private Document solicitorOrJudgeDraftOrderDoc;
     private String recitalsOrPreamble;
     private YesOrNo isTheOrderByConsent;
     private Document previewDraftOrder;
-    private final List<Element<OrderDetails>> draftOrderCollection;
-    private final List<Element<DraftOrderDetails>> draftOrderWithTextCollection;
-    private DynamicList draftOrdersDynamicList;
+    private final List<Element<DraftOrder>> draftOrderCollection;
+    private Object draftOrdersDynamicList;
+    private String courtAdminMessage;
 }

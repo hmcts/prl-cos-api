@@ -14,7 +14,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -34,7 +36,8 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        if (caseData.getDraftOrderCollection() != null && !caseData.getDraftOrderCollection().isEmpty()) {
+        if (caseData.getDraftOrderCollection() != null
+            && !caseData.getDraftOrderCollection().isEmpty()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.getDraftOrderDynamicList(
                     caseData.getDraftOrderCollection())).build();
@@ -52,13 +55,59 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        if (caseData.getDraftOrderWithTextCollection() != null
-            && !caseData.getDraftOrderWithTextCollection().isEmpty()) {
+        if (caseData.getDraftOrderCollection() != null
+            && !caseData.getDraftOrderCollection().isEmpty()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.populateSelectedOrder(
                     caseData)).build();
         } else {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
         }
+    }
+
+
+    @PostMapping(path = "/remove-temp-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Remove dynamic list from the caseData")
+    public AboutToStartOrSubmitCallbackResponse removeTempFields(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        callbackRequest.getCaseDetails().getData().remove("draftOrdersDynamicList");
+        return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
+    }
+
+
+    @PostMapping(path = "/judge-populate-draft-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Remove dynamic list from the caseData")
+    public AboutToStartOrSubmitCallbackResponse populateJudgeDraftOrder(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(draftAnOrderService.populateSelectedOrderText(
+                caseData)).build();
+
+    }
+
+    @PostMapping(path = "/judge-generate-draft-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Remove dynamic list from the caseData")
+    public AboutToStartOrSubmitCallbackResponse generateJudgeDraftOrder(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put(
+            "solicitorOrJudgeDraftOrderDoc",
+            draftAnOrderService.generateJudgeDraftOrder(authorisation, caseData)
+        );
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated).build();
+
     }
 }

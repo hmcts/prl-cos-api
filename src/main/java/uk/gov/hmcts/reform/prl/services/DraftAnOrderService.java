@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.DraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
-import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -68,6 +68,24 @@ public class DraftAnOrderService {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(caseData.getCreateSelectOrderOptions().getDisplayedValue() + ".pdf").build();
+        return document;
+
+    }
+
+    public Document generateJudgeDraftOrder(String authorisation, CaseData caseData) throws Exception {
+
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails
+                .builder().caseData(caseData).build(),
+            solicitorDraftAnOrder
+        );
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName(selectedOrder.getOrderDocument().getDocumentFileName()).build();
         return document;
 
     }
@@ -397,9 +415,9 @@ public class DraftAnOrderService {
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData) {
 
         log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
-        log.info(" ************SolicitorDraftOrderDoc {}", caseData.getSolicitorDraftOrderDoc());
-        List<Element<OrderDetails>> draftOrderList = new ArrayList<>();
-        Element<OrderDetails> orderDetails = element(getCurrentOrderDetails(caseData));
+        log.info(" ************solicitorOrJudgeDraftOrderDoc {}", caseData.getSolicitorOrJudgeDraftOrderDoc());
+        List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
+        Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData));
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
@@ -407,40 +425,23 @@ public class DraftAnOrderService {
             draftOrderList.add(orderDetails);
         }
         draftOrderList.sort(Comparator.comparing(
-            m -> m.getValue().getDateCreated(),
+            m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        return Map.of("draftOrderCollection", draftOrderList,
-                      "draftOrderWithTextCollection", getDraftOrderDetailsWithTextList(caseData)
+        return Map.of("draftOrderCollection", draftOrderList
         );
     }
 
-    private List<Element<DraftOrderDetails>> getDraftOrderDetailsWithTextList(CaseData caseData) {
-        List<Element<DraftOrderDetails>> tempList = new ArrayList<>();
-        Element<DraftOrderDetails> draftOrderDetails = element(getCurrentOrderDetailsWithText(caseData));
-        if (caseData.getDraftOrderWithTextCollection() != null) {
-            tempList.addAll(caseData.getDraftOrderWithTextCollection());
-        }
-        tempList.add(draftOrderDetails);
-        return tempList;
-    }
-
-    private OrderDetails getCurrentOrderDetails(CaseData caseData) {
-        return OrderDetails.builder().orderType(caseData.getSelectedOrder())
+    private DraftOrder getCurrentOrderDetails(CaseData caseData) {
+        return DraftOrder.builder().orderType(caseData.getSelectedOrder())
             .orderTypeId(caseData.getCreateSelectOrderOptions().name())
-            .orderDocument(caseData.getSolicitorDraftOrderDoc())
-            .otherDetails(OtherOrderDetails.builder()
+            .orderDocument(caseData.getSolicitorOrJudgeDraftOrderDoc())
+            .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
-                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                  PrlAppsConstants.D_MMMM_YYYY,
-                                  Locale.UK
-                              )))
-                              .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
-                                  PrlAppsConstants.D_MMMM_YYYY,
-                                  Locale.UK
-                              )))
-                              .orderRecipients("NA").build())
-            .dateCreated(dateTime.now())
+                              .dateCreated(dateTime.now())
+            .status("Draft").build())
+            .orderText(caseData.getPreviewDraftAnOrder())
+            .notes(caseData.getCourtAdminMessage())
             .build();
     }
 
@@ -448,18 +449,18 @@ public class DraftAnOrderService {
     private DraftOrderDetails getCurrentOrderDetailsWithText(CaseData caseData) {
         return DraftOrderDetails.builder()
             .orderTypeId(caseData.getCreateSelectOrderOptions().name())
-            .orderDocument(caseData.getSolicitorDraftOrderDoc())
+            .orderDocument(caseData.getSolicitorOrJudgeDraftOrderDoc())
             .orderText(caseData.getPreviewDraftAnOrder())
             .dateCreated(dateTime.now()).build();
     }
 
-    public Map<String, Object> getDraftOrderDynamicList(List<Element<OrderDetails>> draftOrderCollection) {
+    public Map<String, Object> getDraftOrderDynamicList(List<Element<DraftOrder>> draftOrderCollection) {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
             draftOrderCollection,
             null,
-            OrderDetails::getLabelForOrdersDynamicList
+            DraftOrder::getLabelForOrdersDynamicList
         ));
         return caseDataMap;
     }
@@ -471,22 +472,43 @@ public class DraftAnOrderService {
         return caseDataMap;
     }
 
+
+    public Map<String, Object> populateSelectedOrderText(CaseData caseData) {
+        log.info("inside populateSelectedOrderText caseData {}", caseData);
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("previewDraftAnOrder", getDraftOrderText(caseData));
+        log.info("inside populateSelectedOrderText {}", caseDataMap);
+        return caseDataMap;
+    }
+
+    private String getDraftOrderText(CaseData caseData) {
+
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+
+        log.info("inside getDraftOrderDocument selectedOrder {}", selectedOrder.getOrderText());
+        return selectedOrder.getOrderText();
+
+    }
+
     private Document getDraftOrderDocument(CaseData caseData) {
 
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+
+        log.info("inside getDraftOrderDocument selectedOrder {}", selectedOrder.getOrderDocument());
+
+        return selectedOrder.getOrderDocument();
+    }
+
+    public DraftOrder getSelectedDraftOrderDetails(CaseData caseData) {
         UUID orderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
-        log.info("draftOrderdynamicList {}", caseData.getReplyMessageDynamicList());
-        log.info("DraftOrderWithTextCollection() {}", caseData.getDraftOrderWithTextCollection());
+        log.info("draftOrderdynamicList {}", caseData.getDraftOrdersDynamicList());
         log.info("inside getDraftOrderDocument orderId {}", orderId);
-        DraftOrderDetails selectedOrder = caseData.getDraftOrderWithTextCollection().stream()
+        return caseData.getDraftOrderCollection().stream()
             .filter(element -> element.getId().equals(orderId))
             .map(Element::getValue)
             .findFirst()
             .orElseThrow(() -> new UnsupportedOperationException(String.format(
                 "Could not find order")));
-
-        log.info("inside getDraftOrderDocument selectedOrder {}", selectedOrder.getOrderDocument());
-
-        return selectedOrder.getOrderDocument();
     }
 }
