@@ -175,8 +175,8 @@ public class DraftAnOrderService {
             nonMolestationPlaceHoldersMap.put(
                 "fl404bRespondentAddress",
                 getAddress(
-                    caseData.getRespondentsFL401() != null ?
-                    caseData.getRespondentsFL401().getAddress() : null)
+                    caseData.getRespondentsFL401() != null
+                        ? caseData.getRespondentsFL401().getAddress() : null)
             );
             nonMolestationPlaceHoldersMap.put(
                 "fl404bMentionedProperty", (caseData.getManageOrders().getFl404CustomFields() != null

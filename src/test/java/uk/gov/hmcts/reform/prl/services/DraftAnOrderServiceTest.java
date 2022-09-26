@@ -13,9 +13,9 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.DraftOrderDetails;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -35,7 +35,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -66,7 +68,7 @@ public class DraftAnOrderServiceTest {
 
     private static CaseData caseData;
 
-    private List<Element<OrderDetails>> draftOrderCollection;
+    private List<Element<DraftOrder>> draftOrderCollection;
     private DynamicList dynamicList;
     private Address address;
 
@@ -77,21 +79,28 @@ public class DraftAnOrderServiceTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        draftOrderCollection = List.of(element(OrderDetails.builder().orderType("abcd").orderTypeId("1234").orderDocument(
-            Document.builder().build()).build()));
-        dynamicList =  ElementUtils.asDynamicList(draftOrderCollection, null, OrderDetails::getLabelForOrdersDynamicList);
+        draftOrderCollection = List.of(element(DraftOrder.builder()
+                                                   .orderTypeId("")
+                                                   .orderDocument(Document.builder().build())
+                                                   .build()));
+        dynamicList =  ElementUtils.asDynamicList(draftOrderCollection, null, DraftOrder::getLabelForOrdersDynamicList);
         address = Address.builder().build();
+        Element<DraftOrder> draftOrderElement = element(DraftOrder.builder()
+                                                            .orderText("test")
+                                                            .orderDocument(Document.builder().build())
+                                                            .otherDetails(OtherDraftOrderDetails.builder()
+                                                                              .dateCreated(LocalDateTime.now())
+                                                                              .build())
+                                                            .build());
         caseData = CaseData.builder()
             .replyMessageDynamicList(dynamicList)
             .draftOrdersDynamicList(dynamicList)
-            .draftOrderWithTextCollection(List.of(element(DraftOrderDetails.builder().orderTypeId("123").orderDocument(
-                Document.builder().build()).build())))
             .dateOrderMade(LocalDate.now())
-            .draftOrderCollection(List.of(element(OrderDetails.builder().dateCreated(LocalDateTime.now()).build())))
+            .draftOrderCollection(List.of(draftOrderElement))
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
         when(elementUtils.getDynamicListSelectedValue(
-            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(UUID.fromString("0f14d0ab-9605-4a62-a9e4-5ed26688389b"));
+            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         UUID selectedValue = UUID.randomUUID();
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
@@ -100,8 +109,8 @@ public class DraftAnOrderServiceTest {
 
     @Test
     public void testPopulateSelectedOrder() {
-        Map<String, Object> caseDataMap = draftAnOrderService.populateSelectedOrder(caseData);
-        assertThrows(UnsupportedOperationException.class, () -> caseDataMap.get("previewDraftOrder"));
+        Map<String, Object> caseDataMap = draftAnOrderService.populateSelectedOrderText(caseData);
+        assertEquals("test", caseDataMap.get("previewDraftAnOrder"));
     }
 
     @Test
@@ -114,7 +123,6 @@ public class DraftAnOrderServiceTest {
     public void testGenerateDraftOrderCollection() {
         Map<String, Object> caseDataMap = draftAnOrderService.generateDraftOrderCollection(caseData);
         assertNotNull(caseDataMap.get("draftOrderCollection"));
-        assertNotNull(caseDataMap.get("draftOrderWithTextCollection"));
     }
 
     @Test
@@ -122,7 +130,6 @@ public class DraftAnOrderServiceTest {
         caseData = caseData.toBuilder().draftOrderCollection(null).build();
         Map<String, Object> caseDataMap = draftAnOrderService.generateDraftOrderCollection(caseData);
         assertNotNull(caseDataMap.get("draftOrderCollection"));
-        assertNotNull(caseDataMap.get("draftOrderWithTextCollection"));
     }
 
     @Test
@@ -201,137 +208,4 @@ public class DraftAnOrderServiceTest {
         assertEquals(document.getDocumentUrl(),generatedDocumentInfo.getUrl());
         assertEquals(document.getDocumentHash(),generatedDocumentInfo.getHashToken());
     }
-
-//    @Test
-//    public void testListOfOrdersCreated() {
-//        CaseData caseData = CaseData.builder()
-//            .id(12345L)
-//            .caseTypeOfApplication("FL401")
-//            .applicantCaseName("Test Case 45678")
-//            .fl401FamilymanCaseNumber("familyman12345")
-//            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-//            .build();
-//        List<String> createdOrders = List.of("Blank order (FL404B)",
-//                                             "Standard directions order",
-//                                             "Blank order or directions (C21)",
-//                                             "Blank order or directions (C21) - to withdraw application",
-//                                             "Child arrangements, specific issue or prohibited steps order (C43)",
-//                                             "Parental responsibility order (C45A)",
-//                                             "Special guardianship order (C43A)",
-//                                             "Notice of proceedings (C6) (Notice to parties)",
-//                                             "Notice of proceedings (C6a) (Notice to non-parties)",
-//                                             "Transfer of case to another court (C49)",
-//                                             "Appointment of a guardian (C47A)",
-//                                             "Non-molestation order (FL404A)",
-//                                             "Occupation order (FL404)",
-//                                             "Power of arrest (FL406)",
-//                                             "Amended, discharged or varied order (FL404B)",
-//                                             "General form of undertaking (N117)",
-//                                             "Notice of proceedings (FL402)",
-//                                             "Blank order (FL404B)",
-//                                             "Other (upload an order)");
-//        Map<String, Object> responseMap = serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders, new HashMap<>());
-//        assertEquals(18,responseMap.values().size());
-//        assertEquals("1", responseMap.get("option1"));
-//
-//    }
-//
-//    @Test
-//    public void testCollapasableGettingPopulated() {
-//
-//        String responseMap = serviceOfApplicationService.getCollapsableOfSentDocuments();
-//
-//        assertNotNull(responseMap);
-//
-//    }
-//
-//    @Test
-//    public void testSendViaPost() throws Exception {
-//        CaseData caseData = CaseData.builder()
-//            .id(12345L)
-//            .caseTypeOfApplication("C100")
-//            .applicantCaseName("Test Case 45678")
-//            .fl401FamilymanCaseNumber("familyman12345")
-//            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-//            .build();
-//        Map<String,Object> casedata = new HashMap<>();
-//        casedata.put("caseTyoeOfApplication","C100");
-//        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-//        CaseDetails caseDetails = CaseDetails
-//            .builder()
-//            .id(123L)
-//            .state(CASE_ISSUE.getValue())
-//            .data(casedata)
-//            .build();
-//        CaseData caseData1 = serviceOfApplicationService.sendPost(caseDetails,"test auth");
-//        verify(serviceOfApplicationPostService).sendDocs(Mockito.any(CaseData.class),Mockito.anyString());
-//    }
-//
-//    @Test
-//    public void testSendViaPostNotInvoked() throws Exception {
-//        CaseData caseData = CaseData.builder()
-//            .id(12345L)
-//            .caseTypeOfApplication("FL401")
-//            .applicantCaseName("Test Case 45678")
-//            .fl401FamilymanCaseNumber("familyman12345")
-//            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-//            .build();
-//        Map<String,Object> casedata = new HashMap<>();
-//        casedata.put("caseTyoeOfApplication","C100");
-//        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-//        CaseDetails caseDetails = CaseDetails
-//            .builder()
-//            .id(123L)
-//            .state(CASE_ISSUE.getValue())
-//            .data(casedata)
-//            .build();
-//        CaseData caseData1 = serviceOfApplicationService.sendPost(caseDetails,"test auth");
-//        verifyNoInteractions(serviceOfApplicationPostService);
-//    }
-//
-//    @Test
-//    public void testSendViaEmailC100() throws Exception {
-//        CaseData caseData = CaseData.builder()
-//            .id(12345L)
-//            .caseTypeOfApplication("C100")
-//            .applicantCaseName("Test Case 45678")
-//            .fl401FamilymanCaseNumber("familyman12345")
-//            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-//            .build();
-//        Map<String,Object> casedata = new HashMap<>();
-//        casedata.put("caseTyoeOfApplication","C100");
-//        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-//        when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
-//        CaseDetails caseDetails = CaseDetails
-//            .builder()
-//            .id(123L)
-//            .state(CASE_ISSUE.getValue())
-//            .data(casedata)
-//            .build();
-//        CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
-//        verify(serviceOfApplicationEmailService).sendEmailC100(Mockito.any(CaseDetails.class));
-//    }
-//
-//    @Test
-//    public void testSendViaEmailFl401() throws Exception {
-//        CaseData caseData = CaseData.builder()
-//            .id(12345L)
-//            .caseTypeOfApplication("FL401")
-//            .applicantCaseName("Test Case 45678")
-//            .fl401FamilymanCaseNumber("familyman12345")
-//            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-//            .build();
-//        Map<String,Object> casedata = new HashMap<>();
-//        casedata.put("caseTyoeOfApplication","C100");
-//        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-//        when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
-//        CaseDetails caseDetails = CaseDetails
-//            .builder()
-//            .id(123L)
-//            .state(CASE_ISSUE.getValue())
-//            .data(casedata)
-//            .build();
-//        CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
-//        verify(serviceOfApplicationEmailService).sendEmailFL401(Mockito.any(CaseDetails.class));
-//    }
 }

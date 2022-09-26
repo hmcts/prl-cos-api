@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -71,7 +70,8 @@ public class DraftAnOrderControllerTest {
 
     @Test
     public void testPopulateSelectedOrder() throws Exception {
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = draftAnOrderController.populateSelectedOrder("", callbackRequest);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = draftAnOrderController
+            .populateSelectedOrder("", callbackRequest);
         assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("selectedOrderLabel"),"Non-molestation order (FL404A)");
     }
 
@@ -88,25 +88,29 @@ public class DraftAnOrderControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = draftAnOrderController.prePopulateFields("", callbackRequest1);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = draftAnOrderController
+            .prePopulateFields("", callbackRequest1);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
     @Test
     public void testPrepopulateSolicitorDraftAnOrder() throws Exception {
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = draftAnOrderController.prepopulateSolicitorDraftAnOrder("", callbackRequest);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = draftAnOrderController
+            .prepopulateSolicitorDraftAnOrder("", callbackRequest);
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("previewDraftAnOrder"));
     }
 
     @Test
     public void testPrepareDraftOrderCollection() throws Exception {
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = draftAnOrderController.prepareDraftOrderCollection("", callbackRequest);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = draftAnOrderController
+            .prepareDraftOrderCollection("", callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
     @Test
     public void testDraftAnOrderMidEventCallback() throws Exception {
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = draftAnOrderController.draftAnOrderMidEventCallback("", callbackRequest);
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("solicitorDraftOrderDoc"));
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = draftAnOrderController
+            .draftAnOrderMidEventCallback("", callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("solicitorOrJudgeDraftOrderDoc"));
     }
 }
