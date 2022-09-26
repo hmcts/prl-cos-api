@@ -121,4 +121,5 @@ public class PrlAppsConstants {
     public static final String CITIZEN_UPLOADED_DOCUMENT = "citizenUploadedDocumentList";
 
     public static final String CITIZEN_HINT = "CITIZEN";
+    public static final String APPLICANT_SOLICITOR_EMAIL_ADDRESS = "applicantSolicitorEmailAddress";
 }
