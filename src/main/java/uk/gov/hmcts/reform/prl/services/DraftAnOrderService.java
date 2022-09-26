@@ -443,7 +443,7 @@ public class DraftAnOrderService {
                 .equalsIgnoreCase(caseData.getSolicitorOrJudgeDraftOrderDoc().getDocumentFileName())) {
                 log.info("matching draftorder {}", draftOrder);
                 draftOrderCollection.set(
-                    draftOrderCollection.indexOf(draftOrder),
+                    draftOrderCollection.indexOf(e),
                     element(getUpdatedDraftOrder(draftOrder, caseData))
                 );
                 break;
