@@ -15,19 +15,19 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
 public class DraftOrder {
-    private final String orderType;
-    private final String orderTypeId;
-    private final Document orderDocument;
-    private final OtherDraftOrderDetails otherDetails;
-    private final String orderText;
-    private final String notes;
+    private String orderType;
+    private String orderTypeId;
+    private Document orderDocument;
+    private OtherDraftOrderDetails otherDetails;
+    private String orderText;
+    private String notes;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
         log.info("orderTypeId {},orderTypeId {}", this.orderType, this.orderTypeId);
         return String.format(
             "%s - %s",
-            this.orderType,
+            this.orderTypeId,
             this.orderDocument.getDocumentFileName()
         );
     }
