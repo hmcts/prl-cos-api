@@ -436,16 +436,16 @@ public class DraftAnOrderService {
         log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
         log.info(" ************solicitorOrJudgeDraftOrderDoc {}", caseData.getSolicitorOrJudgeDraftOrderDoc());
         log.info(" ************ casedata {}", caseData);
-        List<DraftOrder> draftOrderList = caseData.getDraftOrderCollection().stream().map(Element::getValue).collect(
-            Collectors.toList());
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
-        int index = 0;
-        for (DraftOrder temp : draftOrderList) {
-            if (temp.getOrderDocument().getDocumentFileName()
+        for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
+            DraftOrder draftOrder = e.getValue();
+            if (draftOrder.getOrderDocument().getDocumentFileName()
                 .equalsIgnoreCase(caseData.getSolicitorOrJudgeDraftOrderDoc().getDocumentFileName())) {
-                index = draftOrderList.indexOf(temp);
-                log.info("matching draftorder {}", temp);
-                draftOrderCollection.set(index, element(getUpdatedDraftOrder(temp, caseData)));
+                log.info("matching draftorder {}", draftOrder);
+                draftOrderCollection.set(
+                    draftOrderCollection.indexOf(draftOrder),
+                    element(getUpdatedDraftOrder(draftOrder, caseData))
+                );
                 break;
             }
         }

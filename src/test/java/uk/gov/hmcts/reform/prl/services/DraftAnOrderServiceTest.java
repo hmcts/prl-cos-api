@@ -155,7 +155,7 @@ public class DraftAnOrderServiceTest {
         assertNotNull(draftAnOrderService.getTheOrderDraftString(caseData));
     }
 
-    @Ignore
+
     @Test
     public void testupdateDraftOrderCollection() {
         assertNotNull(draftAnOrderService.updateDraftOrderCollection(caseData).get("draftOrderCollection"));
