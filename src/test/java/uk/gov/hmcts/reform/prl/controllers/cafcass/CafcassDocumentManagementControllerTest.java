@@ -9,9 +9,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.controllers.cafcaas.CafcassDocumentManagementController;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCdamService;
 
@@ -23,9 +22,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.UUID;
 
+import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_TEST_AUTHORISATION_TOKEN;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.EMPTY_STRING;
@@ -34,8 +36,6 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CAFCASS_DOWNLOAD_
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CafcassDocumentManagementControllerTest {
-    @Mock
-    private CaseDocumentClient caseDocumentClient;
 
     @Mock
     private CafcassCdamService cafcassCdamService;
@@ -50,9 +50,9 @@ public class CafcassDocumentManagementControllerTest {
     public void testCdamDocumentDownloadServiceResponseStatusOk() {
         Resource documentResource = createNewResource();
 
-        ResponseEntity<Resource> expectedResponse = ResponseEntity.status(HttpStatus.OK).body(documentResource);
+        ResponseEntity<Resource> expectedResponse = ResponseEntity.status(OK).contentType(MediaType.APPLICATION_PDF).body(documentResource);
 
-        final UUID documentId = UUID.randomUUID();
+        final UUID documentId = randomUUID();
 
         Mockito.when(cafcassCdamService.getDocument(CAFCASS_TEST_AUTHORISATION_TOKEN, CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN, documentId))
                 .thenReturn(expectedResponse);
@@ -62,17 +62,17 @@ public class CafcassDocumentManagementControllerTest {
                 documentId);
 
         assertNotNull(responseEntity.getBody());
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(OK, responseEntity.getStatusCode());
     }
 
     @Test
     @DisplayName("Failed download of document through CDAM Service")
     public void testGetDocumentBinary() {
-        final UUID documentId = UUID.randomUUID();
+        final UUID documentId = randomUUID();
 
         Mockito.when(cafcassCdamService.getDocument(CAFCASS_TEST_AUTHORISATION_TOKEN, CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN, documentId))
                 .thenReturn(new ResponseEntity<Resource>(
-                        HttpStatus.BAD_REQUEST));
+                        BAD_REQUEST));
 
         ResponseEntity responseEntity = cafcassDocumentManagementController.downloadDocument(
                 CAFCASS_TEST_AUTHORISATION_TOKEN,
@@ -80,7 +80,7 @@ public class CafcassDocumentManagementControllerTest {
                 documentId);
 
         assertNull(responseEntity.getBody());
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals(BAD_REQUEST, responseEntity.getStatusCode());
 
     }
 
