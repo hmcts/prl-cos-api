@@ -114,7 +114,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testPopulateSelectedOrder() {
+    public void testPopulateSelectedOrderText() {
         Map<String, Object> caseDataMap = draftAnOrderService.populateSelectedOrderText(caseData);
         assertEquals("test", caseDataMap.get("previewDraftAnOrder"));
     }
@@ -159,6 +159,11 @@ public class DraftAnOrderServiceTest {
     @Test
     public void testupdateDraftOrderCollection() {
         assertNotNull(draftAnOrderService.updateDraftOrderCollection(caseData).get("draftOrderCollection"));
+    }
+
+    @Test
+    public void testPopulateSelectedOrder() {
+        assertNotNull(draftAnOrderService.populateSelectedOrder(caseData).get("previewDraftOrder"));
     }
 
     @Test
