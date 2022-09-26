@@ -80,18 +80,18 @@ public class ManageOrderEmailService {
                                                                          .getRespondents());
             for (Map.Entry<String, String> appValues : applicantsMap.entrySet()) {
 
-                sendEmailToParty(caseDetails, isFinalOrder, appValues.getKey(),
+                sendEmailToParty(isFinalOrder, appValues.getKey(),
                                  buildApplicantRespondentEmail(caseDetails, appValues.getValue()));
             }
 
             for (Map.Entry<String, String> appValues : respondentMap.entrySet()) {
 
-                sendEmailToParty(caseDetails, isFinalOrder, appValues.getKey(),
+                sendEmailToParty(isFinalOrder, appValues.getKey(),
                                  buildApplicantRespondentEmail(caseDetails, appValues.getValue()));
             }
         } else {
             if (caseData.getApplicantsFL401().getEmail() != null) {
-                sendEmailToParty(caseDetails, isFinalOrder, caseData.getApplicantsFL401().getEmail(),
+                sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getEmail(),
                                  buildApplicantRespondentEmail(
                                      caseDetails, caseData.getApplicantsFL401().getFirstName()
                                      + " " + caseData.getApplicantsFL401().getFirstName()));
@@ -99,7 +99,7 @@ public class ManageOrderEmailService {
 
             }
             if (caseData.getRespondentsFL401().getEmail() != null) {
-                sendEmailToParty(caseDetails, isFinalOrder, caseData.getRespondentsFL401().getEmail(),
+                sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
                                  buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
                                      + " " + caseData.getRespondentsFL401().getFirstName()));
             }
@@ -108,7 +108,7 @@ public class ManageOrderEmailService {
 
     }
 
-    private void sendEmailToParty(CaseDetails caseDetails, SelectTypeOfOrderEnum isFinalOrder,
+    private void sendEmailToParty(SelectTypeOfOrderEnum isFinalOrder,
                                   String emailAddress,
                                   EmailTemplateVars email) {
         emailService.send(
