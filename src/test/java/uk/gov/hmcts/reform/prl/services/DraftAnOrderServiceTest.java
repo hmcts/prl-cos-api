@@ -71,9 +71,13 @@ public class DraftAnOrderServiceTest {
     private List<Element<DraftOrder>> draftOrderCollection;
     private DynamicList dynamicList;
     private Address address;
+    private Document document;
 
     @Before
     public void testDataToUse() throws Exception {
+        document = Document.builder()
+            .documentFileName("test")
+            .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -81,13 +85,13 @@ public class DraftAnOrderServiceTest {
             .build();
         draftOrderCollection = List.of(element(DraftOrder.builder()
                                                    .orderTypeId("")
-                                                   .orderDocument(Document.builder().build())
+                                                   .orderDocument(document)
                                                    .build()));
         dynamicList =  ElementUtils.asDynamicList(draftOrderCollection, null, DraftOrder::getLabelForOrdersDynamicList);
         address = Address.builder().build();
         Element<DraftOrder> draftOrderElement = element(DraftOrder.builder()
                                                             .orderText("test")
-                                                            .orderDocument(Document.builder().build())
+                                                            .orderDocument(document)
                                                             .otherDetails(OtherDraftOrderDetails.builder()
                                                                               .dateCreated(LocalDateTime.now())
                                                                               .build())
@@ -96,6 +100,7 @@ public class DraftAnOrderServiceTest {
             .replyMessageDynamicList(dynamicList)
             .draftOrdersDynamicList(dynamicList)
             .dateOrderMade(LocalDate.now())
+            .solicitorOrJudgeDraftOrderDoc(document)
             .draftOrderCollection(List.of(draftOrderElement))
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
@@ -147,6 +152,11 @@ public class DraftAnOrderServiceTest {
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
             .build();
         assertNotNull(draftAnOrderService.getTheOrderDraftString(caseData));
+    }
+
+    @Test
+    public void testupdateDraftOrderCollection() {
+        assertNotNull(draftAnOrderService.updateDraftOrderCollection(caseData).get("draftOrderCollection"));
     }
 
     @Test
@@ -204,6 +214,14 @@ public class DraftAnOrderServiceTest {
     @Test
     public void testGenerateSolicitorDraftOrder() throws Exception {
         Document document = draftAnOrderService.generateSolicitorDraftOrder("", caseData);
+        assertEquals(document.getDocumentBinaryUrl(),generatedDocumentInfo.getBinaryUrl());
+        assertEquals(document.getDocumentUrl(),generatedDocumentInfo.getUrl());
+        assertEquals(document.getDocumentHash(),generatedDocumentInfo.getHashToken());
+    }
+
+    @Test
+    public void testGenerateJudgeDraftOrder() throws Exception {
+        Document document = draftAnOrderService.generateJudgeDraftOrder("", caseData);
         assertEquals(document.getDocumentBinaryUrl(),generatedDocumentInfo.getBinaryUrl());
         assertEquals(document.getDocumentUrl(),generatedDocumentInfo.getUrl());
         assertEquals(document.getDocumentHash(),generatedDocumentInfo.getHashToken());
