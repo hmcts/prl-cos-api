@@ -67,7 +67,7 @@ xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
 citizen:
-  dashboardUrl: ${CITIZEN_URL:https://wwww.example.com}s
+  dashboardUrl: ${CITIZEN_URL:https://www.example.com}
 
 citizen_frontend:
   url: http://example.com
