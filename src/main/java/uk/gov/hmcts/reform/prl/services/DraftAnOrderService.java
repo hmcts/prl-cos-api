@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
-import uk.gov.hmcts.reform.prl.models.DraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
@@ -431,6 +430,44 @@ public class DraftAnOrderService {
         );
     }
 
+    public Map<String, Object> updateDraftOrderCollection(CaseData caseData) {
+
+        log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
+        log.info(" ************solicitorOrJudgeDraftOrderDoc {}", caseData.getSolicitorOrJudgeDraftOrderDoc());
+        log.info(" ************ casedata {}", caseData);
+        List<DraftOrder> draftOrderList = caseData.getDraftOrderCollection().stream().map(Element::getValue).collect(
+            Collectors.toList());
+        int index = 0;
+        for (DraftOrder temp : draftOrderList) {
+            if (temp.getOrderDocument().getDocumentFileName()
+                .equalsIgnoreCase(caseData.getSolicitorOrJudgeDraftOrderDoc().getDocumentFileName())) {
+                index = draftOrderList.indexOf(temp);
+                log.info("matching draftorder {}", temp);
+                draftOrderList.set(index, getUpdatedDraftOrder(temp, caseData));
+            }
+        }
+        draftOrderList.sort(Comparator.comparing(
+            m -> m.getOtherDetails().getDateCreated(),
+            Comparator.reverseOrder()
+        ));
+        return Map.of("draftOrderCollection", draftOrderList
+        );
+    }
+
+    private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData) {
+
+        return DraftOrder.builder().orderType(draftOrder.getOrderType())
+            .orderTypeId(draftOrder.getOrderTypeId())
+            .orderDocument(caseData.getSolicitorOrJudgeDraftOrderDoc())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .createdBy(draftOrder.getOtherDetails().getCreatedBy())
+                              .dateCreated(dateTime.now())
+                              .status("JUDGE_COMMENTS_ENTERED").build())
+            .orderText(caseData.getPreviewDraftAnOrder())
+            .notes(caseData.getCourtAdminMessage())
+            .build();
+    }
+
     private DraftOrder getCurrentOrderDetails(CaseData caseData) {
         return DraftOrder.builder().orderType(caseData.getSelectedOrder())
             .orderTypeId(caseData.getCreateSelectOrderOptions().name())
@@ -438,19 +475,10 @@ public class DraftAnOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
-            .status("Draft").build())
+                              .status("Draft").build())
             .orderText(caseData.getPreviewDraftAnOrder())
             .notes(caseData.getCourtAdminMessage())
             .build();
-    }
-
-
-    private DraftOrderDetails getCurrentOrderDetailsWithText(CaseData caseData) {
-        return DraftOrderDetails.builder()
-            .orderTypeId(caseData.getCreateSelectOrderOptions().name())
-            .orderDocument(caseData.getSolicitorOrJudgeDraftOrderDoc())
-            .orderText(caseData.getPreviewDraftAnOrder())
-            .dateCreated(dateTime.now()).build();
     }
 
     public Map<String, Object> getDraftOrderDynamicList(List<Element<DraftOrder>> draftOrderCollection) {
