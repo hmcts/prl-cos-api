@@ -57,6 +57,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
@@ -522,7 +523,7 @@ public class DocumentGenService {
                 template
             );
         } else {
-            log.info("Generating document for {} ",template);
+            log.info("Generating document for {} ", template);
             generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
@@ -552,7 +553,7 @@ public class DocumentGenService {
                 fileName = !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
                 break;
             case C1A_DRAFT_HINT:
-                fileName =  !isWelsh ? c100C1aDraftFilename : c100C1aDraftWelshFilename;
+                fileName = !isWelsh ? c100C1aDraftFilename : c100C1aDraftWelshFilename;
                 break;
             case FINAL_HINT:
                 fileName = findFinalFilename(isWelsh, caseTypeOfApp);
@@ -771,6 +772,7 @@ public class DocumentGenService {
         LocalDate today = LocalDate.now();
         String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
         String isApplicant = "";
+        YesOrNo documentRequest = null;
 
         if (generateAndUploadDocumentRequest.getValues() != null) {
             if (generateAndUploadDocumentRequest.getValues().containsKey(PARENT_DOCUMENT_TYPE)) {
@@ -790,6 +792,10 @@ public class DocumentGenService {
                 isApplicant = generateAndUploadDocumentRequest.getValues().get(IS_APPLICANT);
             }
 
+            if (generateAndUploadDocumentRequest.getValues().containsKey(DOCUMENT_REQUEST)) {
+                documentRequest = YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST));
+            }
+
         }
 
         return UploadedDocuments.builder()
@@ -799,6 +805,7 @@ public class DocumentGenService {
             .isApplicant(isApplicant)
             .uploadedBy(partyId)
             .dateCreated(LocalDate.now())
+            .documentRequestedByCourt(documentRequest)
             .documentDetails(DocumentDetails.builder()
                                  .documentName(documentName)
                                  .documentUploadedDate(formattedCurrentDate)

@@ -145,4 +145,5 @@ public class PrlAppsConstants {
     public static final String PARENT_DOCUMENT_TYPE = "parentDocumentType";
     public static final String PARTY_ID = "partyId";
     public static final String IS_APPLICANT = "isApplicant";
+    public static final String DOCUMENT_REQUEST = "documentRequestedByCourt";
 }
