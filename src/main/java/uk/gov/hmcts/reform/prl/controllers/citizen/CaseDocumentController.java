@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -29,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
-import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -37,6 +35,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -159,10 +158,11 @@ public class CaseDocumentController {
     })
     public ResponseEntity uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                          @RequestHeader("serviceAuthorization") String s2sToken,
-                                                         @ModelAttribute UploadedDocumentRequest uploadedDocumentRequest) {
+                                                         @RequestBody HashMap<String, Object> uploadedDocumentRequest) {
 
         log.info("Uploaded doc request: {}", uploadedDocumentRequest);
-        String caseId = uploadedDocumentRequest.getValues().get("caseId").toString();
+        //String caseId = uploadedDocumentRequest.getValues().get("caseId").toString();
+        String caseId = uploadedDocumentRequest.get("caseId").toString();
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
