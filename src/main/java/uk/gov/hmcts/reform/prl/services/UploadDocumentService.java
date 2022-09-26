@@ -17,16 +17,15 @@ import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
-import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @Service
@@ -77,7 +76,7 @@ public class UploadDocumentService {
         return document;
     }
 
-    public UploadedDocuments uploadCitizenDocument(String authorisation, UploadedDocumentRequest uploadedDocumentRequest, String caseId) {
+    public UploadedDocuments uploadCitizenDocument(String authorisation, HashMap<String, Object> uploadedDocumentRequest, String caseId) {
 
         MultipartFile document = null;
         String parentDocumentType = "";
@@ -90,33 +89,28 @@ public class UploadDocumentService {
         String isApplicant = "";
         YesOrNo documentRequest = null;
 
-        if (uploadedDocumentRequest.getValues() != null) {
+        if (uploadedDocumentRequest != null) {
             log.info("=====trying to retrive doc data from request=====");
 
-            if (uploadedDocumentRequest.getValues().containsKey("parentDocumentType")) {
-                parentDocumentType = uploadedDocumentRequest.getValues().get("parentDocumentType").toString();
+            if (uploadedDocumentRequest.containsKey("parentDocumentType")) {
+                parentDocumentType = uploadedDocumentRequest.get("parentDocumentType").toString();
             }
-            if (uploadedDocumentRequest.getValues().containsKey("partyId")) {
-                partyId = uploadedDocumentRequest.getValues().get("partyId").toString();
+            if (uploadedDocumentRequest.containsKey("partyId")) {
+                partyId = uploadedDocumentRequest.get("partyId").toString();
             }
-            if (uploadedDocumentRequest.getValues().containsKey("documentType")) {
-                documentType = uploadedDocumentRequest.getValues().get("documentType").toString();
-                if (uploadedDocumentRequest.getValues().containsKey("partyName")) {
-                    partyName = uploadedDocumentRequest.getValues().get("partyName").toString();
+            if (uploadedDocumentRequest.containsKey("documentType")) {
+                documentType = uploadedDocumentRequest.get("documentType").toString();
+                if (uploadedDocumentRequest.containsKey("partyName")) {
+                    partyName = uploadedDocumentRequest.get("partyName").toString();
                     documentName = documentType.replace("Your", partyName + "'s");
                 }
             }
-            if (uploadedDocumentRequest.getValues().containsKey("isApplicant")) {
-                isApplicant = uploadedDocumentRequest.getValues().get("isApplicant").toString();
+            if (uploadedDocumentRequest.containsKey("isApplicant")) {
+                isApplicant = uploadedDocumentRequest.get("isApplicant").toString();
             }
 
-            if (uploadedDocumentRequest.getValues().containsKey(DOCUMENT_REQUEST)) {
-                documentRequest = YesOrNo.valueOf(uploadedDocumentRequest.getValues().get(DOCUMENT_REQUEST).toString());
-            }
-            document = (MultipartFile) uploadedDocumentRequest.getValues().get(
-                "file") != null
-                ? ((MultipartFile) uploadedDocumentRequest.getValues().get(
-                "file")) : null;
+            document = (MultipartFile) uploadedDocumentRequest.get("file") != null
+                ? ((MultipartFile) uploadedDocumentRequest.get("file")) : null;
 
             log.info("Document name: {} ", document.getOriginalFilename());
         }
