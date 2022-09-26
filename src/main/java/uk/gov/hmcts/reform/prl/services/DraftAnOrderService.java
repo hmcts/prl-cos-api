@@ -155,7 +155,10 @@ public class DraftAnOrderService {
                 "applicantChildNameDob", getApplicantChildDetails(caseData.getApplicantChildDetails())
             );
             nonMolestationPlaceHoldersMap.put(
-                "fl404bRespondentAddress", getAddress(caseData.getRespondentsFL401().getAddress())
+                "fl404bRespondentAddress",
+                getAddress(
+                    caseData.getRespondentsFL401() != null ?
+                    caseData.getRespondentsFL401().getAddress() : null)
             );
             nonMolestationPlaceHoldersMap.put(
                 "fl404bMentionedProperty", (caseData.getManageOrders().getFl404CustomFields() != null
@@ -182,7 +185,6 @@ public class DraftAnOrderService {
             nonMolestationPlaceHoldersMap.put(
                 "respondentMustNotOrders", getRespondentMustNotOrders(caseData.getManageOrders().getFl404CustomFields())
             );
-
             nonMolestationPlaceHoldersMap.put(
                 "furtherDirectionsIfRequired", caseData.getManageOrders().getFurtherDirectionsIfRequired() != null
                     ? caseData.getManageOrders().getFurtherDirectionsIfRequired() : " "
@@ -396,13 +398,12 @@ public class DraftAnOrderService {
 
         log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
         log.info(" ************SolicitorDraftOrderDoc {}", caseData.getSolicitorDraftOrderDoc());
-        List<Element<OrderDetails>> draftOrderList;
+        List<Element<OrderDetails>> draftOrderList = new ArrayList<>();
         Element<OrderDetails> orderDetails = element(getCurrentOrderDetails(caseData));
         if (caseData.getDraftOrderCollection() != null) {
-            draftOrderList = caseData.getDraftOrderCollection();
+            draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
         } else {
-            draftOrderList = new ArrayList<>();
             draftOrderList.add(orderDetails);
         }
         draftOrderList.sort(Comparator.comparing(
@@ -415,12 +416,10 @@ public class DraftAnOrderService {
     }
 
     private List<Element<DraftOrderDetails>> getDraftOrderDetailsWithTextList(CaseData caseData) {
-        List<Element<DraftOrderDetails>> tempList;
+        List<Element<DraftOrderDetails>> tempList = new ArrayList<>();
         Element<DraftOrderDetails> draftOrderDetails = element(getCurrentOrderDetailsWithText(caseData));
         if (caseData.getDraftOrderWithTextCollection() != null) {
-            tempList = caseData.getDraftOrderWithTextCollection();
-        } else {
-            tempList = new ArrayList<>();
+            tempList.addAll(caseData.getDraftOrderWithTextCollection());
         }
         tempList.add(draftOrderDetails);
         return tempList;

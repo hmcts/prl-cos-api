@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
@@ -95,7 +96,7 @@ public class DraftAnOrderController {
                                                          .build())
             .selectedOrder(caseData.getCreateSelectOrderOptions().getDisplayedValue()).build();
         log.info("*** caseData before sending to text area {} ***", caseData);
-        callbackRequest.getCaseDetails().getData().putAll(caseData.toMap(objectMapper));
+        callbackRequest.getCaseDetails().getData().putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         log.info("*** caseDataUpdated {} ***", callbackRequest.getCaseDetails().getData());
         return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
     }
