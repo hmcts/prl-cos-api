@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
@@ -25,6 +26,7 @@ import java.util.Date;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @Service
@@ -86,6 +88,7 @@ public class UploadDocumentService {
         LocalDate today = LocalDate.now();
         String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
         String isApplicant = "";
+        YesOrNo documentRequest = null;
 
         if (uploadedDocumentRequest.getValues() != null) {
             log.info("=====trying to retrive doc data from request=====");
@@ -107,7 +110,9 @@ public class UploadDocumentService {
                 isApplicant = uploadedDocumentRequest.getValues().get("isApplicant").toString();
             }
 
-
+            if (uploadedDocumentRequest.getValues().containsKey(DOCUMENT_REQUEST)) {
+                documentRequest = YesOrNo.valueOf(uploadedDocumentRequest.getValues().get(DOCUMENT_REQUEST).toString());
+            }
             document = (MultipartFile) uploadedDocumentRequest.getValues().get(
                 "file") != null
                 ? ((MultipartFile) uploadedDocumentRequest.getValues().get(
@@ -141,6 +146,7 @@ public class UploadDocumentService {
                 .parentDocumentType(parentDocumentType)
                 .documentType(documentType)
                 .dateCreated(LocalDate.now())
+                .documentRequestedByCourt(documentRequest)
                 .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                                      .documentUrl(uploadResponse.getDocuments().get(0).links.self.href)
                                      .documentBinaryUrl(uploadResponse.getDocuments().get(0).links.binary.href)

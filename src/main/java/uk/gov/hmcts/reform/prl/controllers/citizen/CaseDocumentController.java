@@ -192,7 +192,7 @@ public class CaseDocumentController {
                 .build();
 
             StartEventResponse startEventResponse =
-                coreCaseDataApi.startEventForCaseWorker(
+                coreCaseDataApi.startEventForCitizen(
                     authorisation,
                     authTokenGenerator.generate(),
                     idamClient.getUserInfo(authorisation).getUid(),
@@ -209,7 +209,7 @@ public class CaseDocumentController {
                            .build())
                 .data(caseData).build();
 
-            CaseDetails caseDetails1 = coreCaseDataApi.submitEventForCaseWorker(
+            CaseDetails caseDetails1 = coreCaseDataApi.submitEventForCitizen(
                 authorisation,
                 authTokenGenerator.generate(),
                 idamClient.getUserInfo(authorisation).getUid(),
