@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -148,7 +148,8 @@ public class CaseDocumentController {
     }
 
 
-    @PostMapping(path = "/upload-citizen-statement-document", produces = APPLICATION_JSON_VALUE, consumes = MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(path = "/upload-citizen-statement-document", produces = APPLICATION_JSON_VALUE,
+        consumes = APPLICATION_FORM_URLENCODED_VALUE)
     @Operation(description = "Call CDAM to upload document")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
