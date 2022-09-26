@@ -438,13 +438,15 @@ public class DraftAnOrderService {
         log.info(" ************ casedata {}", caseData);
         List<DraftOrder> draftOrderList = caseData.getDraftOrderCollection().stream().map(Element::getValue).collect(
             Collectors.toList());
+        List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         int index = 0;
         for (DraftOrder temp : draftOrderList) {
             if (temp.getOrderDocument().getDocumentFileName()
                 .equalsIgnoreCase(caseData.getSolicitorOrJudgeDraftOrderDoc().getDocumentFileName())) {
                 index = draftOrderList.indexOf(temp);
                 log.info("matching draftorder {}", temp);
-                draftOrderList.set(index, getUpdatedDraftOrder(temp, caseData));
+                draftOrderCollection.set(index, element(getUpdatedDraftOrder(temp, caseData)));
+                break;
             }
         }
         draftOrderList.sort(Comparator.comparing(
