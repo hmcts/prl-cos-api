@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,4 +21,14 @@ public class DraftOrder {
     private final OtherDraftOrderDetails otherDetails;
     private final String orderText;
     private final String notes;
+
+    @JsonIgnore
+    public String getLabelForOrdersDynamicList() {
+        log.info("orderTypeId {},orderTypeId {}", this.orderType, this.orderTypeId);
+        return String.format(
+            "%s - %s",
+            this.orderType,
+            this.orderDocument.getDocumentFileName()
+        );
+    }
 }

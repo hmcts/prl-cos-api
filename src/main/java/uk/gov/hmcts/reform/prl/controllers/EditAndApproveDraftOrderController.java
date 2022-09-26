@@ -36,11 +36,11 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        if (caseData.getDraftOrderWithTextCollection() != null
-            && !caseData.getDraftOrderWithTextCollection().isEmpty()) {
+        if (caseData.getDraftOrderCollection() != null
+            && !caseData.getDraftOrderCollection().isEmpty()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.getDraftOrderDynamicList(
-                    caseData.getDraftOrderWithTextCollection())).build();
+                    caseData.getDraftOrderCollection())).build();
         } else {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
         }
@@ -55,8 +55,8 @@ public class EditAndApproveDraftOrderController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        if (caseData.getDraftOrderWithTextCollection() != null
-            && !caseData.getDraftOrderWithTextCollection().isEmpty()) {
+        if (caseData.getDraftOrderCollection() != null
+            && !caseData.getDraftOrderCollection().isEmpty()) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.populateSelectedOrder(
                     caseData)).build();

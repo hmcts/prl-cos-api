@@ -453,13 +453,13 @@ public class DraftAnOrderService {
             .dateCreated(dateTime.now()).build();
     }
 
-    public Map<String, Object> getDraftOrderDynamicList(List<Element<DraftOrderDetails>> draftOrderCollection) {
+    public Map<String, Object> getDraftOrderDynamicList(List<Element<DraftOrder>> draftOrderCollection) {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
             draftOrderCollection,
             null,
-            DraftOrderDetails::getLabelForOrdersDynamicList
+            DraftOrder::getLabelForOrdersDynamicList
         ));
         return caseDataMap;
     }
