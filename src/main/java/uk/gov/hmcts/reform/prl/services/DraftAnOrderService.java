@@ -449,11 +449,11 @@ public class DraftAnOrderService {
                 break;
             }
         }
-        draftOrderList.sort(Comparator.comparing(
-            m -> m.getOtherDetails().getDateCreated(),
+        draftOrderCollection.sort(Comparator.comparing(
+            m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        return Map.of("draftOrderCollection", draftOrderList
+        return Map.of("draftOrderCollection", draftOrderCollection
         );
     }
 
