@@ -31,4 +31,16 @@ public enum MortgageNamedAfterEnum {
     public static MortgageNamedAfterEnum getValue(String key) {
         return MortgageNamedAfterEnum.valueOf(key);
     }
+
+    public static MortgageNamedAfterEnum getDisplayedValueFromEnumString(String enteredValue) {
+        if (enteredValue.equalsIgnoreCase("applicant")) {
+            return MortgageNamedAfterEnum.applicant;
+        } else if (enteredValue.equalsIgnoreCase("respondent")) {
+            return MortgageNamedAfterEnum.respondent;
+        } else if (enteredValue.equalsIgnoreCase("other")) {
+            return MortgageNamedAfterEnum.someoneElse;
+        } else {
+            return null;
+        }
+    }
 }

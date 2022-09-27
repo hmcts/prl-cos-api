@@ -30,4 +30,16 @@ public enum Gender {
         return Gender.valueOf(key);
     }
 
+    public static Gender getDisplayedValueFromEnumString(String enteredValue) {
+        if (enteredValue.equalsIgnoreCase("Female")) {
+            return Gender.female;
+        } else if (enteredValue.equalsIgnoreCase("Male")) {
+            return Gender.male;
+        } else if ((enteredValue.equalsIgnoreCase("Non-binary"))
+            || (enteredValue.equalsIgnoreCase("Transgender"))
+            || (enteredValue.equalsIgnoreCase("other"))) {
+            return Gender.other;
+        }
+        return null;
+    }
 }
