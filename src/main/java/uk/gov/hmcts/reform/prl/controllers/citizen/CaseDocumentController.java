@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -35,7 +36,6 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -158,11 +158,10 @@ public class CaseDocumentController {
     })
     public ResponseEntity uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                          @RequestHeader("serviceAuthorization") String s2sToken,
-                                                         @RequestBody HashMap<String, Object> uploadedDocumentRequest) {
+                                                         @RequestBody UploadedDocumentRequest uploadedDocumentRequest) {
 
         log.info("Uploaded doc request: {}", uploadedDocumentRequest);
-        //String caseId = uploadedDocumentRequest.getValues().get("caseId").toString();
-        String caseId = uploadedDocumentRequest.get("caseId").toString();
+        String caseId = uploadedDocumentRequest.getCaseId();
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
