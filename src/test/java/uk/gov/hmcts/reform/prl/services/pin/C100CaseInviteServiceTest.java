@@ -159,7 +159,7 @@ public class C100CaseInviteServiceTest {
             .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAndEmailsOnePartyNoRepresentation);
 
         //two respondents but only one should have a case invite generated
-        assertEquals(2, actualCaseData.getCaseInvites().size());
+        assertEquals(1, actualCaseData.getCaseInvites().size());
         assertEquals("respondentOne@email.com", actualCaseData.getCaseInvites().get(0).getValue()
             .getCaseInviteEmail());
     }
