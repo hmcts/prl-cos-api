@@ -10,4 +10,5 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
 @Jacksonized
 public class RespondentRelationOptionsInfo {
     private final ApplicantRelationshipOptionsEnum applicantRelationshipOptions;
+    private final String relationOptionsOther;
 }

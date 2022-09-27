@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
@@ -18,6 +20,7 @@ import java.io.IOException;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseDataService {
     @Value("${cafcaas.search-case-type-id}")
     private String cafCassSearchCaseTypeId;
@@ -28,11 +31,11 @@ public class CaseDataService {
     @Value("${ccd.elastic-search-api.boost}")
     private String ccdElasticSearchApiBoost;
 
-    @Autowired
-    CafcassCcdDataStoreService cafcassCcdDataStoreService;
+    private final CafcassCcdDataStoreService cafcassCcdDataStoreService;
 
-    @Autowired
-    private CafCassFilter cafCassFilter;
+    private final CafCassFilter cafCassFilter;
+
+    private final  AuthTokenGenerator authTokenGenerator;
 
     public CafCassResponse getCaseData(String authorisation, String serviceAuthorisation, String startDate, String endDate) throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
@@ -42,7 +45,7 @@ public class CaseDataService {
         SearchResult searchResult = cafcassCcdDataStoreService.searchCases(
             authorisation,
             searchString,
-            serviceAuthorisation,
+            authTokenGenerator.generate(),
             cafCassSearchCaseTypeId
         );
         log.info("CCD response: " + objectMapper.writeValueAsString(searchResult));

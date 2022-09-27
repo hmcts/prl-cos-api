@@ -375,6 +375,14 @@ public class ManageOrderService {
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
             : caseData.getChildArrangementOrders().getDisplayedValue();
 
+        String flagSelectedOrderId = null;
+
+        if (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder) {
+            flagSelectedOrderId = String.valueOf(caseData.getCreateSelectOrderOptions());
+        } else {
+            flagSelectedOrderId = String.valueOf(caseData.getChildArrangementOrders());
+        }
+
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
@@ -383,6 +391,7 @@ public class ManageOrderService {
                 fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
             );
             return OrderDetails.builder().orderType(flagSelectedOrder)
+                .orderTypeId(flagSelectedOrderId)
                 .orderDocument(Document.builder()
                                    .documentUrl(generatedDocumentInfo.getUrl())
                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())

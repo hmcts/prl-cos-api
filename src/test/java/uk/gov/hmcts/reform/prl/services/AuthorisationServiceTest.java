@@ -8,8 +8,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
-import uk.gov.hmcts.reform.prl.exception.AuthorisationException;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
+import java.util.UUID;
+
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -23,6 +27,9 @@ public class AuthorisationServiceTest {
     @Mock
     ServiceAuthorisationApi serviceAuthorisationApi;
 
+    @Mock
+    IdamClient idamClient;
+
     @Before
     public void setup() {
         ReflectionTestUtils.setField(authorisationService, "s2sAuthorisedServices", "payment_api");
@@ -32,21 +39,31 @@ public class AuthorisationServiceTest {
     public void authoriseWhenTheServiceIsCalledFromPayment() {
 
         when(serviceAuthorisationApi.getServiceName(any())).thenReturn("payment_api");
-        assertTrue(authorisationService.authorise("Bearer abcasda"));
+        assertTrue(authorisationService.authoriseService("Bearer abcasda"));
 
     }
 
-    @Test(expected = AuthorisationException.class)
+    @Test
     public void doNotAuthoriseWhenTheServiceIsCalledFromUnknownApi() {
         when(serviceAuthorisationApi.getServiceName(any())).thenReturn("unknown_api");
-        authorisationService.authorise("Bearer abcasda");
+        assertFalse(authorisationService.authoriseService("Bearer abc"));
 
     }
 
-    @Test(expected = AuthorisationException.class)
+    @Test
     public void throwUnAuthorisedExceptionWhenS2sTokenIsMalformed() {
-        authorisationService.authorise("Bearer malformed");
+        assertFalse(authorisationService.authoriseService("Bearer malformed"));
     }
 
+    @Test
+    public void authoriseUserTheServiceIsCalledWithValidToken() {
+        when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(UUID.randomUUID().toString()).build());
+        assertTrue(authorisationService.authoriseUser("Bearer abcasda"));
+    }
+
+    @Test
+    public void doNotAuthoriseUserWhenCalledWithInvalidToken() {
+        assertFalse(authorisationService.authoriseUser("Bearer malformed"));
+    }
 
 }
