@@ -163,6 +163,7 @@ public class CaseDocumentController {
 
         log.info("Uploaded doc request: {}", uploadedDocumentRequest);
         String caseId = uploadedDocumentRequest.getCaseId();
+        log.info("Case id from upload doc req: {}", uploadedDocumentRequest.getCaseId());
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);

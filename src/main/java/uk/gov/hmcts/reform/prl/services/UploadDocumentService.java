@@ -91,14 +91,20 @@ public class UploadDocumentService {
             log.info("=====trying to retrive doc data from request=====");
 
             if (null != uploadedDocumentRequest.getParentDocumentType()) {
+                log.info("Parent doc type from upload doc req: {}", uploadedDocumentRequest.getParentDocumentType());
                 parentDocumentType = uploadedDocumentRequest.getParentDocumentType();
             }
             if (null != uploadedDocumentRequest.getPartyId()) {
+                log.info("Party Id from upload doc req: {}", uploadedDocumentRequest.getPartyId());
                 partyId = uploadedDocumentRequest.getPartyId();
             }
             if (null != uploadedDocumentRequest.getDocumentType()) {
+                log.info("document type from upload doc req: {}", uploadedDocumentRequest.getDocumentType());
+
                 documentType = uploadedDocumentRequest.getDocumentType();
                 if (null != uploadedDocumentRequest.getPartyName()) {
+                    log.info("Party name from upload doc req: {}", uploadedDocumentRequest.getPartyName());
+
                     partyName = uploadedDocumentRequest.getPartyName();
                     documentName = documentType.replace("Your", partyName + "'s");
                 }
