@@ -87,6 +87,7 @@ public class UploadDocumentService {
         String isApplicant = "";
         YesOrNo documentRequest = null;
 
+        log.info("=========Trying to retrieve the upload doc request data=======");
         if (uploadedDocumentRequest != null) {
             log.info("=====trying to retrive doc data from request=====");
 

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -168,16 +167,15 @@ public class CaseDocumentController {
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
-            authorisationService.authoriseService(s2sToken))) {
-            log.info("=====trying to upload document=====");
+        log.info("=====trying to upload document=====");
+        UploadedDocuments uploadedDocuments = uploadService.uploadCitizenDocument(
+            authorisation,
+            uploadedDocumentRequest,
+            caseId
+        );
+        List<Element<UploadedDocuments>> uploadedDocumentsList;
+        if (uploadedDocuments != null) {
 
-            UploadedDocuments uploadedDocuments = uploadService.uploadCitizenDocument(
-                authorisation,
-                uploadedDocumentRequest,
-                caseId
-            );
-            List<Element<UploadedDocuments>> uploadedDocumentsList;
             Element<UploadedDocuments> uploadedDocsElement = element(uploadedDocuments);
             if (tempCaseData.getCitizenUploadedDocumentList() != null
                 && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
@@ -224,7 +222,7 @@ public class CaseDocumentController {
                 DocumentDetails.builder().documentId(uploadedDocsElement.getId().toString())
                     .documentName(uploadedDocuments.getCitizenDocument().getDocumentFileName()).build());
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.ordinal()).body(new DocumentDetails());
         }
     }
 
