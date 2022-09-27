@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -158,7 +159,7 @@ public class CaseDocumentController {
     })
     public ResponseEntity uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                          @RequestHeader("serviceAuthorization") String s2sToken,
-                                                         @RequestBody UploadedDocumentRequest uploadedDocumentRequest) {
+                                                         @ModelAttribute UploadedDocumentRequest uploadedDocumentRequest) {
 
         log.info("Uploaded doc request: {}", uploadedDocumentRequest);
         String caseId = uploadedDocumentRequest.getCaseId();
