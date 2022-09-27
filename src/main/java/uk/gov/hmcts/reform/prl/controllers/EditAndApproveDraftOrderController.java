@@ -83,7 +83,7 @@ public class EditAndApproveDraftOrderController {
             && YesOrNo.Yes.equals(caseData.getDoYouWantCourtAdminToAddAnything())) {
             //Update Draft orders collection
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
-        }else{
+        } else {
             //Update orders collection
             //Implement this logic after creating final docmosis template
         }
