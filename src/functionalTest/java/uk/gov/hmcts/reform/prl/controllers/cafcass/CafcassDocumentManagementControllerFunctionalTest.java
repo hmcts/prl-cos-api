@@ -88,6 +88,5 @@ public class CafcassDocumentManagementControllerFunctionalTest {
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-
     }
 }
