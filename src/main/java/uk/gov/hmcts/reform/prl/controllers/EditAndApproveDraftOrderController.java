@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -74,7 +75,18 @@ public class EditAndApproveDraftOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
+        log.info(
+            "********caseData.getDoYouWantCourtAdminToAddAnything***** {}",
+            caseData.getDoYouWantCourtAdminToAddAnything()
+        );
+        if (caseData.getDoYouWantCourtAdminToAddAnything() != null
+            && YesOrNo.Yes.equals(caseData.getDoYouWantCourtAdminToAddAnything())) {
+            //Update Draft orders collection
+            caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
+        }else{
+            //Update orders collection
+            //Implement this logic after creating final docmosis template
+        }
         log.info("*** before returning {} ***", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -89,7 +101,7 @@ public class EditAndApproveDraftOrderController {
     }
 
 
-    @PostMapping(path = "/judge-populate-draft-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/judge-or-admin-populate-draft-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Remove dynamic list from the caseData")
     public AboutToStartOrSubmitCallbackResponse populateJudgeDraftOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -105,7 +117,7 @@ public class EditAndApproveDraftOrderController {
 
     }
 
-    @PostMapping(path = "/judge-generate-draft-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/judge-or-admin-generate-draft-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Remove dynamic list from the caseData")
     public AboutToStartOrSubmitCallbackResponse generateJudgeDraftOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
