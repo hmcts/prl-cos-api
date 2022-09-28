@@ -25,6 +25,7 @@ import java.util.Date;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOAD_DOC_DATE_FORMAT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @Service
@@ -113,6 +114,10 @@ public class UploadDocumentService {
             if (null != uploadedDocumentRequest.getIsApplicant()) {
                 isApplicant = uploadedDocumentRequest.getIsApplicant();
             }
+            if (null != uploadedDocumentRequest.getDocumentRequestedByCourt()) {
+                documentRequest = uploadedDocumentRequest.getDocumentRequestedByCourt();
+            }
+
         }
 
         if (!uploadedDocumentRequest.getFiles().isEmpty()) {
@@ -129,6 +134,9 @@ public class UploadDocumentService {
 
             UploadedDocuments uploadedDocuments = null;
 
+            LocalDate dateCreated = LocalDate.now();
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(CITIZEN_UPLOAD_DOC_DATE_FORMAT);
+
             for (MultipartFile file: uploadedDocumentRequest.getFiles()) {
 
                 uploadedDocuments = UploadedDocuments.builder().dateCreated(LocalDate.now())
@@ -139,7 +147,7 @@ public class UploadDocumentService {
                     .isApplicant(isApplicant)
                     .parentDocumentType(parentDocumentType)
                     .documentType(documentType)
-                    .dateCreated(LocalDate.now())
+                    .dateCreated(LocalDate.parse(dateTimeFormatter.format(dateCreated)))
                     .documentRequestedByCourt(documentRequest)
                     .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                                          .documentUrl(uploadResponse.getDocuments().get(0).links.self.href)

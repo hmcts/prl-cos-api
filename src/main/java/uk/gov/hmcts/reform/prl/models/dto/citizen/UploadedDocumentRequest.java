@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 import java.util.List;
 
@@ -28,4 +29,6 @@ public class UploadedDocumentRequest {
     private final String isApplicant;
     @JsonProperty("files")
     private List<MultipartFile> files;
+    @JsonProperty("documentRequestedByCourt")
+    private final YesOrNo documentRequestedByCourt;
 }
