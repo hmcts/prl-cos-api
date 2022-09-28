@@ -146,4 +146,7 @@ public class PrlAppsConstants {
     public static final String PARTY_ID = "partyId";
     public static final String IS_APPLICANT = "isApplicant";
     public static final String DOCUMENT_REQUEST = "documentRequestedByCourt";
+
+    public static final String CITIZEN_UPLOAD_DOC_DATE_FORMAT = "dd-MMM-yyyy";
+
 }
