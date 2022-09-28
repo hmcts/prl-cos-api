@@ -21,11 +21,9 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOAD_DOC_DATE_FORMAT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @Service
@@ -84,7 +82,7 @@ public class UploadDocumentService {
         String documentName = "";
         String partyId = "";
         LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
+        String formattedDateCreated = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
         String isApplicant = "";
         YesOrNo documentRequest = null;
 
@@ -134,26 +132,24 @@ public class UploadDocumentService {
 
             UploadedDocuments uploadedDocuments = null;
 
-            LocalDate dateCreated = LocalDate.now();
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(CITIZEN_UPLOAD_DOC_DATE_FORMAT);
-
             for (MultipartFile file: uploadedDocumentRequest.getFiles()) {
 
                 uploadedDocuments = UploadedDocuments.builder().dateCreated(LocalDate.now())
                     .uploadedBy(partyId)
                     .documentDetails(DocumentDetails.builder().documentName(file.getOriginalFilename())
-                                         .documentUploadedDate(new Date().toString()).build())
+                                         .documentUploadedDate(formattedDateCreated).build())
                     .partyName(partyName)
                     .isApplicant(isApplicant)
                     .parentDocumentType(parentDocumentType)
                     .documentType(documentType)
-                    .dateCreated(LocalDate.parse(dateTimeFormatter.format(dateCreated)))
+                    .dateCreated(LocalDate.now())
                     .documentRequestedByCourt(documentRequest)
                     .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                                          .documentUrl(uploadResponse.getDocuments().get(0).links.self.href)
                                          .documentBinaryUrl(uploadResponse.getDocuments().get(0).links.binary.href)
                                          .documentHash(uploadResponse.getDocuments().get(0).hashToken)
-                                         .documentFileName(file.getOriginalFilename()).build()).build();
+                                         .documentFileName(file.getOriginalFilename())
+                                         .build()).build();
 
                 log.info("Document has been saved in caseData {}", file.getOriginalFilename());
             }
