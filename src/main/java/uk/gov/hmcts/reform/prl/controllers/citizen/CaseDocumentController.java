@@ -51,8 +51,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RestController
 public class CaseDocumentController {
 
-    public static final String CITIZEN_DOCUMENT_UPLOAD_EVENT_ID = "citizenUploadedDocument";
-
     @Autowired
     private DocumentGenService documentGenService;
 
@@ -193,12 +191,12 @@ public class CaseDocumentController {
             StartEventResponse startEventResponse =
                 coreCaseDataApi.startEventForCitizen(
                     authorisation,
-                    authTokenGenerator.generate(),
+                    s2sToken,
                     idamClient.getUserInfo(authorisation).getUid(),
                     JURISDICTION,
                     CASE_TYPE,
                     caseId,
-                    CITIZEN_DOCUMENT_UPLOAD_EVENT_ID
+                    CITIZEN_UPLOADED_DOCUMENT
                 );
 
             CaseDataContent caseDataContent = CaseDataContent.builder()
@@ -210,7 +208,7 @@ public class CaseDocumentController {
 
             CaseDetails caseDetails1 = coreCaseDataApi.submitEventForCitizen(
                 authorisation,
-                authTokenGenerator.generate(),
+                s2sToken,
                 idamClient.getUserInfo(authorisation).getUid(),
                 JURISDICTION,
                 CASE_TYPE,
