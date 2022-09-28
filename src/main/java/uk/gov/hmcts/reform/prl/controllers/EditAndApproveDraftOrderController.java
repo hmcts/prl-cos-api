@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -79,14 +78,9 @@ public class EditAndApproveDraftOrderController {
             "********caseData.getDoYouWantCourtAdminToAddAnything***** {}",
             caseData.getDoYouWantCourtAdminToAddAnything()
         );
-        if (caseData.getDoYouWantCourtAdminToAddAnything() != null
-            && YesOrNo.Yes.equals(caseData.getDoYouWantCourtAdminToAddAnything())) {
-            //Update Draft orders collection
-            caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
-        } else {
-            //Update orders collection
-            //Implement this logic after creating final docmosis template
-        }
+
+        caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
+
         log.info("*** before returning {} ***", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
