@@ -111,7 +111,8 @@ public class CaseData implements MappableObject {
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
-    private final String dateSubmittedAndTime;
+
+    private final String caseSubmittedTimeStamp;
 
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;
@@ -599,7 +600,6 @@ public class CaseData implements MappableObject {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         this.toBuilder()
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
-            .dateSubmittedAndTime(DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa").format(zonedDateTime).toUpperCase())
             .build();
 
         return this;

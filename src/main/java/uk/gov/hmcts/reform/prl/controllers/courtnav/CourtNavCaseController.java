@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.prl.controllers.courtnav;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +34,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication")
 public class CourtNavCaseController {
 
     private static final String SERVICE_AUTH = "ServiceAuthorization";
@@ -49,7 +52,7 @@ public class CourtNavCaseController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity createCase(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @RequestBody CourtNavFl401 inputData
     ) throws Exception {
@@ -80,7 +83,7 @@ public class CourtNavCaseController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity uploadDocument(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @PathVariable("caseId") String caseId,
         @RequestParam MultipartFile file,
