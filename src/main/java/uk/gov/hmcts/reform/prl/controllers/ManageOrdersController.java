@@ -20,8 +20,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -33,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
@@ -104,24 +103,24 @@ public class ManageOrdersController {
             log.info("Court name before prepopulate: {}", caseData.getCourtName());
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
-        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData.getChildren().forEach(child -> listElements.add(DynamicMultiselectListElement.builder()
-                                 .code(child.getId().toString())
-                                 .label(child.getValue().getFirstName() + " " + child.getValue().getLastName())
-                                 .build()));
-        }
-
-        DynamicMultiSelectList testData = DynamicMultiSelectList
-            .builder()
-            .listItems(listElements)
-            .build();
-        log.info(" ******* Test Data ******* : {}", testData);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        caseData = caseData.toBuilder()
-            .childOption(testData)
-            .build();
+        //        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
+        //        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        //            caseData.getChildren().forEach(child -> listElements.add(DynamicMultiselectListElement.builder()
+        //                                 .code(child.getId().toString())
+        //                                 .label(child.getValue().getFirstName() + " " + child.getValue().getLastName())
+        //                                 .build()));
+        //        }
+        //
+        //        DynamicMultiSelectList testData = DynamicMultiSelectList
+        //            .builder()
+        //            .listItems(listElements)
+        //            .build();
+        //        log.info(" ******* Test Data ******* : {}", testData);
+        //        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        //
+        //        caseData = caseData.toBuilder()
+        //            .childOption(testData)
+        //            .build();
         return CallbackResponse.builder()
             .data(caseData)
             .build();
@@ -150,26 +149,45 @@ public class ManageOrdersController {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
 
-        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData.getChildren().forEach(child -> listElements.add(DynamicMultiselectListElement.builder()
-                                                                         .code(child.getId().toString())
-                                                                         .label(child.getValue().getFirstName() + " "
-                                                                                    + child.getValue().getLastName())
-                                                                         .build()));
+        //        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
+        //        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        //            caseData.getChildren().forEach(child -> listElements.add(DynamicMultiselectListElement.builder()
+        //                                                                         .code(child.getId().toString())
+        //                                                                         .label(child.getValue().getFirstName() + " "
+        //                                                                                    + child.getValue().getLastName())
+        //                                                                         .build()));
+        //        }
+        //
+        //        DynamicMultiSelectList testData = DynamicMultiSelectList
+        //            .builder()
+        //            .listItems(listElements)
+        //            .build();
+        //        log.info(" ******* Test Data ******* : {}", testData);
+        //        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        Map<String, List> testdata = new HashMap<>();
+        List<Map<String, String>> listElements = new ArrayList<>();
+
+        if (caseData.getChildren() != null) {
+            caseData.getChildren().forEach(child -> {
+                Map<String, String> temp = new HashMap<>();
+                temp.put("code",child.getId().toString());
+                temp.put("label",child.getValue().getFirstName() + " "
+                    + child.getValue().getLastName());
+                listElements.add(temp);
+            });
+        } else if (caseData.getApplicantChildDetails() != null) {
+            caseData.getApplicantChildDetails().forEach(child -> {
+                Map<String, String> temp = new HashMap<>();
+                temp.put("code",child.getId().toString());
+                temp.put("label",child.getValue().getFullName());
+                listElements.add(temp);
+            });
         }
-
-        DynamicMultiSelectList testData = DynamicMultiSelectList
-            .builder()
-            .listItems(listElements)
-            .build();
-        log.info(" ******* Test Data ******* : {}", testData);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
+        testdata.put("list_items",listElements);
         caseData = caseData.toBuilder()
-            .childOption(testData)
+            .childOption(testdata)
             .build();
-
         return CallbackResponse.builder()
             .data(caseData)
             .build();

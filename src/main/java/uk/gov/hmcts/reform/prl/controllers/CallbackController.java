@@ -539,10 +539,6 @@ public class CallbackController {
             listElements.add(temp);
         });
         tetdata.put("list_items",listElements);
-        //        DynamicMultiSelectList testData = DynamicMultiSelectList
-        //            .builder()
-        //            .listItems(listElements)
-        //            .build();
         log.info(" ******* Test Data ******* : {}", tetdata);
         //Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("childOption",tetdata);
