@@ -927,7 +927,7 @@ public class ApplicationsTabService implements TabService {
             .livingSituation(String.join(", ", livingSituationEnum))
             .isThereMortgageOnProperty(home.getIsThereMortgageOnProperty());
 
-        if (home.getMortgages() != null) {
+        if (home.getMortgages() != null && home.getMortgages().getMortgageNamedAfter() != null) {
             Mortgage mortgage = home.getMortgages();
 
             List<String> mortgageNameAft = mortgage.getMortgageNamedAfter().stream()
@@ -939,8 +939,10 @@ public class ApplicationsTabService implements TabService {
                 .mortgageNamedAfter(String.join(", ", mortgageNameAft))
                 .mortgageLenderName(mortgage.getMortgageLenderName());
         }
+        log.info("Landlord object infor::: {}",home.getLandlords());
+        if (home.getLandlords() != null && home.getLandlords().getMortgageNamedAfterList() != null) {
+            log.info("Entering inside if loop");
 
-        if (home.getLandlords() != null) {
             Landlord landlord = home.getLandlords();
 
             List<String> landlordNamedAft = landlord.getMortgageNamedAfterList().stream()
