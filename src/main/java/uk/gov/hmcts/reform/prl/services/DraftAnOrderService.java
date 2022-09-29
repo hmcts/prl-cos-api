@@ -468,6 +468,7 @@ public class DraftAnOrderService {
                               .status("JUDGE_COMMENTS_ENTERED").build())
             .orderText(caseData.getPreviewDraftAnOrder())
             .judgeNotes(caseData.getMessageToCourtAdmin())
+            .adminNotes(caseData.getCourtAdminNotes())
             .build();
     }
 
