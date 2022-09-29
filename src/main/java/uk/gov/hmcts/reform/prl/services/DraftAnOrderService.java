@@ -482,6 +482,7 @@ public class DraftAnOrderService {
                               .status("Draft").build())
             .orderText(caseData.getPreviewDraftAnOrder())
             .judgeNotes(caseData.getMessageToCourtAdmin())
+            .adminNotes(caseData.getCourtAdminNotes())
             .build();
     }
 
