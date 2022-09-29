@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ import java.util.Map;
 @RequestMapping("/case-initiation")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
+@SecurityRequirement(name = "Bearer Authentication")
 public class CaseInitiationController extends AbstractCallbackController {
 
 
@@ -36,7 +39,7 @@ public class CaseInitiationController extends AbstractCallbackController {
     private final AuthTokenGenerator authTokenGenerator;
 
     @PostMapping("/submitted")
-    public void handleSubmitted(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+    public void handleSubmitted(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                 @RequestBody CallbackRequest callbackRequest) {
 
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
