@@ -513,21 +513,22 @@ public class CallbackController {
     }
 
     @PostMapping(path = "/test-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Copy fl401 case name to C100 Case name")
+    @Operation(description = "Copy fl401 case name to C100 Case name")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback processed.", response = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse testEndPointForDynamicList(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
         Map<String, List> tetdata = new HashMap<>();
         Map<String, String> items = new HashMap<>();
         items.put("code","sair");
         items.put("label","Sairam");
         tetdata.put("value",List.of(items));
         tetdata.put("list_items",List.of(items));
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("testChild",tetdata);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
