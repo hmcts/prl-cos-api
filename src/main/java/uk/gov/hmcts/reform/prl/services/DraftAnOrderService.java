@@ -467,7 +467,7 @@ public class DraftAnOrderService {
                               .dateCreated(dateTime.now())
                               .status("JUDGE_COMMENTS_ENTERED").build())
             .orderText(caseData.getPreviewDraftAnOrder())
-            .notes(caseData.getCourtAdminMessage())
+            .judgeNotes(caseData.getMessageToCourtAdmin())
             .build();
     }
 
@@ -480,7 +480,7 @@ public class DraftAnOrderService {
                               .dateCreated(dateTime.now())
                               .status("Draft").build())
             .orderText(caseData.getPreviewDraftAnOrder())
-            .notes(caseData.getCourtAdminMessage())
+            .judgeNotes(caseData.getMessageToCourtAdmin())
             .build();
     }
 
@@ -497,7 +497,11 @@ public class DraftAnOrderService {
 
     public Map<String, Object> populateSelectedOrder(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("previewDraftOrder", getDraftOrderDocument(caseData));
+        DraftOrder draftOrder = getDraftOrderDocument(caseData);
+        caseDataMap.put("previewDraftOrder", draftOrder.getOrderDocument());
+        if (draftOrder.getJudgeNotes() != null) {
+            caseDataMap.put("instructionsFromJudge", draftOrder.getJudgeNotes());
+        }
         log.info("inside populateSelectedOrder {}", caseDataMap);
         return caseDataMap;
     }
@@ -520,13 +524,13 @@ public class DraftAnOrderService {
 
     }
 
-    private Document getDraftOrderDocument(CaseData caseData) {
+    private DraftOrder getDraftOrderDocument(CaseData caseData) {
 
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
 
         log.info("inside getDraftOrderDocument selectedOrder {}", selectedOrder.getOrderDocument());
 
-        return selectedOrder.getOrderDocument();
+        return selectedOrder;
     }
 
     public DraftOrder getSelectedDraftOrderDetails(CaseData caseData) {

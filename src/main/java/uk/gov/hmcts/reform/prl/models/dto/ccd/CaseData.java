@@ -652,5 +652,6 @@ public class CaseData implements MappableObject {
     private final List<Element<DraftOrder>> draftOrderCollection;
     private Object draftOrdersDynamicList;
     private YesOrNo doYouWantCourtAdminToAddAnything;
-    private String courtAdminMessage;
+    private String messageToCourtAdmin;
+    private String courtAdminNotes;
 }

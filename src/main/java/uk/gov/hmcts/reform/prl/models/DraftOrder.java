@@ -20,7 +20,8 @@ public class DraftOrder {
     private Document orderDocument;
     private OtherDraftOrderDetails otherDetails;
     private String orderText;
-    private String notes;
+    private String judgeNotes;
+    private String adminNotes;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
