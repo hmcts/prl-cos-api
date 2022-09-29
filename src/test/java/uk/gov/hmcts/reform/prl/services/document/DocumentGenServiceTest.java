@@ -32,12 +32,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.DeleteDocumentService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
@@ -47,8 +49,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -82,6 +86,9 @@ public class DocumentGenServiceTest {
 
     @Mock
     OrganisationService organisationService;
+
+    @Mock
+    DeleteDocumentService deleteDocumentService;
 
     @InjectMocks
     DocumentGenService documentGenService;
@@ -1188,6 +1195,20 @@ public class DocumentGenServiceTest {
         documentGenService.generateSingleDocument("auth", emptyCaseData, DOCUMENT_PRIVACY_NOTICE_HINT, false);
 
         verify(dgsService, times(4)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+    }
+
+    @Test
+    public void testDeleteDocument() throws Exception {
+        //Given
+        DocumentResponse documentResponse = DocumentResponse
+                .builder()
+                .status("Success")
+                .build();
+        doNothing().when(deleteDocumentService).deleteDocument(authToken, "TEST_DOCUMENT_ID");
+        //When
+        DocumentResponse response = documentGenService.deleteDocument(authToken, "TEST_DOCUMENT_ID");
+        //Then
+        assertEquals(documentResponse, response);
     }
 }
 
