@@ -150,6 +150,26 @@ public class ManageOrdersController {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
 
+        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData.getChildren().forEach(child -> listElements.add(DynamicMultiselectListElement.builder()
+                                                                         .code(child.getId().toString())
+                                                                         .label(child.getValue().getFirstName() + " "
+                                                                                    + child.getValue().getLastName())
+                                                                         .build()));
+        }
+
+        DynamicMultiSelectList testData = DynamicMultiSelectList
+            .builder()
+            .listItems(listElements)
+            .build();
+        log.info(" ******* Test Data ******* : {}", testData);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        caseData = caseData.toBuilder()
+            .childOption(testData)
+            .build();
+
         return CallbackResponse.builder()
             .data(caseData)
             .build();
