@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +19,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @RestController
+@SecurityRequirement(name = "Bearer Authentication")
 public class CaseDocumentController {
 
     @Autowired
@@ -29,7 +32,7 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public String generateCitizenStatementDocument(@RequestHeader("Authorization")
-                                                       String authorisation,
+                                                       @Parameter(hidden = true)   String authorisation,
                                                    @RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest) throws Exception {
         return documentGenService.generateCitizenStatementDocument(authorisation, generateAndUploadDocumentRequest);
     }
