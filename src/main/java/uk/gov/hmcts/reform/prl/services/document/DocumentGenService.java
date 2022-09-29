@@ -392,6 +392,28 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
+    public Map<String, Object> generateDocumentsRespondToApplication(String authorisation, CaseData caseData) throws Exception {
+
+        Map<String, Object> updatedCaseData = new HashMap<>();
+
+        caseData = fillOrgDetails(caseData);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        log.info(
+            "Selected Language for generating the docs English => {}, Welsh => {}",
+            documentLanguage.isGenEng(),
+            documentLanguage.isGenWelsh()
+        );
+        if (documentLanguage.isGenEng()) {
+            updatedCaseData.put("isEngDocGen", Yes.toString());
+            updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DOCUMENT_C7_BLANK_HINT, false));
+        }
+        if (documentLanguage.isGenWelsh()) {
+            updatedCaseData.put("isWelshDocGen", Yes.toString());
+            updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DOCUMENT_C7_BLANK_HINT, true));
+        }
+
+        return updatedCaseData;
+    }
 
     private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh)
         throws Exception {
