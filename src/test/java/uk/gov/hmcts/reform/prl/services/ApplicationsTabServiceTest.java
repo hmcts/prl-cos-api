@@ -1141,7 +1141,8 @@ public class ApplicationsTabServiceTest {
             .build();
         CaseData caseData = CaseData.builder().home(home).build();
 
-        Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing","Test data",
+        Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                                "Test data",
             "applicantWantToStopFromRespondentDoingToChild","Being violent or threatening towards their child or children",
             "isPhoneNumberConfidential","This information is to be kept confidential", "isEmailAddressConfidential",
             "This information is to be kept confidential",
@@ -1181,11 +1182,16 @@ public class ApplicationsTabServiceTest {
             .build();
         CaseData caseData = CaseData.builder().home(home).build();
 
-        Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing","Test data",
-                                                "applicantWantToStopFromRespondentDoingToChild","Being violent or threatening towards their child or children",
-                                                "isPhoneNumberConfidential","This information is to be kept confidential", "isEmailAddressConfidential",
+        Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                                "Test data",
+                                                "applicantWantToStopFromRespondentDoingToChild",
+                                                "Being violent or threatening towards their child or children",
+                                                "isPhoneNumberConfidential",
                                                 "This information is to be kept confidential",
-                                                "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
+                                                "isEmailAddressConfidential",
+                                                "This information is to be kept confidential",
+                                                "applicantWantToStopFromRespondentDoing",
+                                                "Being violent or threatening towards them");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
         assertEquals(expected, result);
@@ -1222,11 +1228,16 @@ public class ApplicationsTabServiceTest {
             .build();
         CaseData caseData = CaseData.builder().home(home).build();
 
-        Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing","Test data",
-                                                "applicantWantToStopFromRespondentDoingToChild","Being violent or threatening towards their child or children",
-                                                "isPhoneNumberConfidential","This information is to be kept confidential", "isEmailAddressConfidential",
+        Map<String, Object> expected =   Map.of("otherReasonApplicantWantToStopFromRespondentDoing",
+                                                "Test data",
+                                                "applicantWantToStopFromRespondentDoingToChild",
+                                                "Being violent or threatening towards their child or children",
+                                                "isPhoneNumberConfidential",
                                                 "This information is to be kept confidential",
-                                                "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
+                                                "isEmailAddressConfidential",
+                                                "This information is to be kept confidential",
+                                                "applicantWantToStopFromRespondentDoing",
+                                                "Being violent or threatening towards them");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getHomeDetails(caseData);
         assertEquals(expected, result);
