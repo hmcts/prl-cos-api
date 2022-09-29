@@ -62,6 +62,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -521,15 +522,30 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-
         Map<String, List> tetdata = new HashMap<>();
         Map<String, String> items = new HashMap<>();
         items.put("code","sair");
         items.put("label","Sairam");
-        tetdata.put("value",List.of(items));
         tetdata.put("list_items",List.of(items));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("testChild",tetdata);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Map<String, String>> listElements = new ArrayList<>();
+        caseData.getChildren().forEach(child -> {
+            Map<String, String> temp = new HashMap<>();
+            temp.put("code",child.getId().toString());
+            temp.put("label",child.getValue().getFirstName() + " "
+                + child.getValue().getLastName());
+            listElements.add(temp);
+        });
+        tetdata.put("list_items",listElements);
+        //        DynamicMultiSelectList testData = DynamicMultiSelectList
+        //            .builder()
+        //            .listItems(listElements)
+        //            .build();
+        log.info(" ******* Test Data ******* : {}", tetdata);
+        //Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("childOption",tetdata);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
