@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.jackson.Jacksonized;
 
+import javax.validation.constraints.Size;
+
 @Data
 @Builder(toBuilder = true)
 @Getter
@@ -25,6 +27,7 @@ public class CourtnavAddress {
     @JsonProperty("postTown")
     private final String postTown;
     @JsonProperty("postCode")
+    @Size(max = 14)
     private final String postCode;
     @JsonProperty("county")
     private final String county;

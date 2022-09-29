@@ -939,8 +939,10 @@ public class ApplicationsTabService implements TabService {
                 .mortgageNamedAfter(String.join(", ", mortgageNameAft))
                 .mortgageLenderName(mortgage.getMortgageLenderName());
         }
-
+        log.info("Landlord object infor::: {}",home.getLandlords());
         if (home.getLandlords() != null) {
+            log.info("Entering inside if loop");
+
             Landlord landlord = home.getLandlords();
 
             List<String> landlordNamedAft = landlord.getMortgageNamedAfterList().stream()
