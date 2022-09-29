@@ -20,7 +20,8 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -34,14 +35,9 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.IntStream;
 import javax.ws.rs.core.HttpHeaders;
 
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.joining;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 
@@ -108,21 +104,27 @@ public class ManageOrdersController {
             log.info("Court name before prepopulate: {}", caseData.getCourtName());
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
+        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
         String childOption = null;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            childOption = IntStream.range(0, defaultIfNull(caseData.getChildren(), emptyList()).size())
-                .mapToObj(Integer::toString)
-                .collect(joining());
-        } else {
-            Optional<List<Element<ApplicantChild>>> applicantChildDetails = Optional.ofNullable(caseData.getApplicantChildDetails());
-            if (applicantChildDetails.isPresent()) {
-                childOption = IntStream.range(0, defaultIfNull(applicantChildDetails.get(), emptyList()).size())
-                    .mapToObj(Integer::toString)
-                    .collect(joining());
-            }
+            caseData.getChildren().stream().map(child -> {
+                listElements.add(DynamicMultiselectListElement.builder()
+                                     .code(child.getId().toString())
+                                     .label(child.getValue().getFirstName() + " " + child.getValue().getLastName())
+                                     .build());
+                return child;
+            });
         }
+
+        DynamicMultiSelectList testData = DynamicMultiSelectList
+            .builder()
+            .listItems(listElements)
+            .build();
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
         caseData = caseData.toBuilder()
-            .childOption(childOption)
+            .childOption(testData)
             .build();
         return CallbackResponse.builder()
             .data(caseData)

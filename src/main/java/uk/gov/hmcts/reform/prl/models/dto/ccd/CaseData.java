@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -43,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -562,9 +564,9 @@ public class CaseData implements MappableObject {
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
-
+    private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     @JsonProperty("childOption")
-    private final String childOption;
+    private final DynamicMultiSelectList childOption;
 
     @JsonProperty("childrenList")
     private final String childrenList;
