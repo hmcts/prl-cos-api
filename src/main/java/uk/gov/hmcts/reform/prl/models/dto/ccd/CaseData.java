@@ -565,6 +565,7 @@ public class CaseData implements MappableObject {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
     private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
+    @Builder.Default
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
 
