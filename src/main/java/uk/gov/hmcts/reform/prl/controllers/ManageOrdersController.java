@@ -106,7 +106,7 @@ public class ManageOrdersController {
         }
         List<DynamicMultiselectListElement> listElements = new ArrayList<>();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData.getChildren().stream().peek(child -> listElements.add(DynamicMultiselectListElement.builder()
+            caseData.getChildren().forEach(child -> listElements.add(DynamicMultiselectListElement.builder()
                                  .code(child.getId().toString())
                                  .label(child.getValue().getFirstName() + " " + child.getValue().getLastName())
                                  .build()));

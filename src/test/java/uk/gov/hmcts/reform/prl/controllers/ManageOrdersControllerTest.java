@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -298,7 +299,7 @@ public class ManageOrdersControllerTest {
             .parentalResponsibilityDetails("test")
             .build();
 
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        Element<Child> wrappedChildren = Element.<Child>builder().id(UUID.randomUUID()).value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
@@ -357,7 +358,7 @@ public class ManageOrdersControllerTest {
             .parentalResponsibilityDetails("test")
             .build();
 
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        Element<Child> wrappedChildren = Element.<Child>builder().id(UUID.randomUUID()).value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
