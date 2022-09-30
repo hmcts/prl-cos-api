@@ -42,8 +42,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_RESPOND_TO_APPLICATION_C7;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLANK_RESPOND_TO_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
@@ -60,7 +62,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVAC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD_C7_RESPOND_TO_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD_C7_RESPOND_TO_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
@@ -239,6 +243,12 @@ public class DocumentGenService {
     @Value("${document.templates.citizen.prl_citizen_upload_filename}")
     protected String prlCitizenUploadFileName;
 
+    @Value("${document.templates.citizen.prl_citizen_c7_blank_template}")
+    protected String prlCitizenC7BlankTemplate;
+
+    @Value("${document.templates.citizen.prl_citizen_c7_blank_filename}")
+    protected String prlCitizenC7BlankFilename;
+
     @Autowired
     private DgsService dgsService;
 
@@ -392,8 +402,8 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
-    public Map<String, Object> generateDocumentsRespondToApplication(String authorisation, CaseData caseData) throws Exception {
-
+    public Map<String, Object> generateRespondToApplicationC7Document(String authorisation, CaseData caseData) throws Exception {
+        log.info("generate Documents Respond To Application C7");
         Map<String, Object> updatedCaseData = new HashMap<>();
 
         caseData = fillOrgDetails(caseData);
@@ -405,11 +415,13 @@ public class DocumentGenService {
         );
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put("isEngDocGen", Yes.toString());
-            updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DOCUMENT_C7_BLANK_HINT, false));
+            updatedCaseData.put(DRAFT_DOCUMENT_FIELD_C7_RESPOND_TO_APPLICATION,
+                getDocument(authorisation, caseData, DOCUMENT_C7_BLANK_RESPOND_TO_APPLICATION, false));
         }
         if (documentLanguage.isGenWelsh()) {
             updatedCaseData.put("isWelshDocGen", Yes.toString());
-            updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DOCUMENT_C7_BLANK_HINT, true));
+            updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD_C7_RESPOND_TO_APPLICATION,
+                getDocument(authorisation, caseData, DOCUMENT_C7_BLANK_RESPOND_TO_APPLICATION, true));
         }
 
         return updatedCaseData;
@@ -598,6 +610,9 @@ public class DocumentGenService {
             case DOCUMENT_PRIVACY_NOTICE_HINT:
                 fileName = privacyNoticeFilename;
                 break;
+            case DOCUMENT_C7_BLANK_RESPOND_TO_APPLICATION:
+                fileName = prlCitizenC7BlankFilename;
+                break;
             default:
                 fileName = "";
         }
@@ -680,6 +695,9 @@ public class DocumentGenService {
                 break;
             case CITIZEN_HINT:
                 template = prlCitizenUploadTemplate;
+                break;
+            case CITIZEN_RESPOND_TO_APPLICATION_C7:
+                template = prlCitizenC7BlankTemplate;
                 break;
             default:
                 template = "";

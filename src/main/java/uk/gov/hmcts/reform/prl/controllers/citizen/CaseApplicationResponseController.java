@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -45,18 +46,22 @@ public class CaseApplicationResponseController {
     @Autowired
     private IdamClient idamClient;
 
+    @Autowired
+    CaseService caseService;
 
     Integer fileIndex;
 
-    @PostMapping(path = "/generate-citizen-application-response-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/generate-citizen-respond-to-application-c7document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Document generated"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
-    public ResponseEntity generateCitizenApplicationResponseDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
-                                                                     @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                                                     @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+    public ResponseEntity generateCitizenRespondToApplicationC7Document(
+          @RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+        log.info("generate Citizen Respond To Application C7 Document......");
         log.info("User roles: {} ", idamClient.getUserDetails(authorisation).getRoles());
         log.info("User details: {} ", idamClient.getUserDetails(authorisation));
         fileIndex = 0;
@@ -66,12 +71,16 @@ public class CaseApplicationResponseController {
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataMap = tempCaseData.toMap(objectMapper);
 
-        if (C100_CASE_TYPE.equalsIgnoreCase(tempCaseData.getCaseTypeOfApplication())) {
-            caseDataMap.putAll(documentGenService.generateDocumentsRespondToApplication(authorisation, tempCaseData));
-        }
+        Map<String, Object> caseDataMapTemp = documentGenService.generateRespondToApplicationC7Document(
+            authorisation,
+            tempCaseData
+        );
 
+        if (C100_CASE_TYPE.equalsIgnoreCase(tempCaseData.getCaseTypeOfApplication())) {
+            caseDataMap.putAll(caseDataMapTemp);
+        }
+        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         if (caseDataMap.get(DRAFT_DOCUMENT_FIELD) != null || caseDataMap.get(DRAFT_DOCUMENT_WELSH_FIELD) != null) {
-            // make a call to the dgs service to generate the pdf document //
             return ResponseEntity.status(HttpStatus.OK).body("Generate PDF Successful");
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.ordinal()).body("Generate PDF Failed");
