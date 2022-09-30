@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,8 @@ import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
 import java.io.IOException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATION;
 
 @Slf4j
 @RestController
@@ -42,8 +45,8 @@ public class CafCassController extends AbstractCallbackController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public ResponseEntity searcCasesByDates(
-        @RequestHeader("authorisation") String authorisation,
-        @RequestHeader("serviceAuthorisation") String serviceAuthorisation,
+        @RequestHeader(AUTHORIZATION) String authorisation,
+        @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
         @RequestParam(name = "start_date") String startDate,  @RequestParam(name = "end_date") String endDate
     ) throws IOException {
 
