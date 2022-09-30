@@ -436,7 +436,8 @@ public class DraftAnOrderService {
         log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
         log.info(" ************solicitorOrJudgeDraftOrderDoc {}", caseData.getSolicitorOrJudgeDraftOrderDoc());
         log.info(" ************ casedata {}", caseData);
-        List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection = caseData.getDraftOrderCollection();
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if (draftOrder.getOrderDocument().getDocumentFileName()

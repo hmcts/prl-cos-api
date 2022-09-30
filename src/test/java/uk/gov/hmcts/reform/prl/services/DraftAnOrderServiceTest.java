@@ -88,10 +88,12 @@ public class DraftAnOrderServiceTest {
                                                    .orderTypeId("")
                                                    .orderDocument(document)
                                                    .build()));
-        dynamicList =  ElementUtils.asDynamicList(draftOrderCollection, null, DraftOrder::getLabelForOrdersDynamicList);
+        dynamicList = ElementUtils.asDynamicList(draftOrderCollection, null, DraftOrder::getLabelForOrdersDynamicList);
         address = Address.builder().build();
         Element<DraftOrder> draftOrderElement = element(DraftOrder.builder()
                                                             .orderText("test")
+                                                            .adminNotes("adminNotes")
+                                                            .judgeNotes("judgeNotes")
                                                             .orderDocument(document)
                                                             .otherDetails(OtherDraftOrderDetails.builder()
                                                                               .dateCreated(LocalDateTime.now())
@@ -110,7 +112,11 @@ public class DraftAnOrderServiceTest {
         UUID selectedValue = UUID.randomUUID();
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
-        when(dgsService.generateDocument(Mockito.anyString(),Mockito.any(CaseDetails.class),Mockito.any())).thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        )).thenReturn(generatedDocumentInfo);
     }
 
     @Test
@@ -222,16 +228,16 @@ public class DraftAnOrderServiceTest {
     @Test
     public void testGenerateSolicitorDraftOrder() throws Exception {
         Document document = draftAnOrderService.generateSolicitorDraftOrder("", caseData);
-        assertEquals(document.getDocumentBinaryUrl(),generatedDocumentInfo.getBinaryUrl());
-        assertEquals(document.getDocumentUrl(),generatedDocumentInfo.getUrl());
-        assertEquals(document.getDocumentHash(),generatedDocumentInfo.getHashToken());
+        assertEquals(document.getDocumentBinaryUrl(), generatedDocumentInfo.getBinaryUrl());
+        assertEquals(document.getDocumentUrl(), generatedDocumentInfo.getUrl());
+        assertEquals(document.getDocumentHash(), generatedDocumentInfo.getHashToken());
     }
 
     @Test
     public void testGenerateJudgeDraftOrder() throws Exception {
         Document document = draftAnOrderService.generateJudgeDraftOrder("", caseData);
-        assertEquals(document.getDocumentBinaryUrl(),generatedDocumentInfo.getBinaryUrl());
-        assertEquals(document.getDocumentUrl(),generatedDocumentInfo.getUrl());
-        assertEquals(document.getDocumentHash(),generatedDocumentInfo.getHashToken());
+        assertEquals(document.getDocumentBinaryUrl(), generatedDocumentInfo.getBinaryUrl());
+        assertEquals(document.getDocumentUrl(), generatedDocumentInfo.getUrl());
+        assertEquals(document.getDocumentHash(), generatedDocumentInfo.getHashToken());
     }
 }

@@ -66,26 +66,6 @@ public class EditAndApproveDraftOrderController {
         }
     }
 
-
-    @PostMapping(path = "/admin-populate-draft-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Admin populate draft order details")
-    public AboutToStartOrSubmitCallbackResponse populateAdminDraftOrderDetails(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        if (caseData.getDraftOrderCollection() != null
-            && !caseData.getDraftOrderCollection().isEmpty()) {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.populateSelectedOrder(
-                    caseData)).build();
-        } else {
-            return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
-        }
-    }
-
     @PostMapping(path = "judge-edit-approve/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate draft order collection")
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
