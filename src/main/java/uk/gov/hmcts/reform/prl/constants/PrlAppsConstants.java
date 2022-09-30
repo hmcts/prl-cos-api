@@ -46,6 +46,11 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_FIELD_FINAL = "finalDocument";
     public static final String DRAFT_DOCUMENT_FIELD = "draftOrderDoc";
     public static final String DRAFT_DOCUMENT_WELSH_FIELD = "draftOrderDocWelsh";
+
+    public static final String DRAFT_DOCUMENT_FIELD_C7_RESPOND_TO_APPLICATION = "draftOrderDocC7RespondToApplication";
+
+    public static final String DRAFT_DOCUMENT_WELSH_FIELD_C7_RESPOND_TO_APPLICATION = "draftOrderDocWelshC7RespondToApplication";
+
     public static final String COURT_NAME_FIELD = "courtName";
     public static final String COURT_ID_FIELD = "courtId";
     public static final String COURT_EMAIL_ADDRESS_FIELD = "courtEmailAddress";
@@ -96,6 +101,7 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_C1A_BLANK_HINT = "DOCUMENT_C1A_BLANK";
     public static final String DOCUMENT_PRIVACY_NOTICE_HINT = "PRIVACY_NOTICE";
 
+    public static final String DOCUMENT_C7_BLANK_RESPOND_TO_APPLICATION = "DOCUMENT_C7_BLANK_RESPOND_TO_APPLICATION";
     public static final String TEMPLATE = "template";
     public static final String FILE_NAME = "fileName";
 
@@ -121,6 +127,8 @@ public class PrlAppsConstants {
     public static final String CITIZEN_UPLOADED_DOCUMENT = "citizenUploadedDocument";
 
     public static final String CITIZEN_HINT = "CITIZEN";
+
+    public static final String CITIZEN_RESPOND_TO_APPLICATION_C7 = "CITIZEN_RESPOND_TO_APPLICATION_C7";
 
     public static final String  YOUR_POSITION_STATEMENTS = "Your position statements";
     public static final String  YOUR_WITNESS_STATEMENTS = "Your witness statements";
