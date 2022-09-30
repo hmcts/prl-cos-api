@@ -32,9 +32,9 @@ public class CafcassDocumentManagementController {
             @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    public ResponseEntity<Resource> downloadDocument( @RequestHeader(AUTHORIZATION) String authorisation,
-                                                      @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
-                                                      @PathVariable UUID documentId) {
+    public ResponseEntity<Resource> downloadDocument(@RequestHeader(AUTHORIZATION) String authorisation,
+                                                     @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
+                                                     @PathVariable UUID documentId) {
 
         return cafcassCdamService.getDocument(authorisation, serviceAuthorisation, documentId);
     }
