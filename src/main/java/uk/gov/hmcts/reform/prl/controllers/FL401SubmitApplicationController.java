@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,22 +40,22 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@SecurityRequirement(name = "Bearer Authentication")
 public class FL401SubmitApplicationController {
 
     @Autowired
@@ -91,8 +93,8 @@ public class FL401SubmitApplicationController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Application Submitted."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public CallbackResponse fl401SubmitApplicationValidation(@RequestHeader("Authorization")
-                                                                 String authorisation,
+    public CallbackResponse fl401SubmitApplicationValidation(@RequestHeader("Authorization") @Parameter(hidden = true)
+                                                                     String authorisation,
                                                              @RequestBody CallbackRequest callbackRequest) {
 
         List<String> errorList = new ArrayList<>();
@@ -114,7 +116,7 @@ public class FL401SubmitApplicationController {
         @ApiResponse(responseCode = "200", description = "Application Submitted."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse fl401GenerateDocumentSubmitApplication(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true)  String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -161,10 +163,9 @@ public class FL401SubmitApplicationController {
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        caseDataUpdated.put(
-            DATE_AND_TIME_SUBMITTED_FIELD,
-            DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm:ssa", Locale.UK).format(zonedDateTime).toUpperCase());
+
         caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
+        caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
 
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
 
@@ -179,7 +180,7 @@ public class FL401SubmitApplicationController {
         @ApiResponse(responseCode = "200", description = "Application Submitted."),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public CallbackResponse fl401SendApplicationNotification(@RequestHeader("Authorization")
-                                                                     String authorisation,
+                                                                 @Parameter(hidden = true)  String authorisation,
                                                                    @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
