@@ -19,4 +19,9 @@
       snakeyaml_project:snakeyaml ]]></notes>
         <cve>CVE-2022-25857</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+      snakeyaml_project:snakeyaml ]]></notes>
+        <cve>CVE-2022-38752</cve>
+    </suppress>
 </suppressions>
