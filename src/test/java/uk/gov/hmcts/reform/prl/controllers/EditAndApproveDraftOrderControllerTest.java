@@ -142,4 +142,31 @@ public class EditAndApproveDraftOrderControllerTest {
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("draftOrderCollection"));
     }
 
+
+    @Test
+    public void testPopulateJudgeOrAdminDraftOrder() {
+        when(draftAnOrderService.populateSelectedOrderText((Mockito.any(CaseData.class)))).thenReturn(Map.of(
+            "previewDraftAnOrder",
+            "xyz"
+        ));
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = editAndApproveDraftOrderController
+            .populateJudgeOrAdminDraftOrder("Bearer Test", callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewDraftAnOrder"));
+    }
+
+    @Test
+    public void testGenerateAdminJudgeDraftOrder() throws Exception {
+        when(draftAnOrderService.generateJudgeDraftOrder(
+            (Mockito.any(String.class)),
+            (Mockito.any(CaseData.class))
+        )).thenReturn(
+            document
+        );
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = editAndApproveDraftOrderController
+            .generateAdminJudgeDraftOrder("Bearer Test", callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("solicitorOrJudgeDraftOrderDoc"));
+    }
+
 }

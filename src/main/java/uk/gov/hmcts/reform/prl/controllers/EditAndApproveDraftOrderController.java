@@ -84,19 +84,9 @@ public class EditAndApproveDraftOrderController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/remove-temp-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Remove dynamic list from the caseData")
-    public AboutToStartOrSubmitCallbackResponse removeTempFields(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) {
-        callbackRequest.getCaseDetails().getData().remove("draftOrdersDynamicList");
-        return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
-    }
-
-
     @PostMapping(path = "/judge-or-admin-populate-draft-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Remove dynamic list from the caseData")
-    public AboutToStartOrSubmitCallbackResponse populateJudgeDraftOrder(
+    public AboutToStartOrSubmitCallbackResponse populateJudgeOrAdminDraftOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = objectMapper.convertValue(
@@ -112,7 +102,7 @@ public class EditAndApproveDraftOrderController {
 
     @PostMapping(path = "/judge-or-admin-generate-draft-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Remove dynamic list from the caseData")
-    public AboutToStartOrSubmitCallbackResponse generateJudgeDraftOrder(
+    public AboutToStartOrSubmitCallbackResponse generateAdminJudgeDraftOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = objectMapper.convertValue(
