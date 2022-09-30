@@ -79,6 +79,7 @@ public class CafCassControllerFunctionalTest {
         Mockito.when(postcodeLookupService.isValidNationalPostCode(anyString(), anyString())).thenReturn(true);
         Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedSearchResult);
 
+
         MvcResult mvcResult = mockMvc.perform(get(SEARCH_CASE_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
