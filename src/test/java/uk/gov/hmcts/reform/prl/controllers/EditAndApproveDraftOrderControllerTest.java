@@ -104,13 +104,6 @@ public class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void testDraftOrderDropdownWhenNoDraftOrders() {
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = editAndApproveDraftOrderController
-            .generateDraftOrderDropDown("Bearer Test", callbackRequest);
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
-    }
-
-    @Test
     public void testDraftOrderDropDownWhenOrdersArePresent() {
 
         when(draftAnOrderService.getDraftOrderDynamicList((Mockito.any(List.class)))).thenReturn(Map.of(
