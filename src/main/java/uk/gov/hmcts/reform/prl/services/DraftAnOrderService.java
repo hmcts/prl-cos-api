@@ -474,7 +474,7 @@ public class DraftAnOrderService {
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData) {
         return DraftOrder.builder().orderType(caseData.getSelectedOrder())
-            .orderTypeId(caseData.getCreateSelectOrderOptions().name())
+            .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
             .orderDocument(caseData.getSolicitorOrJudgeDraftOrderDoc())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
