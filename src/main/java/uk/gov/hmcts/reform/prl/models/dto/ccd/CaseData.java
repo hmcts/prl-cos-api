@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -566,7 +567,7 @@ public class CaseData implements MappableObject {
     private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     @Builder.Default
     @JsonProperty("childOption")
-    private final Map<String,List<Map<String,String>>> childOption;
+    private final DynamicMultiSelectList childOption;
 
     @JsonProperty("childrenList")
     private final String childrenList;
