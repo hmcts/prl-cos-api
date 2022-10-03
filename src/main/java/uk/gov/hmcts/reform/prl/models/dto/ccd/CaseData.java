@@ -566,7 +566,7 @@ public class CaseData implements MappableObject {
     private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     @Builder.Default
     @JsonProperty("childOption")
-    private final Map<String,List> childOption;
+    private final Map<String,List<Map<String,String>>> childOption;
 
     @JsonProperty("childrenList")
     private final String childrenList;
