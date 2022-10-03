@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.cafcaas;
+package uk.gov.hmcts.reform.prl.controllers.cafcass;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
