@@ -328,6 +328,8 @@ document:
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf
+      prl_citizen_c7_blank_template: C7-Draft-Document.docx
+      prl_citizen_c7_blank_filename: Citizen_Respond_To_Application.pdf
 
 southampton:
   court:
