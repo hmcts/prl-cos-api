@@ -523,7 +523,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        Map<String, List> tetdata = new HashMap<>();
+        Map<String, List<Map<String,String>>> tetdata = new HashMap<>();
         //Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Map<String, String>> listElements = new ArrayList<>();
