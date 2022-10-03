@@ -8,7 +8,6 @@ import lombok.Getter;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 @Data
 @Getter
