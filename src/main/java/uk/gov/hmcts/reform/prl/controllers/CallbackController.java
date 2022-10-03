@@ -524,12 +524,7 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, List> tetdata = new HashMap<>();
-        Map<String, String> items = new HashMap<>();
-        items.put("code","sair");
-        items.put("label","Sairam");
-        tetdata.put("list_items",List.of(items));
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("testChild",tetdata);
+        //Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Map<String, String>> listElements = new ArrayList<>();
         caseData.getChildren().forEach(child -> {
@@ -542,7 +537,7 @@ public class CallbackController {
         tetdata.put("list_items",listElements);
         log.info(" ******* Test Data ******* : {}", tetdata);
         //Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("childOption",tetdata);
+        //caseDataUpdated.put("childOption",tetdata);
         caseData = caseData.toBuilder().childOption(tetdata).build();
         return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder().data(caseData).build();
         //return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
