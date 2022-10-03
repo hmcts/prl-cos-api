@@ -519,7 +519,7 @@ public class CallbackController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse testEndPointForDynamicList(
+    public uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse testEndPointForDynamicList(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
@@ -543,7 +543,9 @@ public class CallbackController {
         log.info(" ******* Test Data ******* : {}", tetdata);
         //Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("childOption",tetdata);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        caseData = caseData.toBuilder().childOption(tetdata).build();
+        return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder().data(caseData).build();
+        //return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/test-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

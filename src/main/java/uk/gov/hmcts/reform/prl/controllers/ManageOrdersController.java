@@ -134,10 +134,7 @@ public class ManageOrdersController {
     public CallbackResponse prepopulateFL401CaseDetails(
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
