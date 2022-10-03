@@ -90,7 +90,7 @@ public class ServiceOfApplicationEmailService {
                 String email = element.getValue().toString();
                 emailService.send(
                     email,
-                    EmailTemplateNames.RESPONDENT_SOLICITOR,
+                    EmailTemplateNames.LOCAL_AUTHORITY,
                     buildLocalAuthorityEmail(caseDetails),
                     LanguagePreference.english
                 );
