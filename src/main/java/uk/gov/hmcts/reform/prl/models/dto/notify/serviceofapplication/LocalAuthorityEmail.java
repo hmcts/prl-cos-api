@@ -26,10 +26,7 @@ public class LocalAuthorityEmail extends EmailTemplateVars {
     public LocalAuthorityEmail(String caseReference,
                                String caseName,
                                LocalDate issueDate,
-                               String solicitorName,
-                               String respondentName,
-                               String caseLink,
-                               Map<String, Object> privacyNoticeLink) {
+                               String caseLink) {
 
         super(caseReference);
         this.caseName = caseName;
