@@ -162,6 +162,23 @@ public class ManageOrdersController {
         //        log.info(" ******* Test Data ******* : {}", testData);
         //        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
+        return CallbackResponse.builder()
+            .data(caseData)
+            .build();
+    }
+
+    @PostMapping(path = "/populate-header", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to populate the header")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Populated Headers"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse populateHeader(
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
         Map<String, List> testdata = new HashMap<>();
         List<Map<String, String>> listElements = new ArrayList<>();
 
@@ -182,28 +199,11 @@ public class ManageOrdersController {
             });
         }
         testdata.put("list_items",listElements);
-        caseData = caseData.toBuilder()
-            .childOption(testdata)
-            .build();
-        return CallbackResponse.builder()
-            .data(caseData)
-            .build();
-    }
-
-    @PostMapping(path = "/populate-header", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to populate the header")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Populated Headers"),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public AboutToStartOrSubmitCallbackResponse populateHeader(
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
+        log.info("**Test Data** {}",testdata);
+        Map<String, Object> caseDataUpdated =  manageOrderService.populateHeader(caseData);
+        caseDataUpdated.put("childOption", testdata);
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(manageOrderService.populateHeader(caseData))
+            .data(caseDataUpdated)
             .build();
     }
 
