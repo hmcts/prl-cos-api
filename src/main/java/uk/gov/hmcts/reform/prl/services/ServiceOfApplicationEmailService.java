@@ -84,7 +84,10 @@ public class ServiceOfApplicationEmailService {
 
         }
 
-        //
+        sendEmailToLocalAuthority(caseDetails, caseData);
+    }
+
+    private void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) throws Exception {
         if (caseData.getConfirmRecipients() != null) {
             for (Element element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
                 String email = element.getValue().toString();
@@ -125,6 +128,8 @@ public class ServiceOfApplicationEmailService {
                 LanguagePreference.english
             );
         }
+
+        sendEmailToLocalAuthority(caseDetails, caseData);
     }
 
     private EmailTemplateVars buildApplicantSolicitorEmail(CaseDetails caseDetails, String solicitorName)
