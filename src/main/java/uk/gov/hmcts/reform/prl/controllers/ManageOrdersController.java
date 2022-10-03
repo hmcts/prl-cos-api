@@ -188,7 +188,9 @@ public class ManageOrdersController {
                 temp.put("code",child.getId().toString());
                 temp.put("label",child.getValue().getFirstName() + " "
                     + child.getValue().getLastName());
-                listElements.add(temp);
+                if (YesOrNo.No.equals(child.getValue().getIsFinalOrderIssued())) {
+                    listElements.add(temp);
+                }
             });
         } else if (caseData.getApplicantChildDetails() != null) {
             caseData.getApplicantChildDetails().forEach(child -> {
