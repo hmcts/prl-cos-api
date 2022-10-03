@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.cafcass;
+package uk.gov.hmcts.reform.prl.controllers.cafcaas;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,6 +19,9 @@ import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCdamService;
 
 import java.util.UUID;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATION;
+
 @Slf4j
 @RestController
 @RequestMapping("/cases")
@@ -37,8 +40,8 @@ public class CafcassDocumentManagementController {
             @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    public ResponseEntity<Resource> downloadDocument(@RequestHeader("authorisation") String authorisation,
-                                                     @RequestHeader("serviceAuthorisation") String serviceAuthorisation,
+    public ResponseEntity<Resource> downloadDocument(@RequestHeader(AUTHORIZATION) String authorisation,
+                                                     @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
                                                      @PathVariable UUID documentId) {
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorisation))) {
