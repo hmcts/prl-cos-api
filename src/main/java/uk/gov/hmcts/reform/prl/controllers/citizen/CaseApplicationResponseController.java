@@ -62,8 +62,8 @@ public class CaseApplicationResponseController {
          @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
          @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
         log.info("generate Citizen Respond To Application C7 Document......");
-        log.info("User roles: {} ", idamClient.getUserDetails(authorisation).getRoles());
-        log.info("User details: {} ", idamClient.getUserDetails(authorisation));
+        log.info("generateCitizenRespondToApplicationC7Document User roles: {} ", idamClient.getUserDetails(authorisation).getRoles());
+        log.info("generateCitizenRespondToApplicationC7Document User details: {} ", idamClient.getUserDetails(authorisation));
         fileIndex = 0;
         String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
@@ -78,6 +78,7 @@ public class CaseApplicationResponseController {
 
         if (C100_CASE_TYPE.equalsIgnoreCase(tempCaseData.getCaseTypeOfApplication())) {
             caseDataMap.putAll(caseDataMapTemp);
+
         }
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         if (caseDataMap.get(DRAFT_DOCUMENT_FIELD) != null || caseDataMap.get(DRAFT_DOCUMENT_WELSH_FIELD) != null) {
