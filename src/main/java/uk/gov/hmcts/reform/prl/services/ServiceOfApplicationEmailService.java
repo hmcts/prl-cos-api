@@ -85,8 +85,8 @@ public class ServiceOfApplicationEmailService {
         }
 
         //
-        if(caseData.getConfirmRecipients() != null) {
-            for (Element element : caseData.getConfirmRecipients().getOtherEmailAddressList()){
+        if (caseData.getConfirmRecipients() != null) {
+            for (Element element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
                 String email = element.getValue().toString();
                 emailService.send(
                     email,
