@@ -102,6 +102,7 @@ uk:
             RESPONDENT_WITHOUT_SOLICITOR: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
             CASE_INVITE: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
             APPLICANT_SOLICITOR: 72e32651-a952-4063-8a85-5f28950fcc84
+            LOCAL_AUTHORITY: cd275fbe-7987-4b3e-bcd1-c7cf17101b77
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
