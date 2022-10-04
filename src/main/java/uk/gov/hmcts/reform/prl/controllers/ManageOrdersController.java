@@ -70,6 +70,8 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("*** populate child option {}",caseData.getChildOption());
+        log.info("*** populate child option value {}",caseData.getChildOption().getValue());
+        log.info("*** populate child option list items {}",caseData.getChildOption().getListItems());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
