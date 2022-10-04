@@ -287,6 +287,11 @@ document:
       prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
       prl_fl402_final_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
+    solicitor:
+      prl_solicitor_draft_an_order_template: FL-PRL-GOR-ENG-Solicitor-Draft-Order.docx
+      prl_solicitor_draft_an_order_filename: Draft_An_Order.pdf
+      prl_solicitor_final_order_template: FL-PRL-GOR-ENG-Solicitor-Final-Order.docx
+      prl_solicitor_final_order_filename: Final_Order.pdf
 
 southampton:
   court:

@@ -323,6 +323,11 @@ document:
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
       prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
+    solicitor:
+      prl_solicitor_draft_an_order_template: FL-PRL-GOR-ENG-Solicitor-Draft-Order.docx
+      prl_solicitor_draft_an_order_filename: Draft_An_Order.pdf
+      prl_solicitor_final_order_template: FL-PRL-GOR-ENG-Solicitor-Final-Order.docx
+      prl_solicitor_final_order_filename: Final_Order.pdf
 
 southampton:
   court:
