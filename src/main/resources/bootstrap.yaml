@@ -35,3 +35,4 @@ spring:
         prl.idam-solicitor-password: IDAM_SOLICITOR_PASSWORD
         prl.courtnav-functional-test-user: COURTNAV_USERNAME
         prl.courtnav-functional-test-pwd: COURTNAV_PASSWORD
+        bundle.api.url: BUNDLE_URL
