@@ -20,9 +20,12 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
@@ -31,7 +34,6 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
@@ -69,9 +71,9 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("*** populate child option {}",caseData.getChildOption());
-        log.info("*** populate child option value {}",caseData.getChildOption().getValue());
-        log.info("*** populate child option list items {}",caseData.getChildOption().getListItems());
+        log.info("*** populate child option {}",caseData.getManageOrders().getChildOption());
+        log.info("*** populate child option value {}",caseData.getManageOrders().getChildOption().getValue());
+        log.info("*** populate child option list items {}",caseData.getManageOrders().getChildOption().getListItems());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
@@ -130,6 +132,29 @@ public class ManageOrdersController {
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
+        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
+        if (caseData.getChildren() != null) {
+            caseData.getChildren().forEach(child -> {
+                if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
+                    listElements.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
+                                         .label(child.getValue().getFirstName() + " "
+                                                    + child.getValue().getLastName()).build());
+                }
+            });
+        } else if (caseData.getApplicantChildDetails() != null) {
+            caseData.getApplicantChildDetails().forEach(child -> {
+                listElements.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
+                                     .label(child.getValue().getFullName()).build());
+            });
+        }
+        ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
+            .childOption(DynamicMultiSelectList.builder()
+                             .listItems(listElements).build()).build();
+
+        log.info("**Manage orders with child list {}",manageOrders);
+        caseData = caseData.toBuilder()
+            .manageOrders(manageOrders)
+            .build();
         return CallbackResponse.builder()
             .data(caseData)
             .build();
@@ -147,31 +172,7 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        Map<String, List> testdata = new HashMap<>();
-        List<Map<String, String>> listElements = new ArrayList<>();
-
-        if (caseData.getChildren() != null) {
-            caseData.getChildren().forEach(child -> {
-                Map<String, String> temp = new HashMap<>();
-                temp.put("code",child.getId().toString());
-                temp.put("label",child.getValue().getFirstName() + " "
-                    + child.getValue().getLastName());
-                if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
-                    listElements.add(temp);
-                }
-            });
-        } else if (caseData.getApplicantChildDetails() != null) {
-            caseData.getApplicantChildDetails().forEach(child -> {
-                Map<String, String> temp = new HashMap<>();
-                temp.put("code",child.getId().toString());
-                temp.put("label",child.getValue().getFullName());
-                listElements.add(temp);
-            });
-        }
-        testdata.put("list_items",listElements);
-        log.info("**Test Data** {}",testdata);
         Map<String, Object> caseDataUpdated =  manageOrderService.populateHeader(caseData);
-        caseDataUpdated.put("childOption", testdata);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
@@ -202,7 +203,7 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        log.info("*** about to submit child option : {}", callbackRequest.getCaseDetails().getData().get("childOption"));
+        log.info("*** about to submit child option : {}", callbackRequest.getCaseDetails().getData());
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
@@ -227,14 +228,14 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("******* Child Option : {}",caseData.getChildOption());
+        log.info("******* Child Option : {}",caseData.getManageOrders().getChildOption());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
-            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
+            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

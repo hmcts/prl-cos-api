@@ -498,6 +498,9 @@ public class ManageOrderService {
             orderCollection = new ArrayList<>();
             orderCollection.add(orderDetails);
         }
+        //        if (caseData.getChildOption() != null) {
+        //            caseData.getChildOption()
+        //        }
         orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
         return Map.of("orderCollection", orderCollection);
     }
