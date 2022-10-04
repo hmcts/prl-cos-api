@@ -84,7 +84,7 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getAppointmentOfGuardian());
         }
-
+        log.info("*** populate child option casedataupdated {}",caseDataUpdated.get("childOption"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
@@ -106,24 +106,6 @@ public class ManageOrdersController {
             log.info("Court name before prepopulate: {}", caseData.getCourtName());
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
-        //        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
-        //        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-        //            caseData.getChildren().forEach(child -> listElements.add(DynamicMultiselectListElement.builder()
-        //                                 .code(child.getId().toString())
-        //                                 .label(child.getValue().getFirstName() + " " + child.getValue().getLastName())
-        //                                 .build()));
-        //        }
-        //
-        //        DynamicMultiSelectList testData = DynamicMultiSelectList
-        //            .builder()
-        //            .listItems(listElements)
-        //            .build();
-        //        log.info(" ******* Test Data ******* : {}", testData);
-        //        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        //
-        //        caseData = caseData.toBuilder()
-        //            .childOption(testData)
-        //            .build();
         return CallbackResponse.builder()
             .data(caseData)
             .build();
@@ -286,9 +268,6 @@ public class ManageOrdersController {
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
         }
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
-
 }
