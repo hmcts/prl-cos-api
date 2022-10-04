@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.BundleApiClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -44,14 +43,14 @@ public class BundlingService {
                 .id(Long.valueOf(callbackRequest.getCaseDetails().getCaseId())).build(),
             CaseData.class
         );
-        PreSubmitCallbackResponse<CaseData> preSubmitCallbackResponse = new PreSubmitCallbackResponse<>(callbackRequest.getCaseDetails().getCaseData());
         caseData.setBundleConfiguration(getBundleConfig(caseData.getLanguagePreferenceWelsh()));
         BundleCallbackRequest<CaseData> bundleCallback = new BundleCallbackRequest<>(callbackRequest);
-        return creaeBundle(authorisation,authTokenGenerator.generate(),bundleCallback);
+        return creaeBundle(authorisation, authTokenGenerator.generate(), bundleCallback);
     }
 
-    private PreSubmitCallbackResponse<CaseData> creaeBundle(String authorization,String serviceAuthorization, BundleCallbackRequest<CaseData> callbackRequest) {
-        return bundleApiClient.createBundleServiceRequest(authorization,serviceAuthorization,callbackRequest);
+    private PreSubmitCallbackResponse<CaseData> creaeBundle(String authorization, String serviceAuthorization,
+                                                            BundleCallbackRequest<CaseData> callbackRequest) throws Exception {
+        return bundleApiClient.createBundleServiceRequest(authorization, serviceAuthorization, callbackRequest);
     }
 
     private String getBundleConfig(YesOrNo welshPreference) {
