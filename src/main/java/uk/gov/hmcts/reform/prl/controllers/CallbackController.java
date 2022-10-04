@@ -557,6 +557,7 @@ public class CallbackController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("**** test child option {}",caseData.getChildOption());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
             caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
