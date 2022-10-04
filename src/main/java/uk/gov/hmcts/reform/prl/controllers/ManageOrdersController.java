@@ -235,6 +235,7 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
+        log.info("*** about to submit child option : {}", callbackRequest.getCaseDetails().getData().get("childOption"));
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
