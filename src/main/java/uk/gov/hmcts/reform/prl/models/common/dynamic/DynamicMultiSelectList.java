@@ -18,6 +18,7 @@ public class DynamicMultiSelectList {
     /**
      * The selected value for the multiselect options.
      */
+    @JsonProperty("value")
     private List<DynamicMultiselectListElement> value;
 
     /**
