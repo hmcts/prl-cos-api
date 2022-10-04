@@ -80,7 +80,7 @@ public class ManageOrdersController {
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
-            caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
+            caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getAppointmentOfGuardian());
         }
@@ -130,23 +130,6 @@ public class ManageOrdersController {
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
-
-        //        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
-        //        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-        //            caseData.getChildren().forEach(child -> listElements.add(DynamicMultiselectListElement.builder()
-        //                                                                         .code(child.getId().toString())
-        //                                                                         .label(child.getValue().getFirstName() + " "
-        //                                                                                    + child.getValue().getLastName())
-        //                                                                         .build()));
-        //        }
-        //
-        //        DynamicMultiSelectList testData = DynamicMultiSelectList
-        //            .builder()
-        //            .listItems(listElements)
-        //            .build();
-        //        log.info(" ******* Test Data ******* : {}", testData);
-        //        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
         return CallbackResponse.builder()
             .data(caseData)
             .build();
