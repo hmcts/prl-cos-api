@@ -132,6 +132,7 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Test
     public void testAboutToSubmitPrepareDraftOrderCollection() {
+        callbackRequest.setEventId("xyzevent");
         when(draftAnOrderService.updateDraftOrderCollection((Mockito.any(CaseData.class)))).thenReturn(Map.of(
             "draftOrderCollection",
             caseData1.getDraftOrderCollection()

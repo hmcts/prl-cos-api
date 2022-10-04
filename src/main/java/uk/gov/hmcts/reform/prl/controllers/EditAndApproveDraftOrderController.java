@@ -66,7 +66,7 @@ public class EditAndApproveDraftOrderController {
         }
     }
 
-    @PostMapping(path = "judge-edit-approve/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "judge-or-admin-edit-approve/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate draft order collection")
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -77,8 +77,11 @@ public class EditAndApproveDraftOrderController {
             "********caseData.getDoYouWantCourtAdminToAddAnything***** {}",
             caseData.getDoYouWantCourtAdminToAddAnything()
         );
-
-        caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
+        if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")) {
+            caseDataUpdated.putAll(draftAnOrderService.removeDraftOrderAndAddToFinalOrder(authorisation, caseData));
+        } else {
+            caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
+        }
 
         log.info("*** before returning {} ***", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();

@@ -7,12 +7,17 @@ import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -27,11 +32,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ResourceReader.readString;
 
@@ -44,8 +55,11 @@ public class DraftAnOrderService {
         + "they must notify the court in advance that they intend to attend the hearing and oppose the order.If the "
         + "respondent does not notify the court, the court may decide that the applicant or applicant’s solicitor does"
         + "not need to attend the next hearing, and at the next hearing may make an order to extend the injunction.";
-    @Value("${document.templates.common.prl_solicitor_draft_an_order_template}")
+    @Value("${document.templates.solicitor.prl_solicitor_draft_an_order_template}")
     String solicitorDraftAnOrder;
+
+    @Value("${document.templates.solicitor.prl_solicitor_final_order_template}")
+    String solicitorFinalOrder;
 
     private final DgsService dgsService;
     private final Time dateTime;
@@ -547,5 +561,142 @@ public class DraftAnOrderService {
             .findFirst()
             .orElseThrow(() -> new UnsupportedOperationException(String.format(
                 "Could not find order")));
+    }
+
+    public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData) {
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection = caseData.getDraftOrderCollection();
+        for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
+            DraftOrder draftOrder = e.getValue();
+            if (draftOrder.getOrderDocument().getDocumentFileName()
+                .equalsIgnoreCase(caseData.getSolicitorOrJudgeDraftOrderDoc().getDocumentFileName())) {
+                updatedCaseData.put("orderCollection", getFinalOrderCollection(authorisation, caseData, draftOrder));
+                draftOrderCollection.remove(
+                    draftOrderCollection.indexOf(e)
+                );
+                break;
+            }
+        }
+
+        draftOrderCollection.sort(Comparator.comparing(
+            m -> m.getValue().getOtherDetails().getDateCreated(),
+            Comparator.reverseOrder()
+        ));
+        updatedCaseData.put("draftOrderCollection", draftOrderCollection);
+        return updatedCaseData;
+
+    }
+
+    private List<Element<OrderDetails>> getFinalOrderCollection(String auth, CaseData caseData, DraftOrder draftOrder) {
+
+        List<Element<OrderDetails>> orderCollection;
+        if (caseData.getOrderCollection() != null) {
+            orderCollection = caseData.getOrderCollection();
+        } else {
+            orderCollection = new ArrayList<>();
+        }
+        orderCollection.add(convertDraftOrderToFinal(auth, caseData, draftOrder));
+        orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
+        return orderCollection;
+    }
+
+    private Element<OrderDetails> convertDraftOrderToFinal(String auth, CaseData caseData, DraftOrder draftOrder) {
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        try {
+            generatedDocumentInfo = dgsService.generateDocument(
+                auth,
+                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails
+                    .builder().caseData(caseData).build(),
+                solicitorFinalOrder
+            );
+        } catch (Exception e) {
+            log.error("Error while generating the final document");
+        }
+        log.info("*************courtAdminNotes {}", caseData.getPreviewDraftAnOrder());
+        log.info("***************draftorder {}", draftOrder);
+        log.info("*************courtAdminNotes {}", caseData.getCourtAdminNotes());
+        return element(OrderDetails.builder()
+                           .orderType(draftOrder.getOrderTypeId())
+                           .orderDocument(
+                               Document.builder().documentUrl(generatedDocumentInfo.getUrl())
+                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                   .documentHash(generatedDocumentInfo.getHashToken())
+                                   .documentFileName(draftOrder.getOrderDocument().getDocumentFileName()).build())
+                           .adminNotes(caseData.getCourtAdminNotes())
+                           .dateCreated(draftOrder.getOtherDetails().getDateCreated())
+                           .judgeNotes(draftOrder.getJudgeNotes())
+                           .otherDetails(
+                               OtherOrderDetails.builder().createdBy(draftOrder.getOtherDetails().getCreatedBy())
+                                   .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
+                                       PrlAppsConstants.D_MMMM_YYYY,
+                                       Locale.UK
+                                   )))
+                                   .orderMadeDate(draftOrder.getOtherDetails().getDateCreated().toString())
+                                   .orderRecipients(getAllRecipients(caseData)).build()).build());
+
+    }
+
+
+    private String getAllRecipients(CaseData caseData) {
+        StringBuilder recipientsList = new StringBuilder();
+        Optional<List<OrderRecipientsEnum>> appResRecipientList = ofNullable(caseData.getOrderRecipients());
+        if (appResRecipientList.isPresent() && caseData.getOrderRecipients().contains(applicantOrApplicantSolicitor)) {
+            recipientsList.append(getApplicantSolicitorDetails(caseData));
+            recipientsList.append('\n');
+        }
+        if (appResRecipientList.isPresent()
+            && caseData.getOrderRecipients().contains(respondentOrRespondentSolicitor)) {
+            recipientsList.append(getRespondentSolicitorDetails(caseData));
+            recipientsList.append('\n');
+        }
+        return recipientsList.toString();
+    }
+
+
+    private String getApplicantSolicitorDetails(CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> applicants = caseData
+                .getApplicants()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+
+            List<String> applicantSolicitorNames = applicants.stream()
+                .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
+                    ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
+                    : APPLICANT_SOLICITOR)
+                .collect(Collectors.toList());
+            return String.join("\n", applicantSolicitorNames);
+        } else {
+            PartyDetails applicantFl401 = caseData.getApplicantsFL401();
+            return applicantFl401.getRepresentativeLastName();
+        }
+    }
+
+    private String getRespondentSolicitorDetails(CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            List<PartyDetails> respondents = caseData
+                .getRespondents()
+                .stream()
+                .map(Element::getValue)
+                .filter(r -> YesNoDontKnow.yes.equals(r.getDoTheyHaveLegalRepresentation()))
+                .collect(Collectors.toList());
+            if (respondents.isEmpty()) {
+                return "";
+            }
+            List<String> respondentSolicitorNames = respondents.stream()
+                .map(party -> party.getSolicitorOrg().getOrganisationName() + RESPONDENT_SOLICITOR)
+                .collect(Collectors.toList());
+            return String.join("\n", respondentSolicitorNames);
+        } else {
+            PartyDetails respondentFl401 = caseData.getRespondentsFL401();
+            if (YesNoDontKnow.yes.equals(respondentFl401.getDoTheyHaveLegalRepresentation())) {
+                return respondentFl401.getRepresentativeFirstName()
+                    + " "
+                    + respondentFl401.getRepresentativeLastName();
+            }
+            return "";
+        }
     }
 }

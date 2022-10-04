@@ -324,11 +324,14 @@ document:
       prl_c1a_blank_filename: C1ABlankDocument.pdf
       prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
-      prl_solicitor_draft_an_order_template: FL-PRL-GOR-ENG-Solicitor-Draft-Order.docx
-      prl_solicitor_draft_an_order_filename: Draft_An_Order.pdf
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf
+    solicitor:
+      prl_solicitor_draft_an_order_template: FL-PRL-GOR-ENG-Solicitor-Draft-Order.docx
+      prl_solicitor_draft_an_order_filename: Draft_An_Order.pdf
+      prl_solicitor_final_order_template: FL-PRL-GOR-ENG-Solicitor-Final-Order.docx
+      prl_solicitor_final_order_filename: Final_Order.pdf
 
 southampton:
   court:
