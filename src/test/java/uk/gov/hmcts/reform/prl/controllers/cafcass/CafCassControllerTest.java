@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers.cafcaas;
+package uk.gov.hmcts.reform.prl.controllers.cafcass;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
