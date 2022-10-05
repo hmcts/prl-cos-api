@@ -14,16 +14,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -53,11 +54,26 @@ public class ServiceOfApplicationController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
+        //        if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
+        //            List<String> createdOrders = caseData.getOrderCollection().stream()
+        //                .map(Element::getValue).map(OrderDetails::getOrderType)
+        //                .collect(Collectors.toList());
+        //            caseDataUpdated.putAll(serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders,caseDataUpdated));
+        //        }
+        List<DynamicMultiselectListElement> listElements = new ArrayList<>();
         if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
-            List<String> createdOrders = caseData.getOrderCollection().stream()
-                .map(Element::getValue).map(OrderDetails::getOrderType)
-                .collect(Collectors.toList());
-            caseDataUpdated = serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders,caseDataUpdated);
+            caseData.getOrderCollection().forEach(order -> {
+                listElements.add(DynamicMultiselectListElement.builder()
+                                     .code(order.getValue().getOrderTypeId())
+                                     .label(order.getValue().getOrderType())
+                                     .build());
+            });
+            caseDataUpdated.put("serviceOfApplicationScreen1", OrdersToServeSA.builder()
+                .orderOptionsSoA(DynamicMultiSelectList
+                .builder().listItems(listElements).build())
+                .build());
+            log.info("***** listElements : {}", caseDataUpdated.get("serviceOfApplicationScreen1"));
+            //caseDataUpdated.putAll(serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders,caseDataUpdated));
         }
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -74,6 +90,7 @@ public class ServiceOfApplicationController {
         CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        log.info("** submit list items : {}", updatedCaseData.get("serviceOfApplicationScreen1"));
         updatedCaseData.put("respondentCaseInvites", caseData.getRespondentCaseInvites());
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);
