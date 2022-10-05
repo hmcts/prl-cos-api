@@ -2,12 +2,13 @@ package uk.gov.hmcts.reform.prl.services.cafcass;
 
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -37,11 +38,13 @@ public class CafcassCdamServiceTest {
     @InjectMocks
     private CafcassCdamService cafcassCdamService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
+        MockitoAnnotations.openMocks(this);
         uuid = randomUUID();
         authToken = "auth-token";
         s2sToken = "s2sToken";
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
     }
 
     @Test

@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 
 import java.util.UUID;
 
@@ -49,6 +50,9 @@ public class CafcassDocumentManagementControllerFunctionalTest {
     @MockBean
     CaseDocumentClient caseDocumentClient;
 
+    @MockBean
+    private AuthorisationService authorisationService;
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
@@ -59,6 +63,8 @@ public class CafcassDocumentManagementControllerFunctionalTest {
         final UUID documentId = randomUUID();
 
         final ResponseEntity<Resource> response = ResponseEntity.status(HttpStatus.OK).contentType(APPLICATION_PDF).build();
+        Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
+        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
 
         Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
                 .thenReturn(response);
@@ -78,6 +84,9 @@ public class CafcassDocumentManagementControllerFunctionalTest {
         final UUID documentId = randomUUID();
 
         final ResponseEntity<Resource> response = ResponseEntity.status(BAD_REQUEST).build();
+        Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
+        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
+
 
         Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
                 .thenReturn(response);
