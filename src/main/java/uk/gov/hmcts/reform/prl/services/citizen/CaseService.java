@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,7 +72,8 @@ public class CaseService {
 
     }
 
-    public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId, String accessCode) {
+    public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId,
+                                  String accessCode) {
 
         log.info("Inside CaseService::updateCase");
         CaseDetails caseDetails = null;
@@ -170,22 +172,24 @@ public class CaseService {
         caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
         return caseDetails
             .stream()
-            .map(caseDetailsConverter::extractCase)
+            .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
             .collect(Collectors.toList());
     }
 
-    private List<CaseData> searchCasesLinkedToCitizen(String authToken, String s2sToken, Map<String, String> searchCriteria) {
+    private List<CaseData> searchCasesLinkedToCitizen(String authToken, String s2sToken,
+                                                      Map<String, String> searchCriteria) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
         List<CaseDetails> caseDetails = new ArrayList<>();
         caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
         return caseDetails
             .stream()
-            .map(caseDetailsConverter::extractCaseData)
+            .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
             .collect(Collectors.toList());
     }
 
-    private List<CaseDetails> performSearch(String authToken, UserDetails user, Map<String, String> searchCriteria, String serviceAuthToken) {
+    private List<CaseDetails> performSearch(String authToken, UserDetails user, Map<String, String> searchCriteria,
+                                            String serviceAuthToken) {
         List<CaseDetails> result;
 
         result = coreCaseDataApi.searchForCitizen(
@@ -270,7 +274,8 @@ public class CaseService {
         }
     }
 
-    private void processUserDetailsForCase(String userId, String emailId, CaseData caseData, UUID partyId, YesOrNo isApplicant) {
+    private void processUserDetailsForCase(String userId, String emailId, CaseData caseData, UUID partyId,
+                                           YesOrNo isApplicant) {
         //Assumption is for C100 case PartyDetails will be part of list
         // and will always contain the partyId
         // whereas FL401 will have only one party details without any partyId
