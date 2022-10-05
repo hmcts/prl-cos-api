@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -65,14 +64,14 @@ public class ServiceOfApplicationController {
             caseData.getOrderCollection().forEach(order -> {
                 listElements.add(DynamicMultiselectListElement.builder()
                                      .code(order.getValue().getOrderTypeId())
-                                     .label(order.getValue().getOrderType())
+                                     .label(order.getValue().getLabelForDynamicList())
                                      .build());
             });
-            caseDataUpdated.put("serviceOfApplicationScreen1", OrdersToServeSA.builder()
-                .orderOptionsSoA(DynamicMultiSelectList
-                .builder().listItems(listElements).build())
-                .build());
+            caseDataUpdated.put("serviceOfApplicationScreen1", DynamicMultiSelectList
+                .builder().listItems(listElements).build());
+
             log.info("***** listElements : {}", caseDataUpdated.get("serviceOfApplicationScreen1"));
+            log.info("***** listElements : {}", caseDataUpdated);
             //caseDataUpdated.putAll(serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders,caseDataUpdated));
         }
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
