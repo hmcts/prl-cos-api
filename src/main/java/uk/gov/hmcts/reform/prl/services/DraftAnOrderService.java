@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -698,5 +699,34 @@ public class DraftAnOrderService {
             }
             return "";
         }
+    }
+
+    public CaseData populateCustomFields(CaseData caseData) {
+
+        FL404 orderData = FL404.builder()
+            .fl404bCaseNumber(String.valueOf(caseData.getId()))
+            .fl404bCourtName(caseData.getCourtName())
+            .fl404bApplicantName(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
+                                               caseData.getApplicantsFL401().getLastName()
+            ))
+            .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT, caseData.getRespondentsFL401().getFirstName(),
+                                                caseData.getRespondentsFL401().getLastName()
+            ))
+            .build();
+
+        log.info("FL404b court name: {}", orderData.getFl404bCourtName());
+
+        if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+            orderData = orderData.toBuilder().fl404bRespondentAddress(caseData.getRespondentsFL401()
+                                                                          .getAddress()).build();
+        }
+        if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+            orderData = orderData.toBuilder().fl404bRespondentDob(caseData.getRespondentsFL401()
+                                                                      .getDateOfBirth()).build();
+        }
+        return caseData.toBuilder().manageOrders(ManageOrders.builder()
+                                                     .fl404CustomFields(orderData)
+                                                     .build())
+            .selectedOrder(caseData.getCreateSelectOrderOptions().getDisplayedValue()).build();
     }
 }
