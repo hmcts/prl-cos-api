@@ -52,27 +52,19 @@ public class ServiceOfApplicationController {
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        //        if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
-        //            List<String> createdOrders = caseData.getOrderCollection().stream()
-        //                .map(Element::getValue).map(OrderDetails::getOrderType)
-        //                .collect(Collectors.toList());
-        //            caseDataUpdated.putAll(serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders,caseDataUpdated));
-        //        }
         List<DynamicMultiselectListElement> listElements = new ArrayList<>();
         if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
-            caseData.getOrderCollection().forEach(order -> {
+            caseData.getOrderCollection().forEach(order ->
                 listElements.add(DynamicMultiselectListElement.builder()
                                      .code(order.getValue().getOrderTypeId())
                                      .label(order.getValue().getLabelForDynamicList())
-                                     .build());
-            });
+                                     .build())
+            );
             caseDataUpdated.put("serviceOfApplicationScreen1", DynamicMultiSelectList
                 .builder().listItems(listElements).build());
 
             log.info("***** listElements : {}", caseDataUpdated.get("serviceOfApplicationScreen1"));
             log.info("***** listElements : {}", caseDataUpdated);
-            //caseDataUpdated.putAll(serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders,caseDataUpdated));
         }
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
