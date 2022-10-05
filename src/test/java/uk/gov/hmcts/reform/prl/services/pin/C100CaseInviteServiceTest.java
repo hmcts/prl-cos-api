@@ -66,6 +66,7 @@ public class C100CaseInviteServiceTest {
 
         caseDataWithRespondentsAndEmailsNoRepresentation = CaseData.builder()
             .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
             .respondents(respondentsWithEmailsNoRepresentation).build();
 
         PartyDetails respondentTwoWithEmailAndRepresentation = PartyDetails.builder()
@@ -82,6 +83,7 @@ public class C100CaseInviteServiceTest {
 
         caseDataWithRespondentsAndEmailsOnePartyNoRepresentation = CaseData.builder()
             .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.Yes).build())))
             .respondents(respondentsWithEmailsOneNoRepresentation).build();
 
         PartyDetails respondentOneNoEmail = PartyDetails.builder()
@@ -103,6 +105,7 @@ public class C100CaseInviteServiceTest {
 
         getCaseDataWithRespondentsNoEmails = CaseData.builder()
             .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
             .respondents(respondentsNoEmailsNoRepresentation).build();
 
         PartyDetails respondentOneWithEmailAndRepresentation = PartyDetails.builder()
@@ -126,6 +129,7 @@ public class C100CaseInviteServiceTest {
 
         caseDataWithRespondentsAllWithRepresentation = CaseData.builder()
             .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
             .respondents(respondentsWithEmailsAndRepresentation).build();
 
 
@@ -180,6 +184,4 @@ public class C100CaseInviteServiceTest {
             .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAllWithRepresentation);
         assertTrue(actualCaseData.getCaseInvites().isEmpty());
     }
-
-
 }

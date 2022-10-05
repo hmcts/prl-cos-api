@@ -9,6 +9,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PrlAppsConstants {
     public static final String CITIZEN_PRL_CREATE_EVENT = "citizenCreate";
+
     public static final String JURISDICTION = "PRIVATELAW";
     public static final String CASE_TYPE = "PRLAPPS";
 
@@ -53,7 +54,7 @@ public class PrlAppsConstants {
     public static final String FINAL_DOCUMENT_FIELD = "finalDocument";
     public static final String ISSUE_DATE_FIELD = "issueDate";
     public static final String DATE_SUBMITTED_FIELD = "dateSubmitted";
-    public static final String DATE_AND_TIME_SUBMITTED_FIELD = "dateSubmittedAndTime";
+    public static final String CASE_DATE_AND_TIME_SUBMITTED_FIELD = "caseSubmittedTimeStamp";
     public static final String STATE_FIELD = "state";
 
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
@@ -138,5 +139,17 @@ public class PrlAppsConstants {
     public static final String POLICE_REPORTS = "Police reports";
     public static final String OTHER_DOCUMENTS = "Other documents";
 
+    public static final String CASE_ID = "caseId";
+    public static final String DOCUMENT_TYPE = "documentType";
+    public static final String PARTY_NAME = "partyName";
+    public static final String DOCUMENT_ID = "documentId";
+    public static final String SUBMITTED_PDF = "_submitted.pdf";
+    public static final String PARENT_DOCUMENT_TYPE = "parentDocumentType";
+    public static final String PARTY_ID = "partyId";
+    public static final String IS_APPLICANT = "isApplicant";
+    public static final String DOCUMENT_REQUEST = "documentRequestedByCourt";
+
+    public static final String CITIZEN_UPLOAD_DOC_DATE_FORMAT = "dd-MMM-yyyy";
     public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
+
 }

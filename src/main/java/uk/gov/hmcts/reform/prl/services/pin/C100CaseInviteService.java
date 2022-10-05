@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -26,8 +27,8 @@ public class C100CaseInviteService implements CaseInviteService {
     @Autowired
     private LaunchDarklyClient launchDarklyClient;
 
-    private CaseInvite generateRespondentCaseInvite(Element<PartyDetails> partyDetails) {
-        return new CaseInvite().generateAccessCode(partyDetails.getValue().getEmail(), partyDetails.getId());
+    private CaseInvite generateCaseInvite(Element<PartyDetails> partyDetails) {
+        return new CaseInvite().generateAccessCode(partyDetails.getValue().getEmail(), partyDetails.getId(), YesOrNo.No);
     }
 
     private void sendCaseInvite(CaseInvite caseInvite, PartyDetails partyDetails, CaseData caseData) {
@@ -42,7 +43,7 @@ public class C100CaseInviteService implements CaseInviteService {
 
         for (Element<PartyDetails> respondent : caseData.getRespondents()) {
             if (!respondentHasLegalRepresentation(respondent.getValue()) && Yes.equals(respondent.getValue().getCanYouProvideEmailAddress())) {
-                CaseInvite caseInvite = generateRespondentCaseInvite(respondent);
+                CaseInvite caseInvite = generateCaseInvite(respondent);
                 caseInvites.add(element(caseInvite));
                 sendCaseInvite(caseInvite, respondent.getValue(), caseData);
             }

@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -173,8 +174,7 @@ public class CaseService {
             .collect(Collectors.toList());
     }
 
-    private List<CaseData> searchCasesLinkedToCitizen(String authToken, String s2sToken,
-                                                      Map<String, String> searchCriteria) {
+    private List<CaseData> searchCasesLinkedToCitizen(String authToken, String s2sToken, Map<String, String> searchCriteria) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
         List<CaseDetails> caseDetails = new ArrayList<>();
@@ -185,8 +185,7 @@ public class CaseService {
             .collect(Collectors.toList());
     }
 
-    private List<CaseDetails> performSearch(String authToken, UserDetails user, Map<String, String> searchCriteria,
-                                            String serviceAuthToken) {
+    private List<CaseDetails> performSearch(String authToken, UserDetails user, Map<String, String> searchCriteria, String serviceAuthToken) {
         List<CaseDetails> result;
 
         result = coreCaseDataApi.searchForCitizen(
@@ -206,7 +205,8 @@ public class CaseService {
         log.info("Input casedata, applicantcaseName :::: {}", caseData.getApplicantCaseName());
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         Iterables.removeIf(caseDataMap.values(), Objects::isNull);
-        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
+        log.info("======Calling start event for Citizen========");
+        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCitizen(
             authToken,
             s2sToken,
             userDetails.getId(),
@@ -224,7 +224,8 @@ public class CaseService {
             .data(caseDataMap)
             .build();
 
-        return coreCaseDataApi.submitEventForCaseWorker(
+        log.info("-------Calling Submit event for Citizen------  ");
+        return coreCaseDataApi.submitEventForCitizen(
             authToken,
             s2sToken,
             userDetails.getId(),
@@ -251,29 +252,50 @@ public class CaseService {
 
         if ("Valid".equalsIgnoreCase(findAccessCodeStatus(accessCode, caseData))) {
             UUID partyId = null;
+            YesOrNo isApplicant = YesOrNo.Yes;
 
             for (Element<CaseInvite> invite : caseData.getCaseInvites()) {
                 if (accessCode.equals(invite.getValue().getAccessCode())) {
                     partyId = invite.getValue().getPartyId();
+                    isApplicant = invite.getValue().getIsApplicant();
                     invite.getValue().setHasLinked("Yes");
                     invite.getValue().setInvitedUserId(userId);
                 }
             }
-
-            if (partyId != null) {
-                for (Element<PartyDetails> partyDetails : caseData.getRespondents()) {
-                    if (partyId.equals(partyDetails.getId())) {
-                        User user = User.builder().email(emailId)
-                            .idamId(userId).build();
-
-                        partyDetails.getValue().setUser(user);
-                    }
-                }
-            }
+            processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant);
 
             log.info("Updated caseData testing::" + caseData);
             caseRepository.linkDefendant(authorisation, anonymousUserToken, s2sToken, caseId, caseData);
             log.info("Case is now linked" + caseData);
+        }
+    }
+
+    private void processUserDetailsForCase(String userId, String emailId, CaseData caseData, UUID partyId, YesOrNo isApplicant) {
+        //Assumption is for C100 case PartyDetails will be part of list
+        // and will always contain the partyId
+        // whereas FL401 will have only one party details without any partyId
+        User user = User.builder().email(emailId)
+            .idamId(userId).build();
+        if (partyId != null) {
+            if (YesOrNo.Yes.equals(isApplicant)) {
+                for (Element<PartyDetails> partyDetails : caseData.getApplicants()) {
+                    if (partyId.equals(partyDetails.getId())) {
+                        partyDetails.getValue().setUser(user);
+                    }
+                }
+            } else {
+                for (Element<PartyDetails> partyDetails : caseData.getRespondents()) {
+                    if (partyId.equals(partyDetails.getId())) {
+                        partyDetails.getValue().setUser(user);
+                    }
+                }
+            }
+        } else {
+            if (YesOrNo.Yes.equals(isApplicant)) {
+                caseData.getApplicantsFL401().setUser(user);
+            } else {
+                caseData.getRespondentsFL401().setUser(user);
+            }
         }
     }
 
@@ -331,7 +353,7 @@ public class CaseService {
     }
 
     private CaseDataContent getCaseDataContentForCreateCase(String authorization, String s2sToken, CaseData caseData,
-                                               String userId) {
+                                                            String userId) {
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         Iterables.removeIf(caseDataMap.values(), Objects::isNull);
         return CaseDataContent.builder()
@@ -354,4 +376,3 @@ public class CaseService {
         return nonNull(res) ? res.getToken() : null;
     }
 }
-
