@@ -143,7 +143,7 @@ public class CallbackControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-withdrawn-email-notification")
             .then()
-            .assertThat().statusCode(500);
+            .assertThat().statusCode(400);
     }
 
     @Test
