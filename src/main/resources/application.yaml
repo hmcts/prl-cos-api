@@ -350,7 +350,7 @@ postcodelookup:
 cafcaas:
   search-case-type-id: PRLAPPS
   caseTypeOfApplicationList: C100
-  caseState: SUBMITTED_PAID
+  caseState: CASE_ISSUE
 ccd:
   elastic-search-api:
     result-size: 100
