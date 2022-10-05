@@ -102,7 +102,7 @@ public class CaseController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken
     ) {
-        return caseService.retrieveCases(authorisation, s2sToken);
+        return caseService.retrieveCases(authorisation, authTokenGenerator.generate());
     }
 
     @PostMapping(path = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
