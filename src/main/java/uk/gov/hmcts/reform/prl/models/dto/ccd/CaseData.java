@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -77,7 +78,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -627,7 +627,7 @@ public class CaseData implements MappableObject {
     /**
      * Service Of Application.
      */
-    private OrdersToServeSA serviceOfApplicationScreen1;
+    private DynamicMultiSelectList serviceOfApplicationScreen1;
     private ConfirmRecipients confirmRecipients;
 
     @JsonProperty("citizenUploadedDocumentList")

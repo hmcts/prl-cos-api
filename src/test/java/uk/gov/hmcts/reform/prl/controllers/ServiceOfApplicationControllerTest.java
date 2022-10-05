@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
@@ -29,7 +30,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationControllerTest {
-
 
     @InjectMocks
     private ServiceOfApplicationController serviceOfApplicationController;
@@ -53,7 +53,9 @@ public class ServiceOfApplicationControllerTest {
         Map<String, Object> caseData = new HashMap<>();
         CaseData caseData1 = CaseData.builder()
             .orderCollection(List.of(Element.<OrderDetails>builder()
-                                         .value(OrderDetails.builder().orderType("Test").build())
+                                         .value(OrderDetails.builder()
+                                                    .otherDetails(OtherOrderDetails.builder().orderCreatedDate("").build())
+                                                    .orderType("Test").build())
                                          .build()))
             .build();
         caseData.put("serviceOfApplicationHeader","TestHeader");
@@ -83,7 +85,9 @@ public class ServiceOfApplicationControllerTest {
         Map<String, Object> caseData = new HashMap<>();
         CaseData caseData1 = CaseData.builder()
             .orderCollection(List.of(Element.<OrderDetails>builder()
-                                         .value(OrderDetails.builder().build())
+                                         .value(OrderDetails.builder()
+                                                    .otherDetails(OtherOrderDetails.builder().orderCreatedDate("").build())
+                                                    .orderType("Test").build())
                                          .build()))
             .build();
         caseData.put("serviceOfApplicationHeader","TestHeader");

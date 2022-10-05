@@ -5,24 +5,6 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.AmendDischargedVariedEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.AppointmentOfGuardianEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.BlankOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.BlankOrderOrDirectionsEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.BlankOrderOrDirectionsWithdrawEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.ChildArrangementsSpecificProhibitedOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.GeneralFormUndertakingEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.NonMolestationEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.NoticeOfProceedingsEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.NoticeOfProceedingsNonPartiesEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.NoticeOfProceedingsPartiesEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.OccupationEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.OtherUploadAnOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.ParentalResponsibilityEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.PowerOfArrestEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SpecialGuardianShipEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StandardDirectionsOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.TransferOfCaseToAnotherCourtEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 
 import java.util.List;
@@ -35,24 +17,6 @@ import java.util.stream.Stream;
 @Builder
 public class OrdersToServeSA {
 
-    private final List<StandardDirectionsOrderEnum> standardDirectionsOrderOption;
-    private final List<BlankOrderOrDirectionsEnum> blankOrderOrDirectionsOption;
-    private final List<BlankOrderOrDirectionsWithdrawEnum> blankOrderOrDirectionsWithdrawOption;
-    private final List<ChildArrangementsSpecificProhibitedOrderEnum> childArrangementSpecificOrderOption;
-    private final List<ParentalResponsibilityEnum> parentalResponsibilityOption;
-    private final List<SpecialGuardianShipEnum> specialGuardianShipOption;
-    private final List<NoticeOfProceedingsPartiesEnum> noticeOfProceedingsPartiesOption;
-    private final List<NoticeOfProceedingsNonPartiesEnum> noticeOfProceedingsNonPartiesOption;
-    private final List<TransferOfCaseToAnotherCourtEnum> transferOfCaseToAnotherCourtOption;
-    private final List<AppointmentOfGuardianEnum> appointmentOfGuardianOption;
-    private final List<NonMolestationEnum> nonMolestationOption;
-    private final List<OccupationEnum> occupationOption;
-    private final List<PowerOfArrestEnum> powerOfArrestOption;
-    private final List<AmendDischargedVariedEnum> amendDischargedVariedOption;
-    private final List<BlankOrderEnum> blankOrderEnumOption;
-    private final List<GeneralFormUndertakingEnum> generalFormUndertakingOption;
-    private final List<NoticeOfProceedingsEnum> noticeOfProceedingsEnumOption;
-    private final List<OtherUploadAnOrderEnum> otherUploadAnOrderOption;
     @JsonUnwrapped
     @Builder.Default
     @JsonProperty("orderOptionsSoA")
