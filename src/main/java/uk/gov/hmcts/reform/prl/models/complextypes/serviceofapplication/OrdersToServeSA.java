@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.PowerOfArrestEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SpecialGuardianShipEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StandardDirectionsOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.TransferOfCaseToAnotherCourtEnum;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 
 import java.util.List;
 import java.util.Objects;
@@ -50,6 +53,10 @@ public class OrdersToServeSA {
     private final List<GeneralFormUndertakingEnum> generalFormUndertakingOption;
     private final List<NoticeOfProceedingsEnum> noticeOfProceedingsEnumOption;
     private final List<OtherUploadAnOrderEnum> otherUploadAnOrderOption;
+    @JsonUnwrapped
+    @Builder.Default
+    @JsonProperty("orderOptionsSoA")
+    private final DynamicMultiSelectList orderOptionsSoA;
 
     public List<String> getSelectedOrders() {
         return Stream.of(OrdersToServeSA.class.getDeclaredFields()).filter(Objects::nonNull)
