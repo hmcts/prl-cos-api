@@ -72,6 +72,7 @@ public class ServiceOfApplicationController {
         List<DynamicMultiselectListElement> applicantSolicitorList = new ArrayList<>();
         List<DynamicMultiselectListElement> respondentList = new ArrayList<>();
         List<DynamicMultiselectListElement> respondentSolicitorList = new ArrayList<>();
+        List<DynamicMultiselectListElement> otherPeopleList = new ArrayList<>();
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase("C100")) {
             caseData.getApplicants().forEach(applicant -> {
                 applicantList.add(DynamicMultiselectListElement.builder()
@@ -105,6 +106,14 @@ public class ServiceOfApplicationController {
                                                     .build());
                 }
             });
+            if (caseData.getOthersToNotify() != null) {
+                caseData.getOthersToNotify().forEach(others ->
+                    otherPeopleList.add(DynamicMultiselectListElement.builder()
+                                            .code(others.getId().toString())
+                                            .label(others.getValue().getFirstName() + " " + others.getValue().getLastName())
+                                            .build())
+                );
+            }
             log.info("****** respondent list : {}", respondentList);
             log.info("****** respondentSolicitorList : {}", respondentSolicitorList);
         }
@@ -121,6 +130,9 @@ public class ServiceOfApplicationController {
             .respondentSolicitorList(DynamicMultiSelectList.builder()
                                          .listItems(respondentSolicitorList)
                                          .build())
+            .otherPeopleList(DynamicMultiSelectList.builder()
+                                 .listItems(otherPeopleList)
+                                 .build())
             .build();
         caseDataUpdated.put("confirmRecipients",confirmRecipients);
         log.info("****** confirm recepietns : {}", confirmRecipients);
