@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -49,6 +50,54 @@ public class RequestUpdateCallbackService {
     private final AllTabServiceImpl allTabService;
     private final C100JsonMapper c100JsonMapper;
     private final CourtFinderService courtFinderService;
+    private final CoreCaseDataService coreCaseDataService;
+
+    public void processCallbackForUpdateState(ServiceRequestUpdateDto serviceRequestUpdateDto) {
+
+        log.info("Processing the callback for the caseId {} with status {}", serviceRequestUpdateDto.getCcdCaseNumber(),
+                 serviceRequestUpdateDto.getServiceRequestStatus()
+        );
+        String userToken = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(userToken);
+        log.info("Fetching the Case details based on caseId {}", serviceRequestUpdateDto.getCcdCaseNumber()
+        );
+
+        CaseDetails caseDetails = coreCaseDataApi.getCase(
+            userToken,
+            authTokenGenerator.generate(),
+            serviceRequestUpdateDto.getCcdCaseNumber()
+        );
+
+        if (!Objects.isNull(caseDetails.getId())) {
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            log.info(
+                "Refreshing tab based on the payment response for caseid {} ",
+                serviceRequestUpdateDto.getCcdCaseNumber()
+            );
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+            caseData = caseData.toBuilder()
+                .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
+                .state(State.SUBMITTED_PAID)
+                .build();
+
+            log.info(
+                "Updating the Case data with payment information for caseId {}",
+                serviceRequestUpdateDto.getCcdCaseNumber()
+            );
+
+            coreCaseDataService.triggerEvent(
+                JURISDICTION,
+                CASE_TYPE,
+                caseData.getId(),
+                "citizen-case-submit",
+                objectMapper.convertValue(caseData, HashMap.class)
+            );
+
+        } else {
+            log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());
+            throw new CaseNotFoundException("Case not present");
+        }
+    }
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
 

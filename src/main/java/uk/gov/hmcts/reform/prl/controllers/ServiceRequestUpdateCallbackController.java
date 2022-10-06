@@ -50,4 +50,24 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
             throw new WorkflowException(ex.getMessage(), ex);
         }
     }
+
+    @PutMapping(path = "/update-state", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Ways to pay will call this API and send the status of payment with other details")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public void updateState(
+        @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
+    ) throws WorkflowException {
+        try {
+            requestUpdateCallbackService.processCallbackForUpdateState(serviceRequestUpdateDto);
+        } catch (Exception ex) {
+            log.error(
+                "Payment callback is unsuccessful for the CaseID: {}",
+                serviceRequestUpdateDto.getCcdCaseNumber()
+            );
+            throw new WorkflowException(ex.getMessage(), ex);
+        }
+    }
 }
