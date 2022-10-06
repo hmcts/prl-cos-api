@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -94,17 +92,17 @@ public class ManageOrderEmailService {
         return partyDetails
             .stream()
             .map(Element::getValue)
-                .filter(a -> a.getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
+            .filter(a -> a.getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
             .map(PartyDetails::getEmail)
             .collect(Collectors.toList());
     }
 
 
-    public void sendEmailToCafcassAndOtherParties(CaseDetails caseDetails) {
+    public void sendEmailToCafcassAndOtherParties(CaseDetails caseDetails, String eventId) {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
 
-        ManageOrders manageOrders  = caseData.getManageOrders();
+        ManageOrders manageOrders = caseData.getManageOrders();
 
         List<String> cafcassEmails = manageOrders.getCafcassEmailAddress()
             .stream()
@@ -117,17 +115,16 @@ public class ManageOrderEmailService {
             .collect(Collectors.toList());
 
         cafcassEmails.addAll(otherEmails);
-
-        cafcassEmails.forEach(email ->   emailService.send(
+        cafcassEmails.forEach(email -> emailService.send(
             email,
             EmailTemplateNames.CAFCASS_OTHER,
-            buildEmailToCafcassAndOtherParties(caseData),
+            buildEmailToCafcassAndOtherParties(caseData, eventId),
             LanguagePreference.english
         ));
 
     }
 
-    public EmailTemplateVars buildEmailToCafcassAndOtherParties(CaseData caseData) {
+    public EmailTemplateVars buildEmailToCafcassAndOtherParties(CaseData caseData, String eventId) {
 
         String typeOfHearing = " ";
 
@@ -137,6 +134,16 @@ public class ManageOrderEmailService {
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
+        if (eventId.equalsIgnoreCase("adminEditAndApproveAnOrder")) {
+            return ManageOrderEmail.builder()
+                .caseReference(String.valueOf(caseData.getId()))
+                .caseName(caseData.getApplicantCaseName())
+                .caseUrgency(typeOfHearing)
+                .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
+                .familyManNumber(caseData.getFamilymanCaseNumber())
+                .orderLink(caseData.getSolicitorOrJudgeDraftOrderDoc().getDocumentFileName())
+                .build();
+        }
         return ManageOrderEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())

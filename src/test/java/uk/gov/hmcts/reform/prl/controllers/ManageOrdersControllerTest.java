@@ -696,6 +696,7 @@ public class ManageOrdersControllerTest {
                              .id(12345L)
                              .data(stringObjectMap)
                              .build())
+            .eventId("manageOrders")
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
@@ -706,7 +707,7 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
-            .sendEmailToCafcassAndOtherParties(callbackRequest.getCaseDetails());
+            .sendEmailToCafcassAndOtherParties(callbackRequest.getCaseDetails(), "manageOrders");
     }
 
     @Test
@@ -995,6 +996,7 @@ public class ManageOrdersControllerTest {
                              .id(12345L)
                              .data(stringObjectMap)
                              .build())
+            .eventId("manageOrders")
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
@@ -1005,7 +1007,7 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
-            .sendEmailToCafcassAndOtherParties(callbackRequest.getCaseDetails());
+            .sendEmailToCafcassAndOtherParties(callbackRequest.getCaseDetails(), "manageOrders");
     }
 
     @Test
