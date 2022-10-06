@@ -27,9 +27,8 @@ public class DraftOrder {
     public String getLabelForOrdersDynamicList() {
         log.info("orderTypeId {},orderTypeId {}", this.orderType, this.orderTypeId);
         return String.format(
-            "%s - %s",
-            this.orderTypeId,
-            this.orderDocument.getDocumentFileName()
+            "%s",
+            this.orderTypeId
         );
     }
 }

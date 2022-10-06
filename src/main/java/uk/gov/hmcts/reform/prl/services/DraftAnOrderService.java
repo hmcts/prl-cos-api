@@ -633,7 +633,11 @@ public class DraftAnOrderService {
                                        PrlAppsConstants.D_MMMM_YYYY,
                                        Locale.UK
                                    )))
-                                   .orderMadeDate(draftOrder.getOtherDetails().getDateCreated().toString())
+                                   .orderMadeDate(draftOrder.getOtherDetails().getDateCreated().format(
+                                       DateTimeFormatter.ofPattern(
+                                           PrlAppsConstants.D_MMMM_YYYY,
+                                           Locale.UK
+                                       )))
                                    .orderRecipients(getAllRecipients(caseData)).build()).build());
 
     }
