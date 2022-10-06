@@ -39,7 +39,20 @@ public enum Event {
     FL401_SOT_AND_SUBMIT("fl401StatementOfTruthAndSubmit", "Statement of truth and submit"),
     FL401_RESUBMIT("fl401resubmit", "Statement of Truth and submit"),
     FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings"),
-    FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents");
+    FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents"),
+    //Respondent Events
+    CONSENT_TO_APPLICATION("consentToApplication", "Consent to the application"),
+    KEEP_DETAILS_PRIVATE("keepDetailsPrivate", "Keep your details private"),
+    CONFIRM_EDIT_CONTACT_DETAILS("confirmOrEditCOntactDetails", "Confirm or edit your contact details"),
+    ATTENDING_THE_COURT("attendingTheCourt", "Attending the court"),
+    RESPONDENT_MAIM("respondentMiam", "MIAM"),
+    CURRENT_OR_PREVIOUS_PROCEEDINGS("currentOrPreviousProceedings", "Current or previous proceedings"),
+    RESPONDENT_ALLEGATIONS_OF_HARM("respondentAllegationsOfHarm", "Allegations of harm "),
+    RESPONDENT_INTERNATIONAL_ELEMENT("respondentInternationalElement", "International element"),
+    ABILITY_TO_PARICIPATE_PROCEEDINGS("abilityToParticipateInProceedings", "Ability to participate in proceedings"),
+    RESPONDENT_DRAFT_DOCUMENT("abilityToParticipateInProceedings", "View a draft of your response (PDF)"),
+    RESPONDENT_SUBMIT("respondentSubmit", "Submit");
+
 
     private final String id;
     private final String name;
