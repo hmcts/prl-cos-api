@@ -198,6 +198,5 @@ public class ManageOrders {
 
     @Builder.Default
     @JsonProperty("childOption")
-    @JsonUnwrapped
     private final DynamicMultiSelectList childOption;
 }
