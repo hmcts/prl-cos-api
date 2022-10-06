@@ -119,7 +119,7 @@ public class CaseService {
                                                String userId, String caseId, String eventId) {
         CaseDataContent.CaseDataContentBuilder builder = CaseDataContent.builder().data(caseData);
         builder.event(Event.builder().id(eventId).build())
-            .eventToken(getEventTokenForUpdate(authorization, userId, CITIZEN_CASE_UPDATE.getValue(),
+            .eventToken(getEventTokenForUpdate(authorization, userId, eventId,
                                                caseId, s2sToken
             ));
 
