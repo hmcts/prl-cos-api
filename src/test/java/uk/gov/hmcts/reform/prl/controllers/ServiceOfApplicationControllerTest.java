@@ -10,9 +10,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
@@ -27,6 +29,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationControllerTest {
@@ -49,9 +52,18 @@ public class ServiceOfApplicationControllerTest {
 
     @Test
     public void testServiceOfApplicationAboutToStart() throws Exception {
-
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("first")
+            .lastName("last")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeFirstName("first")
+            .representativeLastName("last")
+            .build();
         Map<String, Object> caseData = new HashMap<>();
         CaseData caseData1 = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(partyDetails)))
+            .respondents(List.of(element(partyDetails)))
             .orderCollection(List.of(Element.<OrderDetails>builder()
                                          .value(OrderDetails.builder()
                                                     .otherDetails(OtherOrderDetails.builder().orderCreatedDate("").build())
@@ -84,6 +96,7 @@ public class ServiceOfApplicationControllerTest {
 
         Map<String, Object> caseData = new HashMap<>();
         CaseData caseData1 = CaseData.builder()
+            .caseTypeOfApplication("FL401")
             .orderCollection(List.of(Element.<OrderDetails>builder()
                                          .value(OrderDetails.builder()
                                                     .otherDetails(OtherOrderDetails.builder().orderCreatedDate("").build())
