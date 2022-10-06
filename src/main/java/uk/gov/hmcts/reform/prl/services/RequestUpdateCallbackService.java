@@ -52,7 +52,7 @@ public class RequestUpdateCallbackService {
     private final CourtFinderService courtFinderService;
     private final CoreCaseDataService coreCaseDataService;
 
-    public void processCallbackForUpdateState(ServiceRequestUpdateDto serviceRequestUpdateDto) {
+    public void processCallbackForUpdateState(ServiceRequestUpdateDto serviceRequestUpdateDto, String citizenToken) {
 
         log.info("Processing the callback for the caseId {} with status {}", serviceRequestUpdateDto.getCcdCaseNumber(),
                  serviceRequestUpdateDto.getServiceRequestStatus()
@@ -85,12 +85,12 @@ public class RequestUpdateCallbackService {
                 serviceRequestUpdateDto.getCcdCaseNumber()
             );
 
-            coreCaseDataService.triggerEvent(
+            coreCaseDataService.triggerEventForCitizen(
                 JURISDICTION,
                 CASE_TYPE,
                 caseData.getId(),
                 "citizen-case-submit",
-                objectMapper.convertValue(caseData, HashMap.class)
+                objectMapper.convertValue(caseData, HashMap.class), citizenToken
             );
 
         } else {

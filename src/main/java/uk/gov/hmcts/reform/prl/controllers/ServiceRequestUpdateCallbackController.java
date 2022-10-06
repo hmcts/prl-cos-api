@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
@@ -58,10 +59,11 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public void updateState(
+        @RequestHeader(value = "Authorization", required = true) String authorisation,
         @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws WorkflowException {
         try {
-            requestUpdateCallbackService.processCallbackForUpdateState(serviceRequestUpdateDto);
+            requestUpdateCallbackService.processCallbackForUpdateState(serviceRequestUpdateDto, authorisation);
         } catch (Exception ex) {
             log.error(
                 "Payment callback is unsuccessful for the CaseID: {}",
