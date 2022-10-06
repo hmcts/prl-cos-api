@@ -41,6 +41,7 @@ public enum Event {
     FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings"),
     FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents"),
     //Respondent Events
+    RESPOND_TO_APPLICATION("respondentSolicitorCreate", "Respond to application"),
     CONSENT_TO_APPLICATION("consentToApplication", "Consent to the application"),
     KEEP_DETAILS_PRIVATE("keepDetailsPrivate", "Keep your details private"),
     CONFIRM_EDIT_CONTACT_DETAILS("confirmOrEditCOntactDetails", "Confirm or edit your contact details"),

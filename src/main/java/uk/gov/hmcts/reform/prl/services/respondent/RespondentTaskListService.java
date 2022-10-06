@@ -24,6 +24,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_ALLEGATIONS_OF_HARM
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_MAIM;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_SUBMIT;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPOND_TO_APPLICATION;
 
 @Slf4j
 @Service
@@ -56,6 +57,7 @@ public class RespondentTaskListService {
 
     private List<Event> getEvents(CaseData caseData) {
         return new ArrayList<>(List.of(
+            RESPOND_TO_APPLICATION,
             CONSENT_TO_APPLICATION,
             KEEP_DETAILS_PRIVATE,
             CONFIRM_EDIT_CONTACT_DETAILS,
