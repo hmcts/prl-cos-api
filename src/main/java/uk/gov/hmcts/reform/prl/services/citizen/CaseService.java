@@ -109,16 +109,16 @@ public class CaseService {
             String.valueOf(caseId),
             true,
             getCaseDataContent(authToken, caseData, s2sToken, userId,
-                               String.valueOf(caseId)
+                               String.valueOf(caseId), eventId
             )
         );
 
     }
 
     private CaseDataContent getCaseDataContent(String authorization, CaseData caseData, String s2sToken,
-                                               String userId, String caseId) {
+                                               String userId, String caseId, String eventId) {
         CaseDataContent.CaseDataContentBuilder builder = CaseDataContent.builder().data(caseData);
-        builder.event(Event.builder().id(CITIZEN_CASE_UPDATE.getValue()).build())
+        builder.event(Event.builder().id(eventId).build())
             .eventToken(getEventTokenForUpdate(authorization, userId, CITIZEN_CASE_UPDATE.getValue(),
                                                caseId, s2sToken
             ));
