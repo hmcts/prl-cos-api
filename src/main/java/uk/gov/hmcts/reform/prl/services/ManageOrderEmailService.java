@@ -139,8 +139,8 @@ public class ManageOrderEmailService {
                 .caseReference(String.valueOf(caseData.getId()))
                 .caseName(caseData.getApplicantCaseName())
                 .caseUrgency(typeOfHearing)
-                .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
-                .familyManNumber(caseData.getFamilymanCaseNumber())
+                .issueDate(caseData.getIssueDate() != null ? caseData.getIssueDate().format(dateTimeFormatter) : " ")
+                .familyManNumber(caseData.getFamilymanCaseNumber() != null ? caseData.getFamilymanCaseNumber() : " ")
                 .orderLink(caseData.getSolicitorOrJudgeDraftOrderDoc().getDocumentFileName())
                 .build();
         }
