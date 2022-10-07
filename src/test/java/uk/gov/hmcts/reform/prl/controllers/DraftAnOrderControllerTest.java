@@ -64,7 +64,8 @@ public class DraftAnOrderControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         when(draftAnOrderService.getTheOrderDraftString(Mockito.any(CaseData.class))).thenReturn("test");
         when(draftAnOrderService.generateDraftOrderCollection(Mockito.any(CaseData.class))).thenReturn(caseData);
-        when(draftAnOrderService.generateSolicitorDraftOrder(Mockito.anyString(),Mockito.any(CaseData.class))).thenReturn(
+        when(draftAnOrderService.generateSolicitorDraftOrder(Mockito.anyString(),
+                                                             Mockito.any(CaseData.class))).thenReturn(
             Document.builder().build());
     }
 
@@ -72,18 +73,22 @@ public class DraftAnOrderControllerTest {
     public void testPopulateSelectedOrder() throws Exception {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = draftAnOrderController
             .populateSelectedOrder("", callbackRequest);
-        assertEquals(aboutToStartOrSubmitCallbackResponse.getData().get("selectedOrderLabel"),"Non-molestation order (FL404A)");
+        assertEquals("Non-molestation order (FL404A)",
+                     aboutToStartOrSubmitCallbackResponse.getData().get("selectedOrderLabel"));
     }
 
     @Test
     public void testResetFields() {
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = draftAnOrderController.resetFields("", callbackRequest);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = draftAnOrderController.resetFields(
+            "",
+            callbackRequest
+        );
         assertTrue(aboutToStartOrSubmitCallbackResponse.getData().isEmpty());
     }
 
     @Test
     public void testPrePopulateFields() {
-        caseData.put("applicantCaseName","Hello");
+        caseData.put("applicantCaseName", "Hello");
         CallbackRequest callbackRequest1 = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(1L)
