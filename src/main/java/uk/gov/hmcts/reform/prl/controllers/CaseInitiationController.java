@@ -47,15 +47,17 @@ public class CaseInitiationController extends AbstractCallbackController {
 
         assignCaseAccessService.assignCaseAccess(caseDetails.getId().toString(),authorisation);
 
-        publishEvent(new CaseDataChanged(caseData));
-
         // setting supplementary data updates to enable global search
         String caseId = String.valueOf(caseData.getId());
         Map<String, Map<String, Map<String, Object>>> supplementaryData = new HashMap<>();
         supplementaryData.put("supplementary_data_updates",
-            Map.of("$set", Map.of("HMCTSServiceId", "ABA5")));
+                              Map.of("$set", Map.of("HMCTSServiceId", "ABA5")));
         coreCaseDataApi.submitSupplementaryData(authorisation, authTokenGenerator.generate(), caseId,
-            supplementaryData);
+                                                supplementaryData);
+
+        publishEvent(new CaseDataChanged(caseData));
+
+
 
     }
 }
