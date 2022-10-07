@@ -8,13 +8,9 @@ import lombok.Value;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Value
 @Builder(toBuilder = true)
-public class DocumentLink {
+public class CaseDetails {
 
-    @JsonProperty("document_url")
-    public String documentUrl;
-    @JsonProperty("document_filename")
-    public String documentFilename;
-    @JsonProperty("document_binary_url")
-    public String documentBinaryUrl;
+    @JsonProperty("case_data")
+    public CaseData caseData;
 
 }

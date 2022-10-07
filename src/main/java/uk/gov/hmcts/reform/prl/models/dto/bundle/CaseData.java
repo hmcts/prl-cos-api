@@ -1,3 +1,4 @@
+
 package uk.gov.hmcts.reform.prl.models.dto.bundle;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,13 +9,13 @@ import lombok.Value;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Value
 @Builder(toBuilder = true)
-public class DocumentLink {
+public class CaseData {
 
-    @JsonProperty("document_url")
-    public String documentUrl;
-    @JsonProperty("document_filename")
-    public String documentFilename;
-    @JsonProperty("document_binary_url")
-    public String documentBinaryUrl;
+    @JsonProperty("bundleConfiguration")
+    public String bundleConfiguration;
+    @JsonProperty("id")
+    public String id;
+    @JsonProperty("data")
+    public Data data;
 
 }
