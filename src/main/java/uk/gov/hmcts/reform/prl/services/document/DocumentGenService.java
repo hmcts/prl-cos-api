@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -62,9 +63,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVAC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REQUEST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_FIELD_C7_RESPOND_TO_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD_C7_RESPOND_TO_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
@@ -402,31 +401,6 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
-    public Map<String, Object> generateRespondToApplicationC7Document(String authorisation, CaseData caseData) throws Exception {
-        log.info("generate Documents Respond To Application C7");
-        Map<String, Object> updatedCaseData = new HashMap<>();
-
-        caseData = fillOrgDetails(caseData);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info(
-            "Selected Language for generating the docs English => {}, Welsh => {}",
-            documentLanguage.isGenEng(),
-            documentLanguage.isGenWelsh()
-        );
-        if (documentLanguage.isGenEng()) {
-            updatedCaseData.put("isEngDocGen", Yes.toString());
-            updatedCaseData.put(DRAFT_DOCUMENT_FIELD_C7_RESPOND_TO_APPLICATION,
-                getDocument(authorisation, caseData, DOCUMENT_C7_BLANK_RESPOND_TO_APPLICATION, false));
-        }
-        if (documentLanguage.isGenWelsh()) {
-            updatedCaseData.put("isWelshDocGen", Yes.toString());
-            updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD_C7_RESPOND_TO_APPLICATION,
-                getDocument(authorisation, caseData, DOCUMENT_C7_BLANK_RESPOND_TO_APPLICATION, true));
-        }
-
-        return updatedCaseData;
-    }
-
     private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh)
         throws Exception {
         return generateDocumentField(
@@ -440,6 +414,16 @@ public class DocumentGenService {
         return generateCitizenUploadDocument(
             fileName,
             generateCitizenUploadedDocument(authorisation, prlCitizenUploadTemplate, generateAndUploadDocumentRequest),
+            generateAndUploadDocumentRequest
+        );
+    }
+
+    private ResponseDocuments getCitizenResponseDocument(String authorisation,
+                                    GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest, String fileName)
+        throws Exception {
+        return generateCitizenResponseDocument(
+            fileName,
+            generateCitizenUploadedDocument(authorisation, prlCitizenC7BlankTemplate, generateAndUploadDocumentRequest),
             generateAndUploadDocumentRequest
         );
     }
@@ -506,6 +490,7 @@ public class DocumentGenService {
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_other_documents_" + currentDate + SUBMITTED_PDF;
                     break;
+
                 default:
                     fileName = "";
             }
@@ -517,15 +502,19 @@ public class DocumentGenService {
                                                                   String template,
                                                                   GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest)
         throws Exception {
+        log.info("=========generate Citizen Uploaded Document=========");
         String caseId = generateAndUploadDocumentRequest.getValues().get(CASE_ID);
         log.info("Generating the {} statement document from the text box for case id {} ", template, caseId);
         GeneratedDocumentInfo generatedDocumentInfo = null;
 
+        log.info("call to dgsService start...." + template);
         generatedDocumentInfo = dgsService.generateCitizenDocument(
             authorisation,
             generateAndUploadDocumentRequest,
             template
         );
+        log.info("call to dgsService end....");
+
         boolean isDocumentGenerated = generatedDocumentInfo.getUrl() != null;
         log.info("Is the document generated for the template {} : {} ", template, isDocumentGenerated);
         log.info("Generated the {} document for case id {} ", template, caseId);
@@ -854,5 +843,71 @@ public class DocumentGenService {
                 generatedDocumentInfo
             )).build();
     }
+
+    public ResponseDocuments generateCitizenResponseDocument(String authorisation,
+                                                             GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+                                                             Integer fileIndex, CaseData caseData) throws Exception {
+        String fileName = getFileName(caseData, DOCUMENT_C7_BLANK_RESPOND_TO_APPLICATION, false);
+        log.info("generateCitizenResponseDocument : fileName ", fileName);
+        return getCitizenResponseDocument(authorisation, generateAndUploadDocumentRequest, fileName);
+    }
+
+    private ResponseDocuments generateCitizenResponseDocument(String fileName, GeneratedDocumentInfo generatedDocumentInfo,
+                                                            GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest) {
+        log.info("generateCitizenResponseDocument fileName : " + fileName);
+        if (null == generatedDocumentInfo) {
+            return null;
+        }
+        String parentDocumentType = "";
+        String documentType = "";
+        String partyName = "";
+        String documentName = "";
+        String partyId = "";
+        LocalDate today = LocalDate.now();
+        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
+        String isApplicant = "";
+        YesOrNo documentRequest = null;
+
+        if (generateAndUploadDocumentRequest.getValues() != null) {
+            if (generateAndUploadDocumentRequest.getValues().containsKey(PARENT_DOCUMENT_TYPE)) {
+                parentDocumentType = generateAndUploadDocumentRequest.getValues().get(PARENT_DOCUMENT_TYPE);
+            }
+            if (generateAndUploadDocumentRequest.getValues().containsKey(PARTY_ID)) {
+                partyId = generateAndUploadDocumentRequest.getValues().get(PARTY_ID);
+            }
+            if (generateAndUploadDocumentRequest.getValues().containsKey(DOCUMENT_TYPE)) {
+                documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
+                if (generateAndUploadDocumentRequest.getValues().containsKey(PARTY_NAME)) {
+                    partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
+                    documentName = documentType.replace("Your", partyName + "'s");
+                }
+            }
+            if (generateAndUploadDocumentRequest.getValues().containsKey(IS_APPLICANT)) {
+                isApplicant = generateAndUploadDocumentRequest.getValues().get(IS_APPLICANT);
+            }
+
+            if (generateAndUploadDocumentRequest.getValues().containsKey(DOCUMENT_REQUEST)) {
+                documentRequest = YesOrNo.valueOf(generateAndUploadDocumentRequest.getValues().get(DOCUMENT_REQUEST));
+            }
+
+        }
+        log.info("Return the ResponseDocuments with Document Info Details");
+        return ResponseDocuments.builder()
+            .parentDocumentType(parentDocumentType)
+            .documentType(documentType)
+            .partyName(partyName)
+            .isApplicant(isApplicant)
+            .uploadedBy(partyId)
+            .dateCreated(LocalDate.now())
+            .documentRequestedByCourt(documentRequest)
+            .documentDetails(DocumentDetails.builder()
+                                 .documentName(documentName)
+                                 .documentUploadedDate(formattedCurrentDate)
+                                 .build()).citizenDocument(generateDocumentField(
+                fileName,
+                generatedDocumentInfo
+            )).build();
+    }
+
 
 }

@@ -126,6 +126,8 @@ public class PrlAppsConstants {
 
     public static final String CITIZEN_UPLOADED_DOCUMENT = "citizenUploadedDocument";
 
+    public static final String EVENT_CITIZEN_RESPONSE_C7_DOCUMENT = "citizenResponseC7Document";
+
     public static final String CITIZEN_HINT = "CITIZEN";
 
     public static final String CITIZEN_RESPOND_TO_APPLICATION_C7 = "CITIZEN_RESPOND_TO_APPLICATION_C7";
@@ -135,6 +137,8 @@ public class PrlAppsConstants {
     public static final String  OTHER_WITNESS_STATEMENTS = "Other people's witness statements";
     public static final String  MAIL_SCREENSHOTS_MEDIA_FILES = "Emails, screenshots, images and other media files";
     public static final String  MEDICAL_RECORDS = "Medical records";
+
+    public static final String  RESPONSE_TO_REQUEST_FOR_CA = "Reponse To Request For CA";
 
     public static final String LETTERS_FROM_SCHOOL = "Letters from school";
     public static final String TENANCY_MORTGAGE_AGREEMENTS = "Tenancy and mortgage agreements";
