@@ -167,25 +167,25 @@ public class CaseDocumentController {
         if (C100_CASE_TYPE.equalsIgnoreCase(tempCaseData.getCaseTypeOfApplication())) {
             tempCaseData.getRespondents().forEach(element -> {
                 if (element.getValue().getUser() != null && !partyId.equalsIgnoreCase(element.getValue().getUser().getIdamId())) {
-                    String email = element.getValue().getUser().getEmail();
+                    String email = element.getValue().getEmail();
                     sendEmailToCitizen(tempCaseData, element.getValue().getFirstName(), email);
                 }
             });
             tempCaseData.getApplicants().forEach(element -> {
                 if (element.getValue().getUser() != null && !partyId.equalsIgnoreCase(element.getValue().getUser().getIdamId())) {
-                    String email = element.getValue().getUser().getEmail();
+                    String email = element.getValue().getEmail();
                     sendEmailToCitizen(tempCaseData, element.getValue().getFirstName(), email);
                 }
             });
         } else {
             if (tempCaseData.getRespondentsFL401().getUser() != null
                   && !partyId.equalsIgnoreCase(tempCaseData.getRespondentsFL401().getUser().getIdamId())) {
-                String email = tempCaseData.getRespondentsFL401().getUser().getEmail();
+                String email = tempCaseData.getRespondentsFL401().getEmail();
                 sendEmailToCitizen(tempCaseData, tempCaseData.getRespondentsFL401().getFirstName(), email);
             }
             if (tempCaseData.getApplicantsFL401().getUser() != null
                   && !partyId.equalsIgnoreCase(tempCaseData.getApplicantsFL401().getUser().getIdamId())) {
-                String email = tempCaseData.getApplicantsFL401().getUser().getEmail();
+                String email = tempCaseData.getApplicantsFL401().getEmail();
                 sendEmailToCitizen(tempCaseData, tempCaseData.getApplicantsFL401().getFirstName(), email);
             }
         }
