@@ -90,6 +90,7 @@ public class FL401ApplicationMapper {
     private Court court = null;
 
     public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData) throws NotFoundException {
+        log.info("Special measures: {}", courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures());
         CaseData caseData = null;
         caseData = CaseData.builder()
             .isCourtNavCase(YesOrNo.Yes)
@@ -211,11 +212,11 @@ public class FL401ApplicationMapper {
             .isDisabilityPresent(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds() ? YesOrNo.Yes : YesOrNo.No)
             .adjustmentsRequired(courtNavCaseData.getFl401().getGoingToCourt().isAnyDisabilityNeeds()
                                      ? courtNavCaseData.getFl401().getGoingToCourt().getDisabilityNeedsDetails() : null)
-            .isSpecialArrangementsRequired((!courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures().isEmpty()
-                || null != courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures())
+            .isSpecialArrangementsRequired((null != courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures()
+                || !courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures().isEmpty())
                                                ? YesOrNo.Yes : YesOrNo.No)
-            .specialArrangementsRequired((!courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures().isEmpty()
-                || null != courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures())
+            .specialArrangementsRequired((null != courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures()
+                || !courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures().isEmpty())
                                              ? (courtNavCaseData.getFl401().getGoingToCourt().getAnySpecialMeasures()
                 .stream()
                 .map(SpecialMeasuresEnum::getDisplayedValue)
