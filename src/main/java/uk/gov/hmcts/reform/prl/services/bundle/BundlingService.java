@@ -9,11 +9,12 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.BundleApiClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCallbackRequest;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.PreSubmitCallbackResponse;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
+import uk.gov.hmcts.reform.prl.mapper.bundle.BundleCreateRequestMapper;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 @Service
 @Component
@@ -23,6 +24,8 @@ public class BundlingService {
     private final ObjectMapper objectMapper;
 
     private final BundleApiClient bundleApiClient;
+
+    private final BundleCreateRequestMapper bundleCreateRequestMapper;
 
     private final AuthTokenGenerator authTokenGenerator;
 
@@ -35,22 +38,16 @@ public class BundlingService {
     @Value("${bundle.welsh.config")
     private final String bundleWelshConfig;
 
-    public PreSubmitCallbackResponse<CaseData> createBundleServiceRequest(CallbackRequest callbackRequest, String authorisation) throws Exception {
-
-        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        final CaseData caseData = objectMapper.convertValue(
-            CaseData.builder().applicantCaseName(caseDetails.getCaseData().getApplicantCaseName())
-                .id(Long.valueOf(callbackRequest.getCaseDetails().getCaseId())).build(),
-            CaseData.class
-        );
-        caseData.setBundleConfiguration(getBundleConfig(caseData.getLanguagePreferenceWelsh()));
-        BundleCallbackRequest<CaseData> bundleCallback = new BundleCallbackRequest<>(callbackRequest);
-        return creaeBundle(authorisation, authTokenGenerator.generate(), bundleCallback);
+    public BundleCreateResponse createBundleServiceRequest(CallbackRequest callbackRequest, String authorization) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        //need to check on historical bundles on how to handle
+        return createBundle(authorization, authTokenGenerator.generate(),
+                            bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(caseData,getBundleConfig(caseData.getLanguagePreferenceWelsh())));
     }
 
-    private PreSubmitCallbackResponse<CaseData> creaeBundle(String authorization, String serviceAuthorization,
-                                                            BundleCallbackRequest<CaseData> callbackRequest) throws Exception {
-        return bundleApiClient.createBundleServiceRequest(authorization, serviceAuthorization, callbackRequest);
+    private BundleCreateResponse createBundle(String authorization, String serviceAuthorization,
+                                              BundleCreateRequest bundleCreateRequest) throws Exception {
+        return bundleApiClient.createBundleServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
     }
 
     private String getBundleConfig(YesOrNo welshPreference) {
@@ -59,4 +56,5 @@ public class BundlingService {
         }
         return bundleEnglishConfig;
     }
+
 }

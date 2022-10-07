@@ -8,7 +8,7 @@ import lombok.Value;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Value
 @Builder(toBuilder = true)
-public class DocumentLink {
+public class DocumentOther {
 
     @JsonProperty("document_url")
     public String documentUrl;

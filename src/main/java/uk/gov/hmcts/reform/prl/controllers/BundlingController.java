@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.PreSubmitCallbackResponse;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -34,11 +34,13 @@ public class BundlingController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Bundle Created Successfully ."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public PreSubmitCallbackResponse<CaseData> createBundle(@RequestHeader("Authorization") @Parameter(hidden = true)
-                                                             String authorisation,
-                                                            @RequestBody CallbackRequest callbackRequest)
+    public AboutToStartOrSubmitCallbackResponse createBundle(@RequestHeader("authorization") @Parameter(hidden = true)
+                                                             String authorization,
+                                                             @RequestBody CallbackRequest callbackRequest)
         throws Exception {
-        return bundlingService.createBundleServiceRequest(callbackRequest, authorisation);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("bundles",bundlingService.createBundleServiceRequest(callbackRequest, authorization));
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
 }
