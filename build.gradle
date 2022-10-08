@@ -543,6 +543,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/citizen/*',
   '**uk/gov/hmcts/reform/prl/services/respondent/*',
   '**uk/gov/hmcts/reform/prl/handlers/CaseEventHandler.java',
+  '**uk/gov/hmcts/reform/prl/handlers/RespondentCaseEventHandler.java',
   '**uk/gov/hmcts/reform/prl/controllers/CaseInitiationController.java',
 ]
 

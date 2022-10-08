@@ -49,11 +49,6 @@ public class RespondentCaseEventHandler {
 
         List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
 
-        /* if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
-            List<Event> events = respondentTaskListService.getRespondentEvents();
-            eventErrors.removeIf(e -> !events.contains(e.getEvent()));
-        } */
-
         return respondentTaskListRenderer
             .render(tasks, eventErrors, caseData);
     }
