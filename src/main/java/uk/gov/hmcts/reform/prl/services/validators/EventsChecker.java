@@ -5,16 +5,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.validators.respondent.AbilityToPartcipateChecker;
+import uk.gov.hmcts.reform.prl.services.validators.respondent.AttendingToCourtChecker;
+import uk.gov.hmcts.reform.prl.services.validators.respondent.ConsentToApplicationChecker;
+import uk.gov.hmcts.reform.prl.services.validators.respondent.CurrentOrPastProceedingsChecker;
+import uk.gov.hmcts.reform.prl.services.validators.respondent.EditContactDetailsChecker;
+import uk.gov.hmcts.reform.prl.services.validators.respondent.KeepDetailsPrivateChecker;
+import uk.gov.hmcts.reform.prl.services.validators.respondent.RespondentAllegationsOfHarmChecker;
+import uk.gov.hmcts.reform.prl.services.validators.respondent.RespondentInternationalElementChecker;
+import uk.gov.hmcts.reform.prl.services.validators.respondent.RespondentMiamChecker;
+import uk.gov.hmcts.reform.prl.services.validators.respondent.RespondentSubmitChecker;
+import uk.gov.hmcts.reform.prl.services.validators.respondent.RespondentViewPdfChecker;
 
 import java.util.EnumMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 
+import static uk.gov.hmcts.reform.prl.enums.Event.ABILITY_TO_PARICIPATE;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CONSENT_TO_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.CURRENT_OR_PAST_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
@@ -25,13 +41,19 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_INTERNATIONAL_ELEMENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_MAIM;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.Event.SUBMIT_AND_PAY;
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
@@ -121,6 +143,39 @@ public class EventsChecker {
     @Autowired
     private FL401ResubmitChecker fl401ResubmitChecker;
 
+    @Autowired
+    private ConsentToApplicationChecker consentToApplicationChecker;
+
+    @Autowired
+    private KeepDetailsPrivateChecker keepDetailsPrivateChecker;
+
+    @Autowired
+    private EditContactDetailsChecker editContactDetailsChecker;
+
+    @Autowired
+    private AttendingToCourtChecker attendingToCourtChecker;
+
+    @Autowired
+    private RespondentMiamChecker respondentMiamChecker;
+
+    @Autowired
+    private CurrentOrPastProceedingsChecker currentOrPastProceedingsChecker;
+
+    @Autowired
+    private RespondentAllegationsOfHarmChecker respondentAllegationsOfHarmChecker;
+
+    @Autowired
+    private RespondentInternationalElementChecker respondentInternationalElementChecker;
+
+    @Autowired
+    private AbilityToPartcipateChecker abilityToPartcipateChecker;
+
+    @Autowired
+    private RespondentViewPdfChecker respondentViewPdfChecker;
+
+    @Autowired
+    private RespondentSubmitChecker respondentSubmitChecker;
+
     private Map<Event, EventChecker> eventStatus = new EnumMap<>(Event.class);
 
     @PostConstruct
@@ -154,6 +209,18 @@ public class EventsChecker {
         eventStatus.put(FL401_OTHER_PROCEEDINGS, fl401OtherProceedingsChecker);
         eventStatus.put(FL401_SOT_AND_SUBMIT, fl401StatementOfTruthAndSubmitChecker);
         eventStatus.put(FL401_RESUBMIT, fl401ResubmitChecker);
+
+        eventStatus.put(CONSENT_TO_APPLICATION, consentToApplicationChecker);
+        eventStatus.put(KEEP_DETAILS_PRIVATE, keepDetailsPrivateChecker);
+        eventStatus.put(EDIT_CONTACT_DETAILS, editContactDetailsChecker);
+        eventStatus.put(ATTENDING_THE_COURT, attendingToCourtChecker);
+        eventStatus.put(RESPONDENT_MAIM, respondentMiamChecker);
+        eventStatus.put(CURRENT_OR_PAST_PROCEEDINGS, currentOrPastProceedingsChecker);
+        eventStatus.put(RESPONDENT_ALLEGATIONS_OF_HARM, respondentAllegationsOfHarmChecker);
+        eventStatus.put(RESPONDENT_INTERNATIONAL_ELEMENT, respondentInternationalElementChecker);
+        eventStatus.put(ABILITY_TO_PARICIPATE, abilityToPartcipateChecker);
+        eventStatus.put(RESPONDENT_DRAFT_DOCUMENT, respondentViewPdfChecker);
+        eventStatus.put(RESPONDENT_SUBMIT, respondentSubmitChecker);
     }
 
     public boolean isFinished(Event event, CaseData caseData) {
