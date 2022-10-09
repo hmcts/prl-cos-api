@@ -51,7 +51,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testNotifyOtherPartiesRespondedentCA() throws Exception{
+    public void testNotifyOtherPartiesRespondedentCA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -62,12 +62,17 @@ public class CaseDocumentControllerTest {
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondent);
 
-        CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).applicants(applicantList).respondents(respondentList).build();
+        CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).applicants(
+            applicantList).respondents(respondentList).build();
 
 
-        Method method = CaseDocumentController.class.getDeclaredMethod("notifyOtherParties", String.class, CaseData.class);
+        Method method = CaseDocumentController.class.getDeclaredMethod(
+            "notifyOtherParties",
+            String.class,
+            CaseData.class
+        );
         method.setAccessible(true);
-        method.invoke(caseDocumentController,"577346ec-5c58-491d-938a-112c4bff06fb", casedata);
+        method.invoke(caseDocumentController, "577346ec-5c58-491d-938a-112c4bff06fb", casedata);
         UploadDocumentEmail emailTemplateVars = UploadDocumentEmail.builder().caseReference("123456").name("test").build();
         verify(emailService).send(
             "test@hmcts.net",
@@ -78,7 +83,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testNotifyOtherPartiesRespondedentsCA() throws Exception{
+    public void testNotifyOtherPartiesRespondedentsCA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -94,12 +99,17 @@ public class CaseDocumentControllerTest {
         respondentList.add(wrappedRespondent);
         respondentList.add(wrappedRespondent1);
 
-        CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).applicants(applicantList).respondents(respondentList).build();
+        CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).applicants(
+            applicantList).respondents(respondentList).build();
 
 
-        Method method = CaseDocumentController.class.getDeclaredMethod("notifyOtherParties", String.class, CaseData.class);
+        Method method = CaseDocumentController.class.getDeclaredMethod(
+            "notifyOtherParties",
+            String.class,
+            CaseData.class
+        );
         method.setAccessible(true);
-        method.invoke(caseDocumentController,"577346ec-5c58-491d-938a-112c4bff06fb", casedata);
+        method.invoke(caseDocumentController, "577346ec-5c58-491d-938a-112c4bff06fb", casedata);
         UploadDocumentEmail emailTemplateVars = UploadDocumentEmail.builder().caseReference("123456").name("test").build();
         verify(emailService).send(
             "test@hmcts.net",
@@ -116,7 +126,7 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testNotifyOtherPartiesApplicantCA() throws Exception{
+    public void testNotifyOtherPartiesApplicantCA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -127,12 +137,17 @@ public class CaseDocumentControllerTest {
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondent);
 
-        CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).applicants(applicantList).respondents(respondentList).build();
+        CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).applicants(
+            applicantList).respondents(respondentList).build();
 
 
-        Method method = CaseDocumentController.class.getDeclaredMethod("notifyOtherParties", String.class, CaseData.class);
+        Method method = CaseDocumentController.class.getDeclaredMethod(
+            "notifyOtherParties",
+            String.class,
+            CaseData.class
+        );
         method.setAccessible(true);
-        method.invoke(caseDocumentController,"577346ec-5c58-491d-938a-112c4bff06fa", casedata);
+        method.invoke(caseDocumentController, "577346ec-5c58-491d-938a-112c4bff06fa", casedata);
         UploadDocumentEmail emailTemplateVars = UploadDocumentEmail.builder().caseReference("123456").name("test").build();
         verify(emailService).send(
             "test@hmcts.net",
@@ -143,19 +158,24 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testNotifyOtherPartiesApplicantDA() throws Exception{
+    public void testNotifyOtherPartiesApplicantDA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
 
         User user1 = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fa").build();
         PartyDetails respondent = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
 
-        CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE).applicantsFL401(applicant).respondentsFL401(respondent).build();
+        CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE).applicantsFL401(
+            applicant).respondentsFL401(respondent).build();
 
 
-        Method method = CaseDocumentController.class.getDeclaredMethod("notifyOtherParties", String.class, CaseData.class);
+        Method method = CaseDocumentController.class.getDeclaredMethod(
+            "notifyOtherParties",
+            String.class,
+            CaseData.class
+        );
         method.setAccessible(true);
-        method.invoke(caseDocumentController,"577346ec-5c58-491d-938a-112c4bff06fa", casedata);
+        method.invoke(caseDocumentController, "577346ec-5c58-491d-938a-112c4bff06fa", casedata);
         UploadDocumentEmail emailTemplateVars = UploadDocumentEmail.builder().caseReference("123456").name("test").build();
         verify(emailService).send(
             "test@hmcts.net",
@@ -166,19 +186,24 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testNotifyOtherPartiesRespondentDA() throws Exception{
+    public void testNotifyOtherPartiesRespondentDA() throws Exception {
         User user = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fb").build();
         PartyDetails applicant = PartyDetails.builder().user(user).email("test@hmcts.net").firstName("test").build();
 
         User user1 = User.builder().idamId("577346ec-5c58-491d-938a-112c4bff06fa").build();
         PartyDetails respondent = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
 
-        CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE).applicantsFL401(applicant).respondentsFL401(respondent).build();
+        CaseData casedata = CaseData.builder().id(123456).caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE).applicantsFL401(
+            applicant).respondentsFL401(respondent).build();
 
 
-        Method method = CaseDocumentController.class.getDeclaredMethod("notifyOtherParties", String.class, CaseData.class);
+        Method method = CaseDocumentController.class.getDeclaredMethod(
+            "notifyOtherParties",
+            String.class,
+            CaseData.class
+        );
         method.setAccessible(true);
-        method.invoke(caseDocumentController,"577346ec-5c58-491d-938a-112c4bff06fb", casedata);
+        method.invoke(caseDocumentController, "577346ec-5c58-491d-938a-112c4bff06fb", casedata);
         UploadDocumentEmail emailTemplateVars = UploadDocumentEmail.builder().caseReference("123456").name("test").build();
         verify(emailService).send(
             "test@hmcts.net",
