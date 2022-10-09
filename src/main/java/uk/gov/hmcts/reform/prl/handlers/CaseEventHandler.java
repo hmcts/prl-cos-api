@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
+import uk.gov.hmcts.reform.prl.services.respondent.RespondentTaskListRenderer;
+import uk.gov.hmcts.reform.prl.services.respondent.RespondentTaskListService;
 
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,9 @@ public class CaseEventHandler {
 
     private final CoreCaseDataService coreCaseDataService;
     private final TaskListService taskListService;
+    private final RespondentTaskListService respondentTaskListService;
     private final TaskListRenderer taskListRenderer;
+    private final RespondentTaskListRenderer respondentTaskListRenderer;
     private final TaskErrorService taskErrorService;
 
     @EventListener
@@ -46,6 +50,41 @@ public class CaseEventHandler {
             Map.of("taskList", taskList,"id",String.valueOf(caseData.getId()))
 
         );
+    }
+
+    @EventListener
+    public void handleRespondentCaseDataChange(final CaseDataChanged event) {
+        final CaseData caseData = event.getCaseData();
+
+        final String taskList = getRespondentUpdatedTaskList(caseData);
+
+        coreCaseDataService.triggerEvent(
+            JURISDICTION,
+            CASE_TYPE,
+            caseData.getId(),
+            "internal-update-respondent-task-list",
+            Map.of("taskList", taskList,"id",String.valueOf(caseData.getId()))
+
+        );
+    }
+
+    private String getRespondentUpdatedTaskList(CaseData caseData) {
+        final List<Task> tasks = respondentTaskListService.getTasksForRespondentOpenCase(caseData);
+
+        List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
+
+        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+            List<Event> events = taskListService.getC100Events();
+            eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+        }
+
+        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)) {
+            List<Event> events = taskListService.getFL401Events(caseData);
+            eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+        }
+
+        return respondentTaskListRenderer
+            .render(tasks, eventErrors, caseData);
     }
 
     public String getUpdatedTaskList(CaseData caseData) {
@@ -68,3 +107,4 @@ public class CaseEventHandler {
 
     }
 }
+
