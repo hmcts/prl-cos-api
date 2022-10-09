@@ -52,41 +52,6 @@ public class CaseEventHandler {
         );
     }
 
-    @EventListener
-    public void handleRespondentCaseDataChange(final CaseDataChanged event) {
-        final CaseData caseData = event.getCaseData();
-
-        final String taskList = getRespondentUpdatedTaskList(caseData);
-
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            "internal-update-respondent-task-list",
-            Map.of("taskList", taskList,"id",String.valueOf(caseData.getId()))
-
-        );
-    }
-
-    private String getRespondentUpdatedTaskList(CaseData caseData) {
-        final List<Task> tasks = respondentTaskListService.getTasksForRespondentOpenCase(caseData);
-
-        List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
-
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
-            List<Event> events = taskListService.getC100Events();
-            eventErrors.removeIf(e -> !events.contains(e.getEvent()));
-        }
-
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)) {
-            List<Event> events = taskListService.getFL401Events(caseData);
-            eventErrors.removeIf(e -> !events.contains(e.getEvent()));
-        }
-
-        return respondentTaskListRenderer
-            .render(tasks, eventErrors, caseData);
-    }
-
     public String getUpdatedTaskList(CaseData caseData) {
         final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
 

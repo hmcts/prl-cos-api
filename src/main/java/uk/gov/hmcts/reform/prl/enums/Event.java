@@ -41,18 +41,18 @@ public enum Event {
     FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings"),
     FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents"),
     //Respondent Events
-    RESPOND_TO_APPLICATION("respondentSolicitorCreate", "Respond to application"),
-    CONSENT_TO_APPLICATION("consentToApplication", "Consent to the application"),
-    KEEP_DETAILS_PRIVATE("keepDetailsPrivate", "Keep your details private"),
-    CONFIRM_EDIT_CONTACT_DETAILS("confirmOrEditCOntactDetails", "Confirm or edit your contact details"),
-    ATTENDING_THE_COURT("attendingTheCourt", "Attending the court"),
-    RESPONDENT_MAIM("respondentMiam", "MIAM"),
-    CURRENT_OR_PREVIOUS_PROCEEDINGS("currentOrPreviousProceedings", "Current or previous proceedings"),
-    RESPONDENT_ALLEGATIONS_OF_HARM("respondentAllegationsOfHarm", "Allegations of harm "),
-    RESPONDENT_INTERNATIONAL_ELEMENT("respondentInternationalElement", "International element"),
-    ABILITY_TO_PARICIPATE_PROCEEDINGS("abilityToParticipateInProceedings", "Ability to participate in proceedings"),
-    RESPONDENT_DRAFT_DOCUMENT("abilityToParticipateInProceedings", "View a draft of your response (PDF)"),
-    RESPONDENT_SUBMIT("respondentSubmit", "Submit");
+    CONSENT_TO_APPLICATION("solicitorConsentToApplication", "Do you give your consent?"),
+    KEEP_DETAILS_PRIVATE("solicitorKeepDetailsPrivate", "Keep your details private"),
+    EDIT_CONTACT_DETAILS("solicitorConfirmOrEditContactDetails", "Edit your contact details"),
+    ATTENDING_THE_COURT("solicitorAttendingTheCourt", "Attending the court"),
+    RESPONDENT_MAIM("respondentSolicitorMiam", "MIAM"),
+    CURRENT_OR_PAST_PROCEEDINGS("solicitorCurrentOrPreviousProceedings", "Current or past proceedings"),
+    RESPONDENT_ALLEGATIONS_OF_HARM("respondentSolicitorAllegationsOfHarm", "Allegations of harm"),
+    RESPONDENT_INTERNATIONAL_ELEMENT("respondentSolicitorInternationalElement", "International element"),
+    ABILITY_TO_PARICIPATE("solicitorAbilityToParticipateInProceedings", "Ability to participate"),
+    RESPONDENT_DRAFT_DOCUMENT("solicitorViewResponseDraftDocument", "View a draft of your response"),
+    RESPONDENT_SUBMIT("respondentSolicitorSubmit", "Submit");
+
 
 
     private final String id;
