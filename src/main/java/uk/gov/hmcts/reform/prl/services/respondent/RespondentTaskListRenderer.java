@@ -21,11 +21,11 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
-import static uk.gov.hmcts.reform.prl.enums.Event.ABILITY_TO_PARICIPATE;
+import static uk.gov.hmcts.reform.prl.enums.Event.ABILITY_TO_PARICIPATE_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_COURT;
+import static uk.gov.hmcts.reform.prl.enums.Event.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CONSENT_TO_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.CURRENT_OR_PAST_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CURRENT_OR_PREVIOUS_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_ALLEGATIONS_OF_HARM;
@@ -68,19 +68,19 @@ public class RespondentTaskListRenderer {
 
         final TaskSection yourDetails = newSection("2. Your details")
             .withTask(tasks.get(KEEP_DETAILS_PRIVATE))
-            .withTask(tasks.get(EDIT_CONTACT_DETAILS))
+            .withTask(tasks.get(CONFIRM_EDIT_CONTACT_DETAILS))
             .withTask(tasks.get(ATTENDING_THE_COURT));
 
         final TaskSection applicationDetails = newSection("3. Application details")
             .withTask(tasks.get(MIAM))
-            .withTask(tasks.get(CURRENT_OR_PAST_PROCEEDINGS));
+            .withTask(tasks.get(CURRENT_OR_PREVIOUS_PROCEEDINGS));
 
         final TaskSection safetyDetails = newSection("4. Safety concerns")
             .withTask(tasks.get(RESPONDENT_ALLEGATIONS_OF_HARM));
 
         final TaskSection additionalInformation = newSection("5. Additional information")
             .withTask(tasks.get(RESPONDENT_INTERNATIONAL_ELEMENT))
-            .withTask(tasks.get(ABILITY_TO_PARICIPATE));
+            .withTask(tasks.get(ABILITY_TO_PARICIPATE_PROCEEDINGS));
 
         final TaskSection pdfApplication = newSection("6. View PDF response")
             .withTask(tasks.get(RESPONDENT_DRAFT_DOCUMENT));

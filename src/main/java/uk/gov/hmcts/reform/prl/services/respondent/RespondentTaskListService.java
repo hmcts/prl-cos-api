@@ -14,14 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-import static uk.gov.hmcts.reform.prl.enums.Event.ABILITY_TO_PARICIPATE;
+import static uk.gov.hmcts.reform.prl.enums.Event.ABILITY_TO_PARICIPATE_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_COURT;
+import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CONSENT_TO_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.CURRENT_OR_PAST_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CURRENT_OR_PREVIOUS_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_ALLEGATIONS_OF_HARM;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_MAIM;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_SUBMIT;
@@ -37,12 +37,12 @@ public class RespondentTaskListService {
         return getEvents(caseData).stream()
             .map(event -> Task.builder()
                 .event(event)
-                .state(getRespondentTaskState(caseData, event))
+                .state(getTaskState(caseData, event))
                 .build())
             .collect(toList());
     }
 
-    private TaskState getRespondentTaskState(CaseData caseData, Event event) {
+    private TaskState getTaskState(CaseData caseData, Event event) {
         if (eventsChecker.isFinished(event, caseData)) {
             return TaskState.FINISHED;
         }
@@ -56,22 +56,20 @@ public class RespondentTaskListService {
     }
 
     private List<Event> getEvents(CaseData caseData) {
-        return getRespondentEvents();
-    }
-
-    public List<Event> getRespondentEvents() {
+        log.info("Case Data fro respondent: ========================{}====================", caseData);
         return new ArrayList<>(List.of(
+            CASE_NAME,
             CONSENT_TO_APPLICATION,
             KEEP_DETAILS_PRIVATE,
-            EDIT_CONTACT_DETAILS,
+            CONFIRM_EDIT_CONTACT_DETAILS,
             ATTENDING_THE_COURT,
             RESPONDENT_MAIM,
-            CURRENT_OR_PAST_PROCEEDINGS,
+            CURRENT_OR_PREVIOUS_PROCEEDINGS,
             RESPONDENT_ALLEGATIONS_OF_HARM,
             RESPONDENT_INTERNATIONAL_ELEMENT,
-            ABILITY_TO_PARICIPATE,
-            RESPONDENT_DRAFT_DOCUMENT,
+            ABILITY_TO_PARICIPATE_PROCEEDINGS,
             RESPONDENT_SUBMIT
+
         ));
     }
 }
