@@ -81,7 +81,7 @@ public class RespondentTaskListRenderer {
 
         section.add(HORIZONTAL_LINE);
         sec.getTasks().forEach(task -> {
-            //section.addAll(renderTask(task));
+            section.addAll(renderTask(task));
             section.add(HORIZONTAL_LINE);
         });
 

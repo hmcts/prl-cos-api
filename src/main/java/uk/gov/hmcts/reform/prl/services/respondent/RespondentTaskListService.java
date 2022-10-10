@@ -47,19 +47,10 @@ public class RespondentTaskListService {
     }
 
     private List<Event> getEvents(CaseData caseData) {
-        log.info("Case Data fro respondent: ========================{}====================", caseData);
+        log.info("Case Data from respondent: ========================{}====================", caseData);
         return new ArrayList<>(List.of(
             CONSENT_TO_APPLICATION,
-            KEEP_DETAILS_PRIVATE,
-            EDIT_CONTACT_DETAILS,
-            ATTENDING_THE_COURT,
-            RESPONDENT_MAIM,
-            CURRENT_OR_PAST_PROCEEDINGS,
-            RESPONDENT_ALLEGATIONS_OF_HARM,
-            RESPONDENT_INTERNATIONAL_ELEMENT,
-            ABILITY_TO_PARICIPATE,
-            RESPONDENT_DRAFT_DOCUMENT,
-            RESPONDENT_SUBMIT
+            KEEP_DETAILS_PRIVATE
         ));
     }
 }
