@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
 public class DraftOrder {
+    private final String typeOfOrder;
     private String orderType;
     private String orderTypeId;
     private Document orderDocument;

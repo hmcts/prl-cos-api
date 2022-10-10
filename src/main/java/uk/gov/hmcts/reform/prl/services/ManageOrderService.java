@@ -422,6 +422,7 @@ public class ManageOrderService {
                                   )))
                                   .orderRecipients(getAllRecipients(caseData)).build())
                 .dateCreated(dateTime.now())
+                .typeOfOrder(caseData.getSelectTypeOfOrder().getDisplayedValue())
                 .build();
         }
     }

@@ -619,6 +619,7 @@ public class DraftAnOrderService {
         log.info("*************courtAdminNotes {}", caseData.getCourtAdminNotes());
         return element(OrderDetails.builder()
                            .orderType(draftOrder.getOrderTypeId())
+                           .typeOfOrder(draftOrder.getTypeOfOrder())
                            .orderDocument(
                                Document.builder().documentUrl(generatedDocumentInfo.getUrl())
                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
