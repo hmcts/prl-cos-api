@@ -27,10 +27,10 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CONSENT_TO_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.CURRENT_OR_PAST_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.KEEP_DETAILS_PRIVATE;
-import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_INTERNATIONAL_ELEMENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_MAIM;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_SUBMIT;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskSection.newSection;
 
@@ -72,7 +72,7 @@ public class RespondentTaskListRenderer {
             .withTask(tasks.get(ATTENDING_THE_COURT));
 
         final TaskSection applicationDetails = newSection("3. Application details")
-            .withTask(tasks.get(MIAM))
+            .withTask(tasks.get(RESPONDENT_MAIM))
             .withTask(tasks.get(CURRENT_OR_PAST_PROCEEDINGS));
 
         final TaskSection safetyDetails = newSection("4. Safety concerns")

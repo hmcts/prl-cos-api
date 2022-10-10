@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.respondent.ConsentToApplicationChecker;
-import uk.gov.hmcts.reform.prl.services.respondent.KeepDetailsPrivateChecker;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -17,7 +15,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Event.CONSENT_TO_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
@@ -28,7 +25,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.FL401_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_UPLOAD_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
-import static uk.gov.hmcts.reform.prl.enums.Event.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
@@ -125,12 +121,6 @@ public class EventsChecker {
     @Autowired
     private FL401ResubmitChecker fl401ResubmitChecker;
 
-    @Autowired
-    private ConsentToApplicationChecker consentToApplicationChecker;
-
-    @Autowired
-    private KeepDetailsPrivateChecker keepDetailsPrivateChecker;
-
     private Map<Event, EventChecker> eventStatus = new EnumMap<>(Event.class);
 
     @PostConstruct
@@ -164,9 +154,6 @@ public class EventsChecker {
         eventStatus.put(FL401_OTHER_PROCEEDINGS, fl401OtherProceedingsChecker);
         eventStatus.put(FL401_SOT_AND_SUBMIT, fl401StatementOfTruthAndSubmitChecker);
         eventStatus.put(FL401_RESUBMIT, fl401ResubmitChecker);
-
-        eventStatus.put(CONSENT_TO_APPLICATION, consentToApplicationChecker);
-        eventStatus.put(KEEP_DETAILS_PRIVATE, keepDetailsPrivateChecker);
 
     }
 
