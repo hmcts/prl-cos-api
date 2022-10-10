@@ -126,7 +126,7 @@ public class PrlAppsConstants {
 
     public static final String CITIZEN_UPLOADED_DOCUMENT = "citizenUploadedDocument";
 
-    public static final String EVENT_CITIZEN_RESPONSE_C7_DOCUMENT = "citizenResponseC7Document";
+    public static final String REVIEW_AND_SUBMIT = "reviewAndSubmit";
 
     public static final String CITIZEN_HINT = "CITIZEN";
 
