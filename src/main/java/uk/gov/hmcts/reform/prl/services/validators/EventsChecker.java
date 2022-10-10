@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.respondent.ConsentToApplicationChecker;
+import uk.gov.hmcts.reform.prl.services.respondent.KeepDetailsPrivateChecker;
 
 import java.util.EnumMap;
 import java.util.Map;

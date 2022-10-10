@@ -1,6 +1,7 @@
-package uk.gov.hmcts.reform.prl.services.validators;
+package uk.gov.hmcts.reform.prl.services.respondent;
 
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.validators.EventChecker;
 
 public class KeepDetailsPrivateChecker implements EventChecker {
 
