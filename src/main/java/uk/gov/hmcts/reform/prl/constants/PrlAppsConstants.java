@@ -55,6 +55,9 @@ public class PrlAppsConstants {
     public static final String CASE_DATE_AND_TIME_SUBMITTED_FIELD = "caseSubmittedTimeStamp";
     public static final String STATE_FIELD = "state";
 
+    public static final String DOCUMENT_FIELD_C7 = "c7Document";
+    public static final String C7_HINT = "C7";
+
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
 
     public static final String SEARCH_RESULTS_POSTCODE_POSTCODE_SERVICE_AREA = "search/results?postcode={postcode}&serviceArea=";

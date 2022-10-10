@@ -326,6 +326,8 @@ document:
     citizen:
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
+      respondent_c7_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
+      respondent_c7_file_name: Citizen_Uploaded_Statement.pdf
 
 southampton:
   court:
