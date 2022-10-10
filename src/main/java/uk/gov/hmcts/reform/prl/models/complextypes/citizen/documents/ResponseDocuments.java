@@ -13,7 +13,6 @@ public class ResponseDocuments {
     private final String parentDocumentType;
     private final String documentType;
     private final String partyName;
-    private final String isApplicant;
     private final String uploadedBy;
     private final LocalDate dateCreated;
     private final DocumentDetails documentDetails;
