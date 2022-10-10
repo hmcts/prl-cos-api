@@ -14,17 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-import static uk.gov.hmcts.reform.prl.enums.Event.ABILITY_TO_PARICIPATE;
-import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_COURT;
-import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.CONSENT_TO_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.CURRENT_OR_PAST_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.KEEP_DETAILS_PRIVATE;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_ALLEGATIONS_OF_HARM;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_INTERNATIONAL_ELEMENT;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_MAIM;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_SUBMIT;
 
 @Slf4j
 @Service
@@ -58,18 +49,8 @@ public class RespondentTaskListService {
     private List<Event> getEvents(CaseData caseData) {
         log.info("Case Data fro respondent: ========================{}====================", caseData);
         return new ArrayList<>(List.of(
-            CASE_NAME,
             CONSENT_TO_APPLICATION,
-            KEEP_DETAILS_PRIVATE,
-            EDIT_CONTACT_DETAILS,
-            ATTENDING_THE_COURT,
-            RESPONDENT_MAIM,
-            CURRENT_OR_PAST_PROCEEDINGS,
-            RESPONDENT_ALLEGATIONS_OF_HARM,
-            RESPONDENT_INTERNATIONAL_ELEMENT,
-            ABILITY_TO_PARICIPATE,
-            RESPONDENT_SUBMIT
-
+            KEEP_DETAILS_PRIVATE
         ));
     }
 }
