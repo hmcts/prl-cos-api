@@ -14,17 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-import static uk.gov.hmcts.reform.prl.enums.Event.ABILITY_TO_PARICIPATE;
-import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.Event.CONSENT_TO_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.CURRENT_OR_PAST_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.KEEP_DETAILS_PRIVATE;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_ALLEGATIONS_OF_HARM;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DRAFT_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_INTERNATIONAL_ELEMENT;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_MAIM;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_SUBMIT;
 
 @Slf4j
 @Service
