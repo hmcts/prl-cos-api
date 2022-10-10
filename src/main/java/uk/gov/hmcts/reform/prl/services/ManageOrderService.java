@@ -409,6 +409,7 @@ public class ManageOrderService {
                                   )))
                                   .orderRecipients(getAllRecipients(caseData)).build())
                 .dateCreated(dateTime.now())
+                .typeOfOrder(caseData.getManageOrders().getSelectTypeOfOrder().getDisplayedValue())
                 .build();
         } else {
             return OrderDetails.builder().orderType(flagSelectedOrder)
@@ -449,7 +450,7 @@ public class ManageOrderService {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
 
-            List<String> applicantSolicitorNames  = applicants.stream()
+            List<String> applicantSolicitorNames = applicants.stream()
                 .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
                     ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
                     : APPLICANT_SOLICITOR)
@@ -559,12 +560,14 @@ public class ManageOrderService {
             .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
                                                  caseData.getApplicantsFL401().getLastName()
             ))
-            .manageOrdersRespondent(String.format(PrlAppsConstants.FORMAT, caseData.getRespondentsFL401().getFirstName(),
+            .manageOrdersRespondent(String.format(PrlAppsConstants.FORMAT,
+                                                  caseData.getRespondentsFL401().getFirstName(),
                                                   caseData.getRespondentsFL401().getLastName()
             ))
-            .manageOrdersApplicantReference(String.format(PrlAppsConstants.FORMAT,
-                                                          caseData.getApplicantsFL401().getRepresentativeFirstName(),
-                                                          caseData.getApplicantsFL401().getRepresentativeLastName()
+            .manageOrdersApplicantReference(String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
             .build();
 
@@ -661,15 +664,17 @@ public class ManageOrderService {
     public CaseData getFL402FormData(CaseData caseData) {
 
         log.info("Court name before FL402 order {}", caseData.getCourtName());
-        ManageOrders orderData =  ManageOrders.builder()
+        ManageOrders orderData = ManageOrders.builder()
             .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
             .manageOrdersFl402CourtName(caseData.getCourtName())
-            .manageOrdersFl402Applicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
+            .manageOrdersFl402Applicant(String.format(PrlAppsConstants.FORMAT,
+                                                      caseData.getApplicantsFL401().getFirstName(),
                                                       caseData.getApplicantsFL401().getLastName()
             ))
-            .manageOrdersFl402ApplicantRef(String.format(PrlAppsConstants.FORMAT,
-                                                         caseData.getApplicantsFL401().getRepresentativeFirstName(),
-                                                         caseData.getApplicantsFL401().getRepresentativeLastName()
+            .manageOrdersFl402ApplicantRef(String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
             .build();
         log.info("Court name after FL402 order set{}", orderData.getManageOrdersFl402CourtName());
