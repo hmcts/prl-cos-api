@@ -1,9 +1,8 @@
-package uk.gov.hmcts.reform.prl.services.validators.respondent;
+package uk.gov.hmcts.reform.prl.services.validators;
 
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.validators.EventChecker;
 
-public class ConsentToApplicationChecker implements EventChecker {
+public class KeepDetailsPrivateChecker implements EventChecker {
 
     @Override
     public boolean isFinished(CaseData caseData) {
