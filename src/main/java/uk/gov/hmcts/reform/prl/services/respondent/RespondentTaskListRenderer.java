@@ -21,16 +21,9 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
-import static uk.gov.hmcts.reform.prl.enums.Event.ABILITY_TO_PARICIPATE;
-import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.Event.CONSENT_TO_APPLICATION;
-import static uk.gov.hmcts.reform.prl.enums.Event.CURRENT_OR_PAST_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.KEEP_DETAILS_PRIVATE;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_DRAFT_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_INTERNATIONAL_ELEMENT;
-import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_MAIM;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_SUBMIT;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskSection.newSection;
 
@@ -67,35 +60,12 @@ public class RespondentTaskListRenderer {
             .withTask(tasks.get(CONSENT_TO_APPLICATION));
 
         final TaskSection yourDetails = newSection("2. Your details")
-            .withTask(tasks.get(KEEP_DETAILS_PRIVATE))
-            .withTask(tasks.get(EDIT_CONTACT_DETAILS))
-            .withTask(tasks.get(ATTENDING_THE_COURT));
+            .withTask(tasks.get(KEEP_DETAILS_PRIVATE));
 
-        final TaskSection applicationDetails = newSection("3. Application details")
-            .withTask(tasks.get(RESPONDENT_MAIM))
-            .withTask(tasks.get(CURRENT_OR_PAST_PROCEEDINGS));
-
-        final TaskSection safetyDetails = newSection("4. Safety concerns")
-            .withTask(tasks.get(RESPONDENT_ALLEGATIONS_OF_HARM));
-
-        final TaskSection additionalInformation = newSection("5. Additional information")
-            .withTask(tasks.get(RESPONDENT_INTERNATIONAL_ELEMENT))
-            .withTask(tasks.get(ABILITY_TO_PARICIPATE));
-
-        final TaskSection pdfApplication = newSection("6. View PDF response")
-            .withTask(tasks.get(RESPONDENT_DRAFT_DOCUMENT));
-
-        final TaskSection submit = newSection("7. Submit ")
-                .withTask(tasks.get(RESPONDENT_SUBMIT));
-
-        return Stream.of(applicationDetails,
+        return Stream.of(
                          consentDetails,
-                         yourDetails,
-                         applicationDetails,
-                         safetyDetails,
-                         additionalInformation,
-                         pdfApplication,
-                         submit)
+                         yourDetails
+                         )
             .filter(TaskSection::hasAnyTask)
             .collect(toList());
     }
@@ -111,7 +81,7 @@ public class RespondentTaskListRenderer {
 
         section.add(HORIZONTAL_LINE);
         sec.getTasks().forEach(task -> {
-            section.addAll(renderTask(task));
+            //section.addAll(renderTask(task));
             section.add(HORIZONTAL_LINE);
         });
 
