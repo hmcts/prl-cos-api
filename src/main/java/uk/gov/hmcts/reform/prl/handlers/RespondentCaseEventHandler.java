@@ -33,7 +33,7 @@ public class RespondentCaseEventHandler {
     public void handleRespondentCaseDataChange(final CaseDataChanged event) {
         final CaseData caseData = event.getCaseData();
 
-        if(State.CASE_HEARING.equals(caseData.getState())) {
+        if (State.CASE_HEARING.equals(caseData.getState())) {
 
             final String taskList = getRespondentUpdatedTaskList(caseData);
 
