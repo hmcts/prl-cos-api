@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -32,16 +33,19 @@ public class RespondentCaseEventHandler {
     public void handleRespondentCaseDataChange(final CaseDataChanged event) {
         final CaseData caseData = event.getCaseData();
 
-        final String taskList = getRespondentUpdatedTaskList(caseData);
+        if(State.CASE_HEARING.equals(caseData.getState())) {
 
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            "internal-update-respondent-task-list",
-            Map.of("taskList", taskList,"id",String.valueOf(caseData.getId()))
+            final String taskList = getRespondentUpdatedTaskList(caseData);
 
-        );
+            coreCaseDataService.triggerEvent(
+                JURISDICTION,
+                CASE_TYPE,
+                caseData.getId(),
+                "internal-update-respondent-task-list",
+                Map.of("taskList", taskList, "id", String.valueOf(caseData.getId()))
+
+            );
+        }
     }
 
     private String getRespondentUpdatedTaskList(CaseData caseData) {
