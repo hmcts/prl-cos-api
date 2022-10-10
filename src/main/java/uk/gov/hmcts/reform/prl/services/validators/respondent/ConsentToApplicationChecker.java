@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.prl.services.validators.respondent;
 
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.validators.EventChecker;
 
+@Service
 public class ConsentToApplicationChecker implements EventChecker {
 
     @Override
