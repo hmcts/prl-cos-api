@@ -34,6 +34,15 @@ public class RespondentTaskListService {
     }
 
     private TaskState getTaskState(CaseData caseData, Event event) {
+        if (eventsChecker.isFinished(event, caseData)) {
+            return TaskState.FINISHED;
+        }
+        if (eventsChecker.hasMandatoryCompleted(event, caseData)) {
+            return TaskState.MANDATORY_COMPLETED;
+        }
+        if (eventsChecker.isStarted(event, caseData)) {
+            return TaskState.IN_PROGRESS;
+        }
         return TaskState.NOT_STARTED;
     }
 
