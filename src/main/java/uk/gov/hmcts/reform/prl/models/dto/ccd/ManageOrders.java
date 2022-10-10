@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildSelectorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentOccupationEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -127,7 +126,6 @@ public class ManageOrders {
     private final String underTakingExpiryTime;
     private final YesOrNo underTakingFormSign;
 
-    private final SelectTypeOfOrderEnum selectTypeOfOrder;
     private final YesOrNo isTheOrderByConsent;
     @JsonProperty("judgeOrMagistrateTitle")
     private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;

@@ -409,7 +409,7 @@ public class ManageOrderService {
                                   )))
                                   .orderRecipients(getAllRecipients(caseData)).build())
                 .dateCreated(dateTime.now())
-                .typeOfOrder(caseData.getManageOrders().getSelectTypeOfOrder().getDisplayedValue())
+                .typeOfOrder(caseData.getSelectTypeOfOrder().getDisplayedValue())
                 .build();
         } else {
             return OrderDetails.builder().orderType(flagSelectedOrder)

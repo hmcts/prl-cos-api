@@ -11,6 +11,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -85,6 +86,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .children(listOfChildren)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
@@ -599,6 +601,7 @@ public class ManageOrderServiceTest {
             .applicants(partyDetails)
             .respondents(partyDetails)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -665,6 +668,7 @@ public class ManageOrderServiceTest {
             .orderCollection(new ArrayList<>())
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -741,6 +745,7 @@ public class ManageOrderServiceTest {
             .orderRecipients(recipientList)
             .applicants(partyDetails)
             .respondents(partyDetails)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
@@ -770,6 +775,7 @@ public class ManageOrderServiceTest {
             .orderCollection(new ArrayList<>())
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -956,6 +962,7 @@ public class ManageOrderServiceTest {
             .applicants(partyDetails)
             .respondents(partyDetails)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -997,6 +1004,7 @@ public class ManageOrderServiceTest {
             .applicants(partyDetails)
             .respondents(partyDetails)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -1067,6 +1075,7 @@ public class ManageOrderServiceTest {
             .applicants(partyDetails)
             .respondents(partyDetails)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
