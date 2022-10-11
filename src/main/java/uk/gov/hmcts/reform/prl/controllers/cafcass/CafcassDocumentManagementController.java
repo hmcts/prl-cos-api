@@ -58,8 +58,7 @@ public class CafcassDocumentManagementController {
             }
         } catch (ResponseStatusException e) {
             return status(FORBIDDEN).body(new ApiError(e.getMessage()));
-        } catch (
-            FeignException feignException) {
+        } catch (FeignException feignException) {
             return status(feignException.status()).body(new ApiError(feignException.getMessage()));
         } catch (Exception e) {
             return status(INTERNAL_SERVER_ERROR).body(new ApiError(e.getMessage()));

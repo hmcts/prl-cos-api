@@ -31,7 +31,7 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTHORIZATION;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTHORIZATION;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public  class CafCassControllerTest {
+public class CafCassControllerTest {
 
     @InjectMocks
     private CafCassController cafCassController;
@@ -64,8 +64,10 @@ public  class CafCassControllerTest {
             "endDate"
         );
         CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
-        assertEquals(objectMapper.writeValueAsString(expectedCafCassResponse),
-                     objectMapper.writeValueAsString(realCafCassResponse));
+        assertEquals(
+            objectMapper.writeValueAsString(expectedCafCassResponse),
+            objectMapper.writeValueAsString(realCafCassResponse)
+        );
         assertEquals(realCafCassResponse.getTotal(), 2);
         assertEquals(realCafCassResponse.getCases().size(), 2);
     }
@@ -81,7 +83,7 @@ public  class CafCassControllerTest {
             "endDate"
         );
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        final ApiError body = (ApiError)response.getBody();
+        final ApiError body = (ApiError) response.getBody();
         assertEquals("403 FORBIDDEN", body.getMessage());
 
     }
@@ -91,7 +93,8 @@ public  class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, "startDate",
-                                         "endDate")).thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
+                                         "endDate"
+        )).thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
         final ResponseEntity response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
@@ -106,7 +109,8 @@ public  class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, "startDate",
-                                         "endDate")).thenThrow(feignException(HttpStatus.UNAUTHORIZED.value(), "Unauthorised"));
+                                         "endDate"
+        )).thenThrow(feignException(HttpStatus.UNAUTHORIZED.value(), "Unauthorised"));
         final ResponseEntity response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
@@ -121,14 +125,15 @@ public  class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, "startDate",
-                                         "endDate")).thenThrow(new RuntimeException());
+                                         "endDate"
+        )).thenThrow(new RuntimeException());
         final ResponseEntity response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
             "startDate",
             "endDate"
         );
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR , response.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
 
     public static FeignException feignException(int status, String message) {
