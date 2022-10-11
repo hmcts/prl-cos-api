@@ -4,8 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentDetails;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
@@ -39,7 +36,7 @@ public class RespondentSubmitResponseController {
 
     @PostMapping(value = "{caseId}/{eventId}/respondent-submit-response", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Respondent submit response")
-    public ResponseEntity submitRespondentResponse(
+    public CaseData submitRespondentResponse(
         @Valid @NotNull @RequestBody CaseData caseData,
         @PathVariable("caseId") String caseId,
         @PathVariable("eventId") String eventId,
@@ -64,20 +61,15 @@ public class RespondentSubmitResponseController {
                 .citizenUploadedDocumentList(uploadedDocumentsList).build();
 
 
-            caseService.updateCase(
+        }
+        caseService.updateCase(
                 caseData,
                 authorisation,
                 s2sToken,
                 caseId,
                 CITIZEN_UPLOADED_DOCUMENT
-            );
+        );
 
-            return ResponseEntity.status(HttpStatus.OK).body(
-                DocumentDetails.builder().documentId(uploadDocumentElement.getId().toString())
-                    .documentName(uploadedDocuments.getCitizenDocument().getDocumentFileName()).build());
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.ordinal()).body(new DocumentDetails());
-        }
-
+        return caseData;
     }
 }
