@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -34,14 +33,8 @@ import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class RespondentSubmitResponseControllerTest {
-
-    @Mock
-    CoreCaseDataApi coreCaseDataApi;
-
-    @Mock
-    ObjectMapper objectMapper;
 
     @Mock
     CaseService caseService;
@@ -116,12 +109,11 @@ public class RespondentSubmitResponseControllerTest {
                                                  .build()).citizenDocument(Document.builder().build()).build()
             );
 
-        Mockito.when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
-        Mockito.when(caseService.updateCase(c100CaseData,"auth", "s2s","123456789123L","test-event"))
+        Mockito.when(caseService.updateCase(c100CaseData,"auth", "s2s","123456789123","test-event"))
                 .thenReturn(CaseDetails
                            .builder().data(stringObjectMap).build());
         respondentSubmitResponseController
-            .submitRespondentResponse(c100CaseData,"123456789123L","test-event","auth","s2s");
+            .submitRespondentResponse(c100CaseData,"123456789123","test-event","auth","s2s");
 
 
         Mockito.verify(documentGenService, Mockito.times(1)).generateC7FinalDocument("auth", c100CaseData);
@@ -182,15 +174,14 @@ public class RespondentSubmitResponseControllerTest {
             .build();
         Map<String, Object> stringObjectMap = c100CaseData.toMap(new ObjectMapper());
         Mockito.when(documentGenService.generateC7FinalDocument("auth",c100CaseData))
-            .thenReturn(UploadedDocuments.builder().build()
+            .thenReturn(UploadedDocuments.builder().citizenDocument(Document.builder().documentFileName("test").build()).build()
             );
 
-        Mockito.when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
-        Mockito.when(caseService.updateCase(c100CaseData,"auth", "s2s","123456789123L","test-event"))
+        Mockito.when(caseService.updateCase(c100CaseData,"auth", "s2s","123456789123","test-event"))
                 .thenReturn(CaseDetails
                            .builder().data(stringObjectMap).build());
         respondentSubmitResponseController
-            .submitRespondentResponse(c100CaseData,"123456789123L","test-event","auth","s2s");
+            .submitRespondentResponse(c100CaseData,"123456789123","test-event","auth","s2s");
 
 
         Mockito.verify(documentGenService, Mockito.times(1)).generateC7FinalDocument("auth", c100CaseData);
