@@ -8,8 +8,13 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.*;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Data;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Value;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,14 +33,16 @@ public class BundleCreateRequestMapper {
             caseData.getCourtId()).build();
     }
 
-    private uk.gov.hmcts.reform.prl.models.dto.bundle.CaseData mapCaseData(CaseData caseData,String bundleConfigFileName) {
+    private uk.gov.hmcts.reform.prl.models.dto.bundle.CaseData mapCaseData(CaseData caseData, String bundleConfigFileName) {
         return uk.gov.hmcts.reform.prl.models.dto.bundle.CaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
-            bundleConfigFileName).data(Data.builder().furtherEvidences(mapFurtherEvidencesFromCaseData(caseData.getFurtherEvidences())).otherDocuments(
-            mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).build()).build();
+                bundleConfigFileName)
+            .data(Data.builder().furtherEvidences(mapFurtherEvidencesFromCaseData(caseData.getFurtherEvidences())).otherDocuments(
+                mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).build()).build();
 
     }
 
-    private List<uk.gov.hmcts.reform.prl.models.dto.bundle.FurtherEvidence> mapFurtherEvidencesFromCaseData(List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
+    private List<uk.gov.hmcts.reform.prl.models.dto.bundle.FurtherEvidence> mapFurtherEvidencesFromCaseData(
+        List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
         List<uk.gov.hmcts.reform.prl.models.dto.bundle.FurtherEvidence> furtherEvidences = new ArrayList<>();
         Optional<List<Element<FurtherEvidence>>> existingFurtherEvidences = ofNullable(furtherEvidencesFromCaseData);
         if (existingFurtherEvidences.isEmpty()) {
@@ -49,18 +56,20 @@ public class BundleCreateRequestMapper {
             .forEach(furtherEvidenceElement -> {
                 Document furtherEvidenceDocument = furtherEvidenceElement.getValue().getDocumentFurtherEvidence();
                 furtherEvidences.add(uk.gov.hmcts.reform.prl.models.dto.bundle.FurtherEvidence.builder().id(
-                        furtherEvidenceElement.getId().toString()).
-                                         value(Value.builder().documentFileName(furtherEvidenceDocument.getDocumentFileName()).documentLink(
-                                                 DocumentLink.builder().documentFilename(furtherEvidenceDocument.getDocumentFileName()).
-                                                     documentUrl(furtherEvidenceDocument.getDocumentUrl()).documentBinaryUrl(
-                                                         furtherEvidenceDocument.getDocumentBinaryUrl()).build()).
-                                                   typeOfDocumentFurtherEvidence(furtherEvidenceElement.getValue().getTypeOfDocumentFurtherEvidence().getId()).build()).build());
+                    (null != furtherEvidenceElement.getId()) ? furtherEvidenceElement.getId().toString() : null)
+                    .value(Value.builder().documentFileName(furtherEvidenceDocument.getDocumentFileName()).documentLink(
+                            DocumentLink.builder().documentFilename(furtherEvidenceDocument.getDocumentFileName())
+                                .documentUrl(furtherEvidenceDocument.getDocumentUrl()).documentBinaryUrl(
+                                    furtherEvidenceDocument.getDocumentBinaryUrl()).build())
+                        .typeOfDocumentFurtherEvidence(furtherEvidenceElement.getValue().getTypeOfDocumentFurtherEvidence().getId()).build())
+                    .build());
 
             });
         return furtherEvidences;
     }
 
-    private List<uk.gov.hmcts.reform.prl.models.dto.bundle.OtherDocument> mapOtherDocumentsFromCaseData(List<Element<OtherDocuments>> otherDocumentsFromCaseData) {
+    private List<uk.gov.hmcts.reform.prl.models.dto.bundle.OtherDocument> mapOtherDocumentsFromCaseData(
+        List<Element<OtherDocuments>> otherDocumentsFromCaseData) {
         List<uk.gov.hmcts.reform.prl.models.dto.bundle.OtherDocument> otherDocuments = new ArrayList<>();
         Optional<List<Element<OtherDocuments>>> existingOtherDocuments = ofNullable(otherDocumentsFromCaseData);
         if (existingOtherDocuments.isEmpty()) {
@@ -74,12 +83,12 @@ public class BundleCreateRequestMapper {
             .forEach(otherDocumentsElement -> {
                 Document otherDocument = otherDocumentsElement.getValue().getDocumentOther();
                 otherDocuments.add(uk.gov.hmcts.reform.prl.models.dto.bundle.OtherDocument.builder().id(
-                        otherDocumentsElement.getId().toString()).
-                                       value(Value.builder().documentFileName(otherDocument.getDocumentFileName()).documentLink(
-                                               DocumentLink.builder().documentFilename(otherDocument.getDocumentFileName()).
-                                                   documentUrl(otherDocument.getDocumentUrl()).documentBinaryUrl(
-                                                       otherDocument.getDocumentBinaryUrl()).build()).
-                                                 typeOfDocumentFurtherEvidence(otherDocumentsElement.getValue().getDocumentTypeOther().getId()).build()).build());
+                    (null != otherDocumentsElement.getId() ? otherDocumentsElement.getId().toString() : null))
+                    .value(Value.builder().documentFileName(otherDocument.getDocumentFileName()).documentLink(
+                            DocumentLink.builder().documentFilename(otherDocument.getDocumentFileName())
+                                .documentUrl(otherDocument.getDocumentUrl()).documentBinaryUrl(
+                                    otherDocument.getDocumentBinaryUrl()).build())
+                        .typeOfDocumentFurtherEvidence(otherDocumentsElement.getValue().getDocumentTypeOther().getId()).build()).build());
 
             });
         return otherDocuments;
