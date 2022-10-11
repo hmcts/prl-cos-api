@@ -772,11 +772,11 @@ public class DocumentGenService {
 
     public UploadedDocuments generateC7FinalDocument(String authorisation, CaseData caseData) throws Exception {
 
-        String parentDocumentType = "";
-        String documentType = "";
+        String parentDocumentType = "Respondent's documents";
+        String documentType = "response to the request for child arrangements";
         LocalDate today = LocalDate.now();
         String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-        String isApplicant = "";
+        String isApplicant = "No";
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
         String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
         String fileName = userDetails.getFullName() + "'s-response_child_arrangement" + currentDate + SUBMITTED_PDF;
