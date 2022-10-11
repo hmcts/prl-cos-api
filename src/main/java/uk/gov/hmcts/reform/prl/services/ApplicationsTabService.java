@@ -852,9 +852,12 @@ public class ApplicationsTabService implements TabService {
             .map(ApplicantStopFromRespondentDoingEnum::getDisplayedValue)
             .collect(Collectors.toList());
 
-        List<String> applicantStopFromRespondentDoingToChildEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild().stream()
-            .map(ApplicantStopFromRespondentDoingToChildEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+        List<String> applicantStopFromRespondentDoingToChildEnum = new ArrayList<>();
+        if (respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild() != null) {
+            applicantStopFromRespondentDoingToChildEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild().stream()
+                .map(ApplicantStopFromRespondentDoingToChildEnum::getDisplayedValue)
+                .collect(Collectors.toList());
+        }
 
         rs.applicantWantToStopFromRespondentDoing(String.join(", ", applicantStopFromRespondentDoingEnum))
             .applicantWantToStopFromRespondentDoingToChild(String.join(", ", applicantStopFromRespondentDoingToChildEnum))
@@ -896,6 +899,7 @@ public class ApplicationsTabService implements TabService {
         HomeDetails.HomeDetailsBuilder builder = HomeDetails.builder();
         Home home = caseData.getHome();
 
+        //todo null checks need to add here
         List<String> peopleLivingAtThisAddressEnum = home.getPeopleLivingAtThisAddress().stream()
             .map(PeopleLivingAtThisAddressEnum::getDisplayedValue)
             .collect(Collectors.toList());
@@ -923,7 +927,7 @@ public class ApplicationsTabService implements TabService {
             .livingSituation(String.join(", ", livingSituationEnum))
             .isThereMortgageOnProperty(home.getIsThereMortgageOnProperty());
 
-        if (home.getMortgages() != null) {
+        if (home.getMortgages() != null && home.getMortgages().getMortgageNamedAfter() != null) {
             Mortgage mortgage = home.getMortgages();
 
             List<String> mortgageNameAft = mortgage.getMortgageNamedAfter().stream()
@@ -935,8 +939,7 @@ public class ApplicationsTabService implements TabService {
                 .mortgageNamedAfter(String.join(", ", mortgageNameAft))
                 .mortgageLenderName(mortgage.getMortgageLenderName());
         }
-
-        if (home.getLandlords() != null) {
+        if (home.getLandlords() != null && home.getLandlords().getMortgageNamedAfterList() != null) {
             Landlord landlord = home.getLandlords();
 
             List<String> landlordNamedAft = landlord.getMortgageNamedAfterList().stream()

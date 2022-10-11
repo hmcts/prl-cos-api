@@ -529,7 +529,7 @@ public class CaseData implements MappableObject {
     @JsonProperty("viewPDFlinkLabelText")
     private String viewPdfLinkLabelText;
 
-    private List<Element<CaseInvite>> respondentCaseInvites;
+    private List<Element<CaseInvite>> caseInvites;
 
 
     /**
@@ -640,7 +640,12 @@ public class CaseData implements MappableObject {
     private final ApplicantAge applicantAge;
     private final String specialCourtName;
     private YesOrNo courtNavApproved;
+    private YesOrNo hasDraftOrder;
     private String caseOrigin;
     private String numberOfAttachments;
+
+    private String previewDraftAnOrder;
+
+    private String citizenUploadedStatement;
 
 }

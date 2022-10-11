@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.models.dto.citizen;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,10 +16,10 @@ import java.util.Map;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Schema(description = "Request body model for Document Generation Request")
+@Schema(description = "Request body model for Document Storing Request")
 @Builder(toBuilder = true)
-public class GenerateAndUploadDocumentRequest {
-    @JsonProperty("values")
-    private Map<String, String> values;
+public class UploadedDocumentRequest {
 
+    @JsonProperty("values")
+    private Map<String, Object> values;
 }
