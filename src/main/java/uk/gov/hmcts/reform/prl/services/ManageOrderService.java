@@ -409,7 +409,8 @@ public class ManageOrderService {
                                   )))
                                   .orderRecipients(getAllRecipients(caseData)).build())
                 .dateCreated(dateTime.now())
-                .typeOfOrder(caseData.getSelectTypeOfOrder().getDisplayedValue())
+                .typeOfOrder(caseData.getSelectTypeOfOrder() != null
+                                 ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
                 .build();
         } else {
             return OrderDetails.builder().orderType(flagSelectedOrder)
@@ -422,7 +423,8 @@ public class ManageOrderService {
                                   )))
                                   .orderRecipients(getAllRecipients(caseData)).build())
                 .dateCreated(dateTime.now())
-                .typeOfOrder(caseData.getSelectTypeOfOrder().getDisplayedValue())
+                .typeOfOrder(caseData.getSelectTypeOfOrder() != null
+                                 ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
                 .build();
         }
     }
@@ -561,9 +563,10 @@ public class ManageOrderService {
             .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
                                                  caseData.getApplicantsFL401().getLastName()
             ))
-            .manageOrdersRespondent(String.format(PrlAppsConstants.FORMAT,
-                                                  caseData.getRespondentsFL401().getFirstName(),
-                                                  caseData.getRespondentsFL401().getLastName()
+            .manageOrdersRespondent(String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getRespondentsFL401().getFirstName(),
+                caseData.getRespondentsFL401().getLastName()
             ))
             .manageOrdersApplicantReference(String.format(
                 PrlAppsConstants.FORMAT,
@@ -668,9 +671,10 @@ public class ManageOrderService {
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
             .manageOrdersFl402CourtName(caseData.getCourtName())
-            .manageOrdersFl402Applicant(String.format(PrlAppsConstants.FORMAT,
-                                                      caseData.getApplicantsFL401().getFirstName(),
-                                                      caseData.getApplicantsFL401().getLastName()
+            .manageOrdersFl402Applicant(String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getApplicantsFL401().getFirstName(),
+                caseData.getApplicantsFL401().getLastName()
             ))
             .manageOrdersFl402ApplicantRef(String.format(
                 PrlAppsConstants.FORMAT,

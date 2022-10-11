@@ -481,7 +481,7 @@ public class DraftAnOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(draftOrder.getOtherDetails().getCreatedBy())
                               .dateCreated(dateTime.now())
-                              .status("JUDGE_COMMENTS_ENTERED").build())
+                              .status("Judge reviewed").build())
             .orderText(caseData.getPreviewDraftAnOrder())
             .judgeNotes(caseData.getMessageToCourtAdmin())
             .adminNotes(caseData.getCourtAdminNotes())
@@ -490,6 +490,8 @@ public class DraftAnOrderService {
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData) {
         return DraftOrder.builder().orderType(caseData.getSelectedOrder())
+            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
+                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
             .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
             .orderDocument(caseData.getSolicitorOrJudgeDraftOrderDoc())
             .otherDetails(OtherDraftOrderDetails.builder()
@@ -599,6 +601,7 @@ public class DraftAnOrderService {
         }
         orderCollection.add(convertDraftOrderToFinal(auth, caseData, draftOrder));
         orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
+        log.info("final collection {}", orderCollection);
         return orderCollection;
     }
 
@@ -616,10 +619,11 @@ public class DraftAnOrderService {
         }
         log.info("*************courtAdminNotes {}", caseData.getPreviewDraftAnOrder());
         log.info("***************draftorder {}", draftOrder);
-        log.info("*************courtAdminNotes {}", caseData.getCourtAdminNotes());
+        log.info("*************caseData.getSelectTypeOfOrder() {}", caseData.getSelectTypeOfOrder());
         return element(OrderDetails.builder()
                            .orderType(draftOrder.getOrderTypeId())
-                           .typeOfOrder(draftOrder.getTypeOfOrder())
+                           .typeOfOrder(caseData.getSelectTypeOfOrder() != null
+                                            ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
                            .orderDocument(
                                Document.builder().documentUrl(generatedDocumentInfo.getUrl())
                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
