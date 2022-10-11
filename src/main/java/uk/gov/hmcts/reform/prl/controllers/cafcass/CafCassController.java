@@ -55,15 +55,20 @@ public class CafCassController extends AbstractCallbackController {
             if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))) {
                 log.info("processing request after authorization");
-                return ResponseEntity.ok(caseDataService.getCaseData(authorisation, serviceAuthorisation, startDate, endDate));
+                return ResponseEntity.ok(caseDataService.getCaseData(
+                    authorisation,
+                    serviceAuthorisation,
+                    startDate,
+                    endDate
+                ));
 
             } else {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN);
             }
         } catch (ResponseStatusException e) {
-           return status(FORBIDDEN).body(new ApiError(e.getMessage()));
+            return status(FORBIDDEN).body(new ApiError(e.getMessage()));
         } catch (FeignException feignException) {
-            return  status(feignException.status()).body(new ApiError(feignException.getMessage()));
+            return status(feignException.status()).body(new ApiError(feignException.getMessage()));
         } catch (Exception e) {
             return status(INTERNAL_SERVER_ERROR).body(new ApiError(e.getMessage()));
         }
