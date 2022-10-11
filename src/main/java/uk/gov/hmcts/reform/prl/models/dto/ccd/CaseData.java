@@ -642,5 +642,6 @@ public class CaseData implements MappableObject {
     private YesOrNo courtNavApproved;
     private String caseOrigin;
     private String numberOfAttachments;
-
+    private String caseBundlesData;
+    private String bundleConfiguration;
 }
