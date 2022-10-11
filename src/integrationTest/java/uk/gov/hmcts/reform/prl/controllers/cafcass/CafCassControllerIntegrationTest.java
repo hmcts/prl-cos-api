@@ -14,19 +14,20 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.ENGLAND_POSTCODE_NATIONALCODE;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.CAFCASS_END_DATE_PARAM;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.CAFCASS_END_DATE_PARAM_VALUE;
@@ -52,6 +53,12 @@ public class CafCassControllerIntegrationTest {
     private CoreCaseDataApi coreCaseDataApi;
 
     @MockBean
+    private AuthorisationService authorisationService;
+
+    @MockBean
+    private AuthTokenGenerator authTokenGenerator;
+
+    @MockBean
     private PostcodeLookupService postcodeLookupService;
 
     @Before
@@ -67,8 +74,12 @@ public class CafCassControllerIntegrationTest {
 
         SearchResult searchResult = objectMapper.readValue(cafcassResponseStr, SearchResult.class);
 
-        Mockito.when(postcodeLookupService.isValidNationalPostCode(anyString(), eq(ENGLAND_POSTCODE_NATIONALCODE))).thenReturn(true);
-        Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(searchResult);
+        Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
+        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
+        Mockito.when(postcodeLookupService.isValidNationalPostCode(anyString(), anyString())).thenReturn(true);
+        Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(searchResult);
 
         mockMvc.perform(
                         get(SEARCH_CASE_ENDPOINT)
