@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
+
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -25,7 +27,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RequestMapping("/bundle")
-public class BundlingController {
+public class BundlingController extends AbstractCallbackController {
     @Autowired
     private BundlingService bundlingService;
 
@@ -38,8 +40,9 @@ public class BundlingController {
                                                              String authorization,
                                                              @RequestBody CallbackRequest callbackRequest)
         throws Exception {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("bundles",bundlingService.createBundleServiceRequest(callbackRequest, authorization));
+        caseDataUpdated.put("bundles",bundlingService.createBundleServiceRequest(caseData, authorization));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
