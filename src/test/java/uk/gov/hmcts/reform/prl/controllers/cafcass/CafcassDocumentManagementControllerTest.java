@@ -120,7 +120,7 @@ public class CafcassDocumentManagementControllerTest {
     }
 
     @Test
-    public void testInvalidServicAuth_403Forbidden() {
+    public void testInvalidServicAuth_401UnAuthorized() {
         when(authorisationService.authoriseService(any())).thenReturn(false);
         when(authorisationService.authoriseUser(any())).thenReturn(false);
         final ResponseEntity response = cafcassDocumentManagementController.downloadDocument(
@@ -128,7 +128,7 @@ public class CafcassDocumentManagementControllerTest {
             CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN,
             documentId
         );
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
 
