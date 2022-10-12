@@ -342,3 +342,10 @@ springdoc:
       enabled: true
     polymorphic-converter:
       enabled: true
+bundle:
+  api:
+    url: ${BUNDLE_URL:}
+  english:
+    config: ${BUNDLE_ENGLISH_CONFIG:sample-config.yaml}
+  welsh:
+    config: ${BUNDLE_WELSH_CONFIG:sample-config.yaml}
