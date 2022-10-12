@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -77,7 +78,13 @@ public class CaseApplicationResponseController {
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         CaseDetails caseDetailsReturn = null;
-        log.info("BEFORE call to generate Document " + caseId);
+        caseData.getRespondents().stream().map(respondent -> {
+            if (respondent.getId().toString().equalsIgnoreCase(partyId)) {
+                respondent = element(respondent.getValue().toBuilder().currentRespondent(YesOrNo.Yes).build());
+            }
+            return respondent;
+        });
+        log.info("BEFORE call to generate Document {} {}",caseId, partyId);
         if (generateAndUploadDocumentRequest.getValues() != null) {
             Document document = documentGenService.generateSingleDocument(
                     authorisation,
@@ -85,6 +92,7 @@ public class CaseApplicationResponseController {
                     DOCUMENT_C7_BLANK_HINT,
                     false
                 );
+
             List<Element<ResponseDocuments>> responseDocumentsList = new ArrayList<>();
             if (document != null) {
                 if (caseData.getCitizenResponseC7DocumentList() != null) {
@@ -96,7 +104,12 @@ public class CaseApplicationResponseController {
                                                                                  .dateCreated(LocalDate.now())
                                                                                  .build());
                 responseDocumentsList.add(responseDocumentElement);
-
+                caseData.getRespondents().stream().map(respondent -> {
+                    if (respondent.getId().toString().equalsIgnoreCase(partyId)) {
+                        respondent = element(respondent.getValue().toBuilder().currentRespondent(null).build());
+                    }
+                    return respondent;
+                });
                 log.info("Amending the Case Data with citizenResponseC7DocumentList " + caseId);
                 log.info("Call updateCase with event " + REVIEW_AND_SUBMIT + " for case id " + caseId);
                 caseDetailsReturn = caseService.updateCase(
@@ -113,8 +126,6 @@ public class CaseApplicationResponseController {
             caseDetailsReturn.getData(),
             CaseData.class
         );
-
     }
-
 }
 
