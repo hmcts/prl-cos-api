@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,8 +20,8 @@ import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCdamService;
 import java.util.UUID;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.ResponseEntity.status;
 import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATION;
 
@@ -54,10 +53,10 @@ public class CafcassDocumentManagementController {
                 return cafcassCdamService.getDocument(authorisation, serviceAuthorisation, documentId);
 
             } else {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+                throw new ResponseStatusException(UNAUTHORIZED);
             }
         } catch (ResponseStatusException e) {
-            return status(FORBIDDEN).body(new ApiError(e.getMessage()));
+            return status(UNAUTHORIZED).body(new ApiError(e.getMessage()));
         } catch (FeignException feignException) {
             return status(feignException.status()).body(new ApiError(feignException.getMessage()));
         } catch (Exception e) {
