@@ -57,7 +57,7 @@ public class CaseApplicationResponseController {
 
     Integer fileIndex;
 
-    @PostMapping(path = "{caseId}/{partyId}/generate-c7document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON)
     @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Document generated"),
