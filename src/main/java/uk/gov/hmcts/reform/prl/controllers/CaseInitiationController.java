@@ -49,6 +49,8 @@ public class CaseInitiationController extends AbstractCallbackController {
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         final CaseData caseData = getCaseData(caseDetails);
 
+        assignCaseAccessService.assignCaseAccess(caseDetails.getId().toString(),authorisation);
+        log.info("trying to publish the respondent event");
         publishEvent(new CaseDataChanged(caseData));
 
     }

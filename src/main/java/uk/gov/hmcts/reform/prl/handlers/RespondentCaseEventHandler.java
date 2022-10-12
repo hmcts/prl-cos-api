@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import java.util.Map;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentCaseEventHandler {
@@ -42,7 +44,7 @@ public class RespondentCaseEventHandler {
                 CASE_TYPE,
                 caseData.getId(),
                 "internal-update-respondent-task-list",
-                Map.of("taskList", taskList, "id", String.valueOf(caseData.getId()))
+                Map.of("respondentTaskList", taskList)
 
             );
         }
@@ -52,7 +54,7 @@ public class RespondentCaseEventHandler {
         final List<Task> tasks = respondentTaskListService.getTasksForRespondentOpenCase(caseData);
 
         List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
-
+        log.info("Before rendeting the tasklist..");
         return respondentTaskListRenderer
             .render(tasks, eventErrors, caseData);
     }
