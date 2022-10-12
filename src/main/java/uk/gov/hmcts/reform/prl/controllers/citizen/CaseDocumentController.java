@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
@@ -166,28 +167,21 @@ public class CaseDocumentController {
     private void notifyOtherParties(String partyId, CaseData tempCaseData) {
         if (C100_CASE_TYPE.equalsIgnoreCase(tempCaseData.getCaseTypeOfApplication())) {
             tempCaseData.getRespondents().forEach(element -> {
-                if (element.getValue().getUser() != null && !partyId.equalsIgnoreCase(element.getValue().getUser().getIdamId())) {
-                    String email = element.getValue().getEmail();
-                    sendEmailToCitizen(tempCaseData, element.getValue().getFirstName(), email);
-                }
+                findAndSendEmail(partyId, tempCaseData, element.getValue());
             });
             tempCaseData.getApplicants().forEach(element -> {
-                if (element.getValue().getUser() != null && !partyId.equalsIgnoreCase(element.getValue().getUser().getIdamId())) {
-                    String email = element.getValue().getEmail();
-                    sendEmailToCitizen(tempCaseData, element.getValue().getFirstName(), email);
-                }
+                findAndSendEmail(partyId, tempCaseData, element.getValue());
             });
         } else {
-            if (tempCaseData.getRespondentsFL401().getUser() != null
-                  && !partyId.equalsIgnoreCase(tempCaseData.getRespondentsFL401().getUser().getIdamId())) {
-                String email = tempCaseData.getRespondentsFL401().getEmail();
-                sendEmailToCitizen(tempCaseData, tempCaseData.getRespondentsFL401().getFirstName(), email);
-            }
-            if (tempCaseData.getApplicantsFL401().getUser() != null
-                  && !partyId.equalsIgnoreCase(tempCaseData.getApplicantsFL401().getUser().getIdamId())) {
-                String email = tempCaseData.getApplicantsFL401().getEmail();
-                sendEmailToCitizen(tempCaseData, tempCaseData.getApplicantsFL401().getFirstName(), email);
-            }
+            findAndSendEmail(partyId, tempCaseData, tempCaseData.getRespondentsFL401());
+            findAndSendEmail(partyId, tempCaseData, tempCaseData.getApplicantsFL401());
+        }
+    }
+
+    private void findAndSendEmail(String partyId, CaseData tempCaseData, PartyDetails partyDetails) {
+        if (partyDetails.getUser() != null && !partyId.equalsIgnoreCase(partyDetails.getUser().getIdamId())) {
+            String email = partyDetails.getEmail();
+            sendEmailToCitizen(tempCaseData, partyDetails.getFirstName(), email);
         }
     }
 
