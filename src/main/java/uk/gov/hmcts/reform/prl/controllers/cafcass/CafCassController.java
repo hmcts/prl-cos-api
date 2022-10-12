@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.cafcass;
 
+import feign.FeignException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,13 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
 
-import java.io.IOException;
-
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.ResponseEntity.status;
 import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATION;
 
 @Slf4j
@@ -47,15 +50,27 @@ public class CafCassController extends AbstractCallbackController {
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
         @RequestParam(name = "start_date") String startDate,  @RequestParam(name = "end_date") String endDate
-    ) throws IOException {
+    )  {
+        try {
+            if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+                authorisationService.authoriseService(serviceAuthorisation))) {
+                log.info("processing request after authorization");
+                return ResponseEntity.ok(caseDataService.getCaseData(
+                    authorisation,
+                    serviceAuthorisation,
+                    startDate,
+                    endDate
+                ));
 
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
-            authorisationService.authoriseService(serviceAuthorisation))) {
-            log.info("processing request after authorization");
-            return ResponseEntity.ok(caseDataService.getCaseData(authorisation, serviceAuthorisation, startDate, endDate));
-
-        } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            } else {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            }
+        } catch (ResponseStatusException e) {
+            return status(FORBIDDEN).body(new ApiError(e.getMessage()));
+        } catch (FeignException feignException) {
+            return status(feignException.status()).body(new ApiError(feignException.getMessage()));
+        } catch (Exception e) {
+            return status(INTERNAL_SERVER_ERROR).body(new ApiError(e.getMessage()));
         }
 
     }
