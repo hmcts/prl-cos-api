@@ -76,7 +76,7 @@ public class PartyDetails {
     private final String applicantContactInstructions;
     private User user;
     private Response response;
-
+    private YesOrNo currentRespondent;
 
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
