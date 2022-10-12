@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
@@ -63,6 +64,9 @@ public class CafCassControllerFunctionalTest {
     @MockBean
     private AuthorisationService authorisationService;
 
+    @MockBean
+    private AuthTokenGenerator authTokenGenerator;
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
@@ -75,6 +79,7 @@ public class CafCassControllerFunctionalTest {
 
         SearchResult expectedSearchResult = objectMapper.readValue(cafcassResponseStr, SearchResult.class);
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
         Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
         Mockito.when(postcodeLookupService.isValidNationalPostCode(anyString(), anyString())).thenReturn(true);
         Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedSearchResult);
@@ -94,9 +99,9 @@ public class CafCassControllerFunctionalTest {
 
         CafCassResponse actualCafcassResponse = objectMapper.readValue(contentAsString, CafCassResponse.class);
 
-        //assertEquals(expectedSearchResult.getTotal(), actualCafcassResponse.getTotal());
-        //assertEquals(expectedSearchResult.getCases().size(), actualCafcassResponse.getCases().size())
-        //assertEquals(expectedSearchResult.getTotal(), actualCafcassResponse.getCases().size());
+        assertEquals(expectedSearchResult.getTotal(), actualCafcassResponse.getTotal());
+        assertEquals(expectedSearchResult.getCases().size(), actualCafcassResponse.getCases().size());
+        assertEquals(expectedSearchResult.getTotal(), actualCafcassResponse.getCases().size());
 
         if (0 != actualCafcassResponse.getTotal()) {
             for (int responseCaseCnt = 0; responseCaseCnt < actualCafcassResponse.getTotal(); responseCaseCnt++) {
