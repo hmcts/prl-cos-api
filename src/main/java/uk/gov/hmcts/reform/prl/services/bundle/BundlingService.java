@@ -1,9 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.bundle;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.BundleApiClient;
@@ -14,20 +12,21 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 @Service
-@Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundlingService {
-    private final BundleApiClient bundleApiClient;
+    @Autowired
+    private BundleApiClient bundleApiClient;
 
-    private final BundleCreateRequestMapper bundleCreateRequestMapper;
+    @Autowired
+    private BundleCreateRequestMapper bundleCreateRequestMapper;
 
-    private final AuthTokenGenerator authTokenGenerator;
+    @Autowired
+    private AuthTokenGenerator authTokenGenerator;
 
     @Value("${bundle.english.config")
-    private final String bundleEnglishConfig;
+    private String bundleEnglishConfig;
 
     @Value("${bundle.welsh.config")
-    private final String bundleWelshConfig;
+    private String bundleWelshConfig;
 
     public BundleCreateResponse createBundleServiceRequest(CaseData caseData, String authorization) throws Exception {
 
