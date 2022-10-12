@@ -27,6 +27,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTHORIZATION;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTHORIZATION;
 
@@ -73,7 +74,7 @@ public class CafCassControllerTest {
     }
 
     @Test
-    public void testInvalidServicAuth_403Forbidden() {
+    public void testInvalidServicAuth_401UnAuthorized() {
         when(authorisationService.authoriseService(any())).thenReturn(false);
         when(authorisationService.authoriseUser(any())).thenReturn(false);
         final ResponseEntity response = cafCassController.searcCasesByDates(
@@ -82,9 +83,9 @@ public class CafCassControllerTest {
             "startDate",
             "endDate"
         );
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals(UNAUTHORIZED, response.getStatusCode());
         final ApiError body = (ApiError) response.getBody();
-        assertEquals("403 FORBIDDEN", body.getMessage());
+        assertEquals("401 UNAUTHORIZED", body.getMessage());
 
     }
 
@@ -110,14 +111,14 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, "startDate",
                                          "endDate"
-        )).thenThrow(feignException(HttpStatus.UNAUTHORIZED.value(), "Unauthorised"));
+        )).thenThrow(feignException(UNAUTHORIZED.value(), "Unauthorised"));
         final ResponseEntity response = cafCassController.searcCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
             "startDate",
             "endDate"
         );
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals(UNAUTHORIZED, response.getStatusCode());
     }
 
     @Test
