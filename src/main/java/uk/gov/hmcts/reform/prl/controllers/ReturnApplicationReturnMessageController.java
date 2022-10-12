@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,8 +52,9 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback proceeded"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse returnApplicationReturnMessage(
-        @RequestHeader("Authorization") String authorisation,
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
 

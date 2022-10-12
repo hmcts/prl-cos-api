@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIEL
 @Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@SecurityRequirement(name = "Bearer Authentication")
 public class FL401SubmitApplicationController {
 
     @Autowired
@@ -90,8 +93,8 @@ public class FL401SubmitApplicationController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Application Submitted."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public CallbackResponse fl401SubmitApplicationValidation(@RequestHeader("Authorization")
-                                                                 String authorisation,
+    public CallbackResponse fl401SubmitApplicationValidation(@RequestHeader("Authorization") @Parameter(hidden = true)
+                                                                     String authorisation,
                                                              @RequestBody CallbackRequest callbackRequest) {
 
         List<String> errorList = new ArrayList<>();
@@ -113,7 +116,7 @@ public class FL401SubmitApplicationController {
         @ApiResponse(responseCode = "200", description = "Application Submitted."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse fl401GenerateDocumentSubmitApplication(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true)  String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -176,7 +179,7 @@ public class FL401SubmitApplicationController {
         @ApiResponse(responseCode = "200", description = "Application Submitted."),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public CallbackResponse fl401SendApplicationNotification(@RequestHeader("Authorization")
-                                                                     String authorisation,
+                                                                 @Parameter(hidden = true)  String authorisation,
                                                                    @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
