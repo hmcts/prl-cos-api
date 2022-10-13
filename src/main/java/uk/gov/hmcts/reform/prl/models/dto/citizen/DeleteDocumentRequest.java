@@ -17,9 +17,9 @@ import java.util.Map;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Schema(description = "Request body model for Document Generation Request")
+@Schema(description = "Request body model for Document Delete Request")
 @Builder(toBuilder = true)
-public class GenerateAndUploadDocumentRequest {
+public class DeleteDocumentRequest {
     @JsonProperty("values")
     private Map<String, String> values;
 
