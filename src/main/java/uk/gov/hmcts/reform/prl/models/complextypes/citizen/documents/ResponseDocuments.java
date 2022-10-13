@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents;
 
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
