@@ -9,8 +9,6 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class ResponseDocuments {
-    private final String parentDocumentType;
-    private final String documentType;
     private final String partyName;
     private final String uploadedBy;
     private final LocalDate dateCreated;
