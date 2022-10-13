@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -29,6 +30,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
 
     @Autowired
+    @Lazy
     EventsChecker eventsChecker;
 
     @Override

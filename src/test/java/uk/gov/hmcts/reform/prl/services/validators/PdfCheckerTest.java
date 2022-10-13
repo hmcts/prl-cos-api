@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static org.junit.Assert.assertFalse;
@@ -46,7 +47,8 @@ public class PdfCheckerTest {
     public void whenCaseDataPresentFinishedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name")
             .isCaseUrgent(Yes)
-            .childAbductionReasons("Test string")
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .childAbductionReasons("Test string").build())
             .caseUrgencyTimeAndReason("Random String")
             .jurisdictionIssue(No)
             .build();
@@ -59,7 +61,8 @@ public class PdfCheckerTest {
     public void whenCaseDataPresentStartedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name")
             .isCaseUrgent(Yes)
-            .childAbductionReasons("Test string")
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .childAbductionReasons("Test string").build())
             .caseUrgencyTimeAndReason("Random String")
             .jurisdictionIssue(No)
             .build();
@@ -71,7 +74,8 @@ public class PdfCheckerTest {
     public void whenCaseDataPresentHasMandatoryCompletedShouldReturnFalse() {
         CaseData caseData = CaseData.builder().applicantCaseName("Test Name")
             .isCaseUrgent(Yes)
-            .childAbductionReasons("Test string")
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .childAbductionReasons("Test string").build())
             .caseUrgencyTimeAndReason("Random String")
             .jurisdictionIssue(No)
             .build();

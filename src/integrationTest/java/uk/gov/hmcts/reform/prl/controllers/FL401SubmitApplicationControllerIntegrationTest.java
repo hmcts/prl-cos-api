@@ -57,7 +57,6 @@ public class FL401SubmitApplicationControllerIntegrationTest {
     public void whenFL401SubmitApplicationRequestShouldReturn200() throws Exception {
 
         String token = idamTokenGenerator.generateIdamTokenForSolicitor();
-        log.info("Generated Token: {}", token);
 
         HttpPost httpPost = new HttpPost(baseUrl + "/fl401-generate-document-submit-application");
         String requestBody = ResourceLoader.loadJson(validBody);

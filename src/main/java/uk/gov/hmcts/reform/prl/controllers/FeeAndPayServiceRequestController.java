@@ -1,9 +1,13 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +25,7 @@ import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @RestController
+@SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
 
@@ -30,13 +35,15 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/create-payment-service-request", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to create Fee and Pay service request . Returns service request reference if "
+    @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "
         + "successful")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback processed.", response = CallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public CallbackResponse createPaymentServiceRequest(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequest(callbackRequest, authorisation);

@@ -37,7 +37,6 @@ public class RespondentsMapper {
         List<PartyDetails> respondentList = respondents.stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
-        log.info("Respondent list size  {}", respondentList.size());
         AtomicInteger counter = new AtomicInteger(1);
         return respondentList.stream().map(respondent -> getRespondent(counter, respondent,
                                                                        respondentSolicitorMap

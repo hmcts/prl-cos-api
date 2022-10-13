@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,7 @@ import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/send-and-reply-to-messages")
+@SecurityRequirement(name = "Bearer Authentication")
 public class SendAndReplyController extends AbstractCallbackController {
 
     @Autowired
@@ -56,7 +59,8 @@ public class SendAndReplyController extends AbstractCallbackController {
 
 
     @PostMapping("/about-to-start")
-    public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization") String authorisation,
+    public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization")
+                                                                       @Parameter(hidden = true) String authorisation,
                                                                    @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
@@ -70,7 +74,8 @@ public class SendAndReplyController extends AbstractCallbackController {
     }
 
     @PostMapping("/mid-event")
-    public AboutToStartOrSubmitCallbackResponse handleMidEvent(@RequestHeader("Authorization") String authorisation,
+    public AboutToStartOrSubmitCallbackResponse handleMidEvent(@RequestHeader("Authorization")
+                                                                   @Parameter(hidden = true) String authorisation,
                                                                    @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -95,7 +100,8 @@ public class SendAndReplyController extends AbstractCallbackController {
     }
 
     @PostMapping("/about-to-submit")
-    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(@RequestHeader("Authorization") String authorisation,
+    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(@RequestHeader("Authorization")
+                                                                        @Parameter(hidden = true) String authorisation,
                                                                    @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -114,7 +120,6 @@ public class SendAndReplyController extends AbstractCallbackController {
             List<Element<Message>> messages;
             if (caseData.getMessageReply().getIsReplying().equals(YesOrNo.No)) {
                 messages = sendAndReplyService.closeMessage(selectedValue, caseData);
-                log.info(String.format("Closing message with id: %s", selectedValue));
                 List<Element<Message>> closedMessages = messages.stream()
                     .filter(m -> m.getValue().getStatus().equals(MessageStatus.CLOSED))
                     .collect(Collectors.toList());
@@ -152,7 +157,8 @@ public class SendAndReplyController extends AbstractCallbackController {
     }
 
     @PostMapping("/submitted")
-    public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestHeader("Authorization") String authorisation,
+    public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestHeader("Authorization")
+                                                                    @Parameter(hidden = true) String authorisation,
                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);

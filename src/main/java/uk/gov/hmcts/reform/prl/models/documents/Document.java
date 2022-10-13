@@ -28,4 +28,14 @@ public class Document {
         this.documentFileName = documentFileName;
         this.documentHash = documentHash;
     }
+
+    public static Document buildFromDocument(uk.gov.hmcts.reform.ccd.document.am.model.Document document) {
+        return Document.builder()
+            .documentUrl(document.links.self.href)
+            .documentBinaryUrl(document.links.binary.href)
+            .documentFileName(document.originalDocumentName)
+            .build();
+    }
+
+
 }

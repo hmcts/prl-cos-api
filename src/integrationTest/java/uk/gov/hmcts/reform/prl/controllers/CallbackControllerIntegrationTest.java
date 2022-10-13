@@ -5,6 +5,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +27,9 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
     @Autowired
     private CosApiClient cosApiClient;
 
+    @Value("${case.orchestration.service.base.uri}")
+    protected String serviceUrl;
+
     @Value("${prl.document.generate.uri}")
     protected String documentPrlGenerateUri;
 
@@ -33,6 +37,8 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
     protected String documentGenerateUri;
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
+
+    private static final String PRE_POPULATE_COURT_DETAILS_END_POINT = "/pre-populate-court-details";
 
     @Test
     public void testDocumentGenerate_return200() throws Exception {
@@ -55,5 +61,28 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
         assertEquals(
             httpResponse.getStatusLine().getStatusCode(),
             HttpStatus.SC_NOT_FOUND);
+    }
+
+    @Test
+    public void testPrePopulateCourtDetails200() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+        HttpPost httpPost = new HttpPost(serviceUrl + PRE_POPULATE_COURT_DETAILS_END_POINT);
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(
+            HttpStatus.SC_OK,
+            httpResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testPrePopulateCourtDetails400() throws Exception {
+        HttpGet httpGet = new HttpGet(serviceUrl + PRE_POPULATE_COURT_DETAILS_END_POINT);
+        httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);
+        assertEquals(
+            HttpStatus.SC_NOT_FOUND,
+            httpResponse.getStatusLine().getStatusCode());
     }
 }

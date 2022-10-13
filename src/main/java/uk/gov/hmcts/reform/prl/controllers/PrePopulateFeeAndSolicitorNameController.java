@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +43,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
 @RestController
+@SecurityRequirement(name = "Bearer Authentication")
 public class PrePopulateFeeAndSolicitorNameController {
 
     @Autowired
@@ -85,11 +89,11 @@ public class PrePopulateFeeAndSolicitorNameController {
     public static final String CURRENCY_SIGN_POUND = "£";
 
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to get Solicitor name and fee amount. ")
+    @Operation(description = "Callback to get Solicitor name and fee amount. ")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "User name received."),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public CallbackResponse prePopulateSolicitorAndFees(@RequestHeader("Authorization") String authorisation,
+        @ApiResponse(responseCode = "200", description = "User name received."),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public CallbackResponse prePopulateSolicitorAndFees(@RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
                                                         @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<String> errorList = new ArrayList<>();
         CaseData caseData = null;
@@ -127,7 +131,6 @@ public class PrePopulateFeeAndSolicitorNameController {
                 .build();
 
             caseData = buildGeneratedDocumentCaseData(authorisation, callbackRequest, caseData, caseDataForOrgDetails);
-            log.info("Court name: === {}===", caseData.getCourtName());
 
             log.info("Saving Court name into DB..");
         }
@@ -145,7 +148,6 @@ public class PrePopulateFeeAndSolicitorNameController {
         CaseData caseDataForOrgDetails)
         throws Exception {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
-
         if (documentLanguage.isGenEng()) {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,

@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +24,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -40,6 +45,7 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_EMAIL_ADDRESS_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
@@ -49,6 +55,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIEL
 @Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@SecurityRequirement(name = "Bearer Authentication")
 public class FL401SubmitApplicationController {
 
     @Autowired
@@ -56,6 +63,9 @@ public class FL401SubmitApplicationController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AllTabServiceImpl allTabService;
 
     @Autowired
     private SolicitorEmailService solicitorEmailService;
@@ -75,19 +85,22 @@ public class FL401SubmitApplicationController {
     @Autowired
     OrganisationService organisationService;
 
+    @Autowired
+    private ConfidentialityTabService confidentialityTabService;
 
     @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to send FL401 application notification. ")
+    @Operation(description = "Callback to send FL401 application notification. ")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Application Submitted."),
-        @ApiResponse(code = 400, message = "Bad Request")})
-    public CallbackResponse fl401SubmitApplicationValidation(@RequestHeader("Authorization")
-                                                                 String authorisation,
+        @ApiResponse(responseCode = "200", description = "Application Submitted."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public CallbackResponse fl401SubmitApplicationValidation(@RequestHeader("Authorization") @Parameter(hidden = true)
+                                                                     String authorisation,
                                                              @RequestBody CallbackRequest callbackRequest) {
 
         List<String> errorList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         boolean mandatoryEventStatus = fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData);
+
         if (!mandatoryEventStatus) {
             errorList.add(
                 "Statement of truth and submit is not allowed for this case unless you finish all the mandatory events");
@@ -98,15 +111,19 @@ public class FL401SubmitApplicationController {
     }
 
     @PostMapping(path = "/fl401-generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to generate FL401 final document and submit application. ")
+    @Operation(description = "Callback to generate FL401 final document and submit application. ")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Application Submitted."),
-        @ApiResponse(code = 400, message = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "Application Submitted."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse fl401GenerateDocumentSubmitApplication(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true)  String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        caseData = caseData.toBuilder()
+            .solicitorName(userService.getUserDetails(authorisation).getFullName())
+            .build();
 
         final LocalDate localDate = LocalDate.now();
 
@@ -139,15 +156,17 @@ public class FL401SubmitApplicationController {
                 .build();
         }
         caseData = caseData.setDateSubmittedDate();
-        log.info("Generating the Final document of FL401 for case id " + caseData.getId());
-        log.info("Issue date for the application: {} ", caseData.getIssueDate());
 
         caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
 
         caseDataUpdated.put(ISSUE_DATE_FIELD, localDate);
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+
         caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
+        caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
+
+        caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
@@ -155,12 +174,12 @@ public class FL401SubmitApplicationController {
     }
 
     @PostMapping(path = "/fl401-submit-application-send-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Callback to send FL401 application notification. ")
+    @Operation(description = "Callback to send FL401 application notification. ")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Application Submitted."),
-        @ApiResponse(code = 400, message = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "Application Submitted."),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public CallbackResponse fl401SendApplicationNotification(@RequestHeader("Authorization")
-                                                                     String authorisation,
+                                                                 @Parameter(hidden = true)  String authorisation,
                                                                    @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();

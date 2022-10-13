@@ -34,4 +34,18 @@ public enum PeopleLivingAtThisAddressEnum {
     public static PeopleLivingAtThisAddressEnum getValue(String key) {
         return PeopleLivingAtThisAddressEnum.valueOf(key);
     }
+
+    public static PeopleLivingAtThisAddressEnum getDisplayedValueFromEnumString(String enteredValue) {
+        if (enteredValue.equalsIgnoreCase("applicant")) {
+            return PeopleLivingAtThisAddressEnum.applicant;
+        } else if (enteredValue.equalsIgnoreCase("respondent")) {
+            return PeopleLivingAtThisAddressEnum.respondent;
+        } else if (enteredValue.equalsIgnoreCase("children")) {
+            return PeopleLivingAtThisAddressEnum.applicantChildren;
+        } else if (enteredValue.equalsIgnoreCase("other")) {
+            return PeopleLivingAtThisAddressEnum.someoneElse;
+        } else {
+            return null;
+        }
+    }
 }

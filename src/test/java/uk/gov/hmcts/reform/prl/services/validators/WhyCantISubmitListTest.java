@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -156,7 +157,7 @@ public class WhyCantISubmitListTest {
 
     @Test
     public void testAllegationOfHarmCheckerAddsError() {
-
+        caseData = caseData.toBuilder().allegationOfHarm(AllegationOfHarm.builder().build()).build();
         allegationsOfHarmChecker.isFinished(caseData);
         verify(taskErrorService).addEventError(ALLEGATIONS_OF_HARM, ALLEGATIONS_OF_HARM_ERROR, ALLEGATIONS_OF_HARM_ERROR.getError());
     }

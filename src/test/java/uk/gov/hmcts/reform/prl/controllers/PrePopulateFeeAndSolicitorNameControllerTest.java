@@ -224,7 +224,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(courtFinderService.getNearestFamilyCourt(caseDetails.getCaseData()))
             .thenReturn(court);
-
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(submitAndPayChecker.hasMandatoryCompleted(Mockito.any(CaseData.class))).thenReturn(true);
         prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest);
@@ -240,6 +239,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         );
 
     }
+
 
     @Test
     public void testFeeDetailsForFeeAmount() throws Exception {

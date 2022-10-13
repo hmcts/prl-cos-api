@@ -37,6 +37,7 @@ public enum Event {
     FL401_TYPE_OF_APPLICATION("fl401TypeOfApplication", "Type of application"),
     FL401_APPLICANT_FAMILY_DETAILS("fl401ApplicantFamilyDetails", "Applicant's family"),
     FL401_SOT_AND_SUBMIT("fl401StatementOfTruthAndSubmit", "Statement of truth and submit"),
+    FL401_RESUBMIT("fl401resubmit", "Statement of Truth and submit"),
     FL401_OTHER_PROCEEDINGS("fl401OtherProceedings", "Other proceedings"),
     FL401_UPLOAD_DOCUMENTS("fl401UploadDocuments","Upload documents");
 

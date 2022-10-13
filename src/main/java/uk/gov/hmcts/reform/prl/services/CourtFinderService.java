@@ -33,6 +33,7 @@ public class CourtFinderService {
     public static final String FAMILY_PUBLIC_LAW_CHILDREN_IN_CARE = "Family public law (children in care)";
     public static final String PAPER_PROCESS_INCLUDING_C_100_APPLICATIONS = "Paper process including C100 applications";
     public static final String FAMILY = "Family";
+    public static final String C_100_APPLICATIONS = "C100 applications";
     public static final String CHILD = "child";
     @Autowired
     private CourtFinderApi courtFinderApi;
@@ -45,7 +46,6 @@ public class CourtFinderService {
                 .findClosestDomesticAbuseCourtByPostCode(
                     getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));
         } else {
-            log.info("Getting court with postcode: " + getCorrectPartyPostcode(caseData));
             serviceArea = courtFinderApi
                 .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
         }
@@ -159,7 +159,8 @@ public class CourtFinderService {
     private Optional<CourtEmailAddress> findEmailWithFamilyC100ApplicationKey(Court nearestDomesticAbuseCourt) {
         return nearestDomesticAbuseCourt.getCourtEmailAddresses().stream()
             .filter(p -> (FAMILY_PUBLIC_LAW_CHILDREN_IN_CARE.equalsIgnoreCase(p.getDescription())
-                && (PAPER_PROCESS_INCLUDING_C_100_APPLICATIONS.equalsIgnoreCase(p.getExplanation()))))
+                && PAPER_PROCESS_INCLUDING_C_100_APPLICATIONS.equalsIgnoreCase(p.getExplanation())) || (p.getExplanation() != null
+                && p.getExplanation().contains(C_100_APPLICATIONS)))
             .findFirst();
     }
 

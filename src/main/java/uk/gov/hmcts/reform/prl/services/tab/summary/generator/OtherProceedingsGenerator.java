@@ -4,6 +4,8 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedingEmptyTable;
@@ -17,6 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @Component
 public class OtherProceedingsGenerator implements  FieldGenerator {
@@ -31,13 +34,34 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
     }
 
     private boolean hasOtherProceedings(CaseData caseData) {
-        Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getPreviousOrOngoingProceedingsForChildren());
-        Optional<List<Element<ProceedingDetails>>> proceedingsCheck = ofNullable(caseData.getExistingProceedings());
+        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+            Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getPreviousOrOngoingProceedingsForChildren());
+            Optional<List<Element<ProceedingDetails>>> proceedingsCheck = ofNullable(caseData.getExistingProceedings());
+            return proceedingsCheck.isPresent() && (proceedingCheck.isEmpty() || proceedingCheck.get()
+                .equals(YesNoDontKnow.yes));
+        }
+
+        Optional<FL401OtherProceedingDetails> proceedingObject = ofNullable(caseData.getFl401OtherProceedingDetails());
+
+        Optional<YesNoDontKnow> proceedingCheck = Optional.empty();
+        Optional<List<Element<FL401Proceedings>>> proceedingsCheck = Optional.empty();
+        if (proceedingObject.isPresent()) {
+            proceedingCheck = ofNullable(proceedingObject.get().getHasPrevOrOngoingOtherProceeding());
+            proceedingsCheck = ofNullable(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings());
+        }
         return proceedingsCheck.isPresent() && (proceedingCheck.isEmpty() || proceedingCheck.get()
             .equals(YesNoDontKnow.yes));
     }
 
     public List<Element<OtherProceedings>> getOtherProceedingsDetails(CaseData caseData) {
+        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+            return getC100OtherProceedingsDetails(caseData);
+        }
+
+        return getFl401OtherProceedingsDetails(caseData);
+    }
+
+    public List<Element<OtherProceedings>> getC100OtherProceedingsDetails(CaseData caseData) {
         Optional<YesNoDontKnow> proceedingCheck = ofNullable(caseData.getPreviousOrOngoingProceedingsForChildren());
         Optional<List<Element<ProceedingDetails>>> proceedingsCheck = ofNullable(caseData.getExistingProceedings());
         if (proceedingsCheck.isEmpty() || (proceedingCheck.isPresent() && !proceedingCheck.get().equals(YesNoDontKnow.yes))) {
@@ -65,4 +89,41 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
         }
         return otherProceedingsDetailsList;
     }
+
+    public List<Element<OtherProceedings>> getFl401OtherProceedingsDetails(CaseData caseData) {
+        Optional<FL401OtherProceedingDetails> proceedingObject = ofNullable(caseData.getFl401OtherProceedingDetails());
+
+        Optional<YesNoDontKnow> proceedingCheck = Optional.empty();
+        Optional<List<Element<FL401Proceedings>>> proceedingsCheck = Optional.empty();
+        if (proceedingObject.isPresent()) {
+            proceedingCheck = ofNullable(proceedingObject.get().getHasPrevOrOngoingOtherProceeding());
+            proceedingsCheck = ofNullable(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings());
+        }
+
+        if (proceedingsCheck.isEmpty() || (proceedingCheck.isPresent() && !proceedingCheck.get().equals(YesNoDontKnow.yes))) {
+            OtherProceedings op = OtherProceedings.builder().build();
+            Element<OtherProceedings> other = Element.<OtherProceedings>builder().value(op).build();
+            return Collections.singletonList(other);
+        }
+
+        List<FL401Proceedings> proceedings = caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings().stream()
+            .map(Element::getValue).collect(Collectors.toList());
+        List<Element<OtherProceedings>> otherProceedingsDetailsList = new ArrayList<>();
+
+        for (FL401Proceedings p : proceedings) {
+            String typeOfOrder = null != p.getTypeOfCase() ? p.getTypeOfCase() : null;
+            OtherProceedings otherProceedingsDetails = OtherProceedings.builder()
+                .caseNumber(p.getCaseNumber())
+                .typeOfOrder(typeOfOrder)
+                .nameOfCourt(p.getNameOfCourt())
+                .build();
+
+            Element<OtherProceedings> details = Element.<OtherProceedings>builder()
+                .value(otherProceedingsDetails).build();
+            otherProceedingsDetailsList.add(details);
+        }
+        return otherProceedingsDetailsList;
+    }
+
+
 }
