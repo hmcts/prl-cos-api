@@ -69,7 +69,7 @@ public class BundlingControllerTest {
         bundleList.add(Bundle.builder().value(BundleDetails.builder().folders(bundleFolders).build()).build());
         bundleCreateResponse = BundleCreateResponse.builder().data(BundleData.builder().id("334").caseBundles(bundleList).build()).build();
         caseData = new HashMap<>();
-        caseData.put("caseBundles",bundleCreateResponse);
+        caseData.put("caseBundles",bundleCreateResponse.getData().getCaseBundles());
         caseDetails = CaseDetails.builder().data(caseData).state(State.GATEKEEPING.getValue())
             .id(123488888L).createdDate(LocalDateTime.now()).lastModified(LocalDateTime.now()).build();
     }
@@ -80,9 +80,9 @@ public class BundlingControllerTest {
         when(bundlingService.createBundleServiceRequest(any(CaseData.class),anyString())).thenReturn(bundleCreateResponse);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         response = bundlingController.createBundle(authToken,callbackRequest);
-        BundleCreateResponse responserecieved = (BundleCreateResponse) response.getData().get("caseBundles");
+        List<Bundle> responseCaseBundles = (List)response.getData().get("caseBundles");
         assertEquals("CaseDocuments",
-            responserecieved.getData().getCaseBundles().get(0).getValue().getFolders().get(0)
+            responseCaseBundles.get(0).getValue().getFolders().get(0)
                     .getValue().getFolders().get(0).getValue().getDocuments().get(0).getValue().getName());
     }
 }
