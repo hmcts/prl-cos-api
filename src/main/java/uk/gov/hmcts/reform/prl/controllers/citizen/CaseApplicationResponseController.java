@@ -102,12 +102,7 @@ public class CaseApplicationResponseController {
                                                                              .dateCreated(LocalDate.now())
                                                                              .build());
             responseDocumentsList.add(responseDocumentElement);
-            caseData.getRespondents().stream().map(respondent -> {
-                if (respondent.getId().toString().equalsIgnoreCase(partyId)) {
-                    respondent = element(respondent.getValue().toBuilder().currentRespondent(null).build());
-                }
-                return respondent;
-            });
+            caseData = caseData.toBuilder().citizenResponseC7DocumentList(responseDocumentsList).build();
             log.info("Amending the Case Data with citizenResponseC7DocumentList " + caseId);
             log.info("Call updateCase with event " + REVIEW_AND_SUBMIT + " for case id " + caseId);
             caseDetailsReturn = caseService.updateCase(
