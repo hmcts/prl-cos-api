@@ -17,5 +17,4 @@ public class ResponseDocuments {
     private final LocalDate dateCreated;
     private final DocumentDetails documentDetails;
     private final Document citizenDocument;
-    private final YesOrNo documentRequestedByCourt;
 }
