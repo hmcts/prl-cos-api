@@ -143,7 +143,7 @@ public class CaseService {
             .data(caseDataMap)
             .build();
 
-        log.info("-------Calling Submit event for Citizen------  ");
+        log.info("-------Calling Submit event for Citizen------  " + caseDataMap);
         return coreCaseDataApi.submitEventForCitizen(
             authToken,
             s2sToken,
