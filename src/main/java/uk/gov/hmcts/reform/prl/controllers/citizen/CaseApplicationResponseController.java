@@ -13,27 +13,25 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+//import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+//import uk.gov.hmcts.reform.prl.models.Element;
+//import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+//import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+//import java.time.LocalDate;
+//import java.util.ArrayList;
+//import java.util.List;
+//import java.util.stream.Collectors;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
+//import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLANK_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REVIEW_AND_SUBMIT;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-
+//import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REVIEW_AND_SUBMIT;
+//import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RestController
@@ -66,7 +64,7 @@ public class CaseApplicationResponseController {
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseData = updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+        //caseData = updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
         log.info("BEFORE call to generate Document {} {}",caseData, partyId);
 
         Document document = documentGenService.generateSingleDocument(
@@ -83,73 +81,73 @@ public class CaseApplicationResponseController {
         );
     }
 
-    @PostMapping(path = "{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON)
-    @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Document generated"),
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")})
-    public CaseData generateC7FinalDocument(
-        @PathVariable("caseId") String caseId,
-        @PathVariable("partyId") String partyId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+    //    @PostMapping(path = "{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON)
+    //    @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
+    //    @ApiResponses(value = {
+    //        @ApiResponse(responseCode = "200", description = "Document generated"),
+    //        @ApiResponse(responseCode = "400", description = "Bad Request"),
+    //        @ApiResponse(responseCode = "500", description = "Internal server error")})
+    //    public CaseData generateC7FinalDocument(
+    //        @PathVariable("caseId") String caseId,
+    //        @PathVariable("partyId") String partyId,
+    //        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+    //        @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+    //
+    //        CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
+    //        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
+    //        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+    //        CaseDetails caseDetailsReturn = null;
+    //        caseData = updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+    //        log.info("BEFORE call to C7 final Document {} {}",caseData, partyId);
+    //
+    //        Document document = documentGenService.generateSingleDocument(
+    //            authorisation,
+    //            caseData,
+    //            C7_FINAL_ENGLISH,
+    //            false
+    //        );
+    //        caseData = updateCurrentRespondent(caseData, null, partyId);
+    //
+    //        List<Element<ResponseDocuments>> responseDocumentsList = new ArrayList<>();
+    //        if (document != null) {
+    //            if (caseData.getCitizenResponseC7DocumentList() != null) {
+    //                responseDocumentsList.addAll(caseData.getCitizenResponseC7DocumentList());
+    //            }
+    //            Element<ResponseDocuments> responseDocumentElement = element(ResponseDocuments.builder()
+    //                                                                             .partyName(partyId)
+    //                                                                             .citizenDocument(document)
+    //                                                                             .dateCreated(LocalDate.now())
+    //                                                                             .build());
+    //            responseDocumentsList.add(responseDocumentElement);
+    //            caseData = caseData.toBuilder().citizenResponseC7DocumentList(responseDocumentsList).build();
+    //            log.info("Amending the Case Data with citizenResponseC7DocumentList " + caseId);
+    //            log.info("Call updateCase with event " + REVIEW_AND_SUBMIT + " for case id " + caseId);
+    //            caseDetailsReturn = caseService.updateCase(
+    //                caseData,
+    //                authorisation,
+    //                s2sToken,
+    //                caseId,
+    //                REVIEW_AND_SUBMIT
+    //            );
+    //        }
+    //
+    //        log.info("AFTER call to generate Document " + caseId);
+    //        return objectMapper.convertValue(
+    //            caseDetailsReturn.getData(),
+    //            CaseData.class
+    //        );
+    //    }
 
-        CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
-        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        CaseDetails caseDetailsReturn = null;
-        caseData = updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
-        log.info("BEFORE call to C7 final Document {} {}",caseData, partyId);
-
-        Document document = documentGenService.generateSingleDocument(
-            authorisation,
-            caseData,
-            C7_FINAL_ENGLISH,
-            false
-        );
-        caseData = updateCurrentRespondent(caseData, null, partyId);
-
-        List<Element<ResponseDocuments>> responseDocumentsList = new ArrayList<>();
-        if (document != null) {
-            if (caseData.getCitizenResponseC7DocumentList() != null) {
-                responseDocumentsList.addAll(caseData.getCitizenResponseC7DocumentList());
-            }
-            Element<ResponseDocuments> responseDocumentElement = element(ResponseDocuments.builder()
-                                                                             .partyName(partyId)
-                                                                             .citizenDocument(document)
-                                                                             .dateCreated(LocalDate.now())
-                                                                             .build());
-            responseDocumentsList.add(responseDocumentElement);
-            caseData = caseData.toBuilder().citizenResponseC7DocumentList(responseDocumentsList).build();
-            log.info("Amending the Case Data with citizenResponseC7DocumentList " + caseId);
-            log.info("Call updateCase with event " + REVIEW_AND_SUBMIT + " for case id " + caseId);
-            caseDetailsReturn = caseService.updateCase(
-                caseData,
-                authorisation,
-                s2sToken,
-                caseId,
-                REVIEW_AND_SUBMIT
-            );
-        }
-
-        log.info("AFTER call to generate Document " + caseId);
-        return objectMapper.convertValue(
-            caseDetailsReturn.getData(),
-            CaseData.class
-        );
-    }
-
-    private CaseData updateCurrentRespondent(CaseData caseData, YesOrNo currentRespondent, String partyId) {
-        List<Element<PartyDetails>> partyDetails = caseData.getRespondents().stream().map(respondent -> {
-            if (respondent.getId().toString().equalsIgnoreCase(partyId)) {
-                return element(respondent.getValue().toBuilder().currentRespondent(currentRespondent).build());
-            } else {
-                return respondent;
-            }
-        }).collect(Collectors.toList());
-        caseData = caseData.toBuilder().respondents(partyDetails).build();
-        return caseData;
-    }
+    //    private CaseData updateCurrentRespondent(CaseData caseData, YesOrNo currentRespondent, String partyId) {
+    //        List<Element<PartyDetails>> partyDetails = caseData.getRespondents().stream().map(respondent -> {
+    //            if (respondent.getId().toString().equalsIgnoreCase(partyId)) {
+    //                return element(respondent.getValue().toBuilder().currentRespondent(currentRespondent).build());
+    //            } else {
+    //                return respondent;
+    //            }
+    //        }).collect(Collectors.toList());
+    //        caseData = caseData.toBuilder().respondents(partyDetails).build();
+    //        return caseData;
+    //    }
 }
 
