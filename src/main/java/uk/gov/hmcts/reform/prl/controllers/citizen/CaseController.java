@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +26,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @RestController
+@SecurityRequirement(name = "Bearer Authentication")
 public class CaseController {
 
     @Autowired
@@ -39,7 +42,7 @@ public class CaseController {
     @Operation(description = "Frontend to fetch the data")
     public CaseData getCase(
         @PathVariable("caseId") String caseId,
-        @RequestHeader(value = "Authorization", required = false) String userToken,
+        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
         @RequestHeader("serviceAuthorization") String s2sToken
     ) {
         CaseDetails caseDetails = coreCaseDataApi.getCase(userToken, s2sToken, caseId);
@@ -81,7 +84,7 @@ public class CaseController {
     public List<CaseData> retrieveCases(
         @PathVariable("role") String role,
         @PathVariable("userId") String userId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken
     ) {
         return caseService.retrieveCases(authorisation, s2sToken, role, userId);
