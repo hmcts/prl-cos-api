@@ -15,6 +15,15 @@ public class RespondentSolicitorMiamService {
 
     public String getCollapsableOfWhatIsMiamPlaceHolder() {
         final List<String> collapsible = new ArrayList<>();
+
+        collapsible.add("<details class=\"govuk-details\">");
+
+        collapsible.add("<summary class=\"govuk-details__summary\">");
+        collapsible.add("<span class=\"govuk-details__summary-text\">");
+        collapsible.add("What is a Mediation Information and Assessment Meeting (MIAM)?");
+        collapsible.add("</span>");
+        collapsible.add("</summary>");
+
         collapsible.add("<div class=\"govuk-details__text\">");
         collapsible.add("<p>A MIAM is a first meeting with a mediator.</p>");
         collapsible.add("<p>The MIAM will:");
@@ -35,6 +44,9 @@ public class RespondentSolicitorMiamService {
         collapsible.add("</ul><p></p>");
         collapsible.add("<p>The MIAM process works, with agreement reached in over 70% of cases.</p>");
         collapsible.add("</div>");
+
+        collapsible.add("</details>");
+
         return String.join("\n\n", collapsible);
     }
 
