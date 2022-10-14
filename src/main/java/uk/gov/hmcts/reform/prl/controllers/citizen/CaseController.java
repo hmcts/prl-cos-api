@@ -48,7 +48,7 @@ public class CaseController {
         CaseDetails caseDetails = coreCaseDataApi.getCase(userToken, s2sToken, caseId);
         caseDetails.getData().put("state", caseDetails.getState());
         return objectMapper.convertValue(
-            coreCaseDataApi.getCase(userToken, s2sToken, caseId).getData(),
+            caseDetails.getData(),
             CaseData.class
         );
     }
