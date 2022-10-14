@@ -53,9 +53,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_ID;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -100,10 +98,12 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "200", description = "Document generated"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
-    public String generateCitizenStatementDocument(@RequestHeader("Authorization")
+    public UploadedDocuments generateCitizenStatementDocument(@RequestHeader("Authorization")
                                                        @Parameter(hidden = true)   String authorisation,
-                                                   @RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest) throws Exception {
-        return documentGenService.generateCitizenStatementDocument(authorisation, generateAndUploadDocumentRequest);
+                                                              @RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest)
+        throws Exception {
+        return documentGenService.generateCitizenStatementDocument(authorisation,
+                                                                   generateAndUploadDocumentRequest,10);
     }
 
 
@@ -269,6 +269,6 @@ public class CaseDocumentController {
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
         return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization));
-
+    }
 }
 
