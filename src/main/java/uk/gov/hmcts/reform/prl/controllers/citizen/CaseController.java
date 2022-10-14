@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,7 +71,8 @@ public class CaseController {
         @PathVariable("caseId") String caseId,
         @PathVariable("eventId") String eventId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader("serviceAuthorization") String s2sToken
+        @RequestHeader("serviceAuthorization") String s2sToken,
+        @PathVariable("accessCode") String accessCode
     ) {
         if ("linkCase".equalsIgnoreCase(eventId)) {
             caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
@@ -113,6 +115,8 @@ public class CaseController {
                                   @RequestHeader("accessCode") String accessCode,
                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                   @RequestHeader("serviceAuthorization") String s2sToken) {
+        caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
+    }
 
     @PutMapping("/citizen/link")
     public void linkDefendantToClaim(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
