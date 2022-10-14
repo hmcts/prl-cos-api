@@ -22,10 +22,10 @@ public class BundlingService {
     @Autowired
     private AuthTokenGenerator authTokenGenerator;
 
-    @Value("${bundle.english.config")
+    @Value("${bundle.english.config}")
     private String bundleEnglishConfig;
 
-    @Value("${bundle.welsh.config")
+    @Value("${bundle.welsh.config}")
     private String bundleWelshConfig;
 
     public BundleCreateResponse createBundleServiceRequest(CaseData caseData, String authorization) throws Exception {
