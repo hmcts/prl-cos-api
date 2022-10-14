@@ -96,6 +96,8 @@ uk:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
             CAFCASS_OTHER: b77818d7-7756-4d83-8ecd-e2b54f512cf2
+            CA_DA_MANAGE_ORDER_EMAIL: c95d53c2-e9ed-4ce3-b0f9-95df7401bbfa
+            CA_DA_FINAL_ORDER_EMAIL: a34023e7-c545-4352-b509-574d15c84f52
             SOLICITOR_RESUBMIT_EMAIL: c8fa581b-10c7-4d48-8a22-3d055ae4be79
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
