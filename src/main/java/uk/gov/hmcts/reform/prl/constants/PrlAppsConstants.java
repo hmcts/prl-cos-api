@@ -47,9 +47,9 @@ public class PrlAppsConstants {
     public static final String DRAFT_DOCUMENT_FIELD = "draftOrderDoc";
     public static final String DRAFT_DOCUMENT_WELSH_FIELD = "draftOrderDocWelsh";
 
-    public static final String DRAFT_DOCUMENT_FIELD_C7_RESPOND_TO_APPLICATION = "draftOrderDocC7RespondToApplication";
+    public static final String C7_FINAL_ENGLISH = "c7FinalEng";
 
-    public static final String DRAFT_DOCUMENT_WELSH_FIELD_C7_RESPOND_TO_APPLICATION = "draftOrderDocWelshC7RespondToApplication";
+    public static final String C7_FINAL_WELSH = "c7FinalWelsh";
 
     public static final String COURT_NAME_FIELD = "courtName";
     public static final String COURT_ID_FIELD = "courtId";
@@ -96,12 +96,11 @@ public class PrlAppsConstants {
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
     public static final String DOCUMENT_COVER_SHEET_HINT = "DOC_COVER_SHEET";
-    public static final String DOCUMENT_C7_BLANK_HINT = "DOCUMENT_C7_BLANK";
+    public static final String DOCUMENT_C7_BLANK_HINT = "DOCUMENT_C7_DRAFT";
     public static final String DOCUMENT_C8_BLANK_HINT = "DOCUMENT_C8_BLANK";
     public static final String DOCUMENT_C1A_BLANK_HINT = "DOCUMENT_C1A_BLANK";
     public static final String DOCUMENT_PRIVACY_NOTICE_HINT = "PRIVACY_NOTICE";
 
-    public static final String DOCUMENT_C7_BLANK_RESPOND_TO_APPLICATION = "DOCUMENT_C7_BLANK_RESPOND_TO_APPLICATION";
     public static final String TEMPLATE = "template";
     public static final String FILE_NAME = "fileName";
 
