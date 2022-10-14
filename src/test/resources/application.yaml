@@ -90,12 +90,6 @@ xui:
 citizen:
   url: ${CITIZEN_URL:https://privatelaw.aat.platform.hmcts.net}
 
-citizen_frontend:
-  url: http://example.com
-
-citizen:
-  dashboardUrl: ${CITIZEN_URL:https://wwww.example.com}
-
 uk:
   gov:
     notify:
