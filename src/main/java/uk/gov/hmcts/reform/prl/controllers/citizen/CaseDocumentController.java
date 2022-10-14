@@ -3,8 +3,10 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -58,6 +60,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RestController
+@SecurityRequirement(name = "Bearer Authentication")
 public class CaseDocumentController {
 
     private static final String SERVICE_AUTH = "ServiceAuthorization";
@@ -97,64 +100,10 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "200", description = "Document generated"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
-    public ResponseEntity generateCitizenStatementDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
-                                                           @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                                           @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
-        fileIndex = 0;
-        String caseId = generateAndUploadDocumentRequest.getValues().get(CASE_ID);
-        CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
-        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
-        CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        if (generateAndUploadDocumentRequest.getValues() != null
-            && generateAndUploadDocumentRequest.getValues().containsKey(DOCUMENT_TYPE)
-            && generateAndUploadDocumentRequest.getValues().containsKey(PARTY_NAME)) {
-            final String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-            final String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
-            if (tempCaseData.getCitizenUploadedDocumentList() != null
-                && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
-                tempCaseData.getCitizenUploadedDocumentList()
-                    .stream().forEach((document) -> {
-                        if (documentType.equalsIgnoreCase(document.getValue().getDocumentType())
-                            && partyName.equalsIgnoreCase(document.getValue().getPartyName())) {
-                            fileIndex++;
-                        }
-                    });
-            }
-        }
-        UploadedDocuments uploadedDocuments =
-            documentGenService.generateCitizenStatementDocument(
-                authorisation,
-                generateAndUploadDocumentRequest,
-                fileIndex + 1
-            );
-        List<Element<UploadedDocuments>> uploadedDocumentsList;
-        if (uploadedDocuments != null) {
-            if (tempCaseData.getCitizenUploadedDocumentList() != null
-                && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
-                uploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
-            } else {
-                uploadedDocumentsList = new ArrayList<>();
-            }
-            Element<UploadedDocuments> uploadDocumentElement = element(uploadedDocuments);
-            uploadedDocumentsList.add(uploadDocumentElement);
-
-            CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
-                .citizenUploadedDocumentList(uploadedDocumentsList).build();
-            caseService.updateCase(
-                caseData,
-                authorisation,
-                s2sToken,
-                caseId,
-                CITIZEN_UPLOADED_DOCUMENT
-            );
-            //return uploadedDocuments.getCitizenDocument().getDocumentFileName();
-            return ResponseEntity.status(HttpStatus.OK).body(
-                DocumentDetails.builder().documentId(uploadDocumentElement.getId().toString())
-                    .documentName(uploadedDocuments.getCitizenDocument().getDocumentFileName()).build());
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.ordinal()).body(new DocumentDetails());
-        }
-
+    public String generateCitizenStatementDocument(@RequestHeader("Authorization")
+                                                       @Parameter(hidden = true)   String authorisation,
+                                                   @RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest) throws Exception {
+        return documentGenService.generateCitizenStatementDocument(authorisation, generateAndUploadDocumentRequest);
     }
 
 
@@ -320,7 +269,6 @@ public class CaseDocumentController {
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
         return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization));
-    }
 
 }
 
