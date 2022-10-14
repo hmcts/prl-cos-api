@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +30,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @RestController
+@SecurityRequirement(name = "Bearer Authentication")
 public class CaseController {
 
     @Autowired
@@ -49,7 +52,7 @@ public class CaseController {
     @Operation(description = "Frontend to fetch the data")
     public CaseData getCase(
         @PathVariable("caseId") String caseId,
-        @RequestHeader(value = "Authorization", required = false) String userToken,
+        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
         @RequestHeader("serviceAuthorization") String s2sToken
     ) {
         CaseDetails caseDetails = coreCaseDataApi.getCase(userToken, s2sToken, caseId);
@@ -66,9 +69,8 @@ public class CaseController {
         @Valid @NotNull @RequestBody CaseData caseData,
         @PathVariable("caseId") String caseId,
         @PathVariable("eventId") String eventId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestHeader("serviceAuthorization") String s2sToken,
-        @RequestHeader("accessCode") String accessCode
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader("serviceAuthorization") String s2sToken
     ) {
         if ("linkCase".equalsIgnoreCase(eventId)) {
             caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
@@ -91,7 +93,7 @@ public class CaseController {
     public List<CaseData> retrieveCases(
         @PathVariable("role") String role,
         @PathVariable("userId") String userId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken
     ) {
         return caseService.retrieveCases(authorisation, s2sToken, role, userId);
@@ -111,16 +113,24 @@ public class CaseController {
                                   @RequestHeader("accessCode") String accessCode,
                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                   @RequestHeader("serviceAuthorization") String s2sToken) {
+
+    @PutMapping("/citizen/link")
+    public void linkDefendantToClaim(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+                                     @RequestHeader(value = "caseId", required = false) String caseId,
+                                     @RequestHeader("serviceAuthorization") String s2sToken,
+                                     @RequestHeader("accessCode") String accessCode) {
         caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
     }
 
     @GetMapping(path = "/validate-access-code", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
-    public String validateAccessCode(@RequestHeader(value = "Authorization", required = true) String authorisation,
-                                     @RequestHeader(value = "serviceAuthorization", required = true) String s2sToken,
-                                     @RequestHeader(value = "caseId", required = true) String caseId,
-                                     @RequestHeader(value = "accessCode", required = true) String accessCode) {
-        return caseService.validateAccessCode(authorisation, s2sToken, caseId, accessCode);
+    public String validateAccessCode(
+        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
+        @RequestHeader("serviceAuthorization") String s2sToken,
+        @RequestHeader(value = "caseId", required = true) String caseId,
+        @RequestHeader(value = "accessCode", required = true) String accessCode
+    ) {
+        return caseService.validateAccessCode(userToken, s2sToken, caseId, accessCode);
     }
 
     @PostMapping("/case/create")
