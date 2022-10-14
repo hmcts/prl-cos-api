@@ -38,6 +38,8 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
@@ -45,7 +47,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_RESPOND_TO_APPLICATION_C7;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLANK_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLANK_RESPOND_TO_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
@@ -211,11 +212,23 @@ public class DocumentGenService {
     @Value("${document.templates.common.doc_cover_sheet_welsh_filename}")
     protected String docCoverSheetWelshFilename;
 
-    @Value("${document.templates.common.prl_c7_blank_template}")
-    protected String docC7BlankTemplate;
+    @Value("${document.templates.common.prl_c7_draft_template}")
+    protected String docC7DraftTemplate;
 
-    @Value("${document.templates.common.prl_c7_blank_filename}")
-    protected String docC7BlankFilename;
+    @Value("${document.templates.common.prl_c7_final_template_eng}")
+    protected String docC7FinalEngTemplate;
+
+    @Value("${document.templates.common.prl_c7_final_template_wel}")
+    protected String docC7FinalWelshTemplate;
+
+    @Value("${document.templates.common.prl_c7_draft_filename}")
+    protected String docC7DraftFilename;
+
+    @Value("${document.templates.common.prl_c7_final_filename_eng}")
+    protected String docC7FinalEngFilename;
+
+    @Value("${document.templates.common.prl_c7_final_filename_wel}")
+    protected String docC7FinalWelshFilename;
 
     @Value("${document.templates.common.prl_c1a_blank_template}")
     protected String docC1aBlankTemplate;
@@ -243,9 +256,6 @@ public class DocumentGenService {
 
     @Value("${document.templates.citizen.prl_citizen_c7_blank_template}")
     protected String prlCitizenC7BlankTemplate;
-
-    @Value("${document.templates.citizen.prl_citizen_c7_blank_filename}")
-    protected String prlCitizenC7BlankFilename;
 
     @Autowired
     private DgsService dgsService;
@@ -577,7 +587,7 @@ public class DocumentGenService {
                 fileName = findDocCoversheetFileName(isWelsh);
                 break;
             case DOCUMENT_C7_BLANK_HINT:
-                fileName = docC7BlankFilename;
+                fileName = docC7DraftFilename;
                 break;
             case DOCUMENT_C1A_BLANK_HINT:
                 fileName = docC1aBlankFilename;
@@ -588,8 +598,11 @@ public class DocumentGenService {
             case DOCUMENT_PRIVACY_NOTICE_HINT:
                 fileName = privacyNoticeFilename;
                 break;
-            case DOCUMENT_C7_BLANK_RESPOND_TO_APPLICATION:
-                fileName = prlCitizenC7BlankFilename;
+            case C7_FINAL_ENGLISH:
+                fileName = docC7FinalEngFilename;
+                break;
+            case C7_FINAL_WELSH:
+                fileName = docC7FinalWelshFilename;
                 break;
             default:
                 fileName = "";
@@ -660,7 +673,7 @@ public class DocumentGenService {
                 template = findDocCoverSheetTemplate(isWelsh);
                 break;
             case DOCUMENT_C7_BLANK_HINT:
-                template = docC7BlankTemplate;
+                template = docC7DraftTemplate;
                 break;
             case DOCUMENT_C1A_BLANK_HINT:
                 template = docC1aBlankTemplate;
@@ -676,6 +689,12 @@ public class DocumentGenService {
                 break;
             case CITIZEN_RESPOND_TO_APPLICATION_C7:
                 template = prlCitizenC7BlankTemplate;
+                break;
+            case C7_FINAL_ENGLISH:
+                template = docC7FinalEngTemplate;
+                break;
+            case C7_FINAL_WELSH:
+                template = docC7FinalWelshTemplate;
                 break;
             default:
                 template = "";

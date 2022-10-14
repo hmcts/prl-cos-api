@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -26,8 +26,10 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REVIEW_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -47,15 +49,7 @@ public class CaseApplicationResponseController {
     ObjectMapper objectMapper;
 
     @Autowired
-    private IdamClient idamClient;
-
-    @Autowired
     CaseService caseService;
-
-    @Autowired
-    CaseController caseController;
-
-    Integer fileIndex;
 
     @PostMapping(path = "{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON)
     @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
@@ -63,26 +57,17 @@ public class CaseApplicationResponseController {
         @ApiResponse(responseCode = "200", description = "Document generated"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
-    public CaseData generateC7Document(
+    public Document generateC7DraftDocument(
         @PathVariable("caseId") String caseId,
         @PathVariable("partyId") String partyId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
 
-        log.info("generateCitizenRespondToApplicationC7Document User roles: {} ", idamClient.getUserDetails(authorisation).getRoles());
-        log.info("generateCitizenRespondToApplicationC7Document xUser details: {} ", idamClient.getUserDetails(authorisation));
-        fileIndex = 0;
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        CaseDetails caseDetailsReturn = null;
-        caseData.getRespondents().stream().map(respondent -> {
-            if (respondent.getId().toString().equalsIgnoreCase(partyId)) {
-                respondent = element(respondent.getValue().toBuilder().currentRespondent(YesOrNo.Yes).build());
-            }
-            return respondent;
-        });
-        log.info("BEFORE call to generate Document {} {}",caseId, partyId);
+        caseData = updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+        log.info("BEFORE call to generate Document {} {}",caseData, partyId);
 
         Document document = documentGenService.generateSingleDocument(
                 authorisation,
@@ -90,6 +75,40 @@ public class CaseApplicationResponseController {
                 DOCUMENT_C7_BLANK_HINT,
                 false
             );
+
+        log.info("C7 draft document generated successfully for respondent " + partyId);
+        return objectMapper.convertValue(
+            document,
+            Document.class
+        );
+    }
+
+    @PostMapping(path = "{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON)
+    @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Document generated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public CaseData generateC7FinalDocument(
+        @PathVariable("caseId") String caseId,
+        @PathVariable("partyId") String partyId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+
+        CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
+        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseDetails caseDetailsReturn = null;
+        caseData = updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+        log.info("BEFORE call to C7 final Document {} {}",caseData, partyId);
+
+        Document document = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            C7_FINAL_ENGLISH,
+            false
+        );
+        caseData = updateCurrentRespondent(caseData, null, partyId);
 
         List<Element<ResponseDocuments>> responseDocumentsList = new ArrayList<>();
         if (document != null) {
@@ -119,6 +138,18 @@ public class CaseApplicationResponseController {
             caseDetailsReturn.getData(),
             CaseData.class
         );
+    }
+
+    private CaseData updateCurrentRespondent(CaseData caseData, YesOrNo currentRespondent, String partyId) {
+        List<Element<PartyDetails>> partyDetails = caseData.getRespondents().stream().map(respondent -> {
+            if (respondent.getId().toString().equalsIgnoreCase(partyId)) {
+                return element(respondent.getValue().toBuilder().currentRespondent(currentRespondent).build());
+            } else {
+                return respondent;
+            }
+        }).collect(Collectors.toList());
+        caseData = caseData.toBuilder().respondents(partyDetails).build();
+        return caseData;
     }
 }
 
