@@ -60,6 +60,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -262,9 +263,16 @@ public class FL401ApplicationMapperTest {
         List<LivingSituationOutcomeEnum> livingSituationOutcomeEnum = new ArrayList<>();
         livingSituationOutcomeEnum.add(LivingSituationOutcomeEnum.stayInHome);
 
+        ChildAtAddress childAtAddress1 = ChildAtAddress.builder()
+            .age(5)
+            .fullName("test child")
+            .build();
+
+        List<ChildAtAddress> children1 = new ArrayList<>();
+        children.add(childAtAddress1);
+
         List<FamilyHomeOutcomeEnum> familyHomeOutcomeEnum = new ArrayList<>();
         familyHomeOutcomeEnum.add(FamilyHomeOutcomeEnum.respondentToPayRentMortgage);
-
 
         home1 = TheHome.builder()
             .applyingForOccupationOrder(true)
@@ -278,6 +286,7 @@ public class FL401ApplicationMapperTest {
             .previouslyLivedAtAddress(PreviousOrIntendedResidentAtAddressEnum.applicant)
             .intendedToLiveAtAddress(PreviousOrIntendedResidentAtAddressEnum.applicant)
             .childrenApplicantResponsibility(children)
+            .childrenSharedResponsibility(children1)
             .propertySpeciallyAdapted(true)
             .propertyHasMortgage(true)
             .namedOnMortgage(contractEnum)
@@ -471,6 +480,8 @@ public class FL401ApplicationMapperTest {
             .courtNavApproved(false)
             .caseOrigin("courtnav")
             .numberOfAttachments(4)
+            .hasDraftOrder(true)
+            .courtSpecialRequirements("test")
             .build();
 
         courtNavFl401 = CourtNavFl401.builder()
@@ -508,6 +519,7 @@ public class FL401ApplicationMapperTest {
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
         assertFalse(courtNavFl401.getMetaData().isCourtNavApproved());
+        assertTrue(courtNavFl401.getMetaData().isHasDraftOrder());
         assertNotNull(courtNavFl401.getMetaData().getCaseOrigin());
 
     }
@@ -558,7 +570,6 @@ public class FL401ApplicationMapperTest {
         assertFalse(courtNavFl401.getFl401().getSituation().isBailConditionsOnRespondent());
 
     }
-
 
     @Test
     public void testCourtnavFamilyAsApplicant() throws NotFoundException {
@@ -716,6 +727,61 @@ public class FL401ApplicationMapperTest {
     }
 
     @Test
+    public void testCourtnavGoingToCourtWithNoSpecialMeasures() throws NotFoundException {
+
+        List<SpecialMeasuresEnum> specialMeasuresEnum = new ArrayList<>();
+        specialMeasuresEnum.add(SpecialMeasuresEnum.separateWaitingRoom);
+
+        goingToCourt = GoingToCourt.builder()
+            .isInterpreterRequired(true)
+            .interpreterLanguage("test")
+            .interpreterDialect("test")
+            .anyDisabilityNeeds(true)
+            .disabilityNeedsDetails("test")
+            .anySpecialMeasures(null)
+            .build();
+
+        courtNavFl401 = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(beforeStart)
+                       .situation(situation)
+                       .applicantDetails(applicantsDetails)
+                       .respondentDetails(respondentDetails)
+                       .family(family)
+                       .relationshipWithRespondent(relationShipToRespondent)
+                       .respondentBehaviour(respondentBehaviour)
+                       .theHome(home1)
+                       .statementOfTruth(stmtOfTruth)
+                       .goingToCourt(goingToCourt)
+                       .build())
+            .metaData(courtNavMetaData)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseOrigin("courtnav")
+            .courtNavApproved(YesOrNo.No)
+            .build();
+
+        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
+            .address("test court address")
+            .description("court desc")
+            .explanation("court explanation")
+            .build();
+
+        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
+        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
+
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+
+        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+
+        assertEquals(YesOrNo.Yes, caseData1.getIsInterpreterNeeded());
+        assertEquals(YesOrNo.Yes, caseData1.getIsDisabilityPresent());
+        assertNull(courtNavFl401.getFl401().getGoingToCourt().getAnySpecialMeasures());
+        assertNull(caseData1.getSpecialArrangementsRequired());
+    }
+
+    @Test
     public void testCourtnavOngoingCourtProceedings() throws NotFoundException {
 
         List<CourtProceedings> courtProceedings = new ArrayList<>();
@@ -795,6 +861,7 @@ public class FL401ApplicationMapperTest {
 
         home1 = home1.toBuilder()
             .childrenApplicantResponsibility(null)
+            .childrenSharedResponsibility(null)
             .build();
 
         courtNavFl401 = CourtNavFl401.builder()
@@ -832,6 +899,149 @@ public class FL401ApplicationMapperTest {
         verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
 
         assertEquals(YesOrNo.No, caseData1.getHome().getDoAnyChildrenLiveAtAddress());
+
+    }
+
+    @Test
+    public void testCourtnavHomePreviouslyLivedAtThisAddressAsNeither() throws NotFoundException {
+
+        home1 = home1.toBuilder()
+            .previouslyLivedAtAddress(null)
+            .intendedToLiveAtAddress(null)
+            .build();
+
+        courtNavFl401 = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(beforeStart)
+                       .situation(situation1)
+                       .applicantDetails(applicantsDetails)
+                       .respondentDetails(respondentDetails)
+                       .family(family)
+                       .relationshipWithRespondent(relationShipToRespondent)
+                       .respondentBehaviour(respondentBehaviour)
+                       .theHome(home1)
+                       .statementOfTruth(stmtOfTruth)
+                       .goingToCourt(goingToCourt)
+                       .build())
+            .metaData(courtNavMetaData)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseOrigin("courtnav")
+            .courtNavApproved(YesOrNo.No)
+            .build();
+
+        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
+            .address("test court address")
+            .description("court desc")
+            .explanation("court explanation")
+            .build();
+
+        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
+        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
+
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+
+        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+
+        assertNull(caseData1.getHome().getEverLivedAtTheAddress());
+        assertNull(caseData1.getHome().getIntendToLiveAtTheAddress());
+
+    }
+
+    @Test
+    public void testCourtnavHomeLivingStituationAsNull() throws NotFoundException {
+
+        home1 = home1.toBuilder()
+            .wantToHappenWithLivingSituation(null)
+            .wantToHappenWithFamilyHome(null)
+            .build();
+
+        courtNavFl401 = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(beforeStart)
+                       .situation(situation1)
+                       .applicantDetails(applicantsDetails)
+                       .respondentDetails(respondentDetails)
+                       .family(family)
+                       .relationshipWithRespondent(relationShipToRespondent)
+                       .respondentBehaviour(respondentBehaviour)
+                       .theHome(home1)
+                       .statementOfTruth(stmtOfTruth)
+                       .goingToCourt(goingToCourt)
+                       .build())
+            .metaData(courtNavMetaData)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseOrigin("courtnav")
+            .courtNavApproved(YesOrNo.No)
+            .build();
+
+        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
+            .address("test court address")
+            .description("court desc")
+            .explanation("court explanation")
+            .build();
+
+        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
+        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
+
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+
+        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+
+        assertNull(caseData1.getHome().getLivingSituation());
+        assertNull(caseData1.getHome().getFamilyHome());
+
+    }
+
+    @Test
+    public void testCourtnavHomeNameOnRentalAgreementAsNull() throws NotFoundException {
+
+        home1 = home1.toBuilder()
+            .propertyIsRented(false)
+            .namedOnRentalAgreement(null)
+            .propertyHasMortgage(false)
+            .namedOnMortgage(null)
+            .build();
+
+        courtNavFl401 = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(beforeStart)
+                       .situation(situation1)
+                       .applicantDetails(applicantsDetails)
+                       .respondentDetails(respondentDetails)
+                       .family(family)
+                       .relationshipWithRespondent(relationShipToRespondent)
+                       .respondentBehaviour(respondentBehaviour)
+                       .theHome(home1)
+                       .statementOfTruth(stmtOfTruth)
+                       .goingToCourt(goingToCourt)
+                       .build())
+            .metaData(courtNavMetaData)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseOrigin("courtnav")
+            .courtNavApproved(YesOrNo.No)
+            .build();
+
+        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
+            .address("test court address")
+            .description("court desc")
+            .explanation("court explanation")
+            .build();
+
+        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
+        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
+
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+
+        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+
+        assertNull(caseData1.getHome().getLandlords());
+        assertNull(caseData1.getHome().getMortgages());
 
     }
 
@@ -1060,8 +1270,6 @@ public class FL401ApplicationMapperTest {
 
     }
 
-
-
     @Test
     public void testCourtnavFamilyParentalResponsibilityAsFalse() throws NotFoundException {
 
@@ -1123,6 +1331,100 @@ public class FL401ApplicationMapperTest {
 
 
         assertNotNull(caseData1.getApplicantChildDetails());
+    }
+
+    @Test
+    public void testCourtnavRespondentBehaviourTowardsApplicantAsNull() throws NotFoundException {
+
+        List<BehaviourTowardsChildrenEnum> behaviourTowardsChildrenEnum = new ArrayList<>();
+        behaviourTowardsChildrenEnum.add(BehaviourTowardsChildrenEnum.beingViolentOrThreatening);
+
+        respondentBehaviour = CourtNavRespondentBehaviour.builder()
+            .applyingForMonMolestationOrder(true)
+            .stopBehaviourAnythingElse("abc")
+            .stopBehaviourTowardsApplicant(null)
+            .stopBehaviourTowardsChildren(behaviourTowardsChildrenEnum)
+            .build();
+
+        courtNavFl401 = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(beforeStart)
+                       .situation(situation)
+                       .applicantDetails(applicantsDetails)
+                       .respondentDetails(respondentDetails)
+                       .family(family)
+                       .relationshipWithRespondent(relationShipToRespondent)
+                       .respondentBehaviour(respondentBehaviour)
+                       .theHome(home1)
+                       .statementOfTruth(stmtOfTruth)
+                       .goingToCourt(goingToCourt)
+                       .build())
+            .metaData(courtNavMetaData)
+            .build();
+
+        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
+            .address("test court address")
+            .description("court desc")
+            .explanation("court explanation")
+            .build();
+
+        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
+        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
+
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+
+        assertNull(courtNavFl401.getFl401().getRespondentBehaviour().getStopBehaviourTowardsApplicant());
+        assertNull(caseData1.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoing());
+
+    }
+
+    @Test
+    public void testCourtnavRespondentBehaviourTowardsChildrenAsNull() throws NotFoundException {
+
+        List<BehaviourTowardsApplicantEnum> behaviourTowardsApplicantEnum = new ArrayList<>();
+        behaviourTowardsApplicantEnum.add(BehaviourTowardsApplicantEnum.comingNearHome);
+
+        respondentBehaviour = CourtNavRespondentBehaviour.builder()
+            .applyingForMonMolestationOrder(true)
+            .stopBehaviourAnythingElse("abc")
+            .stopBehaviourTowardsApplicant(behaviourTowardsApplicantEnum)
+            .stopBehaviourTowardsChildren(null)
+            .build();
+
+
+        courtNavFl401 = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(beforeStart)
+                       .situation(situation)
+                       .applicantDetails(applicantsDetails)
+                       .respondentDetails(respondentDetails)
+                       .family(family)
+                       .relationshipWithRespondent(relationShipToRespondent)
+                       .respondentBehaviour(respondentBehaviour)
+                       .theHome(home1)
+                       .statementOfTruth(stmtOfTruth)
+                       .goingToCourt(goingToCourt)
+                       .build())
+            .metaData(courtNavMetaData)
+            .build();
+
+        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
+            .address("test court address")
+            .description("court desc")
+            .explanation("court explanation")
+            .build();
+
+        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
+        when(courtFinderService.getEmailAddress(court)).thenReturn(Optional.of(courtEmailAddress));
+
+        CaseData caseData1 = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+
+        verify(courtFinderService, times(1)).getNearestFamilyCourt(Mockito.any(CaseData.class));
+
+        assertNull(courtNavFl401.getFl401().getRespondentBehaviour().getStopBehaviourTowardsChildren());
+        assertNull(caseData1.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoingToChild());
+
     }
 
 }
