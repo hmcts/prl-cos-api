@@ -404,7 +404,8 @@ public class ManageOrderService {
                                                                                    fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME),
                                                            caseData));
 
-            } else if (documentLanguage.isGenWelsh()) {
+            }
+            if (documentLanguage.isGenWelsh()) {
                 log.info("*** Generating Final order in Welsh ***");
                 orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
                                                                                  fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH),
