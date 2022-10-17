@@ -68,6 +68,7 @@ public class DraftAnOrderService {
     private final ObjectMapper objectMapper;
 
     private static final String NON_MOLESTATION_ORDER = "draftAnOrder/non-molestation-order.html";
+    private static final String BLANK_ORDER_C21 = "draftAnOrder/blank-order-c21.html";
 
     public Document generateSolicitorDraftOrder(String authorisation, CaseData caseData) throws Exception {
 
@@ -711,7 +712,21 @@ public class DraftAnOrderService {
     }
 
     public CaseData populateCustomFields(CaseData caseData) {
+        switch (caseData.getCreateSelectOrderOptions()) {
+            case blank:
+                return caseData.toBuilder().previewDraftAnOrder(getBlankOrderString(
+                    readString(NON_MOLESTATION_ORDER),
+                    caseData
+                )).build();
+            case nonMolestation:
+                return populateFl404Fields(caseData);
+            default:
+                return caseData;
 
+        }
+    }
+
+    public CaseData populateFl404Fields(CaseData caseData) {
         FL404 orderData = FL404.builder()
             .fl404bCaseNumber(String.valueOf(caseData.getId()))
             .fl404bCourtName(caseData.getCourtName())
@@ -737,5 +752,36 @@ public class DraftAnOrderService {
                                                      .fl404CustomFields(orderData)
                                                      .build())
             .selectedOrder(caseData.getCreateSelectOrderOptions().getDisplayedValue()).build();
+    }
+
+    public String getBlankOrderString(String blankOrderString, CaseData caseData) {
+        Map<String, String> blankOrderPlaceHoldersMap = new HashMap<>();
+        if (blankOrderString != null) {
+
+            blankOrderPlaceHoldersMap.put(
+                "familyManNumber", caseData.getFamilymanCaseNumber() != null ? caseData.getFamilymanCaseNumber() : " "
+            );
+
+            blankOrderPlaceHoldersMap.put("ccdId", String.valueOf(caseData.getId()));
+
+            blankOrderPlaceHoldersMap.put(
+                "orderDate",
+                caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
+                    PrlAppsConstants.D_MMMM_YYYY,
+                    Locale.UK
+                )) : " "
+            );
+            blankOrderPlaceHoldersMap.put(
+                "judgeOrMagistrateTitle",
+                caseData.getManageOrders().getJudgeOrMagistrateTitle() != null
+                    ? caseData.getManageOrders().getJudgeOrMagistrateTitle().getDisplayedValue() : " "
+            );
+            blankOrderPlaceHoldersMap.put("judgeOrMagistratesLastName", caseData.getJudgeOrMagistratesLastName());
+            blankOrderPlaceHoldersMap.put("justiceLegalAdviserFullName", caseData.getJusticeLegalAdviserFullName());
+            StringSubstitutor substitutor = new StringSubstitutor(blankOrderPlaceHoldersMap);
+            return substitutor.replace(blankOrderString);
+        } else {
+            return null;
+        }
     }
 }
