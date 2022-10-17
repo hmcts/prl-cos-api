@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -38,6 +40,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
@@ -239,6 +242,12 @@ public class DocumentGenService {
     @Value("${document.templates.citizen.prl_citizen_upload_filename}")
     protected String prlCitizenUploadFileName;
 
+    @Value("${document.templates.citizen.respondent_c7_template}")
+    protected String respondentC7Template;
+
+    @Value("${document.templates.citizen.respondent_c7_file_name}")
+    protected String respondentC7FileName;
+
     @Autowired
     private DgsService dgsService;
 
@@ -250,6 +259,9 @@ public class DocumentGenService {
 
     @Autowired
     UploadDocumentService uploadService;
+
+    @Autowired
+    IdamClient idamClient;
 
     private CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
@@ -576,6 +588,9 @@ public class DocumentGenService {
             case DOCUMENT_PRIVACY_NOTICE_HINT:
                 fileName = privacyNoticeFilename;
                 break;
+            case C7_HINT:
+                fileName = respondentC7FileName;
+                break;
             default:
                 fileName = "";
         }
@@ -658,6 +673,9 @@ public class DocumentGenService {
                 break;
             case CITIZEN_HINT:
                 template = prlCitizenUploadTemplate;
+                break;
+            case C7_HINT:
+                template = respondentC7Template;
                 break;
             default:
                 template = "";
@@ -750,6 +768,30 @@ public class DocumentGenService {
                                            boolean isWelsh) throws Exception {
         log.info(" *** Document generation initiated for {} *** ", hint);
         return getDocument(authorisation, caseData, hint, isWelsh);
+    }
+
+    public UploadedDocuments generateC7FinalDocument(String authorisation, CaseData caseData) throws Exception {
+
+        String parentDocumentType = "Respondent's documents";
+        String documentType = "response to the request for child arrangements";
+        LocalDate today = LocalDate.now();
+        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
+        String isApplicant = "No";
+        UserDetails userDetails = idamClient.getUserDetails(authorisation);
+        String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
+        String fileName = userDetails.getFullName() + "'s-response_child_arrangement" + currentDate + SUBMITTED_PDF;
+        Document generatedDocument = getDocument(authorisation,caseData,"C7",false);
+
+        return UploadedDocuments.builder()
+            .parentDocumentType(parentDocumentType)
+            .documentType(documentType)
+            .partyName(userDetails.getFullName())
+            .isApplicant(isApplicant)
+            .dateCreated(LocalDate.now())
+            .documentDetails(DocumentDetails.builder()
+                                 .documentName(fileName)
+                                 .documentUploadedDate(formattedCurrentDate)
+                                 .build()).citizenDocument(generatedDocument).build();
     }
 
     public UploadedDocuments generateCitizenStatementDocument(String authorisation,
