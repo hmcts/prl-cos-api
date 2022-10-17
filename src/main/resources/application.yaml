@@ -71,11 +71,7 @@ xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
 citizen:
-  dashboardUrl: ${CITIZEN_URL:https://www.example.com}
   url: ${CITIZEN_URL:https://privatelaw.aat.platform.hmcts.net}
-
-citizen_frontend:
-  url: ${CITIZEN_URL:https://www.example.com}
 
 uk:
   gov:
