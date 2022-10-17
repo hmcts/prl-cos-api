@@ -50,4 +50,35 @@ public class RespondentSolicitorMiamService {
         return String.join("\n\n", collapsible);
     }
 
+    public String getCollapsableOfHelpMiamCostsExemptionsPlaceHolder() {
+        final List<String> collapsibleWillingnessToAttendMiam = new ArrayList<>();
+
+        collapsibleWillingnessToAttendMiam.add("<details class=\"govuk-details\" data-module=\"govuk-details\">");
+        collapsibleWillingnessToAttendMiam.add("<summary class=\"govuk-details__summary\">");
+        collapsibleWillingnessToAttendMiam.add("<span class=\"govuk-details__summary-text\">");
+        collapsibleWillingnessToAttendMiam.add("Help with MIAM costs and exemptions");
+        collapsibleWillingnessToAttendMiam.add("</span>");
+        collapsibleWillingnessToAttendMiam.add("</summary>");
+        collapsibleWillingnessToAttendMiam.add("<div class=\"govuk-details__text\">");
+        collapsibleWillingnessToAttendMiam.add("<p>The price of mediation will vary depending on:");
+        collapsibleWillingnessToAttendMiam.add("</p><ul>");
+        collapsibleWillingnessToAttendMiam.add("<li>where you live</li>");
+        collapsibleWillingnessToAttendMiam.add("<li>how many sessions you attend</li>");
+        collapsibleWillingnessToAttendMiam.add("<li>the type of issues you need to discuss</li>");
+        collapsibleWillingnessToAttendMiam.add("</ul><p></p>");
+        collapsibleWillingnessToAttendMiam.add("<p>You may be able to get legal aid if you are on a low income.</p>");
+        collapsibleWillingnessToAttendMiam.add("<h3 class=\"govuk-heading-s\">Family Mediation Voucher Scheme</h3>");
+        collapsibleWillingnessToAttendMiam.add("<p>You may be eligible for the Family Mediation Voucher Scheme. This is a government scheme that provides up to £500 towards the cost of mediation for eligible cases.</p>");
+        collapsibleWillingnessToAttendMiam.add("<p>At your MIAM, your mediator will explain the voucher scheme and you may be offered a voucher if your case meets the scheme's criteria. Not all cases qualify for a voucher.</p>");
+        collapsibleWillingnessToAttendMiam.add("<p>See the <a href=\"https://www.gov.uk\" class=\"govuk-link\" rel=\"external\" target=\"_blank\">GOV.UK</a> guidance on the <a href=\"https://www.gov.uk/guidance/family-mediation-voucher-scheme\" class=\"govuk-link\" rel=\"external\" target=\"_blank\">Family Mediation Voucher Scheme</a> for more information.</p>");
+        collapsibleWillingnessToAttendMiam.add("<p>The MIAM process works, with agreement reached in over 70% of cases.</p>");
+        collapsibleWillingnessToAttendMiam.add("<h3 class=\"govuk-heading-s\">Exemptions</h3>");
+        collapsibleWillingnessToAttendMiam.add("<p>You don't need to attend a MIAM if you have a valid reason. For example, you or the children are at risk of harm.</p>");
+        collapsibleWillingnessToAttendMiam.add("<p>Find out more about <a href=\"https://apply-to-court-about-child-arrangements.service.justice.gov.uk/about/miam_exemptions\" class=\"govuk-link\" rel=\"external\" target=\"_blank\">the reasons for a MIAM exemption</a>.</p>");
+        collapsibleWillingnessToAttendMiam.add("</div>");
+        collapsibleWillingnessToAttendMiam.add("</details>");
+
+        return String.join("\n\n", collapsibleWillingnessToAttendMiam);
+    }
+
 }

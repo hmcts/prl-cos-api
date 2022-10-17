@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 @Data
 @Builder(toBuilder = true)
@@ -15,5 +16,11 @@ public class RespondentSolicitorMiam {
     @JsonProperty("whatIsMiamPlaceHolder")
     private final String whatIsMiamPlaceHolder;
 
+    private final YesOrNo respondentSolicitorHaveYouAttendedMiam;
+
+    private final YesOrNo respondentSolicitorWillingnessToAttendMiam;
+
+    @JsonProperty("helpMiamCostsExemptionsPlaceHolder")
+    private final String helpMiamCostsExemptionsPlaceHolder;
 
 }
