@@ -50,6 +50,7 @@ public class CaseApplicationResponseController {
     @Autowired
     CaseService caseService;
 
+
     @PostMapping(path = "{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON)
     @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
     @ApiResponses(value = {
@@ -76,10 +77,7 @@ public class CaseApplicationResponseController {
             );
 
         log.info("C7 draft document generated successfully for respondent " + partyId);
-        return objectMapper.convertValue(
-            document,
-            Document.class
-        );
+        return document;
     }
 
     @PostMapping(path = "{caseId}/{partyId}/generate-c7document-final", produces = APPLICATION_JSON)
