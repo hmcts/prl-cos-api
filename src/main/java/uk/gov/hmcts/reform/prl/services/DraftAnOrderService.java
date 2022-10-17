@@ -767,6 +767,10 @@ public class DraftAnOrderService {
             blankOrderPlaceHoldersMap.put("ccdId", String.valueOf(caseData.getId()));
 
             blankOrderPlaceHoldersMap.put(
+                "applicantChildNameDob", getApplicantChildDetails(caseData.getApplicantChildDetails())
+            );
+
+            blankOrderPlaceHoldersMap.put(
                 "orderDate",
                 caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
                     PrlAppsConstants.D_MMMM_YYYY,
@@ -774,9 +778,28 @@ public class DraftAnOrderService {
                 )) : " "
             );
             blankOrderPlaceHoldersMap.put(
+                "recitalsOrPreamble", caseData.getRecitalsOrPreamble() != null
+                    ? caseData.getRecitalsOrPreamble() : " "
+            );
+            blankOrderPlaceHoldersMap.put(
                 "judgeOrMagistrateTitle",
                 caseData.getManageOrders().getJudgeOrMagistrateTitle() != null
                     ? caseData.getManageOrders().getJudgeOrMagistrateTitle().getDisplayedValue() : " "
+            );
+            blankOrderPlaceHoldersMap.put(
+                "isTheOrderByConsent",
+                (caseData.getIsTheOrderByConsent() != null
+                    && caseData.getIsTheOrderByConsent().equals(
+                    YesOrNo.Yes) ? "By consent" : " "
+                )
+            );
+            blankOrderPlaceHoldersMap.put(
+                "orderDirections", caseData.getOrderDirections() != null
+                    ? caseData.getOrderDirections() : " "
+            );
+            blankOrderPlaceHoldersMap.put(
+                "furtherDirectionsIfRequired", caseData.getFurtherDirectionsIfRequired() != null
+                    ? caseData.getFurtherDirectionsIfRequired() : " "
             );
             blankOrderPlaceHoldersMap.put("judgeOrMagistratesLastName", caseData.getJudgeOrMagistratesLastName());
             blankOrderPlaceHoldersMap.put("justiceLegalAdviserFullName", caseData.getJusticeLegalAdviserFullName());
