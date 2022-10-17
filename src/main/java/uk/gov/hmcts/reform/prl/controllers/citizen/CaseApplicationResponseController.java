@@ -129,8 +129,14 @@ public class CaseApplicationResponseController {
             );
         }
         log.info("AFTER call to generate Document " + caseId);
+        if (caseDetailsReturn != null) {
+            return objectMapper.convertValue(
+                caseDetailsReturn.getData(),
+                CaseData.class
+            );
+        }
         return objectMapper.convertValue(
-            caseDetailsReturn.getData(),
+            caseData,
             CaseData.class
         );
     }
