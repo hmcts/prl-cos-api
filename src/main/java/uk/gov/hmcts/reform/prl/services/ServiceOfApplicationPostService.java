@@ -150,7 +150,7 @@ public class ServiceOfApplicationPostService {
 
     private List<GeneratedDocumentInfo> getSelectedOrders(CaseData caseData) {
         List<String> orderNames = caseData.getServiceOfApplicationScreen1()
-            .getSelectedOrders();
+            .retrieveSelectedOrders();
 
         return caseData.getOrderCollection().stream()
             .map(Element::getValue)
