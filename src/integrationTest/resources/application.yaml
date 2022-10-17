@@ -90,7 +90,9 @@ xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
 citizen:
+  dashboardUrl: ${CITIZEN_URL:https://wwww.example.com}
   url: ${CITIZEN_URL:https://privatelaw.aat.platform.hmcts.net}
+
 
 aca:
   api:
@@ -118,6 +120,9 @@ uk:
             WITHDRAW_AFTER_ISSUED_SOLICITOR: ba39a8e6-c553-457e-b526-3c241cd207f6
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
+            CA_DA_MANAGE_ORDER_EMAIL: c95d53c2-e9ed-4ce3-b0f9-95df7401bbfa
+            CA_DA_FINAL_ORDER_EMAIL: a34023e7-c545-4352-b509-574d15c84f52
+            SOLICITOR_RESUBMIT_EMAIL: c8fa581b-10c7-4d48-8a22-3d055ae4be79
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -326,6 +331,11 @@ document:
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
       prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
+    citizen:
+      prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
+      prl_citizen_upload_filename: Self_created.pdf
+      respondent_c7_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
+      respondent_c7_file_name: Citizen_Uploaded_Statement.pdf
 
 southampton:
   court:

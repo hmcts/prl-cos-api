@@ -73,9 +73,6 @@ xui:
 citizen:
   url: ${CITIZEN_URL:https://privatelaw.aat.platform.hmcts.net}
 
-citizen_frontend:
-  url: http://example.com
-
 uk:
   gov:
     notify:
@@ -105,6 +102,9 @@ uk:
             RESPONDENT_WITHOUT_SOLICITOR: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
             CASE_INVITE: 6ef4bf4b-e540-40bc-a692-f013b64fe9b9
             APPLICANT_SOLICITOR: 72e32651-a952-4063-8a85-5f28950fcc84
+            CA_DA_MANAGE_ORDER_EMAIL: c95d53c2-e9ed-4ce3-b0f9-95df7401bbfa
+            CA_DA_FINAL_ORDER_EMAIL: a34023e7-c545-4352-b509-574d15c84f52
+            SOLICITOR_RESUBMIT_EMAIL: c8fa581b-10c7-4d48-8a22-3d055ae4be79
             LOCAL_AUTHORITY: cd275fbe-7987-4b3e-bcd1-c7cf17101b77
             DOCUMENT_UPLOADED: 5dd653ff-747f-4df1-9b0e-1532d767035f
           welsh:
@@ -332,6 +332,8 @@ document:
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf
+      respondent_c7_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
+      respondent_c7_file_name: Citizen_Uploaded_Statement.pdf
 
 southampton:
   court:

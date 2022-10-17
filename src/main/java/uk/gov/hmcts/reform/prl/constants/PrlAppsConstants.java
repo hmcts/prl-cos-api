@@ -8,8 +8,6 @@ import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PrlAppsConstants {
-    public static final String CITIZEN_PRL_CREATE_EVENT = "citizenCreate";
-
     public static final String JURISDICTION = "PRIVATELAW";
     public static final String CASE_TYPE = "PRLAPPS";
 
@@ -56,6 +54,9 @@ public class PrlAppsConstants {
     public static final String DATE_SUBMITTED_FIELD = "dateSubmitted";
     public static final String CASE_DATE_AND_TIME_SUBMITTED_FIELD = "caseSubmittedTimeStamp";
     public static final String STATE_FIELD = "state";
+
+    public static final String DOCUMENT_FIELD_C7 = "c7Document";
+    public static final String C7_HINT = "C7";
 
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
 
@@ -123,12 +124,12 @@ public class PrlAppsConstants {
     public static final String CITIZEN_UPLOADED_DOCUMENT = "citizenUploadedDocument";
 
     public static final String CITIZEN_HINT = "CITIZEN";
-
-    public static final String  YOUR_POSITION_STATEMENTS = "Your position statements";
-    public static final String  YOUR_WITNESS_STATEMENTS = "Your witness statements";
-    public static final String  OTHER_WITNESS_STATEMENTS = "Other people's witness statements";
-    public static final String  MAIL_SCREENSHOTS_MEDIA_FILES = "Emails, screenshots, images and other media files";
-    public static final String  MEDICAL_RECORDS = "Medical records";
+    public static final String APPLICANT_SOLICITOR_EMAIL_ADDRESS = "applicantSolicitorEmailAddress";
+    public static final String YOUR_POSITION_STATEMENTS = "Your position statements";
+    public static final String YOUR_WITNESS_STATEMENTS = "Your witness statements";
+    public static final String OTHER_WITNESS_STATEMENTS = "Other people's witness statements";
+    public static final String MAIL_SCREENSHOTS_MEDIA_FILES = "Emails, screenshots, images and other media files";
+    public static final String MEDICAL_RECORDS = "Medical records";
 
     public static final String LETTERS_FROM_SCHOOL = "Letters from school";
     public static final String TENANCY_MORTGAGE_AGREEMENTS = "Tenancy and mortgage agreements";
@@ -150,6 +151,7 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_REQUEST = "documentRequestedByCourt";
 
     public static final String CITIZEN_UPLOAD_DOC_DATE_FORMAT = "dd-MMM-yyyy";
+    public static final String CITIZEN_PRL_CREATE_EVENT = "citizenCreate";
     public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
 
 }

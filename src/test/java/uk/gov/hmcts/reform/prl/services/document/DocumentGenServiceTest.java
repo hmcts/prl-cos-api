@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
@@ -90,6 +92,9 @@ public class DocumentGenServiceTest {
 
     @InjectMocks
     DocumentGenService documentGenService;
+
+    @Mock
+    IdamClient idamClient;
 
     private GeneratedDocumentInfo generatedDocumentInfo;
 
@@ -1289,6 +1294,16 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGeneration() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_COVER_SHEET_HINT, false);
+        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+    }
+
+    @Test
+    public void testCitizenC7Document() throws Exception {
+        when(idamClient.getUserDetails("auth"))
+            .thenReturn(UserDetails.builder().forename("test")
+                            .surname("test1")
+                            .build());
+        documentGenService.generateC7FinalDocument("auth", c100CaseData);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
