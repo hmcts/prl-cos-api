@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -185,7 +186,9 @@ public class DraftAnOrderService {
             );
 
             nonMolestationPlaceHoldersMap.put(
-                "applicantChildNameDob", getApplicantChildDetails(caseData.getApplicantChildDetails())
+                "childDetails", C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                    ? getDaChildDetails(caseData.getApplicantChildDetails()) : getCaChildDetails(
+                    caseData.getChildren())
             );
             nonMolestationPlaceHoldersMap.put(
                 "fl404bRespondentAddress",
@@ -404,7 +407,7 @@ public class DraftAnOrderService {
         return builder.toString();
     }
 
-    private String getApplicantChildDetails(List<Element<ApplicantChild>> applicantChildDetails) {
+    private String getDaChildDetails(List<Element<ApplicantChild>> applicantChildDetails) {
         Optional<List<Element<ApplicantChild>>> appChildDetails = ofNullable(applicantChildDetails);
         StringBuilder builder = new StringBuilder();
         if (appChildDetails.isPresent()) {
@@ -767,7 +770,10 @@ public class DraftAnOrderService {
             blankOrderPlaceHoldersMap.put("ccdId", String.valueOf(caseData.getId()));
 
             blankOrderPlaceHoldersMap.put(
-                "applicantChildNameDob", getApplicantChildDetails(caseData.getApplicantChildDetails())
+                "childDetails",
+                C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                    ? getDaChildDetails(caseData.getApplicantChildDetails()) : getCaChildDetails(
+                    caseData.getChildren())
             );
 
             blankOrderPlaceHoldersMap.put(
@@ -808,5 +814,21 @@ public class DraftAnOrderService {
         } else {
             return null;
         }
+    }
+
+    public String getCaChildDetails(List<Element<Child>> childList) {
+        StringBuilder builder = new StringBuilder();
+        List<Child> children = new ArrayList<>();
+        if (childList != null) {
+            children = childList.stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+        }
+        for (int i = 0; i < children.size(); i++) {
+            Child child = children.get(i);
+            builder.append(String.format("Child %d: %s", i + 1, child.getFirstName() + " " + child.getLastName()));
+            builder.append("\n");
+        }
+        return builder.toString();
     }
 }
