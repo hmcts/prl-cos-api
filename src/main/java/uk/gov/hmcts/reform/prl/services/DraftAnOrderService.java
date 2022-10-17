@@ -712,6 +712,7 @@ public class DraftAnOrderService {
     }
 
     public CaseData populateCustomFields(CaseData caseData) {
+        log.info("inside populateCustomFields {}", caseData.getCreateSelectOrderOptions());
         switch (caseData.getCreateSelectOrderOptions()) {
             case blank:
                 return caseData.toBuilder().previewDraftAnOrder(getBlankOrderString(
@@ -755,6 +756,7 @@ public class DraftAnOrderService {
     }
 
     public String getBlankOrderString(String blankOrderString, CaseData caseData) {
+        log.info("Preparing blank order string {}", blankOrderString);
         Map<String, String> blankOrderPlaceHoldersMap = new HashMap<>();
         if (blankOrderString != null) {
 
