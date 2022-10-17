@@ -6,13 +6,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-
 @Data
 @Builder(toBuilder = true)
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RespondentSolicitorMiam {
-
     @JsonProperty("whatIsMiamPlaceHolder")
     private final String whatIsMiamPlaceHolder;
+    public RespondentSolicitorMiam(String whatIsMiamPlaceHolder){
+        this.whatIsMiamPlaceHolder = whatIsMiamPlaceHolder;
+    }
+
 }
+
