@@ -413,7 +413,6 @@ public class FL401ApplicationMapper {
     private Landlord getLandlordMappingDetails(CourtNavFl401 courtNavCaseData) {
         Landlord landlord = null;
         if (courtNavCaseData.getFl401().getTheHome().isPropertyIsRented()) {
-            log.info("Is property rented is:: {}", courtNavCaseData.getFl401().getTheHome().isPropertyIsRented());
             landlord = Landlord.builder()
                 .mortgageNamedAfterList((null != courtNavCaseData.getFl401()
                     .getTheHome().getNamedOnRentalAgreement())
@@ -423,7 +422,6 @@ public class FL401ApplicationMapper {
                 .address(getAddress(courtNavCaseData.getFl401().getTheHome().getLandlordAddress()))
                 .build();
         }
-        log.info("Landlord object::: {}", landlord);
         return landlord;
     }
 
