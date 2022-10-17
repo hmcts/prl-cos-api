@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,7 +11,8 @@ import lombok.Data;
 public class RespondentSolicitorMiam {
     @JsonProperty("whatIsMiamPlaceHolder")
     private final String whatIsMiamPlaceHolder;
-    public RespondentSolicitorMiam(String whatIsMiamPlaceHolder){
+
+    public RespondentSolicitorMiam(String whatIsMiamPlaceHolder) {
         this.whatIsMiamPlaceHolder = whatIsMiamPlaceHolder;
     }
 
