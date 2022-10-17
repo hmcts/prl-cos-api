@@ -1085,6 +1085,31 @@ public class ApplicationsTabServiceTest {
     }
 
     @Test
+    public void testGetFl401RespondentBehaviourTableWithNoBehaviourTowardsChildren() {
+
+
+        RespondentBehaviour respondentBehaviour = RespondentBehaviour.builder()
+            .otherReasonApplicantWantToStopFromRespondentDoing("Test data")
+            .applicantWantToStopFromRespondentDoingToChild(null)
+            .applicantWantToStopFromRespondentDoing(Collections.singletonList(applicantStopFromRespondentEnum_Value_1)).build();
+
+        caseDataWithParties = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .respondentBehaviourData(respondentBehaviour)
+            .build();
+
+        Map<String, Object> expected = Map.of("otherReasonApplicantWantToStopFromRespondentDoing","Test data",
+                                              "isPhoneNumberConfidential",
+                                              "This information is to be kept confidential",
+                                              "isEmailAddressConfidential","This information is to be kept confidential",
+                                              "applicantWantToStopFromRespondentDoing","Being violent or threatening towards them");
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
+        Map<String, Object> result = applicationsTabService.getFl401RespondentBehaviourTable(caseDataWithParties);
+        assertEquals(expected, result);
+    }
+
+    @Test
     public void testGetFl401RelationshipToRespondentTable() {
 
 
