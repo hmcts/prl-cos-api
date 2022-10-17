@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundleCreateRequestMapper {
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String bundleConfigFileName) {
-        return BundleCreateRequest.builder().caseDetails(CaseDetails.builder().caseData(mapCaseData(
+        return BundleCreateRequest.builder().caseDetails(CaseDetails.builder().id(String.valueOf(caseData.getId())).caseData(mapCaseData(
             caseData, bundleConfigFileName)).build()).caseTypeId(caseData.getSelectedCaseTypeID()).jurisdictionId(
             caseData.getCourtId()).build();
     }

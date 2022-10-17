@@ -13,4 +13,7 @@ public class CaseDetails {
     @JsonProperty("case_data")
     public CaseData caseData;
 
+    @JsonProperty("id")
+    public String id;
+
 }
