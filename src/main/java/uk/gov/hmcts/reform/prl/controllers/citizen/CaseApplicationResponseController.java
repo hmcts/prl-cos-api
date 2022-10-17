@@ -67,7 +67,7 @@ public class CaseApplicationResponseController {
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         caseData = updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
-        log.info("BEFORE call to generate Document {} {}",caseData, partyId);
+        log.info(" Generating C7 draft document for respondent ");
 
         Document document = documentGenService.generateSingleDocument(
                 authorisation,
@@ -76,7 +76,7 @@ public class CaseApplicationResponseController {
                 false
             );
 
-        log.info("C7 draft document generated successfully for respondent " + partyId);
+        log.info("C7 draft document generated successfully for respondent ");
         return document;
     }
 
@@ -96,14 +96,14 @@ public class CaseApplicationResponseController {
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         caseData = updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
-        log.info("BEFORE call to C7 final Document {} {}",caseData, partyId);
-
+        log.info(" Generating C7 Final document for respondent ");
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
             C7_FINAL_ENGLISH,
             false
         );
+        log.info("C7 Final document generated successfully for respondent ");
         caseData = updateCurrentRespondent(caseData, null, partyId);
         CaseDetails caseDetailsReturn = null;
         List<Element<ResponseDocuments>> responseDocumentsList = new ArrayList<>();
@@ -118,7 +118,6 @@ public class CaseApplicationResponseController {
                                                                              .build());
             responseDocumentsList.add(responseDocumentElement);
             caseData = caseData.toBuilder().citizenResponseC7DocumentList(responseDocumentsList).build();
-            log.info("Amending the Case Data with citizenResponseC7DocumentList " + caseId);
             log.info("Call updateCase with event " + REVIEW_AND_SUBMIT + " for case id " + caseId);
             caseDetailsReturn = caseService.updateCase(
                 caseData,
@@ -128,7 +127,6 @@ public class CaseApplicationResponseController {
                 REVIEW_AND_SUBMIT
             );
         }
-        log.info("AFTER call to generate Document " + caseId);
         if (caseDetailsReturn != null) {
             return objectMapper.convertValue(
                 caseDetailsReturn.getData(),
