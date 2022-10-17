@@ -716,7 +716,7 @@ public class DraftAnOrderService {
         switch (caseData.getCreateSelectOrderOptions()) {
             case blankOrderOrDirections:
                 return caseData.toBuilder().previewDraftAnOrder(getBlankOrderString(
-                    readString(NON_MOLESTATION_ORDER),
+                    readString(BLANK_ORDER_C21),
                     caseData
                 )).build();
             case nonMolestation:
