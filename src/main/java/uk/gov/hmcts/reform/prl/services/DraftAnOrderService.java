@@ -714,7 +714,7 @@ public class DraftAnOrderService {
     public CaseData populateCustomFields(CaseData caseData) {
         log.info("inside populateCustomFields {}", caseData.getCreateSelectOrderOptions());
         switch (caseData.getCreateSelectOrderOptions()) {
-            case blank:
+            case blankOrderOrDirections:
                 return caseData.toBuilder().previewDraftAnOrder(getBlankOrderString(
                     readString(NON_MOLESTATION_ORDER),
                     caseData
