@@ -169,7 +169,7 @@ public class CaseController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     public CaseData createCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                               @RequestHeader("serviceAuthorization") String s2sToken,
+                               @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                @RequestBody CaseData caseData) {
         CaseDetails caseDetails = null;
 
