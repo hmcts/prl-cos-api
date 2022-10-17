@@ -85,6 +85,14 @@ public class CaseApplicationResponseControllerTest {
     }
 
     @Test
+    public void testGenerateC7finalDocumentWithNullData() throws Exception {
+        caseDetails = null;
+        CaseData caseData1 = caseApplicationResponseController
+            .generateC7FinalDocument(caseId,partyId,authToken,servAuthToken);
+        assertNotNull(caseData1);
+    }
+
+    @Test
     public void testGenerateC7DraftDocument() throws Exception {
         Document document = caseApplicationResponseController
             .generateC7DraftDocument(caseId,partyId,authToken,servAuthToken);
