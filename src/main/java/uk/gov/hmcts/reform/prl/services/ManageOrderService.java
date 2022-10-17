@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -216,6 +217,8 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_n117_filename}")
     protected String n117File;
 
+    private final DocumentLanguageService documentLanguageService;
+
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
     private final DgsService dgsService;
@@ -392,15 +395,22 @@ public class ManageOrderService {
         }
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
-            log.info("***** Field Map **** {}", fieldMap);
-            Element<OrderDetails> englishOrderDetails = getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
-                                   fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME),
-                                   fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME),caseData);
-            Element<OrderDetails> welshOrderDetails = getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
-                                   fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH),
-                                   fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME),caseData);
+            List<Element<OrderDetails>> orderCollection = new ArrayList<>();
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            if (documentLanguage.isGenEng()) {
+                log.info("*** Generating Final order in English ***");
+                orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
+                                                                                   fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME),
+                                                                                   fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME),
+                                                           caseData));
 
-            return List.of(englishOrderDetails, welshOrderDetails);
+            } else if (documentLanguage.isGenWelsh()) {
+                log.info("*** Generating Final order in Welsh ***");
+                orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
+                                                                                 fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH),
+                                                                                 fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME),caseData));
+            }
+            return orderCollection;
         } else {
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                 .orderDocument(caseData.getAppointmentOfGuardian())

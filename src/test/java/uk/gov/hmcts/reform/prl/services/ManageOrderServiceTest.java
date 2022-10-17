@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -63,9 +65,17 @@ public class ManageOrderServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private DocumentLanguageService documentLanguageService;
+
+    @Before
+    public void setup() {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+    }
+
     @Test
     public void getUpdatedCaseDataCaTest() {
-
         Child child = Child.builder()
             .firstName("Test")
             .lastName("Name")
@@ -128,6 +138,7 @@ public class ManageOrderServiceTest {
         assertNotNull(caseData1.getSelectedOrder());
     }
 
+    @Test
     public void testPupulateHeader() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -140,8 +151,7 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
-        assertEquals("Case Name: Test Case 45678\n\n"
-                         + "Family Man ID: familyman6789\n\n", responseMap.get("manageOrderHeader1"));
+        assertNotNull(responseMap.get("amendOrderDynamicList"));
 
     }
 
