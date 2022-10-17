@@ -44,7 +44,7 @@ public class ManageOrderEmailService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
-    @Value("${citizen.dashboardUrl}")
+    @Value("${citizen.url}")
     private String citizenDashboardUrl;
 
     private static final String URL_STRING = "/";
