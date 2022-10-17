@@ -66,6 +66,12 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c21_filename}")
     protected String c21File;
 
+    @Value("${document.templates.common.prl_c21_welsh_template}")
+    protected String c21WelshTemplate;
+
+    @Value("${document.templates.common.prl_c21_welsh_filename}")
+    protected String c21WelshFileName;
+
     @Value("${document.templates.common.prl_c43a_draft_template}")
     protected String c43ADraftTemplate;
 
@@ -240,8 +246,8 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
-                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, c21Template);
-                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c21File);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, c21WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c21WelshFileName);
                 break;
             case powerOfArrest:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl406DraftTemplate);
@@ -384,9 +390,9 @@ public class ManageOrderService {
         } else {
             flagSelectedOrderId = String.valueOf(caseData.getChildArrangementOrders());
         }
-
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
+            log.info("***** Field Map **** {}", fieldMap);
             Element<OrderDetails> englishOrderDetails = getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
                                    fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME),
                                    fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME),caseData);
