@@ -387,10 +387,10 @@ public class ManageOrderService {
 
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
-            Element<OrderDetails> englishOrderDetails= getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
+            Element<OrderDetails> englishOrderDetails = getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
                                    fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME),
                                    fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME),caseData);
-            Element<OrderDetails> welshOrderDetails= getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
+            Element<OrderDetails> welshOrderDetails = getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
                                    fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH),
                                    fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME),caseData);
 
