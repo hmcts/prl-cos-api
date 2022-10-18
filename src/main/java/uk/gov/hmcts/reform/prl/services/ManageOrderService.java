@@ -679,7 +679,8 @@ public class ManageOrderService {
     private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
                                                          String flagSelectedOrder, String template, String fileName,
                                                          CaseData caseData) throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = FINAL_TEMPLATE_WELSH.equals(template) ? dgsService.generateWelshDocument(
+        log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, template);
+        GeneratedDocumentInfo generatedDocumentInfo = FINAL_TEMPLATE_WELSH.equalsIgnoreCase(template) ? dgsService.generateWelshDocument(
             authorisation,
             CaseDetails.builder().caseData(caseData).build(),
             template
