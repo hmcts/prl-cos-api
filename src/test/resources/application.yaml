@@ -363,8 +363,6 @@ document:
     citizen:
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
-      prl_citizen_c7_blank_template: FL-PRL-GOR-ENG-C7R.docx
-      prl_citizen_c7_blank_filename: Citizen_Respond_To_Application.pdf
 
 southampton:
   court:

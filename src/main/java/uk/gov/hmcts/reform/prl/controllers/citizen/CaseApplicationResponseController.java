@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REVIEW_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -72,7 +72,7 @@ public class CaseApplicationResponseController {
         Document document = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
-                DOCUMENT_C7_BLANK_HINT,
+                DOCUMENT_C7_DRAFT_HINT,
                 false
             );
 

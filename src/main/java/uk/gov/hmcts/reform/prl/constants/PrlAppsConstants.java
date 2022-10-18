@@ -99,7 +99,7 @@ public class PrlAppsConstants {
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
     public static final String DOCUMENT_COVER_SHEET_HINT = "DOC_COVER_SHEET";
-    public static final String DOCUMENT_C7_BLANK_HINT = "DOCUMENT_C7_DRAFT";
+    public static final String DOCUMENT_C7_DRAFT_HINT = "DOCUMENT_C7_DRAFT";
     public static final String DOCUMENT_C8_BLANK_HINT = "DOCUMENT_C8_BLANK";
     public static final String DOCUMENT_C1A_BLANK_HINT = "DOCUMENT_C1A_BLANK";
     public static final String DOCUMENT_PRIVACY_NOTICE_HINT = "PRIVACY_NOTICE";
@@ -132,7 +132,6 @@ public class PrlAppsConstants {
 
     public static final String CITIZEN_HINT = "CITIZEN";
 
-    public static final String CITIZEN_RESPOND_TO_APPLICATION_C7 = "CITIZEN_RESPOND_TO_APPLICATION_C7";
     public static final String APPLICANT_SOLICITOR_EMAIL_ADDRESS = "applicantSolicitorEmailAddress";
     public static final String YOUR_POSITION_STATEMENTS = "Your position statements";
     public static final String YOUR_WITNESS_STATEMENTS = "Your witness statements";

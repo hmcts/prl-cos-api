@@ -45,9 +45,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_RESPOND_TO_APPLICATION_C7;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
@@ -254,9 +253,6 @@ public class DocumentGenService {
 
     @Value("${document.templates.citizen.prl_citizen_upload_filename}")
     protected String prlCitizenUploadFileName;
-
-    @Value("${document.templates.citizen.prl_citizen_c7_blank_template}")
-    protected String prlCitizenC7BlankTemplate;
 
     @Autowired
     private DgsService dgsService;
@@ -590,7 +586,7 @@ public class DocumentGenService {
             case DOCUMENT_COVER_SHEET_HINT:
                 fileName = findDocCoversheetFileName(isWelsh);
                 break;
-            case DOCUMENT_C7_BLANK_HINT:
+            case DOCUMENT_C7_DRAFT_HINT:
                 fileName = docC7DraftFilename;
                 break;
             case DOCUMENT_C1A_BLANK_HINT:
@@ -676,7 +672,7 @@ public class DocumentGenService {
             case DOCUMENT_COVER_SHEET_HINT:
                 template = findDocCoverSheetTemplate(isWelsh);
                 break;
-            case DOCUMENT_C7_BLANK_HINT:
+            case DOCUMENT_C7_DRAFT_HINT:
                 template = docC7DraftTemplate;
                 break;
             case DOCUMENT_C1A_BLANK_HINT:
@@ -690,9 +686,6 @@ public class DocumentGenService {
                 break;
             case CITIZEN_HINT:
                 template = prlCitizenUploadTemplate;
-                break;
-            case CITIZEN_RESPOND_TO_APPLICATION_C7:
-                template = prlCitizenC7BlankTemplate;
                 break;
             case C7_FINAL_ENGLISH:
                 template = docC7FinalEngTemplate;
