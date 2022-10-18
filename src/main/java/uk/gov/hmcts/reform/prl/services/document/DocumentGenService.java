@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -259,6 +261,9 @@ public class DocumentGenService {
 
     @Autowired
     UploadDocumentService uploadService;
+
+    @Autowired
+    DeleteDocumentService deleteDocumentService;
 
     @Autowired
     IdamClient idamClient;
@@ -855,6 +860,36 @@ public class DocumentGenService {
                 fileName,
                 generatedDocumentInfo
             )).build();
+    }
+
+    public DocumentResponse uploadDocument(String authorization, MultipartFile file) {
+        try {
+            uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument
+                = uploadService.uploadDocument(file, file.getOriginalFilename(), file.getContentType(), authorization);
+            log.info("Stored Doc Detail: " + stampedDocument.toString());
+            return DocumentResponse.builder().status("Success").document(Document.builder()
+                                                                             .documentBinaryUrl(stampedDocument.links.binary.href)
+                                                                             .documentUrl(stampedDocument.links.self.href)
+                                                                             .documentFileName(stampedDocument.originalDocumentName)
+                                                                             .documentCreatedOn(stampedDocument.createdOn)
+                                                                             .build()).build();
+
+        } catch (Exception e) {
+            log.error("Error while uploading document ." + e.getMessage());
+            throw e;
+        }
+    }
+
+    public DocumentResponse deleteDocument(String authorization, String documentId) {
+        try {
+            deleteDocumentService.deleteDocument(authorization, documentId);
+            log.info("document deleted successfully..");
+            return DocumentResponse.builder().status("Success").build();
+
+        } catch (Exception e) {
+            log.error("Error while deleting  document ." + e.getMessage());
+            throw e;
+        }
     }
 
 }
