@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 
 import java.util.List;
 
@@ -15,5 +15,5 @@ import java.util.List;
 public class KeepDetailsPrivate {
     private final YesNoDontKnow otherPeopleKnowYourContactDetails;
     private final YesOrNo confidentiality;
-    private List<ConfidentialityEnum> confidentialityList;
+    private List<ConfidentialityListEnum> confidentialityList;
 }
