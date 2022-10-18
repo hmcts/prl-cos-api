@@ -18,4 +18,9 @@ public class RespondentSolicitorMiam {
 
     private final YesOrNo respondentSolicitorHaveYouAttendedMiam;
 
+    @JsonProperty("helpMiamCostsExemptionsPlaceHolder")
+    private final String helpMiamCostsExemptionsPlaceHolder;
+
+    private final YesOrNo respondentSolicitorWillingnessToAttendMiam;
+
 }

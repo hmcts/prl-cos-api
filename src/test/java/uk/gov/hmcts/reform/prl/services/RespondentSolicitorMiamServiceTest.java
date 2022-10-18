@@ -23,4 +23,12 @@ public class RespondentSolicitorMiamServiceTest {
 
     }
 
+    @Test
+    public void testCollapsableOfHelpMiamCostsExemptionsPlaceHolder() {
+
+        String responseMap = respondentSolicitorMiamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder();
+
+        assertNotNull(responseMap);
+
+    }
 }
