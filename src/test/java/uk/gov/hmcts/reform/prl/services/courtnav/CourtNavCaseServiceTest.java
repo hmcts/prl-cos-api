@@ -118,7 +118,7 @@ public class CourtNavCaseServiceTest {
             .event(Event.builder()
                        .id("courtnav-document-upload")
                        .build())
-            .data(Map.of("FL401", tempDoc))
+            .data(Map.of("WITNESS_STATEMENT", tempDoc))
             .build();
         CaseDetails tempCaseDetails = CaseDetails.builder().data(Map.of("id", "1234567891234567")).state(
             "SUBMITTED_PAID").createdDate(
@@ -152,7 +152,7 @@ public class CourtNavCaseServiceTest {
             1234567891234567L).data(stringObjectMap).build();
 
         when(objectMapper.convertValue(tempCaseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        courtNavCaseService.uploadDocument("Bearer abc", file, "FL401",
+        courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT",
                                            "1234567891234567"
         );
         verify(coreCaseDataApi, times(1)).startEventForCaseWorker(
@@ -198,7 +198,7 @@ public class CourtNavCaseServiceTest {
             MediaType.TEXT_PLAIN_VALUE,
             "FL401 case".getBytes()
         );
-        courtNavCaseService.uploadDocument("Bearer abc", file, "FL401",
+        courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT",
                                            "1234567891234567"
         );
     }
