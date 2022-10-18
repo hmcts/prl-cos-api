@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
@@ -249,7 +250,7 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
-                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, c21WelshTemplate);
+                fieldsMap.put(FINAL_TEMPLATE_WELSH, c21WelshTemplate);
                 fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c21WelshFileName);
                 break;
             case powerOfArrest:
@@ -408,7 +409,7 @@ public class ManageOrderService {
             if (documentLanguage.isGenWelsh()) {
                 log.info("*** Generating Final order in Welsh ***");
                 orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
-                                                                                 fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH),
+                                                                                 fieldMap.get(FINAL_TEMPLATE_WELSH),
                                                                                  fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME),caseData));
             }
             return orderCollection;
@@ -678,7 +679,11 @@ public class ManageOrderService {
     private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
                                                          String flagSelectedOrder, String template, String fileName,
                                                          CaseData caseData) throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+        GeneratedDocumentInfo generatedDocumentInfo = FINAL_TEMPLATE_WELSH.equals(template) ? dgsService.generateWelshDocument(
+            authorisation,
+            CaseDetails.builder().caseData(caseData).build(),
+            template
+        ) : dgsService.generateDocument(
             authorisation,
             CaseDetails.builder().caseData(caseData).build(),
             template
