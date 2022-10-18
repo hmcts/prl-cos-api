@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -27,8 +26,8 @@ public class C100CaseInviteService implements CaseInviteService {
     @Autowired
     private LaunchDarklyClient launchDarklyClient;
 
-    private CaseInvite generateCaseInvite(Element<PartyDetails> partyDetails) {
-        return new CaseInvite().generateAccessCode(partyDetails.getValue().getEmail(), partyDetails.getId(), YesOrNo.No);
+    private CaseInvite generateRespondentCaseInvite(Element<PartyDetails> partyDetails) {
+        return new CaseInvite().generateAccessCode(partyDetails.getValue().getEmail(), partyDetails.getId());
     }
 
     private void sendCaseInvite(CaseInvite caseInvite, PartyDetails partyDetails, CaseData caseData) {
@@ -37,18 +36,18 @@ public class C100CaseInviteService implements CaseInviteService {
 
     @Override
     public CaseData generateAndSendRespondentCaseInvite(CaseData caseData) {
-        List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
+        List<Element<CaseInvite>> caseInvites = caseData.getRespondentCaseInvites() != null ? caseData.getRespondentCaseInvites() : new ArrayList<>();
 
         log.info("Generating case invites and sending notification to respondents with email address present");
 
         for (Element<PartyDetails> respondent : caseData.getRespondents()) {
             if (!respondentHasLegalRepresentation(respondent.getValue()) && Yes.equals(respondent.getValue().getCanYouProvideEmailAddress())) {
-                CaseInvite caseInvite = generateCaseInvite(respondent);
+                CaseInvite caseInvite = generateRespondentCaseInvite(respondent);
                 caseInvites.add(element(caseInvite));
                 sendCaseInvite(caseInvite, respondent.getValue(), caseData);
             }
         }
-        return caseData.toBuilder().caseInvites(caseInvites).build();
+        return caseData.toBuilder().respondentCaseInvites(caseInvites).build();
     }
 
     public boolean respondentHasLegalRepresentation(PartyDetails partyDetails) {

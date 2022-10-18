@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -85,24 +84,10 @@ public class SolicitorEmailService {
 
     public void sendEmail(CaseDetails caseDetails) {
         log.info("Sending the email to solicitor for caseId {}", caseDetails.getId());
-        String applicantSolicitorEmailAddress = caseDetails.getData()
-            .get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS).toString();
+        String applicantSolicitorEmailAddress = caseDetails.getData().get("applicantSolicitorEmailAddress").toString();
         emailService.send(
             applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR,
-            buildEmail(caseDetails),
-            LanguagePreference.english
-        );
-
-    }
-
-    public void sendReSubmitEmail(CaseDetails caseDetails) {
-        log.info("Sending case resubmission email to solicitor for caseId {}", caseDetails.getId());
-        String applicantSolicitorEmailAddress = caseDetails.getData()
-            .get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS).toString();
-        emailService.send(
-            applicantSolicitorEmailAddress,
-            EmailTemplateNames.SOLICITOR_RESUBMIT_EMAIL,
             buildEmail(caseDetails),
             LanguagePreference.english
         );

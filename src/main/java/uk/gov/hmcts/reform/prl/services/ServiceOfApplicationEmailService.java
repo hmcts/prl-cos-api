@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.ApplicantSolicitorEmail;
-import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.LocalAuthorityEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
@@ -83,22 +82,6 @@ public class ServiceOfApplicationEmailService {
             );
 
         }
-
-        sendEmailToLocalAuthority(caseDetails, caseData);
-    }
-
-    private void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) throws Exception {
-        if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
-            for (Element element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
-                String email = element.getValue().toString();
-                emailService.send(
-                    email,
-                    EmailTemplateNames.LOCAL_AUTHORITY,
-                    buildLocalAuthorityEmail(caseDetails),
-                    LanguagePreference.english
-                );
-            }
-        }
     }
 
     public void sendEmailFL401(CaseDetails caseDetails) throws Exception {
@@ -128,8 +111,6 @@ public class ServiceOfApplicationEmailService {
                 LanguagePreference.english
             );
         }
-
-        sendEmailToLocalAuthority(caseDetails, caseData);
     }
 
     private EmailTemplateVars buildApplicantSolicitorEmail(CaseDetails caseDetails, String solicitorName)
@@ -167,17 +148,6 @@ public class ServiceOfApplicationEmailService {
             .respondentName(respondentName)
             .issueDate(caseData.getIssueDate())
             .respondentName(respondentName)
-            .build();
-    }
-
-    private EmailTemplateVars buildLocalAuthorityEmail(CaseDetails caseDetails) throws Exception {
-
-        CaseData caseData = emailService.getCaseData(caseDetails);
-        return LocalAuthorityEmail.builder()
-            .caseReference(String.valueOf(caseDetails.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
-            .issueDate(caseData.getIssueDate())
             .build();
     }
 }

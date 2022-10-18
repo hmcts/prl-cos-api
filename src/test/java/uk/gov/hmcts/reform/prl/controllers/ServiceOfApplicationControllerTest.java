@@ -105,7 +105,7 @@ public class ServiceOfApplicationControllerTest {
     @Test
     public void testHandleAboutToSubmit() throws Exception {
         CaseData cd = CaseData.builder()
-            .caseInvites(Collections.emptyList())
+            .respondentCaseInvites(Collections.emptyList())
             .build();
 
         Map<String, Object> caseData = new HashMap<>();

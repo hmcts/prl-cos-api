@@ -8,6 +8,6 @@ import lombok.Data;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class User {
-    private String idamId;
-    private String email;
+    private final String idamId;
+    private final String email;
 }

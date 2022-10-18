@@ -66,7 +66,6 @@ public class C100CaseInviteServiceTest {
 
         caseDataWithRespondentsAndEmailsNoRepresentation = CaseData.builder()
             .caseTypeOfApplication("C100")
-            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
             .respondents(respondentsWithEmailsNoRepresentation).build();
 
         PartyDetails respondentTwoWithEmailAndRepresentation = PartyDetails.builder()
@@ -83,7 +82,6 @@ public class C100CaseInviteServiceTest {
 
         caseDataWithRespondentsAndEmailsOnePartyNoRepresentation = CaseData.builder()
             .caseTypeOfApplication("C100")
-            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.Yes).build())))
             .respondents(respondentsWithEmailsOneNoRepresentation).build();
 
         PartyDetails respondentOneNoEmail = PartyDetails.builder()
@@ -105,7 +103,6 @@ public class C100CaseInviteServiceTest {
 
         getCaseDataWithRespondentsNoEmails = CaseData.builder()
             .caseTypeOfApplication("C100")
-            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
             .respondents(respondentsNoEmailsNoRepresentation).build();
 
         PartyDetails respondentOneWithEmailAndRepresentation = PartyDetails.builder()
@@ -129,7 +126,6 @@ public class C100CaseInviteServiceTest {
 
         caseDataWithRespondentsAllWithRepresentation = CaseData.builder()
             .caseTypeOfApplication("C100")
-            .applicants(List.of(element(PartyDetails.builder().canYouProvideEmailAddress(YesOrNo.No).build())))
             .respondents(respondentsWithEmailsAndRepresentation).build();
 
 
@@ -146,10 +142,10 @@ public class C100CaseInviteServiceTest {
             .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAndEmailsNoRepresentation);
 
         //case invite for both respondents
-        assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("respondentOne@email.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals(2, actualCaseData.getRespondentCaseInvites().size());
+        assertEquals("respondentOne@email.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
             .getCaseInviteEmail());
-        assertEquals("respondentTwo@email.com", actualCaseData.getCaseInvites().get(1).getValue()
+        assertEquals("respondentTwo@email.com", actualCaseData.getRespondentCaseInvites().get(1).getValue()
             .getCaseInviteEmail());
     }
 
@@ -159,8 +155,8 @@ public class C100CaseInviteServiceTest {
             .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAndEmailsOnePartyNoRepresentation);
 
         //two respondents but only one should have a case invite generated
-        assertEquals(1, actualCaseData.getCaseInvites().size());
-        assertEquals("respondentOne@email.com", actualCaseData.getCaseInvites().get(0).getValue()
+        assertEquals(1, actualCaseData.getRespondentCaseInvites().size());
+        assertEquals("respondentOne@email.com", actualCaseData.getRespondentCaseInvites().get(0).getValue()
             .getCaseInviteEmail());
     }
 
@@ -168,20 +164,22 @@ public class C100CaseInviteServiceTest {
     public void givenMultipleRespondentsWithNoEmail_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
         CaseData actualCaseData = c100CaseInviteService
             .generateAndSendRespondentCaseInvite(getCaseDataWithRespondentsNoEmails);
-        assertTrue(actualCaseData.getCaseInvites().isEmpty());
+        assertTrue(actualCaseData.getRespondentCaseInvites().isEmpty());
     }
 
     @Test
     public void givenMultipleRespondentsWithEmailAndRepresentation_whenCaseInvitesGenerated_thenNoRespondentsReceiveInvite() {
         CaseData actualCaseData = c100CaseInviteService
             .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAllWithRepresentation);
-        assertTrue(actualCaseData.getCaseInvites().isEmpty());
+        assertTrue(actualCaseData.getRespondentCaseInvites().isEmpty());
     }
 
     @Test
     public void givenNoRespondents_whenCaseInvitesGenerated_thenNoInvitesGenerated() {
         CaseData actualCaseData = c100CaseInviteService
             .generateAndSendRespondentCaseInvite(caseDataWithRespondentsAllWithRepresentation);
-        assertTrue(actualCaseData.getCaseInvites().isEmpty());
+        assertTrue(actualCaseData.getRespondentCaseInvites().isEmpty());
     }
+
+
 }

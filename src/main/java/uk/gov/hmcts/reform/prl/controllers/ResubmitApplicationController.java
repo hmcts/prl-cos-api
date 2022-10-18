@@ -129,7 +129,7 @@ public class ResubmitApplicationController {
                 caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
                 caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
                 caseWorkerEmailService.sendEmail(caseDetails);
-                solicitorEmailService.sendReSubmitEmail(caseDetails);
+                solicitorEmailService.sendEmail(caseDetails);
             }
             if (State.CASE_ISSUE.getValue().equalsIgnoreCase(previousStates.get())) {
                 caseData = organisationService.getApplicantOrganisationDetails(caseData);

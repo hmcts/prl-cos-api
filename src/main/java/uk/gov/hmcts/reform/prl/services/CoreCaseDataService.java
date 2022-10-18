@@ -38,8 +38,7 @@ public class CoreCaseDataService {
             jurisdiction,
             caseType,
             caseId.toString(),
-            eventName
-        );
+            eventName);
 
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
@@ -57,7 +56,6 @@ public class CoreCaseDataService {
             caseType,
             caseId.toString(),
             true,
-            caseDataContent
-        );
+            caseDataContent);
     }
 }

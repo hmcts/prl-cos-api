@@ -162,7 +162,7 @@ public class ResubmitApplicationControllerTest {
 
         assertEquals(State.SUBMITTED_PAID, response.getData().get("state"));
         verify(caseWorkerEmailService).sendEmail(caseDetails);
-        verify(solicitorEmailService).sendReSubmitEmail(caseDetails);
+        verify(solicitorEmailService).sendEmail(caseDetails);
         verify(allTabService).getAllTabsFields(caseDataSubmitted);
 
     }

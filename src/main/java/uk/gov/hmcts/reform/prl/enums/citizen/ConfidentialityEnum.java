@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum ConfidentialityListEnum {
+public enum ConfidentialityEnum {
     @JsonProperty("phoneNumber")
     phoneNumber("phoneNumber", "Telephone number"),
     @JsonProperty("email")
@@ -28,7 +28,7 @@ public enum ConfidentialityListEnum {
     }
 
     @JsonCreator
-    public static ConfidentialityListEnum getValue(String key) {
-        return ConfidentialityListEnum.valueOf(key);
+    public static ConfidentialityEnum getValue(String key) {
+        return ConfidentialityEnum.valueOf(key);
     }
 }

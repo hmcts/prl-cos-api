@@ -34,7 +34,7 @@ public class CaseInviteManager {
 
     public CaseData reGeneratePinAndSendNotificationEmail(CaseData caseData) {
 
-        caseData = caseData.toBuilder().caseInvites(new ArrayList<>()).build();
+        caseData = caseData.toBuilder().respondentCaseInvites(new ArrayList<>()).build();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = c100CaseInviteService.generateAndSendRespondentCaseInvite(caseData);
         } else {
