@@ -64,7 +64,6 @@ public class CaseApplicationResponseController {
         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
-        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         caseData = updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
         log.info(" Generating C7 draft document for respondent ");

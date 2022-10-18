@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -103,12 +102,9 @@ public class CaseDocumentController {
     public ResponseEntity generateCitizenStatementDocument(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
                                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
-        log.info("User roles: {} ", idamClient.getUserDetails(authorisation).getRoles());
-        log.info("User details: {} ", idamClient.getUserDetails(authorisation));
         fileIndex = 0;
         String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
-        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (generateAndUploadDocumentRequest.getValues() != null
             && generateAndUploadDocumentRequest.getValues().containsKey("documentType")
@@ -217,14 +213,10 @@ public class CaseDocumentController {
                                                          @RequestHeader("serviceAuthorization") String s2sToken,
                                                          @ModelAttribute UploadedDocumentRequest uploadedDocumentRequest) {
 
-        log.info("Uploaded doc request: {}", uploadedDocumentRequest);
         String caseId = uploadedDocumentRequest.getCaseId();
-        log.info("Case id from upload doc req: {}", uploadedDocumentRequest.getCaseId());
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
-        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        log.info("=====trying to upload document=====");
         UploadedDocuments uploadedDocuments = uploadService.uploadCitizenDocument(
             authorisation,
             uploadedDocumentRequest,
@@ -300,19 +292,11 @@ public class CaseDocumentController {
         List<Element<UploadedDocuments>> uploadedDocumentsList = new ArrayList<>();
         String caseId = deleteDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
-        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (deleteDocumentRequest.getValues() != null
             && deleteDocumentRequest.getValues().containsKey("documentId")) {
             final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
-            log.info("Document to be deleted with id : " + documenIdToBeDeleted);
             tempUploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
-            /*for (Element<UploadedDocuments> element : tempUploadedDocumentsList) {
-                if (!documenIdToBeDeleted.equalsIgnoreCase(
-                    element.getId().toString())) {
-                    uploadedDocumentsList.add(element);
-                }
-            }*/
             uploadedDocumentsList = tempUploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(
                     element.getId().toString()))
                 .collect(Collectors.toList());
