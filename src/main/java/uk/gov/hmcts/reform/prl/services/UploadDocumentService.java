@@ -49,28 +49,6 @@ public class UploadDocumentService {
             .orElseThrow(() ->
                              new RuntimeException("Document upload failed due to empty result"));
 
-        log.debug("Document upload resulted with links: {}, {}", document.links.self.href, document.links.binary.href);
-
-        return document;
-    }
-
-    public Document uploadDocument(MultipartFile file, String fileName, String contentType, String authorisation) {
-
-        UploadResponse response = caseDocumentClient.uploadDocuments(
-            authorisation,
-            authTokenGenerator.generate(),
-            CASE_TYPE,
-            JURISDICTION,
-            newArrayList(file)
-        );
-
-        Document document = response.getDocuments().stream()
-            .findFirst()
-            .orElseThrow(() ->
-                             new RuntimeException("Document upload failed due to empty result"));
-
-        log.debug("Document upload resulted with links: {}, {}", document.links.self.href, document.links.binary.href);
-
         return document;
     }
 
@@ -79,34 +57,23 @@ public class UploadDocumentService {
         String parentDocumentType = "";
         String documentType = "";
         String partyName = "";
-        String documentName = "";
         String partyId = "";
         LocalDate today = LocalDate.now();
         String formattedDateCreated = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
         String isApplicant = "";
         YesOrNo documentRequest = null;
 
-        log.info("=========Trying to retrieve the upload doc request data=======");
         if (uploadedDocumentRequest != null) {
-            log.info("=====trying to retrive doc data from request=====");
-
             if (null != uploadedDocumentRequest.getParentDocumentType()) {
-                log.info("Parent doc type from upload doc req: {}", uploadedDocumentRequest.getParentDocumentType());
                 parentDocumentType = uploadedDocumentRequest.getParentDocumentType();
             }
             if (null != uploadedDocumentRequest.getPartyId()) {
-                log.info("Party Id from upload doc req: {}", uploadedDocumentRequest.getPartyId());
                 partyId = uploadedDocumentRequest.getPartyId();
             }
             if (null != uploadedDocumentRequest.getDocumentType()) {
-                log.info("document type from upload doc req: {}", uploadedDocumentRequest.getDocumentType());
-
                 documentType = uploadedDocumentRequest.getDocumentType();
                 if (null != uploadedDocumentRequest.getPartyName()) {
-                    log.info("Party name from upload doc req: {}", uploadedDocumentRequest.getPartyName());
-
                     partyName = uploadedDocumentRequest.getPartyName();
-                    documentName = documentType.replace("Your", partyName + "'s");
                 }
             }
             if (null != uploadedDocumentRequest.getIsApplicant()) {
@@ -127,9 +94,6 @@ public class UploadDocumentService {
                 JURISDICTION,
                 uploadedDocumentRequest.getFiles()
             );
-            log.info("Document Response: {} ", uploadResponse.getDocuments().get(0));
-            log.info("Document uploaded successfully through caseDocumentClient");
-
             UploadedDocuments uploadedDocuments = null;
 
             for (MultipartFile file: uploadedDocumentRequest.getFiles()) {
@@ -150,8 +114,6 @@ public class UploadDocumentService {
                                          .documentHash(uploadResponse.getDocuments().get(0).hashToken)
                                          .documentFileName(file.getOriginalFilename())
                                          .build()).build();
-
-                log.info("Document has been saved in caseData {}", file.getOriginalFilename());
             }
 
             return uploadedDocuments;
