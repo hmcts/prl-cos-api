@@ -680,7 +680,7 @@ public class ManageOrderService {
                                                          String flagSelectedOrder, String template, String fileName,
                                                          CaseData caseData) throws Exception {
         log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, template);
-        GeneratedDocumentInfo generatedDocumentInfo = FINAL_TEMPLATE_WELSH.equalsIgnoreCase(template) ? dgsService.generateWelshDocument(
+        GeneratedDocumentInfo generatedDocumentInfo = template.contains("-WEL-") ? dgsService.generateWelshDocument(
             authorisation,
             CaseDetails.builder().caseData(caseData).build(),
             template
