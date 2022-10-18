@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
@@ -58,7 +57,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
@@ -1297,20 +1296,11 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
-    @Test
-    public void testCitizenC7Document() throws Exception {
-        when(idamClient.getUserDetails("auth"))
-            .thenReturn(UserDetails.builder().forename("test")
-                            .surname("test1")
-                            .build());
-        documentGenService.generateC7FinalDocument("auth", c100CaseData);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
-    }
 
     @Test
     public void testBlankDocsGeneration() throws Exception {
         CaseData emptyCaseData = CaseData.builder().build();
-        documentGenService.generateSingleDocument("auth", emptyCaseData, DOCUMENT_C7_BLANK_HINT, false);
+        documentGenService.generateSingleDocument("auth", emptyCaseData, DOCUMENT_C7_DRAFT_HINT, false);
         documentGenService.generateSingleDocument("auth", emptyCaseData, DOCUMENT_C8_BLANK_HINT, false);
         documentGenService.generateSingleDocument("auth", emptyCaseData, DOCUMENT_C1A_BLANK_HINT, false);
         documentGenService.generateSingleDocument("auth", emptyCaseData, DOCUMENT_PRIVACY_NOTICE_HINT, false);

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -40,13 +39,14 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
@@ -212,11 +212,23 @@ public class DocumentGenService {
     @Value("${document.templates.common.doc_cover_sheet_welsh_filename}")
     protected String docCoverSheetWelshFilename;
 
-    @Value("${document.templates.common.prl_c7_blank_template}")
-    protected String docC7BlankTemplate;
+    @Value("${document.templates.common.prl_c7_draft_template}")
+    protected String docC7DraftTemplate;
 
-    @Value("${document.templates.common.prl_c7_blank_filename}")
-    protected String docC7BlankFilename;
+    @Value("${document.templates.common.prl_c7_final_template_eng}")
+    protected String docC7FinalEngTemplate;
+
+    @Value("${document.templates.common.prl_c7_final_template_wel}")
+    protected String docC7FinalWelshTemplate;
+
+    @Value("${document.templates.common.prl_c7_draft_filename}")
+    protected String docC7DraftFilename;
+
+    @Value("${document.templates.common.prl_c7_final_filename_eng}")
+    protected String docC7FinalEngFilename;
+
+    @Value("${document.templates.common.prl_c7_final_filename_wel}")
+    protected String docC7FinalWelshFilename;
 
     @Value("${document.templates.common.prl_c1a_blank_template}")
     protected String docC1aBlankTemplate;
@@ -241,12 +253,6 @@ public class DocumentGenService {
 
     @Value("${document.templates.citizen.prl_citizen_upload_filename}")
     protected String prlCitizenUploadFileName;
-
-    @Value("${document.templates.citizen.respondent_c7_template}")
-    protected String respondentC7Template;
-
-    @Value("${document.templates.citizen.respondent_c7_file_name}")
-    protected String respondentC7FileName;
 
     @Autowired
     private DgsService dgsService;
@@ -404,7 +410,6 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
-
     private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh)
         throws Exception {
         return generateDocumentField(
@@ -484,6 +489,7 @@ public class DocumentGenService {
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_other_documents_" + currentDate + SUBMITTED_PDF;
                     break;
+
                 default:
                     fileName = "";
             }
@@ -495,15 +501,19 @@ public class DocumentGenService {
                                                                   String template,
                                                                   GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest)
         throws Exception {
+        log.info("=========generate Citizen Uploaded Document=========");
         String caseId = generateAndUploadDocumentRequest.getValues().get(CASE_ID);
         log.info("Generating the {} statement document from the text box for case id {} ", template, caseId);
         GeneratedDocumentInfo generatedDocumentInfo = null;
 
+        log.info("call to dgsService start...." + template);
         generatedDocumentInfo = dgsService.generateCitizenDocument(
             authorisation,
             generateAndUploadDocumentRequest,
             template
         );
+        log.info("call to dgsService end....");
+
         boolean isDocumentGenerated = generatedDocumentInfo.getUrl() != null;
         log.info("Is the document generated for the template {} : {} ", template, isDocumentGenerated);
         log.info("Generated the {} document for case id {} ", template, caseId);
@@ -576,8 +586,8 @@ public class DocumentGenService {
             case DOCUMENT_COVER_SHEET_HINT:
                 fileName = findDocCoversheetFileName(isWelsh);
                 break;
-            case DOCUMENT_C7_BLANK_HINT:
-                fileName = docC7BlankFilename;
+            case DOCUMENT_C7_DRAFT_HINT:
+                fileName = docC7DraftFilename;
                 break;
             case DOCUMENT_C1A_BLANK_HINT:
                 fileName = docC1aBlankFilename;
@@ -588,8 +598,11 @@ public class DocumentGenService {
             case DOCUMENT_PRIVACY_NOTICE_HINT:
                 fileName = privacyNoticeFilename;
                 break;
-            case C7_HINT:
-                fileName = respondentC7FileName;
+            case C7_FINAL_ENGLISH:
+                fileName = docC7FinalEngFilename;
+                break;
+            case C7_FINAL_WELSH:
+                fileName = docC7FinalWelshFilename;
                 break;
             default:
                 fileName = "";
@@ -659,8 +672,8 @@ public class DocumentGenService {
             case DOCUMENT_COVER_SHEET_HINT:
                 template = findDocCoverSheetTemplate(isWelsh);
                 break;
-            case DOCUMENT_C7_BLANK_HINT:
-                template = docC7BlankTemplate;
+            case DOCUMENT_C7_DRAFT_HINT:
+                template = docC7DraftTemplate;
                 break;
             case DOCUMENT_C1A_BLANK_HINT:
                 template = docC1aBlankTemplate;
@@ -674,8 +687,11 @@ public class DocumentGenService {
             case CITIZEN_HINT:
                 template = prlCitizenUploadTemplate;
                 break;
-            case C7_HINT:
-                template = respondentC7Template;
+            case C7_FINAL_ENGLISH:
+                template = docC7FinalEngTemplate;
+                break;
+            case C7_FINAL_WELSH:
+                template = docC7FinalWelshTemplate;
                 break;
             default:
                 template = "";
@@ -770,30 +786,6 @@ public class DocumentGenService {
         return getDocument(authorisation, caseData, hint, isWelsh);
     }
 
-    public UploadedDocuments generateC7FinalDocument(String authorisation, CaseData caseData) throws Exception {
-
-        String parentDocumentType = "Respondent's documents";
-        String documentType = "response to the request for child arrangements";
-        LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-        String isApplicant = "No";
-        UserDetails userDetails = idamClient.getUserDetails(authorisation);
-        String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
-        String fileName = userDetails.getFullName() + "'s-response_child_arrangement" + currentDate + SUBMITTED_PDF;
-        Document generatedDocument = getDocument(authorisation,caseData,"C7",false);
-
-        return UploadedDocuments.builder()
-            .parentDocumentType(parentDocumentType)
-            .documentType(documentType)
-            .partyName(userDetails.getFullName())
-            .isApplicant(isApplicant)
-            .dateCreated(LocalDate.now())
-            .documentDetails(DocumentDetails.builder()
-                                 .documentName(fileName)
-                                 .documentUploadedDate(formattedCurrentDate)
-                                 .build()).citizenDocument(generatedDocument).build();
-    }
-
     public UploadedDocuments generateCitizenStatementDocument(String authorisation,
                                                               GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
                                                               Integer fileIndex) throws Exception {
@@ -856,5 +848,4 @@ public class DocumentGenService {
                 generatedDocumentInfo
             )).build();
     }
-
 }
