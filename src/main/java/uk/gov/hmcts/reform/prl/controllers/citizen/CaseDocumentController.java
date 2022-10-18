@@ -114,12 +114,12 @@ public class CaseDocumentController {
             if (tempCaseData.getCitizenUploadedDocumentList() != null
                 && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
                 tempCaseData.getCitizenUploadedDocumentList()
-                    .stream().forEach((document) -> {
-                        if (documentType.equalsIgnoreCase(document.getValue().getDocumentType())
-                            && partyName.equalsIgnoreCase(document.getValue().getPartyName())) {
-                            fileIndex++;
-                        }
-                    });
+                    .stream().forEach(document -> {
+                    if (documentType.equalsIgnoreCase(document.getValue().getDocumentType())
+                        && partyName.equalsIgnoreCase(document.getValue().getPartyName())) {
+                        fileIndex++;
+                    }
+                });
             }
         }
         UploadedDocuments uploadedDocuments =
@@ -128,6 +128,18 @@ public class CaseDocumentController {
                 generateAndUploadDocumentRequest,
                 fileIndex + 1
             );
+        return getUploadedDocumentsList(
+            generateAndUploadDocumentRequest,
+            authorisation,
+            s2sToken,
+            caseId,
+            tempCaseData,
+            uploadedDocuments
+        );
+
+    }
+
+    private ResponseEntity getUploadedDocumentsList(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation, @RequestHeader("serviceAuthorization") String s2sToken, String caseId, CaseData tempCaseData, UploadedDocuments uploadedDocuments) {
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         if (uploadedDocuments != null) {
             if (tempCaseData.getCitizenUploadedDocumentList() != null
@@ -152,24 +164,22 @@ public class CaseDocumentController {
             final String partyId = generateAndUploadDocumentRequest.getValues().get(PARTY_ID);
             notifyOtherParties(partyId, tempCaseData);
 
-            //return uploadedDocuments.getCitizenDocument().getDocumentFileName();
             return ResponseEntity.status(HttpStatus.OK).body(
                 DocumentDetails.builder().documentId(uploadDocumentElement.getId().toString())
                     .documentName(uploadedDocuments.getCitizenDocument().getDocumentFileName()).build());
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.ordinal()).body(new DocumentDetails());
         }
-
     }
 
     private void notifyOtherParties(String partyId, CaseData tempCaseData) {
         if (C100_CASE_TYPE.equalsIgnoreCase(tempCaseData.getCaseTypeOfApplication())) {
-            tempCaseData.getRespondents().forEach(element -> {
-                findAndSendEmail(partyId, tempCaseData, element.getValue());
-            });
-            tempCaseData.getApplicants().forEach(element -> {
-                findAndSendEmail(partyId, tempCaseData, element.getValue());
-            });
+            tempCaseData.getRespondents().forEach(element ->
+                                                      findAndSendEmail(partyId, tempCaseData, element.getValue())
+            );
+            tempCaseData.getApplicants().forEach(element ->
+                                                     findAndSendEmail(partyId, tempCaseData, element.getValue())
+            );
         } else {
             findAndSendEmail(partyId, tempCaseData, tempCaseData.getRespondentsFL401());
             findAndSendEmail(partyId, tempCaseData, tempCaseData.getApplicantsFL401());
@@ -257,7 +267,7 @@ public class CaseDocumentController {
                            .build())
                 .data(caseData).build();
 
-            CaseDetails caseDetails1 = coreCaseDataApi.submitEventForCitizen(
+            coreCaseDataApi.submitEventForCitizen(
                 authorisation,
                 s2sToken,
                 idamClient.getUserInfo(authorisation).getUid(),
@@ -298,7 +308,7 @@ public class CaseDocumentController {
             final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
             tempUploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
             uploadedDocumentsList = tempUploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(
-                    element.getId().toString()))
+                element.getId().toString()))
                 .collect(Collectors.toList());
         }
         log.info("uploadedDocumentsList::" + uploadedDocumentsList.size());
