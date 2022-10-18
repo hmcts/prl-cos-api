@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
@@ -186,7 +187,7 @@ public class DraftAnOrderService {
             );
 
             nonMolestationPlaceHoldersMap.put(
-                "childDetails", C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                "childDetails", FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                     ? getDaChildDetails(caseData.getApplicantChildDetails()) : getCaChildDetails(
                     caseData.getChildren())
             );
@@ -771,7 +772,7 @@ public class DraftAnOrderService {
 
             blankOrderPlaceHoldersMap.put(
                 "childDetails",
-                C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                     ? getDaChildDetails(caseData.getApplicantChildDetails()) : getCaChildDetails(
                     caseData.getChildren())
             );
