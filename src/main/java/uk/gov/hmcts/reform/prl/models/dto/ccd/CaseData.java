@@ -642,6 +642,7 @@ public class CaseData implements MappableObject {
     private final ApplicantAge applicantAge;
     private final String specialCourtName;
     private YesOrNo courtNavApproved;
+    private YesOrNo hasDraftOrder;
     private String caseOrigin;
     private String numberOfAttachments;
 
