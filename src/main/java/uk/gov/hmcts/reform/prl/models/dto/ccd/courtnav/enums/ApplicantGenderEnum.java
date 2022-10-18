@@ -11,14 +11,10 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ApplicantGenderEnum {
 
-    @JsonProperty("Female")
-    Female("Female", "Female"),
-    @JsonProperty("Male")
-    Male("Male", "Male"),
-    @JsonProperty("Non-binary")
-    NonBinary("Non-binary", "Non-binary"),
-    @JsonProperty("Transgender")
-    Transgender("Transgender", "Transgender"),
+    @JsonProperty("female")
+    female("female", "Female"),
+    @JsonProperty("male")
+    male("male", "Male"),
     @JsonProperty("other")
     other("other", "other");
 

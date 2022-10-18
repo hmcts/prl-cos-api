@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.reform.prl.models.Address;
 
 
 @Data
@@ -21,6 +20,6 @@ public class RespondentDetails {
     private final CourtNavDate respondentDateOfBirth;
     private String respondentPhoneNumber;
     private String respondentEmailAddress;
-    private Address respondentAddress;
+    private CourtnavAddress respondentAddress;
     private final boolean respondentLivesWithApplicant;
 }
