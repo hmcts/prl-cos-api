@@ -115,11 +115,11 @@ public class CaseDocumentController {
                 && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
                 tempCaseData.getCitizenUploadedDocumentList()
                     .stream().forEach(document -> {
-                    if (documentType.equalsIgnoreCase(document.getValue().getDocumentType())
-                        && partyName.equalsIgnoreCase(document.getValue().getPartyName())) {
-                        fileIndex++;
-                    }
-                });
+                        if (documentType.equalsIgnoreCase(document.getValue().getDocumentType())
+                            && partyName.equalsIgnoreCase(document.getValue().getPartyName())) {
+                            fileIndex++;
+                        }
+                    });
             }
         }
         UploadedDocuments uploadedDocuments =
@@ -139,7 +139,12 @@ public class CaseDocumentController {
 
     }
 
-    private ResponseEntity getUploadedDocumentsList(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation, @RequestHeader("serviceAuthorization") String s2sToken, String caseId, CaseData tempCaseData, UploadedDocuments uploadedDocuments) {
+    private ResponseEntity getUploadedDocumentsList(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+                                                    @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                    @RequestHeader("serviceAuthorization") String s2sToken,
+                                                    String caseId,
+                                                    CaseData tempCaseData,
+                                                    UploadedDocuments uploadedDocuments) {
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         if (uploadedDocuments != null) {
             if (tempCaseData.getCitizenUploadedDocumentList() != null
