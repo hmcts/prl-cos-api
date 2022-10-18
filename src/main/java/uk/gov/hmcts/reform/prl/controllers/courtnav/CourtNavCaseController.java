@@ -27,6 +27,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
+import javax.validation.Valid;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
@@ -54,7 +56,7 @@ public class CourtNavCaseController {
     public ResponseEntity createCase(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
-        @RequestBody CourtNavFl401 inputData
+        @Valid @RequestBody CourtNavFl401 inputData
     ) throws Exception {
 
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
