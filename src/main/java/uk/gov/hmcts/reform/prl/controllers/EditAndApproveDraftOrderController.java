@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 
 @Slf4j
 @RestController
@@ -82,7 +85,11 @@ public class EditAndApproveDraftOrderController {
         } else {
             caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
         }
-
+        log.info("*** caseData.getSelectTypeOfOrder() {} ***", caseData.getSelectTypeOfOrder());
+        if ((SelectTypeOfOrderEnum.finl).equals(caseData.getSelectTypeOfOrder())) {
+            caseDataUpdated.put(STATE_FIELD, State.ALL_FINAL_ORDERS_ISSUED);
+        }
+        log.info("*** State details from callback request {} ***", callbackRequest.getCaseDetails().getState());
         log.info("*** before returning {} ***", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

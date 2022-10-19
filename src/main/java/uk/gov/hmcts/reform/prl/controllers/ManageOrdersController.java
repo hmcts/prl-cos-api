@@ -225,10 +225,6 @@ public class ManageOrdersController {
                                                                                                 caseData));
             manageOrderEmailService.sendEmailToApplicantAndRespondent(callbackRequest.getCaseDetails());
         }
-        if ((SelectTypeOfOrderEnum.finl).equals(caseData.getSelectTypeOfOrder())) {
-            caseDataUpdated.put(STATE_FIELD, State.ALL_FINAL_ORDERS_ISSUED);
-        }
-        log.info("*** State details from callback request {} ***", callbackRequest.getCaseDetails().getState());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
