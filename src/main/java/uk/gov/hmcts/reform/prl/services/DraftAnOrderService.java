@@ -114,7 +114,7 @@ public class DraftAnOrderService {
             case nonMolestation:
                 return getNonMolestationString(readString(NON_MOLESTATION_ORDER), caseData);
             case appointmentOfGuardian:
-                return getNonMolestationString(readString(APPOINTMENT_OF_GUARDIAN_ORDER), caseData);
+                return getAppointmentOfGuardianString(readString(APPOINTMENT_OF_GUARDIAN_ORDER), caseData);
             case specialGuardianShip:
                 return getSpecialGuardianShipString(readString(SPECIAL_GUARDIANSHIP_ORDER), caseData);
             default:
@@ -175,6 +175,59 @@ public class DraftAnOrderService {
             );
             StringSubstitutor substitutor = new StringSubstitutor(specialGuardianPlaceHoldersMap);
             return substitutor.replace(specialGuardianString);
+        }
+        return null;
+    }
+
+    private String getAppointmentOfGuardianString(String nonMolestationOrderString, CaseData caseData) {
+        Map<String, String> appointmentOfGuardianHoldersMap = new HashMap<>();
+        if (nonMolestationOrderString != null) {
+
+            appointmentOfGuardianHoldersMap.put(
+                "familyManNumber", caseData.getFamilymanCaseNumber() != null ? caseData.getFamilymanCaseNumber() : " "
+            );
+
+            appointmentOfGuardianHoldersMap.put("ccdId", String.valueOf(caseData.getId()));
+
+            appointmentOfGuardianHoldersMap.put(
+                "orderDate",
+                caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
+                    PrlAppsConstants.D_MMMM_YYYY,
+                    Locale.UK
+                )) : " "
+            );
+            appointmentOfGuardianHoldersMap.put(
+                "judgeOrMagistrateTitle",
+                caseData.getManageOrders().getJudgeOrMagistrateTitle() != null
+                    ? caseData.getManageOrders().getJudgeOrMagistrateTitle().getDisplayedValue() : " "
+            );
+            appointmentOfGuardianHoldersMap.put("judgeOrMagistratesLastName", caseData.getJudgeOrMagistratesLastName());
+            appointmentOfGuardianHoldersMap.put("justiceLegalAdviserFullName", caseData.getJusticeLegalAdviserFullName());
+            appointmentOfGuardianHoldersMap.put(
+                "familyCourtName",
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bCourtName() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bCourtName() : " "
+            );
+
+            appointmentOfGuardianHoldersMap.put(
+                "childDetails", FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                    ? getDaChildDetails(caseData.getApplicantChildDetails()) : getCaChildDetails(
+                    caseData.getChildren())
+            );
+
+            appointmentOfGuardianHoldersMap.put(
+                "childDetails", FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                    ? getDaChildDetails(caseData.getApplicantChildDetails()) : getCaChildDetails(
+                    caseData.getChildren())
+            );
+
+            appointmentOfGuardianHoldersMap.put(
+                "cafcassOfficeDetails", caseData.getManageOrders().getCafcassOfficeDetails());
+
+
+            StringSubstitutor substitutor = new StringSubstitutor(appointmentOfGuardianHoldersMap);
+            return substitutor.replace(appointmentOfGuardianHoldersMap);
         }
         return null;
     }
