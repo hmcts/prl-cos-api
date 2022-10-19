@@ -161,6 +161,18 @@ public class DraftAnOrderServiceTest {
         assertNotNull(draftAnOrderService.getTheOrderDraftString(caseData));
     }
 
+    @Test
+    public void testgetTheOrderDraftStringAppointmentOfGuardianOrder() {
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .manageOrders(ManageOrders.builder()
+                              .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge)
+                              .build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.appointmentOfGuardian)
+            .build();
+        assertNotNull(draftAnOrderService.getTheOrderDraftString(caseData));
+    }
+
 
     @Ignore
     @Test
