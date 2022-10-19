@@ -235,15 +235,11 @@ public class DraftAnOrderService {
             appointmentOfGuardianHoldersMap.put(
                 "cafcassOfficeDetails", caseData.getManageOrders().getCafcassOfficeDetails());
 
-            log.info("orderDirections " + caseData.getManageOrders().getOrderDirections());
-
-            log.info("furtherDirectionsIfRequired " + caseData.getManageOrders().getOrderDirections());
+            appointmentOfGuardianHoldersMap.put(
+                "orderDirections", caseData.getOrderDirections());
 
             appointmentOfGuardianHoldersMap.put(
-                "orderDirections", caseData.getManageOrders().getOrderDirections());
-
-            appointmentOfGuardianHoldersMap.put(
-                "furtherDirectionsIfRequired", caseData.getManageOrders().getFurtherDirectionsIfRequired());
+                "furtherDirectionsIfRequired", caseData.getFurtherDirectionsIfRequired());
 
 
             StringSubstitutor substitutor = new StringSubstitutor(appointmentOfGuardianHoldersMap);
