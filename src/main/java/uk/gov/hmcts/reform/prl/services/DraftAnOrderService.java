@@ -71,6 +71,7 @@ public class DraftAnOrderService {
 
     private static final String NON_MOLESTATION_ORDER = "draftAnOrder/non-molestation-order.html";
     private static final String BLANK_ORDER_C21 = "draftAnOrder/blank-order-c21.html";
+    private static final String APPOINTMENT_OF_GUARDIAN_ORDER = "draftAnOrder/appointment-of-guardian-order.html";
 
     public Document generateSolicitorDraftOrder(String authorisation, CaseData caseData) throws Exception {
 
@@ -114,7 +115,7 @@ public class DraftAnOrderService {
                 temp = getNonMolestationString(readString(NON_MOLESTATION_ORDER), caseData);
                 break;
             case appointmentOfGuardian:
-                temp = getNonMolestationString(readString(NON_MOLESTATION_ORDER), caseData);
+                temp = getNonMolestationString(readString(APPOINTMENT_OF_GUARDIAN_ORDER), caseData);
                 break;
 
             default:
