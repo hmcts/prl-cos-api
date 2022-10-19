@@ -22,7 +22,7 @@ public class CourtNavRelationShipToRespondent {
     private final CourtNavDate relationshipEndDate;
     private final CourtNavDate ceremonyDate;
     private final ApplicantRelationshipOptionsEnum respondentsRelationshipToApplicant;
-    private final String relationshipToApplicantOther;
+    private final String respondentsRelationshipToApplicantOther;
     private final boolean anyChildren;
 
 }
