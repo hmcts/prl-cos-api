@@ -74,6 +74,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
@@ -531,7 +532,7 @@ public class CaseData implements MappableObject {
     @JsonProperty("viewPDFlinkLabelText")
     private String viewPdfLinkLabelText;
 
-    private List<Element<CaseInvite>> respondentCaseInvites;
+    private List<Element<CaseInvite>> caseInvites;
 
 
     /**
@@ -556,6 +557,7 @@ public class CaseData implements MappableObject {
     private final ManageOrdersOptionsEnum manageOrdersOptions;
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
     private final List<OrderRecipientsEnum> orderRecipients;
+    private final SelectTypeOfOrderEnum selectTypeOfOrder;
 
 
     private final YesOrNo doesOrderClosesCase;
@@ -635,6 +637,9 @@ public class CaseData implements MappableObject {
     @JsonProperty("citizenUploadedDocumentList")
     private final List<Element<UploadedDocuments>> citizenUploadedDocumentList;
 
+    @JsonProperty("citizenResponseC7DocumentList")
+    private final List<Element<ResponseDocuments>> citizenResponseC7DocumentList;
+
     /**
      * Courtnav.
      */
@@ -659,4 +664,6 @@ public class CaseData implements MappableObject {
     private String messageToCourtAdmin;
     private String courtAdminNotes;
     private final SelectTypeOfOrderEnum selectTypeOfOrder;
+
+    private String citizenUploadedStatement;
 }
