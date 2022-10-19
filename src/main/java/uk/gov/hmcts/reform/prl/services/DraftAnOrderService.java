@@ -113,6 +113,9 @@ public class DraftAnOrderService {
             case nonMolestation:
                 temp = getNonMolestationString(readString(NON_MOLESTATION_ORDER), caseData);
                 break;
+            case appointmentOfGuardian:
+                temp = getNonMolestationString(readString(NON_MOLESTATION_ORDER), caseData);
+                break;
 
             default:
                 break;
