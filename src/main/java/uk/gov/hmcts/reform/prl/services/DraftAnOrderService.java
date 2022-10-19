@@ -189,9 +189,9 @@ public class DraftAnOrderService {
         return null;
     }
 
-    private String getAppointmentOfGuardianString(String nonMolestationOrderString, CaseData caseData) {
+    private String getAppointmentOfGuardianString(String appointmentOfGuardianOrderString, CaseData caseData) {
         Map<String, String> appointmentOfGuardianHoldersMap = new HashMap<>();
-        if (nonMolestationOrderString != null) {
+        if (appointmentOfGuardianOrderString != null) {
 
             appointmentOfGuardianHoldersMap.put(
                 "familyManNumber", caseData.getFamilymanCaseNumber() != null ? caseData.getFamilymanCaseNumber() : " "
@@ -237,12 +237,12 @@ public class DraftAnOrderService {
 
 
             StringSubstitutor substitutor = new StringSubstitutor(appointmentOfGuardianHoldersMap);
-            return substitutor.replace(appointmentOfGuardianHoldersMap);
-            
+            return substitutor.replace(appointmentOfGuardianOrderString);
+
             }
         return null;
     }
-    
+
     private String getSpecialGuardianMessage(CaseData caseData) {
         if (caseData.getAppointedGuardianName() != null) {
             List<String> guardianList = caseData
