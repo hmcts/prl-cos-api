@@ -212,7 +212,10 @@ public class DraftAnOrderService {
                     ? caseData.getManageOrders().getJudgeOrMagistrateTitle().getDisplayedValue() : " "
             );
             appointmentOfGuardianHoldersMap.put("judgeOrMagistratesLastName", caseData.getJudgeOrMagistratesLastName());
-            appointmentOfGuardianHoldersMap.put("justiceLegalAdviserFullName", caseData.getJusticeLegalAdviserFullName());
+            appointmentOfGuardianHoldersMap.put(
+                "justiceLegalAdviserFullName",
+                caseData.getJusticeLegalAdviserFullName()
+            );
             appointmentOfGuardianHoldersMap.put(
                 "familyCourtName",
                 (caseData.getManageOrders().getFl404CustomFields() != null
@@ -233,7 +236,7 @@ public class DraftAnOrderService {
             StringSubstitutor substitutor = new StringSubstitutor(appointmentOfGuardianHoldersMap);
             return substitutor.replace(appointmentOfGuardianOrderString);
 
-            }
+        }
         return null;
     }
 
