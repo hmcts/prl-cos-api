@@ -227,12 +227,6 @@ public class DraftAnOrderService {
             );
 
             appointmentOfGuardianHoldersMap.put(
-                "childDetails", FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                    ? getDaChildDetails(caseData.getApplicantChildDetails()) : getCaChildDetails(
-                    caseData.getChildren())
-            );
-
-            appointmentOfGuardianHoldersMap.put(
                 "cafcassOfficeDetails", caseData.getManageOrders().getCafcassOfficeDetails());
 
 
