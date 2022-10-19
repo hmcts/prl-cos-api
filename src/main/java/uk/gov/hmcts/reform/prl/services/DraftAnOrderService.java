@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -193,8 +194,9 @@ public class DraftAnOrderService {
                 .stream()
                 .map(Element::getValue)
                 .collect(Collectors.toList());
-            String guardianNames = String.join(",", (CharSequence) guardianList);
-            return guardianNames + ARE_APPOINTED_AS_SPECIAL_GUARDIANS_FOR + getChildNameList(caseData);
+
+            return StringUtils.join(guardianList, ',') + ARE_APPOINTED_AS_SPECIAL_GUARDIANS_FOR
+                + getChildNameList(caseData);
         }
         return " ";
     }
