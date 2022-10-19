@@ -112,18 +112,13 @@ public class DraftAnOrderService {
     public String getTheOrderDraftString(CaseData caseData) {
         switch (caseData.getCreateSelectOrderOptions()) {
             case nonMolestation:
-                temp = getNonMolestationString(readString(NON_MOLESTATION_ORDER), caseData);
-                break;
+                return getNonMolestationString(readString(NON_MOLESTATION_ORDER), caseData);
             case appointmentOfGuardian:
-                temp = getNonMolestationString(readString(APPOINTMENT_OF_GUARDIAN_ORDER), caseData);
-                break;
+                return getNonMolestationString(readString(APPOINTMENT_OF_GUARDIAN_ORDER), caseData);
             case specialGuardianShip:
-                temp = getSpecialGuardianShipString(readString(SPECIAL_GUARDIANSHIP_ORDER), caseData);
-                break;
+                return getSpecialGuardianShipString(readString(SPECIAL_GUARDIANSHIP_ORDER), caseData);
              default:
-                return null;    
-                
-             retrun temp;
+                return null;
         }
     }
 
