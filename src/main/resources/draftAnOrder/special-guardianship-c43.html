@@ -1,7 +1,5 @@
-
-
-Familyman number: <<{familymanCaseNumber}>>
-Case number: <<{id}>>
+Familyman number: ${familyManNumber} </br>
+Case number: ${ccdId} </br></br>
 
 Special Guardianship Order
 Section 14(A)(1) Children Act 1989
@@ -9,7 +7,7 @@ Section 14(A)(1) Children Act 1989
 Ordered on ${orderDate} by ${judgeOrMagistrateTitle} ${judgeOrMagistratesLastName} and Justice’s Legal Adviser ${justiceLegalAdviserFullName}</br></br>
 Family court sitting at: ${familyCourtName}
 
-<h2>Children in the case </h2>
+${childrenPresent}
 <hr style="border:solid 1px black">
 ${childDetails}</br></br>
 <hr style="border:solid 1px black">
@@ -24,10 +22,9 @@ ${isTheOrderByConsent} </br></br>
 ${recitalsOrPreamble} </br></br>
 
 The Court orders:
-<<rs_ appointedGuardianName>><<value.guardianFullName>><<cs_{$itemnum<$size}>>,<<es_>> <<es_ appointedGuardianName>> <<$text=’’>><<rs_ appointedGuardianName>><<cs_{$size == 1}>> <<$text=’is’>> <<else>> <<$text=’are’>> <<es_>><<es_ appointedGuardianName>> <<$text>> appointed as Special Guardians for <<rs_children>><<value.firstName>> <<value.lastName>><<cs_{$itemnum<$size}>>,<<es_>> <<es_children>>
+${specialGuardianshipMessage}
 ${orderDirections} </br></br>
 ${furtherDirectionsIfRequired} </br></br>
-
 
 Notice
 Any person with parental responsibility for a child may obtain advice on what can be done to prevent the issue of a passport to the child.
