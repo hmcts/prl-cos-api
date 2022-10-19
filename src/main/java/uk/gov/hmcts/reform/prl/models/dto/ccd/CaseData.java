@@ -663,7 +663,6 @@ public class CaseData implements MappableObject {
     private YesOrNo doYouWantCourtAdminToAddAnything;
     private String messageToCourtAdmin;
     private String courtAdminNotes;
-    private final SelectTypeOfOrderEnum selectTypeOfOrder;
 
     private String citizenUploadedStatement;
 }
