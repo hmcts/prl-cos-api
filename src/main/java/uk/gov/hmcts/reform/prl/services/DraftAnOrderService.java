@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -58,6 +59,7 @@ public class DraftAnOrderService {
         + "they must notify the court in advance that they intend to attend the hearing and oppose the order.If the "
         + "respondent does not notify the court, the court may decide that the applicant or applicant’s solicitor does"
         + "not need to attend the next hearing, and at the next hearing may make an order to extend the injunction.";
+    public static final String ARE_APPOINTED_AS_SPECIAL_GUARDIANS_FOR = " are appointed as Special Guardians for ";
     @Value("${document.templates.solicitor.prl_solicitor_draft_an_order_template}")
     String solicitorDraftAnOrder;
 
@@ -130,7 +132,15 @@ public class DraftAnOrderService {
             );
 
             specialGuardianPlaceHoldersMap.put("ccdId", String.valueOf(caseData.getId()));
-
+            specialGuardianPlaceHoldersMap.put("childrenPresent", childrenPresent(caseData));
+            specialGuardianPlaceHoldersMap.put(
+                "childDetails", FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                    ? getDaChildDetails(caseData.getApplicantChildDetails()) : getCaChildDetails(
+                    caseData.getChildren())
+            );
+            specialGuardianPlaceHoldersMap.put(
+                "specialGuardianshipMessage", getSpecialGuardianMessage(caseData)
+            );
             specialGuardianPlaceHoldersMap.put(
                 "orderDate",
                 caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
@@ -228,6 +238,36 @@ public class DraftAnOrderService {
 
             StringSubstitutor substitutor = new StringSubstitutor(appointmentOfGuardianHoldersMap);
             return substitutor.replace(appointmentOfGuardianHoldersMap);
+            
+            }
+        return null;
+    }
+    
+    private String getSpecialGuardianMessage(CaseData caseData) {
+        if (caseData.getAppointedGuardianName() != null) {
+            List<String> guardianList = caseData
+                .getAppointedGuardianName()
+                .stream()
+                .map(Element::getValue)
+                .map(a -> a.getGuardianFullName())
+                .collect(Collectors.toList());
+
+            return StringUtils.join(guardianList, ',') + ARE_APPOINTED_AS_SPECIAL_GUARDIANS_FOR
+                + getChildNameList(caseData);
+        }
+        return " ";
+    }
+
+    private String getChildNameList(CaseData caseData) {
+        return FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            ? getDaChildDetails(caseData.getApplicantChildDetails()) : getCaChildDetails(
+            caseData.getChildren());
+    }
+
+    private String childrenPresent(CaseData caseData) {
+        if (caseData.getApplicantChildDetails() != null || caseData.getChildren() != null) {
+            return "<h2>Children in the case </h2>";
+
         }
         return null;
     }
