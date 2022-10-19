@@ -35,12 +35,10 @@ public class SearchCasesDataService {
                 .getRespondentsFL401();
 
             if (Objects.nonNull(fl401Applicant)) {
-                log.info("adding applicant name in casedata for FL401");
                 caseDetails.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
             }
 
             if (Objects.nonNull(fl401respondent)) {
-                log.info("adding respondent name in casedata for FL401");
                 caseDetails.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
             }
         } else {
@@ -51,7 +49,6 @@ public class SearchCasesDataService {
                     .map(Element::getValue)
                     .collect(Collectors.toList());
                 PartyDetails applicant1 = applicants.get(0);
-                log.info("adding applicant name in casedata for C100");
                 if (Objects.nonNull(applicant1)) {
                     caseDetails.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
                 }

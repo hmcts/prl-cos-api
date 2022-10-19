@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
@@ -21,6 +23,11 @@ public class HearingUrgencyCheckerTest {
 
     @InjectMocks
     HearingUrgencyChecker hearingUrgencyChecker;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
     public void notFinishedWhenIsCaseUrgentNotSet() {
@@ -58,8 +65,40 @@ public class HearingUrgencyCheckerTest {
             .areRespondentsAwareOfProceedings(No)
             .doYouRequireAHearingWithReducedNotice(No)
             .build();
+        boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
 
+        assertTrue(isFinished);
+    }
 
+    @Test
+    public void finishedWhenIsReducedNoticeHearingSetToYes() {
+
+        CaseData casedata = CaseData.builder().isCaseUrgent(Yes)
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .caseUrgencyTimeAndReason("reason")
+            .effortsMadeWithRespondents("efforts")
+            .reasonsForApplicationWithoutNotice("test")
+            .setOutReasonsBelow("test")
+            .areRespondentsAwareOfProceedings(No)
+            .doYouRequireAHearingWithReducedNotice(Yes)
+            .build();
+        boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
+
+        assertTrue(isFinished);
+    }
+
+    @Test
+    public void finishedWhenRespondentsAwareOfProceedingsSetToYes() {
+
+        CaseData casedata = CaseData.builder().isCaseUrgent(Yes)
+            .caseUrgencyTimeAndReason("reason")
+            .effortsMadeWithRespondents("efforts")
+            .doYouNeedAWithoutNoticeHearing(Yes)
+            .reasonsForApplicationWithoutNotice("test")
+            .setOutReasonsBelow("test")
+            .areRespondentsAwareOfProceedings(Yes)
+            .doYouRequireAHearingWithReducedNotice(Yes)
+            .build();
         boolean isFinished = hearingUrgencyChecker.isFinished(casedata);
 
         assertTrue(isFinished);

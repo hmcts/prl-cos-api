@@ -1,0 +1,134 @@
+{
+  "metaData": {
+    "caseOrigin": "CourtNav",
+    "courtNavApproved": true,
+    "numberOfAttachments": 12
+  },
+  "fl401": {
+    "beforeStart": {
+      "applicantHowOld": "eighteenOrOlder"
+    },
+    "situation": {
+      "ordersAppliedFor": [
+        "nonMolestationOrder"
+      ],
+      "ordersAppliedWithoutNotice": false,
+      "bailConditionsOnRespondent": false,
+      "additionalDetailsForCourt": "Iusto ea dolor voluptatem ut. In necessitatibus omnis iste assumenda nam. Minima vel et qui sed. Distinctio est consequatur magni laudantium blanditiis et blanditiis."
+    },
+    "applicantDetails": {
+      "applicantFirstName": "Linda",
+      "applicantLastName": "Stewart",
+      "applicantGender": {
+        "value": "other",
+        "other": "Male; Transgender; "
+      },
+      "applicantDateOfBirth": {
+        "day": 26,
+        "month": 8,
+        "year": 2001
+      },
+      "shareContactDetailsWithRespondent": false,
+      "applicantAddress": {
+        "addressUKLine1": "velit aut",
+        "addressUKLine2": "rem fugit",
+        "addressUKLine3": "eos eveniet",
+        "postTown": "alias deleniti",
+        "postCode": "BN3 2BE"
+      },
+      "applicantEmailAddress": "bailey.ethan+faker_generated@example.net",
+      "applicantPhoneNumber": "+44(0)7344 63054",
+      "applicantPreferredContact": [
+        "phone",
+        "email"
+      ],
+      "applicantContactInstructions": "Occaecati illum reiciendis dolor ut consectetur. Ipsum vel et laudantium tenetur voluptate qui. Perspiciatis eos fugiat quae occaecati aut perferendis sint.",
+      "applicantHasLegalRepresentative": true
+    },
+    "respondentDetails": {
+      "respondentFirstName": "dolorem sed",
+      "respondentLastName": "dicta ut",
+      "respondentOtherNames": "reprehenderit veniam",
+      "respondentDateOfBirth": {
+        "day": 26,
+        "month": 8,
+        "year": 1976
+      },
+      "respondentLivesWithApplicant": true,
+      "respondentAddress": {
+        "addressUKLine1": "aliquid tenetur",
+        "addressUKLine2": "quia nostrum",
+        "addressUKLine3": "repudiandae sit",
+        "postTown": "vitae modi",
+        "postCode": "dolor id"
+      },
+      "respondentPhoneNumber": "06868 42087",
+      "respondentEmailAddress": "jake.murphy@example.net"
+    },
+    "relationshipWithRespondent": {
+      "relationshipDescription": "marriedOrCivil",
+      "relationshipStartDate": {
+        "day": 26,
+        "month": 8,
+        "year": 1941
+      },
+      "ceremonyDate": {
+        "day": 26,
+        "month": 8,
+        "year": 1953
+      },
+      "anyChildren": false
+    },
+    "family": {
+      "whoApplicationIsFor": "applicantOnly",
+      "anyOngoingCourtProceedings": false,
+      "ongoingCourtProceedings": [
+
+      ]
+    },
+    "respondentBehaviour": {
+      "applyingForMonMolestationOrder": true,
+      "stopBehaviourTowardsApplicant": [
+        "beingViolentOrThreatening",
+        "damagingPossessions"
+      ],
+      "stopBehaviourTowardsChildren": [
+        "beingViolentOrThreatening",
+        "publishingAboutChildren"
+      ]
+    },
+    "theHome": {
+      "applyingForOccupationOrder": false,
+      "propertySpeciallyAdapted": false,
+      "propertyHasMortgage": false,
+      "propertyIsRented": false,
+      "haveHomeRights": false
+    },
+    "goingToCourt": {
+      "isInterpreterRequired": true,
+      "interpreterLanguage": "aut porro",
+      "interpreterDialect": "eum adipisci",
+      "anyDisabilityNeeds": false,
+      "anySpecialMeasures": [
+        "separateWaitingRoom",
+        "seperateEntranceExit",
+        "shieldedByScreen"
+      ],
+      "courtSpecialRequirements": "et blanditiis"
+    },
+    "statementOfTruth": {
+      "declaration": [
+        "applicantConfirm"
+      ],
+      "signature": "Linda Stewart",
+      "signatureFullName": "Linda Stewart",
+      "signatureDate": {
+        "day": 30,
+        "month": 8,
+        "year": 2022
+      },
+      "representativeFirmName": "courtnav_application",
+      "representativePositionHeld": "courtnav_application"
+    }
+  }
+}

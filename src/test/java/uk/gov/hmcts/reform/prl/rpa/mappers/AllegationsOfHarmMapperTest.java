@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class AllegationsOfHarmMapperTest {
     @Test
     public void testAllegationsOfHarmMapperWithSomeFields() {
 
-        CaseData caseData = CaseData.builder().allegationsOfHarmYesNo(YesOrNo.Yes)
+        AllegationOfHarm allegationOfHarm = AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes)
             .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
             .physicalAbuseVictim(physicalAbuseVictim)
             .emotionalAbuseVictim(emotionalAbuseVictim)
@@ -77,6 +78,7 @@ public class AllegationsOfHarmMapperTest {
             .childrenLocationNow("locationNow").abductionPassportOfficeNotified(YesOrNo.Yes)
             .abductionChildHasPassport(YesOrNo.Yes).abductionChildPassportPosession(AbductionChildPassportPossessionEnum.father)
             .abductionChildPassportPosessionOtherDetail("OtherDetails").build();
+        CaseData caseData = CaseData.builder().allegationOfHarm(allegationOfHarm).build();
 
         assertNotNull(allegationsOfHarmMapper.map(caseData));
 
@@ -85,20 +87,23 @@ public class AllegationsOfHarmMapperTest {
     @Test
     public void testAllegationsOfHarmMapperMapBehaviours() {
 
-        CaseData caseData = CaseData.builder().allegationsOfHarmYesNo(YesOrNo.Yes)
+        AllegationOfHarm allegationOfHarm = AllegationOfHarm.builder()
+            .allegationsOfHarmYesNo(YesOrNo.Yes)
             .allegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
             .physicalAbuseVictim(physicalAbuseVictim)
             .emotionalAbuseVictim(emotionalAbuseVictim)
             .financialAbuseVictim(financialAbuseVictim)
             .psychologicalAbuseVictim(psychologicalAbuseVictim)
             .sexualAbuseVictim(sexualAbuseVictim).behaviours(listOfbehaviours).build();
+        CaseData caseData = CaseData.builder().allegationOfHarm(allegationOfHarm).build();
         assertNotNull(allegationsOfHarmMapper.map(caseData));
     }
 
     @Test
     public void testNoDataAllegationsOfHarmMapperMapBehaviours() {
 
-        CaseData caseData = CaseData.builder().build();
+        CaseData caseData = CaseData.builder()
+            .allegationOfHarm(AllegationOfHarm.builder().build()).build();
         assertNotNull(allegationsOfHarmMapper.map(caseData));
     }
 }
