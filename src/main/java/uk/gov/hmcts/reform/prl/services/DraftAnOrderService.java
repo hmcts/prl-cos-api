@@ -59,7 +59,7 @@ public class DraftAnOrderService {
         + "they must notify the court in advance that they intend to attend the hearing and oppose the order.If the "
         + "respondent does not notify the court, the court may decide that the applicant or applicant’s solicitor does"
         + "not need to attend the next hearing, and at the next hearing may make an order to extend the injunction.";
-    public static final String ARE_APPOINTED_AS_SPECIAL_GUARDIANS_FOR = "are appointed as Special Guardians for";
+    public static final String ARE_APPOINTED_AS_SPECIAL_GUARDIANS_FOR = " are appointed as Special Guardians for ";
     @Value("${document.templates.solicitor.prl_solicitor_draft_an_order_template}")
     String solicitorDraftAnOrder;
 
