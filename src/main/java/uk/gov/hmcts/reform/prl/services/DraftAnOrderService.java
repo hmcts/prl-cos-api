@@ -189,10 +189,11 @@ public class DraftAnOrderService {
 
     private String getSpecialGuardianMessage(CaseData caseData) {
         if (caseData.getAppointedGuardianName() != null) {
-            List<AppointedGuardianFullName> guardianList = caseData
+            List<String> guardianList = caseData
                 .getAppointedGuardianName()
                 .stream()
                 .map(Element::getValue)
+                .map(a -> a.getGuardianFullName())
                 .collect(Collectors.toList());
 
             return StringUtils.join(guardianList, ',') + ARE_APPOINTED_AS_SPECIAL_GUARDIANS_FOR
