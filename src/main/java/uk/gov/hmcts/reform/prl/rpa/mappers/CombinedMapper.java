@@ -30,7 +30,6 @@ public class CombinedMapper {
         applicantArray = applicantsMapper.map(caseData.getApplicants(), solicitorMap);
         respondentArray = respondentsMapper.map(caseData.getRespondents(), respondentMap);
         solicitorMap.putAll(respondentMap);
-        log.info("final solicitor list size is {}", solicitorMap.size());
         return solicitorsMapper.mapSolicitorList(solicitorMap);
     }
 }

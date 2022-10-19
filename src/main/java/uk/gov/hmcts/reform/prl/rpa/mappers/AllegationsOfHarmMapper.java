@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
@@ -29,46 +30,47 @@ public class AllegationsOfHarmMapper {
         String psychologicalAbuseVictimJson = null;
         String sexualAbuseVictimJson = null;
 
-        if (caseData.getPhysicalAbuseVictim() != null && !caseData.getPhysicalAbuseVictim().isEmpty()) {
-            physicalAbuseVictimJson = caseData.getPhysicalAbuseVictim()
+        AllegationOfHarm allegationOfHarm = caseData.getAllegationOfHarm();
+        if (allegationOfHarm.getPhysicalAbuseVictim() != null && !allegationOfHarm.getPhysicalAbuseVictim().isEmpty()) {
+            physicalAbuseVictimJson = allegationOfHarm.getPhysicalAbuseVictim()
                     .stream()
                     .map(ApplicantOrChildren::getDisplayedValue)
                     .collect(Collectors.joining(", "));
         }
 
-        if (caseData.getEmotionalAbuseVictim() != null && !caseData.getEmotionalAbuseVictim().isEmpty()) {
-            emotionalAbuseVictimJson = caseData.getEmotionalAbuseVictim()
+        if (allegationOfHarm.getEmotionalAbuseVictim() != null && !allegationOfHarm.getEmotionalAbuseVictim().isEmpty()) {
+            emotionalAbuseVictimJson = allegationOfHarm.getEmotionalAbuseVictim()
                 .stream()
                 .map(ApplicantOrChildren::getDisplayedValue)
                 .collect(Collectors.joining(", "));
         }
 
-        if (caseData.getFinancialAbuseVictim() != null && !caseData.getFinancialAbuseVictim().isEmpty()) {
-            financialAbuseVictimJson = caseData.getFinancialAbuseVictim()
+        if (allegationOfHarm.getFinancialAbuseVictim() != null && !allegationOfHarm.getFinancialAbuseVictim().isEmpty()) {
+            financialAbuseVictimJson = allegationOfHarm.getFinancialAbuseVictim()
                 .stream()
                 .map(ApplicantOrChildren::getDisplayedValue)
                 .collect(Collectors.joining(", "));
         }
 
-        if (caseData.getPsychologicalAbuseVictim() != null && !caseData.getPsychologicalAbuseVictim().isEmpty()) {
-            psychologicalAbuseVictimJson = caseData.getPhysicalAbuseVictim()
+        if (allegationOfHarm.getPsychologicalAbuseVictim() != null && !allegationOfHarm.getPsychologicalAbuseVictim().isEmpty()) {
+            psychologicalAbuseVictimJson = allegationOfHarm.getPhysicalAbuseVictim()
                 .stream()
                 .map(ApplicantOrChildren::getDisplayedValue)
                 .collect(Collectors.joining(", "));
         }
 
-        if (caseData.getSexualAbuseVictim() != null && !caseData.getSexualAbuseVictim().isEmpty()) {
-            sexualAbuseVictimJson = caseData.getSexualAbuseVictim()
+        if (allegationOfHarm.getSexualAbuseVictim() != null && !allegationOfHarm.getSexualAbuseVictim().isEmpty()) {
+            sexualAbuseVictimJson = allegationOfHarm.getSexualAbuseVictim()
                 .stream()
                 .map(ApplicantOrChildren::getDisplayedValue)
                 .collect(Collectors.joining(", "));
         }
 
         return new NullAwareJsonObjectBuilder()
-            .add("allegationsOfHarmYesNo", CommonUtils.getYesOrNoValue(caseData.getAllegationsOfHarmYesNo()))
+            .add("allegationsOfHarmYesNo", CommonUtils.getYesOrNoValue(allegationOfHarm.getAllegationsOfHarmYesNo()))
             .add(
                 "allegationsOfHarmDomesticAbuseYesNo",
-                CommonUtils.getYesOrNoValue(caseData.getAllegationsOfHarmChildAbuseYesNo())
+                CommonUtils.getYesOrNoValue(allegationOfHarm.getAllegationsOfHarmChildAbuseYesNo())
             )
             .add("physicalAbuseVictim", physicalAbuseVictimJson)
             .add("emotionalAbuseVictim", emotionalAbuseVictimJson)
@@ -77,110 +79,110 @@ public class AllegationsOfHarmMapper {
             .add("sexualAbuseVictim", sexualAbuseVictimJson)
             .add(
                 "allegationsOfHarmChildAbductionYesNo",
-                CommonUtils.getYesOrNoValue(caseData.getAllegationsOfHarmChildAbductionYesNo())
+                CommonUtils.getYesOrNoValue(allegationOfHarm.getAllegationsOfHarmChildAbductionYesNo())
             )
-            .add("childAbductionReasons", caseData.getChildAbductionReasons())
-            .add("previousAbductionThreats", CommonUtils.getYesOrNoValue(caseData.getPreviousAbductionThreats()))
-            .add("previousAbductionThreatsDetails", caseData.getPreviousAbductionThreatsDetails())
+            .add("childAbductionReasons", allegationOfHarm.getChildAbductionReasons())
+            .add("previousAbductionThreats", CommonUtils.getYesOrNoValue(allegationOfHarm.getPreviousAbductionThreats()))
+            .add("previousAbductionThreatsDetails", allegationOfHarm.getPreviousAbductionThreatsDetails())
             .add(
                 "allegationsOfHarmOtherConcernsDetails",
-                caseData.getAllegationsOfHarmOtherConcernsDetails()
+                allegationOfHarm.getAllegationsOfHarmOtherConcernsDetails()
             )
             .add("allegationsOfHarmOtherConcernsCourtActions",
-                 caseData.getAllegationsOfHarmOtherConcernsCourtActions())
+                 allegationOfHarm.getAllegationsOfHarmOtherConcernsCourtActions())
             .add("agreeChildUnsupervisedTime",
-                 CommonUtils.getYesOrNoValue(caseData.getAgreeChildUnsupervisedTime()))
-            .add("agreeChildSupervisedTime", CommonUtils.getYesOrNoValue(caseData.getAgreeChildSupervisedTime()))
-            .add("agreeChildOtherContact", CommonUtils.getYesOrNoValue(caseData.getAgreeChildOtherContact()))
-            .add("childrenLocationNow", caseData.getChildrenLocationNow())
+                 CommonUtils.getYesOrNoValue(allegationOfHarm.getAgreeChildUnsupervisedTime()))
+            .add("agreeChildSupervisedTime", CommonUtils.getYesOrNoValue(allegationOfHarm.getAgreeChildSupervisedTime()))
+            .add("agreeChildOtherContact", CommonUtils.getYesOrNoValue(allegationOfHarm.getAgreeChildOtherContact()))
+            .add("childrenLocationNow", allegationOfHarm.getChildrenLocationNow())
             .add(
                 "abductionPassportOfficeNotified",
-                CommonUtils.getYesOrNoValue(caseData.getAbductionPassportOfficeNotified())
+                CommonUtils.getYesOrNoValue(allegationOfHarm.getAbductionPassportOfficeNotified())
             )
             .add("abductionChildHasPassport",
-                 CommonUtils.getYesOrNoValue(caseData.getAbductionChildHasPassport()))
+                 CommonUtils.getYesOrNoValue(allegationOfHarm.getAbductionChildHasPassport()))
             .add("abductionChildPassportPosession",
-                 String.valueOf(caseData.getAbductionChildPassportPosession()))
+                 String.valueOf(allegationOfHarm.getAbductionChildPassportPosession()))
             .add("abductionChildPassportPosessionOtherDetail",
-                 caseData.getAbductionChildPassportPosessionOtherDetail())
+                 allegationOfHarm.getAbductionChildPassportPosessionOtherDetail())
             .add(
                 "abductionPreviousPoliceInvolvement",
-                CommonUtils.getYesOrNoValue(caseData.getAbductionPreviousPoliceInvolvement())
+                CommonUtils.getYesOrNoValue(allegationOfHarm.getAbductionPreviousPoliceInvolvement())
             )
             .add("abductionPreviousPoliceInvolvementDetails",
-                 caseData.getAbductionPreviousPoliceInvolvementDetails())
+                 allegationOfHarm.getAbductionPreviousPoliceInvolvementDetails())
             .add(
                 "allegationsOfHarmChildAbuseYesNo",
-                CommonUtils.getYesOrNoValue(caseData.getAllegationsOfHarmChildAbuseYesNo())
+                CommonUtils.getYesOrNoValue(allegationOfHarm.getAllegationsOfHarmChildAbuseYesNo())
             )
             .add(
                 "allegationsOfHarmSubstanceAbuseYesNo",
-                CommonUtils.getYesOrNoValue(caseData.getAllegationsOfHarmSubstanceAbuseYesNo())
+                CommonUtils.getYesOrNoValue(allegationOfHarm.getAllegationsOfHarmSubstanceAbuseYesNo())
             )
             .add(
                 "allegationsOfHarmOtherConcernsYesNo",
-                CommonUtils.getYesOrNoValue(caseData.getAllegationsOfHarmOtherConcernsYesNo())
+                CommonUtils.getYesOrNoValue(allegationOfHarm.getAllegationsOfHarmOtherConcernsYesNo())
             )
-            .add("ordersNonMolestation", CommonUtils.getYesOrNoValue(caseData.getOrdersNonMolestation()))
-            .add("ordersNonMolestationDateIssued", String.valueOf(caseData.getOrdersNonMolestationDateIssued()))
-            .add("ordersNonMolestationEndDate", String.valueOf(caseData.getOrdersNonMolestationEndDate()))
-            .add("ordersOccupationDateIssued", String.valueOf(caseData.getOrdersOccupationDateIssued()))
-            .add("ordersOccupationEndDate", String.valueOf(caseData.getOrdersOccupationEndDate()))
+            .add("ordersNonMolestation", CommonUtils.getYesOrNoValue(allegationOfHarm.getOrdersNonMolestation()))
+            .add("ordersNonMolestationDateIssued", String.valueOf(allegationOfHarm.getOrdersNonMolestationDateIssued()))
+            .add("ordersNonMolestationEndDate", String.valueOf(allegationOfHarm.getOrdersNonMolestationEndDate()))
+            .add("ordersOccupationDateIssued", String.valueOf(allegationOfHarm.getOrdersOccupationDateIssued()))
+            .add("ordersOccupationEndDate", String.valueOf(allegationOfHarm.getOrdersOccupationEndDate()))
             .add(
                 "ordersForcedMarriageProtectionDateIssued",
-                String.valueOf(caseData.getOrdersForcedMarriageProtectionDateIssued())
+                String.valueOf(allegationOfHarm.getOrdersForcedMarriageProtectionDateIssued())
             )
             .add(
                 "ordersForcedMarriageProtectionEndDate",
-                String.valueOf(caseData.getOrdersForcedMarriageProtectionEndDate())
+                String.valueOf(allegationOfHarm.getOrdersForcedMarriageProtectionEndDate())
             )
-            .add("ordersRestrainingDateIssued", String.valueOf(caseData.getOrdersRestrainingDateIssued()))
-            .add("ordersRestrainingEndDate", String.valueOf(caseData.getOrdersRestrainingEndDate()))
+            .add("ordersRestrainingDateIssued", String.valueOf(allegationOfHarm.getOrdersRestrainingDateIssued()))
+            .add("ordersRestrainingEndDate", String.valueOf(allegationOfHarm.getOrdersRestrainingEndDate()))
             .add(
                 "ordersOtherInjunctiveDateIssued",
-                String.valueOf(caseData.getOrdersOtherInjunctiveDateIssued())
+                String.valueOf(allegationOfHarm.getOrdersOtherInjunctiveDateIssued())
             )
-            .add("ordersOtherInjunctiveEndDate", String.valueOf(caseData.getOrdersOtherInjunctiveEndDate()))
+            .add("ordersOtherInjunctiveEndDate", String.valueOf(allegationOfHarm.getOrdersOtherInjunctiveEndDate()))
             .add("ordersUndertakingInPlaceDateIssued",
-                 String.valueOf(caseData.getOrdersUndertakingInPlaceDateIssued()))
+                 String.valueOf(allegationOfHarm.getOrdersUndertakingInPlaceDateIssued()))
             .add("ordersUndertakingInPlaceEndDate",
-                 String.valueOf(caseData.getOrdersUndertakingInPlaceEndDate()))
+                 String.valueOf(allegationOfHarm.getOrdersUndertakingInPlaceEndDate()))
             .add("ordersNonMolestationCurrent",
-                 CommonUtils.getYesOrNoValue(caseData.getOrdersNonMolestationCurrent()))
-            .add("ordersNonMolestationCourtName", caseData.getOrdersNonMolestationCourtName())
-            .add("ordersOccupation", CommonUtils.getYesOrNoValue(caseData.getOrdersOccupation()))
-            .add("ordersOccupationCurrent", CommonUtils.getYesOrNoValue(caseData.getOrdersOccupationCurrent()))
+                 CommonUtils.getYesOrNoValue(allegationOfHarm.getOrdersNonMolestationCurrent()))
+            .add("ordersNonMolestationCourtName", allegationOfHarm.getOrdersNonMolestationCourtName())
+            .add("ordersOccupation", CommonUtils.getYesOrNoValue(allegationOfHarm.getOrdersOccupation()))
+            .add("ordersOccupationCurrent", CommonUtils.getYesOrNoValue(allegationOfHarm.getOrdersOccupationCurrent()))
             .add(
                 "ordersOtherInjunctiveCurrent",
-                CommonUtils.getYesOrNoValue(caseData.getOrdersOtherInjunctiveCurrent())
+                CommonUtils.getYesOrNoValue(allegationOfHarm.getOrdersOtherInjunctiveCurrent())
             )
             .add(
                 "allegationsOfHarmOtherConcerns",
-                CommonUtils.getYesOrNoValue(caseData.getAllegationsOfHarmOtherConcerns())
+                CommonUtils.getYesOrNoValue(allegationOfHarm.getAllegationsOfHarmOtherConcerns())
             )
-            .add("ordersOccupationCourtName", caseData.getOrdersOccupationCourtName())
-            .add("ordersRestrainingCourtName", caseData.getOrdersRestrainingCourtName())
-            .add("ordersOtherInjunctiveCourtName", caseData.getOrdersOtherInjunctiveCourtName())
-            .add("ordersUndertakingInPlaceCourtName", caseData.getOrdersUndertakingInPlaceCourtName())
+            .add("ordersOccupationCourtName", allegationOfHarm.getOrdersOccupationCourtName())
+            .add("ordersRestrainingCourtName", allegationOfHarm.getOrdersRestrainingCourtName())
+            .add("ordersOtherInjunctiveCourtName", allegationOfHarm.getOrdersOtherInjunctiveCourtName())
+            .add("ordersUndertakingInPlaceCourtName", allegationOfHarm.getOrdersUndertakingInPlaceCourtName())
             .add(
                 "ordersForcedMarriageProtection",
-                CommonUtils.getYesOrNoValue(caseData.getOrdersForcedMarriageProtection())
+                CommonUtils.getYesOrNoValue(allegationOfHarm.getOrdersForcedMarriageProtection())
             )
             .add(
                 "ordersForcedMarriageProtectionCurrent",
-                CommonUtils.getYesOrNoValue(caseData.getOrdersForcedMarriageProtectionCurrent())
+                CommonUtils.getYesOrNoValue(allegationOfHarm.getOrdersForcedMarriageProtectionCurrent())
             )
-            .add("ordersRestrainingCurrent", CommonUtils.getYesOrNoValue(caseData.getOrdersRestrainingCurrent()))
+            .add("ordersRestrainingCurrent", CommonUtils.getYesOrNoValue(allegationOfHarm.getOrdersRestrainingCurrent()))
             .add(
                 "ordersUndertakingInPlaceCurrent",
-                CommonUtils.getYesOrNoValue(caseData.getOrdersUndertakingInPlaceCurrent())
+                CommonUtils.getYesOrNoValue(allegationOfHarm.getOrdersUndertakingInPlaceCurrent())
             )
             .add("ordersForcedMarriageProtectionCourtName",
-                 caseData.getOrdersForcedMarriageProtectionCourtName())
-            .add("ordersRestraining", CommonUtils.getYesOrNoValue(caseData.getOrdersRestraining()))
-            .add("ordersOtherInjunctive", CommonUtils.getYesOrNoValue(caseData.getOrdersOtherInjunctive()))
-            .add("ordersUndertakingInPlace", CommonUtils.getYesOrNoValue(caseData.getOrdersUndertakingInPlace()))
-            .add("behaviours", mapBehaviours(caseData.getBehaviours()))
+                 allegationOfHarm.getOrdersForcedMarriageProtectionCourtName())
+            .add("ordersRestraining", CommonUtils.getYesOrNoValue(allegationOfHarm.getOrdersRestraining()))
+            .add("ordersOtherInjunctive", CommonUtils.getYesOrNoValue(allegationOfHarm.getOrdersOtherInjunctive()))
+            .add("ordersUndertakingInPlace", CommonUtils.getYesOrNoValue(allegationOfHarm.getOrdersUndertakingInPlace()))
+            .add("behaviours", mapBehaviours(allegationOfHarm.getBehaviours()))
             .build();
     }
 

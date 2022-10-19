@@ -14,10 +14,12 @@ import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,7 +41,12 @@ public class CaseInitiationControllerTest {
     private EventService eventService;
 
     @Mock
+    AssignCaseAccessService assignCaseAccessService;
+
+    @Mock
     EventService eventPublisher;
+
+
 
 
     @Before
@@ -54,6 +61,7 @@ public class CaseInitiationControllerTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("applicantCaseName", "testCaseName");
+        String userID = "12345";
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
@@ -69,11 +77,13 @@ public class CaseInitiationControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
+
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        doNothing().when(assignCaseAccessService).assignCaseAccess(String.valueOf(caseData.getId()),auth);
 
-        caseInitiationController.handleSubmitted(callbackRequest);
+        caseInitiationController.handleSubmitted(auth,callbackRequest);
+        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
         eventService.publishEvent(caseDataChanged);
 
         applicationsTabService.updateTab(caseData);
