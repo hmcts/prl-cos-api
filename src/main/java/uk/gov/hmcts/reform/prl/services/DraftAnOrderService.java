@@ -70,6 +70,7 @@ public class DraftAnOrderService {
     private final ObjectMapper objectMapper;
 
     private static final String NON_MOLESTATION_ORDER = "draftAnOrder/non-molestation-order.html";
+    private static final String SPECIAL_GUARDIANSHIP_ORDER = "draftAnOrder/special-guardianship-c43.html";
     private static final String BLANK_ORDER_C21 = "draftAnOrder/blank-order-c21.html";
     private static final String APPOINTMENT_OF_GUARDIAN_ORDER = "draftAnOrder/appointment-of-guardian-order.html";
 
@@ -109,7 +110,6 @@ public class DraftAnOrderService {
     }
 
     public String getTheOrderDraftString(CaseData caseData) {
-        String temp = null;
         switch (caseData.getCreateSelectOrderOptions()) {
             case nonMolestation:
                 temp = getNonMolestationString(readString(NON_MOLESTATION_ORDER), caseData);
@@ -117,12 +117,71 @@ public class DraftAnOrderService {
             case appointmentOfGuardian:
                 temp = getNonMolestationString(readString(APPOINTMENT_OF_GUARDIAN_ORDER), caseData);
                 break;
-
-            default:
+            case specialGuardianShip:
+                temp = getSpecialGuardianShipString(readString(SPECIAL_GUARDIANSHIP_ORDER), caseData);
                 break;
-
+             default:
+                return null;    
+                
+             retrun temp;
         }
-        return temp;
+    }
+
+    public String getSpecialGuardianShipString(String specialGuardianString, CaseData caseData) {
+        Map<String, String> specialGuardianPlaceHoldersMap = new HashMap<>();
+        if (specialGuardianString != null) {
+            specialGuardianPlaceHoldersMap.put(
+                "familyManNumber", caseData.getFamilymanCaseNumber() != null ? caseData.getFamilymanCaseNumber() : " "
+            );
+
+            specialGuardianPlaceHoldersMap.put("ccdId", String.valueOf(caseData.getId()));
+
+            specialGuardianPlaceHoldersMap.put(
+                "orderDate",
+                caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
+                    PrlAppsConstants.D_MMMM_YYYY,
+                    Locale.UK
+                )) : " "
+            );
+            specialGuardianPlaceHoldersMap.put(
+                "judgeOrMagistrateTitle",
+                caseData.getManageOrders().getJudgeOrMagistrateTitle() != null
+                    ? caseData.getManageOrders().getJudgeOrMagistrateTitle().getDisplayedValue() : " "
+            );
+            specialGuardianPlaceHoldersMap.put("judgeOrMagistratesLastName", caseData.getJudgeOrMagistratesLastName());
+            specialGuardianPlaceHoldersMap.put(
+                "justiceLegalAdviserFullName",
+                caseData.getJusticeLegalAdviserFullName()
+            );
+            specialGuardianPlaceHoldersMap.put(
+                "familyCourtName",
+                (caseData.getManageOrders().getFl404CustomFields() != null
+                    && caseData.getManageOrders().getFl404CustomFields().getFl404bCourtName() != null)
+                    ? caseData.getManageOrders().getFl404CustomFields().getFl404bCourtName() : " "
+            );
+            specialGuardianPlaceHoldersMap.put(
+                "recitalsOrPreamble", caseData.getRecitalsOrPreamble() != null
+                    ? caseData.getRecitalsOrPreamble() : " "
+            );
+            specialGuardianPlaceHoldersMap.put(
+                "isTheOrderByConsent",
+                (caseData.getIsTheOrderByConsent() != null
+                    && caseData.getIsTheOrderByConsent().equals(
+                    YesOrNo.Yes) ? "By consent" : " "
+                )
+            );
+            specialGuardianPlaceHoldersMap.put(
+                "orderDirections", caseData.getOrderDirections() != null
+                    ? caseData.getOrderDirections() : " "
+            );
+            specialGuardianPlaceHoldersMap.put(
+                "furtherDirectionsIfRequired", caseData.getFurtherDirectionsIfRequired() != null
+                    ? caseData.getFurtherDirectionsIfRequired() : " "
+            );
+            StringSubstitutor substitutor = new StringSubstitutor(specialGuardianPlaceHoldersMap);
+            return substitutor.replace(specialGuardianString);
+        }
+        return null;
     }
 
     private String getNonMolestationString(String nonMolestationOrderString, CaseData caseData) {
