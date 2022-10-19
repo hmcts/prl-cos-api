@@ -45,7 +45,7 @@ public class CaseController {
         @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
         @RequestHeader("serviceAuthorization") String s2sToken
     ) {
-        CaseDetails caseDetails = coreCaseDataApi.getCase(userToken, s2sToken, caseId);
+        CaseDetails caseDetails = caseService.fetchCaseById(userToken, s2sToken, caseId);
         caseDetails.getData().put("state", caseDetails.getState());
         return objectMapper.convertValue(
             caseDetails.getData(),
