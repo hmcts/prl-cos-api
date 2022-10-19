@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -87,7 +88,9 @@ public class EditAndApproveDraftOrderController {
         }
         log.info("*** caseData.getSelectTypeOfOrder() {} ***", caseData.getSelectTypeOfOrder());
         if ((SelectTypeOfOrderEnum.finl).equals(caseData.getSelectTypeOfOrder())) {
-            caseDataUpdated.put(STATE_FIELD, State.ALL_FINAL_ORDERS_ISSUED);
+            caseDataUpdated.put("caseStatus", CaseStatus.builder()
+                .state(State.ALL_FINAL_ORDERS_ISSUED.getLabel())
+                .build());
         }
         log.info("*** State details from callback request {} ***", callbackRequest.getCaseDetails().getState());
         log.info("*** before returning {} ***", caseDataUpdated);
