@@ -235,6 +235,10 @@ public class DraftAnOrderService {
             appointmentOfGuardianHoldersMap.put(
                 "cafcassOfficeDetails", caseData.getManageOrders().getCafcassOfficeDetails());
 
+            log.info("orderDirections " + caseData.getManageOrders().getOrderDirections());
+
+            log.info("furtherDirectionsIfRequired " + caseData.getManageOrders().getOrderDirections());
+
             appointmentOfGuardianHoldersMap.put(
                 "orderDirections", caseData.getManageOrders().getOrderDirections());
 
