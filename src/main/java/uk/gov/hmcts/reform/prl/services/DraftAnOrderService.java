@@ -117,7 +117,7 @@ public class DraftAnOrderService {
                 return getNonMolestationString(readString(APPOINTMENT_OF_GUARDIAN_ORDER), caseData);
             case specialGuardianShip:
                 return getSpecialGuardianShipString(readString(SPECIAL_GUARDIANSHIP_ORDER), caseData);
-             default:
+            default:
                 return null;
         }
     }
