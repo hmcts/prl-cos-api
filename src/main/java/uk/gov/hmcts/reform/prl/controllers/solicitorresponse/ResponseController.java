@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.HashMap;
@@ -47,10 +48,12 @@ public class ResponseController {
         StringBuilder selectedList = new StringBuilder();
 
         selectedList.append("<ul>");
-        selectedList.append("<li>");
-        selectedList.append(caseData.getKeepContactDetailsPrivateOther()
-                                .getConfidentialityList());
-        selectedList.append("</li>");
+        for (ConfidentialityListEnum confidentiality: caseData.getKeepContactDetailsPrivateOther()
+            .getConfidentialityList()) {
+            selectedList.append("<li>");
+            selectedList.append(confidentiality.getDisplayedValue());
+            selectedList.append("</li>");
+        }
         selectedList.append("</ul>");
 
         Map<String, Object> keepDetailsPrivateList = new HashMap<>();
