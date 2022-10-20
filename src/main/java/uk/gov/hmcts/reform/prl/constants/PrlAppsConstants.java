@@ -46,6 +46,11 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_FIELD_FINAL = "finalDocument";
     public static final String DRAFT_DOCUMENT_FIELD = "draftOrderDoc";
     public static final String DRAFT_DOCUMENT_WELSH_FIELD = "draftOrderDocWelsh";
+
+    public static final String C7_FINAL_ENGLISH = "c7FinalEng";
+
+    public static final String C7_FINAL_WELSH = "c7FinalWelsh";
+
     public static final String COURT_NAME_FIELD = "courtName";
     public static final String COURT_ID_FIELD = "courtId";
     public static final String COURT_EMAIL_ADDRESS_FIELD = "courtEmailAddress";
@@ -94,7 +99,7 @@ public class PrlAppsConstants {
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
     public static final String DOCUMENT_COVER_SHEET_HINT = "DOC_COVER_SHEET";
-    public static final String DOCUMENT_C7_BLANK_HINT = "DOCUMENT_C7_BLANK";
+    public static final String DOCUMENT_C7_DRAFT_HINT = "DOCUMENT_C7_DRAFT";
     public static final String DOCUMENT_C8_BLANK_HINT = "DOCUMENT_C8_BLANK";
     public static final String DOCUMENT_C1A_BLANK_HINT = "DOCUMENT_C1A_BLANK";
     public static final String DOCUMENT_PRIVACY_NOTICE_HINT = "PRIVACY_NOTICE";
@@ -123,13 +128,18 @@ public class PrlAppsConstants {
 
     public static final String CITIZEN_UPLOADED_DOCUMENT = "citizenUploadedDocument";
 
+    public static final String REVIEW_AND_SUBMIT = "reviewAndSubmit";
+
     public static final String CITIZEN_HINT = "CITIZEN";
+
     public static final String APPLICANT_SOLICITOR_EMAIL_ADDRESS = "applicantSolicitorEmailAddress";
     public static final String YOUR_POSITION_STATEMENTS = "Your position statements";
     public static final String YOUR_WITNESS_STATEMENTS = "Your witness statements";
     public static final String OTHER_WITNESS_STATEMENTS = "Other people's witness statements";
     public static final String MAIL_SCREENSHOTS_MEDIA_FILES = "Emails, screenshots, images and other media files";
     public static final String MEDICAL_RECORDS = "Medical records";
+
+    public static final String  RESPONSE_TO_REQUEST_FOR_CA = "Reponse To Request For CA";
 
     public static final String LETTERS_FROM_SCHOOL = "Letters from school";
     public static final String TENANCY_MORTGAGE_AGREEMENTS = "Tenancy and mortgage agreements";

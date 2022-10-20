@@ -142,8 +142,10 @@ public class RequestUpdateCallbackService {
                             ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
             );
 
-            solicitorEmailService.sendEmail(caseDetails);
-            caseWorkerEmailService.sendEmail(caseDetails);
+            if (PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())) {
+                solicitorEmailService.sendEmail(caseDetails);
+                caseWorkerEmailService.sendEmail(caseDetails);
+            }
 
         } else {
             log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());
