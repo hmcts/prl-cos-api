@@ -5,21 +5,20 @@ import com.google.common.collect.Iterables;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CaseAccessApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
-import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.ccd.client.model.UserId;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 
@@ -28,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -45,20 +45,16 @@ public class CaseService {
     CaseDetailsConverter caseDetailsConverter;
 
     @Autowired
-    CaseAccessApi caseAccessApi;
-
+    CaseRepository caseRepository;
 
     @Autowired
     IdamClient idamClient;
 
     @Autowired
-    AuthTokenGenerator authTokenGenerator;
+    ObjectMapper objectMapper;
 
     @Autowired
     SystemUserService systemUserService;
-
-    @Autowired
-    ObjectMapper objectMapper;
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId) {
 
@@ -77,6 +73,15 @@ public class CaseService {
         return searchCasesWith(authToken, s2sToken, searchCriteria);
     }
 
+    public List<CaseData> retrieveCases(String authToken, String s2sToken) {
+        Map<String, String> searchCriteria = new HashMap<>();
+
+        searchCriteria.put("sortDirection", "desc");
+        searchCriteria.put("page", "1");
+
+        return searchCasesLinkedToCitizen(authToken, s2sToken, searchCriteria);
+    }
+
     private List<CaseData> searchCasesWith(String authToken, String s2sToken, Map<String, String> searchCriteria) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
@@ -85,6 +90,17 @@ public class CaseService {
         return caseDetails
             .stream()
             .map(caseDetailsConverter::extractCase)
+            .collect(Collectors.toList());
+    }
+
+    private List<CaseData> searchCasesLinkedToCitizen(String authToken, String s2sToken, Map<String, String> searchCriteria) {
+
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        List<CaseDetails> caseDetails = new ArrayList<>();
+        caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
+        return caseDetails
+            .stream()
+            .map(caseDetailsConverter::extractCaseData)
             .collect(Collectors.toList());
     }
 
@@ -103,11 +119,26 @@ public class CaseService {
         return result;
     }
 
+    public CaseDetails fetchCaseById(String authToken, String serviceAuthToken, String caseId) {
+        CaseDetails result;
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        result = coreCaseDataApi.readForCitizen(
+            authToken,
+            serviceAuthToken,
+            userDetails.getId(),
+            JURISDICTION,
+            CASE_TYPE,
+            caseId
+        );
+
+        return result;
+    }
+
     private CaseDetails updateCaseDetails(CaseData caseData, String authToken, String s2sToken, String caseId,
                                           String eventId, UserDetails userDetails) {
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         Iterables.removeIf(caseDataMap.values(), Objects::isNull);
-        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
+        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCitizen(
             authToken,
             s2sToken,
             userDetails.getId(),
@@ -125,7 +156,7 @@ public class CaseService {
             .data(caseDataMap)
             .build();
 
-        return coreCaseDataApi.submitEventForCaseWorker(
+        return coreCaseDataApi.submitEventForCitizen(
             authToken,
             s2sToken,
             userDetails.getId(),
@@ -138,126 +169,74 @@ public class CaseService {
     }
 
     public void linkCitizenToCase(String authorisation, String s2sToken, String accessCode, String caseId) {
-        String userId = idamClient.getUserDetails(authorisation).getId();
-        String emailId = idamClient.getUserDetails(authorisation).getEmail();
-        this.grantAccessToCase(systemUserService.getSysUserToken(), caseId, userId);
-        this.updateCitizenIdAndEmail(authorisation, caseId, userId, emailId, s2sToken, "applicantsDetails");
+        UserDetails userDetails = idamClient.getUserDetails(authorisation);
+        String anonymousUserToken = systemUserService.getSysUserToken();
+        String userId = userDetails.getId();
+        String emailId = userDetails.getEmail();
 
-    }
-
-    private void grantAccessToCase(String sysUserToken, String caseId, String userId) {
-        String sysUserId = idamClient.getUserDetails(sysUserToken).getId();
-        caseAccessApi.grantAccessToCase(
-            sysUserToken,
-            authTokenGenerator.generate(),
-            sysUserId,
-            JURISDICTION,
-            CASE_TYPE,
-            caseId,
-            new UserId(userId)
-        );
-    }
-
-    @SuppressWarnings(value = "squid:S1172")
-    private CaseDetails updateCitizenIdAndEmail(
-        String authorisation,
-        String caseId,
-        String citizenId,
-        String citizenEmail,
-        String s2sToken,
-        String eventId
-    ) {
-        try {
-            UserDetails userDetails = idamClient.getUserDetails(authorisation);
-            EventRequestData eventRequestData = eventRequest(
-                CaseEventDetail.builder().id("applicantsDetails")
-                    .eventName("applicantsDetails").build(),
-                userDetails.getId(),
-                authorisation
-            );
-
-            StartEventResponse startEventResponse = startUpdate(
-                authorisation,
-                s2sToken,
-                eventRequestData,
-                Long.valueOf(caseId)
-            );
-
-            CaseDataContent caseDataContent = CaseDataContent.builder()
-                .eventToken(startEventResponse.getToken())
-                .event(Event.builder()
-                           .id(startEventResponse.getEventId())
-                           .build())
-                .build();
-
-            return submitUpdate(
-                authorisation,
-                s2sToken,
-                eventRequestData,
-                caseDataContent,
-                Long.valueOf(caseId)
-            );
-        } catch (Exception exception) {
-            throw new RuntimeException();
-        }
-    }
-
-    private StartEventResponse startUpdate(
-        String authorisation,
-        String s2sToken,
-        EventRequestData eventRequestData,
-        Long caseId
-    ) {
-        return coreCaseDataApi.startEventForCitizen(
-            authorisation,
-            s2sToken,
-            eventRequestData.getUserId(),
-            eventRequestData.getJurisdictionId(),
-            eventRequestData.getCaseTypeId(),
-            caseId.toString(),
-            eventRequestData.getEventId()
-        );
-    }
-
-    private CaseDetails submitUpdate(
-        String authorisation,
-        String s2sToken,
-        EventRequestData eventRequestData,
-        CaseDataContent caseDataContent,
-        Long caseId
-    ) {
-        return coreCaseDataApi.submitEventForCitizen(
-            authorisation,
-            s2sToken,
-            eventRequestData.getUserId(),
-            eventRequestData.getJurisdictionId(),
-            eventRequestData.getCaseTypeId(),
-            caseId.toString(),
-            eventRequestData.isIgnoreWarning(),
-            caseDataContent
-        );
-    }
-
-    private EventRequestData eventRequest(CaseEventDetail caseEvent, String userId, String authorisation) {
-        return EventRequestData.builder()
-            .userToken(authorisation)
-            .userId(userId)
-            .jurisdictionId(JURISDICTION)
-            .caseTypeId(CASE_TYPE)
-            .eventId(caseEvent.getEventName())
-            .ignoreWarning(true)
-            .build();
-    }
-
-    public String validateAccessCode(String userToken, String s2sToken, String caseId, String accessCode) {
-        log.info("validateAccessCode");
-        String accessCodeStatus = "Invalid";
         CaseData caseData = objectMapper.convertValue(
-            coreCaseDataApi.getCase(userToken, s2sToken, caseId).getData(),
+            coreCaseDataApi.getCase(anonymousUserToken, s2sToken, caseId).getData(),
             CaseData.class
         );
 
-        List<CaseInvite> matchingCaseInvite = caseData.getRespondentCaseInvites()
+        if ("Valid".equalsIgnoreCase(findAccessCodeStatus(accessCode, caseData))) {
+            UUID partyId = null;
+            YesOrNo isApplicant = YesOrNo.Yes;
+
+            for (Element<CaseInvite> invite : caseData.getCaseInvites()) {
+                if (accessCode.equals(invite.getValue().getAccessCode())) {
+                    partyId = invite.getValue().getPartyId();
+                    isApplicant = invite.getValue().getIsApplicant();
+                    invite.getValue().setHasLinked("Yes");
+                    invite.getValue().setInvitedUserId(userId);
+                }
+            }
+            processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant);
+
+            caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData);
+        }
+    }
+
+    private void processUserDetailsForCase(String userId, String emailId, CaseData caseData, UUID partyId, YesOrNo isApplicant) {
+        //Assumption is for C100 case PartyDetails will be part of list
+        // and will always contain the partyId
+        // whereas FL401 will have only one party details without any partyId
+        User user = User.builder().email(emailId)
+            .idamId(userId).build();
+        if (partyId != null) {
+            if (YesOrNo.Yes.equals(isApplicant)) {
+                for (Element<PartyDetails> partyDetails : caseData.getApplicants()) {
+                    if (partyId.equals(partyDetails.getId())) {
+                        partyDetails.getValue().setUser(user);
+                    }
+                }
+            } else {
+                for (Element<PartyDetails> partyDetails : caseData.getRespondents()) {
+                    if (partyId.equals(partyDetails.getId())) {
+                        partyDetails.getValue().setUser(user);
+                    }
+                }
+            }
+        } else {
+            if (YesOrNo.Yes.equals(isApplicant)) {
+                caseData.getApplicantsFL401().setUser(user);
+            } else {
+                caseData.getRespondentsFL401().setUser(user);
+            }
+        }
+    }
+
+    public String validateAccessCode(String authorisation, String s2sToken, String caseId, String accessCode) {
+        CaseData caseData = objectMapper.convertValue(
+            coreCaseDataApi.getCase(authorisation, s2sToken, caseId).getData(),
+            CaseData.class
+        );
+        return findAccessCodeStatus(accessCode, caseData);
+    }
+
+    private String findAccessCodeStatus(String accessCode, CaseData caseData) {
+        String accessCodeStatus = "Invalid";
+        List<CaseInvite> matchingCaseInvite = caseData.getCaseInvites()
             .stream()
             .map(Element::getValue)
             .filter(x -> accessCode.equals(x.getAccessCode()))
@@ -271,7 +250,6 @@ public class CaseService {
                 }
             }
         }
-        log.info("accessCodeStatus" + accessCodeStatus);
         return accessCodeStatus;
     }
 }
