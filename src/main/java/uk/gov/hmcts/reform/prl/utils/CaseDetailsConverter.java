@@ -18,4 +18,8 @@ public class CaseDetailsConverter {
     public CaseData extractCase(CaseDetails caseDetails) {
         return objectMapper.convertValue(caseDetails, CaseData.class);
     }
+
+    public CaseData extractCaseData(CaseDetails caseDetails) {
+        return objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+    }
 }
