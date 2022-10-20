@@ -74,9 +74,10 @@ public class PartyDetails {
     @JsonProperty("applicantPreferredContact")
     private final List<PreferredContactEnum> applicantPreferredContact;
     private final String applicantContactInstructions;
+    private User user;
+    private Response response;
+    private YesOrNo currentRespondent;
 
-    private final User userDetails;
-    private final Response response;
     private final SolicitorResponse solicitorResponse;
 
     public boolean hasConfidentialInfo() {
