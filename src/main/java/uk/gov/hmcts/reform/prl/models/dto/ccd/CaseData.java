@@ -648,4 +648,6 @@ public class CaseData implements MappableObject {
     private String c100RebuildHearingWithoutNotice;
     private String c100RebuildOtherProceedings;
     private String c100RebuildReturnUrl;
+    private String c100RebuildMaim;
+    private String c100RebuildHearingUrgency;
 }
