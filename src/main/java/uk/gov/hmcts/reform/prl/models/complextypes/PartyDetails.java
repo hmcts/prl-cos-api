@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 
 import java.time.LocalDate;
@@ -73,8 +75,9 @@ public class PartyDetails {
     private final List<PreferredContactEnum> applicantPreferredContact;
     private final String applicantContactInstructions;
 
-    //private final User userDetails;
-    //private final Response response;
+    private final User userDetails;
+    private final Response response;
+    private final SolicitorResponse solicitorResponse;
 
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)

@@ -46,6 +46,7 @@ import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
@@ -73,10 +74,16 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -642,5 +649,27 @@ public class CaseData implements MappableObject {
     private YesOrNo courtNavApproved;
     private String caseOrigin;
     private String numberOfAttachments;
+
+    /**
+     * Respondent Solicitor.
+     */
+
+    private final KeepDetailsPrivate keepContactDetailsPrivate;
+    private final KeepDetailsPrivate keepContactDetailsPrivateOther;
+    private final String confidentialListDetails;
+
+    private final AttendToCourt respondentAttendingToCourt;
+
+    private final SolicitorInternationalElement internationalElementChild;
+    private final SolicitorInternationalElement internationalElementParent;
+    private final SolicitorInternationalElement internationalElementJurisdiction;
+    private final SolicitorInternationalElement internationalElementRequest;
+
+    private final RespondentAllegationsOfHarm respondentAllegationsOfHarm;
+    private final Behaviours respondentDomesticAbuseBehaviour;
+    private final Behaviours respondentChildAbuseBehaviour;
+    private final RespondentChildAbduction respondentChildAbduction;
+    private final RespondentOtherConcerns respondentOtherConcerns;
+
 
 }
