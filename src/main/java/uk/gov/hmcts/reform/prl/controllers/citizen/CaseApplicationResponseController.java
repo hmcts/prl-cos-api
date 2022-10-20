@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -62,7 +63,7 @@ public class CaseApplicationResponseController {
     public Document generateC7DraftDocument(
         @PathVariable("caseId") String caseId,
         @PathVariable("partyId") String partyId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
@@ -90,7 +91,7 @@ public class CaseApplicationResponseController {
     public CaseData generateC7FinalDocument(
         @PathVariable("caseId") String caseId,
         @PathVariable("partyId") String partyId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
