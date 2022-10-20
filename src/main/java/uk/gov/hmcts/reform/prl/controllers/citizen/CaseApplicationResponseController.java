@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -53,7 +54,7 @@ public class CaseApplicationResponseController {
     CaseService caseService;
 
 
-    @PostMapping(path = "{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON)
+    @PostMapping(value = "{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON)
     @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Document generated"),
@@ -62,7 +63,7 @@ public class CaseApplicationResponseController {
     public Document generateC7DraftDocument(
         @PathVariable("caseId") String caseId,
         @PathVariable("partyId") String partyId,
-        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
@@ -81,7 +82,7 @@ public class CaseApplicationResponseController {
         return document;
     }
 
-    @PostMapping(path = "{caseId}/{partyId}/generate-c7document-final", produces = APPLICATION_JSON)
+    @PostMapping(value = "{caseId}/{partyId}/generate-c7document-final", produces = APPLICATION_JSON)
     @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Document generated"),
@@ -90,7 +91,7 @@ public class CaseApplicationResponseController {
     public CaseData generateC7FinalDocument(
         @PathVariable("caseId") String caseId,
         @PathVariable("partyId") String partyId,
-        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
