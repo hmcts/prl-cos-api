@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -854,10 +855,10 @@ public class DocumentGenService {
             )).build();
     }
 
-    public DocumentResponse uploadDocument(String authorization, MultipartFile file) {
+    public DocumentResponse uploadDocument(String authorization, MultipartFile file) throws IOException {
         try {
             uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument
-                = uploadService.uploadDocument(file, file.getOriginalFilename(), file.getContentType(), authorization);
+                = uploadService.uploadDocument(file.getBytes(), file.getOriginalFilename(), file.getContentType(), authorization);
             log.info("Stored Doc Detail: " + stampedDocument.toString());
             return DocumentResponse.builder().status("Success").document(Document.builder()
                                                                              .documentBinaryUrl(stampedDocument.links.binary.href)

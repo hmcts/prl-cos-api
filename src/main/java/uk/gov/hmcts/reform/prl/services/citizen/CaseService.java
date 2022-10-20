@@ -261,7 +261,7 @@ public class CaseService {
             }
             processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant);
 
-            caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData);
+            caseRepository.linkDefendant(authorisation, anonymousUserToken, s2sToken, caseId, caseData);
         }
     }
 

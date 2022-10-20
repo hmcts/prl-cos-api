@@ -47,6 +47,7 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -345,7 +346,7 @@ public class CaseDocumentController {
     })
     public ResponseEntity<?> uploadCitizenDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                    @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-                                                   @RequestParam("file") MultipartFile file) {
+                                                   @RequestParam("file") MultipartFile file) throws IOException {
 
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException("Invalid Client"));
