@@ -36,3 +36,4 @@ spring:
         prl.courtnav-functional-test-user: COURTNAV_USERNAME
         prl.courtnav-functional-test-pwd: COURTNAV_PASSWORD
         prl.postcode-lookup-token: POST_CODE_LOOKUP_KEY
+        citizen-url: CITIZEN_URL
