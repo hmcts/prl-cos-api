@@ -20,8 +20,8 @@ public enum SpecialMeasuresEnum {
     @JsonProperty("shieldedByScreen")
     shieldedByScreen("shieldedByScreen", "To be shielded by a privacy screen in the courtroom"),
 
-    @JsonProperty("joinByvideoLink")
-    joinByvideoLink("joinByvideoLink", "To join the hearing by video link rather than in person");
+    @JsonProperty("joinByVideoLink")
+    joinByVideoLink("joinByVideoLink", "To join the hearing by video link rather than in person");
 
     private final String id;
     private final String displayedValue;
