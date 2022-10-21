@@ -73,8 +73,7 @@ public class CafcassUploadDocServiceTest {
         caseData = CaseData.builder().id(Long.parseLong(TEST_CASE_ID)).applicantCaseName("xyz").build();
         when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(randomUserId).build());
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-        when(coreCaseDataApi.startForCaseworker(any(), any(), any(), any(), any(), any())
-        ).thenReturn(StartEventResponse.builder().eventId("courtnav-case-creation").token("eventToken").build());
+
         file = new MockMultipartFile(
             "file",
             "private-law.pdf",
@@ -96,7 +95,7 @@ public class CafcassUploadDocServiceTest {
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken("eventToken")
             .event(Event.builder()
-                       .id("courtnav-document-upload")
+                       .id("cafcass-document-upload")
                        .build())
             .data(Map.of("FL401", tempDoc))
             .build();
@@ -105,10 +104,9 @@ public class CafcassUploadDocServiceTest {
             LocalDateTime.now()).lastModified(LocalDateTime.now()).id(Long.valueOf(TEST_CASE_ID)).build();
         UploadResponse uploadResponse = new UploadResponse(List.of(document));
         when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(tempCaseDetails);
-        //when(caseUtils.).thenReturn(caseData);
         when(coreCaseDataApi.startEventForCaseWorker(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
                                                      Mockito.any(), Mockito.any(), Mockito.any())
-        ).thenReturn(StartEventResponse.builder().eventId("courtnav-document-upload").token("eventToken").build());
+        ).thenReturn(StartEventResponse.builder().eventId("cafcass-document-upload").token("eventToken").build());
         when(caseDocumentClient.uploadDocuments(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
                                                 Mockito.any())).thenReturn(uploadResponse);
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
@@ -173,6 +171,32 @@ public class CafcassUploadDocServiceTest {
         );
         cafcassUploadDocService.uploadDocument("Bearer abc", file, "FL401",
                                            "1234567891234567"
+        );
+    }
+
+    @Test(expected = ResponseStatusException.class)
+    public void shouldNotUploadDocumentWhenInvalidCaseId() {
+        uk.gov.hmcts.reform.prl.models.documents.Document tempDoc = uk.gov.hmcts.reform.prl.models.documents
+            .Document.builder()
+            .documentFileName("private-law.pdf")
+            .documentUrl(randomAlphaNumeric)
+            .documentBinaryUrl(randomAlphaNumeric)
+            .build();
+        Document document = testDocument();
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .eventToken("eventToken")
+            .event(Event.builder()
+                       .id("cafcass-document-upload")
+                       .build())
+            .data(Map.of("FL401", tempDoc))
+            .build();
+        CaseDetails tempCaseDetails = CaseDetails.builder().data(Map.of("id", TEST_CASE_ID)).state(
+            "SUBMITTED_PAID").createdDate(
+            LocalDateTime.now()).lastModified(LocalDateTime.now()).id(Long.valueOf(TEST_CASE_ID)).build();
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(null);
+        cafcassUploadDocService.uploadDocument("Bearer abc", file, "FL401",
+                                               "1234567891234567"
         );
     }
 
