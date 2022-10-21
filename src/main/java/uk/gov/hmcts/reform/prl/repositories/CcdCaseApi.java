@@ -105,4 +105,11 @@ public class CcdCaseApi {
             caseData
         );
     }
+
+    public CaseDetails getCase(String authorisation, String caseId) {
+        return citizenCoreCaseDataService.getCase(
+            authorisation,
+            caseId
+        );
+    }
 }

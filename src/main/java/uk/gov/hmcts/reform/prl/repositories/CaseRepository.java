@@ -12,5 +12,7 @@ public interface CaseRepository {
 
     CaseDetails createCase(String authorisation, CaseData caseData);
 
+    CaseDetails getCase(String authorisation, String caseId);
+
 }
 

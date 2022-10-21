@@ -71,7 +71,7 @@ public class CaseControllerTest {
 
         String caseId = "1234567891234567";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.getCase(authToken, "servAuthToken", caseId)).thenReturn(caseDetails);
+        when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
         when(authTokenGenerator.generate()).thenReturn("servAuthToken");
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
@@ -103,8 +103,16 @@ public class CaseControllerTest {
         when(authTokenGenerator.generate()).thenReturn("TestToken");
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
-        when(caseService.updateCase(caseData, authToken, "TestToken", caseId, eventId)).thenReturn(caseDetails);
-        CaseData caseData1 = caseController.updateCase(caseData, caseId, eventId, authToken, servAuthToken, "testAccessCode");
+        when(caseService.updateCase(caseData, authToken, "TestToken", caseId, eventId,
+                                    "testAccessCode")).thenReturn(caseDetails);
+        CaseData caseData1 = caseController.updateCase(
+            caseData,
+            caseId,
+            eventId,
+            authToken,
+            servAuthToken,
+            "testAccessCode"
+        );
         assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
 
     }
@@ -121,9 +129,9 @@ public class CaseControllerTest {
             .build();
 
         caseDataList.add(CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .build());
+                             .id(1234567891234567L)
+                             .applicantCaseName("test")
+                             .build());
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
