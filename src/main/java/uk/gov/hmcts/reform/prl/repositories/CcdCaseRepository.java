@@ -29,4 +29,9 @@ public class CcdCaseRepository implements CaseRepository {
     public CaseDetails createCase(String authorisation, CaseData caseData) {
         return ccdCaseApi.createCase(authorisation, caseData);
     }
+
+    @Override
+    public CaseDetails getCase(String authorisation, String  caseId) {
+        return ccdCaseApi.getCase(authorisation, caseId);
+    }
 }

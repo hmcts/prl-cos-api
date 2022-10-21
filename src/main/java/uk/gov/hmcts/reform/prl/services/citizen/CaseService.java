@@ -52,7 +52,12 @@ public class CaseService {
     @Autowired
     SystemUserService systemUserService;
 
-    public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId) {
+    public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
+                                  String caseId, String eventId, String accessCode) {
+        if ("linkCase".equalsIgnoreCase(eventId)) {
+            linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
+            return caseRepository.getCase(authToken, caseId);
+        }
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.valueOf(eventId));
     }
 
@@ -199,8 +204,8 @@ public class CaseService {
         return accessCodeStatus;
     }
 
-    public CaseDetails getCase(String authToken, String s2sToken, String caseId) {
-        return coreCaseDataApi.getCase(authToken, s2sToken, caseId);
+    public CaseDetails getCase(String authToken, String caseId) {
+        return caseRepository.getCase(authToken, caseId);
     }
 
     public CaseDetails createCase(CaseData caseData, String authToken) {

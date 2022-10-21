@@ -203,6 +203,7 @@ public class CitizenCoreCaseDataService {
         String cosApis2sToken = authTokenGenerator.generate();
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
 
+        // We can Add a Caseworker Event as well in future depending on the Role from userdetails
         EventRequestData eventRequestData = eventRequest(
             CaseEvent.valueOf(PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT),
             userDetails.getId()
@@ -283,5 +284,10 @@ public class CitizenCoreCaseDataService {
                 caseDataContent
             );
         }
+    }
+
+    public CaseDetails getCase(String authorisation, String caseId) {
+        String cosApis2sToken = authTokenGenerator.generate();
+        return coreCaseDataApi.getCase(authorisation, cosApis2sToken, caseId);
     }
 }

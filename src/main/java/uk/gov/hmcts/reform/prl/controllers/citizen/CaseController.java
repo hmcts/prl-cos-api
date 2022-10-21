@@ -58,7 +58,7 @@ public class CaseController {
     ) {
         CaseDetails caseDetails = null;
         if (isAuthorized(userToken, s2sToken)) {
-            caseDetails = caseService.getCase(userToken, authTokenGenerator.generate(), caseId);
+            caseDetails = caseService.getCase(userToken, caseId);
         } else {
             throw (new RuntimeException("Invalid Client"));
         }
@@ -84,23 +84,17 @@ public class CaseController {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
             String cosApis2stoken = authTokenGenerator.generate();
-            if ("linkCase".equalsIgnoreCase(eventId)) {
-                caseService.linkCitizenToCase(authorisation, cosApis2stoken, accessCode, caseId);
-                return objectMapper.convertValue(
-                    coreCaseDataApi.getCase(authorisation, cosApis2stoken, caseId).getData(),
-                    CaseData.class
-                );
-            } else {
-                caseDetails = caseService.updateCase(
-                    caseData,
-                    authorisation,
-                    cosApis2stoken,
-                    caseId,
-                    eventId
-                );
-                return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-                    .toBuilder().id(caseDetails.getId()).build();
-            }
+            caseDetails = caseService.updateCase(
+                caseData,
+                authorisation,
+                cosApis2stoken,
+                caseId,
+                eventId,
+                accessCode
+            );
+            return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+                .toBuilder().id(caseDetails.getId()).build();
+
         } else {
             throw (new RuntimeException("Invalid Client"));
         }
