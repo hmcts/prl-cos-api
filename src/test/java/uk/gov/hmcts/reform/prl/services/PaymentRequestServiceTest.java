@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
@@ -64,9 +65,18 @@ public class PaymentRequestServiceTest {
     @Mock
     private PaymentStatusResponse paymentStatusResponse;
 
+    @Mock
+    private CoreCaseDataApi coreCaseDataApi;
+
     private CallbackRequest callbackRequest;
 
     private PaymentServiceRequest paymentServiceRequest;
+    public static final String TEST_CASE_ID = "1656350492135029";
+    public static final String PAYMENTSRREFERENCENUMBER = "1647959867368635";
+    public static final String PAYMENTREFERENCENUMBER = "RC-1662-4714-6207-7330";
+    public static final String APPLICANT_NAME = "APPLICANT_NAME";
+    private CaseData caseData;
+
 
     @Before
     public void setUp() throws Exception {
@@ -224,5 +234,6 @@ public class PaymentRequestServiceTest {
         assertEquals(paymentStatusResponse,actualPaymentStatusResponse);
 
     }
+
 }
 
