@@ -58,13 +58,14 @@ public class CafCassCaseData {
 
     @Setter(AccessLevel.NONE)
     @JsonProperty("c1ADocument")
-    private Document c1ADocument;
+    private CafCassDocument c1ADocument;
 
-    public void setC1ADocument(Document c1ADocument) throws MalformedURLException {
+    public void setC1ADocument(CafCassDocument c1ADocument) throws MalformedURLException {
         if (c1ADocument != null
             && StringUtils.hasText(c1ADocument.getDocumentUrl())) {
             URL url = new URL(c1ADocument.getDocumentUrl());
-            c1ADocument.setDocumentUrl(getDocumentId(url));
+            c1ADocument.setDocumentId(getDocumentId(url));
+            c1ADocument.setDocumentUrl(null);
         }
         this.c1ADocument = c1ADocument;
     }
