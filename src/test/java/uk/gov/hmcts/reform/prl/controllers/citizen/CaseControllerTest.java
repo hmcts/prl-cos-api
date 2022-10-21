@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -41,6 +42,9 @@ public class CaseControllerTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    AuthTokenGenerator authTokenGenerator;
+
     private CaseData caseData;
     public static final String authToken = "Bearer TestAuthToken";
     public static final String servAuthToken = "Bearer TestServToken";
@@ -67,7 +71,10 @@ public class CaseControllerTest {
 
         String caseId = "1234567891234567";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(coreCaseDataApi.getCase(authToken, servAuthToken, caseId)).thenReturn(caseDetails);
+        when(caseService.getCase(authToken, "servAuthToken", caseId)).thenReturn(caseDetails);
+        when(authTokenGenerator.generate()).thenReturn("servAuthToken");
+        when(authorisationService.authoriseUser(authToken)).thenReturn(true);
+        when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
         CaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
         assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
 
@@ -93,7 +100,10 @@ public class CaseControllerTest {
         String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.updateCase(caseData, authToken, servAuthToken, caseId, eventId)).thenReturn(caseDetails);
+        when(authTokenGenerator.generate()).thenReturn("TestToken");
+        when(authorisationService.authoriseUser(authToken)).thenReturn(true);
+        when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
+        when(caseService.updateCase(caseData, authToken, "TestToken", caseId, eventId)).thenReturn(caseDetails);
         CaseData caseData1 = caseController.updateCase(caseData, caseId, eventId, authToken, servAuthToken, "testAccessCode");
         assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
 
