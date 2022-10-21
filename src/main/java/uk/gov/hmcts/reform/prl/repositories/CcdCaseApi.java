@@ -89,4 +89,20 @@ public class CcdCaseApi {
             CaseEvent.LINK_CITIZEN
         );
     }
+
+    public CaseDetails updateCase(String authorisation, String caseId, CaseData caseData, CaseEvent caseEvent) {
+        return citizenCoreCaseDataService.updateCase(
+            authorisation,
+            Long.valueOf(caseId),
+            caseData,
+            caseEvent
+        );
+    }
+
+    public CaseDetails createCase(String authorisation, CaseData caseData) {
+        return citizenCoreCaseDataService.createCase(
+            authorisation,
+            caseData
+        );
+    }
 }

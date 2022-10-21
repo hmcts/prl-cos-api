@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,10 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -35,6 +40,8 @@ public class CitizenCoreCaseDataService {
     CoreCaseDataApi coreCaseDataApi;
     @Autowired
     AuthTokenGenerator authTokenGenerator;
+    @Autowired
+    ObjectMapper objectMapper;
 
     public CaseDetails linkDefendant(
         String anonymousUserToken,
@@ -88,8 +95,8 @@ public class CitizenCoreCaseDataService {
     private EventRequestData eventRequest(CaseEvent caseEvent, String userId) {
         return EventRequestData.builder()
             .userId(userId)
-            .jurisdictionId(PrlAppsConstants.JURISDICTION)
-            .caseTypeId(PrlAppsConstants.CASE_TYPE)
+            .jurisdictionId(JURISDICTION)
+            .caseTypeId(CASE_TYPE)
             .eventId(caseEvent.getValue())
             .ignoreWarning(true)
             .build();
@@ -151,6 +158,128 @@ public class CitizenCoreCaseDataService {
                 eventRequestData.getCaseTypeId(),
                 caseId.toString(),
                 eventRequestData.isIgnoreWarning(),
+                caseDataContent
+            );
+        }
+    }
+
+    public CaseDetails updateCase(
+        String authorisation,
+        Long caseId,
+        CaseData caseData,
+        CaseEvent caseEvent
+    ) {
+        try {
+            UserDetails userDetails = idamClient.getUserDetails(authorisation);
+            EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
+
+            StartEventResponse startEventResponse = startUpdate(
+                authorisation,
+                eventRequestData,
+                caseId,
+                !userDetails.getRoles().contains(CITIZEN_ROLE)
+            );
+
+            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
+            return submitUpdate(
+                authorisation,
+                eventRequestData,
+                caseDataContent,
+                caseId,
+                !userDetails.getRoles().contains(CITIZEN_ROLE)
+            );
+        } catch (Exception exception) {
+            throw new CoreCaseDataStoreException(
+                String.format(
+                    CCD_UPDATE_FAILURE_MESSAGE,
+                    caseId,
+                    caseEvent
+                ), exception
+            );
+        }
+    }
+
+    public CaseDetails createCase(String authorisation, CaseData caseData) {
+        String cosApis2sToken = authTokenGenerator.generate();
+        UserDetails userDetails = idamClient.getUserDetails(authorisation);
+
+        EventRequestData eventRequestData = eventRequest(
+            CaseEvent.valueOf(PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT),
+            userDetails.getId()
+        );
+
+        StartEventResponse startEventResponse = startSubmitCreate(
+            authorisation,
+            cosApis2sToken,
+            userDetails.getId(),
+            eventRequestData,
+            !userDetails.getRoles().contains(CITIZEN_ROLE)
+        );
+
+        CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
+
+        return submitCreate(
+            authorisation,
+            cosApis2sToken,
+            userDetails.getId(),
+            caseDataContent,
+            !userDetails.getRoles().contains(CITIZEN_ROLE)
+        );
+    }
+
+    private StartEventResponse startSubmitCreate(
+        String authorisation,
+        String s2sToken,
+        String userId,
+        EventRequestData eventRequestData,
+        boolean isRepresented
+    ) {
+        if (isRepresented) {
+            return coreCaseDataApi.startForCaseworker(
+                authorisation,
+                s2sToken,
+                userId,
+                JURISDICTION,
+                CASE_TYPE,
+                eventRequestData.getEventId()
+            );
+        } else {
+            return coreCaseDataApi.startForCitizen(
+                authorisation,
+                s2sToken,
+                userId,
+                JURISDICTION,
+                CASE_TYPE,
+                eventRequestData.getEventId()
+            );
+        }
+    }
+
+    private CaseDetails submitCreate(
+        String authorisation,
+        String s2sToken,
+        String userId,
+        CaseDataContent caseDataContent,
+        boolean isRepresented
+    ) {
+        if (isRepresented) {
+            return coreCaseDataApi.submitForCaseworker(
+                authorisation,
+                s2sToken,
+                userId,
+                JURISDICTION,
+                CASE_TYPE,
+                isRepresented,
+                caseDataContent
+            );
+        } else {
+            return coreCaseDataApi.submitForCitizen(
+                authorisation,
+                s2sToken,
+                userId,
+                JURISDICTION,
+                CASE_TYPE,
+                isRepresented,
                 caseDataContent
             );
         }
