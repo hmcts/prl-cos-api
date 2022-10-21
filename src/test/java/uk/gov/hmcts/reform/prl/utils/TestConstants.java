@@ -22,5 +22,7 @@ public class TestConstants {
     public static final String TEST_AUTHORIZATION = "testAuthorisation";
     public static final String TEST_CAFCASS_DOWNLOAD_FILENAME = "CafcassDownloadFile.doc";
     public static final String TEST_SERVICE_AUTHORIZATION = "testServiceAuthorisation";
+    public static final String JURISDICTION = "PRIVATELAW";
+    public static final String CAFCASS_USER_ROLE = "caseworker-privatelaw-cafcass";
 
 }
