@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.prl.controllers.courtnav;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -25,6 +27,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
+import javax.validation.Valid;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
@@ -32,6 +36,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication")
 public class CourtNavCaseController {
 
     private static final String SERVICE_AUTH = "ServiceAuthorization";
@@ -49,9 +54,9 @@ public class CourtNavCaseController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity createCase(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
-        @RequestBody CourtNavFl401 inputData
+        @Valid @RequestBody CourtNavFl401 inputData
     ) throws Exception {
 
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
@@ -80,7 +85,7 @@ public class CourtNavCaseController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity uploadDocument(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @PathVariable("caseId") String caseId,
         @RequestParam MultipartFile file,

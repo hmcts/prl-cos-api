@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -145,14 +147,15 @@ public class ServiceOfApplicationController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
+    @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         log.info("** submit list items : {}", updatedCaseData.get("serviceOfApplicationScreen1"));
-        updatedCaseData.put("respondentCaseInvites", caseData.getRespondentCaseInvites());
+        updatedCaseData.put("caseInvites", caseData.getCaseInvites());
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();

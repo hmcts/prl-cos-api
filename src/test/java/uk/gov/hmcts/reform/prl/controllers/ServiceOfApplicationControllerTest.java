@@ -122,7 +122,7 @@ public class ServiceOfApplicationControllerTest {
     @Test
     public void testHandleAboutToSubmit() throws Exception {
         CaseData cd = CaseData.builder()
-            .respondentCaseInvites(Collections.emptyList())
+            .caseInvites(Collections.emptyList())
             .build();
 
         Map<String, Object> caseData = new HashMap<>();
