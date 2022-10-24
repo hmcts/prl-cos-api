@@ -260,6 +260,9 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
@@ -286,6 +289,9 @@ public class ManageOrderServiceTest {
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
@@ -316,6 +322,9 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
@@ -342,6 +351,9 @@ public class ManageOrderServiceTest {
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
@@ -372,6 +384,9 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
@@ -400,6 +415,9 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
@@ -426,6 +444,9 @@ public class ManageOrderServiceTest {
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
@@ -488,6 +509,9 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
@@ -514,6 +538,9 @@ public class ManageOrderServiceTest {
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
@@ -545,6 +572,9 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
@@ -572,6 +602,9 @@ public class ManageOrderServiceTest {
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
@@ -819,6 +852,9 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
@@ -846,6 +882,9 @@ public class ManageOrderServiceTest {
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
@@ -877,6 +916,9 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
@@ -906,6 +948,9 @@ public class ManageOrderServiceTest {
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
 
         assertNotNull(caseDataUpdated.get("previewOrderDoc"));
@@ -933,6 +978,9 @@ public class ManageOrderServiceTest {
             .build();
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
         caseDataUpdated = manageOrderService.getCaseData("test token", caseData);
