@@ -24,8 +24,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.Arrays;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.ALLOWED_FILE_TYPES;
-import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.ALLOWED_TYPE_OF_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_DOCUMENT_UPLOAD_EVENT_ID;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkTypeOfDocument;
@@ -36,6 +34,8 @@ import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.getCas
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafcassUploadDocService {
 
+    public static final String[] ALLOWED_FILE_TYPES = {"pdf"};
+    public static final String[] ALLOWED_TYPE_OF_DOCS = {"FL401", "C8", "WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET"};
     private final CoreCaseDataApi coreCaseDataApi;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
