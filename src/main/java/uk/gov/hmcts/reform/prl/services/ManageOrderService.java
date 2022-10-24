@@ -561,12 +561,9 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         GeneratedDocumentInfo generatedDocumentInfo = null;
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
-
-        caseDataUpdated.put("isEngDocGen", Yes.toString());
+        log.info("*** FieldMap *** {}", fieldsMap);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
-            fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, fl404bWelshDraftTemplate);
-            fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, fl404bWelshDraftFile);
             caseDataUpdated.put("isEngDocGen", Yes.toString());
             generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
@@ -586,7 +583,7 @@ public class ManageOrderService {
             generatedDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 CaseDetails.builder().caseData(caseData).build(),
-                PrlAppsConstants.DRAFT_TEMPLATE_WELSH
+                fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
             );
             log.info("*** Generating Draft order in Welsh *** {}", generatedDocumentInfo);
             caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
