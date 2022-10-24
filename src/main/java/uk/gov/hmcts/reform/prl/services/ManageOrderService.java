@@ -4,6 +4,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.resourceloading.PlatformResourceBundleLocator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -559,19 +560,21 @@ public class ManageOrderService {
     public Map<String, Object> getCaseData(String authorisation, CaseData caseData)
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        GeneratedDocumentInfo generatedDocumentInfo = null;
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
-
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-            fieldsMap.get(PrlAppsConstants.TEMPLATE)
-        );
 
         caseDataUpdated.put("isEngDocGen", Yes.toString());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
-            log.info("*** Generating Draft order in English ***");
+            fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, fl404bWelshDraftTemplate);
+            fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, fl404bWelshDraftFile);
             caseDataUpdated.put("isEngDocGen", Yes.toString());
+            generatedDocumentInfo = dgsService.generateDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                fieldsMap.get(PrlAppsConstants.TEMPLATE)
+            );
+            log.info("*** Generating Draft order in English *** {}", generatedDocumentInfo.getBinaryUrl());
             caseDataUpdated.put("previewOrderDoc", Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -580,13 +583,18 @@ public class ManageOrderService {
 
         }
         if (documentLanguage.isGenWelsh()) {
-            log.info("*** Generating Draft order in Welsh ***");
             caseDataUpdated.put("isWelshDocGen", Yes.toString());
+            generatedDocumentInfo = dgsService.generateWelshDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                PrlAppsConstants.DRAFT_TEMPLATE_WELSH
+            );
+            log.info("*** Generating Draft order in Welsh *** {}", generatedDocumentInfo.getBinaryUrl());
             caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(fieldsMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build());
+                .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
 
         }
         return caseDataUpdated;
