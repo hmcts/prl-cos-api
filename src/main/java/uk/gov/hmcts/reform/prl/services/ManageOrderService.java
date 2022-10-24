@@ -74,6 +74,12 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c21_welsh_filename}")
     protected String c21WelshFileName;
 
+    @Value("${document.templates.common.prl_c21_welsh_draft_template}")
+    protected String c21DraftWelshTemplate;
+
+    @Value("${document.templates.common.prl_c21_welsh_draft_filename}")
+    protected String c21DraftWelshFileName;
+
     @Value("${document.templates.common.prl_c43a_draft_template}")
     protected String c43ADraftTemplate;
 
@@ -194,6 +200,12 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_fl404b_draft_filename}")
     protected String fl404bDraftFile;
 
+    @Value("${document.templates.common.prl_fl404b_welsh_draft_template}")
+    protected String fl404bWelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl404b_welsh_draft_filename}")
+    protected String fl404bWelshDraftFile;
+
     @Value("${document.templates.common.prl_fl404b_blank_draft_filename}")
     protected String fl404bBlankDraftFile;
 
@@ -202,6 +214,12 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_fl404b_final_filename}")
     protected String fl404bFile;
+
+    @Value("${document.templates.common.prl_fl404b_welsh_final_template}")
+    protected String fl404bWelshTemplate;
+
+    @Value("${document.templates.common.prl_fl404b_welsh_final_filename}")
+    protected String fl404bWelshFile;
 
     @Value("${document.templates.common.prl_fl404b_blank_final_filename}")
     protected String fl404bBlankFile;
@@ -238,7 +256,8 @@ public class ManageOrderService {
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
         return caseData.toBuilder().childrenList(getChildInfoFromCaseData(caseData))
-            .manageOrders(ManageOrders.builder().childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
+            .manageOrders(ManageOrders.builder()
+                              .childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
@@ -250,7 +269,9 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
-                fieldsMap.put(FINAL_TEMPLATE_WELSH, c21WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, c21DraftWelshTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, c21DraftWelshFileName);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, c21WelshTemplate);
                 fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c21WelshFileName);
                 break;
             case powerOfArrest:
@@ -328,6 +349,10 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404bDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404bTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404bFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, fl404bWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, fl404bWelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, fl404bWelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl404bWelshFile);
                 break;
             case blank:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404bDraftTemplate);
@@ -365,7 +390,8 @@ public class ManageOrderService {
                 builder.append("\n");
             }
         } else {
-            Optional<List<Element<ApplicantChild>>> applicantChildDetails = ofNullable(caseData.getApplicantChildDetails());
+            Optional<List<Element<ApplicantChild>>> applicantChildDetails =
+                ofNullable(caseData.getApplicantChildDetails());
             if (applicantChildDetails.isPresent()) {
                 List<ApplicantChild> children = applicantChildDetails.get().stream()
                     .map(Element::getValue)
@@ -401,30 +427,33 @@ public class ManageOrderService {
             if (documentLanguage.isGenEng()) {
                 log.info("*** Generating Final order in English ***");
                 orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
-                                                                                   fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME),
-                                                                                   fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME),
-                                                           caseData));
+                                                           fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME),
+                                                           fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME),
+                                                           caseData
+                ));
 
             }
             if (documentLanguage.isGenWelsh()) {
                 log.info("*** Generating Final order in Welsh ***");
                 orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
-                                                                                 fieldMap.get(FINAL_TEMPLATE_WELSH),
-                                                                                 fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME),caseData));
+                                                           fieldMap.get(FINAL_TEMPLATE_WELSH),
+                                                           fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME), caseData
+                ));
             }
             return orderCollection;
         } else {
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
-                .orderDocument(caseData.getAppointmentOfGuardian())
-                .otherDetails(OtherOrderDetails.builder()
-                                  .createdBy(caseData.getJudgeOrMagistratesLastName())
-                                  .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                      PrlAppsConstants.D_MMMM_YYYY,
-                                      Locale.UK
-                                  )))
-                                  .orderRecipients(getAllRecipients(caseData)).build())
-                .dateCreated(dateTime.now())
-                .build()));
+                                       .orderDocument(caseData.getAppointmentOfGuardian())
+                                       .otherDetails(OtherOrderDetails.builder()
+                                                         .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                                         .orderCreatedDate(dateTime.now()
+                                                                               .format(DateTimeFormatter.ofPattern(
+                                                                                   PrlAppsConstants.D_MMMM_YYYY,
+                                                                                   Locale.UK
+                                                                               )))
+                                                         .orderRecipients(getAllRecipients(caseData)).build())
+                                       .dateCreated(dateTime.now())
+                                       .build()));
         }
     }
 
@@ -452,7 +481,7 @@ public class ManageOrderService {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
 
-            List<String> applicantSolicitorNames  = applicants.stream()
+            List<String> applicantSolicitorNames = applicants.stream()
                 .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
                     ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
                     : APPLICANT_SOLICITOR)
@@ -490,7 +519,8 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData) throws Exception {
+    public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
+        throws Exception {
         List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
         List<Element<OrderDetails>> orderCollection;
         orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
@@ -538,6 +568,25 @@ public class ManageOrderService {
         );
 
         caseDataUpdated.put("isEngDocGen", Yes.toString());
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (documentLanguage.isGenEng()) {
+            log.info("*** Generating Draft order in English ***");
+            caseDataUpdated.put("previewOrderDoc", Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+
+        }
+        if (documentLanguage.isGenWelsh()) {
+            log.info("*** Generating Draft order in Welsh ***");
+            caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName(fieldsMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build());
+
+        }
         caseDataUpdated.put("previewOrderDoc", Document.builder()
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -556,22 +605,27 @@ public class ManageOrderService {
             .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
                                                  caseData.getApplicantsFL401().getLastName()
             ))
-            .manageOrdersRespondent(String.format(PrlAppsConstants.FORMAT, caseData.getRespondentsFL401().getFirstName(),
-                                                  caseData.getRespondentsFL401().getLastName()
+            .manageOrdersRespondent(String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getRespondentsFL401().getFirstName(),
+                caseData.getRespondentsFL401().getLastName()
             ))
-            .manageOrdersApplicantReference(String.format(PrlAppsConstants.FORMAT,
-                                                          caseData.getApplicantsFL401().getRepresentativeFirstName(),
-                                                          caseData.getApplicantsFL401().getRepresentativeLastName()
+            .manageOrdersApplicantReference(String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
             .build();
 
         log.info("Court name after N117 order set{}", orderData.getManageOrdersCourtName());
 
         if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
-            orderData = orderData.toBuilder().manageOrdersRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+            orderData = orderData.toBuilder()
+                .manageOrdersRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
         }
         if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
-            orderData = orderData.toBuilder().manageOrdersRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+            orderData = orderData.toBuilder()
+                .manageOrdersRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
 
         return caseData.toBuilder().manageOrders(orderData)
@@ -615,10 +669,12 @@ public class ManageOrderService {
         log.info("FL404b court name: {}", orderData.getFl404bCourtName());
 
         if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
-            orderData = orderData.toBuilder().fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+            orderData = orderData.toBuilder()
+                .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
         }
         if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
-            orderData = orderData.toBuilder().fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+            orderData = orderData.toBuilder()
+                .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
         return caseData.toBuilder().manageOrders(ManageOrders.builder()
                                                      .fl404CustomFields(orderData)
@@ -658,15 +714,18 @@ public class ManageOrderService {
     public CaseData getFL402FormData(CaseData caseData) {
 
         log.info("Court name before FL402 order {}", caseData.getCourtName());
-        ManageOrders orderData =  ManageOrders.builder()
+        ManageOrders orderData = ManageOrders.builder()
             .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
             .manageOrdersFl402CourtName(caseData.getCourtName())
-            .manageOrdersFl402Applicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
-                                                      caseData.getApplicantsFL401().getLastName()
+            .manageOrdersFl402Applicant(String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getApplicantsFL401().getFirstName(),
+                caseData.getApplicantsFL401().getLastName()
             ))
-            .manageOrdersFl402ApplicantRef(String.format(PrlAppsConstants.FORMAT,
-                                                         caseData.getApplicantsFL401().getRepresentativeFirstName(),
-                                                         caseData.getApplicantsFL401().getRepresentativeLastName()
+            .manageOrdersFl402ApplicantRef(String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
             .build();
         log.info("Court name after FL402 order set{}", orderData.getManageOrdersFl402CourtName());
@@ -690,25 +749,25 @@ public class ManageOrderService {
             template
         );
         return element(OrderDetails.builder().orderType(flagSelectedOrder)
-                                   .orderTypeId(flagSelectedOrderId)
-                                   .orderDocument(Document.builder()
-                                                      .documentUrl(generatedDocumentInfo.getUrl())
-                                                      .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                      .documentHash(generatedDocumentInfo.getHashToken())
-                                                      .documentFileName(fileName).build())
-                                   .otherDetails(OtherOrderDetails.builder()
-                                                     .createdBy(caseData.getJudgeOrMagistratesLastName())
-                                                     .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                                         PrlAppsConstants.D_MMMM_YYYY,
-                                                         Locale.UK
-                                                     )))
-                                                     .orderMadeDate(caseData.getDateOrderMade()
-                                                                        .format(DateTimeFormatter.ofPattern(
-                                                         PrlAppsConstants.D_MMMM_YYYY,
-                                                         Locale.UK
-                                                     )))
-                                                     .orderRecipients(getAllRecipients(caseData)).build())
-                                   .dateCreated(dateTime.now())
-                                   .build());
+                           .orderTypeId(flagSelectedOrderId)
+                           .orderDocument(Document.builder()
+                                              .documentUrl(generatedDocumentInfo.getUrl())
+                                              .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                              .documentHash(generatedDocumentInfo.getHashToken())
+                                              .documentFileName(fileName).build())
+                           .otherDetails(OtherOrderDetails.builder()
+                                             .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                             .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
+                                                 PrlAppsConstants.D_MMMM_YYYY,
+                                                 Locale.UK
+                                             )))
+                                             .orderMadeDate(caseData.getDateOrderMade()
+                                                                .format(DateTimeFormatter.ofPattern(
+                                                                    PrlAppsConstants.D_MMMM_YYYY,
+                                                                    Locale.UK
+                                                                )))
+                                             .orderRecipients(getAllRecipients(caseData)).build())
+                           .dateCreated(dateTime.now())
+                           .build());
     }
 }
