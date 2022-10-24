@@ -31,16 +31,16 @@ public class CafcassServiceUtil {
     public static CaseData getCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
                                                  CaseData caseData, Document document) {
         String partyName = caseData.getApplicantCaseName() != null
-            ? caseData.getApplicantCaseName() : "COURTNAV";
+            ? caseData.getApplicantCaseName() : "CAFCASS";
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         Element<UploadedDocuments> uploadedDocsElement =
             element(UploadedDocuments.builder().dateCreated(LocalDate.now())
                         .documentType(typeOfDocument)
-                        .uploadedBy("COURTNAV")
+                        .uploadedBy("CAFCASS")
                         .documentDetails(DocumentDetails.builder().documentName(fileName)
                                              .documentUploadedDate(new Date().toString()).build())
-                        .partyName(partyName).isApplicant("NA_COURTNAV")
-                        .parentDocumentType("NA_COURTNAV")
+                        .partyName(partyName).isApplicant("CAFCASS")
+                        .parentDocumentType("Safe_guarding_Letter")
                         .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                                              .documentUrl(document.links.self.href)
                                              .documentBinaryUrl(document.links.binary.href)
