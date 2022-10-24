@@ -573,7 +573,7 @@ public class ManageOrderService {
                 CaseDetails.builder().caseData(caseData).build(),
                 fieldsMap.get(PrlAppsConstants.TEMPLATE)
             );
-            log.info("*** Generating Draft order in English *** {}", generatedDocumentInfo.getBinaryUrl());
+            log.info("*** Generating Draft order in English *** {}", generatedDocumentInfo);
             caseDataUpdated.put("previewOrderDoc", Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -588,7 +588,7 @@ public class ManageOrderService {
                 CaseDetails.builder().caseData(caseData).build(),
                 PrlAppsConstants.DRAFT_TEMPLATE_WELSH
             );
-            log.info("*** Generating Draft order in Welsh *** {}", generatedDocumentInfo.getBinaryUrl());
+            log.info("*** Generating Draft order in Welsh *** {}", generatedDocumentInfo);
             caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
