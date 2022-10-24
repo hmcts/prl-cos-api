@@ -127,11 +127,26 @@ public class PaymentRequestService {
         if (paymentServiceReferenceNumber != null && paymentReferenceNumber != null) {
             PaymentStatusResponse paymentStatus = fetchPaymentStatus(authorization, paymentServiceReferenceNumber);
             if (paymentStatus.getStatus() != null && paymentStatus.getStatus() != PAYMENTSTATUS) {
+                log.info("Payment Status :{} for the case id: {} ",paymentStatus.getStatus(),caseId);
                 paymentResponse = createServicePayment(paymentServiceReferenceNumber,
                                                                        authorization,
                                                                        createPaymentRequest.getReturnUrl());
                 log.info("Payments made for the case id: {} ",caseId);
+                updateReferenceNumber(paymentServiceReferenceNumber,
+                                      authorization,serviceAuthorization,caseId);
+                log.info("Updated the case data for the case id :{}",caseId);
+
             }
+            //Check if paymentServiceReferenceNumber exists and PaymentReference is null
+        } else if (paymentServiceReferenceNumber != null && paymentReferenceNumber == null) {
+            paymentResponse = createServicePayment(paymentServiceReferenceNumber,
+                                                   authorization,
+                                                   createPaymentRequest.getReturnUrl());
+            log.info("Payments made for the case id: {} ",caseId);
+            updateReferenceNumber(paymentServiceReferenceNumber,
+                                  authorization,serviceAuthorization,caseId);
+            log.info("Updated the case data for the case id :{}",caseId);
+
         } else {
             // if CR and PR doesnt exist
             CallbackRequest request = buildCallBackRequest(createPaymentRequest);
@@ -139,21 +154,31 @@ public class PaymentRequestService {
             paymentResponse = createServicePayment(paymentServiceResponse.getServiceRequestReference(),
                                                                    authorization, createPaymentRequest.getReturnUrl()
             );
-            CaseData caseData = objectMapper.convertValue(
-                CaseData.builder()
-                    .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference())
-                    .paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
-                CaseData.class
-            );
-            caseService.updateCase(caseData,
-                                   authorization,
-                                   serviceAuthorization,
-                                   createPaymentRequest.getCaseId(),
-                                   CITIZEN_UPDATE_REFERENCE);
-            log.info("Updated the case date for the case id :{}",caseId);
+            log.info("Payments made for the case id: {} ",caseId);
+            paymentServiceReferenceNumber = paymentServiceResponse.getServiceRequestReference();
+            updateReferenceNumber(paymentServiceReferenceNumber,
+                                  authorization,serviceAuthorization,caseId);
+            log.info("Updated the case data for the case id :{} ",caseId);
 
         }
         return paymentResponse;
+    }
+
+
+    private void  updateReferenceNumber(String paymentServiceReferenceNumber, String authorization,
+                                         String serviceAuthorization, String caseId) {
+        CaseData caseData = objectMapper.convertValue(
+            CaseData.builder()
+                .paymentServiceRequestReferenceNumber(paymentServiceReferenceNumber)
+                .paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
+            CaseData.class
+        );
+        caseService.updateCase(caseData,
+                               authorization,
+                               serviceAuthorization,
+                               caseId,
+                               CITIZEN_UPDATE_REFERENCE);
+        log.info("Updated the case data for the case id :{}",caseId);
     }
 
     private CallbackRequest buildCallBackRequest(CreatePaymentRequest createPaymentRequest) {
