@@ -571,6 +571,7 @@ public class ManageOrderService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Draft order in English ***");
+            caseDataUpdated.put("isEngDocGen", Yes.toString());
             caseDataUpdated.put("previewOrderDoc", Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -580,6 +581,7 @@ public class ManageOrderService {
         }
         if (documentLanguage.isGenWelsh()) {
             log.info("*** Generating Draft order in Welsh ***");
+            caseDataUpdated.put("isWelshDocGen", Yes.toString());
             caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -587,11 +589,6 @@ public class ManageOrderService {
                 .documentFileName(fieldsMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build());
 
         }
-        caseDataUpdated.put("previewOrderDoc", Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
         return caseDataUpdated;
     }
 
