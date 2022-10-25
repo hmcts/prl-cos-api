@@ -113,8 +113,16 @@ public class CaseApplicationResponseController {
             if (caseData.getCitizenResponseC7DocumentList() != null) {
                 responseDocumentsList.addAll(caseData.getCitizenResponseC7DocumentList());
             }
+            String partyName = caseData.getRespondents().stream().filter(element -> element.getId()
+                    .toString().equalsIgnoreCase(partyId)).map(Element::getValue).findFirst().map(partyDetails -> partyDetails
+                .getFirstName()
+                + " "
+                + partyDetails
+                .getLastName()).orElse("");
+
             Element<ResponseDocuments> responseDocumentElement = element(ResponseDocuments.builder()
-                                                                             .partyName(partyId)
+                                                                             .partyName(partyName)
+                                                                             .createdBy(partyId)
                                                                              .citizenDocument(document)
                                                                              .dateCreated(LocalDate.now())
                                                                              .build());
