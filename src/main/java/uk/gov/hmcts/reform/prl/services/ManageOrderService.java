@@ -110,11 +110,17 @@ public class ManageOrderService {
     @Value("${document.templates.fl401.fl401_fl406_engllish_filename}")
     protected String fl406FileEnglish;
 
+    @Value("${document.templates.fl401.fl401_fl406_welsh_draft_template}")
+    protected String fl406WelshDraftTemplate;
+
+    @Value("${document.templates.fl401.fl401_fl406_welsh_draft_filename}")
+    protected String fl406WelshDraftFile;
+
     @Value("${document.templates.fl401.fl401_fl406_welsh_template}")
-    protected String fl406TemplateWelsh;
+    protected String fl406WelshTemplate;
 
     @Value("${document.templates.fl401.fl401_fl406_welsh_filename}")
-    protected String fl406FileWelsh;
+    protected String fl406WelshFile;
 
     @Value("${document.templates.common.prl_c43a_final_template}")
     protected String c43AFinalTemplate;
@@ -146,6 +152,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_fl404_filename}")
     protected String fl404File;
 
+    @Value("${document.templates.common.prl_fl404_welsh_draft_template}")
+    protected String fl404WelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl404_welsh_draft_filename}")
+    protected String fl404WelshDraftFile;
+
+    @Value("${document.templates.common.prl_fl404_welsh_template}")
+    protected String fl404WelshTemplate;
+
+    @Value("${document.templates.common.prl_fl404_welsh_filename}")
+    protected String fl404WelshFile;
+
     @Value("${document.templates.common.prl_fl404a_draft_template}")
     protected String fl404aDraftTemplate;
 
@@ -157,6 +175,18 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_fl404a_final_filename}")
     protected String fl404aFinalFile;
+
+    @Value("${document.templates.common.prl_fl404a_welsh_draft_template}")
+    protected String fl404aWelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl404a_welsh_draft_filename}")
+    protected String fl404aWelshDraftFile;
+
+    @Value("${document.templates.common.prl_fl404a_welsh_final_template}")
+    protected String fl404aWelshFinalTemplate;
+
+    @Value("${document.templates.common.prl_fl404a_welsh_final_filename}")
+    protected String fl404aWelshFinalFile;
 
     @Value("${document.templates.common.prl_c45a_draft_template}")
     protected String c45aDraftTemplate;
@@ -279,6 +309,11 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl406DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl406TemplateEnglish);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl406FileEnglish);
+
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, fl406WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, fl406WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, fl406WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl406WelshFile);
                 break;
             case standardDirectionsOrder:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, "");
@@ -301,6 +336,11 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404File);
+
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, fl404WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, fl404WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, fl404WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl404WelshFile);
                 break;
             case specialGuardianShip:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c43ADraftTemplate);
@@ -319,6 +359,11 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404aFinalTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404aFinalFile);
+
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, fl404aWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, fl404aWelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, fl404aWelshFinalTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl404aWelshFinalFile);
                 break;
             case parentalResponsibility:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c45aDraftTemplate);
