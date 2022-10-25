@@ -62,7 +62,7 @@ public class ResponseController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
+        log.info("Case Data with solicitor respondent data: {} ",caseData);
         StringBuilder selectedList = new StringBuilder();
 
         selectedList.append("<ul>");
