@@ -119,21 +119,6 @@ public class CaseService {
         return result;
     }
 
-    public CaseDetails fetchCaseById(String authToken, String serviceAuthToken, String caseId) {
-        CaseDetails result;
-        UserDetails userDetails = idamClient.getUserDetails(authToken);
-        result = coreCaseDataApi.readForCitizen(
-            authToken,
-            serviceAuthToken,
-            userDetails.getId(),
-            JURISDICTION,
-            CASE_TYPE,
-            caseId
-        );
-
-        return result;
-    }
-
     private CaseDetails updateCaseDetails(CaseData caseData, String authToken, String s2sToken, String caseId,
                                           String eventId, UserDetails userDetails) {
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
