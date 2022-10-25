@@ -77,6 +77,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
@@ -665,22 +666,36 @@ public class CaseData implements MappableObject {
      * Respondent Solicitor.
      */
 
+    private final Consent respondentConsentToApplication;
+
     private final KeepDetailsPrivate keepContactDetailsPrivate;
     private final KeepDetailsPrivate keepContactDetailsPrivateOther;
     private final String confidentialListDetails;
 
     private final AttendToCourt respondentAttendingToCourt;
 
+    /**
+     * Respondent solicitor's international element.
+     */
     private final SolicitorInternationalElement internationalElementChild;
     private final SolicitorInternationalElement internationalElementParent;
     private final SolicitorInternationalElement internationalElementJurisdiction;
     private final SolicitorInternationalElement internationalElementRequest;
 
+    /**
+     * Respondent solicitor's allegations of harm.
+     */
     private final RespondentAllegationsOfHarm respondentAllegationsOfHarm;
     private final Behaviours respondentDomesticAbuseBehaviour;
     private final Behaviours respondentChildAbuseBehaviour;
     private final RespondentChildAbduction respondentChildAbduction;
     private final RespondentOtherConcerns respondentOtherConcerns;
 
+    /**
+     * Respondent solicitor's Draft PDF response.
+     */
+    private final String viewC7PdflinkText;
+    private final String isEngC7DocGen;
+    private final Document draftC7ResponseDoc;
 
 }
