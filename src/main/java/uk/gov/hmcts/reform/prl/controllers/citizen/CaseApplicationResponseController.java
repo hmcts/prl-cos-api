@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
@@ -151,14 +150,15 @@ public class CaseApplicationResponseController {
     }
 
     private CaseData updateCurrentRespondent(CaseData caseData, YesOrNo currentRespondent, String partyId) {
-        List<Element<PartyDetails>> partyDetails = caseData.getRespondents().stream().map(respondent -> {
-            if (respondent.getId().toString().equalsIgnoreCase(partyId)) {
-                return element(respondent.getValue().toBuilder().currentRespondent(currentRespondent).build());
-            } else {
-                return respondent;
+
+        for (Element<PartyDetails> partyElement: caseData.getRespondents()) {
+            if (partyElement.getId().toString().equalsIgnoreCase(partyId)) {
+                PartyDetails respondent = partyElement.getValue();
+                respondent = respondent.toBuilder().currentRespondent(currentRespondent).build();
+                partyElement = Element.<PartyDetails>builder().id(partyElement.getId()).value(respondent).build();
             }
-        }).collect(Collectors.toList());
-        caseData = caseData.toBuilder().respondents(partyDetails).build();
+        }
+        log.info("****** Please update ***** {} ", caseData);
         return caseData;
     }
 }
