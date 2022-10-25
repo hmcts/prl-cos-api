@@ -41,17 +41,4 @@ public class CaseInitiationController extends AbstractCallbackController {
         publishEvent(new CaseDataChanged(caseData));
 
     }
-
-    @PostMapping("respondent/submitted")
-    public void handleRespondentTaskListSubmitted(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-                                @RequestBody CallbackRequest callbackRequest) {
-
-        final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        final CaseData caseData = getCaseData(caseDetails);
-
-        assignCaseAccessService.assignCaseAccess(caseDetails.getId().toString(),authorisation);
-        log.info("trying to publish the respondent event");
-        publishEvent(new CaseDataChanged(caseData));
-
-    }
 }

@@ -432,11 +432,6 @@ public class DocumentGenService {
         Map<String, Object> updatedCaseData = new HashMap<>();
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info(
-            "Selected Language for generating the docs English => {}, Welsh => {}",
-            documentLanguage.isGenEng(),
-            documentLanguage.isGenWelsh()
-        );
         if (documentLanguage.isGenEng()) {
             updatedCaseData.put("isEngC7DocGen", Yes.toString());
             updatedCaseData.put("draftC7ResponseDoc", getDocument(authorisation, caseData, DRAFT_HINT, false));
