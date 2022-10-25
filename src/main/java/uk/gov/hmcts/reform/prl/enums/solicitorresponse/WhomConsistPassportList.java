@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.enums.citizen;
+package uk.gov.hmcts.reform.prl.enums.solicitorresponse;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,13 +11,16 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum ConfidentialityEnum {
-    @JsonProperty("phoneNumber")
-    phoneNumber("phoneNumber", "Telephone number"),
-    @JsonProperty("email")
-    email("email", "Email"),
-    @JsonProperty("address")
-    address("address", "Address");
+public enum WhomConsistPassportList {
+
+    @JsonProperty("mother")
+    mother("mother", "Mother"),
+
+    @JsonProperty("father")
+    father("father", "Father"),
+
+    @JsonProperty("otherPeople")
+    otherPeople("otherPeople", "Other");
 
     private final String id;
     private final String displayedValue;
@@ -28,7 +31,7 @@ public enum ConfidentialityEnum {
     }
 
     @JsonCreator
-    public static ConfidentialityEnum getValue(String key) {
-        return ConfidentialityEnum.valueOf(key);
+    public static WhomConsistPassportList getValue(String key) {
+        return WhomConsistPassportList.valueOf(key);
     }
 }

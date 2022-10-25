@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -46,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
@@ -72,11 +74,19 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -529,7 +539,7 @@ public class CaseData implements MappableObject {
     @JsonProperty("viewPDFlinkLabelText")
     private String viewPdfLinkLabelText;
 
-    private List<Element<CaseInvite>> respondentCaseInvites;
+    private List<Element<CaseInvite>> caseInvites;
 
 
     /**
@@ -554,6 +564,7 @@ public class CaseData implements MappableObject {
     private final ManageOrdersOptionsEnum manageOrdersOptions;
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
     private final List<OrderRecipientsEnum> orderRecipients;
+    private final SelectTypeOfOrderEnum selectTypeOfOrder;
 
 
     private final YesOrNo doesOrderClosesCase;
@@ -635,6 +646,9 @@ public class CaseData implements MappableObject {
     @JsonProperty("citizenUploadedDocumentList")
     private final List<Element<UploadedDocuments>> citizenUploadedDocumentList;
 
+    @JsonProperty("citizenResponseC7DocumentList")
+    private final List<Element<ResponseDocuments>> citizenResponseC7DocumentList;
+
     /**
      * Courtnav.
      */
@@ -642,7 +656,48 @@ public class CaseData implements MappableObject {
     private final ApplicantAge applicantAge;
     private final String specialCourtName;
     private YesOrNo courtNavApproved;
+    private YesOrNo hasDraftOrder;
     private String caseOrigin;
     private String numberOfAttachments;
+
+    private String previewDraftAnOrder;
+
+    private String citizenUploadedStatement;
+
+    /**
+     * Respondent Solicitor.
+     */
+
+    private final Consent respondentConsentToApplication;
+
+    private final KeepDetailsPrivate keepContactDetailsPrivate;
+    private final KeepDetailsPrivate keepContactDetailsPrivateOther;
+    private final String confidentialListDetails;
+
+    private final AttendToCourt respondentAttendingToCourt;
+
+    /**
+     * Respondent solicitor's international element.
+     */
+    private final SolicitorInternationalElement internationalElementChild;
+    private final SolicitorInternationalElement internationalElementParent;
+    private final SolicitorInternationalElement internationalElementJurisdiction;
+    private final SolicitorInternationalElement internationalElementRequest;
+
+    /**
+     * Respondent solicitor's allegations of harm.
+     */
+    private final RespondentAllegationsOfHarm respondentAllegationsOfHarm;
+    private final Behaviours respondentDomesticAbuseBehaviour;
+    private final Behaviours respondentChildAbuseBehaviour;
+    private final RespondentChildAbduction respondentChildAbduction;
+    private final RespondentOtherConcerns respondentOtherConcerns;
+
+    /**
+     * Respondent solicitor's Draft PDF response.
+     */
+    private final String viewC7PdflinkText;
+    private final String isEngC7DocGen;
+    private final Document draftC7ResponseDoc;
 
 }
