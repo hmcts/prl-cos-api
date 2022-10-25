@@ -127,7 +127,7 @@ public class CaseApplicationResponseController {
                                                                              .build());
             responseDocumentsList.add(responseDocumentElement);
             caseData = caseData.toBuilder().citizenResponseC7DocumentList(responseDocumentsList).build();
-            log.info("******  Call updateCase with event " + REVIEW_AND_SUBMIT + " for case id " + caseData);
+            log.info("****** updating Case with event " + REVIEW_AND_SUBMIT + " for case id " + caseId);
             caseDetailsReturn = caseService.updateCase(
                 caseData,
                 authorisation,
@@ -158,7 +158,6 @@ public class CaseApplicationResponseController {
                 partyElement = Element.<PartyDetails>builder().id(partyElement.getId()).value(respondent).build();
             }
         }
-        log.info("****** Please update ***** {} ", caseData);
         return caseData;
     }
 }
