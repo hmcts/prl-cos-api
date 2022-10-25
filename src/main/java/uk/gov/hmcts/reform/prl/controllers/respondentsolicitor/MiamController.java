@@ -63,6 +63,7 @@ public class MiamController {
 
         log.info("handleMidEvent: Callback for Respondent Solicitor - MIAM details");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("in MiamController - handleMidEvent - caseDataUpdated {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -79,6 +80,7 @@ public class MiamController {
 
         log.info("handleAboutToSubmit: Callback for Respondent Solicitor - MIAM details");
         Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        log.info("in MiamController - handleAboutToSubmit - caseDataUpdated {}", updatedCaseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
     }
 }
