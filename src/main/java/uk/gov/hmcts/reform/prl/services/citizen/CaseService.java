@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 @Service
 public class CaseService {
 
+    public static final String LINK_CASE = "linkCase";
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
 
@@ -54,7 +55,7 @@ public class CaseService {
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) {
-        if ("linkCase".equalsIgnoreCase(eventId)) {
+        if (LINK_CASE.equalsIgnoreCase(eventId) && null != accessCode) {
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
             return caseRepository.getCase(authToken, caseId);
         }

@@ -170,7 +170,7 @@ public class CaseDocumentController {
                 s2sToken,
                 caseId,
                 CITIZEN_UPLOADED_DOCUMENT,
-                ""
+                null
             );
 
             final String partyId = generateAndUploadDocumentRequest.getValues().get(PARTY_ID);
@@ -332,7 +332,7 @@ public class CaseDocumentController {
             s2sToken,
             caseId,
             CITIZEN_UPLOADED_DOCUMENT,
-            ""
+            null
         );
         return "SUCCESS";
     }

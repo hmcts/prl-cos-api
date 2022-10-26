@@ -124,7 +124,7 @@ public class CaseApplicationResponseController {
                 s2sToken,
                 caseId,
                 REVIEW_AND_SUBMIT,
-                ""
+                null
             );
         }
         if (caseDetailsReturn != null) {
