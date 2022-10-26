@@ -83,11 +83,11 @@ public class CaseController {
     ) {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
-            String cosApis2stoken = authTokenGenerator.generate();
+            String cosApis2sToken = authTokenGenerator.generate();
             caseDetails = caseService.updateCase(
                 caseData,
                 authorisation,
-                cosApis2stoken,
+                cosApis2sToken,
                 caseId,
                 eventId,
                 accessCode
@@ -132,17 +132,24 @@ public class CaseController {
     public void linkCitizenToCase(@RequestHeader("caseId") String caseId,
                                   @RequestHeader("accessCode") String accessCode,
                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                  @RequestHeader("serviceAuthorization") String s2sToken) {
+                                  @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
         caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
     }
 
     @GetMapping(path = "/validate-access-code", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
-    public String validateAccessCode(@RequestHeader(value = "Authorization", required = true) String authorisation,
-                                     @RequestHeader(value = "serviceAuthorization", required = true) String s2sToken,
-                                     @RequestHeader(value = "caseId", required = true) String caseId,
-                                     @RequestHeader(value = "accessCode", required = true) String accessCode) {
-        return caseService.validateAccessCode(authorisation, s2sToken, caseId, accessCode);
+    public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+                                     @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                     @RequestHeader(value = "caseId", required = true)
+                                         String caseId,
+                                     @RequestHeader(value = "accessCode", required = true)
+                                         String accessCode) {
+        if (isAuthorized(authorisation, s2sToken)) {
+            String cosApis2sToken = authTokenGenerator.generate();
+            return caseService.validateAccessCode(authorisation, cosApis2sToken, caseId, accessCode);
+        } else {
+            throw (new RuntimeException("Invalid Client"));
+        }
     }
 
     @PostMapping("/case/create")
