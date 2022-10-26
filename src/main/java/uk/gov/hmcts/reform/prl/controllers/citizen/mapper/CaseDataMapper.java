@@ -6,13 +6,17 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildCourtOrderElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHearingWithoutNoticeElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildInternationalElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildMiamElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataHwnElementsMapper.updateHearingWithoutNoticeElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataInternationalElementsMapper.updateInternationalElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherProceedingsElementsMapper.updateOtherProceedingsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
 
 @Component
 public class CaseDataMapper {
@@ -39,6 +43,14 @@ public class CaseDataMapper {
         C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements = mapper
                 .readValue(caseData.getC100RebuildOtherProceedings(), C100RebuildOtherProceedingsElements.class);
         updateOtherProceedingsElementsForCaseData(caseDataBuilder, c100RebuildOtherProceedingsElements);
+
+        C100RebuildUrgencyElements c100RebuildUrgencyElements = mapper
+                .readValue(caseData.getC100RebuildHearingUrgency(), C100RebuildUrgencyElements.class);
+        updateUrgencyElementsForCaseData(caseDataBuilder, c100RebuildUrgencyElements);
+
+        C100RebuildMiamElements c100RebuildMiamElements = mapper
+                .readValue(caseData.getC100RebuildMaim(), C100RebuildMiamElements.class);
+        updateMiamElementsForCaseData(caseDataBuilder, c100RebuildMiamElements);
 
         return caseDataBuilder.build();
     }

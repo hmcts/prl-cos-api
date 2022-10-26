@@ -16,8 +16,14 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum.bothLiveWithAndSpendTimeWithOrder;
 import static uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum.liveWithOrder;
+import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.childProtectionConcern;
+import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.domesticViolence;
+import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.other;
+import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.previousMIAMattendance;
+import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.urgency;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
@@ -118,6 +124,27 @@ public class CaseDataMapperTest {
                         + "\n\"orderDate\": {\n\"year\": \"\",\n\"month\": \"\",\n\"day\": \"\"\n},\n\"currentOrder\": \"\","
                         + "\n\"orderEndDate\": {\n\"year\": \"\",\n\"month\": \"\",\n\"day\": \"\"\n},\n\"orderCopy\": "
                         + "\"\"\n}\n]\n}\n}\n},\n   }\n}")
+                .c100RebuildMaim("{\n  \"miam_otherProceedings\": \"No\",\n\"miam_consent\": \"s\",\n\"miam_attendance\": "
+                        + "\"No\",\n\"miam_mediatorDocument\": \"No\",\n\"miam_validReason\": \"Yes\","
+                        + "\n\"miam_nonAttendanceReasons\": [\n\"domesticViolence\",\n\"childProtection\",\n\"urgentHearing\","
+                        + "\n\"previousMIAMOrExempt\",\n\"validExemption\"\n],\n\"miam_domesticAbuse\": [\n\"policeInvolvement"
+                        + "\"\n],\n\"miam_domesticabuse_involvement_subfields\": [\n\"\",\n\"\",\n\"\",\n\"\",\n\"\","
+                        + "\n\"evidenceOfSomeoneArrest\",\n\"evidenceOfPolice\",\n\"evidenceOfOnGoingCriminalProceeding\","
+                        + "\n\"evidenceOfConviction\",\n\"evidenceOFProtectionNotice\"\n],"
+                        + "\n\"miam_domesticabuse_courtInvolvement_subfields\": [\n\"\",\n\"\",\n\"\",\n\"\",\n\"\"\n],"
+                        + "\n\"miam_domesticabuse_letterOfBeingVictim_subfields\": [\n\"\",\n\"\"\n],\n"
+                        + "\"miam_domesticabuse_letterFromAuthority_subfields\": [\n\"\",\n\"\",\n\"\"\n],"
+                        + "\n\"miam_domesticabuse_letterFromSupportService_subfields\": [],\n\"miam_childProtectionEvidence\": "
+                        + "[\n\"localAuthority\",\n\"childProtectionPlan\"\n],\n\"miam_urgency\": "
+                        + "[\n\"freedomPhysicalSafety\",\n\"freedomPhysicalSafetyInFamily\"\n],\n\"miam_previousAttendance\": "
+                        + "[\n\"fourMonthsPriorAttended\",\n\"onTimeParticipation\"\n],\n\"miam_notAttendingReasons\": "
+                        + "[\n\"noSufficientContactDetails\",\n\"applyingForWithoutNoticeHearing\"\n],"
+                        + "\n\"miam_noMediatorAccessSubfields\": []\n}")
+                .c100RebuildHearingUrgency("{\n  \"hu_urgentHearingReasons\": \"Yes\",\n\"hu_reasonOfUrgentHearing\":"
+                        + " [\n\"risk of safety\",\n\"risk of child abduction\",\n\"overseas legal proceeding\","
+                        + "\n\"other risks\"\n],\n\"hu_otherRiskDetails\": \"test\",\n\"hu_timeOfHearingDetails\": "
+                        + "\"24 hours\",\n\"hu_hearingWithNext48HrsDetails\": \"Yes\",\n\"hu_hearingWithNext48HrsMsg\": "
+                        + "\"48 hours\"\n}")
                 .build();
     }
 
@@ -159,6 +186,17 @@ public class CaseDataMapperTest {
         assertEquals(16, proceedingDetails.size());
         assertEquals(List.of(superviosionOrder), proceedingDetails.get(0).getValue().getTypeOfOrder());
         assertEquals(List.of(careOrder), proceedingDetails.get(1).getValue().getTypeOfOrder());
+        assertEquals(No, updatedCaseData.getApplicantAttendedMiam());
+        //assertEquals(No, updatedCaseData.getOtherProceedingsMiam());
+        assertEquals(No, updatedCaseData.getFamilyMediatorMiam());
+        //assertEquals("s", updatedCaseData.getApplicantConsentMiam());
+        assertTrue(updatedCaseData.getMiamExemptionsChecklist().containsAll(List.of(domesticViolence,
+                urgency, previousMIAMattendance, other, childProtectionConcern)));
+        assertEquals(Yes, updatedCaseData.getIsCaseUrgent());
+        assertEquals("Case Urgency Time - 24 hours Case Urgency Reasons - Risk to my safety or the "
+                + "children's safety, Risk that the children will be abducted, Legal proceedings taking place overseas, "
+                + "Other risks, test", updatedCaseData.getCaseUrgencyTimeAndReason());
+        assertEquals("48 hours", updatedCaseData.getEffortsMadeWithRespondents());
     }
 
     @Test
@@ -200,5 +238,24 @@ public class CaseDataMapperTest {
 
         //Then
         assertNull(updatedCaseData.getExistingProceedings());
+    }
+
+    @Test
+    public void testCaseDataMapperForMiamExtraFields() throws JsonProcessingException {
+
+        //Given
+        CaseData caseData1 = caseData
+                .toBuilder()
+                .c100RebuildMaim("{\n  \"miam_otherProceedings\": \"No\",\n\"miam_consent\": \"s\",\n\"miam_attendance\": "
+                        + "\"No\",\n\"miam_haveDocSigned\": \"Yes\",\n\"miam_mediatorDocument\": \"No\",\n\"miam_validReason\": "
+                        + "\"Yes\",\n\"miam_nonAttendanceReasons\": [\n\"none\"\n],\n\"miam_certificate\": {\n  \"id\": "
+                        + "\"test\",\n  \"url\": \"test\",\n  \"filename\": \"test\",\n  \"binaryUrl\": \"test\"\n}\n}")
+                .build();
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+        assertNull(updatedCaseData.getMiamExemptionsChecklist());
     }
 }
