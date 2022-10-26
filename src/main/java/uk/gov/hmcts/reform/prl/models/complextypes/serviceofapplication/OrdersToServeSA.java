@@ -51,7 +51,7 @@ public class OrdersToServeSA {
     private final List<NoticeOfProceedingsEnum> noticeOfProceedingsEnumOption;
     private final List<OtherUploadAnOrderEnum> otherUploadAnOrderOption;
 
-    public List<String> getSelectedOrders() {
+    public List<String> retrieveSelectedOrders() {
         return Stream.of(OrdersToServeSA.class.getDeclaredFields()).filter(Objects::nonNull)
             .map(field -> {
                 try {
