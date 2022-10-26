@@ -23,7 +23,7 @@ java:
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    PAY_CALLBACK_URL: http://prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/service-request
+    PAY_CALLBACK_URL: https://prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/service-request
     FEE_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
     IDAM_CLIENT_ID: prl-cos-api
@@ -46,3 +46,4 @@ java:
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-558-aac-manage-case-assignment
+    CITIZEN_URL: https://privatelaw.{{ .Values.global.environment }}.platform.hmcts.net
