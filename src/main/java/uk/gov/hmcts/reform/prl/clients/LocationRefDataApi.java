@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 
-@FeignClient(name = "location-ref-data-api", primary = false, url = "${courtfinder.api.url}")
+@FeignClient(name = "location-ref-data-api", primary = false, url = "${locationFinder.api.url}")
 public interface LocationRefDataApi {
     @GetMapping(value = "/refdata/location/court-venues/services")
     CourtDetails getCourtDetailsByService(@RequestHeader("Authorization") String authorization,
