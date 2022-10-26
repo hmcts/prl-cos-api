@@ -60,6 +60,7 @@ public class DgsService {
                                                                                            .getCaseTypeOfApplication()
                                                                                    )
                 );
+                log.info("**** Updated Welsh object ***** {}", updatedWelshObj);
                 caseDataValues.put(k, updatedWelshObj);
             }
         });
