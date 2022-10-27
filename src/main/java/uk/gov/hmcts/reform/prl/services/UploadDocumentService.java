@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -121,6 +122,15 @@ public class UploadDocumentService {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    public void deleteDocument(String authorizationToken, String documentId) {
+        caseDocumentClient.deleteDocument(
+            authorizationToken,
+            authTokenGenerator.generate(),
+            UUID.fromString(documentId),
+            true
+        );
     }
 
 }

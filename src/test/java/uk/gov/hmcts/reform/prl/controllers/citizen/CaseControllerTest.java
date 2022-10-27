@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -41,6 +42,9 @@ public class CaseControllerTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    AuthTokenGenerator authTokenGenerator;
+
     private CaseData caseData;
     public static final String authToken = "Bearer TestAuthToken";
     public static final String servAuthToken = "Bearer TestServToken";
@@ -67,7 +71,10 @@ public class CaseControllerTest {
 
         String caseId = "1234567891234567";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(coreCaseDataApi.getCase(authToken, servAuthToken, caseId)).thenReturn(caseDetails);
+        when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
+        when(authTokenGenerator.generate()).thenReturn("servAuthToken");
+        when(authorisationService.authoriseUser(authToken)).thenReturn(true);
+        when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
         CaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
         assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
 
@@ -93,8 +100,19 @@ public class CaseControllerTest {
         String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.updateCase(caseData, authToken, servAuthToken, caseId, eventId)).thenReturn(caseDetails);
-        CaseData caseData1 = caseController.updateCase(caseData, caseId, eventId, authToken, servAuthToken, "testAccessCode");
+        when(authTokenGenerator.generate()).thenReturn("TestToken");
+        when(authorisationService.authoriseUser(authToken)).thenReturn(true);
+        when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
+        when(caseService.updateCase(caseData, authToken, "TestToken", caseId, eventId,
+                                    "testAccessCode")).thenReturn(caseDetails);
+        CaseData caseData1 = caseController.updateCase(
+            caseData,
+            caseId,
+            eventId,
+            authToken,
+            servAuthToken,
+            "testAccessCode"
+        );
         assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
 
     }
@@ -111,9 +129,9 @@ public class CaseControllerTest {
             .build();
 
         caseDataList.add(CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .build());
+                             .id(1234567891234567L)
+                             .applicantCaseName("test")
+                             .build());
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
@@ -171,15 +189,17 @@ public class CaseControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
 
-        String caseId = "1234567891234567";
+        String caseId = "1234567891234567L";
         String accessCode = "e3ceb507";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.validateAccessCode(authToken, servAuthToken, caseId, accessCode)).thenReturn("test");
+        when(caseService.validateAccessCode(authToken, servAuthToken, caseId, accessCode)).thenReturn("Valid");
+
         String data = caseController.validateAccessCode(authToken, servAuthToken, caseId, accessCode);
         assertNotNull(data);
 
