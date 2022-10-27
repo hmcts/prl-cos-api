@@ -189,15 +189,17 @@ public class CaseControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
 
-        String caseId = "1234567891234567";
+        String caseId = "1234567891234567L";
         String accessCode = "e3ceb507";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.validateAccessCode(authToken, servAuthToken, caseId, accessCode)).thenReturn("test");
+        when(caseService.validateAccessCode(authToken, servAuthToken, caseId, accessCode)).thenReturn("Valid");
+
         String data = caseController.validateAccessCode(authToken, servAuthToken, caseId, accessCode);
         assertNotNull(data);
 
