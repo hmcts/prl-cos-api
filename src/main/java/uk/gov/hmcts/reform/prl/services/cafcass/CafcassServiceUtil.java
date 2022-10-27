@@ -46,14 +46,14 @@ public class CafcassServiceUtil {
                                              .documentBinaryUrl(document.links.binary.href)
                                              .documentHash(document.hashToken)
                                              .documentFileName(fileName).build()).build());
-        if (caseData.getCourtNavUploadedDocs() != null) {
-            uploadedDocumentsList = caseData.getCourtNavUploadedDocs();
+        if (caseData.getCafcassUploadedDocs() != null) {
+            uploadedDocumentsList = caseData.getCafcassUploadedDocs();
             uploadedDocumentsList.add(uploadedDocsElement);
         } else {
             uploadedDocumentsList = new ArrayList<>();
             uploadedDocumentsList.add(uploadedDocsElement);
         }
-        return CaseData.builder().id(Long.valueOf(caseId)).courtNavUploadedDocs(uploadedDocumentsList).build();
+        return CaseData.builder().id(Long.valueOf(caseId)).cafcassUploadedDocs(uploadedDocumentsList).build();
     }
 
 }
