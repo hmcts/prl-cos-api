@@ -39,8 +39,10 @@ public class DraftAnOrderController {
             CaseData.class
         );
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseData.toBuilder().selectedOrder(caseData.getCreateSelectOrderOptions() != null ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "").build().toMap(
-                CcdObjectMapper.getObjectMapper())).build();
+            .data(caseData.toBuilder()
+                      .selectedOrder(caseData.getCreateSelectOrderOptions() != null
+                                         ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
+                      .build().toMap(CcdObjectMapper.getObjectMapper())).build();
 
     }
 
