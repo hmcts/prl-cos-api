@@ -232,9 +232,9 @@ public class CallbackController {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
         Map<String,Object> map = documentGenService.generateDocuments(authorisation, caseData);
-        map.putAll(nocFieldPopulator.generate(caseData, SolicitorRole.Representing.RESPONDENT));
+        Map<String,Object> nocMap = nocFieldPopulator.generate(caseData, SolicitorRole.Representing.RESPONDENT);
         caseDataUpdated.putAll(map);
-
+        caseDataUpdated.putAll(nocMap);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

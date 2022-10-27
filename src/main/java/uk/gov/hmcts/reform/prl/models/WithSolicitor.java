@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.models;
 
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
@@ -14,6 +16,8 @@ public interface WithSolicitor {
     List<Element<LegalCounsellor>> getLegalCounsellors();
 
     void setLegalCounsellors(List<Element<LegalCounsellor>> legalCounsellors);
+
+    PartyDetails toParty();
 
     default boolean hasRegisteredOrganisation() {
         return ofNullable(getSolicitor())

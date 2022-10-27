@@ -69,6 +69,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.noc.NoticeOfChangeFieldPopulator;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsProvider;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
@@ -194,6 +195,9 @@ public class CallbackControllerTest {
 
     @Mock
     private AssignCaseAccessClient assignCaseAccessClient;
+
+    @Mock
+    private NoticeOfChangeFieldPopulator nocFieldPopulator;
 
 
     public static final String authToken = "Bearer TestAuthToken";
