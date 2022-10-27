@@ -74,9 +74,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("*** populate child option {}",caseData.getManageOrders().getChildOption());
-        log.info("*** populate child option value {}",caseData.getManageOrders().getChildOption().getValue());
-        log.info("*** populate child option list items {}",caseData.getManageOrders().getChildOption().getListItems());
+        log.info("*** populate child option {}",caseData.getManageOrders());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
