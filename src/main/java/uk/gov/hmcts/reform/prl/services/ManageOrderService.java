@@ -224,6 +224,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_fl402_final_filename}")
     protected String fl402FinalFile;
 
+    @Value("${document.templates.common.prl_fl402_welsh_draft_template}")
+    protected String fl402WelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl402_welsh_draft_filename}")
+    protected String fl402WelshDraftFile;
+
+    @Value("${document.templates.common.prl_fl402_welsh_final_template}")
+    protected String fl402WelshFinalTemplate;
+
+    @Value("${document.templates.common.prl_fl402_welsh_final_filename}")
+    protected String fl402WelshFinalFile;
+
     @Value("${document.templates.common.prl_fl404b_draft_template}")
     protected String fl404bDraftTemplate;
 
@@ -382,6 +394,10 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl402DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl402FinalTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl402FinalFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, fl402WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, fl402WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, fl402WelshFinalTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl402WelshFinalFile);
                 break;
             case generalForm:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, n117DraftTemplate);
