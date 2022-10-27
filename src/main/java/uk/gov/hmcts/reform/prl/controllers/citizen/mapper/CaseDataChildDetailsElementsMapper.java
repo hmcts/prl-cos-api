@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
 
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -26,9 +28,14 @@ public class CaseDataChildDetailsElementsMapper {
                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         caseDataBuilder
             .children(buildChildDetails(c100RebuildChildDetailsElements.getChildDetails()))
-            .childrenKnownToLocalAuthority(c100RebuildChildDetailsElements.getChildrenKnownToSocialServices())
-            .childrenKnownToLocalAuthorityTextArea(c100RebuildChildDetailsElements.getChildrenKnownToSocialServicesDetails())
-            .childrenSubjectOfChildProtectionPlan(c100RebuildChildDetailsElements.getChildrenSubjectOfProtectionPlan());
+            .childrenKnownToLocalAuthority(
+                YesNoDontKnow.getDisplayedValueIgnoreCase(
+                    c100RebuildChildDetailsElements.getChildrenKnownToSocialServices()))
+            .childrenKnownToLocalAuthorityTextArea(
+                c100RebuildChildDetailsElements.getChildrenKnownToSocialServicesDetails())
+            .childrenSubjectOfChildProtectionPlan(
+                YesNoDontKnow.getDisplayedValueIgnoreCase(
+                    c100RebuildChildDetailsElements.getChildrenSubjectOfProtectionPlan()));
     }
 
     private static List<Element<Child>> buildChildDetails(List<C100RebuildChildDetailsElements.ChildDetail> childDetails) {
@@ -41,9 +48,9 @@ public class CaseDataChildDetailsElementsMapper {
         return Element.<Child>builder().value(Child.builder()
                    .firstName(childDetail.getFirstName())
                    .lastName(childDetail.getLastName())
-                   .dateOfBirth(buildDateOfBirth(childDetail.getPersonalDetails().getDateofBirth()))
+                   .dateOfBirth(buildDateOfBirth(childDetail.getPersonalDetails().getDateOfBirth()))
                    .isDateOfBirthUnknown(buildDateOfBirthUnknown(childDetail.getPersonalDetails()))
-                   .gender(childDetail.getPersonalDetails().getGender())
+                   .gender(Gender.getDisplayedValueFromEnumString((childDetail.getPersonalDetails().getGender())))
                    .otherGender(childDetail.getPersonalDetails().getOtherGenderDetails())
                    .approxDateOfBirth(buildDateOfBirth(childDetail.getPersonalDetails().getApproxDateOfBirth()))
                    .parentalResponsibilityDetails(buildParentalResponsibility(
@@ -77,12 +84,6 @@ public class CaseDataChildDetailsElementsMapper {
         if (childMattersNeedsResolutions.contains(WHO_THE_CHILD_LIVE_WITH)  || childMattersNeedsResolutions.contains(CHILD_TIME_SPENT)) {
             orderTypeEnums.add(childArrangementsOrder);
         }
-//        if (childMattersNeedsResolutions.contains(STOP_OTHER_DOING_SOMETHING)) {
-//            orderTypeEnums.add(prohibitedStepsOrder);
-//        }
-//        if (childMattersNeedsResolutions.contains(RESOLVE_SPECIFIC_ISSUE)) {
-//            orderTypeEnums.add(specificIssueOrder);
-//        }
         return orderTypeEnums;
     }
 }
