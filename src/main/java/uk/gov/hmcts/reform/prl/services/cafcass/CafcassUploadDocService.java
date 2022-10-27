@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_DOCUMENT_UPLOAD_EVENT_ID;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.INVALID_DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkTypeOfDocument;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.getCaseDataWithUploadedDocs;
@@ -65,9 +66,6 @@ public class CafcassUploadDocService {
             log.info("Document uploaded successfully through caseDocumentClient");
             updateCcdAfterUploadingDocument(authorisation, document, typeOfDocument, caseId, caseData, uploadResponse);
 
-        } else {
-            log.error("Un acceptable format/type of document {}", typeOfDocument);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -145,6 +143,7 @@ public class CafcassUploadDocService {
             && checkTypeOfDocument(typeOfDocument, List.of(ALLOWED_TYPE_OF_DOCS))) {
             return true;
         }
-        return  false;
+        log.error("Un acceptable format/type of document {}", typeOfDocument);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(INVALID_DOCUMENT_TYPE, typeOfDocument));
     }
 }
