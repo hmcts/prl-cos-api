@@ -83,6 +83,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
+import uk.gov.hmcts.reform.prl.services.noc.ChangeOfRepresentation;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -582,6 +583,17 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final NoticeOfChangeAnswersData noticeOfChangeAnswersData = NoticeOfChangeAnswersData.builder().build();
+
+
+    @JsonUnwrapped
+    @Builder.Default
+    private final ChangeOrganisationRequest changeOrganisationRequest;
+
+    private final List<Element<ChangeOfRepresentation>> changeOfRepresentatives;
 
     /**
      * Solicitor Details.
