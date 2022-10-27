@@ -1,15 +1,12 @@
 package uk.gov.hmcts.reform.prl.models.c100rebuild;
 
-    import com.fasterxml.jackson.annotation.JsonProperty;
-    import lombok.AllArgsConstructor;
-    import lombok.Builder;
-    import lombok.Data;
-    import lombok.NoArgsConstructor;
-    import uk.gov.hmcts.reform.prl.enums.Gender;
-    import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-    import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    import java.util.List;
+import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
@@ -18,11 +15,11 @@ package uk.gov.hmcts.reform.prl.models.c100rebuild;
 public class C100RebuildChildDetailsElements {
 
     @JsonProperty("cd_childrenKnownToSocialServices")
-    private YesNoDontKnow childrenKnownToSocialServices;
+    private String childrenKnownToSocialServices;
     @JsonProperty("cd_childrenKnownToSocialServicesDetails")
     private String childrenKnownToSocialServicesDetails;
     @JsonProperty("cd_childrenSubjectOfProtectionPlan")
-    private YesNoDontKnow childrenSubjectOfProtectionPlan;
+    private String childrenSubjectOfProtectionPlan;
     @JsonProperty("cd_children")
     private List<ChildDetail> childDetails;
 
@@ -30,7 +27,7 @@ public class C100RebuildChildDetailsElements {
     @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
-    public class ChildDetail {
+    public static class ChildDetail {
         @JsonProperty("id")
         private String id;
         @JsonProperty("firstName")
@@ -41,7 +38,7 @@ public class C100RebuildChildDetailsElements {
         private PersonalDetails personalDetails;
         @JsonProperty("childMatters")
         private ChildMatters childMatters;
-        @JsonProperty("ParentialResponsibility")
+        @JsonProperty("parentialResponsibility")
         private ParentialResponsibility parentialResponsibility;
     }
 
@@ -49,11 +46,11 @@ public class C100RebuildChildDetailsElements {
     @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
-    public class PersonalDetails {
-        private DateofBirth dateofBirth;
-        private YesOrNo isDateOfBirthUnknown;
+    public static class PersonalDetails {
+        private DateofBirth dateOfBirth;
+        private String isDateOfBirthUnknown;
         private DateofBirth approxDateOfBirth;
-        private Gender gender;
+        private String gender;
         private String otherGenderDetails;
     }
 
@@ -61,7 +58,7 @@ public class C100RebuildChildDetailsElements {
     @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
-    public class DateofBirth {
+    public static class DateofBirth {
         private String year;
         private String month;
         private String day;
@@ -71,7 +68,7 @@ public class C100RebuildChildDetailsElements {
     @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
-    public class ChildMatters {
+    public static class ChildMatters {
         private List<String> needsResolution;
     }
 
@@ -79,7 +76,7 @@ public class C100RebuildChildDetailsElements {
     @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
-    public class ParentialResponsibility {
+    public static class ParentialResponsibility {
         private String statement;
     }
 }
