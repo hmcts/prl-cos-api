@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ChangeOfRepresentationMethod {
     NOC("Notice of change"),
-    RESPONDENTS_EVENT("FPL");
+    RESPONDENTS_EVENT("PRLAPPS");
 
     private final String label;
 }
