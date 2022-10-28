@@ -333,11 +333,11 @@ public class ManageOrderService {
         StringBuilder selectedOrder = new StringBuilder();
         log.info("*******caseData********{}", caseData);
         if (caseData.getManageOrdersOptions() != null) {
-            selectedOrder.append(caseData.getCreateSelectOrderOptions().getDisplayedValue());
-        } else {
             selectedOrder.append(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
                                      ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
                                      : caseData.getChildArrangementOrders().getDisplayedValue());
+        } else {
+            selectedOrder.append(caseData.getCreateSelectOrderOptions().getDisplayedValue());
         }
         selectedOrder.append("\n\n");
         return selectedOrder.toString();
