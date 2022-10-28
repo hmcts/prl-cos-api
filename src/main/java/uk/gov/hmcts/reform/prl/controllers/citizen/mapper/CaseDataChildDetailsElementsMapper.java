@@ -45,14 +45,14 @@ public class CaseDataChildDetailsElementsMapper {
     }
 
     private static Element<Child> mapToChildDetails(C100RebuildChildDetailsElements.ChildDetail childDetail) {
+        LocalDate dateOfBirth = buildDateOfBirth(childDetail.getPersonalDetails().getDateOfBirth());
         return Element.<Child>builder().value(Child.builder()
                    .firstName(childDetail.getFirstName())
                    .lastName(childDetail.getLastName())
-                   .dateOfBirth(buildDateOfBirth(childDetail.getPersonalDetails().getDateOfBirth()))
+                   .dateOfBirth(dateOfBirth != null ? dateOfBirth : buildDateOfBirth(childDetail.getPersonalDetails().getApproxDateOfBirth()))
                    .isDateOfBirthUnknown(buildDateOfBirthUnknown(childDetail.getPersonalDetails()))
                    .gender(Gender.getDisplayedValueFromEnumString((childDetail.getPersonalDetails().getGender())))
                    .otherGender(childDetail.getPersonalDetails().getOtherGenderDetails())
-                   .approxDateOfBirth(buildDateOfBirth(childDetail.getPersonalDetails().getApproxDateOfBirth()))
                    .parentalResponsibilityDetails(buildParentalResponsibility(
                        childDetail.getParentialResponsibility()))
                    .orderAppliedFor(buildOrdersApplyingFor(childDetail.getChildMatters()))
