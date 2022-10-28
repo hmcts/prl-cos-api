@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -29,7 +30,6 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPDATE_REFERENCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 
 @Slf4j
@@ -138,7 +138,9 @@ public class PaymentRequestService {
                                            authorization,
                                            serviceAuthorization,
                                            caseId,
-                                           CITIZEN_UPDATE_REFERENCE);
+                                           CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+                                           null
+                    );
 
                 }
             } else {
@@ -152,7 +154,9 @@ public class PaymentRequestService {
                                        authorization,
                                        serviceAuthorization,
                                        caseId,
-                                       CITIZEN_UPDATE_REFERENCE);
+                                       CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+                                       null
+                );
                 log.info("Updated the case data for the case id :{}",caseId);
             }
         } else {
@@ -170,7 +174,9 @@ public class PaymentRequestService {
                                    authorization,
                                    serviceAuthorization,
                                    caseId,
-                                   CITIZEN_UPDATE_REFERENCE);
+                                   CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+                                   null
+                                   );
             log.info("Updated the case data for the case id :{} ",caseId);
 
         }

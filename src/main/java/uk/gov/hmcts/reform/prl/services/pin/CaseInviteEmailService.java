@@ -17,19 +17,21 @@ import uk.gov.hmcts.reform.prl.services.EmailService;
 @Service
 public class CaseInviteEmailService {
 
+    public static final String CITIZEN_HOME = "/citizen-home";
     @Autowired
     EmailService emailService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
 
-    @Value("${citizen_frontend.url}")
+    @Value("${citizen.url}")
     private String citizenSignUpLink;
 
 
     public EmailTemplateVars buildCaseInviteEmail(CaseInvite caseInvite, PartyDetails partyDetails, CaseData caseData) {
         return new CaseInviteEmail(caseInvite, String.valueOf(caseData.getId()),
-            partyDetails, manageCaseUrl, citizenSignUpLink, caseData);
+                                   partyDetails, manageCaseUrl, citizenSignUpLink + CITIZEN_HOME, caseData
+        );
     }
 
     public void sendEmail(String address, EmailTemplateVars email) {

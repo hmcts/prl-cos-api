@@ -1,0 +1,329 @@
+{
+  "case_details": {
+    "callback_response_status": "string",
+    "case_data": {
+      "id": "1647892677063924",
+      "home": {
+        "address": {
+          "County": "",
+          "Country": "",
+          "PostCode": "le2 1yh",
+          "PostTown": "test",
+          "AddressLine1": "17 Lorne Road",
+          "AddressLine2": "",
+          "AddressLine3": ""
+        },
+        "children": [
+          {
+            "id": "559c3c44-a2fc-475d-9822-42747c29469c",
+            "value": {
+              "childsAge": "5",
+              "childFullName": "John Doe",
+              "keepChildrenInfoConfidential": "Yes",
+              "isRespondentResponsibleForChild": "Yes"
+            }
+          }
+        ],
+        "landlords": {
+          "address": {
+            "County": "",
+            "Country": "",
+            "PostCode": "le2 1yh",
+            "PostTown": "jj",
+            "AddressLine1": "61 Lorne Road",
+            "AddressLine2": "",
+            "AddressLine3": ""
+          },
+          "landlordName": "asdf",
+          "textAreaSomethingElse": null,
+          "mortgageNamedAfterList": [
+            "applicant"
+          ]
+        },
+        "mortgages": {
+          "address": {
+            "County": "",
+            "Country": "",
+            "PostCode": "le2 1yh",
+            "PostTown": "test",
+            "AddressLine1": "61 Lorne Road",
+            "AddressLine2": "",
+            "AddressLine3": ""
+          },
+          "mortgageNumber": "12345",
+          "mortgageLenderName": "lender",
+          "mortgageNamedAfter": [
+            "applicant",
+            "someoneElse"
+          ],
+          "textAreaSomethingElse": "Provide the details in the box below"
+        },
+        "familyHome": [
+          "payForRepairs"
+        ],
+        "livingSituation": [
+          "ableToReturnHome"
+        ],
+        "isPropertyRented": "Yes",
+        "isPropertyAdapted": "Yes",
+        "furtherInformation": null,
+        "everLivedAtTheAddress": "No",
+        "textAreaSomethingElse": "details",
+        "howIsThePropertyAdapted": "details",
+        "intendToLiveAtTheAddress": "yesBothOfThem",
+        "isThereMortgageOnProperty": "Yes",
+        "peopleLivingAtThisAddress": [
+          "applicant",
+          "someoneElse"
+        ],
+        "doAnyChildrenLiveAtAddress": "Yes",
+        "doesApplicantHaveHomeRights": "Yes"
+      },
+      "isWelshNeeded": "Yes",
+      "applicantsFL401": {
+        "email": "soli@gmail.com",
+        "gender": "male",
+        "address": {
+          "County": "",
+          "Country": "",
+          "PostCode": "le2 1yh",
+          "PostTown": "Leicester",
+          "AddressLine1": "17 Lorne Road",
+          "AddressLine2": "",
+          "AddressLine3": ""
+        },
+        "dxNumber": "1234455",
+        "landline": null,
+        "lastName": "Manchella",
+        "firstName": "Sairam",
+        "dateOfBirth": "1111-11-11",
+        "otherGender": null,
+        "phoneNumber": "01234567891",
+        "placeOfBirth": null,
+        "previousName": null,
+        "solicitorOrg": {
+          "OrganisationID": "Q1KOKP2",
+          "OrganisationName": "Civil - Organisation 1"
+        },
+        "sendSignUpLink": null,
+        "solicitorEmail": "soli@gmail.com",
+        "isAddressUnknown": null,
+        "solicitorAddress": {
+          "County": null,
+          "Country": null,
+          "PostCode": null,
+          "PostTown": null,
+          "AddressLine1": null,
+          "AddressLine2": null,
+          "AddressLine3": null
+        },
+        "isDateOfBirthKnown": null,
+        "solicitorReference": "007",
+        "solicitorTelephone": "01234567891",
+        "isPlaceOfBirthKnown": null,
+        "isDateOfBirthUnknown": null,
+        "isAddressConfidential": "No",
+        "isCurrentAddressKnown": null,
+        "relationshipToChildren": null,
+        "representativeLastName": "Doe",
+        "representativeFirstName": "John",
+        "canYouProvidePhoneNumber": null,
+        "canYouProvideEmailAddress": "Yes",
+        "isAtAddressLessThan5Years": null,
+        "isPhoneNumberConfidential": "No",
+        "isEmailAddressConfidential": "No",
+        "respondentLivedWithApplicant": null,
+        "doTheyHaveLegalRepresentation": null,
+        "addressLivedLessThan5YearsDetails": null,
+        "otherPersonRelationshipToChildren": [
+
+        ],
+        "isAtAddressLessThan5YearsWithDontKnow": null
+      },
+      "fl401WelshNeeds": [
+        {
+          "id": "8f16bd67-2020-4a90-9118-48fbf4926fbe",
+          "value": {
+            "whoNeedsWelsh": "Provide the details in the box below",
+            "spokenOrWritten": [
+
+            ],
+            "fl401SpokenOrWritten": [
+              "spoken",
+              "written"
+            ]
+          }
+        }
+      ],
+      "interpreterNeeds": [
+        {
+          "id": "894f95f3-8658-4d5f-966a-d9d802306d23",
+          "value": {
+            "name": "grandmother",
+            "party": [
+              "other",
+              "applicant"
+            ],
+            "language": "ko",
+            "otherAssistance": "Sign language"
+          }
+        }
+      ],
+      "respondentsFL401": {
+        "email": "soli@gmail.com",
+        "gender": null,
+        "address": {
+          "County": null,
+          "Country": null,
+          "PostCode": null,
+          "PostTown": null,
+          "AddressLine1": null,
+          "AddressLine2": null,
+          "AddressLine3": null
+        },
+        "dxNumber": null,
+        "landline": null,
+        "lastName": "Doe",
+        "firstName": "John",
+        "dateOfBirth": null,
+        "otherGender": null,
+        "phoneNumber": "01234567891",
+        "placeOfBirth": null,
+        "previousName": null,
+        "solicitorOrg": {
+          "OrganisationID": null,
+          "OrganisationName": null
+        },
+        "sendSignUpLink": null,
+        "solicitorEmail": null,
+        "isAddressUnknown": null,
+        "solicitorAddress": {
+          "County": null,
+          "Country": null,
+          "PostCode": null,
+          "PostTown": null,
+          "AddressLine1": null,
+          "AddressLine2": null,
+          "AddressLine3": null
+        },
+        "isDateOfBirthKnown": "No",
+        "solicitorReference": null,
+        "solicitorTelephone": null,
+        "isPlaceOfBirthKnown": null,
+        "isDateOfBirthUnknown": null,
+        "isAddressConfidential": null,
+        "isCurrentAddressKnown": "No",
+        "relationshipToChildren": null,
+        "representativeLastName": null,
+        "representativeFirstName": null,
+        "canYouProvidePhoneNumber": "Yes",
+        "canYouProvideEmailAddress": "Yes",
+        "isAtAddressLessThan5Years": null,
+        "isPhoneNumberConfidential": null,
+        "isEmailAddressConfidential": null,
+        "respondentLivedWithApplicant": "No",
+        "doTheyHaveLegalRepresentation": null,
+        "addressLivedLessThan5YearsDetails": "*Provide details of all previous addresses for the last 5 years below(if known, including the dates and starting with most recent) (Optional)",
+        "otherPersonRelationshipToChildren": [
+
+        ],
+        "isAtAddressLessThan5YearsWithDontKnow": "yes"
+      },
+      "adjustmentsRequired": "Provide the details in the box below",
+      "isDisabilityPresent": "Yes",
+      "isInterpreterNeeded": "Yes",
+      "isIntermediaryNeeded": "Yes",
+      "applicantChildDetails": [
+        {
+          "id": "347f3141-b1bc-42d0-a297-a5a9861597bd",
+          "value": {
+            "fullName": "full",
+            "dateOfBirth": "1212-11-11",
+            "applicantChildRelationship": "bro",
+            "respondentChildRelationship": "Guardian",
+            "applicantRespondentShareParental": "Yes"
+          }
+        }
+      ],
+      "caseTypeOfApplication": "FL401",
+      "applicantFamilyDetails": {
+        "doesApplicantHaveChildren": "Yes"
+      },
+      "reasonsForIntermediary": "Provide the details in the box below",
+      "respondentBehaviourData": {
+        "applicantWantToStopFromRespondentDoing": [
+          "applicantStopFromRespondentEnum_Value_1",
+          "applicantStopFromRespondentEnum_Value_3",
+          "applicantStopFromRespondentEnum_Value_4"
+        ],
+        "applicantWantToStopFromRespondentDoingToChild": [
+          "applicantStopFromRespondentDoingToChildEnum_Value_3",
+          "applicantStopFromRespondentDoingToChildEnum_Value_4"
+        ],
+        "otherReasonApplicantWantToStopFromRespondentDoing": "awergs"
+      },
+      "typeOfApplicationOrders": {
+        "orderType": [
+          "nonMolestationOrder",
+          "occupationOrder"
+        ]
+      },
+      "respondentRelationObject": {
+        "applicantRelationship": "noneOfTheAbove"
+      },
+      "welshLanguageRequirement": "Yes",
+      "respondentRelationOptions": {
+        "relationOptionsOther": null,
+        "applicantRelationshipOptions": "sister"
+      },
+      "typeOfApplicationLinkToCA": {
+        "caApplicationNumber": null,
+        "linkToCaApplication": "No"
+      },
+      "fl401OtherProceedingDetails": {
+        "fl401OtherProceedings": [
+
+        ],
+        "hasPrevOrOngoingOtherProceeding": "dontKnow"
+      },
+      "specialArrangementsRequired": "Provide the details in the box below",
+      "applicantOrRespondentCaseName": "John Doe",
+      "isSpecialArrangementsRequired": "Yes",
+      "respondentRelationDateInfoObject": {
+
+      },
+      "confidentialityStatementDisclaimer": [
+        "confidentialityStatementUnderstood"
+      ],
+      "welshLanguageRequirementApplication": "english",
+      "orderWithoutGivingNoticeToRespondent": {
+        "orderWithoutGivingNotice": "No"
+      },
+      "languageRequirementApplicationNeedWelsh": "No",
+      "welshLanguageRequirementApplicationNeedEnglish": null
+    },
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "case_details_before": {
+    "callback_response_status": "string",
+    "case_data": {},
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "event_id": "string"
+}

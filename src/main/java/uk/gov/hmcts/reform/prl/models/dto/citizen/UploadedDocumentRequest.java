@@ -1,25 +1,34 @@
 package uk.gov.hmcts.reform.prl.models.dto.citizen;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
-import java.util.Map;
+import java.util.List;
 
-@Data
-@NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Schema(description = "Request body model for Document Storing Request")
-@Builder(toBuilder = true)
+@Getter
+@Data
+@Builder
 public class UploadedDocumentRequest {
-
-    @JsonProperty("values")
-    private Map<String, Object> values;
+    @JsonProperty("caseId")
+    private final String caseId;
+    @JsonProperty("parentDocumentType")
+    private final String parentDocumentType;
+    @JsonProperty("documentType")
+    private final String documentType;
+    @JsonProperty("partyId")
+    private final String partyId;
+    @JsonProperty("partyName")
+    private final String partyName;
+    @JsonProperty("isApplicant")
+    private final String isApplicant;
+    @JsonProperty("files")
+    private List<MultipartFile> files;
+    @JsonProperty("documentRequestedByCourt")
+    private final YesOrNo documentRequestedByCourt;
 }
