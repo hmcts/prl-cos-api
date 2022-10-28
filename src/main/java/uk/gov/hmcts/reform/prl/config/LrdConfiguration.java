@@ -12,8 +12,8 @@ public class LrdConfiguration {
     private final String endpoint;
 
     public LrdConfiguration(
-        @Value("${genApp.lrd.url}") String url,
-        @Value("${genApp.lrd.endpoint}") String endpoint) {
+        @Value("${locationFinder.api.url}") String url,
+        @Value("${locationFinder.api.endPoint}") String endpoint) {
         this.url = url;
         this.endpoint = endpoint;
     }
