@@ -46,7 +46,7 @@ public class CaseControllerTest {
     private ObjectMapper objectMapper;
 
     @Mock
-    private AuthTokenGenerator authTokenGenerator;
+    AuthTokenGenerator authTokenGenerator;
 
     private CaseData caseData;
     public static final String authToken = "Bearer TestAuthToken";
@@ -75,7 +75,10 @@ public class CaseControllerTest {
 
         String caseId = "1234567891234567";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(coreCaseDataApi.getCase(authToken, servAuthToken, caseId)).thenReturn(caseDetails);
+        when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
+        when(authTokenGenerator.generate()).thenReturn("servAuthToken");
+        when(authorisationService.authoriseUser(authToken)).thenReturn(true);
+        when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
         CaseData caseData1 = caseController.getCase(caseId, authToken, servAuthToken);
         assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
 
@@ -102,8 +105,19 @@ public class CaseControllerTest {
         String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.updateCase(caseData, authToken, servAuthToken, caseId, eventId)).thenReturn(caseDetails);
-        CaseData caseData1 = caseController.updateCase(caseData, caseId, eventId, authToken, servAuthToken, "testAccessCode");
+        when(authTokenGenerator.generate()).thenReturn("TestToken");
+        when(authorisationService.authoriseUser(authToken)).thenReturn(true);
+        when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
+        when(caseService.updateCase(caseData, authToken, "TestToken", caseId, eventId,
+                                    "testAccessCode")).thenReturn(caseDetails);
+        CaseData caseData1 = caseController.updateCase(
+            caseData,
+            caseId,
+            eventId,
+            authToken,
+            servAuthToken,
+            "testAccessCode"
+        );
         assertEquals(caseData.getApplicantCaseName(), caseData1.getApplicantCaseName());
 
     }
@@ -180,15 +194,17 @@ public class CaseControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
 
-        String caseId = "1234567891234567";
+        String caseId = "1234567891234567L";
         String accessCode = "e3ceb507";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.validateAccessCode(authToken, servAuthToken, caseId, accessCode)).thenReturn("test");
+        when(caseService.validateAccessCode(authToken, servAuthToken, caseId, accessCode)).thenReturn("Valid");
+
         String data = caseController.validateAccessCode(authToken, servAuthToken, caseId, accessCode);
         assertNotNull(data);
 
@@ -202,7 +218,7 @@ public class CaseControllerTest {
         Map<String, Object> data = mock(Map.class);
         Mockito.when(caseDetails.getData()).thenReturn(data);
         Mockito.when(objectMapper.convertValue(data, CaseData.class)).thenReturn(caseData);
-        Mockito.when(caseService.createCase(caseData, authToken, servAuthToken)).thenReturn(caseDetails);
+        Mockito.when(caseService.createCase(caseData, authToken)).thenReturn(caseDetails);
         Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
         Mockito.when(authTokenGenerator.generate()).thenReturn(servAuthToken);

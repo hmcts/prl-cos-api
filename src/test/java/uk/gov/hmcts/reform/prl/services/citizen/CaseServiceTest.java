@@ -58,7 +58,7 @@ public class CaseServiceTest {
                 JURISDICTION, CASE_TYPE, true, caseDataContent)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.createCase(caseData, authToken, s2sToken);
+        CaseDetails actualCaseDetails =  caseService.createCase(caseData, authToken);
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
