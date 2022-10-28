@@ -26,6 +26,7 @@ public class AuthorisationService {
     public Boolean authoriseService(String serviceAuthHeader) {
         String callingService;
         try {
+            log.info("serviceAuthHeader is ::" + serviceAuthHeader);
             callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
             log.info("callingService is ::" + callingService);
             log.info("s2sAuthorisedServices is: " + s2sAuthorisedServices);
