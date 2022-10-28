@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.enums;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.WithSolicitor;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Arrays;
@@ -34,8 +34,8 @@ public enum SolicitorRole {
             .collect(Collectors.toList());
     }
 
-    public Optional<Element<WithSolicitor>> getRepresentedPerson(CaseData caseData) {
-        List<Element<WithSolicitor>> parties = this.representing.target.apply(caseData);
+    public Optional<Element<PartyDetails>> getRepresentedPerson(CaseData caseData) {
+        List<Element<PartyDetails>> parties = this.representing.target.apply(caseData);
         if (this.index < parties.size()) {
             return Optional.of(parties.get(this.index));
         } else {
@@ -50,12 +50,12 @@ public enum SolicitorRole {
             "noticeOfChangeAnswers%d",
             "respondents1");
 
-        private final Function<CaseData, List<Element<WithSolicitor>>> target;
+        private final Function<CaseData, List<Element<PartyDetails>>> target;
         private final String policyFieldTemplate;
         private final String nocAnswersTemplate;
         private final String caseField;
 
-        Representing(Function<CaseData, List<Element<WithSolicitor>>> target,
+        Representing(Function<CaseData, List<Element<PartyDetails>>> target,
                      String policyFieldTemplate, String nocAnswersTemplate, String caseField) {
             this.target = target;
             this.policyFieldTemplate = policyFieldTemplate;
@@ -63,7 +63,7 @@ public enum SolicitorRole {
             this.caseField = caseField;
         }
 
-        public Function<CaseData, List<Element<WithSolicitor>>> getTarget() {
+        public Function<CaseData, List<Element<PartyDetails>>> getTarget() {
             return target;
         }
 

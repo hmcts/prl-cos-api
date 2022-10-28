@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.WithSolicitor;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.NoticeOfChangeAnswers;
 
@@ -33,14 +33,14 @@ public class NoticeOfChangeFieldPopulator {
 
         String applicant = getApplicantName(caseData);
 
-        List<Element<WithSolicitor>> elements = representing.getTarget().apply(caseData);
+        List<Element<PartyDetails>> elements = representing.getTarget().apply(caseData);
         int numElements = elements.size();
 
         List<SolicitorRole> solicitorRoles = SolicitorRole.values(representing);
         for (int i = 0; i < solicitorRoles.size(); i++) {
             SolicitorRole solicitorRole = solicitorRoles.get(i);
 
-            Optional<Element<WithSolicitor>> solicitorContainer = i < numElements
+            Optional<Element<PartyDetails>> solicitorContainer = i < numElements
                                                                   ? Optional.of(elements.get(i))
                                                                   : Optional.empty();
 
@@ -64,7 +64,7 @@ public class NoticeOfChangeFieldPopulator {
 
     private Optional<NoticeOfChangeAnswers> populateAnswer(NoticeOfChangeAnswersPopulationStrategy strategy,
                                                            String applicantName,
-                                                           Optional<Element<WithSolicitor>> element) {
+                                                           Optional<Element<PartyDetails>> element) {
         if (NoticeOfChangeAnswersPopulationStrategy.BLANK == strategy) {
             return Optional.of(NoticeOfChangeAnswers.builder().build());
         }

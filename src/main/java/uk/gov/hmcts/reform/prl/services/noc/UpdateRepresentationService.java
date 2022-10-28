@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.prl.enums.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.RespondentSolicitor;
-import uk.gov.hmcts.reform.prl.models.WithSolicitor;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Collections;
@@ -38,13 +38,18 @@ public class UpdateRepresentationService {
 
         final SolicitorRole.Representing representing = role.getRepresenting();
 
-        final List<Element<WithSolicitor>> elements = defaultIfNull(
+        final List<Element<PartyDetails>> elements = defaultIfNull(
             representing.getTarget().apply(caseData), Collections.emptyList()
         );
 
-        final WithSolicitor container = elements.get(role.getIndex()).getValue();
+        final PartyDetails container = elements.get(role.getIndex()).getValue();
 
-        RespondentSolicitor removedSolicitor = container.getSolicitor();
+        RespondentSolicitor removedSolicitor = RespondentSolicitor.builder()
+            .email(container.getEmail())
+            .firstName(container.getFirstName())
+            .lastName(container.getLastName())
+            .organisation(container.getSolicitorOrg())
+            .build();
 
         RespondentSolicitor addedSolicitor = RespondentSolicitor.builder()
             .email(solicitor.getEmail())

@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.services.noc;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.RespondentSolicitor;
-import uk.gov.hmcts.reform.prl.models.WithSolicitor;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Map;
@@ -19,9 +19,11 @@ public class RespondentNoticeOfChangeUpdateAction implements NoticeOfChangeUpdat
     }
 
     @Override
-    public Map<String, Object> applyUpdates(WithSolicitor respondent, CaseData caseData,
+    public Map<String, Object> applyUpdates(PartyDetails respondent, CaseData caseData,
                                             RespondentSolicitor solicitor) {
-        respondent.setSolicitor(solicitor);
+        respondent.toBuilder()
+            .solicitorEmail(solicitor.getEmail())
+            .solicitorOrg(solicitor.getOrganisation()).build();
         return Map.of("respondents1", caseData.getRespondents());
     }
 }
