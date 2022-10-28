@@ -639,6 +639,8 @@ public class CaseData implements MappableObject {
     private String previewDraftAnOrder;
 
     private String citizenUploadedStatement;
+    @JsonProperty("paymentReferenceNumber")
+    private final String paymentReferenceNumber;
 
     // C100 Rebuild
     private String c100RebuildConfidentiality;
@@ -648,7 +650,6 @@ public class CaseData implements MappableObject {
     private String c100RebuildHearingWithoutNotice;
     private String c100RebuildOtherProceedings;
     private String c100RebuildReturnUrl;
-
-    @JsonProperty("paymentReferenceNumber")
-    private final String paymentReferenceNumber;
+    private String c100RebuildMaim;
+    private String c100RebuildHearingUrgency;
 }
