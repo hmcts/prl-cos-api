@@ -48,14 +48,4 @@ public class CourtVenue {
     private String mrdBuildingLocationId;
     @JsonProperty("mrd_venue_id")
     private String mrdVenueId;
-
-    @JsonIgnore
-    public String getLabelForDynamicList() {
-        return String.format(
-            "%s, %s",
-            this.mrdVenueId,
-            ofNullable(concat(concat(concat(this.getSiteName(), " - "), concat(this.getCourtAddress(), " - ")),
-                              this.getPostcode())).orElse("")
-        );
-    }
 }
