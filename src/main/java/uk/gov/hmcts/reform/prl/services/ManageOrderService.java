@@ -332,9 +332,13 @@ public class ManageOrderService {
     private String getSelectedOrderInfo(CaseData caseData) {
         StringBuilder selectedOrder = new StringBuilder();
         log.info("*******caseData********{}", caseData);
-        selectedOrder.append(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
-                                 ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
-                                 : caseData.getChildArrangementOrders().getDisplayedValue());
+        if (caseData.getManageOrdersOptions() != null) {
+            selectedOrder.append(caseData.getCreateSelectOrderOptions().getDisplayedValue());
+        } else {
+            selectedOrder.append(caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
+                                     ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
+                                     : caseData.getChildArrangementOrders().getDisplayedValue());
+        }
         selectedOrder.append("\n\n");
         return selectedOrder.toString();
     }
@@ -560,9 +564,10 @@ public class ManageOrderService {
             .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
                                                  caseData.getApplicantsFL401().getLastName()
             ))
-            .manageOrdersRespondent(String.format(PrlAppsConstants.FORMAT,
-                                                  caseData.getRespondentsFL401().getFirstName(),
-                                                  caseData.getRespondentsFL401().getLastName()
+            .manageOrdersRespondent(String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getRespondentsFL401().getFirstName(),
+                caseData.getRespondentsFL401().getLastName()
             ))
             .manageOrdersApplicantReference(String.format(
                 PrlAppsConstants.FORMAT,
@@ -667,9 +672,10 @@ public class ManageOrderService {
         ManageOrders orderData = ManageOrders.builder()
             .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
             .manageOrdersFl402CourtName(caseData.getCourtName())
-            .manageOrdersFl402Applicant(String.format(PrlAppsConstants.FORMAT,
-                                                      caseData.getApplicantsFL401().getFirstName(),
-                                                      caseData.getApplicantsFL401().getLastName()
+            .manageOrdersFl402Applicant(String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getApplicantsFL401().getFirstName(),
+                caseData.getApplicantsFL401().getLastName()
             ))
             .manageOrdersFl402ApplicantRef(String.format(
                 PrlAppsConstants.FORMAT,
