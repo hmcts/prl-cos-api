@@ -114,9 +114,7 @@ public class FeesAndPaymentCitizenControllerTest {
 
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-        when(paymentRequestService.createServiceRequest(callbackRequest, authToken)).thenReturn(paymentServiceResponse);
-        when(paymentRequestService.createServicePayment(paymentServiceResponse.getServiceRequestReference(),
-                authToken, createPaymentRequest.getReturnUrl())).thenReturn(paymentResponse);
+        when(paymentRequestService.createPayment(authToken,s2sToken,createPaymentRequest)).thenReturn(paymentResponse);
 
         //When
         PaymentResponse actualPaymentResponse = feesAndPaymentCitizenController
@@ -124,6 +122,7 @@ public class FeesAndPaymentCitizenControllerTest {
         //Then
         assertEquals(paymentResponse, actualPaymentResponse);
     }
+
 
     @Test
     public void createPaymentRequestWithInvalidClient() throws Exception {
