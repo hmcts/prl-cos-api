@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.ExampleService;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
@@ -105,6 +106,7 @@ public class CallbackController {
     private final C100JsonMapper c100JsonMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private final CourtFinderService courtLocatorService;
+    private final LocationRefDataService locationRefDataService;
     private final SearchCasesDataService searchCasesDataService;
 
     private final ConfidentialityTabService confidentialityTabService;
@@ -207,6 +209,10 @@ public class CallbackController {
             log.info("Court email not found for case id {}", caseData.getId());
         }
         log.info("******** courtDetails {}", courtLocatorService.getCourtDetails(authorisation, authTokenGenerator.generate()));
+        log.info("       ------------********--------------      ");
+        List<String> courtList = locationRefDataService.getCourtLocations(authorisation);
+        //caseDataUpdated.put("courtList", ElementUtils.asDynamicList());
+        log.info("******** courtDetails {}", courtList);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
