@@ -6,6 +6,11 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildDetail;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildMatters;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.ParentialResponsibility;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.PersonalDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -38,18 +43,18 @@ public class CaseDataChildDetailsElementsMapper {
                     c100RebuildChildDetailsElements.getChildrenSubjectOfProtectionPlan()));
     }
 
-    private static List<Element<Child>> buildChildDetails(List<C100RebuildChildDetailsElements.ChildDetail> childDetails) {
+    private static List<Element<Child>> buildChildDetails(List<ChildDetail> childDetails) {
         return childDetails.stream()
             .map(CaseDataChildDetailsElementsMapper::mapToChildDetails)
             .collect(Collectors.toList());
     }
 
-    private static Element<Child> mapToChildDetails(C100RebuildChildDetailsElements.ChildDetail childDetail) {
-        LocalDate dateOfBirth = buildDateOfBirth(childDetail.getPersonalDetails().getDateOfBirth());
+    private static Element<Child> mapToChildDetails(ChildDetail childDetail) {
+
         return Element.<Child>builder().value(Child.builder()
                    .firstName(childDetail.getFirstName())
                    .lastName(childDetail.getLastName())
-                   .dateOfBirth(dateOfBirth != null ? dateOfBirth : buildDateOfBirth(childDetail.getPersonalDetails().getApproxDateOfBirth()))
+                   .dateOfBirth(getDateOfBirth(childDetail))
                    .isDateOfBirthUnknown(buildDateOfBirthUnknown(childDetail.getPersonalDetails()))
                    .gender(Gender.getDisplayedValueFromEnumString((childDetail.getPersonalDetails().getGender())))
                    .otherGender(childDetail.getPersonalDetails().getOtherGenderDetails())
@@ -60,15 +65,20 @@ public class CaseDataChildDetailsElementsMapper {
             ).build();
     }
 
-    private static String buildParentalResponsibility(C100RebuildChildDetailsElements.ParentialResponsibility parentalResponsibility) {
+    private static LocalDate getDateOfBirth(ChildDetail childDetail) {
+        LocalDate dateOfBirth = buildDateOfBirth(childDetail.getPersonalDetails().getDateOfBirth());
+        return dateOfBirth != null ? dateOfBirth : buildDateOfBirth(childDetail.getPersonalDetails().getApproxDateOfBirth());
+    }
+
+    private static String buildParentalResponsibility(ParentialResponsibility parentalResponsibility) {
         return parentalResponsibility.getStatement();
     }
 
-    private static DontKnow buildDateOfBirthUnknown(C100RebuildChildDetailsElements.PersonalDetails personalDetails) {
+    private static DontKnow buildDateOfBirthUnknown(PersonalDetails personalDetails) {
         return Yes.equals(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null;
     }
 
-    private static LocalDate buildDateOfBirth(C100RebuildChildDetailsElements.DateofBirth dateOfBirth) {
+    private static LocalDate buildDateOfBirth(DateofBirth dateOfBirth) {
         if (isNotEmpty(dateOfBirth.getYear()) && isNotEmpty(dateOfBirth.getMonth()) && isNotEmpty(dateOfBirth.getDay())) {
             return LocalDate.of(Integer.parseInt(dateOfBirth.getYear()), Integer.parseInt(dateOfBirth.getMonth()),
                                 Integer.parseInt(dateOfBirth.getDay())
@@ -78,7 +88,7 @@ public class CaseDataChildDetailsElementsMapper {
     }
 
 
-    private static List<OrderTypeEnum> buildOrdersApplyingFor(C100RebuildChildDetailsElements.ChildMatters childMatters) {
+    private static List<OrderTypeEnum> buildOrdersApplyingFor(ChildMatters childMatters) {
         List<OrderTypeEnum> orderTypeEnums = new ArrayList<>();
         List<String> childMattersNeedsResolutions = childMatters.getNeedsResolution();
         if (childMattersNeedsResolutions.contains(WHO_THE_CHILD_LIVE_WITH)  || childMattersNeedsResolutions.contains(CHILD_TIME_SPENT)) {
