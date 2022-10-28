@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.time.LocalDate;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
@@ -42,6 +44,7 @@ public class DraftAnOrderController {
             .data(caseData.toBuilder()
                       .selectedOrder(caseData.getCreateSelectOrderOptions() != null
                                          ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
+                .dateOrderMade(LocalDate.now())
                       .build().toMap(CcdObjectMapper.getObjectMapper())).build();
 
     }
