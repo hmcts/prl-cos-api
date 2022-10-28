@@ -15,16 +15,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Getter
 public enum SolicitorRole {
-    SOLICITORA("[SOLICITORA]", 0, Representing.RESPONDENT),
-    SOLICITORB("[SOLICITORB]", 1, Representing.RESPONDENT),
-    SOLICITORC("[SOLICITORC]", 2, Representing.RESPONDENT),
-    SOLICITORD("[SOLICITORD]", 3, Representing.RESPONDENT),
-    SOLICITORE("[SOLICITORE]", 4, Representing.RESPONDENT),
-    SOLICITORF("[SOLICITORF]", 5, Representing.RESPONDENT),
-    SOLICITORG("[SOLICITORG]", 6, Representing.RESPONDENT),
-    SOLICITORH("[SOLICITORH]", 7, Representing.RESPONDENT),
-    SOLICITORI("[SOLICITORI]", 8, Representing.RESPONDENT),
-    SOLICITORJ("[SOLICITORJ]", 9, Representing.RESPONDENT);
+    APPLICANTSOLICITOR("[APPLICANTSOLICITOR]", 0, Representing.RESPONDENT),
+    RESPONDENTSOLICITOR("[RESPONDENTSOLICITOR]", 1, Representing.RESPONDENT);
+
     private final String caseRoleLabel;
     private final int index;
     private final Representing representing;

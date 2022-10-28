@@ -16,7 +16,7 @@ public class RespondentPolicyConverter {
     public OrganisationPolicy generate(SolicitorRole solicitorRole,
                                        Optional<Element<WithSolicitor>> optionalRespondentElement) {
         return OrganisationPolicy.builder()
-            .organisation(getOrganisation(optionalRespondentElement))
+            //.organisation(getOrganisation(optionalRespondentElement))
             .orgPolicyCaseAssignedRole(solicitorRole.getCaseRoleLabel())
             .build();
     }
