@@ -27,10 +27,14 @@ public class AuthorisationService {
         String callingService;
         try {
             callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
+            log.info("callingService is ::" + callingService);
+            log.info("s2sAuthorisedServices is: " + s2sAuthorisedServices);
             if (callingService != null && Arrays.asList(s2sAuthorisedServices.split(","))
                 .contains(callingService)) {
+                log.info("match found");
                 return true;
             }
+            log.info("no match");
         } catch (Exception ex) {
             //do nothing
             log.error("S2S token is not authorised");
