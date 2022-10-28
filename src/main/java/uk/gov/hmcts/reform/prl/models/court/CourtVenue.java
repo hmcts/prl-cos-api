@@ -1,12 +1,8 @@
 package uk.gov.hmcts.reform.prl.models.court;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
-
-import static java.util.Optional.ofNullable;
-import static org.apache.logging.log4j.util.Strings.concat;
 
 @Data
 @Builder
