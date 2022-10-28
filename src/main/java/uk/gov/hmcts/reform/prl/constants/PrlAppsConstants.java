@@ -148,4 +148,6 @@ public class PrlAppsConstants {
     public static final String IS_APPLICANT = "isApplicant";
 
     public static final String CITIZEN_ROLE = "citizen";
+
+    public static final String CITIZEN_UPDATE_REFERENCE = "citizenUpdatePaymentReference";
 }

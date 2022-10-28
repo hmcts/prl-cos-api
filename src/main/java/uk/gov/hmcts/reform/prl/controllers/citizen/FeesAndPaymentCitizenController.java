@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
@@ -96,10 +95,9 @@ public class FeesAndPaymentCitizenController {
         if (!isAuthorized(authorization, serviceAuthorization)) {
             throw (new RuntimeException("Invalid Client"));
         }
-        CallbackRequest request = buildCallBackRequest(createPaymentRequest);
-        PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequest(request, authorization);
-        return paymentRequestService.createServicePayment(paymentServiceResponse.getServiceRequestReference(),
-                authorization, createPaymentRequest.getReturnUrl());
+
+        return paymentRequestService.createPayment(authorization,serviceAuthorization,createPaymentRequest);
+
     }
 
 
