@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHearingWithoutNotic
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildInternationalElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildMiamElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildSafetyConcernsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -15,6 +16,7 @@ import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataHwnElem
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataInternationalElementsMapper.updateInternationalElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherProceedingsElementsMapper.updateOtherProceedingsElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataSafetyConcernsElementsMapper.updateSafetyConcernsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
 
@@ -51,6 +53,10 @@ public class CaseDataMapper {
         C100RebuildMiamElements c100RebuildMiamElements = mapper
                 .readValue(caseData.getC100RebuildMaim(), C100RebuildMiamElements.class);
         updateMiamElementsForCaseData(caseDataBuilder, c100RebuildMiamElements);
+
+        C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements = mapper
+                .readValue(caseData.getC100RebuildSafetyConcerns(), C100RebuildSafetyConcernsElements.class);
+        updateSafetyConcernsElementsForCaseData(caseDataBuilder, c100RebuildSafetyConcernsElements);
 
         return caseDataBuilder.build();
     }
