@@ -278,6 +278,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_n117_filename}")
     protected String n117File;
 
+    @Value("${document.templates.common.prl_n117_welsh_draft_template}")
+    protected String n117WelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_n117_welsh_draft_filename}")
+    protected String n117WelshDraftFile;
+
+    @Value("${document.templates.common.prl_n117_welsh_template}")
+    protected String n117WelshTemplate;
+
+    @Value("${document.templates.common.prl_n117_welsh_filename}")
+    protected String n117WelshFile;
+
     private final DocumentLanguageService documentLanguageService;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
@@ -404,6 +416,10 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, n117DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, n117Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, n117File);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, n117WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, n117WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, n117WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, n117WelshFile);
                 break;
             case amendDischargedVaried:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404bDraftTemplate);
