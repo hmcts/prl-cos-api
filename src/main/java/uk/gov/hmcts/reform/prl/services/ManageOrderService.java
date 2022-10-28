@@ -337,7 +337,7 @@ public class ManageOrderService {
                                      ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
                                      : caseData.getChildArrangementOrders().getDisplayedValue());
         } else {
-            selectedOrder.append(caseData.getCreateSelectOrderOptions().getDisplayedValue());
+            selectedOrder.append(caseData.getCreateSelectOrderOptions());
         }
         selectedOrder.append("\n\n");
         return selectedOrder.toString();
