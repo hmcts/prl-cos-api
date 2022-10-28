@@ -4,12 +4,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.SolicitorRole;
+import uk.gov.hmcts.reform.prl.models.ChangeOrganisationApprovalStatus;
+import uk.gov.hmcts.reform.prl.models.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.NoticeOfChangeAnswers;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +55,9 @@ public class NoticeOfChangeFieldPopulator {
             );
 
             data.put(String.format(representing.getPolicyFieldTemplate(), i), organisationPolicy);
+            data.put("changeOrganisationRequestField",
+                     changeRequest(solicitorRole.getCaseRoleLabel(),solicitorContainer.get().getValue().getSolicitorOrg(),
+                                                                     solicitorContainer.get().getValue().getSolicitorOrg()));
 
             Optional<NoticeOfChangeAnswers> possibleAnswer = populateAnswer(
                 strategy, applicant, solicitorContainer
@@ -78,6 +87,25 @@ public class NoticeOfChangeFieldPopulator {
         }
 
         return caseData.getApplicants().get(0).getValue().getSolicitorOrg().getOrganisationName();
+    }
+
+    private ChangeOrganisationRequest changeRequest(String role, Organisation add, Organisation remove) {
+
+        final DynamicListElement roleItem = DynamicListElement.builder()
+            .code(role)
+            .label(role)
+            .build();
+
+        return ChangeOrganisationRequest.builder()
+            .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
+            .requestTimestamp(LocalDateTime.now())
+            .caseRoleId(DynamicList.builder()
+                            .value(roleItem)
+                            .listItems(List.of(roleItem))
+                            .build())
+            .organisationToRemove(remove)
+            .organisationToAdd(add)
+            .build();
     }
 
     public enum NoticeOfChangeAnswersPopulationStrategy {
