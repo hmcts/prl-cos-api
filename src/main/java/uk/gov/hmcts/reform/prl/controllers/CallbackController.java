@@ -208,9 +208,10 @@ public class CallbackController {
         } else {
             log.info("Court email not found for case id {}", caseData.getId());
         }
-        log.info("******** courtDetails {}", courtLocatorService.getCourtDetails(authorisation, authTokenGenerator.generate()));
         log.info("       ------------********--------------      ");
-        List<String> courtList = locationRefDataService.getCourtLocations(authorisation);
+        List<Map<String,String>> courtList = locationRefDataService.getCourtLocations(authorisation);
+        //DynamicList.builder().value(DynamicListElement.EMPTY)
+        //    .listItems().build();
         //caseDataUpdated.put("courtList", ElementUtils.asDynamicList());
         log.info("******** courtDetails {}", courtList);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
