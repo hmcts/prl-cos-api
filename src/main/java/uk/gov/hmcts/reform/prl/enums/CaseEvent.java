@@ -4,7 +4,9 @@ import java.util.Arrays;
 
 public enum CaseEvent {
     LINK_CITIZEN("linkCitizenAccount"),
-    CITIZEN_CASE_UPDATE("citizen-case-update");
+    CITIZEN_CASE_UPDATE("citizen-case-update"),
+    CITIZEN_UPLOADED_DOCUMENT("citizenUploadedDocument"),
+    CITIZEN_CASE_SUBMIT("citizen-case-submit");
 
     private final String value;
 
