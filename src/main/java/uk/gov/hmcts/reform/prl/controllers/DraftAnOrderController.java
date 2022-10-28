@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 
 import java.time.LocalDate;
 
@@ -27,6 +29,9 @@ public class DraftAnOrderController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ManageOrderService manageOrderService;
 
     @PostMapping(path = "/selected-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate the header")
@@ -44,10 +49,32 @@ public class DraftAnOrderController {
             .data(caseData.toBuilder()
                       .selectedOrder(caseData.getCreateSelectOrderOptions() != null
                                          ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
-                .dateOrderMade(LocalDate.now())
+                      .dateOrderMade(LocalDate.now())
                       .build().toMap(CcdObjectMapper.getObjectMapper())).build();
 
     }
+
+    @PostMapping(path = "/populate-draft-order-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to populate the header")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Populated Headers"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse populateFl404Fields(
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            log.info("Court name before prepopulate: {}", caseData.getCourtName());
+            caseData = manageOrderService.populateCustomOrderFields(caseData);
+        }
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseData.toMap(CcdObjectMapper.getObjectMapper())).build();
+    }
+
 
 }
 
