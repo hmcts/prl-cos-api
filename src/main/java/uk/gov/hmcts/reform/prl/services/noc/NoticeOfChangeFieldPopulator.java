@@ -55,9 +55,6 @@ public class NoticeOfChangeFieldPopulator {
             );
 
             data.put(String.format(representing.getPolicyFieldTemplate(), i), organisationPolicy);
-            data.put("changeOrganisationRequestField",
-                     changeRequest(solicitorRole.getCaseRoleLabel(),Organisation.builder().build(),
-                                   Organisation.builder().build()));
 
             Optional<NoticeOfChangeAnswers> possibleAnswer = populateAnswer(
                 strategy, applicant, solicitorContainer
