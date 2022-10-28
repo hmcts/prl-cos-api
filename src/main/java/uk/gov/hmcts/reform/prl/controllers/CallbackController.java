@@ -32,6 +32,8 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
@@ -209,10 +211,9 @@ public class CallbackController {
             log.info("Court email not found for case id {}", caseData.getId());
         }
         log.info("       ------------********--------------      ");
-        List<Map<String,String>> courtList = locationRefDataService.getCourtLocations(authorisation);
-        //DynamicList.builder().value(DynamicListElement.EMPTY)
-        //    .listItems().build();
-        //caseDataUpdated.put("courtList", ElementUtils.asDynamicList());
+        List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
+        caseDataUpdated.put("courtList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+            .build());
         log.info("******** courtDetails {}", courtList);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

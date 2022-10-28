@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
@@ -1553,7 +1554,7 @@ public class CallbackControllerTest {
         when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.of(CourtEmailAddress.builder()
                 .address("123@gamil.com").build()));
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(new HashMap<>()));
+        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
             .prePopulateCourtDetails(authToken, callbackRequest);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
@@ -1569,7 +1570,7 @@ public class CallbackControllerTest {
         when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(Court.builder().build());
         when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.empty());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(new HashMap<>()));
+        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
             .prePopulateCourtDetails(authToken,callbackRequest);
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));

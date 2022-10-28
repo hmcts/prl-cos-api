@@ -5,15 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
-import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.concat;
@@ -25,7 +22,7 @@ public class LocationRefDataService {
     private final AuthTokenGenerator authTokenGenerator;
     private final LocationRefDataApi locationRefDataApi;
 
-    public List<Map<String,String>> getCourtLocations(String authToken) {
+    public List<DynamicListElement> getCourtLocations(String authToken) {
         try {
             CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(authToken,
                                                                                    authTokenGenerator.generate(),
@@ -34,23 +31,22 @@ public class LocationRefDataService {
         } catch (Exception e) {
             log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
         }
-        return new ArrayList<>();
+        return List.of(DynamicListElement.builder().build());
     }
 
-    private List<Map<String,String>> onlyEnglandAndWalesLocations(CourtDetails locationRefData) {
-        return locationRefData == null
+    private List<DynamicListElement> onlyEnglandAndWalesLocations(CourtDetails locationRefData) {
+        List<DynamicListElement> listItems = locationRefData == null
             ? new ArrayList<>()
             : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
             .map(this::getDisplayEntry).collect(Collectors.toList());
+        return listItems;
     }
 
-    private Map<String,String> getDisplayEntry(CourtVenue location) {
+    private DynamicListElement getDisplayEntry(CourtVenue location) {
         String value = concat(concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
                       location.getPostcode());
         String key = location.getMrdVenueId();
-        Map<String,String> locationMap = new HashMap<>();
-        log.info(" element ", Element.builder().id(UUID.fromString(key)).value(value).build());
-        locationMap.put(key, value);
-        return locationMap;
+
+        return DynamicListElement.builder().code(key).label(value).build();
     }
 }
