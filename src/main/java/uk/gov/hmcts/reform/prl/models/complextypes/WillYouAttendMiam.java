@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.dto.ccd;
+package uk.gov.hmcts.reform.prl.models.complextypes;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,16 +11,13 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RespondentSolicitorMiam {
-
-    @JsonProperty("whatIsMiamPlaceHolder")
-    private final String whatIsMiamPlaceHolder;
-
-    private final YesOrNo respondentSolicitorHaveYouAttendedMiam;
+public class WillYouAttendMiam {
 
     @JsonProperty("helpMiamCostsExemptionsPlaceHolder")
     private final String helpMiamCostsExemptionsPlaceHolder;
 
-    private final YesOrNo respondentSolicitorWillingnessToAttendMiam;
+    private final YesOrNo willYouAttend;
+
+    private final String explainWhy;
 
 }

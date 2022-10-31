@@ -56,6 +56,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.GatekeeperEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.IsMiamAttended;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
@@ -72,6 +73,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo
 import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.WillYouAttendMiam;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
@@ -592,7 +594,8 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
 
-    private final RespondentSolicitorMiam respondentSolicitorMiam;
+    private final IsMiamAttended didYouAttendMiam;
+    private final WillYouAttendMiam willingToAttendMiam;
 
     /**
      * Solicitor Details.
