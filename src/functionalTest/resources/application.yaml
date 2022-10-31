@@ -343,3 +343,10 @@ document:
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
+bundle:
+  api:
+    url: ${BUNDLE_URL:}
+  english:
+    config: ${BUNDLE_ENGLISH_CONFIG:sample-config.yaml}
+  welsh:
+    config: ${BUNDLE_WELSH_CONFIG:sample-config.yaml}
