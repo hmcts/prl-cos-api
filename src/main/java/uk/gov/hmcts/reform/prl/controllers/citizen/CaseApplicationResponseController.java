@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.solicitornotifications.SolicitorNotificationServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
@@ -52,6 +53,9 @@ public class CaseApplicationResponseController {
     @Autowired
     CaseService caseService;
 
+    @Autowired
+    SolicitorNotificationServiceImpl solicitorNotificationService;
+
 
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
@@ -76,7 +80,10 @@ public class CaseApplicationResponseController {
                 DOCUMENT_C7_DRAFT_HINT,
                 false
             );
-
+        /**
+         * send notification to Applicant solicitor for respondent's response
+         */
+        solicitorNotificationService.generateAndSendNotificationToApplicantSolicitor(caseDetails);
         log.info("C7 draft document generated successfully for respondent ");
         return document;
     }

@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.solicitornotifications.SolicitorNotificationServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -69,6 +70,9 @@ public class ManageOrdersController {
 
     @Autowired
     private AmendOrderService amendOrderService;
+
+    @Autowired
+    private SolicitorNotificationServiceImpl solicitorNotificationService;
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -221,7 +225,8 @@ public class ManageOrdersController {
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,
                                                                                                 caseData));
             manageOrderEmailService.sendEmailToApplicantAndRespondent(callbackRequest.getCaseDetails());
-
+            solicitorNotificationService.generateAndSendNotificationToRespondentSolicitor(callbackRequest.getCaseDetails());
+            solicitorNotificationService.generateAndSendNotificationToRespondent(callbackRequest.getCaseDetails());
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
