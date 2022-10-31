@@ -167,4 +167,8 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_REQUEST = "documentRequestedByCourt";
 
     public static final String CITIZEN_UPLOAD_DOC_DATE_FORMAT = "dd-MMM-yyyy";
+
+    public static final String CITIZEN_PRL_CREATE_EVENT = "citizenCreate";
+    public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
+    public static final String CITIZEN_ROLE = "citizen";
 }
