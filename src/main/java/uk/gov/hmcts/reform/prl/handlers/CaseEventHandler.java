@@ -13,8 +13,6 @@ import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
-import uk.gov.hmcts.reform.prl.services.respondent.RespondentTaskListRenderer;
-import uk.gov.hmcts.reform.prl.services.respondent.RespondentTaskListService;
 
 import java.util.List;
 import java.util.Map;
@@ -31,9 +29,7 @@ public class CaseEventHandler {
 
     private final CoreCaseDataService coreCaseDataService;
     private final TaskListService taskListService;
-    private final RespondentTaskListService respondentTaskListService;
     private final TaskListRenderer taskListRenderer;
-    private final RespondentTaskListRenderer respondentTaskListRenderer;
     private final TaskErrorService taskErrorService;
 
     @EventListener
