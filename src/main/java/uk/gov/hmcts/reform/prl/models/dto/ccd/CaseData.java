@@ -703,4 +703,13 @@ public class CaseData implements MappableObject {
      */
     private final YesNoDontKnow currentOrPastProceedingsForChildren;
     private final List<Element<ProceedingDetails>> respondentExistingProceedings;
+    // C100 Rebuild
+    private String c100RebuildConfidentiality;
+    private String c100RebuildInternationalElements;
+    private String c100RebuildReasonableAdjustments;
+    private String c100RebuildTypeOfOrder;
+    private String c100RebuildHearingWithoutNotice;
+    private String c100RebuildOtherProceedings;
+    private String c100RebuildReturnUrl;
+
 }
