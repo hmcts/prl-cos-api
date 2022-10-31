@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -27,9 +28,8 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REVIEW_AND_SUBMIT;
@@ -53,7 +53,7 @@ public class CaseApplicationResponseController {
     CaseService caseService;
 
 
-    @PostMapping(path = "{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON)
+    @PostMapping(path = "/{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Document generated"),
@@ -62,7 +62,7 @@ public class CaseApplicationResponseController {
     public Document generateC7DraftDocument(
         @PathVariable("caseId") String caseId,
         @PathVariable("partyId") String partyId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
@@ -81,7 +81,7 @@ public class CaseApplicationResponseController {
         return document;
     }
 
-    @PostMapping(path = "{caseId}/{partyId}/generate-c7document-final", produces = APPLICATION_JSON)
+    @PostMapping(path = "/{caseId}/{partyId}/generate-c7document-final", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Document generated"),
@@ -90,7 +90,7 @@ public class CaseApplicationResponseController {
     public CaseData generateC7FinalDocument(
         @PathVariable("caseId") String caseId,
         @PathVariable("partyId") String partyId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
@@ -112,14 +112,22 @@ public class CaseApplicationResponseController {
             if (caseData.getCitizenResponseC7DocumentList() != null) {
                 responseDocumentsList.addAll(caseData.getCitizenResponseC7DocumentList());
             }
+            String partyName = caseData.getRespondents().stream().filter(element -> element.getId()
+                    .toString().equalsIgnoreCase(partyId)).map(Element::getValue).findFirst().map(partyDetails -> partyDetails
+                .getFirstName()
+                + " "
+                + partyDetails
+                .getLastName()).orElse("");
+
             Element<ResponseDocuments> responseDocumentElement = element(ResponseDocuments.builder()
-                                                                             .partyName(partyId)
+                                                                             .partyName(partyName)
+                                                                             .createdBy(partyId)
                                                                              .citizenDocument(document)
                                                                              .dateCreated(LocalDate.now())
                                                                              .build());
             responseDocumentsList.add(responseDocumentElement);
             caseData = caseData.toBuilder().citizenResponseC7DocumentList(responseDocumentsList).build();
-            log.info("Call updateCase with event " + REVIEW_AND_SUBMIT + " for case id " + caseId);
+            log.info("****** updating Case with event " + REVIEW_AND_SUBMIT + " for case id " + caseId);
             caseDetailsReturn = caseService.updateCase(
                 caseData,
                 authorisation,
@@ -128,6 +136,7 @@ public class CaseApplicationResponseController {
                 REVIEW_AND_SUBMIT
             );
         }
+        log.info("***** CaseDetails return ***** " + caseDetailsReturn);
         if (caseDetailsReturn != null) {
             return objectMapper.convertValue(
                 caseDetailsReturn.getData(),
@@ -141,14 +150,14 @@ public class CaseApplicationResponseController {
     }
 
     private CaseData updateCurrentRespondent(CaseData caseData, YesOrNo currentRespondent, String partyId) {
-        List<Element<PartyDetails>> partyDetails = caseData.getRespondents().stream().map(respondent -> {
-            if (respondent.getId().toString().equalsIgnoreCase(partyId)) {
-                return element(respondent.getValue().toBuilder().currentRespondent(currentRespondent).build());
-            } else {
-                return respondent;
+
+        for (Element<PartyDetails> partyElement: caseData.getRespondents()) {
+            if (partyElement.getId().toString().equalsIgnoreCase(partyId)) {
+                PartyDetails respondent = partyElement.getValue();
+                respondent = respondent.toBuilder().currentRespondent(currentRespondent).build();
+                partyElement = Element.<PartyDetails>builder().id(partyElement.getId()).value(respondent).build();
             }
-        }).collect(Collectors.toList());
-        caseData = caseData.toBuilder().respondents(partyDetails).build();
+        }
         return caseData;
     }
 }
