@@ -119,6 +119,9 @@ uk:
             WITHDRAW_AFTER_ISSUED_SOLICITOR: ba39a8e6-c553-457e-b526-3c241cd207f6
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             SEND_AND_REPLY_NOTIFICATION: 9f30cc9f-25d2-4abf-9568-cb428dff1d3a
+            CA_APPLICANT_SOLICITOR_RES_NOTIFICATION: a08975e3-6438-4f58-a0f6-827c0dcab291
+            CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION: b6224e6a-f55c-46f8-bfc7-631d273070a4
+            CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
             CA_DA_MANAGE_ORDER_EMAIL: c95d53c2-e9ed-4ce3-b0f9-95df7401bbfa
             CA_DA_FINAL_ORDER_EMAIL: a34023e7-c545-4352-b509-574d15c84f52
             SOLICITOR_RESUBMIT_EMAIL: c8fa581b-10c7-4d48-8a22-3d055ae4be79
@@ -291,7 +294,7 @@ document:
       doc_cover_sheet_welsh_filename: not_implemented
       prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf
-      prl_c21_welsh_template: PRL-GOR-WEL-C21-Blank-Order-Final.docx
+      prl_c21_welsh_template: FL-PRL-GOR-WEL-C21-Final.docx
       prl_c21_welsh_filename: Blank_Order_Directions_C21_Welsh.pdf
       prl_c21_draft_template: PRL-GOR-ENG-C21-Blank-Order-Draft.docx
       prl_c21_draft_filename: Blank_Order_Directions_C21_Draft.pdf
