@@ -34,8 +34,8 @@ public class MiamControllerTest {
     private ObjectMapper objectMapper;
 
 
-    @org.junit.Test
-    public void testServiceOfApplicationAboutToStart() {
+    @Test
+    public void testMiamControllerAboutToStart() {
 
         Map<String, Object> caseData = new HashMap<>();
         CaseData caseData1 = CaseData.builder()
@@ -54,7 +54,7 @@ public class MiamControllerTest {
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = miamController
             .handleAboutToStart(callbackRequest);
-        assertEquals("Collapsable", aboutToStartOrSubmitCallbackResponse.getData().get("whatIsMiamPlaceHolder"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("whatIsMiamPlaceHolder"));
         assertEquals("1", aboutToStartOrSubmitCallbackResponse.getData().get("option1"));
         assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("miamHeader"));
     }
