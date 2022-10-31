@@ -68,23 +68,26 @@ public class CaseApplicationResponseControllerTest {
         caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
 
-        when(documentGenService.generateSingleDocument(Mockito.anyString(),
-                                                       Mockito.any(CaseData.class),
-                                                       Mockito.anyString(),
-                                                       Mockito.anyBoolean()))
+        when(documentGenService.generateSingleDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseData.class),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        ))
             .thenReturn(Document.builder().build());
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(coreCaseDataApi.getCase(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(caseService.updateCase(Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyString(),
-                                    Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
+                                    Mockito.anyString(), Mockito.anyString(),Mockito.isNull()
+        )).thenReturn(caseDetails);
     }
 
     @Test
     public void testGenerateC7finalDocument() throws Exception {
         CaseData caseData1 = caseApplicationResponseController
-            .generateC7FinalDocument(caseId,partyId,authToken,servAuthToken);
+            .generateC7FinalDocument(caseId, partyId, authToken, servAuthToken);
         assertNotNull(caseData1);
     }
 
@@ -92,14 +95,14 @@ public class CaseApplicationResponseControllerTest {
     public void testGenerateC7finalDocumentWithNullData() throws Exception {
         caseDetails = null;
         CaseData caseData1 = caseApplicationResponseController
-            .generateC7FinalDocument(caseId,partyId,authToken,servAuthToken);
+            .generateC7FinalDocument(caseId, partyId, authToken, servAuthToken);
         assertNotNull(caseData1);
     }
 
     @Test
     public void testGenerateC7DraftDocument() throws Exception {
         Document document = caseApplicationResponseController
-            .generateC7DraftDocument(caseId,partyId,authToken,servAuthToken);
+            .generateC7DraftDocument(caseId, partyId, authToken, servAuthToken);
         assertNotNull(document);
     }
 }
