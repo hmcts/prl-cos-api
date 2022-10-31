@@ -22,32 +22,26 @@ public class SolicitorNotificationServiceImpl implements SolicitorNotificationSe
     private final ObjectMapper objectMapper;
 
     @Override
-    public CaseData generateAndSendNotificationToApplicantSolicitor(CaseDetails caseDetails) throws Exception {
+    public void generateAndSendNotificationToApplicantSolicitor(CaseDetails caseDetails) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (caseData.getState() != State.CASE_WITHDRAWN) {
             solicitorNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
         }
-
-        return caseData;
     }
 
     @Override
-    public CaseData generateAndSendNotificationToRespondentSolicitor(CaseDetails caseDetails) throws Exception {
+    public void generateAndSendNotificationToRespondentSolicitor(CaseDetails caseDetails) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (caseData.getState() == State.ALL_FINAL_ORDERS_ISSUED) {
             solicitorNotificationEmailService.sendC100RespondentSolicitorNotification(caseDetails);
         }
-
-        return caseData;
     }
 
     @Override
-    public CaseData generateAndSendNotificationToRespondent(CaseDetails caseDetails) throws Exception {
+    public void generateAndSendNotificationToRespondent(CaseDetails caseDetails) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (caseData.getState() == State.ALL_FINAL_ORDERS_ISSUED) {
             solicitorNotificationEmailService.sendC100RespondentNotification(caseDetails);
         }
-
-        return caseData;
     }
 }

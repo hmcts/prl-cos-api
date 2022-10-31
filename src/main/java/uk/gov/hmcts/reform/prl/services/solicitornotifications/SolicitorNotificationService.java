@@ -6,9 +6,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 public interface SolicitorNotificationService {
 
 
-    public CaseData generateAndSendNotificationToApplicantSolicitor(CaseDetails caseDetails) throws Exception;
+    public void generateAndSendNotificationToApplicantSolicitor(CaseDetails caseDetails) throws Exception;
 
-    public CaseData generateAndSendNotificationToRespondentSolicitor(CaseDetails caseDetails) throws Exception;
+    public void generateAndSendNotificationToRespondentSolicitor(CaseDetails caseDetails) throws Exception;
 
-    public CaseData generateAndSendNotificationToRespondent(CaseDetails caseDetails) throws Exception;
+    public void generateAndSendNotificationToRespondent(CaseDetails caseDetails) throws Exception;
 }

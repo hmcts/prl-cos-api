@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.solicitornotifications.SolicitorNotificationServiceImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,9 @@ public class CaseApplicationResponseControllerTest {
 
     @Mock
     DocumentGenService documentGenService;
+
+    @Mock
+    SolicitorNotificationServiceImpl solicitorNotificationService;
 
     private CaseData caseData;
     private CaseDetails caseDetails;
