@@ -45,8 +45,7 @@ public class LocationRefDataService {
     private DynamicListElement getDisplayEntry(CourtVenue location) {
         String value = concat(concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
                       location.getPostcode());
-        String key = location.getMrdVenueId();
-
+        String key = location.getCourtEpimmsId() + "-" + location.getRegionId();
         return DynamicListElement.builder().code(key).label(value).build();
     }
 }

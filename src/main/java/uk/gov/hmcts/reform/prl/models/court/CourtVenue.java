@@ -7,23 +7,16 @@ import lombok.Data;
 @Data
 @Builder
 public class CourtVenue {
-
     @JsonProperty("court_venue_id")
     private String courtVenueId;
     @JsonProperty("epimms_id")
-    private String epimmsId;
+    private String courtEpimmsId;
     @JsonProperty("site_name")
     private String siteName;
     @JsonProperty("region_id")
     private String regionId;
     @JsonProperty("region")
     private String region;
-    @JsonProperty("cluster_id")
-    private String clusterId;
-    @JsonProperty("cluster_name")
-    private String clusterName;
-    @JsonProperty("open_for_public")
-    private String openForPublic;
     @JsonProperty("court_address")
     private String courtAddress;
     @JsonProperty("postcode")
