@@ -3,12 +3,14 @@ package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildCourtOrderElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHearingWithoutNoticeElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildInternationalElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataChildDetailsElementsMapper.updateChildDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataHwnElementsMapper.updateHearingWithoutNoticeElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataInternationalElementsMapper.updateInternationalElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherProceedingsElementsMapper.updateOtherProceedingsElementsForCaseData;
@@ -39,6 +41,11 @@ public class CaseDataMapper {
         C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements = mapper
                 .readValue(caseData.getC100RebuildOtherProceedings(), C100RebuildOtherProceedingsElements.class);
         updateOtherProceedingsElementsForCaseData(caseDataBuilder, c100RebuildOtherProceedingsElements);
+
+        C100RebuildChildDetailsElements c100RebuildChildDetailsElements = mapper
+            .readValue(caseData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
+        updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
+
 
         return caseDataBuilder.build();
     }
