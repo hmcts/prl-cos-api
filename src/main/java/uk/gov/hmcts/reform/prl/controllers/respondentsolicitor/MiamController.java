@@ -38,7 +38,7 @@ public class MiamController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("handleAboutToStart: Callback for Respondent Solicitor - MIAM details  - Load What is MIAM?");
+        log.info("handleAboutToStart: Callback for Respondent Solicitor - MIAM details  - Load What is MIAM?", callbackRequest);
         String collapsale1 = miamService.getCollapsableOfWhatIsMiamPlaceHolder();
         String collapsale2 = miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder();
         caseDataUpdated.put("whatIsMiamPlaceHolder", collapsale1);
