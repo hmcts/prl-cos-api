@@ -236,6 +236,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c47a_filename}")
     protected String c47aFile;
 
+    @Value("${document.templates.common.prl_c47a_welsh_draft_template}")
+    protected String c47aWelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_c47a_welsh_draft_filename}")
+    protected String c47aWelshDraftFile;
+
+    @Value("${document.templates.common.prl_c47a_welsh_template}")
+    protected String c47aWelshTemplate;
+
+    @Value("${document.templates.common.prl_c47a_welsh_filename}")
+    protected String c47aWelshFile;
+
     @Value("${document.templates.common.prl_fl402_draft_template}")
     protected String fl402DraftTemplate;
 
@@ -411,6 +423,10 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c47aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, c47aWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, c47aWelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, c47aWelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c47aWelshFile);
                 break;
             case nonMolestation:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404aDraftTemplate);

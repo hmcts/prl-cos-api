@@ -378,6 +378,10 @@ document:
       prl_c43a_welsh_draft_filename: Welsh_Special_Guardianship_Order_C43A_Draft.pdf
       prl_c43a_welsh_final_template: PRL-GOR-WEL-C43A-Special-Guardianship-Order-Final.docx
       prl_c43a_welsh_final_filename: Welsh_Special_Guardianship_Order_C43A.pdf
+      prl_c47a_welsh_template: PRL-GOR-WEL-C47A-Appointment-Of-Guardian-Final.docx
+      prl_c47a_welsh_filename: Welsh_Appointment_of_a_guardian_C47A.pdf
+      prl_c47a_welsh_draft_template: PRL-GOR-WEL-C47A-Appointment-Of-Guardian-Draft.docx
+      prl_c47a_welsh_draft_filename: Welsh_Appointment_of_a_guardian_C47A_draft.pdf
     citizen:
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
