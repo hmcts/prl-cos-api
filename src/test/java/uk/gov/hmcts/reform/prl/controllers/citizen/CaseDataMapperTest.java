@@ -8,9 +8,11 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -19,6 +21,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum.bothLiveWithAndSpendTimeWithOrder;
 import static uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum.liveWithOrder;
+import static uk.gov.hmcts.reform.prl.enums.Gender.male;
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.childProtectionConcern;
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.domesticViolence;
 import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.other;
@@ -145,6 +148,28 @@ public class CaseDataMapperTest {
                         + "\n\"other risks\"\n],\n\"hu_otherRiskDetails\": \"test\",\n\"hu_timeOfHearingDetails\": "
                         + "\"24 hours\",\n\"hu_hearingWithNext48HrsDetails\": \"Yes\",\n\"hu_hearingWithNext48HrsMsg\": "
                         + "\"48 hours\"\n}")
+                .c100RebuildApplicantDetails("{\n  \n  \"appl_allApplicants\": [\n{\n\"id\": "
+                        + "\"c84edd0f-b332-4169-9499-614cb06ace98\",\n\"applicantFirstName\": \"c1\",\n\"applicantLastName\": "
+                        + "\"c1\",\n\"startAlternative\": \"Yes\",\n\"start\": \"Yes\",\n\"contactDetailsPrivate\": [],"
+                        + "\n\"contactDetailsPrivateAlternative\": [\n\"address\",\n\"telephone\",\n\"email\"\n],"
+                        + "\n\"applicantPreviousName\": \"applicantPreviousName\",\n\"applicantGender\": \"male\","
+                        + "\n\"applicantDateOfBirth\": {\n  \"year\": \"1990\",\n  \"month\": \"12\",\n  \"day\": "
+                        + "\"12\"\n  \n},\n\"applicantPlaceOfBirth\": \"applicantPlaceOfBirth\",\n\"applicantAddressPostcode\": "
+                        + "\"XXX XXX\",\n\"applicantAddress1\": \"applicantAddress1\",\n\"applicantAddress2\": "
+                        + "\"applicantAddress2\",\n\"applicantAddressTown\": \"LONDON\",\n\"applicantAddressCounty\": "
+                        + "\"BRENT\",\n\"applicantAddressHistory\": \"Yes\",\n\"applicantProvideDetailsOfPreviousAddresses\": "
+                        + "\"applicantProvideDetailsOfPreviousAddresses\"\n},\n{\n\"id\": "
+                        + "\"c84edd0f-b332-4169-9499-614cb06ace99\","
+                        + "\n\"applicantFirstName\": \"c2\",\n\"applicantLastName\": \"c2\",\n\"startAlternative\": "
+                        + "\"Yes\",\n\"start\": \"Yes\",\n\"contactDetailsPrivate\": [],\n\"contactDetailsPrivateAlternative\": "
+                        + "[\n\"address\",\n\"telephone\",\n\"email\"\n],\n\"applicantPreviousName\": \"applicantPreviousName\","
+                        + "\n\"applicantGender\": \"male\",\n\"applicantDateOfBirth\": {\n  \"year\": \"1990\",\n  \"month\": "
+                        + "\"12\",\n  \"day\": \"12\"\n  \n},\n\"applicantPlaceOfBirth\": \"applicantPlaceOfBirth\","
+                        + "\n\"applicantAddressPostcode\": \"XXX XXX\",\n\"applicantAddress1\": \"applicantAddress1\","
+                        + "\n\"applicantAddress2\": \"applicantAddress2\",\n\"applicantAddressTown\": "
+                        + "\"LONDON\",\n\"applicantAddressCounty\": \"BRENT\",\n\"applicantAddressHistory\": \"Yes\","
+                        + "\n\"applicantProvideDetailsOfPreviousAddresses\": \"applicantProvideDetailsOfPreviousAddresses\"\n}"
+                        + "\n]\n}")
                 .build();
     }
 
@@ -187,9 +212,9 @@ public class CaseDataMapperTest {
         assertEquals(List.of(superviosionOrder), proceedingDetails.get(0).getValue().getTypeOfOrder());
         assertEquals(List.of(careOrder), proceedingDetails.get(1).getValue().getTypeOfOrder());
         assertEquals(No, updatedCaseData.getApplicantAttendedMiam());
-        //assertEquals(No, updatedCaseData.getOtherProceedingsMiam());
+        assertEquals(No, updatedCaseData.getOtherProceedingsMiam());
         assertEquals(No, updatedCaseData.getFamilyMediatorMiam());
-        //assertEquals("s", updatedCaseData.getApplicantConsentMiam());
+        assertEquals("s", updatedCaseData.getApplicantConsentMiam());
         assertTrue(updatedCaseData.getMiamExemptionsChecklist().containsAll(List.of(domesticViolence,
                 urgency, previousMIAMattendance, other, childProtectionConcern)));
         assertEquals(Yes, updatedCaseData.getIsCaseUrgent());
@@ -197,6 +222,13 @@ public class CaseDataMapperTest {
                 + "children's safety, Risk that the children will be abducted, Legal proceedings taking place overseas, "
                 + "Other risks, test", updatedCaseData.getCaseUrgencyTimeAndReason());
         assertEquals("48 hours", updatedCaseData.getEffortsMadeWithRespondents());
+
+        assertEquals(2, updatedCaseData.getApplicants().size());
+        PartyDetails partyDetails = updatedCaseData.getApplicants().get(0).getValue();
+        assertEquals("c1", partyDetails.getFirstName());
+        assertEquals("c1", partyDetails.getLastName());
+        assertEquals(LocalDate.of(1990, 12, 12), partyDetails.getDateOfBirth());
+        assertEquals(male, partyDetails.getGender());
     }
 
     @Test

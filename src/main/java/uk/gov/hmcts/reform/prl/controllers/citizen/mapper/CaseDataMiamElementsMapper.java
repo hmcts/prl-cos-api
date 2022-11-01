@@ -25,6 +25,8 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.enums.citizen.DomesticAbuseMapperEnum.ILRDuetoDomesticAbuse;
+import static uk.gov.hmcts.reform.prl.enums.citizen.DomesticAbuseMapperEnum.financiallyAbuse;
 
 public class CaseDataMiamElementsMapper {
 
@@ -111,8 +113,8 @@ public class CaseDataMiamElementsMapper {
 
     private static List<MiamDomesticViolenceChecklistEnum> buildMiamDomesticViolenceChecklist(C100RebuildMiamElements
                                                                                                       c100RebuildMiamElements) {
-        List<String> domesticAbuses = nonNull(c100RebuildMiamElements.getMiamDomesticAbuse())
-                ? List.of(c100RebuildMiamElements.getMiamDomesticAbuse()) : Collections.emptyList();
+        List<String> domesticAbuses = new java.util.ArrayList<>(nonNull(c100RebuildMiamElements.getMiamDomesticAbuse())
+                ? List.of(c100RebuildMiamElements.getMiamDomesticAbuse()) : Collections.emptyList());
 
         if (domesticAbuses.isEmpty() || domesticAbuses.contains("none")) {
             return null;
@@ -138,10 +140,10 @@ public class CaseDataMiamElementsMapper {
 
         List<String> domesticAbuseHeads = List.of(c100RebuildMiamElements.getMiamDomesticAbuse());
 
-        if (domesticAbuseHeads.contains("c100RebuildMiamElements")) {
-            domesticAbuses.add("c100RebuildMiamElements");
-        } else if (domesticAbuseHeads.contains("financiallyAbuse")) {
-            domesticAbuses.add("financiallyAbuse");
+        if (domesticAbuseHeads.contains(ILRDuetoDomesticAbuse.toString())) {
+            domesticAbusesList.add(ILRDuetoDomesticAbuse.toString());
+        } else if (domesticAbuseHeads.contains(financiallyAbuse.toString())) {
+            domesticAbusesList.add(financiallyAbuse.toString());
         }
 
         return domesticAbusesList.stream().map(value -> DomesticAbuseMapperEnum.valueOf(value).getValue())

@@ -48,7 +48,7 @@ def versions = [
   puppyCrawl                   : '8.43',
   reformPropertiesVolume       : '0.0.4',
   reformsJavaLogging           : '5.1.7',
-  sendLetterClient             : '2.2.0',
+  sendLetterClient             : '3.0.10',
   serenity                     : '2.3.10',
   serenityCucumber             : '1.9.50',
   serviceTokenGenerator        : '3.1.1',
@@ -286,18 +286,17 @@ dependencies {
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.17.2'
   implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version: versions.reformPropertiesVolume
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
-  implementation group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: versions.sendLetterClient
+  implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz'
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
   implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
-  implementation group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '3.0.3'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
-  compile group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '2.2.0'
+  compile group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
   compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '5.10.1'
   compile group: 'org.elasticsearch', name: 'elasticsearch', version: '7.13.4'
   compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4'

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildCourtOrderElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHearingWithoutNoticeElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildInternationalElements;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsEle
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataApplicantElementsMapper.updateApplicantElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataHwnElementsMapper.updateHearingWithoutNoticeElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataInternationalElementsMapper.updateInternationalElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
@@ -51,6 +53,10 @@ public class CaseDataMapper {
         C100RebuildMiamElements c100RebuildMiamElements = mapper
                 .readValue(caseData.getC100RebuildMaim(), C100RebuildMiamElements.class);
         updateMiamElementsForCaseData(caseDataBuilder, c100RebuildMiamElements);
+
+        C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = mapper
+                .readValue(caseData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
+        updateApplicantElementsForCaseData(caseDataBuilder, c100RebuildApplicantDetailsElements);
 
         return caseDataBuilder.build();
     }
