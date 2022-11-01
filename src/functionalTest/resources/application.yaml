@@ -170,6 +170,9 @@ idam:
   apigateway:
     username: ${COURTNAV_USERNAME:xxxxxx}
     password: ${COURTNAV_PASSWORD:xxxxxx}
+  cafcass:
+    username: ${CAFCASS_USERNAME:xxxxxx}
+    password: ${CAFCASS_PASSWORD:xxxxxx}
   api_gw:
     microservice: api_gw
 
