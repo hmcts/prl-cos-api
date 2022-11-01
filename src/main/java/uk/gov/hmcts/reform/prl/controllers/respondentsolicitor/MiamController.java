@@ -47,6 +47,7 @@ public class MiamController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("whatIsMiamPlaceHolder", miamService.getCollapsableOfWhatIsMiamPlaceHolder());
         caseDataUpdated.put("helpMiamCostsExemptionsPlaceHolder", miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder());
+        log.info("*****CaseDataUpdated****** - ", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
