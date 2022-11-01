@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.complextypes.IsMiamAttended;
-import uk.gov.hmcts.reform.prl.models.complextypes.WillYouAttendMiam;
 import uk.gov.hmcts.reform.prl.services.RespondentSolicitorMiamService;
 
 import java.util.Map;
@@ -47,12 +45,8 @@ public class MiamController {
 
         log.info("handleAboutToStart: Callback for Respondent Solicitor - MIAM details  - Load What is MIAM?");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("whatIsMiamPlaceHolder", IsMiamAttended.builder()
-            .whatIsMiamPlaceHolder(miamService.getCollapsableOfWhatIsMiamPlaceHolder())
-            .build());
-        caseDataUpdated.put("helpMiamCostsExemptionsPlaceHolder", WillYouAttendMiam.builder()
-            .helpMiamCostsExemptionsPlaceHolder(miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder())
-            .build());
+        caseDataUpdated.put("whatIsMiamPlaceHolder", miamService.getCollapsableOfWhatIsMiamPlaceHolder());
+        caseDataUpdated.put("helpMiamCostsExemptionsPlaceHolder", miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
