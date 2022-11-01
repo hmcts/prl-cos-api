@@ -128,6 +128,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c43a_final_filename}")
     protected String c43AFinalFilename;
 
+    @Value("${document.templates.common.prl_c43a_welsh_final_template}")
+    protected String c43AWelshFinalTemplate;
+
+    @Value("${document.templates.common.prl_c43a_welsh_final_filename}")
+    protected String c43AWelshFinalFilename;
+
+    @Value("${document.templates.common.prl_c43a_welsh_draft_template}")
+    protected String c43AWelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_c43a_welsh_draft_filename}")
+    protected String c43AWelshDraftFilename;
+
     @Value("${document.templates.common.prl_c43_draft_template}")
     protected String c43DraftTemplate;
 
@@ -139,6 +151,18 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_c43_filename}")
     protected String c43File;
+
+    @Value("${document.templates.common.prl_c43_welsh_draft_template}")
+    protected String c43WelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_c43_welsh_draft_filename}")
+    protected String c43WelshDraftFile;
+
+    @Value("${document.templates.common.prl_c43_welsh_template}")
+    protected String c43WelshTemplate;
+
+    @Value("${document.templates.common.prl_c43_welsh_filename}")
+    protected String c43WelshFile;
 
     @Value("${document.templates.common.prl_fl404_draft_template}")
     protected String fl404DraftTemplate;
@@ -354,6 +378,11 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c43DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c43Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c43File);
+
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, c43WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, c43WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, c43WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c43WelshFile);
                 break;
             case occupation:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404DraftTemplate);
@@ -371,6 +400,11 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c43ADraftFilename);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c43AFinalTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c43AFinalFilename);
+
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, c43AWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, c43AWelshDraftFilename);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, c43AWelshFinalTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c43AWelshFinalFilename);
                 break;
             case appointmentOfGuardian:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c47aDraftTemplate);
@@ -638,7 +672,6 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         GeneratedDocumentInfo generatedDocumentInfo = null;
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
-        log.info("*** FieldMap *** {}", fieldsMap);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -647,7 +680,6 @@ public class ManageOrderService {
                 CaseDetails.builder().caseData(caseData).build(),
                 fieldsMap.get(PrlAppsConstants.TEMPLATE)
             );
-            log.info("*** Generating Draft order in English *** {}", generatedDocumentInfo);
             caseDataUpdated.put("previewOrderDoc", Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -662,7 +694,6 @@ public class ManageOrderService {
                 CaseDetails.builder().caseData(caseData).build(),
                 fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
             );
-            log.info("*** Generating Draft order in Welsh *** {}", generatedDocumentInfo);
             caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())

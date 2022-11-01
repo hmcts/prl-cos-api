@@ -326,6 +326,14 @@ document:
       prl_n117_welsh_draft_filename: Welsh_N117CreateOrderDraft.pdf
       prl_n117_welsh_template: PRL-GOR-WEL-N117-General-Undertaking-Form-Final.docx
       prl_n117_welsh_filename: Welsh_N117CreateOrder.pdf
+      prl_c43_welsh_template: PRL-GOR-WEL-C43-Child-Arrangements-Final.docx
+      prl_c43_welsh_filename: Welsh_ChildArrangements_Specific_Prohibited_Steps_C43.pdf
+      prl_c43_welsh_draft_template: PRL-GOR-WEL-C43-Child-Arrangements-Draft.docx
+      prl_c43_welsh_draft_filename: Welsh_ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
+      prl_c43a_welsh_draft_template: PRL-GOR-WEL-C43A-Special-Guardianship-Order-Draft.docx
+      prl_c43a_welsh_draft_filename: Welsh_Special_Guardianship_Order_C43A_Draft.pdf
+      prl_c43a_welsh_final_template: PRL-GOR-WEL-C43A-Special-Guardianship-Order-Final.docx
+      prl_c43a_welsh_final_filename: Welsh_Special_Guardianship_Order_C43A.pdf
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf
