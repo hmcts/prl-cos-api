@@ -29,8 +29,6 @@ public class BundlingService {
     private String bundleWelshConfig;
 
     public BundleCreateResponse createBundleServiceRequest(CaseData caseData, String authorization) throws Exception {
-
-        //need to check on historical bundles on how to handle
         return createBundle(authorization, authTokenGenerator.generate(),
             bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(
                 caseData, getBundleConfig(caseData.getLanguagePreferenceWelsh())));

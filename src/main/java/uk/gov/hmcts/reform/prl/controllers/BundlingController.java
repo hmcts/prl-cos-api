@@ -15,11 +15,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
@@ -42,8 +46,21 @@ public class BundlingController extends AbstractCallbackController {
         throws Exception {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        moveExistingCaseBundlesToHistoricalBundles(caseData);
         caseDataUpdated.put("caseBundles",bundlingService.createBundleServiceRequest(caseData, authorization).getData().getCaseBundles());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
+    }
+
+    private void moveExistingCaseBundlesToHistoricalBundles(CaseData caseData) {
+        List<Bundle> historicalBundles = new ArrayList<>();
+        if (nonNull(caseData.getHistoricalBundles())) {
+            historicalBundles.addAll(caseData.getHistoricalBundles());
+        }
+        if (nonNull(caseData.getCaseBundles())) {
+            historicalBundles.addAll(caseData.getCaseBundles());
+        }
+        caseData.setHistoricalBundles(historicalBundles);
+        caseData.setCaseBundles(null);
     }
 }
