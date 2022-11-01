@@ -272,8 +272,8 @@ public class CaseDataMapperTest {
         assertNull(updatedCaseData.getMiamExemptionsChecklist());
     }
 
-  @Test
-  public void testCaseDataMapperForChildDetail() throws JsonProcessingException {
+    @Test
+    public void testCaseDataMapperForChildDetail() throws JsonProcessingException {
         //Given
         CaseData caseData1 = caseData.toBuilder().c100RebuildChildDetails("{\"cd_children\":"
                   + "[{\"id\":\"6c2505da-dae5-4541-9df5-5f4045f0ad4a\",\"firstName\":\"c1\",\"lastName\":\"c11\","
@@ -288,7 +288,7 @@ public class CaseDataMapperTest {
              + "\"parentialResponsibility\":{\"statement\":\"test22\"}}],\"cd_childrenKnownToSocialServices\":\"Yes\","
                  + "\"cd_childrenKnownToSocialServicesDetails\":\"Testchild\",\"cd_childrenSubjectOfProtectionPlan\":\""
                   + "Dontknow\"}").build();
-                  
+
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
 
