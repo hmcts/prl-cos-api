@@ -29,6 +29,7 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
 
+        log.info("Case details before generating doc : {}", caseDetails);
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put("caseDetails", AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
         GeneratedDocumentInfo generatedDocumentInfo = null;
@@ -93,8 +94,8 @@ public class DgsService {
         }
         String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = CaseDetails.builder().caseId(caseId).state("ISSUE")
-                                        .caseData(CaseData.builder().id(Long.valueOf(caseId))
-                                                      .citizenUploadedStatement(freeTextUploadStatements).build()).build();
+            .caseData(CaseData.builder().id(Long.valueOf(caseId))
+                          .citizenUploadedStatement(freeTextUploadStatements).build()).build();
         tempCaseDetails.put("caseDetails", AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
 
 
