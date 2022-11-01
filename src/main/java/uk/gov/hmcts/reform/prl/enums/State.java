@@ -26,7 +26,8 @@ public enum State {
     PREPARE_FOR_HEARING_CONDUCT_HEARING("PREPARE_FOR_HEARING_CONDUCT_HEARING", "Hearing"),
     DECISION_OUTCOME("DECISION_OUTCOME"),
     ALL_FINAL_ORDERS_ISSUED("ALL_FINAL_ORDERS_ISSUED"),
-    CASE_HEARING("CASE_HEARING","Prepare for hearing");
+    CASE_HEARING("CASE_HEARING","Prepare for hearing"),
+    CASE_HEARINGS("CASE_HEARINGS","Case Hearings");
     private final String value;
     private final String label;
 
