@@ -9,8 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -21,6 +21,9 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.HearingDetailsRequest;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
@@ -30,8 +33,11 @@ import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.Optional;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
@@ -66,7 +72,7 @@ public class HearingsNotificationController {
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public String sendHearingNotification(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                           @RequestHeader("serviceAuthorization") String s2sToken,
-                                          @RequestBody HearingDetailsRequest hearingDetailsRequest) throws Exception {
+                                          @ModelAttribute HearingDetailsRequest hearingDetailsRequest) throws Exception {
 
         String caseId = hearingDetailsRequest.getCaseId();
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
@@ -114,7 +120,7 @@ public class HearingsNotificationController {
 
         String email = "";
         String  partyId = hearingDetailsRequest.getPartyId();
-        /* if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
             Optional<PartyDetails> applicantPartyDetails = caseData.getApplicants()
 
                 .stream()
@@ -132,7 +138,7 @@ public class HearingsNotificationController {
                 .map(Element::getValue)
                 .findFirst();
 
-            if (respondenytPartyDetails.isPresent()) {
+            if (respondenytPartyDetails.isPresent() && email.isEmpty()) {
                 if (respondenytPartyDetails.get().getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
                     email = respondenytPartyDetails.get().getEmail();
             }
@@ -140,10 +146,10 @@ public class HearingsNotificationController {
             if (caseData.getApplicantsFL401().getCanYouProvideEmailAddress().equals(YesOrNo.Yes)) {
                 email = caseData.getApplicantsFL401().getEmail();
             }
-            if (caseData.getRespondentsFL401().getCanYouProvideEmailAddress().equals(YesOrNo.Yes)) {
+            if (caseData.getRespondentsFL401().getCanYouProvideEmailAddress().equals(YesOrNo.Yes) && email.isEmpty()) {
                 email = caseData.getRespondentsFL401().getEmail();
             }
-        }  */
+        }
 
         emailService.send(
             "test@example.com",
