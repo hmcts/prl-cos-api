@@ -48,6 +48,7 @@ public class BundlingController extends AbstractCallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         moveExistingCaseBundlesToHistoricalBundles(caseData);
         caseDataUpdated.put("caseBundles",bundlingService.createBundleServiceRequest(caseData, authorization).getData().getCaseBundles());
+        caseDataUpdated.put("historicalBundles",caseData.getHistoricalBundles());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
