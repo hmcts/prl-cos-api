@@ -128,8 +128,9 @@ public class HearingsNotificationController {
                 .map(Element::getValue)
                 .findFirst();
             if (applicantPartyDetails.isPresent()) {
-                if (applicantPartyDetails.get().getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
+                if (applicantPartyDetails.get().getCanYouProvideEmailAddress().equals(YesOrNo.Yes)) {
                     email = applicantPartyDetails.get().getEmail();
+                }
             }
 
             Optional<PartyDetails> respondenytPartyDetails = caseData.getRespondents()
@@ -139,8 +140,9 @@ public class HearingsNotificationController {
                 .findFirst();
 
             if (respondenytPartyDetails.isPresent() && email.isEmpty()) {
-                if (respondenytPartyDetails.get().getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
+                if (respondenytPartyDetails.get().getCanYouProvideEmailAddress().equals(YesOrNo.Yes)) {
                     email = respondenytPartyDetails.get().getEmail();
+                }
             }
         } else {
             if (caseData.getApplicantsFL401().getCanYouProvideEmailAddress().equals(YesOrNo.Yes)) {
