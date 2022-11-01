@@ -32,6 +32,12 @@ public class IdamTokenGenerator {
     @Value("${idam.apigateway.password}")
     private String apiGwPassword;
 
+    @Value("${idam.cafcass.username}")
+    private String cafcassUserName;
+
+    @Value("${idam.cafcass.password}")
+    private String cafcassPassword;
+
     public String generateIdamTokenForSolicitor() {
         return idamClient.getAccessToken(solicitorUsername, solicitorPassword);
     }
@@ -46,6 +52,10 @@ public class IdamTokenGenerator {
 
     public String generateIdamTokenForUser(String username, String password) {
         return idamClient.getAccessToken(username, password);
+    }
+
+    public String generateIdamTokenForCafcass() {
+        return idamClient.getAccessToken(cafcassUserName, cafcassPassword);
     }
 
     public UserDetails getUserDetailsFor(final String token) {
