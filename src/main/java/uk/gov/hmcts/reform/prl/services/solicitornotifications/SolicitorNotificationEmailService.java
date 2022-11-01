@@ -37,7 +37,7 @@ public class SolicitorNotificationEmailService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
-    @Value("${citizen.dashboardUrl}")
+    @Value("${citizen.url}")
     private String dashboardUrl;
 
     public void sendC100ApplicantSolicitorNotification(CaseDetails caseDetails) throws Exception {
