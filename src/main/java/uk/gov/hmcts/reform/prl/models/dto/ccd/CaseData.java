@@ -654,4 +654,7 @@ public class CaseData implements MappableObject {
 
     private String citizenUploadedStatement;
 
+    @JsonProperty("cafcassUploadedDocs")
+    private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
+
 }
