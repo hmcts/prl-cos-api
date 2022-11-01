@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -43,6 +44,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
@@ -65,6 +67,12 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_c21_filename}")
     protected String c21File;
+
+    @Value("${document.templates.common.prl_c21_welsh_template}")
+    protected String c21WelshTemplate;
+
+    @Value("${document.templates.common.prl_c21_welsh_filename}")
+    protected String c21WelshFileName;
 
     @Value("${document.templates.common.prl_c43a_draft_template}")
     protected String c43ADraftTemplate;
@@ -210,6 +218,8 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_n117_filename}")
     protected String n117File;
 
+    private final DocumentLanguageService documentLanguageService;
+
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
 
     private final DgsService dgsService;
@@ -240,6 +250,8 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
+                fieldsMap.put(FINAL_TEMPLATE_WELSH, c21WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c21WelshFileName);
                 break;
             case powerOfArrest:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl406DraftTemplate);
@@ -373,7 +385,7 @@ public class ManageOrderService {
         return builder.toString();
     }
 
-    private OrderDetails getCurrentOrderDetails(String authorisation, CaseData caseData)
+    private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData)
         throws Exception {
 
         String flagSelectedOrder = caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
@@ -387,36 +399,27 @@ public class ManageOrderService {
         } else {
             flagSelectedOrderId = String.valueOf(caseData.getChildArrangementOrders());
         }
-
         if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                CaseDetails.builder().caseData(caseData).build(),
-                fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
-            );
-            return OrderDetails.builder().orderType(flagSelectedOrder)
-                .orderTypeId(flagSelectedOrderId)
-                .orderDocument(Document.builder()
-                                   .documentUrl(generatedDocumentInfo.getUrl())
-                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                   .documentHash(generatedDocumentInfo.getHashToken())
-                                   .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
-                .otherDetails(OtherOrderDetails.builder()
-                                  .createdBy(caseData.getJudgeOrMagistratesLastName())
-                                  .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                      PrlAppsConstants.D_MMMM_YYYY,
-                                      Locale.UK
-                                  )))
-                                  .orderMadeDate(caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(
-                                      PrlAppsConstants.D_MMMM_YYYY,
-                                      Locale.UK
-                                  )))
-                                  .orderRecipients(getAllRecipients(caseData)).build())
-                .dateCreated(dateTime.now())
-                .build();
+            List<Element<OrderDetails>> orderCollection = new ArrayList<>();
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            if (documentLanguage.isGenEng()) {
+                log.info("*** Generating Final order in English ***");
+                orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
+                                                                                   fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME),
+                                                                                   fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME),
+                                                           caseData));
+
+            }
+            if (documentLanguage.isGenWelsh()) {
+                log.info("*** Generating Final order in Welsh ***");
+                orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
+                                                                                 fieldMap.get(FINAL_TEMPLATE_WELSH),
+                                                                                 fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME),caseData));
+            }
+            return orderCollection;
         } else {
-            return OrderDetails.builder().orderType(flagSelectedOrder)
+            return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                 .orderDocument(caseData.getAppointmentOfGuardian())
                 .otherDetails(OtherOrderDetails.builder()
                                   .createdBy(caseData.getJudgeOrMagistratesLastName())
@@ -426,7 +429,7 @@ public class ManageOrderService {
                                   )))
                                   .orderRecipients(getAllRecipients(caseData)).build())
                 .dateCreated(dateTime.now())
-                .build();
+                .build()));
         }
     }
 
@@ -493,16 +496,10 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData) throws Exception {
-        Element<OrderDetails> orderDetails = element(getCurrentOrderDetails(authorisation, caseData));
+        List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
         List<Element<OrderDetails>> orderCollection;
-
-        if (caseData.getOrderCollection() != null) {
-            orderCollection = caseData.getOrderCollection();
-            orderCollection.add(orderDetails);
-        } else {
-            orderCollection = new ArrayList<>();
-            orderCollection.add(orderDetails);
-        }
+        orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
+        orderCollection.addAll(orderDetails);
         orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
         return Map.of("orderCollection", orderCollection);
     }
@@ -688,5 +685,41 @@ public class ManageOrderService {
 
         return caseData.toBuilder().manageOrders(orderData)
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
+    }
+
+    private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
+                                                         String flagSelectedOrder, String template, String fileName,
+                                                         CaseData caseData) throws Exception {
+        log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, template);
+        GeneratedDocumentInfo generatedDocumentInfo = template.contains("-WEL-") ? dgsService.generateWelshDocument(
+            authorisation,
+            CaseDetails.builder().caseData(caseData).build(),
+            template
+        ) : dgsService.generateDocument(
+            authorisation,
+            CaseDetails.builder().caseData(caseData).build(),
+            template
+        );
+        return element(OrderDetails.builder().orderType(flagSelectedOrder)
+                                   .orderTypeId(flagSelectedOrderId)
+                                   .orderDocument(Document.builder()
+                                                      .documentUrl(generatedDocumentInfo.getUrl())
+                                                      .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                      .documentHash(generatedDocumentInfo.getHashToken())
+                                                      .documentFileName(fileName).build())
+                                   .otherDetails(OtherOrderDetails.builder()
+                                                     .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                                     .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
+                                                         PrlAppsConstants.D_MMMM_YYYY,
+                                                         Locale.UK
+                                                     )))
+                                                     .orderMadeDate(caseData.getDateOrderMade()
+                                                                        .format(DateTimeFormatter.ofPattern(
+                                                         PrlAppsConstants.D_MMMM_YYYY,
+                                                         Locale.UK
+                                                     )))
+                                                     .orderRecipients(getAllRecipients(caseData)).build())
+                                   .dateCreated(dateTime.now())
+                                   .build());
     }
 }
