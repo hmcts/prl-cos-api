@@ -89,7 +89,6 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getAppointmentOfGuardian());
         }
-        log.info("in populate-preview-order caseDataUpdated {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
@@ -242,7 +241,6 @@ public class ManageOrdersController {
             caseData.setAppointedGuardianName(namesList);
             caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
         }
-        log.info("in show-preview-order caseDataUpdated {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
