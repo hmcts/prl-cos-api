@@ -31,7 +31,8 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @Slf4j
 @RestController
