@@ -57,7 +57,7 @@ public class HearingsNotificationController {
     @Value("${citizen.url}")
     private String hearingDetailsUrl;
 
-    @PostMapping(path = "/{caseId}/{eventId}/{partyName}/hearing-details-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/hearing-details-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Send a notification to the parties about the hearing date.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Notification Sent"),
