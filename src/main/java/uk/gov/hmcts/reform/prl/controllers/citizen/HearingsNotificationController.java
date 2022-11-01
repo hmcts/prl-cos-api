@@ -30,7 +30,8 @@ import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
@@ -57,7 +58,7 @@ public class HearingsNotificationController {
     @Value("${citizen.url}")
     private String hearingDetailsUrl;
 
-    @PostMapping(path = "/hearing-details-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/hearing-details-notification", produces = APPLICATION_JSON_VALUE, consumes = MULTIPART_FORM_DATA_VALUE)
     @Operation(description = "Send a notification to the parties about the hearing date.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Notification Sent"),
@@ -111,9 +112,9 @@ public class HearingsNotificationController {
 
     private void sendHearingDetailsEmailToCitizen(HearingDetailsRequest hearingDetailsRequest, CaseData caseData) {
 
-        /* String email = "";
+        String email = "";
         String  partyId = hearingDetailsRequest.getPartyId();
-        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+        /* if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
             Optional<PartyDetails> applicantPartyDetails = caseData.getApplicants()
 
                 .stream()
