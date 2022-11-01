@@ -217,7 +217,7 @@ public class CaseDataMapperTest {
         assertEquals(Yes, updatedCaseData.getJurisdictionIssue());
         assertEquals("AnotherpersoncanapplyoutsideUK", updatedCaseData.getJurisdictionIssueGiveReason());
         assertEquals(Yes, updatedCaseData.getRequestToForeignAuthority());
-        assertEquals("Anoqthercountryorjurisdictiondetails", updatedCaseData.getRequestToForeignAuthorityGiveReason());
+        assertEquals("Anothercountryorjurisdictiondetails", updatedCaseData.getRequestToForeignAuthorityGiveReason());
         assertEquals(yes, updatedCaseData.getPreviousOrOngoingProceedingsForChildren());
         List<Element<ProceedingDetails>> proceedingDetails = updatedCaseData.getExistingProceedings();
         assertEquals(16, proceedingDetails.size());

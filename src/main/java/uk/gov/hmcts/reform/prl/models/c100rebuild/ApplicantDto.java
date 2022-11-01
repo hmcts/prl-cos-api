@@ -21,7 +21,7 @@ public class ApplicantDto {
     private String[] contactDetailsPrivateAlternative;
     private String applicantPreviousName;
     private String applicantGender;
-    private DateOfBirth applicantDateOfBirth;
+    private DateofBirth applicantDateOfBirth;
     private String applicantPlaceOfBirth;
     private String applicantAddressPostcode;
     private String applicantAddress1;

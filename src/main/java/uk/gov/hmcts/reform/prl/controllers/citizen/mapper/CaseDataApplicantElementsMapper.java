@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ApplicantDto;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -79,7 +80,7 @@ public class CaseDataApplicantElementsMapper {
         return contactDetailsPrivateList.contains(field) ? YesOrNo.Yes : YesOrNo.No;
     }
 
-    private static LocalDate buildDateOfBirth(DateOfBirth date) {
+    private static LocalDate buildDateOfBirth(DateofBirth date) {
         if (isNotEmpty(date) && isNotEmpty(date.getYear()) &&  isNotEmpty(date.getMonth()) && isNotEmpty(date.getDay())) {
             return LocalDate.of(Integer.parseInt(date.getYear()), Integer.parseInt(date.getMonth()),
                     Integer.parseInt(date.getDay()));
