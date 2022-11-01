@@ -14,7 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -27,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 
 @Slf4j
 @RestController
@@ -44,6 +49,9 @@ public class HearingsNotificationController {
 
     @Autowired
     private CaseService caseService;
+
+    @Autowired
+    private IdamClient idamClient;
 
     @Value("${citizen.url}")
     private String hearingDetailsUrl;
@@ -67,14 +75,34 @@ public class HearingsNotificationController {
             .state(State.CASE_HEARINGS)
             .build();
 
-        caseService.updateCase(
-            caseData,
+        StartEventResponse startEventResponse =
+            coreCaseDataApi.startEventForCitizen(
+                authorisation,
+                s2sToken,
+                idamClient.getUserInfo(authorisation).getUid(),
+                JURISDICTION,
+                CASE_TYPE,
+                caseId,
+                eventId
+            );
+
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(Event.builder()
+                       .id(startEventResponse.getEventId())
+                       .build())
+            .data(caseData).build();
+
+        coreCaseDataApi.submitEventForCitizen(
             authorisation,
             s2sToken,
+            idamClient.getUserInfo(authorisation).getUid(),
+            JURISDICTION,
+            CASE_TYPE,
             caseId,
-            eventId
+            true,
+            caseDataContent
         );
-
         sendHearingDetailsEmailToCitizen(hearingDetailsRequest, caseData);
 
         return "SUCCESS";
