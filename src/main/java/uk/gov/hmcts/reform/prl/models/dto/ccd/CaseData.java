@@ -222,10 +222,10 @@ public class CaseData implements MappableObject {
     /**
      * Child details.
      */
-    private final List<Element<Child>> children;
-    private final YesNoDontKnow childrenKnownToLocalAuthority;
-    private final String childrenKnownToLocalAuthorityTextArea;
-    private final YesNoDontKnow childrenSubjectOfChildProtectionPlan;
+    private List<Element<Child>> children;
+    private YesNoDontKnow childrenKnownToLocalAuthority;
+    private String childrenKnownToLocalAuthorityTextArea;
+    private YesNoDontKnow childrenSubjectOfChildProtectionPlan;
 
     /**
      * Respondent details.
@@ -653,5 +653,6 @@ public class CaseData implements MappableObject {
     private String c100RebuildOtherProceedings;
     private String c100RebuildReturnUrl;
     private String c100RebuildMaim;
+    private String c100RebuildChildDetails;
     private String c100RebuildApplicantDetails;
 }
