@@ -53,7 +53,7 @@ public class MiamControllerTest {
 
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = miamController
-            .handleAboutToStart(callbackRequest);
+            .handleAboutToStart("", callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("whatIsMiamPlaceHolder"));
         assertEquals("1", aboutToStartOrSubmitCallbackResponse.getData().get("option1"));
         assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("miamHeader"));
