@@ -33,7 +33,6 @@ public class MiamControllerTest {
     @Mock
     private ObjectMapper objectMapper;
 
-
     @Test
     public void testMiamControllerAboutToStart() {
 
@@ -53,48 +52,10 @@ public class MiamControllerTest {
 
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = miamController
-            .handleAboutToStart("", callbackRequest);
+            .handleAboutToStart(callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("whatIsMiamPlaceHolder"));
         assertEquals("1", aboutToStartOrSubmitCallbackResponse.getData().get("option1"));
         assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("miamHeader"));
-    }
-
-    @Test
-    public void testHandleAboutToSubmit() throws Exception {
-        CaseData cd = CaseData.builder()
-            .build();
-
-        Map<String, Object> caseData = new HashMap<>();
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(1L)
-                             .data(caseData).build()).build();
-
-        when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse result = miamController.handleAboutToSubmit("test auth",
-                                                                                            callbackRequest);
-        assertNotNull(result);
-
-    }
-
-    @Test
-    public void testHandleMidEvent() throws Exception {
-        CaseData cd = CaseData.builder()
-            .build();
-
-        Map<String, Object> caseData = new HashMap<>();
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(1L)
-                             .data(caseData).build()).build();
-
-        when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse result = miamController.handleMidEvent("test auth",
-                                                                                         callbackRequest);
-        assertNotNull(result);
-
     }
 }
 
