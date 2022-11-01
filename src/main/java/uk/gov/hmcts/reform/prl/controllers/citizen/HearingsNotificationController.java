@@ -9,10 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -65,7 +62,7 @@ public class HearingsNotificationController {
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public String sendHearingNotification(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                           @RequestHeader("serviceAuthorization") String s2sToken,
-                                          @ModelAttribute HearingDetailsRequest hearingDetailsRequest) throws Exception {
+                                          @RequestBody HearingDetailsRequest hearingDetailsRequest) throws Exception {
 
         String caseId = hearingDetailsRequest.getCaseId();
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
@@ -110,6 +107,39 @@ public class HearingsNotificationController {
     }
 
     private void sendHearingDetailsEmailToCitizen(HearingDetailsRequest hearingDetailsRequest, CaseData caseData) {
+
+        /* String email = "";
+        String  partyId = hearingDetailsRequest.getPartyId();
+        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+            Optional<PartyDetails> applicantPartyDetails = caseData.getApplicants()
+
+                .stream()
+                .filter(applicant -> applicant.getId().equals(partyId))
+                .map(Element::getValue)
+                .findFirst();
+            if (applicantPartyDetails.isPresent()) {
+                if (applicantPartyDetails.get().getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
+                    email = applicantPartyDetails.get().getEmail();
+            }
+
+            Optional<PartyDetails> respondenytPartyDetails = caseData.getRespondents()
+                .stream()
+                .filter(respondent -> respondent.getId().equals(partyId))
+                .map(Element::getValue)
+                .findFirst();
+
+            if (respondenytPartyDetails.isPresent()) {
+                if (respondenytPartyDetails.get().getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
+                    email = respondenytPartyDetails.get().getEmail();
+            }
+        } else {
+            if (caseData.getApplicantsFL401().getCanYouProvideEmailAddress().equals(YesOrNo.Yes)) {
+                email = caseData.getApplicantsFL401().getEmail();
+            }
+            if (caseData.getRespondentsFL401().getCanYouProvideEmailAddress().equals(YesOrNo.Yes)) {
+                email = caseData.getRespondentsFL401().getEmail();
+            }
+        }  */
 
         emailService.send(
             "test@example.com",

@@ -18,4 +18,6 @@ public class HearingDetailsRequest {
     private final String partyName;
     @JsonProperty("eventId")
     private final String eventId;
+    @JsonProperty("partyId")
+    private final String partyId;
 }
