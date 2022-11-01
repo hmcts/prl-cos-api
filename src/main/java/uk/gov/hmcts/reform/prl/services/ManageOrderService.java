@@ -407,30 +407,32 @@ public class ManageOrderService {
             if (documentLanguage.isGenEng()) {
                 log.info("*** Generating Final order in English ***");
                 orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
-                                                                                   fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME),
-                                                                                   fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME),
-                                                           caseData));
+                                                           fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME),
+                                                           fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME),
+                                                           caseData
+                ));
 
             }
             if (documentLanguage.isGenWelsh()) {
                 log.info("*** Generating Final order in Welsh ***");
                 orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
-                                                                                 fieldMap.get(FINAL_TEMPLATE_WELSH),
-                                                                                 fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME),caseData));
+                                                           fieldMap.get(FINAL_TEMPLATE_WELSH),
+                                                           fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME), caseData
+                ));
             }
             return orderCollection;
         } else {
             return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
-                .orderDocument(caseData.getAppointmentOfGuardian())
-                .otherDetails(OtherOrderDetails.builder()
-                                  .createdBy(caseData.getJudgeOrMagistratesLastName())
-                                  .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                      PrlAppsConstants.D_MMMM_YYYY,
-                                      Locale.UK
-                                  )))
-                                  .orderRecipients(getAllRecipients(caseData)).build())
-                .dateCreated(dateTime.now())
-                .build()));
+                                       .orderDocument(caseData.getAppointmentOfGuardian())
+                                       .otherDetails(OtherOrderDetails.builder()
+                                                         .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                                         .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
+                                                             PrlAppsConstants.D_MMMM_YYYY,
+                                                             Locale.UK
+                                                         )))
+                                                         .orderRecipients(getAllRecipients(caseData)).build())
+                                       .dateCreated(dateTime.now())
+                                       .build()));
         }
     }
 
@@ -537,7 +539,7 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
 
-        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())){
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = populateCustomOrderFields(caseData);
         }
 
@@ -706,25 +708,25 @@ public class ManageOrderService {
             template
         );
         return element(OrderDetails.builder().orderType(flagSelectedOrder)
-                                   .orderTypeId(flagSelectedOrderId)
-                                   .orderDocument(Document.builder()
-                                                      .documentUrl(generatedDocumentInfo.getUrl())
-                                                      .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                      .documentHash(generatedDocumentInfo.getHashToken())
-                                                      .documentFileName(fileName).build())
-                                   .otherDetails(OtherOrderDetails.builder()
-                                                     .createdBy(caseData.getJudgeOrMagistratesLastName())
-                                                     .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                                         PrlAppsConstants.D_MMMM_YYYY,
-                                                         Locale.UK
-                                                     )))
-                                                     .orderMadeDate(caseData.getDateOrderMade()
-                                                                        .format(DateTimeFormatter.ofPattern(
-                                                         PrlAppsConstants.D_MMMM_YYYY,
-                                                         Locale.UK
-                                                     )))
-                                                     .orderRecipients(getAllRecipients(caseData)).build())
-                                   .dateCreated(dateTime.now())
-                                   .build());
+                           .orderTypeId(flagSelectedOrderId)
+                           .orderDocument(Document.builder()
+                                              .documentUrl(generatedDocumentInfo.getUrl())
+                                              .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                              .documentHash(generatedDocumentInfo.getHashToken())
+                                              .documentFileName(fileName).build())
+                           .otherDetails(OtherOrderDetails.builder()
+                                             .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                             .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
+                                                 PrlAppsConstants.D_MMMM_YYYY,
+                                                 Locale.UK
+                                             )))
+                                             .orderMadeDate(caseData.getDateOrderMade()
+                                                                .format(DateTimeFormatter.ofPattern(
+                                                                    PrlAppsConstants.D_MMMM_YYYY,
+                                                                    Locale.UK
+                                                                )))
+                                             .orderRecipients(getAllRecipients(caseData)).build())
+                           .dateCreated(dateTime.now())
+                           .build());
     }
 }
