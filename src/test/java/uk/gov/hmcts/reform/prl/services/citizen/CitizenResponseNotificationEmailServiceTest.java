@@ -14,8 +14,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,7 +55,8 @@ public class CitizenResponseNotificationEmailServiceTest {
 
 
         CaseDetails caseDetails = CaseDetails.builder().build();
-        Mockito.when(objectMapper.convertValue(Mockito.any((CaseDetails.class)), CaseData.class)).thenReturn(caseData);
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         solicitorNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
 
         Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
@@ -82,7 +86,8 @@ public class CitizenResponseNotificationEmailServiceTest {
 
 
         CaseDetails caseDetails = CaseDetails.builder().build();
-        Mockito.when(objectMapper.convertValue(Mockito.any((CaseDetails.class)), CaseData.class)).thenReturn(caseData);
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         solicitorNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
 
         Mockito.verify(emailService,Mockito.times(0)).send(Mockito.anyString(),
