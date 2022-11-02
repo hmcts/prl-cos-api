@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
-import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
@@ -29,8 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
 
 @Service
@@ -212,10 +209,10 @@ public class ManageOrderEmailService {
 
     private EmailTemplateVars buildRespondentEmail(CaseDetails caseDetails, PartyDetails partyDetails) {
         CaseData caseData = emailService.getCaseData(caseDetails);
-        return CitizenEmail.builder()
+        return  ManageOrderEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
-            .respondentName(String.format("%s %s", partyDetails.getFirstName(), partyDetails.getLastName()))
+            .applicantName(String.format("%s %s", partyDetails.getFirstName(), partyDetails.getLastName()))
             .dashboardLink(citizenDashboardUrl)
             .build();
     }
