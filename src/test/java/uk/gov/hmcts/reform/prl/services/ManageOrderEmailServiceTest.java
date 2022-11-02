@@ -923,13 +923,13 @@ public class ManageOrderEmailServiceTest {
         Mockito.when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
 
-        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.anyString(),
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
                                                            Mockito.any(),
                                                            Mockito.any(),Mockito.any());
     }
 
     @Test
-    public void verifyNoEmailNotificationTriggeredIfStateisNotAllOrderIssued() throws  Exception {
+    public void verifyNoEmailNotificationTriggeredIfStateIsNotAllOrderIssued() throws  Exception {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
