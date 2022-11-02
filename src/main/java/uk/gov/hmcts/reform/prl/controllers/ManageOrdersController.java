@@ -191,6 +191,8 @@ public class ManageOrdersController {
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
+        manageOrderEmailService.sendEmailToApplicantAndRespondent(callbackRequest.getCaseDetails());
+        manageOrderEmailService.sendFinalOrderIssuedNotification(callbackRequest.getCaseDetails());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -220,8 +222,6 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,
                                                                                                 caseData));
-            manageOrderEmailService.sendEmailToApplicantAndRespondent(callbackRequest.getCaseDetails());
-
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
