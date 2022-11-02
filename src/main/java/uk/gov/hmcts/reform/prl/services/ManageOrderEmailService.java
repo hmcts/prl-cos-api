@@ -118,7 +118,7 @@ public class ManageOrderEmailService {
 
     public void sendFinalOrderIssuedNotification(CaseDetails caseDetails) {
         CaseData caseData = emailService.getCaseData(caseDetails);
-        log.info(" Case state "+ caseData.getState());
+        log.info(" Case state " + caseData.getState());
         if (State.ALL_FINAL_ORDERS_ISSUED.equals(caseData.getState())) {
             sendNotificationToRespondentSolicitor(caseDetails);
             sendNotificationToRespondent(caseDetails);
