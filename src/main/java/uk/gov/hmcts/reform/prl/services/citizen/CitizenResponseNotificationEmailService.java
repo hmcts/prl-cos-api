@@ -44,7 +44,7 @@ public class CitizenResponseNotificationEmailService {
     public void sendC100ApplicantSolicitorNotification(CaseDetails caseDetails) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        if (caseData.getState() != State.CASE_WITHDRAWN) {
+        if (!State.CASE_WITHDRAWN.equals(caseData.getState())) {
             Map<String, String> applicantSolicitors = caseData
                 .getApplicants()
                 .stream()

@@ -157,18 +157,21 @@ public class ManageOrderEmailService {
 
     private void sendNotificationToRespondentSolicitor(CaseDetails caseDetails) {
         log.info("inside sendNotificationToRespondentSolicitor ");
-        for (Map<String, List<String>> resSols : getRespondentSolicitor(caseDetails)) {
-            String solicitorEmail = resSols.keySet().toArray()[0].toString();
-            log.info("Respondent Email solicitor " + solicitorEmail);
-            if (!StringUtils.isEmpty(solicitorEmail)) {
-                emailService.send(
-                    solicitorEmail,
-                    EmailTemplateNames.CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION,
-                    buildRespondentSolicitorEmail(caseDetails, resSols.get(solicitorEmail).get(0),
-                                                  resSols.get(solicitorEmail).get(1)
-                    ),
-                    LanguagePreference.english
-                );
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+            for (Map<String, List<String>> resSols : getRespondentSolicitor(caseDetails)) {
+                String solicitorEmail = resSols.keySet().toArray()[0].toString();
+                log.info("Respondent Email solicitor " + solicitorEmail);
+                if (!StringUtils.isEmpty(solicitorEmail)) {
+                    emailService.send(
+                        solicitorEmail,
+                        EmailTemplateNames.CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION,
+                        buildRespondentSolicitorEmail(caseDetails, resSols.get(solicitorEmail).get(0),
+                                                      resSols.get(solicitorEmail).get(1)
+                        ),
+                        LanguagePreference.english
+                    );
+                }
             }
         }
     }
