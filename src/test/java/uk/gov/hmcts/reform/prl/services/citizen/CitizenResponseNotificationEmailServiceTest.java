@@ -53,7 +53,7 @@ public class CitizenResponseNotificationEmailServiceTest {
 
 
         CaseDetails caseDetails = CaseDetails.builder().build();
-        Mockito.when( objectMapper.convertValue(Mockito.any((CaseDetails.class)), CaseData.class)).thenReturn(caseData);
+        Mockito.when(objectMapper.convertValue(Mockito.any((CaseDetails.class)), CaseData.class)).thenReturn(caseData);
         solicitorNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
 
         Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
@@ -83,7 +83,7 @@ public class CitizenResponseNotificationEmailServiceTest {
 
 
         CaseDetails caseDetails = CaseDetails.builder().build();
-        Mockito.when( objectMapper.convertValue(Mockito.any((CaseDetails.class)), CaseData.class)).thenReturn(caseData);
+        Mockito.when(objectMapper.convertValue(Mockito.any((CaseDetails.class)), CaseData.class)).thenReturn(caseData);
         solicitorNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
 
         Mockito.verify(emailService,Mockito.times(0)).send(Mockito.anyString(),
