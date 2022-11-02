@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+
+import java.util.Map;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
@@ -216,7 +220,9 @@ public class CitizenCoreCaseDataService {
             !userDetails.getRoles().contains(CITIZEN_ROLE)
         );
 
-        CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
+        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+        Iterables.removeIf(caseDataMap.values(), Objects::isNull);
+        CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataMap);
 
         return submitCreate(
             authorisation,
