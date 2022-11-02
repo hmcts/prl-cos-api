@@ -183,8 +183,9 @@ public class CitizenCoreCaseDataService {
                 caseId,
                 !userDetails.getRoles().contains(CITIZEN_ROLE)
             );
-
-            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
+            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+            Iterables.removeIf(caseDataMap.values(), Objects::isNull);
+            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataMap);
             return submitUpdate(
                 authorisation,
                 eventRequestData,
