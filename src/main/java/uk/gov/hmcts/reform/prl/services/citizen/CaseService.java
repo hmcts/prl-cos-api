@@ -59,7 +59,7 @@ public class CaseService {
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
             return caseRepository.getCase(authToken, caseId);
         }
-        return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.valueOf(eventId));
+        return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken, String role, String userId) {
