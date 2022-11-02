@@ -23,14 +23,14 @@ import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
-@Service
 @Slf4j
-@RequiredArgsConstructor
+@Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenResponseNotificationEmailService {
 
 
     @Autowired
-    EmailService emailService;
+    private final EmailService emailService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
