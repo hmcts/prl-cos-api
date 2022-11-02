@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -82,18 +83,22 @@ public class ManageOrderEmailService {
             Map<String, String> respondentMap = getEmailPartyWithName(caseData
                                                                          .getRespondents());
             for (Map.Entry<String, String> appValues : applicantsMap.entrySet()) {
-
-                sendEmailToParty(isFinalOrder, appValues.getKey(),
-                                 buildApplicantRespondentEmail(caseDetails, appValues.getValue()));
+                if(!StringUtils.isEmpty(appValues.getKey())) {
+                    sendEmailToParty(isFinalOrder, appValues.getKey(),
+                                     buildApplicantRespondentEmail(caseDetails, appValues.getValue())
+                    );
+                }
             }
 
             for (Map.Entry<String, String> appValues : respondentMap.entrySet()) {
-
-                sendEmailToParty(isFinalOrder, appValues.getKey(),
-                                 buildApplicantRespondentEmail(caseDetails, appValues.getValue()));
+                if(!StringUtils.isEmpty(appValues.getKey())) {
+                    sendEmailToParty(isFinalOrder, appValues.getKey(),
+                                     buildApplicantRespondentEmail(caseDetails, appValues.getValue())
+                    );
+                }
             }
         } else {
-            if (caseData.getApplicantsFL401().getEmail() != null) {
+            if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getEmail())) {
                 sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getEmail(),
                                  buildApplicantRespondentEmail(
                                      caseDetails, caseData.getApplicantsFL401().getFirstName()
@@ -101,7 +106,7 @@ public class ManageOrderEmailService {
 
 
             }
-            if (caseData.getRespondentsFL401().getEmail() != null) {
+            if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
                 sendEmailToParty(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
                                  buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
                                      + " " + caseData.getRespondentsFL401().getFirstName()));
@@ -123,12 +128,14 @@ public class ManageOrderEmailService {
         CaseData caseData = emailService.getCaseData(caseDetails);
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             for (Element<PartyDetails> respondent : caseData.getRespondents()) {
-                emailService.send(
-                    respondent.getValue().getEmail(),
-                    EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
-                    buildRespondentEmail(caseDetails, respondent.getValue()),
-                    LanguagePreference.english
-                );
+                if(!StringUtils.isEmpty(respondent.getValue().getEmail())) {
+                    emailService.send(
+                        respondent.getValue().getEmail(),
+                        EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
+                        buildRespondentEmail(caseDetails, respondent.getValue()),
+                        LanguagePreference.english
+                    );
+                }
             }
         } else {
             if (caseData.getRespondentsFL401().getEmail() != null) {
@@ -148,14 +155,16 @@ public class ManageOrderEmailService {
 
         for (Map<String, List<String>> resSols : getRespondentSolicitor(caseDetails)) {
             String solicitorEmail = resSols.keySet().toArray()[0].toString();
-            emailService.send(
-                solicitorEmail,
-                EmailTemplateNames.CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION,
-                buildRespondentSolicitorEmail(caseDetails, resSols.get(solicitorEmail).get(0),
-                                              resSols.get(solicitorEmail).get(1)
-                ),
-                LanguagePreference.english
-            );
+            if(!StringUtils.isEmpty(resSols.get(solicitorEmail).get(0))) {
+                emailService.send(
+                    solicitorEmail,
+                    EmailTemplateNames.CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION,
+                    buildRespondentSolicitorEmail(caseDetails, resSols.get(solicitorEmail).get(0),
+                                                  resSols.get(solicitorEmail).get(1)
+                    ),
+                    LanguagePreference.english
+                );
+            }
         }
     }
 
