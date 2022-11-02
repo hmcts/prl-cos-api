@@ -30,7 +30,7 @@ public class CitizenResponseNotificationEmailServiceTest {
     CitizenResponseNotificationEmailService solicitorNotificationEmailService;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Test
     public void verifyEmailNotificationTriggeredForApplicantSolicitor() throws Exception {
