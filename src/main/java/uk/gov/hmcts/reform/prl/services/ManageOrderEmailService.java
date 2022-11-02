@@ -83,7 +83,7 @@ public class ManageOrderEmailService {
             Map<String, String> respondentMap = getEmailPartyWithName(caseData
                                                                          .getRespondents());
             for (Map.Entry<String, String> appValues : applicantsMap.entrySet()) {
-                if(!StringUtils.isEmpty(appValues.getKey())) {
+                if (!StringUtils.isEmpty(appValues.getKey())) {
                     sendEmailToParty(isFinalOrder, appValues.getKey(),
                                      buildApplicantRespondentEmail(caseDetails, appValues.getValue())
                     );
@@ -91,7 +91,7 @@ public class ManageOrderEmailService {
             }
 
             for (Map.Entry<String, String> appValues : respondentMap.entrySet()) {
-                if(!StringUtils.isEmpty(appValues.getKey())) {
+                if (!StringUtils.isEmpty(appValues.getKey())) {
                     sendEmailToParty(isFinalOrder, appValues.getKey(),
                                      buildApplicantRespondentEmail(caseDetails, appValues.getValue())
                     );
@@ -128,7 +128,7 @@ public class ManageOrderEmailService {
         CaseData caseData = emailService.getCaseData(caseDetails);
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             for (Element<PartyDetails> respondent : caseData.getRespondents()) {
-                if(!StringUtils.isEmpty(respondent.getValue().getEmail())) {
+                if (!StringUtils.isEmpty(respondent.getValue().getEmail())) {
                     emailService.send(
                         respondent.getValue().getEmail(),
                         EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
@@ -138,7 +138,7 @@ public class ManageOrderEmailService {
                 }
             }
         } else {
-            if (caseData.getRespondentsFL401().getEmail() != null) {
+            if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
                 emailService.send(
                     caseData.getRespondentsFL401().getEmail(),
                     EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
@@ -155,7 +155,7 @@ public class ManageOrderEmailService {
 
         for (Map<String, List<String>> resSols : getRespondentSolicitor(caseDetails)) {
             String solicitorEmail = resSols.keySet().toArray()[0].toString();
-            if(!StringUtils.isEmpty(resSols.get(solicitorEmail).get(0))) {
+            if (!StringUtils.isEmpty(resSols.get(solicitorEmail).get(0))) {
                 emailService.send(
                     solicitorEmail,
                     EmailTemplateNames.CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION,
