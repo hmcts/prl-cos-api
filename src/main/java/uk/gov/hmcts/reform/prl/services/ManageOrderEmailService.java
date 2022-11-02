@@ -146,6 +146,7 @@ public class ManageOrderEmailService {
             );
         }
     }
+
     private void sendEmailToParty(SelectTypeOfOrderEnum isFinalOrder,
                                   String emailAddress,
                                   EmailTemplateVars email) {
