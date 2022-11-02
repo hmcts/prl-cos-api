@@ -315,8 +315,11 @@ public class CallbackControllerFT {
         when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement
                                                                                                    .builder().build()));
         String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
-        mockMvc.perform(post("/pre-populate-court-details").contentType(MediaType.APPLICATION_JSON).content(requestBody)
-            .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+        mockMvc.perform(post("/pre-populate-court-details")
+                            .header("Authorization", "auth")
+                            .contentType(MediaType.APPLICATION_JSON).content(requestBody)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
                 .andExpect(jsonPath("data.localCourtAdmin[0].value.email").value("123@gamil.com")).andReturn();
     }
 
@@ -326,10 +329,11 @@ public class CallbackControllerFT {
         when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement
                                                                                                    .builder().build()));
         String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
-        mockMvc.perform(post("/pre-populate-court-details").contentType(MediaType.APPLICATION_JSON).content(requestBody)
-                .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+        mockMvc.perform(post("/pre-populate-court-details")
+                            .header("Authorization", "auth")
+                            .contentType(MediaType.APPLICATION_JSON).content(requestBody)
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
             .andExpect(jsonPath("data.localCourtAdmin").doesNotHaveJsonPath()).andReturn();
     }
-
-
 }
