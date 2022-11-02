@@ -29,7 +29,7 @@ public class CitizenResponseNotificationEmailServiceTest {
     @InjectMocks
     CitizenResponseNotificationEmailService solicitorNotificationEmailService;
 
-    @Autowired
+    @Mock
     private ObjectMapper objectMapper;
 
     @Test
