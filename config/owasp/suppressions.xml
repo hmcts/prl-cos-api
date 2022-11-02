@@ -37,5 +37,6 @@
     <notes><![CDATA[
       jackson-databind-2.13.3.jar ]]></notes>
     <cve>CVE-2022-38752</cve>
+    <cve>CVE-2022-42252</cve>
   </suppress>
 </suppressions>
