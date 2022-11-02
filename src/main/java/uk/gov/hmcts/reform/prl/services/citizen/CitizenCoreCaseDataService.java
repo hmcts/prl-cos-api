@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -22,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
 
 @Slf4j
 @Service
@@ -204,8 +204,7 @@ public class CitizenCoreCaseDataService {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
 
         // We can Add a Caseworker Event as well in future depending on the Role from userdetails
-        EventRequestData eventRequestData = eventRequest(
-            CaseEvent.valueOf(PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT),
+        EventRequestData eventRequestData = eventRequest(CITIZEN_CASE_CREATE,
             userDetails.getId()
         );
 
