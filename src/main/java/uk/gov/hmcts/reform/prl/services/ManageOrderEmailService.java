@@ -118,16 +118,19 @@ public class ManageOrderEmailService {
 
     public void sendFinalOrderIssuedNotification(CaseDetails caseDetails) {
         CaseData caseData = emailService.getCaseData(caseDetails);
-        if (caseData.getState() == State.ALL_FINAL_ORDERS_ISSUED) {
+        log.info(" Case state "+ caseData.getState());
+        if (State.ALL_FINAL_ORDERS_ISSUED.equals(caseData.getState())) {
             sendNotificationToRespondentSolicitor(caseDetails);
             sendNotificationToRespondent(caseDetails);
         }
     }
 
     private void sendNotificationToRespondent(CaseDetails caseDetails) {
+        log.info("inside sendNotificationToRespondent");
         CaseData caseData = emailService.getCaseData(caseDetails);
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+                log.info("Respondent Email C100 " + respondent.getValue().getEmail());
                 if (!StringUtils.isEmpty(respondent.getValue().getEmail())) {
                     emailService.send(
                         respondent.getValue().getEmail(),
@@ -139,6 +142,7 @@ public class ManageOrderEmailService {
             }
         } else {
             if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
+                log.info("Respondent Email FL401 " + caseData.getRespondentsFL401().getEmail());
                 emailService.send(
                     caseData.getRespondentsFL401().getEmail(),
                     EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
@@ -152,10 +156,11 @@ public class ManageOrderEmailService {
 
 
     private void sendNotificationToRespondentSolicitor(CaseDetails caseDetails) {
-
+        log.info("inside sendNotificationToRespondentSolicitor ");
         for (Map<String, List<String>> resSols : getRespondentSolicitor(caseDetails)) {
             String solicitorEmail = resSols.keySet().toArray()[0].toString();
-            if (!StringUtils.isEmpty(resSols.get(solicitorEmail).get(0))) {
+            log.info("Respondent Email solicitor " + solicitorEmail);
+            if (!StringUtils.isEmpty(solicitorEmail)) {
                 emailService.send(
                     solicitorEmail,
                     EmailTemplateNames.CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION,
