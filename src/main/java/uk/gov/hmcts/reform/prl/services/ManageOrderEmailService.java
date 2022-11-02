@@ -121,17 +121,17 @@ public class ManageOrderEmailService {
 
     private void sendNotificationToRespondent(CaseDetails caseDetails) {
         CaseData caseData = emailService.getCaseData(caseDetails);
-
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-                for (Element<PartyDetails> respondent : caseData.getRespondents()) {
-                    emailService.send(
-                        respondent.getValue().getEmail(),
-                        EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
-                        buildRespondentEmail(caseDetails, respondent.getValue()),
-                        LanguagePreference.english
-                    );
-                }
-            } else if (caseData.getRespondentsFL401().getEmail() != null) {
+            for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+                emailService.send(
+                    respondent.getValue().getEmail(),
+                    EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
+                    buildRespondentEmail(caseDetails, respondent.getValue()),
+                    LanguagePreference.english
+                );
+            }
+        } else {
+            if (caseData.getRespondentsFL401().getEmail() != null) {
                 emailService.send(
                     caseData.getRespondentsFL401().getEmail(),
                     EmailTemplateNames.CA_CITIZEN_RES_NOTIFICATION,
@@ -139,6 +139,8 @@ public class ManageOrderEmailService {
                     LanguagePreference.english
                 );
             }
+        }
+
     }
 
 
