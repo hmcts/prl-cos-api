@@ -194,14 +194,14 @@ public class CaseData implements MappableObject {
     /**
      * Hearing urgency.
      */
-    private final YesOrNo isCaseUrgent;
-    private final String caseUrgencyTimeAndReason;
-    private final String effortsMadeWithRespondents;
+    private YesOrNo isCaseUrgent;
+    private String caseUrgencyTimeAndReason;
+    private String effortsMadeWithRespondents;
     private YesOrNo doYouNeedAWithoutNoticeHearing;
     private String reasonsForApplicationWithoutNotice;
     private YesOrNo doYouRequireAHearingWithReducedNotice;
     private String setOutReasonsBelow;
-    private final YesOrNo areRespondentsAwareOfProceedings;
+    private YesOrNo areRespondentsAwareOfProceedings;
 
     /**
      * Applicant details.
@@ -238,20 +238,24 @@ public class CaseData implements MappableObject {
     /**
      * MIAM.
      */
-    private final YesOrNo applicantAttendedMiam;
-    private final YesOrNo claimingExemptionMiam;
-    private final YesOrNo familyMediatorMiam;
-    private final List<MiamExemptionsChecklistEnum> miamExemptionsChecklist;
-    private final List<MiamDomesticViolenceChecklistEnum> miamDomesticViolenceChecklist;
-    private final List<MiamUrgencyReasonChecklistEnum> miamUrgencyReasonChecklist;
-    private final List<MiamChildProtectionConcernChecklistEnum> miamChildProtectionConcernList;
-    private final MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceChecklist;
-    private final MiamOtherGroundsChecklistEnum miamOtherGroundsChecklist;
+    private YesOrNo applicantAttendedMiam;
+    private YesOrNo claimingExemptionMiam;
+    private YesOrNo familyMediatorMiam;
+    private YesOrNo otherProceedingsMiam;
+    private String applicantConsentMiam;
+    private List<MiamExemptionsChecklistEnum> miamExemptionsChecklist;
+    private List<MiamDomesticViolenceChecklistEnum> miamDomesticViolenceChecklist;
+    private List<MiamUrgencyReasonChecklistEnum> miamUrgencyReasonChecklist;
+    private List<MiamChildProtectionConcernChecklistEnum> miamChildProtectionConcernList;
+    private MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceChecklist;
+    private List<MiamPreviousAttendanceChecklistEnum> miamPreviousAttendanceChecklist1;
+    private MiamOtherGroundsChecklistEnum miamOtherGroundsChecklist;
+    private List<MiamOtherGroundsChecklistEnum> miamOtherGroundsChecklist1;
     private final String mediatorRegistrationNumber;
     private final String familyMediatorServiceName;
     private final String soleTraderName;
     //TODO: refactor to remove duplicated details screen
-    private final Document miamCertificationDocumentUpload;
+    private Document miamCertificationDocumentUpload;
     private final String mediatorRegistrationNumber1;
     private final String familyMediatorServiceName1;
     private final String soleTraderName1;
@@ -645,7 +649,10 @@ public class CaseData implements MappableObject {
     private String c100RebuildReasonableAdjustments;
     private String c100RebuildTypeOfOrder;
     private String c100RebuildHearingWithoutNotice;
+    private String c100RebuildHearingUrgency;
     private String c100RebuildOtherProceedings;
     private String c100RebuildReturnUrl;
+    private String c100RebuildMaim;
     private String c100RebuildChildDetails;
+    private String c100RebuildApplicantDetails;
 }

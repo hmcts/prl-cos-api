@@ -8,16 +8,25 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum.bothLiveWithAndSpendTimeWithOrder;
 import static uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum.liveWithOrder;
+import static uk.gov.hmcts.reform.prl.enums.Gender.male;
+import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.childProtectionConcern;
+import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.domesticViolence;
+import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.other;
+import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.previousMIAMattendance;
+import static uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum.urgency;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
@@ -118,6 +127,27 @@ public class CaseDataMapperTest {
                         + "\n\"orderDate\": {\n\"year\": \"\",\n\"month\": \"\",\n\"day\": \"\"\n},\n\"currentOrder\": \"\","
                         + "\n\"orderEndDate\": {\n\"year\": \"\",\n\"month\": \"\",\n\"day\": \"\"\n},\n\"orderCopy\": "
                         + "\"\"\n}\n]\n}\n}\n},\n   }\n}")
+                .c100RebuildMaim("{\n  \"miam_otherProceedings\": \"No\",\n\"miam_consent\": \"s\",\n\"miam_attendance\": "
+                        + "\"No\",\n\"miam_mediatorDocument\": \"No\",\n\"miam_validReason\": \"Yes\","
+                        + "\n\"miam_nonAttendanceReasons\": [\n\"domesticViolence\",\n\"childProtection\",\n\"urgentHearing\","
+                        + "\n\"previousMIAMOrExempt\",\n\"validExemption\"\n],\n\"miam_domesticAbuse\": [\n\"policeInvolvement"
+                        + "\"\n],\n\"miam_domesticabuse_involvement_subfields\": [\n\"\",\n\"\",\n\"\",\n\"\",\n\"\","
+                        + "\n\"evidenceOfSomeoneArrest\",\n\"evidenceOfPolice\",\n\"evidenceOfOnGoingCriminalProceeding\","
+                        + "\n\"evidenceOfConviction\",\n\"evidenceOFProtectionNotice\"\n],"
+                        + "\n\"miam_domesticabuse_courtInvolvement_subfields\": [\n\"\",\n\"\",\n\"\",\n\"\",\n\"\"\n],"
+                        + "\n\"miam_domesticabuse_letterOfBeingVictim_subfields\": [\n\"\",\n\"\"\n],\n"
+                        + "\"miam_domesticabuse_letterFromAuthority_subfields\": [\n\"\",\n\"\",\n\"\"\n],"
+                        + "\n\"miam_domesticabuse_letterFromSupportService_subfields\": [],\n\"miam_childProtectionEvidence\": "
+                        + "[\n\"localAuthority\",\n\"childProtectionPlan\"\n],\n\"miam_urgency\": "
+                        + "[\n\"freedomPhysicalSafety\",\n\"freedomPhysicalSafetyInFamily\"\n],\n\"miam_previousAttendance\": "
+                        + "[\n\"fourMonthsPriorAttended\",\n\"onTimeParticipation\"\n],\n\"miam_notAttendingReasons\": "
+                        + "[\n\"noSufficientContactDetails\",\n\"applyingForWithoutNoticeHearing\"\n],"
+                        + "\n\"miam_noMediatorAccessSubfields\": []\n}")
+                .c100RebuildHearingUrgency("{\n  \"hu_urgentHearingReasons\": \"Yes\",\n\"hu_reasonOfUrgentHearing\":"
+                        + " [\n\"risk of safety\",\n\"risk of child abduction\",\n\"overseas legal proceeding\","
+                        + "\n\"other risks\"\n],\n\"hu_otherRiskDetails\": \"test\",\n\"hu_timeOfHearingDetails\": "
+                        + "\"24 hours\",\n\"hu_hearingWithNext48HrsDetails\": \"Yes\",\n\"hu_hearingWithNext48HrsMsg\": "
+                        + "\"48 hours\"\n}")
             .c100RebuildChildDetails("{\"cd_children\":[{\"id\":\"6c2505da-dae5-4541-9df5-5f4045f0ad4a\",\"firstName\":\""
                          + "c1\",\"lastName\":\"c11\",\"personalDetails\":{\"dateOfBirth\":{\"year\":\"2021\",\"month\":\""
                          + "10\",\"day\":\"10\"},\"isDateOfBirthUnknown\":\"\",\"approxDateOfBirth\":{\"day\":\"\",\"month"
@@ -130,6 +160,28 @@ public class CaseDataMapperTest {
                          + "\"needsResolution\":[\"childTimeSpent\"]},\"parentialResponsibility\":{\"statement\":\"test22"
                         + "\"}}],\"cd_childrenKnownToSocialServices\":\"Yes\",\"cd_childrenKnownToSocialServicesDetails\""
                         + ":\"Testchild\",\"cd_childrenSubjectOfProtectionPlan\":\"Dontknow\"}")
+                .c100RebuildApplicantDetails("{\n  \n  \"appl_allApplicants\": [\n{\n\"id\": "
+                        + "\"c84edd0f-b332-4169-9499-614cb06ace98\",\n\"applicantFirstName\": \"c1\",\n\"applicantLastName\": "
+                        + "\"c1\",\n\"startAlternative\": \"Yes\",\n\"start\": \"Yes\",\n\"contactDetailsPrivate\": [],"
+                        + "\n\"contactDetailsPrivateAlternative\": [\n\"address\",\n\"telephone\",\n\"email\"\n],"
+                        + "\n\"applicantPreviousName\": \"applicantPreviousName\",\n\"applicantGender\": \"male\","
+                        + "\n\"applicantDateOfBirth\": {\n  \"year\": \"1990\",\n  \"month\": \"12\",\n  \"day\": "
+                        + "\"12\"\n  \n},\n\"applicantPlaceOfBirth\": \"applicantPlaceOfBirth\",\n\"applicantAddressPostcode\": "
+                        + "\"XXX XXX\",\n\"applicantAddress1\": \"applicantAddress1\",\n\"applicantAddress2\": "
+                        + "\"applicantAddress2\",\n\"applicantAddressTown\": \"LONDON\",\n\"applicantAddressCounty\": "
+                        + "\"BRENT\",\n\"applicantAddressHistory\": \"Yes\",\n\"applicantProvideDetailsOfPreviousAddresses\": "
+                        + "\"applicantProvideDetailsOfPreviousAddresses\"\n},\n{\n\"id\": "
+                        + "\"c84edd0f-b332-4169-9499-614cb06ace99\","
+                        + "\n\"applicantFirstName\": \"c2\",\n\"applicantLastName\": \"c2\",\n\"startAlternative\": "
+                        + "\"Yes\",\n\"start\": \"Yes\",\n\"contactDetailsPrivate\": [],\n\"contactDetailsPrivateAlternative\": "
+                        + "[\n\"address\",\n\"telephone\",\n\"email\"\n],\n\"applicantPreviousName\": \"applicantPreviousName\","
+                        + "\n\"applicantGender\": \"male\",\n\"applicantDateOfBirth\": {\n  \"year\": \"1990\",\n  \"month\": "
+                        + "\"12\",\n  \"day\": \"12\"\n  \n},\n\"applicantPlaceOfBirth\": \"applicantPlaceOfBirth\","
+                        + "\n\"applicantAddressPostcode\": \"XXX XXX\",\n\"applicantAddress1\": \"applicantAddress1\","
+                        + "\n\"applicantAddress2\": \"applicantAddress2\",\n\"applicantAddressTown\": "
+                        + "\"LONDON\",\n\"applicantAddressCounty\": \"BRENT\",\n\"applicantAddressHistory\": \"Yes\","
+                        + "\n\"applicantProvideDetailsOfPreviousAddresses\": \"applicantProvideDetailsOfPreviousAddresses\"\n}"
+                        + "\n]\n}")
                 .build();
     }
 
@@ -171,6 +223,24 @@ public class CaseDataMapperTest {
         assertEquals(16, proceedingDetails.size());
         assertEquals(List.of(superviosionOrder), proceedingDetails.get(0).getValue().getTypeOfOrder());
         assertEquals(List.of(careOrder), proceedingDetails.get(1).getValue().getTypeOfOrder());
+        assertEquals(No, updatedCaseData.getApplicantAttendedMiam());
+        assertEquals(No, updatedCaseData.getOtherProceedingsMiam());
+        assertEquals(No, updatedCaseData.getFamilyMediatorMiam());
+        assertEquals("s", updatedCaseData.getApplicantConsentMiam());
+        assertTrue(updatedCaseData.getMiamExemptionsChecklist().containsAll(List.of(domesticViolence,
+                urgency, previousMIAMattendance, other, childProtectionConcern)));
+        assertEquals(Yes, updatedCaseData.getIsCaseUrgent());
+        assertEquals("Case Urgency Time - 24 hours Case Urgency Reasons - Risk to my safety or the "
+                + "children's safety, Risk that the children will be abducted, Legal proceedings taking place overseas, "
+                + "Other risks, test", updatedCaseData.getCaseUrgencyTimeAndReason());
+        assertEquals("48 hours", updatedCaseData.getEffortsMadeWithRespondents());
+
+        assertEquals(2, updatedCaseData.getApplicants().size());
+        PartyDetails partyDetails = updatedCaseData.getApplicants().get(0).getValue();
+        assertEquals("c1", partyDetails.getFirstName());
+        assertEquals("c1", partyDetails.getLastName());
+        assertEquals(LocalDate.of(1990, 12, 12), partyDetails.getDateOfBirth());
+        assertEquals(male, partyDetails.getGender());
     }
 
     @Test
@@ -215,6 +285,26 @@ public class CaseDataMapperTest {
     }
 
     @Test
+    public void testCaseDataMapperForMiamExtraFields() throws JsonProcessingException {
+
+        //Given
+        CaseData caseData1 = caseData
+                .toBuilder()
+                .c100RebuildMaim("{\n  \"miam_otherProceedings\": \"No\",\n\"miam_consent\": \"s\",\n\"miam_attendance\": "
+                        + "\"No\",\n\"miam_haveDocSigned\": \"Yes\",\n\"miam_mediatorDocument\": \"No\",\n\"miam_validReason\": "
+                        + "\"Yes\",\n\"miam_nonAttendanceReasons\": [\n\"none\"\n],\n\"miam_certificate\": {\n  \"id\": "
+                        + "\"test\",\n  \"url\": \"test\",\n  \"filename\": \"test\",\n  \"binaryUrl\": \"test\"\n}\n}")
+                .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+        assertNull(updatedCaseData.getMiamExemptionsChecklist());
+    }
+
+    @Test
     public void testCaseDataMapperForChildDetail() throws JsonProcessingException {
         //Given
         CaseData caseData1 = caseData.toBuilder().c100RebuildChildDetails("{\"cd_children\":"
@@ -235,6 +325,8 @@ public class CaseDataMapperTest {
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
 
         //Then
+        assertNotNull(updatedCaseData);
         assertNotNull(updatedCaseData.getChildren());
     }
+
 }
