@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -82,5 +83,8 @@ public class FL404 {
     private final String fl404bOccupationTime2;
     private final String fl404bDateOfNextHearing;
     private final String fl404bTimeOfNextHearing;
+
+    //Draft order changes
+    private final List<Element<String>> addDirections;
 
 }
