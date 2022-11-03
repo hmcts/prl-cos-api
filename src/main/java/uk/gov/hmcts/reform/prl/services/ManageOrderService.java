@@ -224,6 +224,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c45a_filename}")
     protected String c45aFile;
 
+    @Value("${document.templates.common.prl_c45a_welsh_draft_template}")
+    protected String c45aWelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_c45a_welsh_draft_filename}")
+    protected String c45aWelshDraftFile;
+
+    @Value("${document.templates.common.prl_c45a_welsh_template}")
+    protected String c45aWelshTemplate;
+
+    @Value("${document.templates.common.prl_c45a_welsh_filename}")
+    protected String c45aWelshFile;
+
     @Value("${document.templates.common.prl_c47a_draft_template}")
     protected String c47aDraftTemplate;
 
@@ -444,6 +456,10 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c45aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c45aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c45aFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, c45aWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, c45aWelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, c45aWelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c45aWelshFile);
                 break;
             case transferOfCaseToAnotherCourt:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c49TDraftTemplate);
