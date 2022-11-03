@@ -236,6 +236,7 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse showPreviewOrderWhenOrderCreated(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
+        log.info("**********callbackRequesttttt**********{}", callbackRequest);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getCreateSelectOrderOptions() != null
