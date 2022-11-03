@@ -129,8 +129,6 @@ public class ManageOrders {
     private final YesOrNo isTheOrderByConsent;
     private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
 
-    private final List<Element<String>> addDirections;
-
     private Document manageOrdersDocumentToAmend;
     private Document manageOrdersAmendedOrder;
     private DynamicList amendOrderDynamicList;
