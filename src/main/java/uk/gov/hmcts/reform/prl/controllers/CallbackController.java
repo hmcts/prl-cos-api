@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -58,6 +59,7 @@ import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
@@ -103,6 +105,7 @@ public class CallbackController {
 
     private final ObjectMapper objectMapper;
     private final AllTabServiceImpl allTabsService;
+    private final CaseSummaryTabService caseSummaryTab;
     private final UserService userService;
     private final DocumentGenService documentGenService;
     private final SendgridService sendgridService;
@@ -221,6 +224,9 @@ public class CallbackController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
         caseData = caseData.toBuilder().applicantsConfidentialDetails(confidentialityTabService
                 .getConfidentialApplicantDetails(caseData.getApplicants().stream()
                     .map(Element::getValue)
@@ -228,13 +234,12 @@ public class CallbackController {
             .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(caseData.getChildren()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList()))).build();
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+                .collect(Collectors.toList()))).state(State.SUBMITTED_NOT_PAID)
+            .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)).build();
 
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
         Map<String,Object> map = documentGenService.generateDocuments(authorisation, caseData);
-
+        // updating Summary tab to update case status
+        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         caseDataUpdated.putAll(map);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
