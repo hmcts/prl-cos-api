@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -17,10 +19,13 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 
 @Slf4j
 @RestController
@@ -73,6 +78,29 @@ public class DraftAnOrderController {
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseData.toMap(CcdObjectMapper.getObjectMapper())).build();
+    }
+
+    @PostMapping(path = "/generate-doc", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to populate the header")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Populated Headers"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse generateDoc(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("**********callbackRequest**********{}", callbackRequest);
+        if (callbackRequest
+            .getCaseDetailsBefore() != null && callbackRequest
+            .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
+            caseData.setCourtName(callbackRequest
+                                      .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
+        }
+        caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
 
