@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
@@ -43,7 +45,7 @@ public class CaseInitiationController extends AbstractCallbackController {
                                 @RequestBody CallbackRequest callbackRequest) {
 
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        final CaseData caseData = getCaseData(caseDetails);
+        final CaseData caseData = getCaseData(caseDetails).toBuilder().isNewCaseCreated(YesOrNo.Yes).build();
 
         assignCaseAccessService.assignCaseAccess(caseDetails.getId().toString(),authorisation);
 
@@ -54,7 +56,7 @@ public class CaseInitiationController extends AbstractCallbackController {
                               Map.of("$set", Map.of("HMCTSServiceId", "ABA5")));
         coreCaseDataApi.submitSupplementaryData(authorisation, authTokenGenerator.generate(), caseId,
                                                 supplementaryData);
-
+        log.info("Case created with data {} ", new Gson().toJson(caseData));
         publishEvent(new CaseDataChanged(caseData));
 
 
