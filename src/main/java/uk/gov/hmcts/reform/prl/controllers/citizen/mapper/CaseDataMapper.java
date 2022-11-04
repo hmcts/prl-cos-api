@@ -18,6 +18,7 @@ import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataChildDe
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataHwnElementsMapper.updateHearingWithoutNoticeElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataInternationalElementsMapper.updateInternationalElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherChildrenDetailsElementsMapper.updateOtherChildDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherProceedingsElementsMapper.updateOtherProceedingsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
@@ -63,6 +64,10 @@ public class CaseDataMapper {
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements = mapper
             .readValue(caseData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
         updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
+
+        C100RebuildChildDetailsElements c100RebuildOtherChildrenDetailsElements = mapper
+            .readValue(caseData.getC100RebuildOtherChildrenDetails(), C100RebuildChildDetailsElements.class);
+        updateOtherChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherChildrenDetailsElements);
 
         return caseDataBuilder.build();
     }
