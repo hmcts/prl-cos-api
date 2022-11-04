@@ -148,7 +148,7 @@ public class CaseDataMapperTest {
                         + "\n\"other risks\"\n],\n\"hu_otherRiskDetails\": \"test\",\n\"hu_timeOfHearingDetails\": "
                         + "\"24 hours\",\n\"hu_hearingWithNext48HrsDetails\": \"Yes\",\n\"hu_hearingWithNext48HrsMsg\": "
                         + "\"48 hours\"\n}")
-            .c100RebuildChildDetails("{\"cd_children\":[{\"id\":\"6c2505da-dae5-4541-9df5-5f4045f0ad4a\",\"firstName\":\""
+                .c100RebuildChildDetails("{\"cd_children\":[{\"id\":\"6c2505da-dae5-4541-9df5-5f4045f0ad4a\",\"firstName\":\""
                          + "c1\",\"lastName\":\"c11\",\"personalDetails\":{\"dateOfBirth\":{\"year\":\"2021\",\"month\":\""
                          + "10\",\"day\":\"10\"},\"isDateOfBirthUnknown\":\"\",\"approxDateOfBirth\":{\"day\":\"\",\"month"
                          + "\":\"\",\"year\":\"\"},\"gender\":\"Female\",\"otherGenderDetails\":\"\"},\"childMatters\":{\""
@@ -182,6 +182,16 @@ public class CaseDataMapperTest {
                         + "\"LONDON\",\n\"applicantAddressCounty\": \"BRENT\",\n\"applicantAddressHistory\": \"Yes\","
                         + "\n\"applicantProvideDetailsOfPreviousAddresses\": \"applicantProvideDetailsOfPreviousAddresses\"\n}"
                         + "\n]\n}")
+            .c100RebuildOtherChildrenDetails("{\"cd_otherChildren\":[{\"id\":\"a6c3e7f1-ce2f-42a7-b60e-82b80f8f36ab\","
+                         + "\"firstName\":\"test1\",\"lastName\":\"test11\",\"personalDetails\":{\"dateOfBirth\":"
+                         + "{\"year\":\"2000\",\"month\":\"12\",\"day\":\"7\"},\"isDateOfBirthUnknown\":\"\",\"approxDateOfBirth\":"
+                         + "{\"day\":\"\",\"month\":\"\",\"year\":\"\"},\"gender\":\"Male\",\"otherGenderDetails\":\"\"},"
+                         + "\"childMatters\":{\"needsResolution\":[]},\"parentialResponsibility\":{\"statement\":\"\"}},"
+                         + "{\"id\":\"498bbf69-f8ab-45bb-a762-1810a339566f\",\"firstName\":\"test2\",\"lastName\":\"test22\","
+                         + "\"personalDetails\":{\"dateOfBirth\":{\"year\":\"\",\"month\":\"\",\"day\":\"\"},"
+                         + "\"isDateOfBirthUnknown\":\"Yes\",\"approxDateOfBirth\":{\"year\":\"2012\",\"month\":\"8\",\"day\":\"8\"},"
+                         + "\"gender\":\"Other\",\"otherGenderDetails\":\"test\"},\"childMatters\":{\"needsResolution\":[]},"
+                         + "\"parentialResponsibility\":{\"statement\":\"\"}}]}")
                 .build();
     }
 
@@ -327,6 +337,29 @@ public class CaseDataMapperTest {
         //Then
         assertNotNull(updatedCaseData);
         assertNotNull(updatedCaseData.getChildren());
+    }
+
+    @Test
+    public void testCaseDataMapperForOtherChildrenDetail() throws JsonProcessingException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder().c100RebuildOtherChildrenDetails("{\"cd_otherChildren\":"
+                      + "[{\"id\":\"a6c3e7f1-ce2f-42a7-b60e-82b80f8f36ab\",\"firstName\":\"test1\",\"lastName\":\"test11\","
+                      + "\"personalDetails\":{\"dateOfBirth\":{\"year\":\"2000\",\"month\":\"12\",\"day\":\"7\"},"
+                      + "\"isDateOfBirthUnknown\":\"\",\"approxDateOfBirth\":{\"day\":\"\",\"month\":\"\",\"year\":\"\"},"
+                      + "\"gender\":\"Male\",\"otherGenderDetails\":\"\"},\"childMatters\":{\"needsResolution\":[]},"
+                    + "\"parentialResponsibility\":{\"statement\":\"\"}},{\"id\":\"498bbf69-f8ab-45bb-a762-1810a339566f\","
+                  + "\"firstName\":\"test2\",\"lastName\":\"test22\",\"personalDetails\":{\"dateOfBirth\":"
+                  + "{\"year\":\"\",\"month\":\"\",\"day\":\"\"},\"isDateOfBirthUnknown\":\"Yes\",\"approxDateOfBirth\":"
+                  + "{\"year\":\"2012\",\"month\":\"8\",\"day\":\"8\"},\"gender\":\"Other\",\"otherGenderDetails\":\"test\"},"
+              + "\"childMatters\":{\"needsResolution\":[]},\"parentialResponsibility\":{\"statement\":\"\"}}]}")
+                                .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+        assertNotNull(updatedCaseData.getOtherChildren());
     }
 
 }
