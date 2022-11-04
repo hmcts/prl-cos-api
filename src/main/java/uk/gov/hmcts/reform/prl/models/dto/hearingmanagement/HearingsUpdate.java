@@ -32,9 +32,9 @@ public class HearingsUpdate {
     private final String hearingJudgeId;
     @JsonProperty("hearingRoomId")
     private final String hearingRoomId;
-    @JsonProperty("HmcStatus")
-    private final String HmcStatus;
-    @JsonProperty("ListAssistCaseStatus")
-    private final String ListAssistCaseStatus;
+    @JsonProperty("hmcStatus")
+    private final String hmcStatus;
+    @JsonProperty("listAssistCaseStatus")
+    private final String listAssistCaseStatus;
 
 }
