@@ -14,7 +14,7 @@ java:
         - send-grid-api-key
         - rpa-notify-to-email
         - rpa-notify-from-email
-        - AppInsightsInstrumentationKey
+        - AppInsightsInstrumentationKey-preview
         - southampton-court-email-address
         - idam-solicitor-username
         - idam-solicitor-password
