@@ -126,7 +126,7 @@ public class ResubmitApplicationController {
                 caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
                 ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
                 caseData = caseData.setDateSubmittedDate();
-                caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
+                caseDataUpdated.put(DATE_SUBMITTED_FIELD, DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
                 caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
                 caseWorkerEmailService.sendEmail(caseDetails);
                 solicitorEmailService.sendReSubmitEmail(caseDetails);
