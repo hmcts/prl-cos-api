@@ -53,7 +53,6 @@ public class ManageOrderEmailService {
 
 
     public void sendEmail(CaseDetails caseDetails) {
-        log.info("Sending the manage order emails for caseId {}", caseDetails.getId());
         List<String> emailList = new ArrayList<>();
 
         CaseData caseData = emailService.getCaseData(caseDetails);
@@ -70,7 +69,6 @@ public class ManageOrderEmailService {
     }
 
     public void sendEmailToApplicantAndRespondent(CaseDetails caseDetails) {
-        log.info("Sending the new manage order emails for Applicant/Respondent {}",caseDetails.getId());
         CaseData caseData = emailService.getCaseData(caseDetails);
         SelectTypeOfOrderEnum isFinalOrder = caseData.getSelectTypeOfOrder();
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {

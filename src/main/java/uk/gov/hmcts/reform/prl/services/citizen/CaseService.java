@@ -121,10 +121,8 @@ public class CaseService {
 
     private CaseDetails updateCaseDetails(CaseData caseData, String authToken, String s2sToken, String caseId,
                                           String eventId, UserDetails userDetails) {
-        log.info("Input casedata, applicantcaseName :::: {}", caseData.getApplicantCaseName());
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         Iterables.removeIf(caseDataMap.values(), Objects::isNull);
-        log.info("======Calling start event for Citizen========");
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCitizen(
             authToken,
             s2sToken,
@@ -143,7 +141,6 @@ public class CaseService {
             .data(caseDataMap)
             .build();
 
-        log.info("-------Calling Submit event for Citizen------  ");
         return coreCaseDataApi.submitEventForCitizen(
             authToken,
             s2sToken,
@@ -167,8 +164,6 @@ public class CaseService {
             CaseData.class
         );
 
-        log.info("caseData testing::" + caseData);
-
         if ("Valid".equalsIgnoreCase(findAccessCodeStatus(accessCode, caseData))) {
             UUID partyId = null;
             YesOrNo isApplicant = YesOrNo.Yes;
@@ -183,9 +178,7 @@ public class CaseService {
             }
             processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant);
 
-            log.info("Updated caseData testing::" + caseData);
             caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData);
-            log.info("Case is now linked" + caseData);
         }
     }
 
@@ -219,16 +212,10 @@ public class CaseService {
     }
 
     public String validateAccessCode(String authorisation, String s2sToken, String caseId, String accessCode) {
-        log.info("validateAccessCode");
-        log.info("parameters are :" + caseId + " and " + accessCode);
-
         CaseData caseData = objectMapper.convertValue(
             coreCaseDataApi.getCase(authorisation, s2sToken, caseId).getData(),
             CaseData.class
         );
-
-        log.info("caseData testing::" + caseData);
-
         return findAccessCodeStatus(accessCode, caseData);
     }
 
@@ -240,7 +227,6 @@ public class CaseService {
             .filter(x -> accessCode.equals(x.getAccessCode()))
             .collect(Collectors.toList());
 
-        log.info("matchingCaseInvite testing::" + matchingCaseInvite);
         if (matchingCaseInvite.size() > 0) {
             accessCodeStatus = "Valid";
             for (CaseInvite caseInvite : matchingCaseInvite) {
@@ -249,7 +235,6 @@ public class CaseService {
                 }
             }
         }
-        log.info("accessCodeStatus" + accessCodeStatus);
         return accessCodeStatus;
     }
 }
