@@ -144,6 +144,9 @@ public class CaseData implements MappableObject {
 
     private String childName;
 
+
+    private final YesOrNo isNewCaseCreated;
+
     /**
      * Confidential Disclaimer.
      */
@@ -271,6 +274,8 @@ public class CaseData implements MappableObject {
 
     @JsonUnwrapped
     private final AllegationOfHarm allegationOfHarm;
+
+    private final String allegationOfHarmNewText;
 
     /**
      * Other people in the case.

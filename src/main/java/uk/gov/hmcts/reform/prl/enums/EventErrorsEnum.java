@@ -20,6 +20,7 @@ public enum EventErrorsEnum {
     WELSH_LANGUAGE_ERROR("Add details about welsh language requirements"),
     OTHER_PROCEEDINGS_ERROR("Add details about other proceedings"),
     ALLEGATIONS_OF_HARM_ERROR("Add details about allegations of harm"),
+    ALLEGATIONS_OF_HARM_ERROR_NEW("Add details about allegations of harm new"),
 
     //FL401 ERRORS
     WITHOUT_NOTICE_ORDER_ERROR("Ensure all relevant information has been added"),
