@@ -20,7 +20,7 @@ public class HearingService {
     @Autowired
     HearingApiClient hearingApiClient;
 
-    public Hearings getHearings(String userToken, String caseReferenceNumber){
+    public Hearings getHearings(String userToken, String caseReferenceNumber, String referenceNumber){
         try {
             hearingDetails = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
         }catch (Exception e){
