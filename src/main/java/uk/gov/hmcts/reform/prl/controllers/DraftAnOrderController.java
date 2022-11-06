@@ -90,7 +90,6 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("**********callbackRequest**********{}", callbackRequest);
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
@@ -99,6 +98,7 @@ public class DraftAnOrderController {
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         caseData = manageOrderService.populateCustomOrderFields(caseData);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
