@@ -98,6 +98,7 @@ public class DraftAnOrderController {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
+        caseData = manageOrderService.populateCustomOrderFields(caseData);
         caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
