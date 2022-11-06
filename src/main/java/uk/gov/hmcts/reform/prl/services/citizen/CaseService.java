@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,7 +88,7 @@ public class CaseService {
         caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
         return caseDetails
             .stream()
-            .map(caseDetailsConverter::extractCase)
+            .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
             .collect(Collectors.toList());
     }
 
@@ -99,7 +100,7 @@ public class CaseService {
         caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
         return caseDetails
             .stream()
-            .map(caseDetailsConverter::extractCaseData)
+            .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
             .collect(Collectors.toList());
     }
 
