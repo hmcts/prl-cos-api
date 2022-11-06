@@ -99,6 +99,7 @@ public class DraftAnOrderController {
         }
         log.info("Case data before generating doc: {}", caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseData = manageOrderService.populateCustomOrderFields(caseData);
         caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
