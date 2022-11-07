@@ -101,7 +101,7 @@ public class DraftAnOrderController {
         }
         log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
-        fl404CustomFields.toBuilder().fl404bApplicantName(String.format(PrlAppsConstants.FORMAT,
+        fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(PrlAppsConstants.FORMAT,
                                                                         caseData.getApplicantsFL401().getFirstName(),
                                                                         caseData.getApplicantsFL401().getLastName()
         ))
