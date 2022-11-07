@@ -36,3 +36,5 @@ spring:
         prl.courtnav-functional-test-user: COURTNAV_USERNAME
         prl.courtnav-functional-test-pwd: COURTNAV_PASSWORD
         citizen-url: CITIZEN_URL
+        prl.citizen-user: IDAM_CITIZEN_USERNAME
+        prl.citizen-password: IDAM_CITIZEN_PASSWORD

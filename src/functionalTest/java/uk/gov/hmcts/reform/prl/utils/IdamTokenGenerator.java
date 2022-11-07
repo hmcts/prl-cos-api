@@ -57,4 +57,9 @@ public class IdamTokenGenerator {
     public UserDetails getUserDetailsFor(final String token) {
         return idamClient.getUserDetails(token);
     }
+
+    public String generateIdamTokenForCitizen() {
+        return idamClient.getAccessToken(solicitorUsername, solicitorPassword);
+    }
+
 }
