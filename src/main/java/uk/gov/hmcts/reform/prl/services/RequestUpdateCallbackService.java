@@ -93,8 +93,10 @@ public class RequestUpdateCallbackService {
                             ? PAYMENT_SUCCESS_CALLBACK : PAYMENT_FAILURE_CALLBACK
             );
 
-            solicitorEmailService.sendEmail(caseDetails);
-            caseWorkerEmailService.sendEmail(caseDetails);
+            if (PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())) {
+                solicitorEmailService.sendEmail(caseDetails);
+                caseWorkerEmailService.sendEmail(caseDetails);
+            }
 
         } else {
             log.error("Case id {} not present", serviceRequestUpdateDto.getCcdCaseNumber());
@@ -109,8 +111,8 @@ public class RequestUpdateCallbackService {
             if (serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)) {
                 ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
                 caseData = caseData.toBuilder()
-                    .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                     .state(State.SUBMITTED_PAID)
+                    .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                     .build();
 
             } else {

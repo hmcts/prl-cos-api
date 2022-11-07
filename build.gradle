@@ -48,7 +48,7 @@ def versions = [
   puppyCrawl                   : '8.43',
   reformPropertiesVolume       : '0.0.4',
   reformsJavaLogging           : '5.1.7',
-  sendLetterClient             : '2.2.0',
+  sendLetterClient             : '3.0.10',
   serenity                     : '2.3.10',
   serenityCucumber             : '1.9.50',
   serviceTokenGenerator        : '3.1.1',
@@ -57,7 +57,7 @@ def versions = [
   springSecurityRsa            : '1.0.9.RELEASE',
   springBoot                   : '2.7.0',
   springCloud                  : '3.1.1',
-  tomcat                       : '9.0.63',
+  tomcat                       : '9.0.68',
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.7.3',
   pdfbox                       : '2.0.24',
@@ -98,7 +98,6 @@ allprojects {
   repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
-    jcenter()
     maven { url 'https://repo.spring.io/libs-milestone' }
   }
 
@@ -278,7 +277,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: versions.springBoot
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry'
-  implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.6'
+  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.8.6'
   implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-httpcomponents', version: versions.reformsJavaLogging
@@ -287,7 +286,7 @@ dependencies {
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.17.2'
   implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version: versions.reformPropertiesVolume
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
-  implementation group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: versions.sendLetterClient
+  implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz'
@@ -300,14 +299,14 @@ dependencies {
   implementation group: 'org.apache.commons', name: 'commons-text', version: versions.commonsText
 
 
-  compile group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '2.2.0'
+  compile group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
   compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '5.10.2'
   compile group: 'org.elasticsearch', name: 'elasticsearch', version: '7.13.4'
   compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   compile group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
-  compile group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.6'
+  compile group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.8.6'
   compile group: 'com.sendgrid', name: 'sendgrid-java', version: '4.0.1'
-  implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.7.6'
+  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.8.6'
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '4.0.0'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
