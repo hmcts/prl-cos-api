@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.Cafcass.HearingApiClient;
 import uk.gov.hmcts.reform.prl.models.cafcass.Hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -15,10 +18,12 @@ public class HearingService {
 
     Hearings hearingDetails = null;
 
+    @Autowired
+    CaseDataService caseDataService;
+
     private final AuthTokenGenerator authTokenGenerator;
 
-    @Autowired
-    HearingApiClient hearingApiClient;
+    private final HearingApiClient hearingApiClient;
 
     public Hearings getHearings(String userToken, String caseReferenceNumber, String referenceNumber){
         try {
@@ -28,4 +33,6 @@ public class HearingService {
         }
         return hearingDetails;
     }
+
+
 }

@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -30,6 +32,9 @@ public class CaseDataService {
 
     @Value("${ccd.elastic-search-api.boost}")
     private String ccdElasticSearchApiBoost;
+
+    @Autowired
+    HearingService hearingService;
 
     private final CafcassCcdDataStoreService cafcassCcdDataStoreService;
 
@@ -61,5 +66,10 @@ public class CaseDataService {
         Range range = Range.builder().lastModified(lastModified).build();
         Query query = Query.builder().range(range).build();
         return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize).build();
+    }
+
+    public List<Long> getHearingDetails(CafCassResponse cafCassResponse){
+        //return cafCassResponse.getCases().stream().filter(cafCassCaseDetail -> cafCassCaseDetail)
+        return cafCassResponse.getCases().stream().map(cafCassCaseDetail -> cafCassCaseDetail.getId()).collect(Collectors.toList());
     }
 }
