@@ -48,6 +48,7 @@ public class CaseController {
 
     @Autowired
     AuthTokenGenerator authTokenGenerator;
+    private static final String invalidClient = "Invalid Client";
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
@@ -60,7 +61,7 @@ public class CaseController {
         if (isAuthorized(userToken, s2sToken)) {
             caseDetails = caseService.getCase(userToken, caseId);
         } else {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(invalidClient));
         }
         return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder().id(caseDetails.getId()).build();
@@ -95,7 +96,7 @@ public class CaseController {
                 .toBuilder().id(caseDetails.getId()).build();
 
         } else {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(invalidClient));
         }
     }
 
@@ -109,7 +110,7 @@ public class CaseController {
         if (isAuthorized(authorisation, s2sToken)) {
             return caseService.retrieveCases(authorisation, authTokenGenerator.generate(), role, userId);
         } else {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(invalidClient));
         }
     }
 
@@ -121,7 +122,7 @@ public class CaseController {
         if (isAuthorized(authorisation, s2sToken)) {
             return caseService.retrieveCases(authorisation, authTokenGenerator.generate());
         } else {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(invalidClient));
         }
 
     }
@@ -147,7 +148,7 @@ public class CaseController {
             String cosApis2sToken = authTokenGenerator.generate();
             return caseService.validateAccessCode(authorisation, cosApis2sToken, caseId, accessCode);
         } else {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(invalidClient));
         }
     }
 
@@ -166,7 +167,7 @@ public class CaseController {
         if (isAuthorized(authorisation, s2sToken)) {
             caseDetails = caseService.createCase(caseData, authorisation);
         } else {
-            throw (new RuntimeException("Invalid Client"));
+            throw (new RuntimeException(invalidClient));
         }
         return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder().id(caseDetails.getId()).build();
