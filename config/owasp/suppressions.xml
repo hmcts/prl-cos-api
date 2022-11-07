@@ -24,20 +24,4 @@
         <cve>CVE-2022-38752</cve>
         <cve>CVE-2022-42252</cve>
     </suppress>
-
-  <suppress>
-    <notes><![CDATA[
-      jackson-databind-2.13.3.jar ]]></notes>
-    <cve>CVE-2022-42003</cve>
-  </suppress>
-  <suppress>
-    <notes><![CDATA[
-      jackson-databind-2.13.3.jar ]]></notes>
-    <cve>CVE-2022-42004</cve>
-  </suppress>
-  <suppress>
-    <notes><![CDATA[
-      jackson-databind-2.13.3.jar ]]></notes>
-    <cve>CVE-2022-38752</cve>
-  </suppress>
 </suppressions>

@@ -56,7 +56,7 @@ public class CaseDocumentControllerFunctionalTest {
     public void shouldSuccessfullyUploadDocument() throws Exception {
         //TODO Replace with citizen auth token once secrets added
         Response response = request
-                .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
                 .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
                 .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
                 .when()
@@ -75,7 +75,7 @@ public class CaseDocumentControllerFunctionalTest {
     public void shouldSuccessfullyDeleteDocument() throws Exception {
         //TODO Replace with citizen auth token once secrets added
         Response response = request
-                .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
                 .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
                 .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
                 .when()

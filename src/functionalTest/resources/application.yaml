@@ -162,8 +162,8 @@ idam:
   user:
     genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
   citizen:
-    username: XXXXXXX
-    password: XXXXXXX
+    username: ${IDAM_CITIZEN_USERNAME:xxxxxxxxx}
+    password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxxx}
   solicitor:
     username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
     password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
