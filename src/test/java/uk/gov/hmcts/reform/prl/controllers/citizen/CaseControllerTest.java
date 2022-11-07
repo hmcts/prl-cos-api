@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class CaseControllerTest {
+class CaseControllerTest {
 
     @InjectMocks
     private CaseController caseController;
@@ -52,7 +52,7 @@ public class CaseControllerTest {
     public static final String authToken = "Bearer TestAuthToken";
     public static final String servAuthToken = "Bearer TestServToken";
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
     }
@@ -211,7 +211,7 @@ public class CaseControllerTest {
     }
 
     @org.junit.jupiter.api.Test
-    public void shouldCreateCase() {
+    void shouldCreateCase() {
         //Given
         CaseData caseData = mock(CaseData.class);
         CaseDetails caseDetails = mock(CaseDetails.class);
