@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHearingWithoutNotic
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildInternationalElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildMiamElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherChildrenDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherPersonDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmentsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
@@ -21,6 +22,7 @@ import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataHwnElem
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataInternationalElementsMapper.updateInternationalElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherChildrenDetailsElementsMapper.updateOtherChildDetailsElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherPersonsElementsMapper.updateOtherPersonDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherProceedingsElementsMapper.updateOtherProceedingsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataReasonableAdjustmentsElementsMapper.updateReasonableAdjustmentsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
@@ -75,6 +77,10 @@ public class CaseDataMapper {
         C100RebuildReasonableAdjustmentsElements c100RebuildReasonableAdjustmentsElements = mapper
                 .readValue(caseData.getC100RebuildReasonableAdjustments(), C100RebuildReasonableAdjustmentsElements.class);
         updateReasonableAdjustmentsElementsForCaseData(caseDataBuilder, c100RebuildReasonableAdjustmentsElements);
+
+        C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements = mapper
+                .readValue(caseData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
+        updateOtherPersonDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherPersonDetailsElements);
 
         return caseDataBuilder.build();
     }
