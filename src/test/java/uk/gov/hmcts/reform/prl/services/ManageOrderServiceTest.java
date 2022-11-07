@@ -1136,7 +1136,7 @@ public class ManageOrderServiceTest {
             .respondentsFL401(partyDetails)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm).build();
-        manageOrderService.populateCustomOrderFields(caseData);
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
     }
 
     @Test
@@ -1152,6 +1152,6 @@ public class ManageOrderServiceTest {
             .respondentsFL401(partyDetails)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings).build();
-        manageOrderService.populateCustomOrderFields(caseData);
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
     }
 }
