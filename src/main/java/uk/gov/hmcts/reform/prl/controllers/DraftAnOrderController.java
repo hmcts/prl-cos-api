@@ -99,6 +99,7 @@ public class DraftAnOrderController {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
+        log.info("Case data {}", caseData);
         log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
         fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(PrlAppsConstants.FORMAT,
