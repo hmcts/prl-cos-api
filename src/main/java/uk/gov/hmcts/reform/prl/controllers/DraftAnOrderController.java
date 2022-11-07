@@ -78,7 +78,7 @@ public class DraftAnOrderController {
             log.info("Court name before prepopulate: {}", caseData.getCourtName());
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
-
+        log.info("Case data {}", caseData);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseData.toMap(CcdObjectMapper.getObjectMapper())).build();
     }
