@@ -204,4 +204,39 @@ public class CaseControllerTest {
         assertNotNull(data);
 
     }
+
+    @Test
+    public void testretrieveCitizenCases() {
+        List<CaseData> caseDataList = new ArrayList<>();
+
+
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .build();
+
+        caseDataList.add(CaseData.builder()
+                             .id(1234567891234567L)
+                             .applicantCaseName("test")
+                             .build());
+
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+
+        List<CaseDetails> caseDetails = new ArrayList<>();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        caseDetails.add(CaseDetails.builder().id(
+            1234567891234567L).data(stringObjectMap).build());
+
+        String userId = "12345";
+        String role = "test role";
+
+        List<CaseData> caseDataList1 = new ArrayList<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(caseService.retrieveCases(role, userId, authToken, servAuthToken)).thenReturn(caseDataList);
+        caseDataList1 = caseController.retrieveCitizenCases(authToken, servAuthToken);
+        assertNotNull(caseDataList1);
+    }
 }
