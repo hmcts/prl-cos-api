@@ -123,6 +123,9 @@ uk:
             SOLICITOR_RESUBMIT_EMAIL: c8fa581b-10c7-4d48-8a22-3d055ae4be79
             LOCAL_AUTHORITY: cd275fbe-7987-4b3e-bcd1-c7cf17101b77
             DOCUMENT_UPLOADED: 5dd653ff-747f-4df1-9b0e-1532d767035f
+            CA_APPLICANT_SOLICITOR_RES_NOTIFICATION: a08975e3-6438-4f58-a0f6-827c0dcab291
+            CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION: b6224e6a-f55c-46f8-bfc7-631d273070a4
+            CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -367,3 +370,10 @@ document:
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
+bundle:
+  api:
+    url: ${BUNDLE_URL:}
+  english:
+    config: ${BUNDLE_ENGLISH_CONFIG:sample-config.yaml}
+  welsh:
+    config: ${BUNDLE_WELSH_CONFIG:sample-config.yaml}
