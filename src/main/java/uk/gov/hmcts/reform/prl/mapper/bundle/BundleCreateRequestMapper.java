@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -12,8 +13,10 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Data;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Order;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Value;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +40,23 @@ public class BundleCreateRequestMapper {
         return uk.gov.hmcts.reform.prl.models.dto.bundle.CaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(Data.builder().furtherEvidences(mapFurtherEvidencesFromCaseData(caseData.getFurtherEvidences())).otherDocuments(
-                mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).build()).build();
+                mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).finalDocument(caseData.getFinalDocument())
+                .finalWelshDocument(caseData.getFinalWelshDocument()).orders(mapOrdersFromCaseData(caseData.getOrderCollection())).build()).build();
 
+    }
+
+    private List<Element<Order>> mapOrdersFromCaseData(List<Element<OrderDetails>> ordersFromCaseData) {
+        List<Element<Order>> orders = new ArrayList<>();
+        Optional<List<Element<OrderDetails>>> existingOrders = ofNullable(ordersFromCaseData);
+        if(existingOrders.isEmpty()) {
+            return orders;
+        }
+        ordersFromCaseData.forEach(orderDetailsElement -> {
+            orders.add(ElementUtils.element(orderDetailsElement.getId(),
+                Order.builder().orderType(orderDetailsElement.getValue().getOrderType())
+                    .orderDocument(orderDetailsElement.getValue().getOrderDocument()).build()));
+        });
+        return orders;
     }
 
     private List<uk.gov.hmcts.reform.prl.models.dto.bundle.FurtherEvidence> mapFurtherEvidencesFromCaseData(
