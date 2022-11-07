@@ -24,11 +24,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-class CaseControllerTest {
+public class CaseControllerTest {
 
     @InjectMocks
     private CaseController caseController;
@@ -210,14 +209,18 @@ class CaseControllerTest {
 
     }
 
-    @org.junit.jupiter.api.Test
-    void shouldCreateCase() {
+    @Test
+    public void shouldCreateCase() {
         //Given
-        CaseData caseData = mock(CaseData.class);
-        CaseDetails caseDetails = mock(CaseDetails.class);
-        Map<String, Object> data = mock(Map.class);
-        Mockito.when(caseDetails.getData()).thenReturn(data);
-        Mockito.when(objectMapper.convertValue(data, CaseData.class)).thenReturn(caseData);
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1234567891234567L).data(stringObjectMap).build();
+
+        Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         Mockito.when(caseService.createCase(caseData, authToken)).thenReturn(caseDetails);
         Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
