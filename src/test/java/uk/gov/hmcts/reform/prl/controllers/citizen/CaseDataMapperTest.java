@@ -182,7 +182,8 @@ public class CaseDataMapperTest {
                         + "\"LONDON\",\n\"applicantAddressCounty\": \"BRENT\",\n\"applicantAddressHistory\": \"Yes\","
                         + "\n\"applicantProvideDetailsOfPreviousAddresses\": \"applicantProvideDetailsOfPreviousAddresses\"\n}"
                         + "\n]\n}")
-            .c100RebuildOtherChildrenDetails("{\"cd_otherChildren\":[{\"id\":\"a6c3e7f1-ce2f-42a7-b60e-82b80f8f36ab\","
+            .c100RebuildOtherChildrenDetails("{\"ocd_hasOtherChildren\":\"Yes\",\"ocd_otherChildren\":[{\"id\":"
+                         + "\"a6c3e7f1-ce2f-42a7-b60e-82b80f8f36ab\","
                          + "\"firstName\":\"test1\",\"lastName\":\"test11\",\"personalDetails\":{\"dateOfBirth\":"
                          + "{\"year\":\"2000\",\"month\":\"12\",\"day\":\"7\"},\"isDateOfBirthUnknown\":\"\",\"approxDateOfBirth\":"
                          + "{\"day\":\"\",\"month\":\"\",\"year\":\"\"},\"gender\":\"Male\",\"otherGenderDetails\":\"\"},"
@@ -342,7 +343,8 @@ public class CaseDataMapperTest {
     @Test
     public void testCaseDataMapperForOtherChildrenDetail() throws JsonProcessingException {
         //Given
-        CaseData caseData1 = caseData.toBuilder().c100RebuildOtherChildrenDetails("{\"cd_otherChildren\":"
+        CaseData caseData1 = caseData.toBuilder().c100RebuildOtherChildrenDetails("{\"ocd_hasOtherChildren\":\"Yes\","
+                      + "\"ocd_otherChildren\":"
                       + "[{\"id\":\"a6c3e7f1-ce2f-42a7-b60e-82b80f8f36ab\",\"firstName\":\"test1\",\"lastName\":\"test11\","
                       + "\"personalDetails\":{\"dateOfBirth\":{\"year\":\"2000\",\"month\":\"12\",\"day\":\"7\"},"
                       + "\"isDateOfBirthUnknown\":\"\",\"approxDateOfBirth\":{\"day\":\"\",\"month\":\"\",\"year\":\"\"},"
@@ -360,6 +362,29 @@ public class CaseDataMapperTest {
         //Then
         assertNotNull(updatedCaseData);
         assertNotNull(updatedCaseData.getOtherChildren());
+    }
+
+    @Test
+    public void testCaseDataMapperForOtherChildrenDetailNull() throws JsonProcessingException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder().c100RebuildOtherChildrenDetails("{\"ocd_hasOtherChildren\":\"No\",\"ocd_otherChildren\":"
+                  + "[{\"id\":\"a6c3e7f1-ce2f-42a7-b60e-82b80f8f36ab\",\"firstName\":\"test1\",\"lastName\":\"test11\","
+                  + "\"personalDetails\":{\"dateOfBirth\":{\"year\":\"2000\",\"month\":\"12\",\"day\":\"7\"},"
+                  + "\"isDateOfBirthUnknown\":\"\",\"approxDateOfBirth\":{\"day\":\"\",\"month\":\"\",\"year\":\"\"},"
+                  + "\"gender\":\"Male\",\"otherGenderDetails\":\"\"},\"childMatters\":{\"needsResolution\":[]},"
+                  + "\"parentialResponsibility\":{\"statement\":\"\"}},{\"id\":\"498bbf69-f8ab-45bb-a762-1810a339566f\","
+                  + "\"firstName\":\"test2\",\"lastName\":\"test22\",\"personalDetails\":{\"dateOfBirth\":"
+                  + "{\"year\":\"\",\"month\":\"\",\"day\":\"\"},\"isDateOfBirthUnknown\":\"Yes\",\"approxDateOfBirth\":"
+                  + "{\"year\":\"2012\",\"month\":\"8\",\"day\":\"8\"},\"gender\":\"Other\",\"otherGenderDetails\":\"test\"},"
+                  + "\"childMatters\":{\"needsResolution\":[]},\"parentialResponsibility\":{\"statement\":\"\"}}]}")
+            .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+        assertNull(updatedCaseData.getOtherChildren());
     }
 
 }

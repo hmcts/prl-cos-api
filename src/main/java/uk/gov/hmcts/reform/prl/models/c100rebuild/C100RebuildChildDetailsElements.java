@@ -22,6 +22,4 @@ public class C100RebuildChildDetailsElements {
     private String childrenSubjectOfProtectionPlan;
     @JsonProperty("cd_children")
     private List<ChildDetail> childDetails;
-    @JsonProperty("cd_otherChildren")
-    private List<ChildDetail> otherChildrenDetails;
 }

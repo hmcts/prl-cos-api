@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherChildrenDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildDetail;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.PersonalDetails;
@@ -20,9 +20,12 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 public class CaseDataOtherChildrenDetailsElementsMapper {
 
     public static void updateOtherChildDetailsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
-                                                             C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
-        caseDataBuilder
-            .otherChildren(buildChildDetails(c100RebuildChildDetailsElements.getOtherChildrenDetails()));
+                                                                  C100RebuildOtherChildrenDetailsElements c100RebuildOtherChildrenDetailsElements) {
+
+        if ("Yes".equals(c100RebuildOtherChildrenDetailsElements.getHasOtherChildren())) {
+            caseDataBuilder
+                .otherChildren(buildChildDetails(c100RebuildOtherChildrenDetailsElements.getOtherChildrenDetails()));
+        }
     }
 
     private static List<Element<Child>> buildChildDetails(List<ChildDetail> childDetails) {

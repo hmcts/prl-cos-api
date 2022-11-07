@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildCourtOrderElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHearingWithoutNoticeElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildInternationalElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildMiamElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherChildrenDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -65,8 +66,8 @@ public class CaseDataMapper {
             .readValue(caseData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
         updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
 
-        C100RebuildChildDetailsElements c100RebuildOtherChildrenDetailsElements = mapper
-            .readValue(caseData.getC100RebuildOtherChildrenDetails(), C100RebuildChildDetailsElements.class);
+        C100RebuildOtherChildrenDetailsElements c100RebuildOtherChildrenDetailsElements = mapper
+            .readValue(caseData.getC100RebuildOtherChildrenDetails(), C100RebuildOtherChildrenDetailsElements.class);
         updateOtherChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherChildrenDetailsElements);
 
         return caseDataBuilder.build();
