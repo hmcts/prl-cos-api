@@ -111,6 +111,7 @@ public class CaseControllerIntegrationTest {
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);
         assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
     }
+
     @Test
     public void testUpdateCaseEndpoint() throws Exception {
         String requestBody = ResourceLoader.loadJson(validBody);
