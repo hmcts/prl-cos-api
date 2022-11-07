@@ -59,7 +59,7 @@ public class IdamTokenGenerator {
     }
 
     public String generateIdamTokenForCitizen() {
-        return idamClient.getAccessToken(solicitorUsername, solicitorPassword);
+        return idamClient.getAccessToken(citizenUsername, citizenPassword);
     }
 
 }
