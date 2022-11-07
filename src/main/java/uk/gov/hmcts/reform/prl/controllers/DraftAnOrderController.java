@@ -97,7 +97,9 @@ public class DraftAnOrderController {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
-        log.info("Case data before generating doc: {}", caseData);
+        log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
+        caseData = manageOrderService.populateCustomOrderFields(caseData);
+        log.info("Case data after prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
