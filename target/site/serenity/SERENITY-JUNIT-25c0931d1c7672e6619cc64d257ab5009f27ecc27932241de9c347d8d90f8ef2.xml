@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><testsuite errors="1" failures="0" name="uk.gov.hmcts.reform.prl.controllers.citizen.CaseControllerIntegrationTest" skipped="0" tests="1" time="1.98" timestamp="2022-11-07 06:06:24"><testcase classname="uk.gov.hmcts.reform.prl.controllers.citizen.CaseControllerIntegrationTest" name="Test get case endpoint"><error message="[415 Unsupported Media Type] during [POST] to [https://idam-api.aat.platform.hmcts.net/o/token] [IdamApi#generateOpenIdToken(TokenRequest)]: [{&#34;timestamp&#34;:&#34;2022-11-07T18:06:26.924+00:00&#34;,&#34;status&#34;:415,&#34;error&#34;:&#34;Unsupported Media Type&#34;,&#34;path&#34;:&#34;/o/token&#34;}]" type="feign.FeignException$UnsupportedMediaType">[415 Unsupported Media Type] during [POST] to [https://idam-api.aat.platform.hmcts.net/o/token] [IdamApi#generateOpenIdToken(TokenRequest)]: [{"timestamp":"2022-11-07T18:06:26.924+00:00","status":415,"error":"Unsupported Media Type","path":"/o/token"}]</error><system-err>[415 Unsupported Media Type] during [POST] to [https://idam-api.aat.platform.hmcts.net/o/token] [IdamApi#generateOpenIdToken(TokenRequest)]: [{"timestamp":"2022-11-07T18:06:26.924+00:00","status":415,"error":"Unsupported Media Type","path":"/o/token"}]
+feign.FeignException.clientErrorStatus(FeignException.java:229)
+feign.FeignException.errorStatus(FeignException.java:194)
+feign.FeignException.errorStatus(FeignException.java:185)
+feign.AsyncResponseHandler.handleResponse(AsyncResponseHandler.java:96)
+feign.SynchronousMethodHandler.executeAndDecode(SynchronousMethodHandler.java:138)
+feign.SynchronousMethodHandler.invoke(SynchronousMethodHandler.java:89)
+uk.gov.hmcts.reform.idam.client.IdamClient.getAccessTokenResponse(IdamClient.java:53)
+uk.gov.hmcts.reform.idam.client.IdamClient.getAccessToken(IdamClient.java:68)
+uk.gov.hmcts.reform.prl.util.IdamTokenGenerator.generateIdamTokenForSystem(IdamTokenGenerator.java:34)
+uk.gov.hmcts.reform.prl.controllers.citizen.CaseControllerIntegrationTest.testGetCaseEndpoint(CaseControllerIntegrationTest.java:55)
+org.springframework.test.context.junit4.statements.RunBeforeTestMethodCallbacks.evaluate(RunBeforeTestMethodCallbacks.java:75)
+org.springframework.test.context.junit4.statements.RunAfterTestMethodCallbacks.evaluate(RunAfterTestMethodCallbacks.java:86)
+org.springframework.test.context.junit4.statements.RunBeforeTestClassCallbacks.evaluate(RunBeforeTestClassCallbacks.java:61)
+org.springframework.test.context.junit4.statements.RunAfterTestClassCallbacks.evaluate(RunAfterTestClassCallbacks.java:70)
+</system-err></testcase></testsuite>
