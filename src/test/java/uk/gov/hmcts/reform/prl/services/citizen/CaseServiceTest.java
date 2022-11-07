@@ -22,7 +22,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_PRL_CRE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @ExtendWith(MockitoExtension.class)
-public class CaseServiceTest {
+class CaseServiceTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "Bearer TestS2sToken";
@@ -38,7 +38,7 @@ public class CaseServiceTest {
     IdamClient idamClient;
 
     @Test
-    public void shouldCreateCase() {
+    void shouldCreateCase() {
         //Given
         CaseData caseData = mock(CaseData.class);
         CaseDetails caseDetails = mock(CaseDetails.class);
