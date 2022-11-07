@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -150,6 +151,42 @@ public class CaseDocumentControllerFunctionalTest {
             .when()
             .contentType("application/json")
             .post("/generate-citizen-statement-document")
+            .then().assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenUploadDocumentForCitizen_return200() throws Exception {
+        final File fileToUpload = ResourceLoader.readFile(DUMMY_UPLOAD_FILE);
+
+        request
+            .header("Authorization", "auth")
+            .header(
+                "serviceAuthorization",
+                "test s2sToken"
+            )
+            .multiPart("file",fileToUpload)
+            .param("typeOfDocument", "C8")
+            .pathParam("caseId","1667826894103746")
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/upload-citizen-document")
+            .then().assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenDeleteDocumentForCitizenById_return200() throws Exception {
+        final File fileToUpload = ResourceLoader.readFile(DUMMY_UPLOAD_FILE);
+
+        request
+            .header("Authorization", "auth")
+            .header(
+                "serviceAuthorization",
+                "test s2sToken"
+            )
+            .pathParam("caseId","1667826894103746")
+            .contentType("application/json")
+            .post("/{caseId}/document")
             .then().assertThat().statusCode(200);
 
     }
