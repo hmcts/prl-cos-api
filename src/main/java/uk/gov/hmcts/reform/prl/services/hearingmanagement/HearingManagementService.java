@@ -4,18 +4,31 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.HearingDetailsRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
+import uk.gov.hmcts.reform.prl.models.dto.notify.HearingDetailsEmail;
+import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.Optional;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
@@ -39,6 +52,11 @@ public class HearingManagementService {
 
     @Autowired
     private CoreCaseDataApi coreCaseDataApi;
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${citizen.url}")
+    private String hearingDetailsUrl;
 
     public void stateChangeForHearingManagement(HearingRequest hearingRequest, String s2sToken) {
 
@@ -95,5 +113,59 @@ public class HearingManagementService {
             true,
             caseDataContent
         );
+    }
+
+    public void sendHearingDetailsEmailToCitizen(HearingDetailsRequest hearingDetailsRequest, CaseData caseData) {
+
+        String email = "";
+        String  partyId = hearingDetailsRequest.getPartyId();
+        if (caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+            Optional<PartyDetails> applicantPartyDetails = caseData.getApplicants()
+
+                .stream()
+                .filter(applicant -> applicant.getId().equals(partyId))
+                .map(Element::getValue)
+                .findFirst();
+            if (applicantPartyDetails.isPresent()) {
+                if (applicantPartyDetails.get().getCanYouProvideEmailAddress().equals(YesOrNo.Yes)) {
+                    email = applicantPartyDetails.get().getEmail();
+                }
+            }
+
+            Optional<PartyDetails> respondenytPartyDetails = caseData.getRespondents()
+                .stream()
+                .filter(respondent -> respondent.getId().equals(partyId))
+                .map(Element::getValue)
+                .findFirst();
+
+            if (respondenytPartyDetails.isPresent() && email.isEmpty()) {
+                if (respondenytPartyDetails.get().getCanYouProvideEmailAddress().equals(YesOrNo.Yes)) {
+                    email = respondenytPartyDetails.get().getEmail();
+                }
+            }
+        } else {
+            if (caseData.getApplicantsFL401().getCanYouProvideEmailAddress().equals(YesOrNo.Yes)) {
+                email = caseData.getApplicantsFL401().getEmail();
+            }
+            if (caseData.getRespondentsFL401().getCanYouProvideEmailAddress().equals(YesOrNo.Yes) && email.isEmpty()) {
+                email = caseData.getRespondentsFL401().getEmail();
+            }
+        }
+
+        emailService.send(
+            "test@example.com",
+            EmailTemplateNames.HEARING_DETAILS,
+            buildHearingDateEmail(hearingDetailsRequest, caseData),
+            LanguagePreference.english
+        );
+    }
+
+    private EmailTemplateVars buildHearingDateEmail(HearingDetailsRequest hearingDetailsRequest, CaseData caseData) {
+        return HearingDetailsEmail.builder()
+            .caseReference(hearingDetailsRequest.getCaseId())
+            .caseName(caseData.getApplicantCaseName())
+            .partyName(hearingDetailsRequest.getPartyName())
+            .hearingDetailsPageLink(hearingDetailsUrl)
+            .build();
     }
 }
