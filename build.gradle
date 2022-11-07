@@ -95,7 +95,9 @@ allprojects {
   }
 
   repositories {
+    mavenLocal()
     mavenCentral()
+    jcenter()
     maven { url 'https://jitpack.io' }
     maven { url 'https://repo.spring.io/libs-milestone' }
   }
@@ -292,7 +294,6 @@ dependencies {
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
   implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
   implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
-  implementation group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '3.0.3'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
@@ -535,15 +536,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/enums/**/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/*',
-  '**uk/gov/hmcts/reform/prl/Application.*',
-  '**uk/gov/hmcts/reform/prl/utils/ElementUtils.java',
-  '**uk/gov/hmcts/reform/prl/services/validators/EventsChecker.java',
-  '**uk/gov/hmcts/reform/prl/services/pin/*',
-  '**uk/gov/hmcts/reform/prl/services/**/*',
-  '**uk/gov/hmcts/reform/prl/controllers/citizen/*',
-  '**uk/gov/hmcts/reform/prl/services/citizen/*',
-  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
-  '**uk/gov/hmcts/reform/prl/repositories/**/*'
+  '**uk/gov/hmcts/reform/prl/Application.*'
 ]
 
 sonarqube {
