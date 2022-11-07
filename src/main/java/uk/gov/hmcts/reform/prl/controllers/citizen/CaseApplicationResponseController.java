@@ -67,7 +67,7 @@ public class CaseApplicationResponseController {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseData = updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+        updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
         log.info(" Generating C7 draft document for respondent ");
 
         Document document = documentGenService.generateSingleDocument(
@@ -96,7 +96,7 @@ public class CaseApplicationResponseController {
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseData = updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+        updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
         log.info(" Generating C7 Final document for respondent ");
         Document document = documentGenService.generateSingleDocument(
             authorisation,
@@ -105,7 +105,7 @@ public class CaseApplicationResponseController {
             false
         );
         log.info("C7 Final document generated successfully for respondent ");
-        caseData = updateCurrentRespondent(caseData, null, partyId);
+        updateCurrentRespondent(caseData, null, partyId);
         CaseDetails caseDetailsReturn = null;
         List<Element<ResponseDocuments>> responseDocumentsList = new ArrayList<>();
         if (document != null) {
