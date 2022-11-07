@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,7 +24,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CitizenResponseNotificationEmailServiceTest {
 
-
     @Mock
     private EmailService emailService;
 
@@ -36,7 +34,6 @@ public class CitizenResponseNotificationEmailServiceTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @Ignore
     public void verifyEmailNotificationTriggeredForApplicantSolicitor() throws Exception {
 
         CaseData caseData = CaseData.builder()
@@ -54,10 +51,8 @@ public class CitizenResponseNotificationEmailServiceTest {
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                                              .build())))
             .build();
-
-
-        CaseDetails caseDetails = CaseDetails.builder().build();
         Map<String, Object> stringObjectMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(stringObjectMap).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         solicitorNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
 
@@ -67,7 +62,6 @@ public class CitizenResponseNotificationEmailServiceTest {
     }
 
     @Test
-    @Ignore
     public void verifyNoEmailNotificationTriggeredForApplicantSolicitor() throws Exception {
 
         CaseData caseData = CaseData.builder()
@@ -87,9 +81,8 @@ public class CitizenResponseNotificationEmailServiceTest {
                                              .build())))
             .build();
 
-
-        CaseDetails caseDetails = CaseDetails.builder().build();
         Map<String, Object> stringObjectMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).state("CASE_WITHDRAWN").data(stringObjectMap).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         solicitorNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
 
