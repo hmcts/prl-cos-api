@@ -1,0 +1,12 @@
+{
+  "values": {
+    "documentRequestedByCourt": "Yes",
+    "caseId": "1667826894103746",
+    "freeTextUploadStatements": "testing document gen",
+    "parentDocumentType": "Witness statements and evidence",
+    "documentType": "Your position statements",
+    "partyName": "test applicant1",
+    "partyId": "65d93485-7605-438a-8cc3-fc701e80f5b3",
+    "isApplicant": "Yes"
+  }
+}
