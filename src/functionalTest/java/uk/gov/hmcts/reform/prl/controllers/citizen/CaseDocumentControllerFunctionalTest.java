@@ -1,9 +1,14 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -31,6 +37,9 @@ import java.util.List;
 public class CaseDocumentControllerFunctionalTest {
 
     private MockMvc mockMvc;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -53,6 +62,59 @@ public class CaseDocumentControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
+    @Before
+    public void setUp() {
+        objectMapper.registerModule(new JavaTimeModule());
+    }
+
+    @Test
+    public void shouldSuccessfullyUploadDocument() throws Exception {
+        //TODO Replace with citizen auth token once secrets added
+        Response response = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
+            .when()
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/upload-citizen-statement-document");
+
+        response.then().assertThat().statusCode(200);
+        DocumentResponse res = objectMapper.readValue(response.getBody().asString(), DocumentResponse.class);
+
+        Assert.assertEquals("Success", res.getStatus());
+        Assert.assertNotNull(res.getDocument());
+        Assert.assertEquals("Test.pdf", res.getDocument().getDocumentFileName());
+    }
+
+    @Test
+    public void shouldSuccessfullyDeleteDocument() throws Exception {
+        //TODO Replace with citizen auth token once secrets added
+        final File fileToUpload = ResourceLoader.readFile(DUMMY_UPLOAD_FILE);
+
+        Response response = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .multiPart("file", fileToUpload)
+            .when()
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/upload-citizen-statement-document");
+
+        DocumentResponse res = objectMapper.readValue(response.getBody().asString(), DocumentResponse.class);
+
+        String[] documentSplit = res.getDocument().getDocumentUrl().split("/");
+
+        Response deleteResponse = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .when()
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .delete(String.format("/%s/delete", documentSplit[documentSplit.length - 1]));
+
+        deleteResponse.then().assertThat().statusCode(200);
+        DocumentResponse delRes = objectMapper.readValue(deleteResponse.getBody().asString(), DocumentResponse.class);
+
+        Assert.assertEquals("Success", delRes.getStatus());
+    }
     @Test
     public void givenGenerateDocumentForCitizen_return200() throws Exception {
         String requestBody = ResourceLoader.loadJson(GENERATE_UPLOAD_DOCUMENT_REQUEST);
@@ -104,40 +166,6 @@ public class CaseDocumentControllerFunctionalTest {
     }
 
     @Test
-    public void givenUploadStatementDocumentForCitizen_return200() throws Exception {
-
-        final File fileToUpload = ResourceLoader.readFile(DUMMY_UPLOAD_FILE);
-
-        List<MultipartFile> fileList = new ArrayList<>();
-        fileList.add((MultipartFile) fileToUpload);
-
-        UploadedDocumentRequest uploadedDocumentRequest = UploadedDocumentRequest.builder()
-            .caseId("1667826894103746")
-            .documentType("Your position statements")
-            .documentRequestedByCourt(YesOrNo.Yes)
-            .parentDocumentType("Witness statements and evidence")
-            .files(fileList)
-            .isApplicant("Yes")
-            .partyName("")
-            .partyId("65d93485-7605-438a-8cc3-fc701e80f5b3")
-            .build();
-
-        String requestBody = ResourceLoader.loadJson(String.valueOf(uploadedDocumentRequest));
-        request
-            .header("Authorization", "auth")
-            .header(
-                "serviceAuthorization",
-                "test s2sToken"
-            )
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/upload-citizen-statement-document")
-            .then().assertThat().statusCode(200);
-
-    }
-
-    @Test
     public void givenDeleteDocumentForCitizen_return200() throws Exception {
         String requestBody = ResourceLoader.loadJson(GENERATE_UPLOAD_DOCUMENT_REQUEST);
 
@@ -185,7 +213,6 @@ public class CaseDocumentControllerFunctionalTest {
                 "test s2sToken"
             )
             .pathParam("caseId","1667826894103746")
-            .contentType("application/json")
             .post("/{caseId}/document")
             .then().assertThat().statusCode(200);
 
