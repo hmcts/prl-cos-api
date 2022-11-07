@@ -1,7 +1,10 @@
 package uk.gov.hmcts.reform.prl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -37,5 +40,10 @@ public class ResourceLoader {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static File readFile(final String resourcePath) throws IOException {
+        final File file = ResourceUtils.getFile(resourcePath);
+        return file;
     }
 }

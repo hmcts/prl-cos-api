@@ -181,7 +181,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
+    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-640.service.core-compute-preview.internal}
 
 auth:
   idam:
@@ -203,7 +203,7 @@ send-letter:
   url: http://rpe-send-letter-service-aat.service.core-compute-aat.internal
 
 case_document_am:
-  url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
+  url: ${CCD_CASE_DOCS_AM_API:http://ccd-data-store-api-prl-ccd-definitions-pr-640.service.core-compute-preview.internal}
 
 prl-dgs-api:
   url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
