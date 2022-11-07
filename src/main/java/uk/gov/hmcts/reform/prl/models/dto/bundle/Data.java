@@ -13,14 +13,24 @@ import java.util.List;
 @Value
 @Builder(toBuilder = true)
 public class Data {
+    @JsonProperty("applicantCaseName")
+    private final String applicantCaseName;
+
+    @JsonProperty("caseNumber")
+    private final String caseNumber;
+
     @JsonProperty("furtherEvidences")
     public List<FurtherEvidence> furtherEvidences;
+
     @JsonProperty("otherDocuments")
     public List<OtherDocument> otherDocuments;
+
     @JsonProperty("finalDocument")
     private final Document finalDocument;
+
     @JsonProperty("finalWelshDocument")
     private final Document finalWelshDocument;
+
     @JsonProperty("orders")
     private final List<Element<Order>> orders;
 }

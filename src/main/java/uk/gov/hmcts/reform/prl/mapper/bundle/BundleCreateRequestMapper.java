@@ -39,7 +39,8 @@ public class BundleCreateRequestMapper {
     private uk.gov.hmcts.reform.prl.models.dto.bundle.CaseData mapCaseData(CaseData caseData, String bundleConfigFileName) {
         return uk.gov.hmcts.reform.prl.models.dto.bundle.CaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
-            .data(Data.builder().furtherEvidences(mapFurtherEvidencesFromCaseData(caseData.getFurtherEvidences())).otherDocuments(
+            .data(Data.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
+                .furtherEvidences(mapFurtherEvidencesFromCaseData(caseData.getFurtherEvidences())).otherDocuments(
                 mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).finalDocument(caseData.getFinalDocument())
                 .finalWelshDocument(caseData.getFinalWelshDocument()).orders(mapOrdersFromCaseData(caseData.getOrderCollection())).build()).build();
 
