@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Applications;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Data;
@@ -31,9 +33,9 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundleCreateRequestMapper {
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String bundleConfigFileName) {
-        return BundleCreateRequest.builder().caseDetails(CaseDetails.builder().id(String.valueOf(caseData.getId())).caseData(mapCaseData(
-            caseData, bundleConfigFileName)).build()).caseTypeId(caseData.getSelectedCaseTypeID()).jurisdictionId(
-            caseData.getCourtId()).build();
+        return BundleCreateRequest.builder().caseDetails(CaseDetails.builder().id(String.valueOf(caseData.getId()))
+            .caseData(mapCaseData(caseData, bundleConfigFileName)).build())
+            .caseTypeId(caseData.getSelectedCaseTypeID()).jurisdictionId(caseData.getCourtId()).build();
     }
 
     private uk.gov.hmcts.reform.prl.models.dto.bundle.CaseData mapCaseData(CaseData caseData, String bundleConfigFileName) {
@@ -41,21 +43,35 @@ public class BundleCreateRequestMapper {
                 bundleConfigFileName)
             .data(Data.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
                 .furtherEvidences(mapFurtherEvidencesFromCaseData(caseData.getFurtherEvidences())).otherDocuments(
-                mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).finalDocument(caseData.getFinalDocument())
-                .finalWelshDocument(caseData.getFinalWelshDocument()).orders(mapOrdersFromCaseData(caseData.getOrderCollection())).build()).build();
+                mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).applications(mapApplicationsFromCaseData(caseData))
+                .orders(mapOrdersFromCaseData(caseData.getOrderCollection())).build()).build();
 
+    }
+
+    private List<Applications> mapApplicationsFromCaseData(CaseData caseData) {
+        List<Applications> applications = new ArrayList<>();
+        if (YesOrNo.Yes.equals(caseData.getLanguagePreferenceWelsh())) {
+            applications.add(Applications.builder().appDocument(caseData.getFinalWelshDocument())
+                .documentFileName(caseData.getFinalWelshDocument().getDocumentFileName()).build());
+        } else {
+            applications.add(Applications.builder().appDocument(caseData.getFinalDocument())
+                .documentFileName(caseData.getFinalDocument().getDocumentFileName()).build());
+        }
+        return applications;
     }
 
     private List<Element<Order>> mapOrdersFromCaseData(List<Element<OrderDetails>> ordersFromCaseData) {
         List<Element<Order>> orders = new ArrayList<>();
         Optional<List<Element<OrderDetails>>> existingOrders = ofNullable(ordersFromCaseData);
-        if(existingOrders.isEmpty()) {
+        if (existingOrders.isEmpty()) {
             return orders;
         }
         ordersFromCaseData.forEach(orderDetailsElement -> {
+            OrderDetails orderDetails = orderDetailsElement.getValue();
+            Document document = orderDetails.getOrderDocument();
             orders.add(ElementUtils.element(orderDetailsElement.getId(),
-                Order.builder().orderType(orderDetailsElement.getValue().getOrderType())
-                    .orderDocument(orderDetailsElement.getValue().getOrderDocument()).build()));
+                Order.builder().orderType(orderDetails.getOrderType()).documentFileName(document.getDocumentFileName())
+                    .orderDocument(document).build()));
         });
         return orders;
     }
