@@ -20,7 +20,8 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @TestPropertySource(
     properties = {
         "idam.client.secret=${CITIZEN_IDAM_CLIENT_SECRET}",
-        "idam.client.id=prl-citizen-frontend"
+        "idam.client.id=prl-citizen-frontend",
+        "idam.s2s-auth.microservice=prl_citizen_frontend"
     }
 )
 public class FeesAndPaymentControllerFunctionalTest {
