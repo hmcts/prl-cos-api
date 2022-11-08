@@ -118,11 +118,8 @@ public class CaseDocumentControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(GENERATE_UPLOAD_DOCUMENT_REQUEST);
 
         request
-            .header("Authorization", "auth")
-            .header(
-                "serviceAuthorization",
-                "test s2sToken"
-            )
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -168,11 +165,8 @@ public class CaseDocumentControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(GENERATE_UPLOAD_DOCUMENT_REQUEST);
 
         request
-            .header("Authorization", "auth")
-            .header(
-                "serviceAuthorization",
-                "test s2sToken"
-            )
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -186,32 +180,13 @@ public class CaseDocumentControllerFunctionalTest {
         final File fileToUpload = ResourceLoader.readFile(DUMMY_UPLOAD_FILE);
 
         request
-            .header("Authorization", "auth")
-            .header(
-                "serviceAuthorization",
-                "test s2sToken"
-            )
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
             .multiPart("file",fileToUpload)
             .param("typeOfDocument", "C8")
             .pathParam("caseId","1667826894103746")
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
             .post("/upload-citizen-document")
-            .then().assertThat().statusCode(200);
-
-    }
-
-    @Test
-    public void givenDeleteDocumentForCitizenById_return200() throws Exception {
-        final File fileToUpload = ResourceLoader.readFile(DUMMY_UPLOAD_FILE);
-
-        request
-            .header("Authorization", "auth")
-            .header(
-                "serviceAuthorization",
-                "test s2sToken"
-            )
-            .pathParam("caseId","1667826894103746")
-            .post("/{caseId}/document")
             .then().assertThat().statusCode(200);
 
     }
