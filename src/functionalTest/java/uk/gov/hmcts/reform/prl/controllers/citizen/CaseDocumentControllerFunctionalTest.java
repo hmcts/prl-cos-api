@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
@@ -26,6 +27,12 @@ import java.io.File;
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@TestPropertySource(
+    properties = {
+        "idam.client.secret=${CITIZEN_IDAM_CLIENT_SECRET}",
+        "idam.client.id=prl-citizen-frontend"
+    }
+)
 @ContextConfiguration
 @SuppressWarnings("PMD")
 public class CaseDocumentControllerFunctionalTest {
@@ -40,10 +47,10 @@ public class CaseDocumentControllerFunctionalTest {
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     private final String targetInstance =
-            StringUtils.defaultIfBlank(
-                    System.getenv("TEST_URL"),
-                    "http://localhost:4044"
-            );
+        StringUtils.defaultIfBlank(
+            System.getenv("TEST_URL"),
+            "http://localhost:4044"
+        );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
@@ -56,12 +63,12 @@ public class CaseDocumentControllerFunctionalTest {
     public void shouldSuccessfullyUploadDocument() throws Exception {
         //TODO Replace with citizen auth token once secrets added
         Response response = request
-                .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
-                .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-                .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
-                .when()
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .post("/upload-citizen-statement-document");
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
+            .when()
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/upload-citizen-statement-document");
 
         response.then().assertThat().statusCode(200);
         DocumentResponse res = objectMapper.readValue(response.getBody().asString(), DocumentResponse.class);
@@ -75,23 +82,23 @@ public class CaseDocumentControllerFunctionalTest {
     public void shouldSuccessfullyDeleteDocument() throws Exception {
         //TODO Replace with citizen auth token once secrets added
         Response response = request
-                .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
-                .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-                .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
-                .when()
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .post("/upload-citizen-statement-document");
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
+            .when()
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/upload-citizen-statement-document");
 
         DocumentResponse res = objectMapper.readValue(response.getBody().asString(), DocumentResponse.class);
 
         String[] documentSplit = res.getDocument().getDocumentUrl().split("/");
 
         Response deleteResponse = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
-                .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-                .when()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .delete(String.format("/%s/delete", documentSplit[documentSplit.length - 1]));
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .when()
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .delete(String.format("/%s/delete", documentSplit[documentSplit.length - 1]));
 
         deleteResponse.then().assertThat().statusCode(200);
         DocumentResponse delRes = objectMapper.readValue(deleteResponse.getBody().asString(), DocumentResponse.class);
