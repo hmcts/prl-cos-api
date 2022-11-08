@@ -20,5 +20,9 @@ public class OtherPersonDetail {
     private String lastName;
     @JsonProperty("personalDetails")
     private PersonalDetails personalDetails;
+    @JsonProperty("relationshipDetails")
+    private RelationshipDetails relationshipDetails;
+    @JsonProperty("otherPersonAddress")
+    private OtherPersonAddress otherPersonAddress;
 
 }
