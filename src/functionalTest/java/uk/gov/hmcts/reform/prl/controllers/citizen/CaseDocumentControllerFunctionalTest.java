@@ -68,7 +68,7 @@ public class CaseDocumentControllerFunctionalTest {
             .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
             .when()
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-            .post("/upload-citizen-statement-document");
+            .post("/upload-citizen-document");
 
         response.then().assertThat().statusCode(200);
         DocumentResponse res = objectMapper.readValue(response.getBody().asString(), DocumentResponse.class);
@@ -87,7 +87,7 @@ public class CaseDocumentControllerFunctionalTest {
             .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
             .when()
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-            .post("/upload-citizen-statement-document");
+            .post("/upload-citizen-document");
 
         DocumentResponse res = objectMapper.readValue(response.getBody().asString(), DocumentResponse.class);
 
