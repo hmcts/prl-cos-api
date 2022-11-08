@@ -20,10 +20,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @SpringBootTest
@@ -70,7 +73,7 @@ public class CaseDocumentControllerFunctionalTest {
         Response response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .multiPart("file", fileToUpload)
+            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
             .when()
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
             .post("/upload-citizen-statement-document");
@@ -91,7 +94,7 @@ public class CaseDocumentControllerFunctionalTest {
         Response response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .multiPart("file", fileToUpload)
+            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
             .when()
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
             .post("/upload-citizen-statement-document");
@@ -116,6 +119,10 @@ public class CaseDocumentControllerFunctionalTest {
     @Test
     public void givenGenerateDocumentForCitizen_return200() throws Exception {
         String requestBody = ResourceLoader.loadJson(GENERATE_UPLOAD_DOCUMENT_REQUEST);
+
+
+
+
 
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -162,31 +169,23 @@ public class CaseDocumentControllerFunctionalTest {
 
     @Test
     public void givenDeleteDocumentForCitizen_return200() throws Exception {
-        String requestBody = ResourceLoader.loadJson(GENERATE_UPLOAD_DOCUMENT_REQUEST);
-
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/generate-citizen-statement-document")
-            .then().assertThat().statusCode(200);
-
-    }
-
-    @Test
-    public void givenUploadDocumentForCitizen_return200() throws Exception {
         final File fileToUpload = ResourceLoader.readFile(DUMMY_UPLOAD_FILE);
 
+        Map<String, String> documentMap = new HashMap<>();
+        documentMap.put("caseId","1667826894103746");
+        documentMap.put("documentId", "test123");
+
+        DeleteDocumentRequest deleteDocumentRequest = DeleteDocumentRequest.builder()
+            .values(documentMap)
+            .build();
+
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .multiPart("file",fileToUpload)
-            .param("typeOfDocument", "C8")
-            .pathParam("caseId","1667826894103746")
-            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-            .post("/upload-citizen-document")
+            .header("Authorization", "Bearer testauth")
+            .header("serviceAuthorization", "Bearer tests2stoken")
+            .body(deleteDocumentRequest)
+            .contentType("application/json")
+            .when()
+            .post("/delete-citizen-statement-document")
             .then().assertThat().statusCode(200);
 
     }
