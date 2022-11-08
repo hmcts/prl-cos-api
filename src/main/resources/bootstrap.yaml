@@ -38,3 +38,4 @@ spring:
         citizen-url: CITIZEN_URL
         prl.citizen-user: IDAM_CITIZEN_USERNAME
         prl.citizen-password: IDAM_CITIZEN_PASSWORD
+        prl-citizen-frontend-idam-client-secret: CITIZEN_IDAM_CLIENT_SECRET
