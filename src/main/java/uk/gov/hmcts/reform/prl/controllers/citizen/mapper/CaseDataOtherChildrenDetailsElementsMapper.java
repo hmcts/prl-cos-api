@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
 
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -22,7 +23,7 @@ public class CaseDataOtherChildrenDetailsElementsMapper {
     public static void updateOtherChildDetailsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
                                                                   C100RebuildOtherChildrenDetailsElements c100RebuildOtherChildrenDetailsElements) {
 
-        if ("Yes".equals(c100RebuildOtherChildrenDetailsElements.getHasOtherChildren())) {
+        if (PrlAppsConstants.YES.equals(c100RebuildOtherChildrenDetailsElements.getHasOtherChildren())) {
             caseDataBuilder
                 .otherChildren(buildChildDetails(c100RebuildOtherChildrenDetailsElements.getOtherChildrenDetails()));
         }
