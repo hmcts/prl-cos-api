@@ -221,6 +221,16 @@ public class CaseDataMapperTest {
                         + "\n\"helpUsingLift\",\n\"differentTypeChair\",\n\"guideBuilding\",\n\"travellingCourtOther\"\n],"
                         + "\n\"ra_parkingSpaceSubField\": \"test\",\n\"ra_differentTypeChairSubField\": "
                         + "\"test\",\n\"ra_travellingCourtOtherSubField\": \"test\"\n}")
+            .c100RebuildOtherPersonsDetails("{\"oprs_otherPersons\":[{\"id\":\"530b66b8-b718-4aca-bc29-09cca1c0429f\","
+                        + "\"firstName\":\"c1\",\"lastName\":\"c1\",\"personalDetails\":{\"dateOfBirth\":"
+                        + "{\"year\":\"1990\",\"month\":\"12\",\"day\":\"12\"},\"isDateOfBirthUnknown\":\"\","
+                        + "\"isNameChanged\":\"yes\",\"previousFullName\":\"previous name\",\"approxDateOfBirth\":"
+                        + "{\"day\":\"\",\"month\":\"\",\"year\":\"\"},\"gender\":\"Male\",\"otherGenderDetails\":\"\"},"
+                        + "\"relationshipDetails\":{\"relationshipToChildren\":[{\"childId\":"
+                        + "\"4a9f3ec0-c359-4dc0-9e94-e4fc868f0341\",\"relationshipType\":\"Mother\","
+                        + "\"otherRelationshipTypeDetails\":\"\"}]},\"otherPersonAddress\":{\"AddressLine1\":\"\","
+                        + "\"AddressLine2\":\"\",\"AddressLine3\":\"\",\"PostTown\":\"\",\"County\":\"\","
+                        + "\"PostCode\":\"\",\"Country\":\"\"}}]}")
                 .build();
     }
 
@@ -453,6 +463,29 @@ public class CaseDataMapperTest {
 
         //Then
         assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testCaseDataMapperForOtherPersonDetails() throws JsonProcessingException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder().c100RebuildOtherPersonsDetails("{\"oprs_otherPersons\":[{"
+              + "\"id\":\"530b66b8-b718-4aca-bc29-09cca1c0429f\",\"firstName\":\"c1\",\"lastName\":\"c1\","
+              + "\"personalDetails\":{\"dateOfBirth\":{\"year\":\"1990\",\"month\":\"12\",\"day\":\"12\"},"
+              + "\"isDateOfBirthUnknown\":\"\",\"isNameChanged\":\"yes\",\"previousFullName\":\"previous name\","
+              + "\"approxDateOfBirth\":{\"day\":\"\",\"month\":\"\",\"year\":\"\"},\"gender\":\"Male\","
+              + "\"otherGenderDetails\":\"\"},\"relationshipDetails\":{\"relationshipToChildren\":[{\"childId\":"
+              + "\"4a9f3ec0-c359-4dc0-9e94-e4fc868f0341\",\"relationshipType\":\"Mother\","
+              + "\"otherRelationshipTypeDetails\":\"\"}]},\"otherPersonAddress\":{\"AddressLine1\":\"\","
+              + "\"AddressLine2\":\"\",\"AddressLine3\":\"\",\"PostTown\":\"\",\"County\":\"\",\"PostCode\":\"\","
+              + "\"Country\":\"\"}}]}")
+            .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+        assertNotNull(updatedCaseData.getOthersToNotify());
     }
 
 }
