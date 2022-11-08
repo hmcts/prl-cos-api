@@ -65,10 +65,12 @@ public class CaseDocumentControllerFunctionalTest {
     @Test
     public void shouldSuccessfullyUploadDocument() throws Exception {
         //TODO Replace with citizen auth token once secrets added
+        final File fileToUpload = ResourceLoader.readFile(DUMMY_UPLOAD_FILE);
+
         Response response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
+            .multiPart("file", fileToUpload)
             .when()
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
             .post("/upload-citizen-statement-document");
@@ -78,7 +80,7 @@ public class CaseDocumentControllerFunctionalTest {
 
         Assert.assertEquals("Success", res.getStatus());
         Assert.assertNotNull(res.getDocument());
-        Assert.assertEquals("Test.pdf", res.getDocument().getDocumentFileName());
+        Assert.assertEquals("Dummy_pdf_file.pdf", res.getDocument().getDocumentFileName());
     }
 
     @Test
