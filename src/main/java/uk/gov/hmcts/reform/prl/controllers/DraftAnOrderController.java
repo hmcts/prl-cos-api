@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -40,6 +42,9 @@ public class DraftAnOrderController {
 
     @Autowired
     private ManageOrderService manageOrderService;
+
+    @Autowired
+    private DraftAnOrderService draftAnOrderService;
 
     @PostMapping(path = "/selected-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate the header")
@@ -122,6 +127,18 @@ public class DraftAnOrderController {
         log.info("Case data after prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to generate draft order collection")
+    public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.putAll(draftAnOrderService.generateDraftOrderCollection(caseData));
+        log.info("*** before returning {} ***", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
