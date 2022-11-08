@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildCourtOrderElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHearingWithoutNoticeElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildInternationalElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildMiamElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherChildrenDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -18,6 +19,7 @@ import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataChildDe
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataHwnElementsMapper.updateHearingWithoutNoticeElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataInternationalElementsMapper.updateInternationalElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherChildrenDetailsElementsMapper.updateOtherChildDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherProceedingsElementsMapper.updateOtherProceedingsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
@@ -63,6 +65,10 @@ public class CaseDataMapper {
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements = mapper
             .readValue(caseData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
         updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
+
+        C100RebuildOtherChildrenDetailsElements c100RebuildOtherChildrenDetailsElements = mapper
+            .readValue(caseData.getC100RebuildOtherChildrenDetails(), C100RebuildOtherChildrenDetailsElements.class);
+        updateOtherChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherChildrenDetailsElements);
 
         return caseDataBuilder.build();
     }
