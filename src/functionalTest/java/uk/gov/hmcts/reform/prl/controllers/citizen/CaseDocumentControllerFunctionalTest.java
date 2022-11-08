@@ -17,11 +17,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.ResourceUtils;
+import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 
 @Slf4j
@@ -62,10 +67,14 @@ public class CaseDocumentControllerFunctionalTest {
     @Test
     public void shouldSuccessfullyUploadDocument() throws Exception {
         //TODO Replace with citizen auth token once secrets added
+        String filePath = "classpath:Test.pdf";
+        final MultipartFile file = new InMemoryMultipartFile(filePath, filePath, MediaType.APPLICATION_PDF_VALUE,
+                                                             resourceAsBytes(filePath)
+        );
         Response response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
+            .multiPart("file", file)
             .when()
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
             .post("/upload-citizen-document");
@@ -80,11 +89,14 @@ public class CaseDocumentControllerFunctionalTest {
 
     @Test
     public void shouldSuccessfullyDeleteDocument() throws Exception {
+        final MultipartFile file = new InMemoryMultipartFile(filePath, filePath, MediaType.APPLICATION_PDF_VALUE,
+                                                             resourceAsBytes(filePath)
+        );
         //TODO Replace with citizen auth token once secrets added
         Response response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
+            .multiPart("file", file)
             .when()
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
             .post("/upload-citizen-document");
@@ -104,5 +116,11 @@ public class CaseDocumentControllerFunctionalTest {
         DocumentResponse delRes = objectMapper.readValue(deleteResponse.getBody().asString(), DocumentResponse.class);
 
         Assert.assertEquals("Success", delRes.getStatus());
+    }
+
+
+    public static byte[] resourceAsBytes(final String resourcePath) throws IOException {
+        final File file = ResourceUtils.getFile(resourcePath);
+        return Files.readAllBytes(file.toPath());
     }
 }
