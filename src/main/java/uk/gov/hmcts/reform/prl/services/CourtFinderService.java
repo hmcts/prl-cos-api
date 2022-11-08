@@ -86,7 +86,7 @@ public class CourtFinderService {
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
         } else if (child.getChildLiveWith().contains(anotherPerson) && ofNullable(getFirstOtherPerson(child)).isPresent()) {
             if (ofNullable(getFirstOtherPerson(child).getAddress().getPostCode()).isEmpty()) {
-                log.info("getPostcodeFromWrappedParty(caseData.getApplicants().get(0)):::",getPostcodeFromWrappedParty(caseData.getApplicants().get(0)));
+                log.info("POstoce :::",getPostcodeFromWrappedParty(caseData.getApplicants().get(0)));
                 return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
             }
             return getFirstOtherPerson(child).getAddress().getPostCode();
