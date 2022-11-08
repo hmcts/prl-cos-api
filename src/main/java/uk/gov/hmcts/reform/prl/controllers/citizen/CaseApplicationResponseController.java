@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -52,6 +53,9 @@ public class CaseApplicationResponseController {
     @Autowired
     CaseService caseService;
 
+    @Autowired
+    CitizenResponseNotificationEmailService citizenResponseNotificationEmailService;
+
 
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
@@ -67,7 +71,7 @@ public class CaseApplicationResponseController {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseData = updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+        updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
         log.info(" Generating C7 draft document for respondent ");
 
         Document document = documentGenService.generateSingleDocument(
@@ -76,7 +80,10 @@ public class CaseApplicationResponseController {
                 DOCUMENT_C7_DRAFT_HINT,
                 false
             );
-
+        /**
+         * send notification to Applicant solicitor for respondent's response
+         */
+        citizenResponseNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
         log.info("C7 draft document generated successfully for respondent ");
         return document;
     }
@@ -96,7 +103,7 @@ public class CaseApplicationResponseController {
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseData = updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+        updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
         log.info(" Generating C7 Final document for respondent ");
         Document document = documentGenService.generateSingleDocument(
             authorisation,
@@ -105,7 +112,7 @@ public class CaseApplicationResponseController {
             false
         );
         log.info("C7 Final document generated successfully for respondent ");
-        caseData = updateCurrentRespondent(caseData, null, partyId);
+        updateCurrentRespondent(caseData, null, partyId);
         CaseDetails caseDetailsReturn = null;
         List<Element<ResponseDocuments>> responseDocumentsList = new ArrayList<>();
         if (document != null) {
