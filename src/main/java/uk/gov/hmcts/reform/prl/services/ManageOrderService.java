@@ -880,15 +880,19 @@ public class ManageOrderService {
                                                          String flagSelectedOrder, String template, String fileName,
                                                          CaseData caseData) throws Exception {
         log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, template);
-        GeneratedDocumentInfo generatedDocumentInfo = template.contains("-WEL-") ? dgsService.generateWelshDocument(
-            authorisation,
-            CaseDetails.builder().caseData(caseData).build(),
-            template
-        ) : dgsService.generateDocument(
-            authorisation,
-            CaseDetails.builder().caseData(caseData).build(),
-            template
-        );
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
+        if (template != null) {
+            generatedDocumentInfo = template.contains("-WEL-") ? dgsService.generateWelshDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                template
+            ) : dgsService.generateDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                template
+            );
+        }
+
         return element(OrderDetails.builder().orderType(flagSelectedOrder)
                            .orderTypeId(flagSelectedOrderId)
                            .orderDocument(Document.builder()
