@@ -69,7 +69,6 @@ public class CaseDataService {
     }
 
     public List<Long> getHearingDetails(CafCassResponse cafCassResponse){
-        //return cafCassResponse.getCases().stream().filter(cafCassCaseDetail -> cafCassCaseDetail)
         return cafCassResponse.getCases().stream().map(cafCassCaseDetail -> cafCassCaseDetail.getId()).collect(Collectors.toList());
     }
 }
