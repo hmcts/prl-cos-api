@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -106,7 +105,7 @@ public class DraftAnOrderService {
         );
     }
 
-   /* public Map<String, Object> updateDraftOrderCollection(CaseData caseData) {
+    /*public Map<String, Object> updateDraftOrderCollection(CaseData caseData) {
 
         log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
         log.info(" ************solicitorOrJudgeDraftOrderDoc {}", caseData.getSolicitorOrJudgeDraftOrderDoc());

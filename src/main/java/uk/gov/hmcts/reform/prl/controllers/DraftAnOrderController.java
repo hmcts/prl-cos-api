@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Map;
 
 import static java.util.Optional.ofNullable;
@@ -45,6 +46,15 @@ public class DraftAnOrderController {
 
     @Autowired
     private DraftAnOrderService draftAnOrderService;
+
+    @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to reset fields")
+    public AboutToStartOrSubmitCallbackResponse resetFields(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        return AboutToStartOrSubmitCallbackResponse.builder().data(Collections.emptyMap()).build();
+    }
+
 
     @PostMapping(path = "/selected-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate the header")
