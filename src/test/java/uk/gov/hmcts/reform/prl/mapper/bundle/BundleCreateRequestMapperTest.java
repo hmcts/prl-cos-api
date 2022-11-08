@@ -1,14 +1,5 @@
 package uk.gov.hmcts.reform.prl.mapper.bundle;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.Assert.assertNotNull;
-import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -33,6 +24,15 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertNotNull;
+import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BundleCreateRequestMapperTest {
