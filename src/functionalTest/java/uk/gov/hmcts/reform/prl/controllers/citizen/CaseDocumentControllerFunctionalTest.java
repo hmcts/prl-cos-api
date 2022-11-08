@@ -90,6 +90,7 @@ public class CaseDocumentControllerFunctionalTest {
 
     @Test
     public void shouldSuccessfullyDeleteDocument() throws Exception {
+        String filePath = "classpath:Test.pdf";
         final MultipartFile file = new InMemoryMultipartFile(filePath, filePath, MediaType.APPLICATION_PDF_VALUE,
                                                              resourceAsBytes(filePath)
         );
