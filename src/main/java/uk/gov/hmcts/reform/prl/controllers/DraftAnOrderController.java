@@ -49,12 +49,13 @@ public class DraftAnOrderController {
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback to reset fields"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse resetFields(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         return AboutToStartOrSubmitCallbackResponse.builder().data(Collections.emptyMap()).build();
     }
-
 
     @PostMapping(path = "/selected-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate the header")
