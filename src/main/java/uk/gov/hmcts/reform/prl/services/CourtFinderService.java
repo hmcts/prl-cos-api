@@ -86,9 +86,6 @@ public class CourtFinderService {
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
         } else if (child.getChildLiveWith().contains(anotherPerson) && ofNullable(getFirstOtherPerson(child)).isPresent()) {
             if (ofNullable(getFirstOtherPerson(child).getAddress().getPostCode()).isEmpty()) {
-                log.info("addressLine1 :::",caseData.getApplicants().get(0).getValue().getAddress().getAddressLine1());
-                log.info("addressLine2 :::",caseData.getApplicants().get(0).getValue().getAddress().getAddressLine2());
-                log.info("PostCode :::",caseData.getApplicants().get(0).getValue().getAddress().getPostCode());
 
                 return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
             }
@@ -105,6 +102,9 @@ public class CourtFinderService {
     }
 
     private String getPostcodeFromWrappedParty(Element<PartyDetails> party) {
+        log.info("addressLine1 :::",party.getValue().getAddress().getAddressLine1());
+        log.info("addressLine2 :::",party.getValue().getAddress().getAddressLine2());
+        log.info("PostCode :::",party.getValue().getAddress().getPostCode());
         return party.getValue().getAddress().getPostCode();
     }
 
