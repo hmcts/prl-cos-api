@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
         "idam.s2s-auth.microservice=prl_citizen_frontend"
     }
 )
+@Ignore
 public class FeesAndPaymentControllerFunctionalTest {
 
     @Autowired
@@ -43,6 +45,7 @@ public class FeesAndPaymentControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
+    @Ignore
     @Test
     public void createPaymentTest() throws Exception {
         String requestBody = ResourceLoader.loadJson(CREATE_PAYMENT_INPUT);
@@ -52,11 +55,12 @@ public class FeesAndPaymentControllerFunctionalTest {
                 .body(requestBody)
                 .when()
                 .contentType("application/json")
-                .post("/fees-and-payment-apis/")
+                .post("/fees-and-payment-apis/create-payment")
                 .then()
                 .assertThat().statusCode(200);
     }
 
+    @Ignore
     @Test
     public void retrievePaymentStatustest() throws Exception {
         request
