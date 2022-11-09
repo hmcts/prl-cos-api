@@ -336,6 +336,7 @@ public class CourtFinderServiceTest {
     }
 
     //@Test
+
     public void givenChildPresent_whenLivesWithApplicant_thenReturnApplicantPostcode() throws NotFoundException {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))

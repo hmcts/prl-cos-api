@@ -114,6 +114,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                     .build();
             }
             CaseData caseDataForOrgDetails = callbackRequest.getCaseDetails().getCaseData();
+            log.info("caseDataForOrgDetails ::::",caseDataForOrgDetails);
             caseDataForOrgDetails = organisationService.getApplicantOrganisationDetails(caseDataForOrgDetails);
             caseDataForOrgDetails = organisationService.getRespondentOrganisationDetails(caseDataForOrgDetails);
 
