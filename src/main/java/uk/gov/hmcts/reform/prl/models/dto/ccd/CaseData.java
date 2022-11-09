@@ -105,6 +105,7 @@ public class CaseData implements MappableObject {
 
     private final long id;
 
+
     private final State state;
 
     @JsonIgnore
