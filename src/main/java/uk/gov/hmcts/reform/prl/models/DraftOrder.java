@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 
@@ -22,6 +23,7 @@ public class DraftOrder {
     private OtherDraftOrderDetails otherDetails;
     private String judgeNotes;
     private String adminNotes;
+    private FL404 fl404CustomFields;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {

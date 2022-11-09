@@ -666,5 +666,6 @@ public class CaseData implements MappableObject {
 
 
     private final List<Element<DraftOrder>> draftOrderCollection;
+    private Object draftOrdersDynamicList;
 
 }

@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
@@ -36,7 +38,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class DraftAnOrderService {
 
-    private final DgsService dgsService;
     private final Time dateTime;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
@@ -157,6 +158,7 @@ public class DraftAnOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status("Draft").build())
+            .fl404CustomFields(FL404.builder().fl404bCourtName("Test").build())
             .build();
     }
 
@@ -360,5 +362,26 @@ public class DraftAnOrderService {
                 return caseData;
 
         }
+    }
+
+    public Map<String, Object> populateDraftOrderFields(CaseData caseData) {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        caseDataMap.put("previewDraftOrder", selectedOrder.getOrderDocument());
+        return caseDataMap;
+    }
+
+
+    public DraftOrder getSelectedDraftOrderDetails(CaseData caseData) {
+        UUID orderId = elementUtils.getDynamicListSelectedValue(
+            caseData.getDraftOrdersDynamicList(), objectMapper);
+        log.info("draftOrderdynamicList {}", caseData.getDraftOrdersDynamicList());
+        log.info("inside getDraftOrderDocument orderId {}", orderId);
+        return caseData.getDraftOrderCollection().stream()
+            .filter(element -> element.getId().equals(orderId))
+            .map(Element::getValue)
+            .findFirst()
+            .orElseThrow(() -> new UnsupportedOperationException(String.format(
+                "Could not find order")));
     }
 }
