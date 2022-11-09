@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
         "idam.s2s-auth.microservice=prl_citizen_frontend"
     }
 )
+@Ignore
 public class FeesAndPaymentControllerFunctionalTest {
 
     @Autowired
