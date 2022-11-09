@@ -70,7 +70,7 @@ public class CaseDocumentControllerFunctionalTest {
         Response response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .multiPart("file", new File("resources/Test.pdf"))
+            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
             .when()
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
             .post("/upload-citizen-document");
@@ -91,7 +91,7 @@ public class CaseDocumentControllerFunctionalTest {
         Response response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
-            .multiPart("file", new File("resources/Test.pdf"))
+            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
             .when()
             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
             .post("/upload-citizen-document");
