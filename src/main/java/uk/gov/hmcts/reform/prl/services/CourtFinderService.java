@@ -86,7 +86,6 @@ public class CourtFinderService {
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
         } else if (child.getChildLiveWith().contains(anotherPerson) && ofNullable(getFirstOtherPerson(child)).isPresent()) {
             if (ofNullable(getFirstOtherPerson(child).getAddress().getPostCode()).isEmpty()) {
-
                 return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
             }
             return getFirstOtherPerson(child).getAddress().getPostCode();
@@ -103,6 +102,16 @@ public class CourtFinderService {
 
     private String getPostcodeFromWrappedParty(Element<PartyDetails> party) {
         log.info("addressLine1 :::",party.getValue().getAddress().getAddressLine1());
+        log.info("LName :::",party.getValue().getLastName());
+        log.info("FName :::",party.getValue().getFirstName());
+        log.info("DOB :::",party.getValue().getDateOfBirth());
+        log.info("GENDER :::",party.getValue().getGender());
+        log.info("Phone :::",party.getValue().getPhoneNumber());
+        log.info("Solicitor address1 :::",party.getValue().getSolicitorAddress().getAddressLine1());
+        log.info("Solicitor address1 :::",party.getValue().getSolicitorAddress().getAddressLine2());
+        log.info("Solicitor postCode :::",party.getValue().getSolicitorAddress().getPostCode());
+        log.info("email :::",party.getValue().getEmail());
+        log.info("caseType :::",party.getValue().getCaseTypeOfApplication());
         log.info("addressLine2 :::",party.getValue().getAddress().getAddressLine2());
         log.info("PostCode :::",party.getValue().getAddress().getPostCode());
         return party.getValue().getAddress().getPostCode();
