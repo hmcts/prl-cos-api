@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
+
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.applicant;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
@@ -85,15 +86,10 @@ public class CourtFinderService {
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
         } else if (child.getChildLiveWith().contains(anotherPerson) && ofNullable(getFirstOtherPerson(child)).isPresent()) {
             if (ofNullable(getFirstOtherPerson(child).getAddress().getPostCode()).isEmpty()) {
-                caseData.getApplicants().stream().forEach(x->{
-                    log.info("addressLine1 :::",x.getValue().getAddress().getAddressLine1());
-                });
-                caseData.getApplicants().stream().forEach(x->{
-                    log.info("addressLine2 :::",x.getValue().getAddress().getAddressLine2());
-                });
-                caseData.getApplicants().stream().forEach(x->{
-                    log.info("PostCode :::",x.getValue().getAddress().getPostCode());
-                });
+                log.info("addressLine1 :::",caseData.getApplicants().get(0).getValue().getAddress().getAddressLine1());
+                log.info("addressLine2 :::",caseData.getApplicants().get(0).getValue().getAddress().getAddressLine2());
+                log.info("PostCode :::",caseData.getApplicants().get(0).getValue().getAddress().getPostCode());
+
                 return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
             }
             return getFirstOtherPerson(child).getAddress().getPostCode();
