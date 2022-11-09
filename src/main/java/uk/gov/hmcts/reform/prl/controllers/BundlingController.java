@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -47,10 +49,25 @@ public class BundlingController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         moveExistingCaseBundlesToHistoricalBundles(caseData);
-        caseDataUpdated.put("caseBundles",bundlingService.createBundleServiceRequest(caseData, authorization).getData().getCaseBundles());
+        caseDataUpdated.put("caseBundles",
+            bundlingService.createBundleServiceRequest(caseData, callbackRequest.getEventId(),authorization).getData().getCaseBundles());
         caseDataUpdated.put("historicalBundles",caseData.getHistoricalBundles());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
+    }
+
+    @PostMapping(path = "/createBundleCallback", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",  content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse saveBundleDocument(
+        @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) throws Exception {
+        log.info("*** callback data recieved to cos api : {}", callbackRequest.getCaseDetails().getData());
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     private void moveExistingCaseBundlesToHistoricalBundles(CaseData caseData) {
