@@ -18,8 +18,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
-import static java.util.Optional.ofNullable;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.applicant;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
