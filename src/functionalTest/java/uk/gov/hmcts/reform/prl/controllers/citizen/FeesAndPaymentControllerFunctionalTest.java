@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
         "idam.s2s-auth.microservice=prl_citizen_frontend"
     }
 )
-@Ignore
 public class FeesAndPaymentControllerFunctionalTest {
 
     @Autowired
@@ -45,8 +44,10 @@ public class FeesAndPaymentControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
+    /*
+    These test cases will be enabled once we have merged and integrated with Fee and Pay on Demo environment.
+     */
     @Ignore
-    @Test
     public void createPaymentTest() throws Exception {
         String requestBody = ResourceLoader.loadJson(CREATE_PAYMENT_INPUT);
         request
@@ -60,8 +61,10 @@ public class FeesAndPaymentControllerFunctionalTest {
                 .assertThat().statusCode(200);
     }
 
+    /*
+    These test cases will be enabled once we have merged and integrated with Fee and Pay on Demo environment.
+     */
     @Ignore
-    @Test
     public void retrievePaymentStatustest() throws Exception {
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
