@@ -81,6 +81,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.MultiBundleConfig;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -653,5 +655,17 @@ public class CaseData implements MappableObject {
     private String previewDraftAnOrder;
 
     private String citizenUploadedStatement;
+
+    @JsonProperty("cafcassUploadedDocs")
+    private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
+
+    /**
+     * Bundle.
+     */
+    private List<Bundle> caseBundles;
+    private List<Bundle> historicalBundles;
+    private String bundleConfiguration;
+    private List<MultiBundleConfig> multiBundleConfiguration;
+
 
 }
