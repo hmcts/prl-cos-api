@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,9 +17,7 @@ import uk.gov.hmcts.reform.prl.services.ChildDetailsService;
 import java.util.Map;
 
 
-@Slf4j
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/child-details")
 @SecurityRequirement(name = "Bearer Authentication")
 public class ChildDetailsController extends AbstractCallbackController {
