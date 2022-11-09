@@ -212,6 +212,12 @@ public class CaseControllerTest {
     @Test
     public void testretrieveCitizenCases() {
         List<CaseData> caseDataList = new ArrayList<>();
+
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .build();
+
         caseDataList.add(CaseData.builder()
                              .id(1234567891234567L)
                              .applicantCaseName("test")
@@ -236,9 +242,14 @@ public class CaseControllerTest {
         caseDataList1 = caseController.retrieveCitizenCases(authToken, servAuthToken);
         assertNotNull(caseDataList1);
     }
-    
+
     @Test
     public void shouldCreateCase() {
+        //Given
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
