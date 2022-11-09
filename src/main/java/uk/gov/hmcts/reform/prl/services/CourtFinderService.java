@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.List;
+
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -87,9 +87,9 @@ public class CourtFinderService {
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
         } else if (child.getChildLiveWith().contains(anotherPerson) && ofNullable(getFirstOtherPerson(child)).isPresent()) {
             if (ofNullable(getFirstOtherPerson(child).getAddress().getPostCode()).isEmpty()) {
-                caseData.getApplicants().stream().forEach(x->   log.info("addressLine1 :::",x.getValue().getAddress().getAddressLine1()));
-                caseData.getApplicants().stream().forEach(x->   log.info("addressLine2 :::",x.getValue().getAddress().getAddressLine2()));
-                caseData.getApplicants().stream().forEach(x->   log.info("PostCode :::",x.getValue().getAddress().getPostCode()));
+                caseData.getApplicants().stream().forEach(x->log.info("addressLine1 :::",x.getValue().getAddress().getAddressLine1()));
+                caseData.getApplicants().stream().forEach(x->log.info("addressLine2 :::",x.getValue().getAddress().getAddressLine2()));
+                caseData.getApplicants().stream().forEach(x->log.info("PostCode :::",x.getValue().getAddress().getPostCode()));
                 return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
             }
             return getFirstOtherPerson(child).getAddress().getPostCode();
