@@ -171,4 +171,12 @@ public class PrlAppsConstants {
     public static final String CITIZEN_PRL_CREATE_EVENT = "citizenCreate";
     public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     public static final String CITIZEN_ROLE = "citizen";
+
+    public static final String WAITING_TO_BE_LISTED = "waiting to be listed";
+    public static final String LISTED = "listed";
+    public static final String AWAITING_HEARING_DETAILS = "awaiting hearing details";
+    public static final String CANCELLED = "cancelled";
+    public static final String ADJOURNED = "adjourned";
+    public static final String POSTPONED = "postponed";
+    public static final String COMPLETED = "completed";
 }
