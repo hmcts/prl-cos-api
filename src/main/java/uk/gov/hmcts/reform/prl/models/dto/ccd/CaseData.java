@@ -338,20 +338,12 @@ public class CaseData implements MappableObject {
     private final Document draftOrderDocWelsh;
     @JsonProperty("c8Document")
     private final Document c8Document;
-    @JsonProperty("c8DraftDocument")
-    private final Document c8DraftDocument;
     @JsonProperty("c8WelshDocument")
     private final Document c8WelshDocument;
-    @JsonProperty("c8WelshDraftDocument")
-    private final Document c8WelshDraftDocument;
     @JsonProperty("c1ADocument")
     private final Document c1ADocument;
-    @JsonProperty("c1ADraftDocument")
-    private final Document c1ADraftDocument;
     @JsonProperty("c1AWelshDocument")
     private final Document c1AWelshDocument;
-    @JsonProperty("c1AWelshDraftDocument")
-    private final Document c1AWelshDraftDocument;
 
     @JsonProperty("isEngDocGen")
     private final String isEngDocGen;
@@ -653,14 +645,29 @@ public class CaseData implements MappableObject {
     private String previewDraftAnOrder;
 
     private String citizenUploadedStatement;
+    @JsonProperty("paymentReferenceNumber")
+    private final String paymentReferenceNumber;
 
     // C100 Rebuild
-    private String c100RebuildConfidentiality;
     private String c100RebuildInternationalElements;
     private String c100RebuildReasonableAdjustments;
     private String c100RebuildTypeOfOrder;
     private String c100RebuildHearingWithoutNotice;
+    private String c100RebuildHearingUrgency;
     private String c100RebuildOtherProceedings;
     private String c100RebuildReturnUrl;
+    private String c100RebuildMaim;
+    private String c100RebuildChildDetails;
+    private String c100RebuildApplicantDetails;
+    private String c100RebuildOtherChildrenDetails;
+    private String c100RebuildRespondentDetails;
+    private String c100RebuildOtherPersonsDetails;
 
+    private String c100RebuildSafetyConcerns;
+    private String c100RebuildScreeningQuestions;
+    private String c100RebuildHelpWithFeesDetails;
+    private String c100RebuildStatementOfTruth;
+    private String helpWithFeesReferenceNumber;
+    private String c100RebuildChildPostCode;
+    private String c100RebuildConsentOrderDetails;
 }

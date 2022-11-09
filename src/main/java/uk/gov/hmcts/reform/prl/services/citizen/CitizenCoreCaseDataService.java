@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +15,17 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.Map;
+import java.util.Objects;
+
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
 
 @Slf4j
 @Service
@@ -179,8 +183,9 @@ public class CitizenCoreCaseDataService {
                 caseId,
                 !userDetails.getRoles().contains(CITIZEN_ROLE)
             );
-
-            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
+            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+            Iterables.removeIf(caseDataMap.values(), Objects::isNull);
+            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataMap);
             return submitUpdate(
                 authorisation,
                 eventRequestData,
@@ -204,8 +209,7 @@ public class CitizenCoreCaseDataService {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
 
         // We can Add a Caseworker Event as well in future depending on the Role from userdetails
-        EventRequestData eventRequestData = eventRequest(
-            CaseEvent.valueOf(PrlAppsConstants.CITIZEN_PRL_CREATE_EVENT),
+        EventRequestData eventRequestData = eventRequest(CITIZEN_CASE_CREATE,
             userDetails.getId()
         );
 
@@ -217,7 +221,9 @@ public class CitizenCoreCaseDataService {
             !userDetails.getRoles().contains(CITIZEN_ROLE)
         );
 
-        CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
+        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+        Iterables.removeIf(caseDataMap.values(), Objects::isNull);
+        CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataMap);
 
         return submitCreate(
             authorisation,
