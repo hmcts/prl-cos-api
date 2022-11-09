@@ -43,7 +43,7 @@ public class ChildDetailsControllerTest {
     String auth = "authorisation";
 
     @Before
-    void setUp() {
+   public void setUp() {
         caseDataMap = new HashMap<>();
 
         caseData = CaseData.builder()
@@ -63,7 +63,7 @@ public class ChildDetailsControllerTest {
     }
 
     @Test
-    void handleAboutToStart() {
+   public void handleAboutToStart() {
         Map<String, Object> aboutToStartMap = new HashMap<>();
         aboutToStartMap.put("messageObject", MessageMetaData.builder().build());
         when(childDetailsService.getApplicantDetails(caseData)).thenReturn(aboutToStartMap);
