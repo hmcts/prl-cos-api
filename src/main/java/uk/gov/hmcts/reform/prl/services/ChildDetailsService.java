@@ -19,7 +19,7 @@ public class ChildDetailsService {
 
     public Map<String, Object> getApplicantDetails(CaseData caseData) {
         Map<String, Object> data = new HashMap<>();
-        data.put("selectedApplicantName", getApplicantsAsDynamicList(caseData));
+        data.put("applicantsRelatedToChild.selectedApplicantName", getApplicantsAsDynamicList(caseData));
         return data;
     }
 
