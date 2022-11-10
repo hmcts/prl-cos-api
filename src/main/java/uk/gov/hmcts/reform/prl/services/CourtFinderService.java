@@ -100,6 +100,16 @@ public class CourtFinderService {
     }
 
     private String getPostcodeFromWrappedParty(Element<PartyDetails> party) {
+        log.info("addressLine1 :::",party.getValue().getAddress().getAddressLine1());
+        log.info("LName :::",party.getValue().getLastName());
+        log.info("FName :::",party.getValue().getFirstName());
+        log.info("DOB :::",party.getValue().getDateOfBirth());
+        log.info("GENDER :::",party.getValue().getGender());
+        log.info("Phone :::",party.getValue().getPhoneNumber());
+        log.info("email :::",party.getValue().getEmail());
+        log.info("caseType :::",party.getValue().getCaseTypeOfApplication());
+        log.info("addressLine2 :::",party.getValue().getAddress().getAddressLine2());
+        log.info("PostCode :::",party.getValue().getAddress().getPostCode());
         return party.getValue().getAddress().getPostCode();
     }
 
