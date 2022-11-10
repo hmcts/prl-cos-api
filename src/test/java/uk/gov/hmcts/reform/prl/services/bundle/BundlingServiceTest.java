@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.prl.services.bundle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -195,7 +195,7 @@ public class BundlingServiceTest {
         bundleCreateRequestMapper = new BundleCreateRequestMapper();
     }
 
-    @Test
+    @Ignore
     public void testCreateBundleService() throws Exception {
         when(authTokenGenerator.generate()).thenReturn("authToken");
         BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseData,
