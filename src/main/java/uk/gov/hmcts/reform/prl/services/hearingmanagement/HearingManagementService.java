@@ -32,13 +32,13 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 public class HearingManagementService {
 
-    private static final String HMC_STATUS = "LISTED";
     public static final String HEARING_STATE_CHANGE_SUCCESS = "hmcCaseUpdateSuccess";
     public static final String HEARING_STATE_CHANGE_FAILURE = "hmcCaseUpdateFailure";
 
@@ -83,7 +83,7 @@ public class HearingManagementService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         createEvent(hearingRequest, userToken, systemUpdateUserId,
-                    HMC_STATUS.equals(hearingRequest.getHearingUpdate().getHmcStatus())
+                    LISTED.equals(hearingRequest.getHearingUpdate().getHmcStatus())
                         ? HEARING_STATE_CHANGE_SUCCESS : HEARING_STATE_CHANGE_FAILURE, caseData
         );
 

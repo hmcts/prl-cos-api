@@ -173,7 +173,7 @@ public class PrlAppsConstants {
     public static final String CITIZEN_ROLE = "citizen";
 
     public static final String WAITING_TO_BE_LISTED = "waiting to be listed";
-    public static final String LISTED = "listed";
+    public static final String LISTED = "LISTED";
     public static final String AWAITING_HEARING_DETAILS = "awaiting hearing details";
     public static final String CANCELLED = "cancelled";
     public static final String ADJOURNED = "adjourned";
