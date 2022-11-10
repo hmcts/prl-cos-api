@@ -198,7 +198,8 @@ public class BundlingServiceTest {
     @Test
     public void testCreateBundleService() throws Exception {
         when(authTokenGenerator.generate()).thenReturn("authToken");
-        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization");
+        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseData,
+            "eventId","authorization","ServiceAuth");
     }
 
 }

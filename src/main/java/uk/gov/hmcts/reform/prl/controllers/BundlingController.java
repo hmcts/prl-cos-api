@@ -42,15 +42,17 @@ public class BundlingController extends AbstractCallbackController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Bundle Created Successfully ."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse createBundle(@RequestHeader("authorization") @Parameter(hidden = true)
-                                                             String authorization,
+    public AboutToStartOrSubmitCallbackResponse createBundle(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
+                                                             @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
+                                                             String serviceAuthorization,
                                                              @RequestBody CallbackRequest callbackRequest)
         throws Exception {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         moveExistingCaseBundlesToHistoricalBundles(caseData);
         caseDataUpdated.put("caseBundles",
-            bundlingService.createBundleServiceRequest(caseData, callbackRequest.getEventId(),authorization).getData().getCaseBundles());
+            bundlingService.createBundleServiceRequest(caseData,
+                callbackRequest.getEventId(),authorization,serviceAuthorization).getData().getCaseBundles());
         caseDataUpdated.put("historicalBundles",caseData.getHistoricalBundles());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
