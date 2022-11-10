@@ -39,15 +39,19 @@ public class CourtFinderService {
     private CourtFinderApi courtFinderApi;
 
     public Court getNearestFamilyCourt(CaseData caseData) throws NotFoundException {
-        ServiceArea serviceArea;
+        ServiceArea serviceArea = null;
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             serviceArea = courtFinderApi
                 .findClosestDomesticAbuseCourtByPostCode(
                     getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));
         } else {
-            serviceArea = courtFinderApi
-                .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
+            try {
+                serviceArea = courtFinderApi
+                    .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
+            }catch (Exception e){
+                log.error("CourtFinderService.getNearestFamilyCourt() method is throwing exception : ",e.getMessage());
+            }
         }
 
         if (serviceArea != null
