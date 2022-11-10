@@ -5,9 +5,26 @@
       "id": 1661164783455399,
       "jurisdiction": "PRIVATELAW",
       "state": "SUBMITTED_PAID",
+      "caseTypeOfApplication": "C100",
       "case_type_id": "PRLAPPS",
-      "created_date": "2022-08-22T10:39:43.49",
-      "last_modified": "2022-08-22T10:44:54.055",
+      "created_date": [
+        2022,
+        8,
+        22,
+        10,
+        39,
+        43,
+        490000000
+      ],
+      "last_modified": [
+        2022,
+        8,
+        22,
+        10,
+        44,
+        54,
+        55000000
+      ],
       "case_data": {
         "dateSubmitted": "2022-08-22",
         "caseTypeOfApplication": "C100",
@@ -34,7 +51,9 @@
               "childLiveWith": [
                 "applicant"
               ],
-              "personWhoLivesWithChild": [],
+              "personWhoLivesWithChild": [
+
+              ],
               "parentalResponsibilityDetails": "adw"
             }
           }
@@ -65,7 +84,9 @@
               "isAtAddressLessThan5Years": "No",
               "canYouProvideEmailAddress": "No",
               "isPhoneNumberConfidential": "No",
-              "otherPersonRelationshipToChildren": [],
+              "otherPersonRelationshipToChildren": [
+
+              ],
               "solicitorOrg": {
                 "OrganisationID": "V4031UM",
                 "OrganisationName": "AutoTestt43tdf4af7d"
@@ -107,16 +128,26 @@
               "isCurrentAddressKnown": "No",
               "canYouProvidePhoneNumber": "No",
               "isPlaceOfBirthKnown": "No",
-              "otherPersonRelationshipToChildren": [],
-              "solicitorOrg": {},
-              "solicitorAddress": {},
+              "otherPersonRelationshipToChildren": [
+
+              ],
+              "solicitorOrg": {
+
+              },
+              "solicitorAddress": {
+
+              },
               "isAtAddressLessThan5YearsWithDontKnow": "no",
               "doTheyHaveLegalRepresentation": "no",
-              "address": {}
+              "address": {
+
+              }
             }
           }
         ],
-        "applicantsConfidentialDetails": [],
+        "applicantsConfidentialDetails": [
+
+        ],
         "applicantSolicitorEmailAddress": "prl-e2etestsolicitor@mailinator.com",
         "solicitorName": "E2E Test Solicitor",
         "courtName": "West London Family Court",
@@ -124,11 +155,20 @@
           {
             "id": "a5d86587-ba06-4db0-8620-10ef472af3e5",
             "value": {
-              "address": {},
-              "relationshipToChild": []
+              "address": {
+
+              },
+              "relationshipToChild": [
+
+              ]
             }
           }
         ],
+        "hearingData": {
+          "hmctsServiceCode": "hmcts",
+          "caseRef": "234567890",
+          "caseHearings": null
+        },
         "submitAndPayDownloadApplicationLink": {
           "document_filename": "Draft_C100_application.pdf"
         }
@@ -138,9 +178,26 @@
       "id": 1660043120096788,
       "jurisdiction": "PRIVATELAW",
       "state": "SUBMITTED_PAID",
+      "caseTypeOfApplication": "C100",
       "case_type_id": "PRLAPPS",
-      "created_date": "2022-08-09T11:05:20.089",
-      "last_modified": "2022-08-23T14:12:07.264",
+      "created_date": [
+        2022,
+        8,
+        9,
+        11,
+        5,
+        20,
+        89000000
+      ],
+      "last_modified": [
+        2022,
+        8,
+        23,
+        14,
+        12,
+        7,
+        264000000
+      ],
       "case_data": {
         "dateSubmitted": "2022-08-23",
         "caseTypeOfApplication": "C100",
@@ -188,7 +245,9 @@
               "childLiveWith": [
                 "applicant"
               ],
-              "personWhoLivesWithChild": [],
+              "personWhoLivesWithChild": [
+
+              ],
               "parentalResponsibilityDetails": "Text area field Test"
             }
           },
@@ -207,7 +266,9 @@
               "childLiveWith": [
                 "applicant"
               ],
-              "personWhoLivesWithChild": [],
+              "personWhoLivesWithChild": [
+
+              ],
               "parentalResponsibilityDetails": "Text area field Test"
             }
           }
@@ -242,12 +303,16 @@
               "canYouProvideEmailAddress": "Yes",
               "isEmailAddressConfidential": "Yes",
               "isPhoneNumberConfidential": "Yes",
-              "otherPersonRelationshipToChildren": [],
+              "otherPersonRelationshipToChildren": [
+
+              ],
               "solicitorOrg": {
                 "OrganisationID": "6M8BF5D",
                 "OrganisationName": "Divorce-AAT-2"
               },
-              "solicitorAddress": {},
+              "solicitorAddress": {
+
+              },
               "representativeFirstName": "Ted",
               "representativeLastName": "Robinson",
               "solicitorEmail": "test@example.com",
@@ -280,12 +345,16 @@
               "isCurrentAddressKnown": "Yes",
               "canYouProvidePhoneNumber": "Yes",
               "isPlaceOfBirthKnown": "Yes",
-              "otherPersonRelationshipToChildren": [],
+              "otherPersonRelationshipToChildren": [
+
+              ],
               "solicitorOrg": {
                 "OrganisationID": "6M8BF5D",
                 "OrganisationName": "Divorce-AAT-2"
               },
-              "solicitorAddress": {},
+              "solicitorAddress": {
+
+              },
               "representativeFirstName": "Ted",
               "representativeLastName": "Robinson",
               "isAtAddressLessThan5YearsWithDontKnow": "yes",
@@ -368,6 +437,11 @@
         "ordersNonMolestationDocument": {
           "document_filename": "dummy.pdf"
         },
+        "hearingData": {
+          "hmctsServiceCode": "hmcts",
+          "caseRef": "234567890",
+          "caseHearings": null
+        },
         "submitAndPayDownloadApplicationLink": {
           "document_filename": "Draft_C100_application.pdf"
         },
@@ -375,8 +449,8 @@
           "document_filename": "C8Document.pdf"
         },
         "c1ADocument": {
-          "document_url": "http://localhost:8090/bbde63bc-1625-419e-b15a-66dfd0596f6e",
-          "document_filename": "C1A_Document.pdf"
+          "document_filename": "C1A_Document.pdf",
+          "document_id": "bbde63bc-1625-419e-b15a-66dfd0596f6e"
         }
       }
     }
