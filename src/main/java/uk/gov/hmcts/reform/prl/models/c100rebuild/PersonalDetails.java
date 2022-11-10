@@ -18,6 +18,10 @@ public class PersonalDetails {
     private DateofBirth approxDateOfBirth;
     private String gender;
     private String otherGenderDetails;
+    private String hasNameChanged;
+    private String resPreviousName;
+    private String respondentPlaceOfBirth;
+    private String respondentPlaceOfBirthUnknown;
     private String isNameChanged;
     private String previousFullName;
     private String applicantPlaceOfBirth;
