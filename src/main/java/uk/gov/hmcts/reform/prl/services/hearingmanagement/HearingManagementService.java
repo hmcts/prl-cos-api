@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -52,6 +53,10 @@ public class HearingManagementService {
 
     @Autowired
     private CoreCaseDataApi coreCaseDataApi;
+
+    @Autowired
+    private AuthTokenGenerator authTokenGenerator;
+
     @Autowired
     private EmailService emailService;
 
@@ -70,9 +75,11 @@ public class HearingManagementService {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(
             userToken,
-            s2sToken,
+            authTokenGenerator.generate(),
             hearingRequest.getCaseRef()
         );
+
+        log.info("Retreiving thecase details: {}",caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         createEvent(hearingRequest, userToken, s2sToken, systemUpdateUserId,

@@ -78,7 +78,6 @@ public class HearingsManagementController {
     public void hearingManagementStateUpdate(@RequestHeader("serviceAuthorization") String s2sToken,
                                      @RequestBody HearingRequest hearingRequest) throws Exception {
 
-        log.info("");
         if (Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
             throw new HearingManagementValidationException("Provide a valid s2s token");
         } else {
