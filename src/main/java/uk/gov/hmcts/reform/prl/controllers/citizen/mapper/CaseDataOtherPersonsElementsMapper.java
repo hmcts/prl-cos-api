@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen.mapper;
 
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -49,9 +50,11 @@ public class CaseDataOtherPersonsElementsMapper {
                 .lastName(otherPersonDetail.getLastName())
                 .previousName(personalDetails.getPreviousFullName())
                 .gender(Gender.getDisplayedValueFromEnumString(personalDetails.getGender()))
-                .dateOfBirth(PrlAppsConstants.NO.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown())
-                        ? buildDateOfBirth(personalDetails.getDateOfBirth())
-                        : buildDateOfBirth(personalDetails.getApproxDateOfBirth()))
+                .otherGender(PrlAppsConstants.OTHER.equalsIgnoreCase(personalDetails.getGender()) ? personalDetails.getOtherGenderDetails() : null)
+                .dateOfBirth(PrlAppsConstants.YES.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown())
+                        ? buildDateOfBirth(personalDetails.getApproxDateOfBirth())
+                        : buildDateOfBirth(personalDetails.getDateOfBirth()))
+                .isDateOfBirthUnknown(PrlAppsConstants.YES.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null)
                 .address(buildAddress(otherPersonDetail.getOtherPersonAddress()))
                 .relationshipToChildren(buildChildRelationship(otherPersonDetail.getRelationshipDetails()))
         .build();
