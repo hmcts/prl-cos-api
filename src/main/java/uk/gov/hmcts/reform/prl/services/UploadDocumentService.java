@@ -14,14 +14,14 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.UUID;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -50,110 +50,87 @@ public class UploadDocumentService {
             .orElseThrow(() ->
                              new RuntimeException("Document upload failed due to empty result"));
 
-        log.debug("Document upload resulted with links: {}, {}", document.links.self.href, document.links.binary.href);
-
-        return document;
-    }
-
-    public Document uploadDocument(MultipartFile file, String fileName, String contentType, String authorisation) {
-
-        UploadResponse response = caseDocumentClient.uploadDocuments(
-            authorisation,
-            authTokenGenerator.generate(),
-            CASE_TYPE,
-            JURISDICTION,
-            newArrayList(file)
-        );
-
-        Document document = response.getDocuments().stream()
-            .findFirst()
-            .orElseThrow(() ->
-                             new RuntimeException("Document upload failed due to empty result"));
-
-        log.debug("Document upload resulted with links: {}, {}", document.links.self.href, document.links.binary.href);
-
         return document;
     }
 
     public UploadedDocuments uploadCitizenDocument(String authorisation, UploadedDocumentRequest uploadedDocumentRequest, String caseId) {
 
-        MultipartFile document = null;
         String parentDocumentType = "";
         String documentType = "";
         String partyName = "";
-        String documentName = "";
         String partyId = "";
         LocalDate today = LocalDate.now();
-        String formattedCurrentDate = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
+        String formattedDateCreated = today.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
         String isApplicant = "";
+        YesOrNo documentRequest = null;
 
-        if (uploadedDocumentRequest.getValues() != null) {
-            log.info("=====trying to retrive doc data from request=====");
-
-            if (uploadedDocumentRequest.getValues().containsKey("parentDocumentType")) {
-                parentDocumentType = uploadedDocumentRequest.getValues().get("parentDocumentType").toString();
+        if (uploadedDocumentRequest != null) {
+            if (null != uploadedDocumentRequest.getParentDocumentType()) {
+                parentDocumentType = uploadedDocumentRequest.getParentDocumentType();
             }
-            if (uploadedDocumentRequest.getValues().containsKey("partyId")) {
-                partyId = uploadedDocumentRequest.getValues().get("partyId").toString();
+            if (null != uploadedDocumentRequest.getPartyId()) {
+                partyId = uploadedDocumentRequest.getPartyId();
             }
-            if (uploadedDocumentRequest.getValues().containsKey("documentType")) {
-                documentType = uploadedDocumentRequest.getValues().get("documentType").toString();
-                if (uploadedDocumentRequest.getValues().containsKey("partyName")) {
-                    partyName = uploadedDocumentRequest.getValues().get("partyName").toString();
-                    documentName = documentType.replace("Your", partyName + "'s");
+            if (null != uploadedDocumentRequest.getDocumentType()) {
+                documentType = uploadedDocumentRequest.getDocumentType();
+                if (null != uploadedDocumentRequest.getPartyName()) {
+                    partyName = uploadedDocumentRequest.getPartyName();
                 }
             }
-            if (uploadedDocumentRequest.getValues().containsKey("isApplicant")) {
-                isApplicant = uploadedDocumentRequest.getValues().get("isApplicant").toString();
+            if (null != uploadedDocumentRequest.getIsApplicant()) {
+                isApplicant = uploadedDocumentRequest.getIsApplicant();
+            }
+            if (null != uploadedDocumentRequest.getDocumentRequestedByCourt()) {
+                documentRequest = uploadedDocumentRequest.getDocumentRequestedByCourt();
             }
 
-
-            document = (MultipartFile) uploadedDocumentRequest.getValues().get(
-                "file") != null
-                ? ((MultipartFile) uploadedDocumentRequest.getValues().get(
-                "file")) : null;
-
-            log.info("Document name: {} ", document.getOriginalFilename());
         }
 
-        if (null != document && null != document.getOriginalFilename()) {
-            /* CaseDetails tempCaseDetails = checkIfCasePresent(caseId, authorisation);
-            if (tempCaseDetails == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-            }
-            CaseData tempCaseData = CaseUtils.getCaseData(tempCaseDetails, objectMapper); */
+        if (!uploadedDocumentRequest.getFiles().isEmpty()) {
+
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 authorisation,
                 authTokenGenerator.generate(),
                 CASE_TYPE,
                 JURISDICTION,
-                Arrays.asList(document)
+                uploadedDocumentRequest.getFiles()
             );
-            log.info("Document Response: {} ", uploadResponse.getDocuments().get(0));
-            log.info("Document uploaded successfully through caseDocumentClient");
+            UploadedDocuments uploadedDocuments = null;
 
-            UploadedDocuments uploadedDocuments = UploadedDocuments.builder().dateCreated(LocalDate.now())
-                .uploadedBy(partyId)
-                .documentDetails(DocumentDetails.builder().documentName(document.getOriginalFilename())
-                                     .documentUploadedDate(new Date().toString()).build())
-                .partyName(partyName)
-                .isApplicant(isApplicant)
-                .parentDocumentType(parentDocumentType)
-                .documentType(documentType)
-                .dateCreated(LocalDate.now())
-                .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                                     .documentUrl(uploadResponse.getDocuments().get(0).links.self.href)
-                                     .documentBinaryUrl(uploadResponse.getDocuments().get(0).links.binary.href)
-                                     .documentHash(uploadResponse.getDocuments().get(0).hashToken)
-                                     .documentFileName(document.getOriginalFilename()).build()).build();
+            for (MultipartFile file: uploadedDocumentRequest.getFiles()) {
 
-            log.info("Document has been saved in caseData {}", document.getOriginalFilename());
+                uploadedDocuments = UploadedDocuments.builder().dateCreated(LocalDate.now())
+                    .uploadedBy(partyId)
+                    .documentDetails(DocumentDetails.builder().documentName(file.getOriginalFilename())
+                                         .documentUploadedDate(formattedDateCreated).build())
+                    .partyName(partyName)
+                    .isApplicant(isApplicant)
+                    .parentDocumentType(parentDocumentType)
+                    .documentType(documentType)
+                    .dateCreated(LocalDate.now())
+                    .documentRequestedByCourt(documentRequest)
+                    .citizenDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                                         .documentUrl(uploadResponse.getDocuments().get(0).links.self.href)
+                                         .documentBinaryUrl(uploadResponse.getDocuments().get(0).links.binary.href)
+                                         .documentHash(uploadResponse.getDocuments().get(0).hashToken)
+                                         .documentFileName(file.getOriginalFilename())
+                                         .build()).build();
+            }
 
             return uploadedDocuments;
 
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    public void deleteDocument(String authorizationToken, String documentId) {
+        caseDocumentClient.deleteDocument(
+            authorizationToken,
+            authTokenGenerator.generate(),
+            UUID.fromString(documentId),
+            true
+        );
     }
 
 }
