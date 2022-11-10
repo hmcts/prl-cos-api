@@ -63,7 +63,7 @@ public class HearingManagementService {
     @Value("${citizen.url}")
     private String hearingDetailsUrl;
 
-    public void stateChangeForHearingManagement(HearingRequest hearingRequest, String s2sToken) {
+    public void stateChangeForHearingManagement(HearingRequest hearingRequest) {
 
         log.info("Processing the callback for the caseId {} with HMC status {}", hearingRequest.getCaseRef(),
                      hearingRequest.getHearingUpdate().getHmcStatus());
@@ -82,19 +82,19 @@ public class HearingManagementService {
         log.info("Retreiving thecase details: {}",caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        createEvent(hearingRequest, userToken, s2sToken, systemUpdateUserId,
+        createEvent(hearingRequest, userToken, systemUpdateUserId,
                     HMC_STATUS.equals(hearingRequest.getHearingUpdate().getHmcStatus())
                         ? HEARING_STATE_CHANGE_SUCCESS : HEARING_STATE_CHANGE_FAILURE, caseData
         );
 
     }
 
-    private void createEvent(HearingRequest hearingRequest, String userToken, String s2sToken,
+    private void createEvent(HearingRequest hearingRequest, String userToken,
                              String systemUpdateUserId, String eventId, CaseData caseData) {
 
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             userToken,
-            s2sToken,
+            authTokenGenerator.generate(),
             systemUpdateUserId,
             JURISDICTION,
             CASE_TYPE,
@@ -112,7 +112,7 @@ public class HearingManagementService {
 
         coreCaseDataApi.submitEventForCaseWorker(
             userToken,
-            s2sToken,
+            authTokenGenerator.generate(),
             systemUpdateUserId,
             JURISDICTION,
             CASE_TYPE,
