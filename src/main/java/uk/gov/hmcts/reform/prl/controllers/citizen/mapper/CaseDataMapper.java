@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherChildrenDetail
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherPersonDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmentsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -25,8 +26,10 @@ import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherCh
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherPersonsElementsMapper.updateOtherPersonDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherProceedingsElementsMapper.updateOtherProceedingsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataReasonableAdjustmentsElementsMapper.updateReasonableAdjustmentsElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataRespondentDetailsElementsMapper.updateRespondentDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
+
 
 @Component
 public class CaseDataMapper {
@@ -81,6 +84,10 @@ public class CaseDataMapper {
         C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements = mapper
                 .readValue(caseData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
         updateOtherPersonDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherPersonDetailsElements);
+
+        C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = mapper
+            .readValue(caseData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
+        updateRespondentDetailsElementsForCaseData(caseDataBuilder, c100RebuildRespondentDetailsElements);
 
         return caseDataBuilder.build();
     }
