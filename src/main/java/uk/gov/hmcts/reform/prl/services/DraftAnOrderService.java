@@ -158,7 +158,7 @@ public class DraftAnOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status("Draft").build())
-            .fl404CustomFields(FL404.builder().fl404bCourtName("Test").build())
+            .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
             .build();
     }
 
