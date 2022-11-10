@@ -19,4 +19,9 @@ public final class TestResourceUtil {
         final File file = ResourceUtils.getFile(resourcePath);
         return new String(Files.readAllBytes(file.toPath()));
     }
+
+    public static File readFile(final String resourcePath) throws IOException {
+        final File file = ResourceUtils.getFile(resourcePath);
+        return file;
+    }
 }
