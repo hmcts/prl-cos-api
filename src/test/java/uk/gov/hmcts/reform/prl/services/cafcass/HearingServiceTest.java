@@ -60,7 +60,6 @@ public class HearingServiceTest {
         hearings.setCaseHearings(caseHearings);
         //when(hearingApiClient.getHearingDetails(anyString(),anyString() ,anyString())).thenReturn(hearings);
 
-
     }
 
     @Test
