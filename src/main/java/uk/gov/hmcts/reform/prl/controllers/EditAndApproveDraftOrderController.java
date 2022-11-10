@@ -60,7 +60,25 @@ public class EditAndApproveDraftOrderController {
         );
 
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(draftAnOrderService.populateDraftOrderFields(
+            .data(draftAnOrderService.populateDraftOrderDocument(
+                caseData)).build();
+
+    }
+
+    @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Remove dynamic list from the caseData")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback to populate draft order dropdown"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse populateJudgeOrAdminDraftOrderCustomFields(
+        @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(draftAnOrderService.populateDraftOrderCustomFields(
                 caseData)).build();
 
     }

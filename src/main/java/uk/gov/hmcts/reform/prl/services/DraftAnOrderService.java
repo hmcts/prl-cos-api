@@ -364,10 +364,17 @@ public class DraftAnOrderService {
         }
     }
 
-    public Map<String, Object> populateDraftOrderFields(CaseData caseData) {
+    public Map<String, Object> populateDraftOrderDocument(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("previewDraftOrder", selectedOrder.getOrderDocument());
+        return caseDataMap;
+    }
+
+    public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData) {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
         return caseDataMap;
     }
 
