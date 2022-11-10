@@ -75,7 +75,7 @@ public class CaseDataChildDetailsElementsMapper {
     }
 
     private static DontKnow buildDateOfBirthUnknown(PersonalDetails personalDetails) {
-        return Yes.equals(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null;
+        return Yes.name().equals(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null;
     }
 
     private static LocalDate buildDateOfBirth(DateofBirth dateOfBirth) {
