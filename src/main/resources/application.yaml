@@ -119,10 +119,10 @@ notify:
 
 payments:
   api:
-    url: ${PAY_URL:}
-    callback-url: ${PAY_CALLBACK_URL:}
+    url: http://payment-api-demo.service.core-compute-demo.internal
+    callback-url: http://prl-cos-demo.service.core-compute-demo.internal/service-request-update
 private-law:
-    authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw}
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend}
 
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
@@ -147,7 +147,7 @@ fees-register:
 
 idam:
   s2s-auth:
-    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
+    url: ${AUTH_PROVIDER_SERVICE_CLIENT_BASEURL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
     microservice: prl_cos_api
     totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
@@ -170,6 +170,9 @@ idam:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+  citizen:
+    username: ${IDAM_CITIZEN_USERNAME:xxxxxxxxx}
+    password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxxx}
 
 aca:
   api:
@@ -179,7 +182,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    url: https://ccd-data-store-api-prl-ccd-definitions-pr-581.service.core-compute-preview.internal
+    url: https://ccd-data-store-api-prl-ccd-definitions-pr-543.service.core-compute-preview.internal
 
 auth:
   idam:
@@ -347,8 +350,8 @@ southampton:
 springdoc:
   swagger-ui:
     operationsSorter: alpha
-    tagsSorter : alpha
-    doc-expansion : none
+    tagsSorter: alpha
+    doc-expansion: none
   model-converters:
     pageable-converter:
       enabled: true

@@ -57,7 +57,7 @@ def versions = [
   springSecurityRsa            : '1.0.9.RELEASE',
   springBoot                   : '2.7.0',
   springCloud                  : '3.1.1',
-  tomcat                       : '9.0.63',
+  tomcat                       : '9.0.68',
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.7.3',
   pdfbox                       : '2.0.24'
