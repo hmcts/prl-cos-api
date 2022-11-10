@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
@@ -445,6 +446,7 @@ public class CaseData implements MappableObject {
      * Issue and send to local court'.
      */
     private final List<Element<LocalCourtAdminEmail>> localCourtAdmin;
+    private final DynamicList courtList;
 
     /**
      * This field contains Application Submitter solicitor email address.
@@ -656,6 +658,14 @@ public class CaseData implements MappableObject {
 
     private String citizenUploadedStatement;
 
+    // C100 Rebuild
+    private String c100RebuildConfidentiality;
+    private String c100RebuildInternationalElements;
+    private String c100RebuildReasonableAdjustments;
+    private String c100RebuildTypeOfOrder;
+    private String c100RebuildHearingWithoutNotice;
+    private String c100RebuildOtherProceedings;
+    private String c100RebuildReturnUrl;
     @JsonProperty("cafcassUploadedDocs")
     private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
 
@@ -666,6 +676,5 @@ public class CaseData implements MappableObject {
     private List<Bundle> historicalBundles;
     private String bundleConfiguration;
     private List<MultiBundleConfig> multiBundleConfiguration;
-
 
 }
