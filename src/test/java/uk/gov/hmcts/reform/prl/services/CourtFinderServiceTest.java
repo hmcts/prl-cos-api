@@ -201,7 +201,7 @@ public class CourtFinderServiceTest {
     }
 
    // @Test
-    public void givenValidCaseData_whenChildLivesWithRespondent_thenReturnCourtClosestToRespondent() throws NotFoundException {
+    /*public void givenValidCaseData_whenChildLivesWithRespondent_thenReturnCourtClosestToRespondent() throws NotFoundException {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
@@ -214,10 +214,10 @@ public class CourtFinderServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(westLondonCourt));
-    }
+    }*/
 
     //@Test
-    public void givenInvalidPostCode_NoServiceAreaReturned() throws NotFoundException {
+    /*public void givenInvalidPostCode_NoServiceAreaReturned() throws NotFoundException {
 
         Child child = Child.builder()
             .childLiveWith(Collections.emptyList())
@@ -231,10 +231,10 @@ public class CourtFinderServiceTest {
             .build();
 
         assertNull(courtFinderService.getNearestFamilyCourt(caseData));
-    }
+    }*/
 
 //    @Test
-    public void givenInValidCaseData_NoCourtDetailsRetrieved() throws NotFoundException {
+    /*public void givenInValidCaseData_NoCourtDetailsRetrieved() throws NotFoundException {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.respondent))
             .build();
@@ -248,7 +248,7 @@ public class CourtFinderServiceTest {
             .build();
         assertNull(courtFinderService.getNearestFamilyCourt(caseData));
     }
-
+*/
     @Test
     public void givenValidCaseData_whenChildLivesWithOther_thenReturnCourtClosestToOther() throws NotFoundException {
         OtherPersonWhoLivesWithChild person = OtherPersonWhoLivesWithChild.builder()
@@ -276,7 +276,7 @@ public class CourtFinderServiceTest {
     }
 
     //@Test
-    public void givenValidCaseData_whenChildLivesWithApplicant_thenReturnCourtClosestToApplicant() throws NotFoundException {
+    /*public void givenValidCaseData_whenChildLivesWithApplicant_thenReturnCourtClosestToApplicant() throws NotFoundException {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
@@ -291,10 +291,10 @@ public class CourtFinderServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(newcastleCourt));
-    }
+    }*/
 
     //@Test
-    public void givenValidCaseData_whenChildLivesWithApp_thenReturnCourtClosestToFirstApp() throws NotFoundException {
+    /*public void givenValidCaseData_whenChildLivesWithApp_thenReturnCourtClosestToFirstApp() throws NotFoundException {
         Child child = Child.builder()
             .childLiveWith(Collections.singletonList(LiveWithEnum.applicant))
             .build();
@@ -314,7 +314,7 @@ public class CourtFinderServiceTest {
 
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(newcastleCourt));
     }
-
+*/
     @Test
     public void givenValidCourtSlug_thenReturnsCourtDetails() {
         Court basicCourt = Court.builder()
@@ -336,6 +336,7 @@ public class CourtFinderServiceTest {
     }
 
     //@Test
+/*
 
     public void givenChildPresent_whenLivesWithApplicant_thenReturnApplicantPostcode() throws NotFoundException {
         Child child = Child.builder()
@@ -354,6 +355,7 @@ public class CourtFinderServiceTest {
         assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
         Assert.assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
     }
+*/
 
 
     @Test
