@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -44,6 +45,8 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -78,8 +81,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.OrdersToServeSA;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.MultiBundleConfig;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -343,12 +347,20 @@ public class CaseData implements MappableObject {
     private final Document draftOrderDocWelsh;
     @JsonProperty("c8Document")
     private final Document c8Document;
+    @JsonProperty("c8DraftDocument")
+    private final Document c8DraftDocument;
     @JsonProperty("c8WelshDocument")
     private final Document c8WelshDocument;
+    @JsonProperty("c8WelshDraftDocument")
+    private final Document c8WelshDraftDocument;
     @JsonProperty("c1ADocument")
     private final Document c1ADocument;
+    @JsonProperty("c1ADraftDocument")
+    private final Document c1ADraftDocument;
     @JsonProperty("c1AWelshDocument")
     private final Document c1AWelshDocument;
+    @JsonProperty("c1AWelshDraftDocument")
+    private final Document c1AWelshDraftDocument;
 
     @JsonProperty("isEngDocGen")
     private final String isEngDocGen;
@@ -439,6 +451,7 @@ public class CaseData implements MappableObject {
      * Issue and send to local court'.
      */
     private final List<Element<LocalCourtAdminEmail>> localCourtAdmin;
+    private final DynamicList courtList;
 
     /**
      * This field contains Application Submitter solicitor email address.
@@ -563,6 +576,8 @@ public class CaseData implements MappableObject {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
 
+    private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
+
     @JsonProperty("childOption")
     private final String childOption;
 
@@ -627,7 +642,7 @@ public class CaseData implements MappableObject {
     /**
      * Service Of Application.
      */
-    private OrdersToServeSA serviceOfApplicationScreen1;
+    private DynamicMultiSelectList serviceOfApplicationScreen1;
     private ConfirmRecipients confirmRecipients;
 
     @JsonProperty("citizenUploadedDocumentList")
@@ -652,6 +667,18 @@ public class CaseData implements MappableObject {
     private String citizenUploadedStatement;
     @JsonProperty("paymentReferenceNumber")
     private final String paymentReferenceNumber;
+
+    @JsonProperty("cafcassUploadedDocs")
+    private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
+
+    /**
+     * Bundle.
+     */
+    private List<Bundle> caseBundles;
+    private List<Bundle> historicalBundles;
+    private String bundleConfiguration;
+    private List<MultiBundleConfig> multiBundleConfiguration;
+
 
     // C100 Rebuild
     private String c100RebuildInternationalElements;
