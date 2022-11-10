@@ -27,7 +27,7 @@ public class C100CaseInviteService implements CaseInviteService {
     @Autowired
     private LaunchDarklyClient launchDarklyClient;
 
-    private CaseInvite generateRespondentCaseInvite(Element<PartyDetails> partyDetails) {
+    private CaseInvite generateCaseInvite(Element<PartyDetails> partyDetails) {
         return new CaseInvite().generateAccessCode(partyDetails.getValue().getEmail(), partyDetails.getId(), YesOrNo.No);
     }
 
@@ -43,7 +43,7 @@ public class C100CaseInviteService implements CaseInviteService {
 
         for (Element<PartyDetails> respondent : caseData.getRespondents()) {
             if (!respondentHasLegalRepresentation(respondent.getValue()) && Yes.equals(respondent.getValue().getCanYouProvideEmailAddress())) {
-                CaseInvite caseInvite = generateRespondentCaseInvite(respondent);
+                CaseInvite caseInvite = generateCaseInvite(respondent);
                 caseInvites.add(element(caseInvite));
                 sendCaseInvite(caseInvite, respondent.getValue(), caseData);
             }

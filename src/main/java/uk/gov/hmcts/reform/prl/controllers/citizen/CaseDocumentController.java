@@ -1,17 +1,20 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -27,19 +29,26 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
+import uk.gov.hmcts.reform.prl.models.dto.notify.UploadDocumentEmail;
+import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,31 +56,26 @@ import java.util.stream.Collectors;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_ID;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_ID;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RestController
+@SecurityRequirement(name = "Bearer Authentication")
 public class CaseDocumentController {
-
-    private static final String SERVICE_AUTH = "ServiceAuthorization";
-
-    public static final String CITIZEN_DOCUMENT_UPLOAD_EVENT_ID = "citizenUploadedDocument";
-
-    @Autowired
-    private AuthorisationService authorisationService;
 
     @Autowired
     private DocumentGenService documentGenService;
 
     @Autowired
     private UploadDocumentService uploadService;
+
+    @Autowired
+    private AuthorisationService authorisationService;
 
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
@@ -90,8 +94,13 @@ public class CaseDocumentController {
 
     Integer fileIndex;
 
-    @PostMapping(path = "/generate-citizen-statement-document", consumes = APPLICATION_JSON, produces =
-        APPLICATION_JSON)
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${citizen.url}")
+    private String dashboardUrl;
+
+    @PostMapping(path = "/generate-citizen-statement-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Generate a PDF for citizen as part of upload documents")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Document generated"),
@@ -101,19 +110,18 @@ public class CaseDocumentController {
                                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                            @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
         fileIndex = 0;
-        String caseId = generateAndUploadDocumentRequest.getValues().get(CASE_ID);
+        String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
-        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (generateAndUploadDocumentRequest.getValues() != null
-            && generateAndUploadDocumentRequest.getValues().containsKey(DOCUMENT_TYPE)
-            && generateAndUploadDocumentRequest.getValues().containsKey(PARTY_NAME)) {
-            final String documentType = generateAndUploadDocumentRequest.getValues().get(DOCUMENT_TYPE);
-            final String partyName = generateAndUploadDocumentRequest.getValues().get(PARTY_NAME);
+            && generateAndUploadDocumentRequest.getValues().containsKey("documentType")
+            && generateAndUploadDocumentRequest.getValues().containsKey("partyName")) {
+            final String documentType = generateAndUploadDocumentRequest.getValues().get("documentType");
+            final String partyName = generateAndUploadDocumentRequest.getValues().get("partyName");
             if (tempCaseData.getCitizenUploadedDocumentList() != null
                 && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
                 tempCaseData.getCitizenUploadedDocumentList()
-                    .stream().forEach((document) -> {
+                    .stream().forEach(document -> {
                         if (documentType.equalsIgnoreCase(document.getValue().getDocumentType())
                             && partyName.equalsIgnoreCase(document.getValue().getPartyName())) {
                             fileIndex++;
@@ -127,6 +135,23 @@ public class CaseDocumentController {
                 generateAndUploadDocumentRequest,
                 fileIndex + 1
             );
+        return getUploadedDocumentsList(
+            generateAndUploadDocumentRequest,
+            authorisation,
+            s2sToken,
+            caseId,
+            tempCaseData,
+            uploadedDocuments
+        );
+
+    }
+
+    private ResponseEntity getUploadedDocumentsList(@RequestBody GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+                                                    @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                    @RequestHeader("serviceAuthorization") String s2sToken,
+                                                    String caseId,
+                                                    CaseData tempCaseData,
+                                                    UploadedDocuments uploadedDocuments) throws JsonProcessingException {
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         if (uploadedDocuments != null) {
             if (tempCaseData.getCitizenUploadedDocumentList() != null
@@ -145,21 +170,61 @@ public class CaseDocumentController {
                 authorisation,
                 s2sToken,
                 caseId,
-                CITIZEN_UPLOADED_DOCUMENT
+                CITIZEN_UPLOADED_DOCUMENT,
+                null
             );
-            //return uploadedDocuments.getCitizenDocument().getDocumentFileName();
+
+            final String partyId = generateAndUploadDocumentRequest.getValues().get(PARTY_ID);
+            notifyOtherParties(partyId, tempCaseData);
+
             return ResponseEntity.status(HttpStatus.OK).body(
                 DocumentDetails.builder().documentId(uploadDocumentElement.getId().toString())
                     .documentName(uploadedDocuments.getCitizenDocument().getDocumentFileName()).build());
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.ordinal()).body(new DocumentDetails());
         }
-
     }
 
+    private void notifyOtherParties(String partyId, CaseData tempCaseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(tempCaseData.getCaseTypeOfApplication())) {
+            tempCaseData.getRespondents().forEach(element ->
+                                                      findAndSendEmail(partyId, tempCaseData, element.getValue())
+            );
+            tempCaseData.getApplicants().forEach(element ->
+                                                     findAndSendEmail(partyId, tempCaseData, element.getValue())
+            );
+        } else {
+            findAndSendEmail(partyId, tempCaseData, tempCaseData.getRespondentsFL401());
+            findAndSendEmail(partyId, tempCaseData, tempCaseData.getApplicantsFL401());
+        }
+    }
 
-    @PostMapping(path = "/upload-citizen-statement-document", produces = APPLICATION_JSON_VALUE, consumes =
-        MULTIPART_FORM_DATA_VALUE)
+    private void findAndSendEmail(String partyId, CaseData tempCaseData, PartyDetails partyDetails) {
+        if (partyDetails.getUser() != null && !partyId.equalsIgnoreCase(partyDetails.getUser().getIdamId())) {
+            String email = partyDetails.getEmail();
+            sendEmailToCitizen(tempCaseData, partyDetails.getFirstName(), email);
+        }
+    }
+
+    private void sendEmailToCitizen(CaseData tempCaseData, String name, String email) {
+        emailService.send(
+            email,
+            EmailTemplateNames.DOCUMENT_UPLOADED,
+            buildUploadDocuemntEmail(tempCaseData, name, dashboardUrl),
+            LanguagePreference.english
+        );
+    }
+
+    private EmailTemplateVars buildUploadDocuemntEmail(CaseData caseData, String name, String link) {
+        return UploadDocumentEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .name(name)
+            .dashboardLink(link)
+            .build();
+    }
+
+    @PostMapping(path = "/upload-citizen-statement-document", produces = APPLICATION_JSON_VALUE, consumes = MULTIPART_FORM_DATA_VALUE)
     @Operation(description = "Call CDAM to upload document")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
@@ -169,24 +234,20 @@ public class CaseDocumentController {
     })
     public ResponseEntity uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                          @RequestHeader("serviceAuthorization") String s2sToken,
-                                                         @RequestBody UploadedDocumentRequest uploadedDocumentRequest) {
+                                                         @ModelAttribute UploadedDocumentRequest uploadedDocumentRequest) {
 
-        log.info("Uploaded doc request: {}", uploadedDocumentRequest);
-        String caseId = uploadedDocumentRequest.getValues().get("caseId").toString();
+        String caseId = uploadedDocumentRequest.getCaseId();
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
-        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
-            authorisationService.authoriseService(s2sToken))) {
-            log.info("=====trying to upload document=====");
+        UploadedDocuments uploadedDocuments = uploadService.uploadCitizenDocument(
+            authorisation,
+            uploadedDocumentRequest,
+            caseId
+        );
+        List<Element<UploadedDocuments>> uploadedDocumentsList;
+        if (uploadedDocuments != null) {
 
-            UploadedDocuments uploadedDocuments = uploadService.uploadCitizenDocument(
-                authorisation,
-                uploadedDocumentRequest,
-                caseId
-            );
-            List<Element<UploadedDocuments>> uploadedDocumentsList;
             Element<UploadedDocuments> uploadedDocsElement = element(uploadedDocuments);
             if (tempCaseData.getCitizenUploadedDocumentList() != null
                 && !tempCaseData.getCitizenUploadedDocumentList().isEmpty()) {
@@ -202,14 +263,14 @@ public class CaseDocumentController {
                 .build();
 
             StartEventResponse startEventResponse =
-                coreCaseDataApi.startEventForCaseWorker(
+                coreCaseDataApi.startEventForCitizen(
                     authorisation,
-                    authTokenGenerator.generate(),
+                    s2sToken,
                     idamClient.getUserInfo(authorisation).getUid(),
                     JURISDICTION,
                     CASE_TYPE,
                     caseId,
-                    CITIZEN_DOCUMENT_UPLOAD_EVENT_ID
+                    CITIZEN_UPLOADED_DOCUMENT
                 );
 
             CaseDataContent caseDataContent = CaseDataContent.builder()
@@ -219,9 +280,9 @@ public class CaseDocumentController {
                            .build())
                 .data(caseData).build();
 
-            CaseDetails caseDetails1 = coreCaseDataApi.submitEventForCaseWorker(
+            coreCaseDataApi.submitEventForCitizen(
                 authorisation,
-                authTokenGenerator.generate(),
+                s2sToken,
                 idamClient.getUserInfo(authorisation).getUid(),
                 JURISDICTION,
                 CASE_TYPE,
@@ -229,11 +290,15 @@ public class CaseDocumentController {
                 true,
                 caseDataContent
             );
+
+            final String partyId = uploadedDocumentRequest.getPartyId();
+            notifyOtherParties(partyId, tempCaseData);
+
             return ResponseEntity.ok().body(
                 DocumentDetails.builder().documentId(uploadedDocsElement.getId().toString())
                     .documentName(uploadedDocuments.getCitizenDocument().getDocumentFileName()).build());
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.ordinal()).body(new DocumentDetails());
         }
     }
 
@@ -248,25 +313,16 @@ public class CaseDocumentController {
                                                  @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
         List<Element<UploadedDocuments>> tempUploadedDocumentsList;
         List<Element<UploadedDocuments>> uploadedDocumentsList = new ArrayList<>();
-        String caseId = deleteDocumentRequest.getValues().get(CASE_ID);
+        String caseId = deleteDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
-        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (deleteDocumentRequest.getValues() != null
-            && deleteDocumentRequest.getValues().containsKey(DOCUMENT_ID)) {
-            final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get(DOCUMENT_ID);
-            log.info("Document to be deleted with id : " + documenIdToBeDeleted);
+            && deleteDocumentRequest.getValues().containsKey("documentId")) {
+            final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
             tempUploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
-            /*for (Element<UploadedDocuments> element : tempUploadedDocumentsList) {
-                if (!documenIdToBeDeleted.equalsIgnoreCase(
-                    element.getId().toString())) {
-                    uploadedDocumentsList.add(element);
-                }
-            }*/
-            uploadedDocumentsList =
-                tempUploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(
-                    element.getId().toString()))
-                    .collect(Collectors.toList());
+            uploadedDocumentsList = tempUploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(
+                element.getId().toString()))
+                .collect(Collectors.toList());
         }
         log.info("uploadedDocumentsList::" + uploadedDocumentsList.size());
         CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
@@ -276,7 +332,8 @@ public class CaseDocumentController {
             authorisation,
             s2sToken,
             caseId,
-            CITIZEN_UPLOADED_DOCUMENT
+            CITIZEN_UPLOADED_DOCUMENT,
+            null
         );
         return "SUCCESS";
     }
@@ -291,8 +348,8 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     public ResponseEntity<?> uploadCitizenDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                                   @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
-                                                   @RequestParam("file") MultipartFile file) {
+                                                   @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+                                                   @RequestParam("file") MultipartFile file) throws IOException {
 
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException("Invalid Client"));
@@ -309,7 +366,7 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "404", description = "Document not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public ResponseEntity<?> deleteDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                            @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+                                            @RequestHeader("ServiceAuthorization") String serviceAuthorization,
                                             @PathVariable("documentId") String documentId) {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException("Invalid Client"));
@@ -321,6 +378,5 @@ public class CaseDocumentController {
         return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization));
     }
-
 }
 

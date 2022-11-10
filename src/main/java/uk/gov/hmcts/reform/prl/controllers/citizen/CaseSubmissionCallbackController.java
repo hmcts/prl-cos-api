@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers;
+package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -16,23 +16,20 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Tag(name = "case-initiation-controller")
+@Tag(name = "case-submission-callback-controller")
 @RestController
-@RequestMapping("/case-initiation")
+@RequestMapping("/case-submission-callback")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 @SecurityRequirement(name = "Bearer Authentication")
-public class CaseInitiationController extends AbstractCallbackController {
-
-
-    private  final AssignCaseAccessService assignCaseAccessService;
+public class CaseSubmissionCallbackController extends AbstractCallbackController {
 
     private final CoreCaseDataApi coreCaseDataApi;
 
@@ -44,8 +41,6 @@ public class CaseInitiationController extends AbstractCallbackController {
 
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
         final CaseData caseData = getCaseData(caseDetails);
-
-        assignCaseAccessService.assignCaseAccess(caseDetails.getId().toString(),authorisation);
 
         // setting supplementary data updates to enable global search
         String caseId = String.valueOf(caseData.getId());

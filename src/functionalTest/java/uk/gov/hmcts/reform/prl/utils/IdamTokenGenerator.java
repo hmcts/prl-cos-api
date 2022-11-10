@@ -57,4 +57,10 @@ public class IdamTokenGenerator {
     public UserDetails getUserDetailsFor(final String token) {
         return idamClient.getUserDetails(token);
     }
+
+    public String generateIdamTokenForCitizen() {
+        System.out.println("citizenUsername -- " + citizenUsername + "--citizenPassword--" + citizenPassword);
+        return idamClient.getAccessToken(citizenUsername, citizenPassword);
+    }
+
 }

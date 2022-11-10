@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -72,6 +73,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
@@ -550,6 +552,7 @@ public class CaseData implements MappableObject {
     private final ManageOrdersOptionsEnum manageOrdersOptions;
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
     private final List<OrderRecipientsEnum> orderRecipients;
+    private final SelectTypeOfOrderEnum selectTypeOfOrder;
 
 
     private final YesOrNo doesOrderClosesCase;
@@ -629,6 +632,9 @@ public class CaseData implements MappableObject {
     @JsonProperty("citizenUploadedDocumentList")
     private final List<Element<UploadedDocuments>> citizenUploadedDocumentList;
 
+    @JsonProperty("citizenResponseC7DocumentList")
+    private final List<Element<ResponseDocuments>> citizenResponseC7DocumentList;
+
     /**
      * Courtnav.
      */
@@ -636,15 +642,17 @@ public class CaseData implements MappableObject {
     private final ApplicantAge applicantAge;
     private final String specialCourtName;
     private YesOrNo courtNavApproved;
+    private YesOrNo hasDraftOrder;
     private String caseOrigin;
     private String numberOfAttachments;
 
     private String previewDraftAnOrder;
 
     private String citizenUploadedStatement;
+    @JsonProperty("paymentReferenceNumber")
+    private final String paymentReferenceNumber;
 
     // C100 Rebuild
-    private String c100RebuildConfidentiality;
     private String c100RebuildInternationalElements;
     private String c100RebuildReasonableAdjustments;
     private String c100RebuildTypeOfOrder;
@@ -656,4 +664,14 @@ public class CaseData implements MappableObject {
     private String c100RebuildChildDetails;
     private String c100RebuildApplicantDetails;
     private String c100RebuildOtherChildrenDetails;
+    private String c100RebuildRespondentDetails;
+    private String c100RebuildOtherPersonsDetails;
+
+    private String c100RebuildSafetyConcerns;
+    private String c100RebuildScreeningQuestions;
+    private String c100RebuildHelpWithFeesDetails;
+    private String c100RebuildStatementOfTruth;
+    private String helpWithFeesReferenceNumber;
+    private String c100RebuildChildPostCode;
+    private String c100RebuildConsentOrderDetails;
 }
