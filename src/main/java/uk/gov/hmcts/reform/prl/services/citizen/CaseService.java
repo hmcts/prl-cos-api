@@ -60,6 +60,9 @@ public class CaseService {
     @Autowired
     CaseDataMapper caseDataMapper;
 
+    @Autowired
+    CitizenEmailService citizenEmailService;
+
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
 
@@ -68,6 +71,7 @@ public class CaseService {
             return caseRepository.getCase(authToken, caseId);
         }
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)) {
+            citizenEmailService.sendCitizenCaseSubmissionEmail(authToken, caseData);
             CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData);
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
