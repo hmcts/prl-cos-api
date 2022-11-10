@@ -50,6 +50,7 @@ import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class BundlingServiceTest {
     @Mock
