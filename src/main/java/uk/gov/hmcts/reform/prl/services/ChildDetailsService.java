@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class ChildDetailsService {
 
 
     public Map<String, Object> getApplicantDetails(CaseData caseData) {
+        log.info("child data : {}",new Gson().toJson(getApplicantsAsDynamicList(caseData)));
         return  objectMapper.convertValue(ApplicantRelatedToChild.builder()
                 .selectedApplicantName(getApplicantsAsDynamicList(caseData)).build(), Map.class);
     }
