@@ -119,10 +119,10 @@ notify:
 
 payments:
   api:
-    url: ${PAY_URL:}
-    callback-url: ${PAY_CALLBACK_URL:}
+    url: http://payment-api-demo.service.core-compute-demo.internal
+    callback-url: http://prl-cos-demo.service.core-compute-demo.internal/service-request-update
 private-law:
-    authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw}
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend}
 
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
@@ -147,7 +147,7 @@ fees-register:
 
 idam:
   s2s-auth:
-    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
+    url: ${AUTH_PROVIDER_SERVICE_CLIENT_BASEURL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
     microservice: prl_cos_api
     totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
@@ -170,6 +170,9 @@ idam:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+  citizen:
+    username: ${IDAM_CITIZEN_USERNAME:xxxxxxxxx}
+    password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxxx}
 
 aca:
   api:
@@ -179,7 +182,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    url: https://ccd-data-store-api-prl-ccd-definitions-pr-581.service.core-compute-preview.internal
+    url: https://ccd-data-store-api-prl-ccd-definitions-pr-543.service.core-compute-preview.internal
 
 auth:
   idam:
@@ -210,6 +213,10 @@ courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
+locationfinder:
+  api:
+    url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
+    endpoint: /refdata/location/court-venues/services
 launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
 
@@ -270,7 +277,7 @@ document:
       doc_cover_sheet_welsh_filename: not_implemented
       prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf
-      prl_c21_welsh_template: PRL-GOR-WEL-C21-Blank-Order-Final.docx
+      prl_c21_welsh_template: FL-PRL-GOR-WEL-C21-Final.docx
       prl_c21_welsh_filename: Blank_Order_Directions_C21_Welsh.pdf
       prl_c21_draft_template: PRL-GOR-ENG-C21-Blank-Order-Draft.docx
       prl_c21_draft_filename: Blank_Order_Directions_C21_Draft.pdf
@@ -343,8 +350,8 @@ southampton:
 springdoc:
   swagger-ui:
     operationsSorter: alpha
-    tagsSorter : alpha
-    doc-expansion : none
+    tagsSorter: alpha
+    doc-expansion: none
   model-converters:
     pageable-converter:
       enabled: true

@@ -1,17 +1,14 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Iterables;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -21,12 +18,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,6 +35,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 @Service
 public class CaseService {
 
+    public static final String LINK_CASE = "linkCase";
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
 
@@ -56,12 +54,13 @@ public class CaseService {
     @Autowired
     SystemUserService systemUserService;
 
-    public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken, String caseId, String eventId) {
-
-        UserDetails userDetails = idamClient.getUserDetails(authToken);
-
-        return updateCaseDetails(caseData, authToken, s2sToken, caseId, eventId, userDetails);
-
+    public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
+                                  String caseId, String eventId, String accessCode) {
+        if (LINK_CASE.equalsIgnoreCase(eventId) && null != accessCode) {
+            linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
+            return caseRepository.getCase(authToken, caseId);
+        }
+        return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken, String role, String userId) {
@@ -89,22 +88,24 @@ public class CaseService {
         caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
         return caseDetails
             .stream()
-            .map(caseDetailsConverter::extractCase)
+            .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
             .collect(Collectors.toList());
     }
 
-    private List<CaseData> searchCasesLinkedToCitizen(String authToken, String s2sToken, Map<String, String> searchCriteria) {
+    private List<CaseData> searchCasesLinkedToCitizen(String authToken, String s2sToken,
+                                                      Map<String, String> searchCriteria) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
         List<CaseDetails> caseDetails = new ArrayList<>();
         caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
         return caseDetails
             .stream()
-            .map(caseDetailsConverter::extractCaseData)
+            .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
             .collect(Collectors.toList());
     }
 
-    private List<CaseDetails> performSearch(String authToken, UserDetails user, Map<String, String> searchCriteria, String serviceAuthToken) {
+    private List<CaseDetails> performSearch(String authToken, UserDetails user, Map<String, String> searchCriteria,
+                                            String serviceAuthToken) {
         List<CaseDetails> result;
 
         result = coreCaseDataApi.searchForCitizen(
@@ -117,40 +118,6 @@ public class CaseService {
         );
 
         return result;
-    }
-
-    private CaseDetails updateCaseDetails(CaseData caseData, String authToken, String s2sToken, String caseId,
-                                          String eventId, UserDetails userDetails) {
-        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-        Iterables.removeIf(caseDataMap.values(), Objects::isNull);
-        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCitizen(
-            authToken,
-            s2sToken,
-            userDetails.getId(),
-            JURISDICTION,
-            CASE_TYPE,
-            caseId,
-            eventId
-        );
-
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .eventToken(startEventResponse.getToken())
-            .event(Event.builder()
-                       .id(startEventResponse.getEventId())
-                       .build())
-            .data(caseDataMap)
-            .build();
-
-        return coreCaseDataApi.submitEventForCitizen(
-            authToken,
-            s2sToken,
-            userDetails.getId(),
-            JURISDICTION,
-            CASE_TYPE,
-            caseId,
-            true,
-            caseDataContent
-        );
     }
 
     public void linkCitizenToCase(String authorisation, String s2sToken, String accessCode, String caseId) {
@@ -182,7 +149,8 @@ public class CaseService {
         }
     }
 
-    private void processUserDetailsForCase(String userId, String emailId, CaseData caseData, UUID partyId, YesOrNo isApplicant) {
+    private void processUserDetailsForCase(String userId, String emailId, CaseData caseData, UUID partyId,
+                                           YesOrNo isApplicant) {
         //Assumption is for C100 case PartyDetails will be part of list
         // and will always contain the partyId
         // whereas FL401 will have only one party details without any partyId
@@ -237,4 +205,13 @@ public class CaseService {
         }
         return accessCodeStatus;
     }
+
+    public CaseDetails getCase(String authToken, String caseId) {
+        return caseRepository.getCase(authToken, caseId);
+    }
+
+    public CaseDetails createCase(CaseData caseData, String authToken) {
+        return caseRepository.createCase(authToken, caseData);
+    }
+
 }

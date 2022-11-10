@@ -191,6 +191,9 @@ idam:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+  citizen:
+    username: ${IDAM_CITIZEN_USERNAME:xxxxxxxxx}
+    password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxxx}
 
 test-url: ${TEST_URL:http://localhost:4044}
 
@@ -240,6 +243,11 @@ courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
+locationfinder:
+  api:
+    url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
+    endpoint: /refdata/location/court-venues/services
+
 launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
 
@@ -258,14 +266,6 @@ document:
       c100_c8_filename: C8Document.pdf
       c100_c1a_template: PRL-C1A.docx
       c100_c1a_filename: C1A_Document.pdf
-      c100_c8_draft_template: FL-PRL-CON-ENG-01118.docx
-      c100_c8_draft_filename: C8DocumentDraft.pdf
-      c100_c1a_draft_template: FL-PRL-APP-ENG-01119.docx
-      c100_c1a_draft_filename: C1A_DocumentDraft.pdf
-      c100_c8_draft_welsh_template: FL-PRL-CON-WEL-01122.docx
-      c100_c8_draft_welsh_filename: C8Document_Welsh.pdf
-      c100_c1a_draft_welsh_template: FL-PRL-APP-WEL-01121.docx
-      c100_c1a_draft_welsh_filename: C1A_Document_Welsh.pdf
       c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
       c100_final_welsh_filename: C100FinalDocumentWelsh.pdf
       c100_draft_welsh_template: PRL-C100-R1-Draft-WelshLang.docx
@@ -300,7 +300,7 @@ document:
       doc_cover_sheet_welsh_filename: not_implemented
       prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf
-      prl_c21_welsh_template: PRL-GOR-WEL-C21-Blank-Order-Final.docx
+      prl_c21_welsh_template: FL-PRL-GOR-WEL-C21-Final.docx
       prl_c21_welsh_filename: Blank_Order_Directions_C21_Welsh.pdf
       prl_c21_draft_template: PRL-GOR-ENG-C21-Blank-Order-Draft.docx
       prl_c21_draft_filename: Blank_Order_Directions_C21_Draft.pdf
