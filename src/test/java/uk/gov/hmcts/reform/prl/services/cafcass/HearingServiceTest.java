@@ -1,11 +1,8 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
 import org.junit.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -13,17 +10,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.prl.clients.Cafcass.HearingApiClient;
-import uk.gov.hmcts.reform.prl.models.cafcass.Hearing.CaseHearing;
-import uk.gov.hmcts.reform.prl.models.cafcass.Hearing.Hearings;
+import uk.gov.hmcts.reform.prl.clients.cafcass.HearingApiClient;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingServiceTest {
@@ -48,23 +40,20 @@ public class HearingServiceTest {
         MockitoAnnotations.openMocks(this);
         s2sToken = "s2sToken";
         authToken = "Authorization";
-       // when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
         caseReferenceNumber = "1234567890";
 
-        List<CaseHearing> caseHearings = new ArrayList();
+        final List<CaseHearing> caseHearings = new ArrayList();
 
         hearings = new Hearings();
         hearings.setCaseRef("caseReference");
         hearings.setHmctsServiceCode("Authorization");
         hearings.setCaseHearings(caseHearings);
-        //when(hearingApiClient.getHearingDetails(anyString(),anyString() ,anyString())).thenReturn(hearings);
-
     }
 
     @Test
     @DisplayName("test case for HearingService.")
-    public void getHearingsTestSuccess(){
+    public void getHearingsTestSuccess() {
 
         Hearings response =
             hearingService.getHearings(authToken, caseReferenceNumber);
@@ -74,7 +63,7 @@ public class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService.")
-    public void getHearingsTestException(){
+    public void getHearingsTestException() {
         hearingApiClient = null;
 
         Hearings response =
