@@ -105,7 +105,6 @@ public class HearingsManagementController {
             .state(State.DECISION_OUTCOME)
             .build();
 
-        hearingManagementService.sendHearingDetailsEmailToCitizen(hearingDetailsRequest, caseData);
 
         return "SUCCESS";
     }
