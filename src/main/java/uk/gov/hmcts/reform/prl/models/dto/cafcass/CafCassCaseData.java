@@ -14,7 +14,7 @@ import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.cafcass.Hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
-import uk.gov.hmcts.reform.prl.models.cafcass.Hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -19,9 +18,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -74,15 +70,15 @@ public class CaseDataService {
 
     /**
      * Fetch the hearing data from fis hearing service.
-     * @param authorisation
-     * @param cafCassResponse
+     *@param authorisation //
+     *@param cafCassResponse //
      */
-    private void getHearingDetails(String authorisation, CafCassResponse cafCassResponse){
+    private void getHearingDetails(String authorisation, CafCassResponse cafCassResponse) {
 
-        for (CafCassCaseDetail cafCassCaseDetail: cafCassResponse.getCases())
-              {
-                  cafCassCaseDetail.getCaseData().setHearingData(hearingService.getHearings(authorisation,String.valueOf(cafCassCaseDetail.getId())));
-             }
+        for (CafCassCaseDetail cafCassCaseDetail: cafCassResponse.getCases()) {
+            cafCassCaseDetail.getCaseData().setHearingData(hearingService.getHearings(authorisation,
+                                                                                      String.valueOf(cafCassCaseDetail.getId())));
+        }
     }
 
 

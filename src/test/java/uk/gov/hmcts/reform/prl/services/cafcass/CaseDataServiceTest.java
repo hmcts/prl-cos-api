@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -14,7 +13,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
-import uk.gov.hmcts.reform.prl.models.cafcass.Hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 

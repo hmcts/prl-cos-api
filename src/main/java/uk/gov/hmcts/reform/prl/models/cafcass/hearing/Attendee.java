@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.cafcass.Hearing;
+package uk.gov.hmcts.reform.prl.models.cafcass.hearing;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
