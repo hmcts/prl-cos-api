@@ -52,7 +52,7 @@ public class SearchCasesDataService {
                     .collect(Collectors.toList());
                 PartyDetails applicant1 = applicants.get(0);
                 if (Objects.nonNull(applicant1)) {
-                    caseDetails.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
+                    caseDetails.put("applicantName", applicant1.getFirstName() + " " + applicant1.getLastName());
                 }
 
             }
@@ -84,21 +84,21 @@ public class SearchCasesDataService {
         }
     }
 
-        private void setRespondentFlag (CaseData caseData, Map < String, Object > caseDetails){
-            Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
-            if (respondentsWrapped.isPresent() && !respondentsWrapped.get().isEmpty()) {
-                List<PartyDetails> respondents = respondentsWrapped.get()
-                    .stream()
-                    .map(Element::getValue)
-                    .collect(Collectors.toList());
+    private void setRespondentFlag(CaseData caseData, Map<String, Object> caseDetails) {
+        Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
+        if (respondentsWrapped.isPresent() && !respondentsWrapped.get().isEmpty()) {
+            List<PartyDetails> respondents = respondentsWrapped.get()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
 
-                for (PartyDetails respondent : respondents) {
-                    final String partyName = respondent.getFirstName() + " " + respondent.getLastName();
-                    final CaseFlag respondentFlag = CaseFlag.builder().partyName(partyName)
-                        .roleOnCase(PartyEnum.respondent.getDisplayedValue()).build();
-                    respondent.setRespondentFlag(respondentFlag);
-                }
-                caseDetails.put("respondents", respondents);
+            for (PartyDetails respondent : respondents) {
+                final String partyName = respondent.getFirstName() + " " + respondent.getLastName();
+                final CaseFlag respondentFlag = CaseFlag.builder().partyName(partyName)
+                    .roleOnCase(PartyEnum.respondent.getDisplayedValue()).build();
+                respondent.setRespondentFlag(respondentFlag);
             }
+            caseDetails.put("respondents", respondents);
         }
+    }
 }
