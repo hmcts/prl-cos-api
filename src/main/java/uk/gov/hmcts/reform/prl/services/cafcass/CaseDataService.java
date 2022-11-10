@@ -36,8 +36,8 @@ public class CaseDataService {
     @Value("${ccd.elastic-search-api.boost}")
     private String ccdElasticSearchApiBoost;
 
-    @Autowired
-    HearingService hearingService;
+
+    private final HearingService hearingService;
 
     private final CafcassCcdDataStoreService cafcassCcdDataStoreService;
 
@@ -48,9 +48,6 @@ public class CaseDataService {
     public CafCassResponse getCaseData(String authorisation, String serviceAuthorisation, String startDate, String endDate) throws IOException {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
-
-        //mine
-        cafCassSearchCaseTypeId = "12345";
 
         String searchString = objectMapper.writeValueAsString(ccdQueryParam);
         SearchResult searchResult = cafcassCcdDataStoreService.searchCases(

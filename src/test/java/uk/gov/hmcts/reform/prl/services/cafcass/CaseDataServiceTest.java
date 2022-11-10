@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -54,18 +55,18 @@ public class CaseDataServiceTest {
     public void getCaseData() throws IOException {
 
         Hearings hearings = new Hearings();
-        when(hearingService.getHearings(anyString(),anyString())).thenReturn(hearings);
-
+        hearings.setCaseRef("234567890");
+        hearings.setHmctsServiceCode("hmcts");
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
         SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
                                                                     SearchResult.class);
         CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
 
-        when(cafcassCcdDataStoreService.searchCases(
-            anyString(),  anyString(),  anyString(),  anyString()
-        )).thenReturn(searchResult);
+        when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
         Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
+        when(hearingService.getHearings(anyString(),anyString())).thenReturn(hearings);
+
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation", "serviceAuthorisation",
                                                                "start", "end"
         );
