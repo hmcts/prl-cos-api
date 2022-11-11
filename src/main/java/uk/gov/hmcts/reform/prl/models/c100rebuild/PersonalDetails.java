@@ -20,4 +20,5 @@ public class PersonalDetails {
     private String otherGenderDetails;
     private String isNameChanged;
     private String previousFullName;
+    private String applicantPlaceOfBirth;
 }

@@ -19,10 +19,9 @@ public class ApplicantDto {
     private String applicantLastName;
     private String[] contactDetailsPrivate;
     private String[] contactDetailsPrivateAlternative;
-    private String applicantPreviousName;
-    private String applicantGender;
-    private DateofBirth applicantDateOfBirth;
-    private String applicantPlaceOfBirth;
+    private RelationshipDetails relationshipDetails;
+    private PersonalDetails personalDetails;
+    private ContactDetail applicantContactDetail;
     private String applicantAddressPostcode;
     private String applicantAddress1;
     private String applicantAddress2;
