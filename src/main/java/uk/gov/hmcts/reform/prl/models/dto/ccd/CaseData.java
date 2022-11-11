@@ -285,17 +285,17 @@ public class CaseData implements MappableObject {
     /**
      * Attending the hearing.
      */
-    private final YesOrNo isWelshNeeded;
+    private YesOrNo isWelshNeeded;
     @JsonAlias({"welshNeeds", "fl401WelshNeeds"})
-    private final List<Element<WelshNeed>> welshNeeds;
-    private final YesOrNo isInterpreterNeeded;
-    private final List<Element<InterpreterNeed>> interpreterNeeds;
-    private final YesOrNo isDisabilityPresent;
-    private final String adjustmentsRequired;
-    private final YesOrNo isSpecialArrangementsRequired;
-    private final String specialArrangementsRequired;
-    private final YesOrNo isIntermediaryNeeded;
-    private final String reasonsForIntermediary;
+    private List<Element<WelshNeed>> welshNeeds;
+    private YesOrNo isInterpreterNeeded;
+    private List<Element<InterpreterNeed>> interpreterNeeds;
+    private YesOrNo isDisabilityPresent;
+    private String adjustmentsRequired;
+    private YesOrNo isSpecialArrangementsRequired;
+    private String specialArrangementsRequired;
+    private YesOrNo isIntermediaryNeeded;
+    private String reasonsForIntermediary;
 
     /**
      * International element.
