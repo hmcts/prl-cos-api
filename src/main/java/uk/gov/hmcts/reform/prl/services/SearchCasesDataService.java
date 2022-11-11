@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.CaseFlag;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -50,16 +52,53 @@ public class SearchCasesDataService {
                     .collect(Collectors.toList());
                 PartyDetails applicant1 = applicants.get(0);
                 if (Objects.nonNull(applicant1)) {
-                    caseDetails.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
+                    caseDetails.put("applicantName", applicant1.getFirstName() + " " + applicant1.getLastName());
                 }
 
             }
-
+            // set applicant and respondent case flag
+            setApplicantFlag(caseData, caseDetails);
+            setRespondentFlag(caseData, caseDetails);
         }
 
         return caseDetails;
-
-
     }
 
+    private void setApplicantFlag(CaseData caseData, Map<String, Object> caseDetails) {
+
+        Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
+        if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
+            List<PartyDetails> applicants = applicantsWrapped.get()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+
+            for (PartyDetails applicant : applicants) {
+                final String partyName = applicant.getFirstName() + " " + applicant.getLastName();
+                final CaseFlag applicantFlag = CaseFlag.builder().partyName(partyName)
+                    .roleOnCase(PartyEnum.applicant.getDisplayedValue()).build();
+                applicant.setApplicantFlag(applicantFlag);
+            }
+
+            caseDetails.put("applicants", applicants);
+        }
+    }
+
+    private void setRespondentFlag(CaseData caseData, Map<String, Object> caseDetails) {
+        Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
+        if (respondentsWrapped.isPresent() && !respondentsWrapped.get().isEmpty()) {
+            List<PartyDetails> respondents = respondentsWrapped.get()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+
+            for (PartyDetails respondent : respondents) {
+                final String partyName = respondent.getFirstName() + " " + respondent.getLastName();
+                final CaseFlag respondentFlag = CaseFlag.builder().partyName(partyName)
+                    .roleOnCase(PartyEnum.respondent.getDisplayedValue()).build();
+                respondent.setRespondentFlag(respondentFlag);
+            }
+            caseDetails.put("respondents", respondents);
+        }
+    }
 }
