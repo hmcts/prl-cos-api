@@ -65,6 +65,7 @@ public class CourtFinderService {
     }
 
     public String getCorrectPartyPostcode(CaseData caseData) throws NotFoundException {
+        log.info("--getCorrectPartyPostcode()->");
         //current requirements use the first child if multiple children present
         Optional<Child> childOptional = caseData.getChildren()
             .stream()
@@ -84,7 +85,9 @@ public class CourtFinderService {
             }
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
         } else if (child.getChildLiveWith().contains(anotherPerson) && ofNullable(getFirstOtherPerson(child)).isPresent()) {
+            log.info("anotherPerson inside  1st loop:::");
             if (ofNullable(getFirstOtherPerson(child).getAddress().getPostCode()).isEmpty()) {
+                log.info("anotherPerson inside  2nst loop::: {}");
                 return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
             }
             return getFirstOtherPerson(child).getAddress().getPostCode();
@@ -118,6 +121,7 @@ public class CourtFinderService {
     }
 
     public OtherPersonWhoLivesWithChild getFirstOtherPerson(Child c) {
+        log.info("getFirstOtherPerson  {}",c.getFirstName());
         return c.getPersonWhoLivesWithChild()
             .stream()
             .map(Element::getValue)
