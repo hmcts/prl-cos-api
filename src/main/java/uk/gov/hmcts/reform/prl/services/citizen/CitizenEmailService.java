@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import static uk.gov.hmcts.reform.prl.services.pin.CaseInviteEmailService.CITIZE
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CitizenEmailService {
 
     @Autowired
