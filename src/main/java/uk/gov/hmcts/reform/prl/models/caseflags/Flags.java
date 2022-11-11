@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
-public class CaseFlag {
+public class Flags {
 
     String partyName;
     String roleOnCase;
