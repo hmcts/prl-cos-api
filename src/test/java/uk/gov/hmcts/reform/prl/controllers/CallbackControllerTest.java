@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
@@ -60,6 +61,7 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SearchCasesDataService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
@@ -200,6 +202,9 @@ public class CallbackControllerTest {
 
     @Mock
     private AssignCaseAccessClient assignCaseAccessClient;
+
+    @Mock
+    private LocationRefDataService locationRefDataService;
 
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -1585,11 +1590,10 @@ public class CallbackControllerTest {
         when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.of(
             CourtEmailAddress.builder().address("123@gamil.com").build()));
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            callbackController.prePopulateCourtDetails(
-                callbackRequest);
+        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
+            .prePopulateCourtDetails(authToken, callbackRequest);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
-
     }
 
     @Test
@@ -1603,9 +1607,9 @@ public class CallbackControllerTest {
         when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(Court.builder().build());
         when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.empty());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            callbackController.prePopulateCourtDetails(
-                callbackRequest);
+        when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
+            .prePopulateCourtDetails(authToken,callbackRequest);
         Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
     }
 }
