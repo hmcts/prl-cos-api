@@ -15,4 +15,6 @@ public class BundleCreateRequest {
     public String jurisdictionId;
     @JsonProperty("case_details")
     public CaseDetails caseDetails;
+    @JsonProperty("event_id")
+    private String eventId;
 }
