@@ -97,9 +97,16 @@ public class PrePopulateFeeAndSolicitorNameController {
                                                         @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<String> errorList = new ArrayList<>();
         CaseData caseData = null;
+        CaseData caseData1 = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getCaseData(),
+            CaseData.class
+        );
+        log.info("caseData1 {}",caseData1);
         boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
                                                                                      .getCaseDetails().getCaseData());
 
+
+        log.info("Case data {}", caseData);
         if (!mandatoryEventStatus) {
             errorList.add(
                 "Submit and pay is not allowed for this case unless you finish all the mandatory events");
@@ -114,7 +121,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                     .build();
             }
             CaseData caseDataForOrgDetails = callbackRequest.getCaseDetails().getCaseData();
-            log.debug("caseDataForOrgDetails ::::",caseDataForOrgDetails);
+            log.info("caseDataForOrgDetails {}",caseDataForOrgDetails);
             caseDataForOrgDetails = organisationService.getApplicantOrganisationDetails(caseDataForOrgDetails);
             caseDataForOrgDetails = organisationService.getRespondentOrganisationDetails(caseDataForOrgDetails);
 
