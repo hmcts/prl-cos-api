@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ApplicantDto;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.ContactDetail;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherPersonsElementsMapper.buildChildRelationship;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 public class CaseDataApplicantElementsMapper {
     private static final String ADDRESS_FIELD = "address";
@@ -52,10 +55,17 @@ public class CaseDataApplicantElementsMapper {
                 .builder()
                 .firstName(applicantDto.getApplicantFirstName())
                 .lastName(applicantDto.getApplicantLastName())
-                .previousName(applicantDto.getApplicantPreviousName())
-                .gender(Gender.valueOf(applicantDto.getApplicantGender()))
-                .dateOfBirth(buildDateOfBirth(applicantDto.getApplicantDateOfBirth()))
-                .placeOfBirth(applicantDto.getApplicantPlaceOfBirth())
+                .previousName(applicantDto.getPersonalDetails().getPreviousFullName())
+                .gender(Gender.getDisplayedValueFromEnumString(applicantDto.getPersonalDetails().getGender()))
+                .otherGender(applicantDto.getPersonalDetails().getOtherGenderDetails())
+                .dateOfBirth(buildDateOfBirth(applicantDto.getPersonalDetails().getDateOfBirth()))
+                .placeOfBirth(applicantDto.getPersonalDetails().getApplicantPlaceOfBirth())
+                .relationshipToChildren(buildChildRelationship(applicantDto.getRelationshipDetails()))
+                .phoneNumber(applicantDto.getApplicantContactDetail().getTelephoneNumber())
+                .canYouProvideEmailAddress(applicantDto.getApplicantContactDetail().getCanProvideEmail())
+                .canYouProvidePhoneNumber(applicantDto.getApplicantContactDetail().getCanProvideTelephoneNumber())
+                .email(buildEmailOrReason(applicantDto.getApplicantContactDetail()))
+                .phoneNumber(buildTelephoneOrReason(applicantDto.getApplicantContactDetail()))
                 .address(buildAddress(applicantDto))
                 .isAtAddressLessThan5Years(applicantDto.getApplicantAddressHistory())
                 .addressLivedLessThan5YearsDetails(applicantDto.getApplicantProvideDetailsOfPreviousAddresses())
@@ -63,6 +73,16 @@ public class CaseDataApplicantElementsMapper {
                 .isEmailAddressConfidential(buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
                 .isPhoneNumberConfidential(buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
                 .build();
+    }
+
+    private static String buildEmailOrReason(ContactDetail applicantContactDetail) {
+        return Yes.equals(applicantContactDetail.getCanProvideEmail()) ? applicantContactDetail.getEmailAddress()
+                : applicantContactDetail.getCanNotProvideEmailReason();
+    }
+
+    private static String buildTelephoneOrReason(ContactDetail applicantContactDetail) {
+        return Yes.equals(applicantContactDetail.getCanProvideTelephoneNumber()) ? applicantContactDetail.getTelephoneNumber()
+                : applicantContactDetail.getCanNotProvideTelephoneNumberReason();
     }
 
     private static Address buildAddress(ApplicantDto applicantDto) {
@@ -77,7 +97,7 @@ public class CaseDataApplicantElementsMapper {
     }
 
     private static YesOrNo buildConfidentialField(List<String> contactDetailsPrivateList, String field) {
-        return contactDetailsPrivateList.contains(field) ? YesOrNo.Yes : YesOrNo.No;
+        return contactDetailsPrivateList.contains(field) ? Yes : YesOrNo.No;
     }
 
     private static LocalDate buildDateOfBirth(DateofBirth date) {

@@ -60,7 +60,7 @@ public class CaseDataOtherPersonsElementsMapper {
         .build();
     }
 
-    private static String buildChildRelationship(RelationshipDetails relationshipDetails) {
+    public static String buildChildRelationship(RelationshipDetails relationshipDetails) {
         Optional<ChildRelationship> childRelationship = relationshipDetails.getRelationshipToChildren().stream().findFirst();
         if (childRelationship.isPresent()) {
             ChildRelationship relationship = childRelationship.get();

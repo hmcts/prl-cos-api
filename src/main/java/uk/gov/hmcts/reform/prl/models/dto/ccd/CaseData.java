@@ -522,7 +522,7 @@ public class CaseData implements MappableObject {
      * FL401 Statement Of truth and submit.
      */
     @JsonProperty("fl401StmtOfTruth")
-    private final StatementOfTruth fl401StmtOfTruth;
+    private StatementOfTruth fl401StmtOfTruth;
 
     @JsonProperty("viewPDFlinkLabelText")
     private String viewPdfLinkLabelText;

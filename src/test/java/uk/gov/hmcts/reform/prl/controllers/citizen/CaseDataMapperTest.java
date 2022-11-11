@@ -160,6 +160,29 @@ public class CaseDataMapperTest {
                          + "\"needsResolution\":[\"childTimeSpent\"]},\"parentialResponsibility\":{\"statement\":\"test22"
                         + "\"}}],\"cd_childrenKnownToSocialServices\":\"Yes\",\"cd_childrenKnownToSocialServicesDetails\""
                         + ":\"Testchild\",\"cd_childrenSubjectOfProtectionPlan\":\"Dontknow\"}")
+                .c100RebuildApplicantDetails("{\n   \"appl_allApplicants\":[\n      {\n         "
+                        + "\"id\":\"f468e727-5691-45b0-b456-0d6156fb55d7\",\n         \"applicantFirstName\":\"c1\",\n         "
+                        + "\"applicantLastName\":\"c1\",\n         \"detailsKnown\":\"Yes\",\n         "
+                        + "\"startAlternative\":\"\",\n         \"start\":\"No\",\n         "
+                        + "\"contactDetailsPrivate\":[\n            \n         ],\n         \"contactDetailsPrivateAlternative\""
+                        + ":[\n            \n         ],\n         \"relationshipDetails\":{\n            "
+                        + "\"relationshipToChildren\":[\n               {\n                  \"childId\":"
+                        + "\"c4befd68-8cc2-4582-b4f5-630d41bda1c3\",\n                  \"relationshipType\":"
+                        + "\"Father\",\n                  \"otherRelationshipTypeDetails\":\"\"\n               "
+                        + "}\n            ]\n         },\n         \"personalDetails\":{\n            "
+                        + "\"haveYouChangeName\":\"Yes\",\n            \"applPreviousName\":\"test\",\n            "
+                        + "\"dateOfBirth\":{\n               \"day\":\"12\",\n               "
+                        + "\"month\":\"12\",\n               \"year\":\"1990\"\n            },\n            "
+                        + "\"gender\":\"Male\",\n            \"otherGenderDetails\":\"\",\n            "
+                        + "\"applicantPlaceOfBirth\":\"India\"\n         },\n         \"applicantContactDetail\":{\n            "
+                        + "\"canProvideEmail\":\"Yes\",\n            \"emailAddress\":\"test@gmail.com\",\n            "
+                        + "\"canNotProvideEmailReason\":\"\",\n            \"canProvideTelephoneNumber\":\"Yes\",\n            "
+                        + "\"telephoneNumber\":\"09999999999\",\n            \"canNotProvideTelephoneNumberReason\":\"\","
+                        + "\n            \"canLeaveVoiceMail\":\"No\"\n         },\n         "
+                        + "\"applicantAddressPostcode\":\"XXX XXX\",\n         \"applicantAddress1\":\"10\",\n         "
+                        + "\"applicantAddress2\":\"Test Road\",\n         \"applicantAddressTown\":\"Harror\",\n         "
+                        + "\"applicantAddressCounty\":\"Brent\",\n         \"applicantAddressHistory\":\"No\",\n         "
+                        + "\"applicantProvideDetailsOfPreviousAddresses\":\"test\"\n      }\n   ]\n}")
                 .c100RebuildApplicantDetails("{\n  \n  \"appl_allApplicants\": [\n{\n\"id\": "
                         + "\"c84edd0f-b332-4169-9499-614cb06ace98\",\n\"applicantFirstName\": \"c1\",\n\"applicantLastName\": "
                         + "\"c1\",\n\"startAlternative\": \"Yes\",\n\"start\": \"Yes\",\n\"contactDetailsPrivate\": [],"
@@ -284,7 +307,7 @@ public class CaseDataMapperTest {
                 + "Other risks, test", updatedCaseData.getCaseUrgencyTimeAndReason());
         assertEquals("48 hours", updatedCaseData.getEffortsMadeWithRespondents());
 
-        assertEquals(2, updatedCaseData.getApplicants().size());
+        assertEquals(1, updatedCaseData.getApplicants().size());
         PartyDetails partyDetails = updatedCaseData.getApplicants().get(0).getValue();
         assertEquals("c1", partyDetails.getFirstName());
         assertEquals("c1", partyDetails.getLastName());
