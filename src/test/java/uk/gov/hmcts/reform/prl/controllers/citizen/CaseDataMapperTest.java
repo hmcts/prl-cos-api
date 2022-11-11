@@ -51,22 +51,22 @@ public class CaseDataMapperTest {
         caseData = CaseData.builder()
                 .id(1234567891234567L)
                 .caseTypeOfApplication(CASE_TYPE)
-                .c100RebuildInternationalElements("{\"internationalStart\":\"Yes\",\"internationalParents\":\"Yes\""
-                        + ",\"provideDetailsParents\":\"Child'sParentslifeoutsideUK\",\"internationalJurisdiction\":\"Yes\""
-                        + ",\"provideDetailsJurisdiction\":\"AnotherpersoncanapplyoutsideUK\",\"internationalRequest\":\"Yes\""
-                        + ",\"provideDetailsRequest\":\"Anothercountryorjurisdictiondetails\"}")
-                .c100RebuildHearingWithoutNotice("{\"hearingPart1\":\"No\",\"reasonsForApplicationWithoutNotice\":\"WNH Details\""
-                        + "," + "\"doYouNeedAWithoutNoticeHearing\":\"Yes\",\"doYouNeedAWithoutNoticeHearingDetails\":"
-                        + "\"Other people will do something\",\"doYouRequireAHearingWithReducedNotice\":\"Yes\","
-                        + "\"doYouRequireAHearingWithReducedNoticeDetails\":\""
+                .c100RebuildInternationalElements("{\"ie_internationalStart\":\"Yes\",\"ie_internationalParents\":\"Yes\""
+                        + ",\"ie_provideDetailsParents\":\"Child'sParentslifeoutsideUK\",\"ie_internationalJurisdiction\":\"Yes\""
+                        + ",\"ie_provideDetailsJurisdiction\":\"AnotherpersoncanapplyoutsideUK\",\"ie_internationalRequest\":\"Yes\""
+                        + ",\"ie_provideDetailsRequest\":\"Anothercountryorjurisdictiondetails\"}")
+                .c100RebuildHearingWithoutNotice("{\"hwn_hearingPart1\":\"No\",\"hwn_reasonsForApplicationWithoutNotice\":\"WNH Details\""
+                        + "," + "\"hwn_doYouNeedAWithoutNoticeHearing\":\"Yes\",\"hwn_doYouNeedAWithoutNoticeHearingDetails\":"
+                        + "\"Other people will do something\",\"hwn_doYouRequireAHearingWithReducedNotice\":\"Yes\","
+                        + "\"hwn_doYouRequireAHearingWithReducedNoticeDetails\":\""
                         + "No time to give notice\"}")
-                .c100RebuildTypeOfOrder("{\"courtOrder\":[\"whoChildLiveWith\",\"childTimeSpent\","
-                        + "\"stopOtherPeopleDoingSomething\"" + ",\"resolveSpecificIssue\"],\"stopOtherPeopleDoingSomethingSubField"
+                .c100RebuildTypeOfOrder("{\"too_courtOrder\":[\"whoChildLiveWith\",\"childTimeSpent\","
+                        + "\"stopOtherPeopleDoingSomething\"" + ",\"resolveSpecificIssue\"],\"too_stopOtherPeopleDoingSomethingSubField"
                         + "\":[\"changeChildrenNameSurname\",\"allowMedicalTreatment\",\"takingChildOnHoliday\","
-                        + "\"relocateChildrenDifferentUkArea\",\"relocateChildrenOutsideUk\"],\"resolveSpecificIssueSubField"
+                        + "\"relocateChildrenDifferentUkArea\",\"relocateChildrenOutsideUk\"],\"too_resolveSpecificIssueSubField"
                         + "\":[\"specificHoliday\",\"whatSchoolChildrenWillGoTo\",\"religiousIssue\",\"changeChildrenNameSurnameA"
                         + "\",\"medicalTreatment\",\"relocateChildrenDifferentUkAreaA\",\"relocateChildrenOutsideUkA\","
-                        + "\"returningChildrenToYourCare\"],\"shortStatement\":\"shortStatementFieldValue\"}")
+                        + "\"returningChildrenToYourCare\"],\"too_shortStatement\":\"shortStatementFieldValue\"}")
                 .c100RebuildOtherProceedings("{\n   \"op_childrenInvolvedCourtCase\": \"No\",\n\"op_courtOrderProtection\": "
                         + "\"Yes\",\n   \"op_courtProceedingsOrders\": [\n\"childArrangementOrder\",\n\"emergencyProtectionOrder"
                         + "\",\n\"supervisionOrder\",\n\"careOrder\",\n\"childAbductionOrder\",\n\"contactOrderForDivorce\","
@@ -229,7 +229,7 @@ public class CaseDataMapperTest {
                         + "{\"day\":\"\",\"month\":\"\",\"year\":\"\"},\"gender\":\"Male\",\"otherGenderDetails\":\"\"},"
                         + "\"relationshipDetails\":{\"relationshipToChildren\":[{\"childId\":"
                         + "\"4a9f3ec0-c359-4dc0-9e94-e4fc868f0341\",\"relationshipType\":\"Mother\","
-                        + "\"otherRelationshipTypeDetails\":\"\"}]},\"otherPersonAddress\":{\"AddressLine1\":\"\","
+                        + "\"otherRelationshipTypeDetails\":\"\"}]},\"address\":{\"AddressLine1\":\"\","
                         + "\"AddressLine2\":\"\",\"AddressLine3\":\"\",\"PostTown\":\"\",\"County\":\"\","
                         + "\"PostCode\":\"\",\"Country\":\"\"}}]}")
                 .c100RebuildRespondentDetails(" {\"resp_Respondents\":[{\"id\":\"5739186d-e782-4e49-9f0e-dc62729fdbf2\","
@@ -244,7 +244,7 @@ public class CaseDataMapperTest {
                         + "\"selectedAddress\":\"ILFORD\",\"addressHistory\":\"Yes\",\"provideDetailsOfPreviousAddresses\":"
                         + "\"\",\"County\":\"\"},\"relationshipDetails\":{\"relationshipToChildren\":"
                         + "[{\"childId\":\"2e665739-0578-46cf-a4c4-bdaaefd61b0a\",\"relationshipType\":"
-                        + "\"Other\",\"otherRelationshipTypeDetails\":\"others\"}]},\"respondentContactDetail\""
+                        + "\"Other\",\"otherRelationshipTypeDetails\":\"others\"}]},\"contactDetails\""
                         + ":{\"emailAddress\":\"abc@gmail.com\",\"telephoneNumber\":\"+447205308786\","
                         + "\"donKnowEmailAddress\":\"No\",\"donKnowTelephoneNumber\":\"No\"}}]}").build();
     }
@@ -336,10 +336,10 @@ public class CaseDataMapperTest {
         //Given
         CaseData caseData1 = caseData
                 .toBuilder()
-                .c100RebuildTypeOfOrder("{\"courtOrder\":[\"whoChildLiveWith\","
-                        + "\"stopOtherPeopleDoingSomething\"" + ",\"resolveSpecificIssue\"],\"stopOtherPeopleDoingSomethingSubField"
+                .c100RebuildTypeOfOrder("{\"too_courtOrder\":[\"whoChildLiveWith\","
+                        + "\"stopOtherPeopleDoingSomething\"" + ",\"resolveSpecificIssue\"],\"too_stopOtherPeopleDoingSomethingSubField"
                         + "\":[\"changeChildrenNameSurname\",\"allowMedicalTreatment\",\"takingChildOnHoliday\","
-                        + "\"relocateChildrenDifferentUkArea\",\"relocateChildrenOutsideUk\"],\"resolveSpecificIssueSubField"
+                        + "\"relocateChildrenDifferentUkArea\",\"relocateChildrenOutsideUk\"],\"too_resolveSpecificIssueSubField"
                         + "\":[\"specificHoliday\",\"whatSchoolChildrenWillGoTo\",\"religiousIssue\",\"changeChildrenNameSurnameA"
                         + "\",\"medicalTreatment\",\"relocateChildrenDifferentUkAreaA\",\"relocateChildrenOutsideUkA\","
                         + "\"returningChildrenToYourCare\"]}")
@@ -490,7 +490,7 @@ public class CaseDataMapperTest {
               + "\"approxDateOfBirth\":{\"day\":\"\",\"month\":\"\",\"year\":\"\"},\"gender\":\"Male\","
               + "\"otherGenderDetails\":\"\"},\"relationshipDetails\":{\"relationshipToChildren\":[{\"childId\":"
               + "\"4a9f3ec0-c359-4dc0-9e94-e4fc868f0341\",\"relationshipType\":\"Mother\","
-              + "\"otherRelationshipTypeDetails\":\"\"}]},\"otherPersonAddress\":{\"AddressLine1\":\"add1\","
+              + "\"otherRelationshipTypeDetails\":\"\"}]},\"address\":{\"AddressLine1\":\"add1\","
               + "\"AddressLine2\":\"add2\",\"AddressLine3\":\"add3\",\"PostTown\":\"\",\"County\":\"thames\",\"PostCode\":\"tw22tr8\","
               + "\"Country\":\"uk\"}}]}")
             .build();
@@ -513,7 +513,7 @@ public class CaseDataMapperTest {
              + "\"approxDateOfBirth\":{\"day\":\"12\",\"month\":\"12\",\"year\":\"1990\"},\"gender\":\"Other\","
              + "\"otherGenderDetails\":\"Test\"},\"relationshipDetails\":{\"relationshipToChildren\":[{\"childId\":"
              + "\"4a9f3ec0-c359-4dc0-9e94-e4fc868f0341\",\"relationshipType\":\"Mother\","
-             + "\"otherRelationshipTypeDetails\":\"\"}]},\"otherPersonAddress\":{\"AddressLine1\":\"address1\","
+             + "\"otherRelationshipTypeDetails\":\"\"}]},\"address\":{\"AddressLine1\":\"address1\","
              + "\"AddressLine2\":\"address2\",\"AddressLine3\":\"address3\",\"PostTown\":\"town\",\"County\":\"sdy\","
              + "\"PostCode\":\"tw23tr9\",\"Country\":\"uk\"}}]}")
             .build();
@@ -542,7 +542,7 @@ public class CaseDataMapperTest {
                                 + "\"selectedAddress\":\"ILFORD\",\"addressHistory\":\"Yes\",\"provideDetailsOfPreviousAddresses\":"
                                 + "\"\",\"County\":\"\"},\"relationshipDetails\":{\"relationshipToChildren\":"
                                 + "[{\"childId\":\"2e665739-0578-46cf-a4c4-bdaaefd61b0a\",\"relationshipType\":"
-                                + "\"Other\",\"otherRelationshipTypeDetails\":\"others\"}]},\"respondentContactDetail\""
+                                + "\"Other\",\"otherRelationshipTypeDetails\":\"others\"}]},\"contactDetails\""
                                 + ":{\"emailAddress\":\"abc@gmail.com\",\"telephoneNumber\":\"+447205308786\","
                                 + "\"donKnowEmailAddress\":\"No\",\"donKnowTelephoneNumber\":\"No\"}}]}").build();
 
