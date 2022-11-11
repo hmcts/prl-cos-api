@@ -64,7 +64,8 @@ public class BundlingController extends AbstractCallbackController {
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse saveBundleDocument(
-        @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
+        @RequestHeader("ServiceAuthorization") @Parameter(hidden = true) String serviceAuthorization,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         log.info("*** callback data recieved to cos api : {}", callbackRequest.getCaseDetails().getData());
