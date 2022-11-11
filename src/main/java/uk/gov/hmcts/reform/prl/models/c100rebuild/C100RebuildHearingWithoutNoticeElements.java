@@ -15,16 +15,16 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class C100RebuildHearingWithoutNoticeElements {
 
-    @JsonProperty("hearingPart1")
+    @JsonProperty("hwn_hearingPart1")
     private YesOrNo doYouNeedHearingWithoutNotice;
-    @JsonProperty("reasonsForApplicationWithoutNotice")
+    @JsonProperty("hwn_reasonsForApplicationWithoutNotice")
     private String reasonsOfHearingWithoutNotice;
-    @JsonProperty("doYouNeedAWithoutNoticeHearing")
+    @JsonProperty("hwn_doYouNeedAWithoutNoticeHearing")
     private YesOrNo doYouNeedHearingWithoutNoticeAsOtherPplDoSomething;
-    @JsonProperty("doYouNeedAWithoutNoticeHearingDetails")
+    @JsonProperty("hwn_doYouNeedAWithoutNoticeHearingDetails")
     private String doYouNeedHearingWithoutNoticeAsOtherPplDoSomethingDetails;
-    @JsonProperty("doYouRequireAHearingWithReducedNotice")
+    @JsonProperty("hwn_doYouRequireAHearingWithReducedNotice")
     private YesOrNo doYouNeedHearingWithoutNoticeWithoutReducedNotice;
-    @JsonProperty("doYouRequireAHearingWithReducedNoticeDetails")
+    @JsonProperty("hwn_doYouRequireAHearingWithReducedNoticeDetails")
     private String doYouNeedHearingWithoutNoticeWithoutReducedNoticeDetails;
 }
