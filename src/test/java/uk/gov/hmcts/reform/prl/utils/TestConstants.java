@@ -25,4 +25,7 @@ public class TestConstants {
     public static final String JURISDICTION = "PRIVATELAW";
     public static final String CAFCASS_USER_ROLE = "caseworker-privatelaw-cafcass";
 
+
+    public static final String APPLICANT_FLAG = "applicantFlag";
+    public static final String RESPONDENT_FLAG = "respondentFlag";
 }
