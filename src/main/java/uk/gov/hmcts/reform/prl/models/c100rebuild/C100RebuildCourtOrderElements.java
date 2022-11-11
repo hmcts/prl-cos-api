@@ -14,12 +14,12 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class C100RebuildCourtOrderElements {
 
-    @JsonProperty("courtOrder")
+    @JsonProperty("too_courtOrder")
     private String[] courtOrder;
-    @JsonProperty("stopOtherPeopleDoingSomethingSubField")
+    @JsonProperty("too_stopOtherPeopleDoingSomethingSubField")
     private String[] reasonsOfHearingWithoutNotice;
-    @JsonProperty("resolveSpecificIssueSubField")
+    @JsonProperty("too_resolveSpecificIssueSubField")
     private String[] resolveSpecificIssueSubField;
-    @JsonProperty("shortStatement")
+    @JsonProperty("too_shortStatement")
     private String shortStatement;
 }
