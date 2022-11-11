@@ -193,6 +193,34 @@ public class CaseDataMapperTest {
                          + "\"isDateOfBirthUnknown\":\"Yes\",\"approxDateOfBirth\":{\"year\":\"2012\",\"month\":\"8\",\"day\":\"8\"},"
                          + "\"gender\":\"Other\",\"otherGenderDetails\":\"test\"},\"childMatters\":{\"needsResolution\":[]},"
                          + "\"parentialResponsibility\":{\"statement\":\"\"}}]}")
+                .c100RebuildReasonableAdjustments("{\n  \"ra_typeOfHearing\": [\n\"videoHearing\",\n\"phoneHearing\"\n],"
+                        + "\n\"ra_languageNeeds\": [\n\"speakInWelsh\",\n\"readAndWriteInWelsh\","
+                        + "\n\"needInterpreterInCertainLanguage\"\n],\n\"ra_needInterpreterInCertainLanguageDetails\": "
+                        + "\"test\",\n\"ra_specialArrangements\": [\n\"separateWaitingRoom\",\n\"separateExitEntrance\","
+                        + "\n\"screenWithOtherPeople\",\n\"separateToilets\",\n\"visitCourtBeforeHearing\",\n\"videoLinks\","
+                        + "\n\"specialArrangementsOther\"\n],\n\"ra_specialArrangementsOtherSubField\": \"test\","
+                        + "\n\"ra_disabilityRequirements\": [\n\"documentsHelp\",\n\"communicationHelp\",\n\"extraSupport\","
+                        + "\n\"feelComfortableSupport\",\n\"helpTravellingMovingBuildingSupport\"\n],"
+                        + "\n\"ra_documentInformation\": "
+                        + "[\n\"specifiedColorDocuments\",\n\"easyReadFormatDocuments\",\n\"brailleDocuments\","
+                        + "\n\"largePrintDocuments\",\n\"audioTranslationDocuments\",\n\"readOutDocuments\","
+                        + "\n\"emailInformation\",\n\"other\"\n],\n\"ra_specifiedColorDocumentsDetails\": \"test\","
+                        + "\n\"ra_largePrintDocumentsDetails\": \"test\",\n\"ra_otherDetails\": \"test\",\n"
+                        + "\"ra_communicationHelp\": [\n\"hearingLoop\",\n\"infraredReceiver\",\n\"needToBeClosedWithSpeaker\","
+                        + "\n\"lipSpeaker\",\n\"signLanguageInterpreter\",\n\"speechToTextReporter\",\n\"needExtraTime\","
+                        + "\n\"visitCourtBeforeHearing\",\n\"explanationOfCourt\",\n\"intermediary\",\n\"other\"\n],"
+                        + "\n\"ra_signLanguageInterpreterDetails\": \"test\",\n\"ra_communicationHelpOtherDetails\": "
+                        + "\"test\",\n\"ra_supportCourt\": [\n\"supportWorkerCarer\",\n\"friendFamilyMember\","
+                        + "\n\"assistanceGuideDog\",\n\"therapyAnimal\",\n\"supportCourtOther\"\n],"
+                        + "\n\"ra_supportWorkerCarerSubField\": \"test\",\n\"ra_friendFamilyMemberSubField\": "
+                        + "\"test\",\n\"ra_therapyAnimalSubField\": \"test\",\n\"ra_supportCourtOtherSubField\": "
+                        + "\"test\",\n\"ra_feelComportable\": [\n\"appropriateLighting\",\n\"regularBreaks\","
+                        + "\n\"spaceUpAndMoveAround\",\n\"feelComportableOther\"\n],\n\"ra_appropriateLightingSubField\": "
+                        + "\"test\",\n\"ra_feelComportableOtherSubField\": \"test\",\n\"ra_travellingCourt\": "
+                        + "[\n\"parkingSpace\",\n\"wheelchairAccess\",\n\"venueWheelchair\",\n\"accessToilet\","
+                        + "\n\"helpUsingLift\",\n\"differentTypeChair\",\n\"guideBuilding\",\n\"travellingCourtOther\"\n],"
+                        + "\n\"ra_parkingSpaceSubField\": \"test\",\n\"ra_differentTypeChairSubField\": "
+                        + "\"test\",\n\"ra_travellingCourtOtherSubField\": \"test\"\n}")
                 .build();
     }
 
@@ -252,6 +280,29 @@ public class CaseDataMapperTest {
         assertEquals("c1", partyDetails.getLastName());
         assertEquals(LocalDate.of(1990, 12, 12), partyDetails.getDateOfBirth());
         assertEquals(male, partyDetails.getGender());
+
+        assertEquals(Yes, updatedCaseData.getIsWelshNeeded());
+        assertEquals(Yes, updatedCaseData.getIsIntermediaryNeeded());
+        assertEquals(Yes, updatedCaseData.getIsInterpreterNeeded());
+        assertEquals(Yes, updatedCaseData.getIsDisabilityPresent());
+        assertEquals(Yes, updatedCaseData.getIsSpecialArrangementsRequired());
+        assertEquals("I need documents in an alternative format: Documents in a specified colour(test), "
+                + "Documents in Easy Read format, Braille documents, Documents in large print(test), Audio translation of "
+                + "documents, Documents read out to me, Information emailed to me, Other(test), I need help communicating "
+                + "and understanding: Hearing loop (hearing enhancement system), Infrared receiver (hearing enhancement system), "
+                + "Need to be close to who is speaking, Lip speaker, Sign Language interpreter(test), Speech to text reporter "
+                + "(palantypist), Extra time to think and explain myself, Visit to court before the hearing, "
+                + "Explanation of the court and who's in the room at the hearing, Intermediary, Other(test), "
+                + "I need to bring support with me to a hearing: A support worker or carer(test), "
+                + "A friend or family member(test), Assistance / guide dog, Therapy animal(test), Other(test), "
+                + "I need something to feel comfortable during a hearing: Appropriate lighting(test), Regular breaks, "
+                + "Space to be able to get up and move around, Other(test), I need help travelling to, or moving around "
+                + "court buildings: Parking space close to the venue(test), Step free / wheelchair access, Use of "
+                + "venue wheelchair, Accessible toilet, Help using a lift, A different type of chair(test), "
+                + "Guiding in the building, Other(test)", updatedCaseData.getAdjustmentsRequired());
+        assertEquals("Separate waiting room, Separate exits and entrances, Screens so you and the other "
+                + "people in the case cannot see each other, Separate toilets, Visit to court before the hearing, "
+                + "Video links, Other(test)", updatedCaseData.getSpecialArrangementsRequired());
     }
 
     @Test
@@ -385,6 +436,23 @@ public class CaseDataMapperTest {
         //Then
         assertNotNull(updatedCaseData);
         assertNull(updatedCaseData.getOtherChildren());
+    }
+
+    @Test
+    public void testCaseDataMapperReasonableAdjustmentsExtraFields() throws JsonProcessingException {
+        CaseData caseData1 = caseData.toBuilder()
+                .c100RebuildReasonableAdjustments("{\n  \"ra_typeOfHearing\": [\n\"videoHearing\",\n\"phoneHearing\"\n],"
+                        + "\n\"ra_languageNeeds\": [\n\"speakInWelsh\",\n\"readAndWriteInWelsh\","
+                        + "\n\"needInterpreterInCertainLanguage\"\n],\n\"ra_needInterpreterInCertainLanguageDetails\": "
+                        + "\"test\",\n\"ra_specialArrangements\": [\n\"noSafetyRequirements\"\n],"
+                        + "\n\"ra_disabilityRequirements\": [\n\"noSupport\"\n]\n}")
+                .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
     }
 
 }

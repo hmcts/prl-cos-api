@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildInternationalElemen
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildMiamElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherChildrenDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmentsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -21,6 +22,7 @@ import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataInterna
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherChildrenDetailsElementsMapper.updateOtherChildDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherProceedingsElementsMapper.updateOtherProceedingsElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataReasonableAdjustmentsElementsMapper.updateReasonableAdjustmentsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
 
@@ -69,6 +71,10 @@ public class CaseDataMapper {
         C100RebuildOtherChildrenDetailsElements c100RebuildOtherChildrenDetailsElements = mapper
             .readValue(caseData.getC100RebuildOtherChildrenDetails(), C100RebuildOtherChildrenDetailsElements.class);
         updateOtherChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherChildrenDetailsElements);
+
+        C100RebuildReasonableAdjustmentsElements c100RebuildReasonableAdjustmentsElements = mapper
+                .readValue(caseData.getC100RebuildReasonableAdjustments(), C100RebuildReasonableAdjustmentsElements.class);
+        updateReasonableAdjustmentsElementsForCaseData(caseDataBuilder, c100RebuildReasonableAdjustmentsElements);
 
         return caseDataBuilder.build();
     }
