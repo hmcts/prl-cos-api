@@ -25,7 +25,7 @@ public class RespondentDetails {
     private PersonalDetails personalDetails;
     @JsonProperty("address")
     private C100Address address;
-    @JsonProperty("respondentContactDetail")
+    @JsonProperty("contactDetails")
     private C100ContactDetail respondentContactDetail;
 }
 
