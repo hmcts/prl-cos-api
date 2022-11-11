@@ -6,7 +6,6 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ApplicantDto;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.ContactDetail;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -64,8 +63,7 @@ public class CaseDataApplicantElementsMapper {
                 .phoneNumber(applicantDto.getApplicantContactDetail().getTelephoneNumber())
                 .canYouProvideEmailAddress(applicantDto.getApplicantContactDetail().getCanProvideEmail())
                 .canYouProvidePhoneNumber(applicantDto.getApplicantContactDetail().getCanProvideTelephoneNumber())
-                .email(buildEmailOrReason(applicantDto.getApplicantContactDetail()))
-                .phoneNumber(buildTelephoneOrReason(applicantDto.getApplicantContactDetail()))
+                .email(applicantDto.getApplicantContactDetail().getEmailAddress())
                 .address(buildAddress(applicantDto))
                 .isAtAddressLessThan5Years(applicantDto.getApplicantAddressHistory())
                 .addressLivedLessThan5YearsDetails(applicantDto.getApplicantProvideDetailsOfPreviousAddresses())
@@ -73,16 +71,6 @@ public class CaseDataApplicantElementsMapper {
                 .isEmailAddressConfidential(buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
                 .isPhoneNumberConfidential(buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
                 .build();
-    }
-
-    private static String buildEmailOrReason(ContactDetail applicantContactDetail) {
-        return Yes.equals(applicantContactDetail.getCanProvideEmail()) ? applicantContactDetail.getEmailAddress()
-                : applicantContactDetail.getCanNotProvideEmailReason();
-    }
-
-    private static String buildTelephoneOrReason(ContactDetail applicantContactDetail) {
-        return Yes.equals(applicantContactDetail.getCanProvideTelephoneNumber()) ? applicantContactDetail.getTelephoneNumber()
-                : applicantContactDetail.getCanNotProvideTelephoneNumberReason();
     }
 
     private static Address buildAddress(ApplicantDto applicantDto) {
