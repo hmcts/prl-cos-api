@@ -86,13 +86,20 @@ public class CourtFinderService {
             }
             return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
         } else if (child.getChildLiveWith().contains(anotherPerson) && ofNullable(getFirstOtherPerson(child)).isPresent()) {
-            if (ofNullable(getFirstOtherPerson(child).getAddress().getPostCode()).isEmpty()) {
+            if (getPostCode(getFirstOtherPerson(child)).isEmpty()) {
                 return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
             }
             return getFirstOtherPerson(child).getAddress().getPostCode();
         }
         //default to the applicant postcode
         return getPostcodeFromWrappedParty(caseData.    getApplicants().get(0));
+    }
+
+    public String getPostCode(OtherPersonWhoLivesWithChild otherPerson) {
+        return ofNullable(otherPerson)
+            .map(r -> r.getAddress())
+            .map(t -> t.getPostCode())
+            .orElse("");
     }
 
     public CaseData setCourtNameAndId(CaseData caseData, Court court) {
