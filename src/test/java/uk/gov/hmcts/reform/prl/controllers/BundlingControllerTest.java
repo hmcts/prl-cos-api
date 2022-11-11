@@ -77,9 +77,9 @@ public class BundlingControllerTest {
     @Test
     public void testCreateBundle() throws Exception {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        when(bundlingService.createBundleServiceRequest(any(CaseData.class),anyString())).thenReturn(bundleCreateResponse);
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        response = bundlingController.createBundle(authToken,callbackRequest);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class),anyString(),anyString(),anyString())).thenReturn(bundleCreateResponse);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
+        response = bundlingController.createBundle(authToken,"serviceAuth",callbackRequest);
         List<Bundle> responseCaseBundles = (List)response.getData().get("caseBundles");
         assertEquals("CaseDocuments",
             responseCaseBundles.get(0).getValue().getFolders().get(0)

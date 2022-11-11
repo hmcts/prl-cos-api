@@ -45,7 +45,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -198,8 +197,7 @@ public class BundlingServiceTest {
 
     @Test
     public void testCreateBundleService() throws Exception {
-        when(authTokenGenerator.generate()).thenReturn("authToken");
-        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseData,"authorization");
+        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization","serviceAuth");
     }
 
 }
