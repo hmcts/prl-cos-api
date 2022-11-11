@@ -87,7 +87,7 @@ public class CourtFinderService {
         } else if (child.getChildLiveWith().contains(anotherPerson) && ofNullable(getFirstOtherPerson(child)).isPresent()) {
             log.info("anotherPerson inside  1st loop:::");
             OtherPersonWhoLivesWithChild  otherPerson = getFirstOtherPerson(child);
-            if (ofNullable(otherPerson.getAddress()).isEmpty() || ofNullable(otherPerson.getAddress().getPostCode()).isEmpty()) {
+            if (getPostCode(otherPerson).isEmpty()) {
                 log.info("anotherPerson inside  2nst loop::: {}");
                 return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
             }
@@ -95,6 +95,13 @@ public class CourtFinderService {
         }
         //default to the applicant postcode
         return getPostcodeFromWrappedParty(caseData.    getApplicants().get(0));
+    }
+
+    public String getPostCode(OtherPersonWhoLivesWithChild otherPerson) {
+        return ofNullable(otherPerson)
+            .map(r -> r.getAddress())
+            .map(t -> t.getPostCode())
+            .orElse("");
     }
 
     public CaseData setCourtNameAndId(CaseData caseData, Court court) {
