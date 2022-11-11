@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -30,20 +29,20 @@ public class CitizenEmailService {
     @Value("${citizen.url}")
     private String citizenSignUpLink;
 
-    public EmailTemplateVars buildCitizenCaseSubmissionEmail(UserDetails userDetails, CaseData caseData) {
-        return new CitizenCaseSubmissionEmail(String.valueOf(caseData.getId()),
+    public EmailTemplateVars buildCitizenCaseSubmissionEmail(UserDetails userDetails, String caseId) {
+        return new CitizenCaseSubmissionEmail(String.valueOf(caseId),
                                               citizenSignUpLink + CITIZEN_HOME, userDetails.getFullName()
         );
     }
 
-    public void sendCitizenCaseSubmissionEmail(String authorisation, CaseData caseData) {
+    public void sendCitizenCaseSubmissionEmail(String authorisation, String caseId) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        EmailTemplateVars email = buildCitizenCaseSubmissionEmail(userDetails, caseData);
+        EmailTemplateVars email = buildCitizenCaseSubmissionEmail(userDetails, caseId);
         sendEmail(userDetails.getEmail(), email);
     }
 
     public void sendEmail(String address, EmailTemplateVars email) {
-        log.info("Sending case invite PIN");
+        log.info("Sending case submission email to " + address);
         emailService.send(
             address,
             EmailTemplateNames.CITIZEN_CASE_SUBMISSION,

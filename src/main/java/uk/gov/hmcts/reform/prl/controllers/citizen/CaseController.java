@@ -173,4 +173,32 @@ public class CaseController {
         return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder().id(caseDetails.getId()).build();
     }
+
+    @PostMapping(value = "{caseId}/{eventId}/sendemail", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Updating casedata")
+    public CaseData sendEmail(
+        @Valid @NotNull @RequestBody CaseData caseData,
+        @PathVariable("caseId") String caseId,
+        @PathVariable("eventId") String eventId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader("accessCode") String accessCode
+    ) throws JsonProcessingException {
+        if (isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = null;
+            String cosApis2sToken = authTokenGenerator.generate();
+            caseDetails = caseService.updateCase(
+                caseData,
+                authorisation,
+                cosApis2sToken,
+                caseId,
+                eventId,
+                accessCode
+            );
+            return null;
+
+        } else {
+            throw (new RuntimeException("Invalid Client"));
+        }
+    }
 }
