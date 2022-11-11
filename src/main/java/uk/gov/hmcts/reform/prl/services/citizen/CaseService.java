@@ -72,8 +72,8 @@ public class CaseService {
         }
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)) {
             citizenEmailService.sendCitizenCaseSubmissionEmail(authToken, caseData);
-            CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData);
-            return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
+            //CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData);
+            return null; //caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
