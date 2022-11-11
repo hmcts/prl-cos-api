@@ -160,29 +160,30 @@ public class CaseDataMapperTest {
                          + "\"needsResolution\":[\"childTimeSpent\"]},\"parentialResponsibility\":{\"statement\":\"test22"
                         + "\"}}],\"cd_childrenKnownToSocialServices\":\"Yes\",\"cd_childrenKnownToSocialServicesDetails\""
                         + ":\"Testchild\",\"cd_childrenSubjectOfProtectionPlan\":\"Dontknow\"}")
-                .c100RebuildApplicantDetails("{\n  \n  \"appl_allApplicants\": [\n{\n\"id\": "
-                        + "\"c84edd0f-b332-4169-9499-614cb06ace98\",\n\"applicantFirstName\": \"c1\",\n\"applicantLastName\": "
-                        + "\"c1\",\n\"startAlternative\": \"Yes\",\n\"start\": \"Yes\",\n\"contactDetailsPrivate\": [],"
-                        + "\n\"contactDetailsPrivateAlternative\": [\n\"address\",\n\"telephone\",\n\"email\"\n],"
-                        + "\n\"applicantPreviousName\": \"applicantPreviousName\",\n\"applicantGender\": \"male\","
-                        + "\n\"applicantDateOfBirth\": {\n  \"year\": \"1990\",\n  \"month\": \"12\",\n  \"day\": "
-                        + "\"12\"\n  \n},\n\"applicantPlaceOfBirth\": \"applicantPlaceOfBirth\",\n\"applicantAddressPostcode\": "
-                        + "\"XXX XXX\",\n\"applicantAddress1\": \"applicantAddress1\",\n\"applicantAddress2\": "
-                        + "\"applicantAddress2\",\n\"applicantAddressTown\": \"LONDON\",\n\"applicantAddressCounty\": "
-                        + "\"BRENT\",\n\"applicantAddressHistory\": \"Yes\",\n\"applicantProvideDetailsOfPreviousAddresses\": "
-                        + "\"applicantProvideDetailsOfPreviousAddresses\"\n},\n{\n\"id\": "
-                        + "\"c84edd0f-b332-4169-9499-614cb06ace99\","
-                        + "\n\"applicantFirstName\": \"c2\",\n\"applicantLastName\": \"c2\",\n\"startAlternative\": "
-                        + "\"Yes\",\n\"start\": \"Yes\",\n\"contactDetailsPrivate\": [],\n\"contactDetailsPrivateAlternative\": "
-                        + "[\n\"address\",\n\"telephone\",\n\"email\"\n],\n\"applicantPreviousName\": \"applicantPreviousName\","
-                        + "\n\"applicantGender\": \"male\",\n\"applicantDateOfBirth\": {\n  \"year\": \"1990\",\n  \"month\": "
-                        + "\"12\",\n  \"day\": \"12\"\n  \n},\n\"applicantPlaceOfBirth\": \"applicantPlaceOfBirth\","
-                        + "\n\"applicantAddressPostcode\": \"XXX XXX\",\n\"applicantAddress1\": \"applicantAddress1\","
-                        + "\n\"applicantAddress2\": \"applicantAddress2\",\n\"applicantAddressTown\": "
-                        + "\"LONDON\",\n\"applicantAddressCounty\": \"BRENT\",\n\"applicantAddressHistory\": \"Yes\","
-                        + "\n\"applicantProvideDetailsOfPreviousAddresses\": \"applicantProvideDetailsOfPreviousAddresses\"\n}"
-                        + "\n]\n}")
-            .c100RebuildOtherChildrenDetails("{\"ocd_hasOtherChildren\":\"Yes\",\"ocd_otherChildren\":[{\"id\":"
+                .c100RebuildApplicantDetails("{\n   \"appl_allApplicants\":[\n      {\n         "
+                        + "\"id\":\"f468e727-5691-45b0-b456-0d6156fb55d7\",\n         \"applicantFirstName\":\"c1\",\n         "
+                        + "\"applicantLastName\":\"c1\",\n         \"detailsKnown\":\"Yes\",\n         "
+                        + "\"startAlternative\":\"\",\n         \"start\":\"No\",\n         "
+                        + "\"contactDetailsPrivate\":[\n            \n         ],\n         \"contactDetailsPrivateAlternative\""
+                        + ":[\n            \n         ],\n         \"relationshipDetails\":{\n            "
+                        + "\"relationshipToChildren\":[\n               {\n                  \"childId\":"
+                        + "\"c4befd68-8cc2-4582-b4f5-630d41bda1c3\",\n                  \"relationshipType\":"
+                        + "\"Father\",\n                  \"otherRelationshipTypeDetails\":\"\"\n               "
+                        + "}\n            ]\n         },\n         \"personalDetails\":{\n            "
+                        + "\"haveYouChangeName\":\"Yes\",\n            \"applPreviousName\":\"test\",\n            "
+                        + "\"dateOfBirth\":{\n               \"day\":\"12\",\n               "
+                        + "\"month\":\"12\",\n               \"year\":\"1990\"\n            },\n            "
+                        + "\"gender\":\"Male\",\n            \"otherGenderDetails\":\"\",\n            "
+                        + "\"applicantPlaceOfBirth\":\"India\"\n         },\n         \"applicantContactDetail\":{\n            "
+                        + "\"canProvideEmail\":\"Yes\",\n            \"emailAddress\":\"test@gmail.com\",\n            "
+                        + "\"canNotProvideEmailReason\":\"\",\n            \"canProvideTelephoneNumber\":\"Yes\",\n            "
+                        + "\"telephoneNumber\":\"09999999999\",\n            \"canNotProvideTelephoneNumberReason\":\"\","
+                        + "\n            \"canLeaveVoiceMail\":\"No\"\n         },\n         "
+                        + "\"applicantAddressPostcode\":\"XXX XXX\",\n         \"applicantAddress1\":\"10\",\n         "
+                        + "\"applicantAddress2\":\"Test Road\",\n         \"applicantAddressTown\":\"Harror\",\n         "
+                        + "\"applicantAddressCounty\":\"Brent\",\n         \"applicantAddressHistory\":\"No\",\n         "
+                        + "\"applicantProvideDetailsOfPreviousAddresses\":\"test\"\n      }\n   ]\n}")
+                .c100RebuildOtherChildrenDetails("{\"ocd_hasOtherChildren\":\"Yes\",\"ocd_otherChildren\":[{\"id\":"
                          + "\"a6c3e7f1-ce2f-42a7-b60e-82b80f8f36ab\","
                          + "\"firstName\":\"test1\",\"lastName\":\"test11\",\"personalDetails\":{\"dateOfBirth\":"
                          + "{\"year\":\"2000\",\"month\":\"12\",\"day\":\"7\"},\"isDateOfBirthUnknown\":\"\",\"approxDateOfBirth\":"
@@ -221,6 +222,16 @@ public class CaseDataMapperTest {
                         + "\n\"helpUsingLift\",\n\"differentTypeChair\",\n\"guideBuilding\",\n\"travellingCourtOther\"\n],"
                         + "\n\"ra_parkingSpaceSubField\": \"test\",\n\"ra_differentTypeChairSubField\": "
                         + "\"test\",\n\"ra_travellingCourtOtherSubField\": \"test\"\n}")
+                .c100RebuildOtherPersonsDetails("{\"oprs_otherPersons\":[{\"id\":\"530b66b8-b718-4aca-bc29-09cca1c0429f\","
+                        + "\"firstName\":\"c1\",\"lastName\":\"c1\",\"personalDetails\":{\"dateOfBirth\":"
+                        + "{\"year\":\"1990\",\"month\":\"12\",\"day\":\"12\"},\"isDateOfBirthUnknown\":\"\","
+                        + "\"isNameChanged\":\"yes\",\"previousFullName\":\"previous name\",\"approxDateOfBirth\":"
+                        + "{\"day\":\"\",\"month\":\"\",\"year\":\"\"},\"gender\":\"Male\",\"otherGenderDetails\":\"\"},"
+                        + "\"relationshipDetails\":{\"relationshipToChildren\":[{\"childId\":"
+                        + "\"4a9f3ec0-c359-4dc0-9e94-e4fc868f0341\",\"relationshipType\":\"Mother\","
+                        + "\"otherRelationshipTypeDetails\":\"\"}]},\"otherPersonAddress\":{\"AddressLine1\":\"\","
+                        + "\"AddressLine2\":\"\",\"AddressLine3\":\"\",\"PostTown\":\"\",\"County\":\"\","
+                        + "\"PostCode\":\"\",\"Country\":\"\"}}]}")
                 .build();
     }
 
@@ -274,7 +285,7 @@ public class CaseDataMapperTest {
                 + "Other risks, test", updatedCaseData.getCaseUrgencyTimeAndReason());
         assertEquals("48 hours", updatedCaseData.getEffortsMadeWithRespondents());
 
-        assertEquals(2, updatedCaseData.getApplicants().size());
+        assertEquals(1, updatedCaseData.getApplicants().size());
         PartyDetails partyDetails = updatedCaseData.getApplicants().get(0).getValue();
         assertEquals("c1", partyDetails.getFirstName());
         assertEquals("c1", partyDetails.getLastName());
@@ -453,6 +464,52 @@ public class CaseDataMapperTest {
 
         //Then
         assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testCaseDataMapperForOtherPersonDetails() throws JsonProcessingException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder().c100RebuildOtherPersonsDetails("{\"oprs_otherPersons\":[{"
+              + "\"id\":\"530b66b8-b718-4aca-bc29-09cca1c0429f\",\"firstName\":\"c1\",\"lastName\":\"c1\","
+              + "\"personalDetails\":{\"dateOfBirth\":{\"year\":\"1990\",\"month\":\"12\",\"day\":\"12\"},"
+              + "\"isDateOfBirthUnknown\":\"\",\"isNameChanged\":\"yes\",\"previousFullName\":\"previous name\","
+              + "\"approxDateOfBirth\":{\"day\":\"\",\"month\":\"\",\"year\":\"\"},\"gender\":\"Male\","
+              + "\"otherGenderDetails\":\"\"},\"relationshipDetails\":{\"relationshipToChildren\":[{\"childId\":"
+              + "\"4a9f3ec0-c359-4dc0-9e94-e4fc868f0341\",\"relationshipType\":\"Mother\","
+              + "\"otherRelationshipTypeDetails\":\"\"}]},\"otherPersonAddress\":{\"AddressLine1\":\"add1\","
+              + "\"AddressLine2\":\"add2\",\"AddressLine3\":\"add3\",\"PostTown\":\"\",\"County\":\"thames\",\"PostCode\":\"tw22tr8\","
+              + "\"Country\":\"uk\"}}]}")
+            .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+        assertNotNull(updatedCaseData.getOthersToNotify());
+    }
+
+    @Test
+    public void testCaseDataMapperForOtherPersonDetailsUnknownDoB() throws JsonProcessingException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder().c100RebuildOtherPersonsDetails("{\"oprs_otherPersons\":"
+             + "[{\"id\":\"530b66b8-b718-4aca-bc29-09cca1c0429f\",\"firstName\":\"c1\",\"lastName\":\"c1\","
+             + "\"personalDetails\":{\"dateOfBirth\":{\"year\":\"\",\"month\":\"\",\"day\":\"\"},"
+             + "\"isDateOfBirthUnknown\":\"Yes\",\"isNameChanged\":\"yes\",\"previousFullName\":\"previous name\","
+             + "\"approxDateOfBirth\":{\"day\":\"12\",\"month\":\"12\",\"year\":\"1990\"},\"gender\":\"Other\","
+             + "\"otherGenderDetails\":\"Test\"},\"relationshipDetails\":{\"relationshipToChildren\":[{\"childId\":"
+             + "\"4a9f3ec0-c359-4dc0-9e94-e4fc868f0341\",\"relationshipType\":\"Mother\","
+             + "\"otherRelationshipTypeDetails\":\"\"}]},\"otherPersonAddress\":{\"AddressLine1\":\"address1\","
+             + "\"AddressLine2\":\"address2\",\"AddressLine3\":\"address3\",\"PostTown\":\"town\",\"County\":\"sdy\","
+             + "\"PostCode\":\"tw23tr9\",\"Country\":\"uk\"}}]}")
+            .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+        assertNotNull(updatedCaseData.getOthersToNotify());
     }
 
 }
