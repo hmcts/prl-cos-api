@@ -47,7 +47,8 @@ public class EditAndApproveDraftOrderController {
         }
     }
 
-    @PostMapping(path = "/judge-or-admin-populate-draft-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/judge-or-admin-populate-draft-order",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Remove dynamic list from the caseData")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback to populate draft order dropdown"),
@@ -65,7 +66,8 @@ public class EditAndApproveDraftOrderController {
 
     }
 
-    @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON,
+        produces = APPLICATION_JSON)
     @Operation(description = "Remove dynamic list from the caseData")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback to populate draft order dropdown"),
@@ -81,6 +83,24 @@ public class EditAndApproveDraftOrderController {
             .data(draftAnOrderService.populateDraftOrderCustomFields(
                 caseData)).build();
 
+    }
+
+    @PostMapping(path = "/judge-or-admin-populate-draft-order-common-fields", consumes = APPLICATION_JSON,
+        produces = APPLICATION_JSON)
+    @Operation(description = "Callback to populate common fields")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Populated common fields"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse populateCommonFields(
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        log.info("Case data {}", caseData);
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(draftAnOrderService.populateCommonDraftOrderFields(caseData)).build();
     }
     /*@PostMapping(path = "/populate-draft-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")

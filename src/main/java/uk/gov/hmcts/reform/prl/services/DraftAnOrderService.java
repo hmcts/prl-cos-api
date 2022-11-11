@@ -87,10 +87,9 @@ public class DraftAnOrderService {
     }*/
 
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData) {
-        log.info(" ************caseData {}", caseData);
-        log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData));
+        log.info("current order details {}", orderDetails);
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
@@ -157,6 +156,17 @@ public class DraftAnOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status("Draft").build())
+            .isOrderDrawnForCafcass(caseData.getManageOrders().getIsOrderDrawnForCafcass())
+            .selectTypeOfOrder(caseData.getSelectTypeOfOrder())
+            .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
+            .isTheOrderByConsent(caseData.getConsentOrder())
+            .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
+            .judgeOrMagistratesLastName(caseData.getJudgeOrMagistratesLastName())
+            .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
+            .magistrateLastName(caseData.getMagistrateLastName())
+            .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+            .orderDirections(caseData.getManageOrders().getOrderDirections())
+            .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
             .build();
     }
@@ -374,6 +384,24 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
+        return caseDataMap;
+    }
+
+    public Map<String, Object> populateCommonDraftOrderFields(CaseData caseData) {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        caseDataMap.put("isOrderDrawnForCafcass", selectedOrder.getIsOrderDrawnForCafcass());
+        caseDataMap.put("selectTypeOfOrder", selectedOrder.getSelectTypeOfOrder());
+        caseDataMap.put("doesOrderClosesCase", selectedOrder.getDoesOrderClosesCase());
+        caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
+        caseDataMap.put("wasTheOrderApprovedAtHearing", selectedOrder.getWasTheOrderApprovedAtHearing());
+        caseDataMap.put("judgeOrMagistratesLastName", selectedOrder.getJudgeOrMagistratesLastName());
+        caseDataMap.put("justiceLegalAdviserFullName", selectedOrder.getJusticeLegalAdviserFullName());
+        caseDataMap.put("magistrateLastName", selectedOrder.getMagistrateLastName());
+        caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
+        caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
+        caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
+        log.info("Common fields map {}", caseDataMap);
         return caseDataMap;
     }
 
