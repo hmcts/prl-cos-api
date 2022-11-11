@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.c100rebuild;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OtherPersonDetail {
 
     @JsonProperty("id")
@@ -22,7 +24,7 @@ public class OtherPersonDetail {
     private PersonalDetails personalDetails;
     @JsonProperty("relationshipDetails")
     private RelationshipDetails relationshipDetails;
-    @JsonProperty("otherPersonAddress")
+    @JsonProperty("address")
     private OtherPersonAddress otherPersonAddress;
 
 }

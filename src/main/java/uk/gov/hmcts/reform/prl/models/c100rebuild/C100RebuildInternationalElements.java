@@ -15,20 +15,20 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class C100RebuildInternationalElements {
 
-    @JsonProperty("internationalStart")
+    @JsonProperty("ie_internationalStart")
     private YesOrNo doChildHaveInternationalResidence;
-    @JsonProperty("provideDetailsStart")
+    @JsonProperty("ie_provideDetailsStart")
     private String childInternationalResidenceDetails;
-    @JsonProperty("internationalParents")
+    @JsonProperty("ie_internationalParents")
     private YesOrNo doChildsParentHaveInternationalResidence;
-    @JsonProperty("provideDetailsParents")
+    @JsonProperty("ie_provideDetailsParents")
     private String childsParentHaveInternationalResidenceDetails;
-    @JsonProperty("internationalJurisdiction")
+    @JsonProperty("ie_internationalJurisdiction")
     private YesOrNo doesApplicationLinkedPeopleHaveInternationalOrder;
-    @JsonProperty("provideDetailsJurisdiction")
+    @JsonProperty("ie_provideDetailsJurisdiction")
     private String applicationLinkedPeopleHaveInternationalOrderDetails;
-    @JsonProperty("internationalRequest")
+    @JsonProperty("ie_internationalRequest")
     private YesOrNo hasAnotherCountryRequestedChildInformation;
-    @JsonProperty("provideDetailsRequest")
+    @JsonProperty("ie_provideDetailsRequest")
     private String anotherCountryRequestedChildInformationDetails;
 }

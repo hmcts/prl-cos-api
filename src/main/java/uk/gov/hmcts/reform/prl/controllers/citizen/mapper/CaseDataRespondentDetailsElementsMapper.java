@@ -101,11 +101,11 @@ public class CaseDataRespondentDetailsElementsMapper {
 
     private static YesOrNo buildCanYouProvideEmailAddress(RespondentDetails respondentDetails) {
 
-        return respondentDetails.getRespondentContactDetail().getDonKnowEmailAddress().equalsIgnoreCase("Yes") ? YesOrNo.No : YesOrNo.Yes;
+        return "Yes".equalsIgnoreCase(respondentDetails.getRespondentContactDetail().getDonKnowEmailAddress()) ? YesOrNo.No : YesOrNo.Yes;
     }
 
     private static YesOrNo buildCanYouProvidePhoneNumber(RespondentDetails respondentDetails) {
 
-        return respondentDetails.getRespondentContactDetail().getDonKnowTelephoneNumber().equalsIgnoreCase("Yes") ? YesOrNo.No : YesOrNo.Yes;
+        return "Yes".equalsIgnoreCase(respondentDetails.getRespondentContactDetail().getDonKnowTelephoneNumber()) ? YesOrNo.No : YesOrNo.Yes;
     }
 }
