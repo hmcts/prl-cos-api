@@ -57,8 +57,8 @@ public class SearchCasesDataService {
 
             }
             // set applicant and respondent case flag
-            setApplicantFlag(caseData, caseDetails);
-            setRespondentFlag(caseData, caseDetails);
+            //    setApplicantFlag(caseData, caseDetails);
+            //    setRespondentFlag(caseData, caseDetails);
         }
 
         return caseDetails;
