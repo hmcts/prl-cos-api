@@ -53,11 +53,17 @@ public class BundleCreateRequestMapper {
     private List<Applications> mapApplicationsFromCaseData(CaseData caseData) {
         List<Applications> applications = new ArrayList<>();
         if (YesOrNo.Yes.equals(caseData.getLanguagePreferenceWelsh())) {
-            applications.add(Applications.builder().appDocument(caseData.getFinalWelshDocument())
-                .documentFileName(caseData.getFinalWelshDocument().getDocumentFileName()).build());
+            Document finalWelshDocument = caseData.getFinalWelshDocument();
+            if (null != finalWelshDocument) {
+                applications.add(Applications.builder().appDocument(finalWelshDocument)
+                    .documentFileName(finalWelshDocument.getDocumentFileName()).build());
+            }
         } else {
-            applications.add(Applications.builder().appDocument(caseData.getFinalDocument())
-                .documentFileName(caseData.getFinalDocument().getDocumentFileName()).build());
+            Document finalDocument = caseData.getFinalDocument();
+            if (null != finalDocument) {
+                applications.add(Applications.builder().appDocument(finalDocument)
+                    .documentFileName(finalDocument.getDocumentFileName()).build());
+            }
         }
         return applications;
     }
