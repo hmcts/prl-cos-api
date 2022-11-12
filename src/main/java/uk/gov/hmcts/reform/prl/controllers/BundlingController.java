@@ -47,6 +47,7 @@ public class BundlingController extends AbstractCallbackController {
                                                              String serviceAuthorization,
                                                              @RequestBody CallbackRequest callbackRequest)
         throws Exception {
+        log.info("*** callRecieved to createBundle api in prl-cos-api : {}", callbackRequest.toString());
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         moveExistingCaseBundlesToHistoricalBundles(caseData);
