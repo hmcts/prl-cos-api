@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -44,8 +45,7 @@ public class BundleCreateRequestMapper {
         return uk.gov.hmcts.reform.prl.models.dto.bundle.CaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(Data.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
-                .furtherEvidences(mapFurtherEvidencesFromCaseData(caseData.getFurtherEvidences())).otherDocuments(
-                mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).applications(mapApplicationsFromCaseData(caseData))
+                .otherDocuments(mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).applications(mapApplicationsFromCaseData(caseData))
                 .orders(mapOrdersFromCaseData(caseData.getOrderCollection())).build()).build();
 
     }
@@ -53,18 +53,34 @@ public class BundleCreateRequestMapper {
     private List<Applications> mapApplicationsFromCaseData(CaseData caseData) {
         List<Applications> applications = new ArrayList<>();
         if (YesOrNo.Yes.equals(caseData.getLanguagePreferenceWelsh())) {
-            Document finalWelshDocument = caseData.getFinalWelshDocument();
-            if (null != finalWelshDocument) {
-                applications.add(Applications.builder().appDocument(finalWelshDocument)
-                    .documentFileName(finalWelshDocument.getDocumentFileName()).build());
-            }
+            applications.add(mapApplicationsFromDocument(caseData.getFinalWelshDocument()));
+            applications.add(mapApplicationsFromDocument(caseData.getC1AWelshDocument()));
         } else {
-            Document finalDocument = caseData.getFinalDocument();
-            if (null != finalDocument) {
-                applications.add(Applications.builder().appDocument(finalDocument)
-                    .documentFileName(finalDocument.getDocumentFileName()).build());
-            }
+            applications.add(mapApplicationsFromDocument(caseData.getFinalDocument()));
+            applications.add(mapApplicationsFromDocument(caseData.getC1ADocument()));
         }
+        applications.addAll(mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences()));
+        return applications;
+    }
+
+    private Applications mapApplicationsFromDocument(Document document) {
+        return (null != document) ? Applications.builder().appDocument(document).documentFileName(document.getDocumentFileName()).build()
+            : Applications.builder().build();
+    }
+
+    private List<Applications> mapApplicationsFromFurtherEvidences(List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
+        List<Applications> applications = new ArrayList<>();
+        Optional<List<Element<FurtherEvidence>>> existingFurtherEvidences = ofNullable(furtherEvidencesFromCaseData);
+        if (existingFurtherEvidences.isEmpty()) {
+            return applications;
+        }
+        ElementUtils.unwrapElements(furtherEvidencesFromCaseData).forEach(furtherEvidence -> {
+                if (!furtherEvidence.getRestrictCheckboxFurtherEvidence().contains(restrictToGroup)) {
+                    if (!FurtherEvidenceDocumentType.consentOrder.equals(furtherEvidence.getTypeOfDocumentFurtherEvidence())) {
+                        applications.add(mapApplicationsFromDocument(furtherEvidence.getDocumentFurtherEvidence()));
+                    }
+                }
+            });
         return applications;
     }
 
@@ -82,33 +98,6 @@ public class BundleCreateRequestMapper {
                     .orderDocument(document).build()));
         });
         return orders;
-    }
-
-    private List<uk.gov.hmcts.reform.prl.models.dto.bundle.FurtherEvidence> mapFurtherEvidencesFromCaseData(
-        List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
-        List<uk.gov.hmcts.reform.prl.models.dto.bundle.FurtherEvidence> furtherEvidences = new ArrayList<>();
-        Optional<List<Element<FurtherEvidence>>> existingFurtherEvidences = ofNullable(furtherEvidencesFromCaseData);
-        if (existingFurtherEvidences.isEmpty()) {
-            return furtherEvidences;
-        }
-        List<Element<FurtherEvidence>> furtherEvidencesNotConfidential = furtherEvidencesFromCaseData.stream()
-            .filter(element -> !element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
-            .collect(Collectors.toList());
-
-        furtherEvidencesNotConfidential
-            .forEach(furtherEvidenceElement -> {
-                Document furtherEvidenceDocument = furtherEvidenceElement.getValue().getDocumentFurtherEvidence();
-                furtherEvidences.add(uk.gov.hmcts.reform.prl.models.dto.bundle.FurtherEvidence.builder().id(
-                    (null != furtherEvidenceElement.getId()) ? furtherEvidenceElement.getId().toString() : null)
-                    .value(Value.builder().documentFileName(furtherEvidenceDocument.getDocumentFileName()).documentLink(
-                            DocumentLink.builder().documentFilename(furtherEvidenceDocument.getDocumentFileName())
-                                .documentUrl(furtherEvidenceDocument.getDocumentUrl()).documentBinaryUrl(
-                                    furtherEvidenceDocument.getDocumentBinaryUrl()).build())
-                        .typeOfDocumentFurtherEvidence(furtherEvidenceElement.getValue().getTypeOfDocumentFurtherEvidence().getId()).build())
-                    .build());
-
-            });
-        return furtherEvidences;
     }
 
     private List<uk.gov.hmcts.reform.prl.models.dto.bundle.OtherDocument> mapOtherDocumentsFromCaseData(
