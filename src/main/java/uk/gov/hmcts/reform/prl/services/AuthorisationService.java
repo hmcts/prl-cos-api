@@ -25,10 +25,14 @@ public class AuthorisationService {
 
     public Boolean authoriseService(String serviceAuthHeader) {
         String callingService;
+        log.info("=========authoriseService serviceAuthHeader: " + serviceAuthHeader);
+        log.info("=============authoriseService s2sAuthorisedServices: " + s2sAuthorisedServices);
         try {
             callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
+            log.info("===============authoriseService callingService: " + callingService);
             if (callingService != null && Arrays.asList(s2sAuthorisedServices.split(","))
                 .contains(callingService)) {
+                log.info("==============returning authoriseService true");
                 return true;
             }
         } catch (Exception ex) {

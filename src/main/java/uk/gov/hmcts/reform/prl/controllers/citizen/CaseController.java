@@ -82,6 +82,10 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader("accessCode") String accessCode
     ) {
+        log.info("============inside updateCase caseId: " + caseId + ", eventId: " + eventId);
+        log.info("============authorisation: " + authorisation);
+        log.info("============s2sToken: " + s2sToken);
+        log.info("============accessCode: " + accessCode);
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
             String cosApis2sToken = authTokenGenerator.generate();
