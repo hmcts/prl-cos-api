@@ -27,6 +27,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 
 @Slf4j
@@ -36,8 +38,8 @@ public class BundleCreateRequestMapper {
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, String bundleConfigFileName) {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder().caseDetails(CaseDetails.builder().id(String.valueOf(caseData.getId()))
                 .caseData(mapCaseData(caseData, bundleConfigFileName)).build())
-            .caseTypeId(caseData.getSelectedCaseTypeID()).jurisdictionId(caseData.getCourtId()).eventId(eventId).build();
-        log.info("*** createbundle request payload  : {}", bundleCreateRequest.toString());
+            .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
+        //log.info("*** createbundle request payload  : {}", bundleCreateRequest.toString());
         return bundleCreateRequest;
     }
 
@@ -75,12 +77,12 @@ public class BundleCreateRequestMapper {
             return applications;
         }
         ElementUtils.unwrapElements(furtherEvidencesFromCaseData).forEach(furtherEvidence -> {
-                if (!furtherEvidence.getRestrictCheckboxFurtherEvidence().contains(restrictToGroup)) {
-                    if (!FurtherEvidenceDocumentType.consentOrder.equals(furtherEvidence.getTypeOfDocumentFurtherEvidence())) {
-                        applications.add(mapApplicationsFromDocument(furtherEvidence.getDocumentFurtherEvidence()));
-                    }
+            if (!furtherEvidence.getRestrictCheckboxFurtherEvidence().contains(restrictToGroup)) {
+                if (!FurtherEvidenceDocumentType.consentOrder.equals(furtherEvidence.getTypeOfDocumentFurtherEvidence())) {
+                    applications.add(mapApplicationsFromDocument(furtherEvidence.getDocumentFurtherEvidence()));
                 }
-            });
+            }
+        });
         return applications;
     }
 

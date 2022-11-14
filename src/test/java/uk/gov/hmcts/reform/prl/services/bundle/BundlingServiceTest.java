@@ -183,7 +183,7 @@ public class BundlingServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
-            .state(State.GATEKEEPING)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
@@ -197,7 +197,7 @@ public class BundlingServiceTest {
 
     @Test
     public void testCreateBundleService() throws Exception {
-        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization","serviceAuth");
+        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization");
     }
 
 }

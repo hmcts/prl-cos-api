@@ -70,14 +70,14 @@ public class BundlingControllerTest {
         bundleCreateResponse = BundleCreateResponse.builder().data(BundleData.builder().id("334").caseBundles(bundleList).build()).build();
         caseData = new HashMap<>();
         caseData.put("caseBundles",bundleCreateResponse.getData().getCaseBundles());
-        caseDetails = CaseDetails.builder().data(caseData).state(State.GATEKEEPING.getValue())
+        caseDetails = CaseDetails.builder().data(caseData).state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue())
             .id(123488888L).createdDate(LocalDateTime.now()).lastModified(LocalDateTime.now()).build();
     }
 
     @Test
     public void testCreateBundle() throws Exception {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        when(bundlingService.createBundleServiceRequest(any(CaseData.class),anyString(),anyString(),anyString())).thenReturn(bundleCreateResponse);
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class),anyString(),anyString())).thenReturn(bundleCreateResponse);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
         response = bundlingController.createBundle(authToken,"serviceAuth",callbackRequest);
         List<Bundle> responseCaseBundles = (List)response.getData().get("caseBundles");

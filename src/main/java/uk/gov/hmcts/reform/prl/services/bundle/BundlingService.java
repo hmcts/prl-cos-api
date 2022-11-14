@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.bundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.BundleApiClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.bundle.BundleCreateRequestMapper;
@@ -18,6 +19,9 @@ public class BundlingService {
     @Autowired
     private BundleCreateRequestMapper bundleCreateRequestMapper;
 
+    @Autowired
+    private AuthTokenGenerator authTokenGenerator;
+
     @Value("${bundle.english.config}")
     private String bundleEnglishConfig;
 
@@ -25,8 +29,8 @@ public class BundlingService {
     private String bundleWelshConfig;
 
     public BundleCreateResponse createBundleServiceRequest(CaseData caseData,String eventId,
-                                                           String authorization,String serviceAuthoriztion) throws Exception {
-        return createBundle(authorization, serviceAuthoriztion,
+                                                           String authorization) throws Exception {
+        return createBundle(authorization,authTokenGenerator.generate(),
             bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(
                 caseData, eventId,
                 getBundleConfig(null != caseData.getLanguagePreferenceWelsh() ? caseData.getLanguagePreferenceWelsh() : YesOrNo.No)));
