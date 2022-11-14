@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -76,7 +77,7 @@ public class SearchCasesDataService {
             for (PartyDetails applicant : applicants) {
                 final String partyName = applicant.getFirstName() + " " + applicant.getLastName();
                 final Flags applicantFlag = Flags.builder().partyName(partyName)
-                    .roleOnCase(PartyEnum.applicant.getDisplayedValue()).build();
+                    .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
                 applicant.setApplicantFlag(applicantFlag);
             }
 
@@ -96,7 +97,7 @@ public class SearchCasesDataService {
             for (PartyDetails respondent : respondents) {
                 final String partyName = respondent.getFirstName() + " " + respondent.getLastName();
                 final Flags respondentFlag = Flags.builder().partyName(partyName)
-                    .roleOnCase(PartyEnum.respondent.getDisplayedValue()).build();
+                    .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
                 respondent.setRespondentFlag(respondentFlag);
             }
             caseDetails.put("respondents", respondents);
