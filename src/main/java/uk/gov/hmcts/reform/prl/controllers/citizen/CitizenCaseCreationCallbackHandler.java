@@ -25,11 +25,11 @@ import java.util.Map;
 
 @Tag(name = "case-submission-callback-controller")
 @RestController
-@RequestMapping("/case-submission-callback")
+@RequestMapping("/citizen-case-creation-callback")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 @SecurityRequirement(name = "Bearer Authentication")
-public class CaseSubmissionCallbackController extends AbstractCallbackController {
+public class CitizenCaseCreationCallbackHandler extends AbstractCallbackController {
 
     private final CoreCaseDataApi coreCaseDataApi;
 
@@ -45,14 +45,17 @@ public class CaseSubmissionCallbackController extends AbstractCallbackController
         // setting supplementary data updates to enable global search
         String caseId = String.valueOf(caseData.getId());
         Map<String, Map<String, Map<String, Object>>> supplementaryData = new HashMap<>();
-        supplementaryData.put("supplementary_data_updates",
-                              Map.of("$set", Map.of("HMCTSServiceId", "ABA5")));
+        supplementaryData.put(
+            "supplementary_data_updates",
+            Map.of("$set", Map.of("HMCTSServiceId", "ABA5"))
+        );
         coreCaseDataApi.submitSupplementaryData(authorisation, authTokenGenerator.generate(), caseId,
-                                                supplementaryData);
+                                                supplementaryData
+        );
 
         publishEvent(new CaseDataChanged(caseData));
 
 
-
     }
 }
+
