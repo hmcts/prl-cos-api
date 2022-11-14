@@ -398,7 +398,12 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         requireNonNull(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        log.info("Case Data before update --> {}", caseDataUpdated);
+
         caseDataUpdated = searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated);
+
+        log.info("Case Data after updating CASE FLAG data --> {}", caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
