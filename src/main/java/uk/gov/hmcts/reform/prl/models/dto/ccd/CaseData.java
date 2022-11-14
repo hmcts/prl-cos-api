@@ -591,7 +591,6 @@ public class CaseData implements MappableObject {
     private String caseSolicitorOrgName;
     private String selectedOrder;
 
-
     /**
      * FL401 Court details for Pilot.
      */
@@ -613,6 +612,7 @@ public class CaseData implements MappableObject {
 
         return this;
     }
+
 
     /**
      * Withdraw request flag.

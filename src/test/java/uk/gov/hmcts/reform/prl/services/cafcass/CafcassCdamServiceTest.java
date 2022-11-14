@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
