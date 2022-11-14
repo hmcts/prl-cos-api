@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Query;
@@ -30,6 +31,9 @@ public class CaseDataService {
 
     @Value("${ccd.elastic-search-api.boost}")
     private String ccdElasticSearchApiBoost;
+
+
+    private final HearingService hearingService;
 
     private final CafcassCcdDataStoreService cafcassCcdDataStoreService;
 
@@ -53,6 +57,7 @@ public class CaseDataService {
         CafCassResponse cafCassResponse = objectMapper.convertValue(searchResult,
                                                              CafCassResponse.class);
         cafCassFilter.filter(cafCassResponse);
+        getHearingDetails(authorisation,cafCassResponse);
         return cafCassResponse;
     }
 
@@ -62,4 +67,19 @@ public class CaseDataService {
         Query query = Query.builder().range(range).build();
         return QueryParam.builder().query(query).size(ccdElasticSearchApiResultSize).build();
     }
+
+    /**
+     * Fetch the hearing data from fis hearing service.
+     *@param authorisation //
+     *@param cafCassResponse //
+     */
+    private void getHearingDetails(String authorisation, CafCassResponse cafCassResponse) {
+
+        for (CafCassCaseDetail cafCassCaseDetail: cafCassResponse.getCases()) {
+            cafCassCaseDetail.getCaseData().setHearingData(hearingService.getHearings(authorisation,
+                                                                                      String.valueOf(cafCassCaseDetail.getId())));
+        }
+    }
+
+
 }
