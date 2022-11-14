@@ -30,9 +30,11 @@ public class BundlingService {
 
     public BundleCreateResponse createBundleServiceRequest(CaseData caseData, String eventId,String authorization,
                                                            String serviceAuthorization) throws Exception {
-        return createBundle(authorization, serviceAuthorization,
+
+        return createBundle(authorization, authTokenGenerator.generate(),
             bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(
-                caseData,eventId, getBundleConfig(caseData.getLanguagePreferenceWelsh())));
+                caseData, eventId,
+                getBundleConfig(null != caseData.getLanguagePreferenceWelsh() ? caseData.getLanguagePreferenceWelsh() : YesOrNo.No)));
     }
 
     private BundleCreateResponse createBundle(String authorization, String serviceAuthorization,

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 
@@ -50,10 +51,13 @@ public class BundlingController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         moveExistingCaseBundlesToHistoricalBundles(caseData);
+        BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(caseData,
+            callbackRequest.getEventId(),authorization,serviceAuthorization);
+        log.info("*** caseBundles from bundling api response : {}", bundleCreateResponse);
         caseDataUpdated.put("caseBundles",
-            bundlingService.createBundleServiceRequest(caseData,
-                callbackRequest.getEventId(),authorization,serviceAuthorization).getData().getCaseBundles());
+            bundleCreateResponse.getData().getCaseBundles());
         caseDataUpdated.put("historicalBundles",caseData.getHistoricalBundles());
+        log.info("*** caseBundles updated in caseData : {}", caseDataUpdated.get("caseBundles"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
     }
