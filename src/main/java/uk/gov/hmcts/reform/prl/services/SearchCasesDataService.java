@@ -85,7 +85,7 @@ public class SearchCasesDataService {
                 final String partyName = applicant.getFirstName() + " " + applicant.getLastName();
                 final Flags applicantFlag = Flags.builder().partyName(partyName)
                     .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
-            //                applicant.setApplicantFlag(applicantFlag);
+                //                applicant.setApplicantFlag(applicantFlag);
             }
 
             caseDetails.put("applicants", applicants);
@@ -105,7 +105,7 @@ public class SearchCasesDataService {
                 final String partyName = respondent.getFirstName() + " " + respondent.getLastName();
                 final Flags respondentFlag = Flags.builder().partyName(partyName)
                     .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
-            //                respondent.setRespondentFlag(respondentFlag);
+                //                respondent.setRespondentFlag(respondentFlag);
             }
             caseDetails.put("respondents", respondents);
             log.info("caseDetails respondents -> {}", respondents);
