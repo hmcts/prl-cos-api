@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -19,11 +20,11 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseApplicationResponseControllerTest {
@@ -58,7 +59,10 @@ public class CaseApplicationResponseControllerTest {
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
-            .respondents(List.of(element(PartyDetails.builder().firstName("test").build())))
+            .respondents(List.of(Element.<PartyDetails>builder()
+                                     .id(UUID.fromString(partyId))
+                                     .value(PartyDetails.builder().firstName("test").build())
+                                     .build()))
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         caseDetails = CaseDetails.builder().id(
