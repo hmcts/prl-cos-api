@@ -191,8 +191,10 @@ public class ManageOrdersController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
+        manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
+        manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -220,8 +222,6 @@ public class ManageOrdersController {
         } else {
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,
                                                                                                 caseData));
-            manageOrderEmailService.sendEmailToApplicantAndRespondent(callbackRequest.getCaseDetails());
-
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
