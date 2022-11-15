@@ -25,7 +25,9 @@ import static uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum.spoken;
 import static uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum.written;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.appropriateLighting;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.communicationHelp;
+import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.communicationHelpOther;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.differentTypeChair;
+import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.documentHelpOther;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.documentsHelp;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.extraSupport;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.feelComfortableSupport;
@@ -35,7 +37,6 @@ import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.he
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.intermediary;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.largePrintDocuments;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.noSupport;
-import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.other;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.parkingSpace;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.signLanguageInterpreter;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.specifiedColorDocuments;
@@ -247,8 +248,8 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                                                         String communicationHelpOtherDetails) {
         if (signLanguageInterpreter.name().equalsIgnoreCase(element)) {
             return signLanguageInterpreter.getDisplayedValue() + OPEN_BRACKET + signLanguageInterpreterDetails + CLOSE_BRACKET;
-        } else if (other.name().equalsIgnoreCase(element)) {
-            return other.getDisplayedValue() + OPEN_BRACKET + communicationHelpOtherDetails + CLOSE_BRACKET;
+        } else if (communicationHelpOther.name().equalsIgnoreCase(element)) {
+            return communicationHelpOther.getDisplayedValue() + OPEN_BRACKET + communicationHelpOtherDetails + CLOSE_BRACKET;
         } else {
             return DisabilityRequirementEnum.valueOf(element).getDisplayedValue();
         }
@@ -269,8 +270,8 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
             return specifiedColorDocuments.getDisplayedValue() + OPEN_BRACKET + specifiedColorDocumentsDetails + CLOSE_BRACKET;
         } else if (largePrintDocuments.name().equalsIgnoreCase(element)) {
             return largePrintDocuments.getDisplayedValue() + OPEN_BRACKET + largePrintDocumentsDetails + CLOSE_BRACKET;
-        } else if (other.name().equalsIgnoreCase(element)) {
-            return other.getDisplayedValue() + OPEN_BRACKET + otherDetails + CLOSE_BRACKET;
+        } else if (documentHelpOther.name().equalsIgnoreCase(element)) {
+            return documentHelpOther.getDisplayedValue() + OPEN_BRACKET + otherDetails + CLOSE_BRACKET;
         } else {
             return DisabilityRequirementEnum.valueOf(element).getDisplayedValue();
         }

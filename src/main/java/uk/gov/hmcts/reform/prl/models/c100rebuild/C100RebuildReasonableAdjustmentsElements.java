@@ -18,50 +18,50 @@ public class C100RebuildReasonableAdjustmentsElements {
     private String[] typeOfHearings;
     @JsonProperty("ra_languageNeeds")
     private String[] languageNeeds;
-    @JsonProperty("ra_needInterpreterInCertainLanguageDetails")
+    @JsonProperty("ra_needInterpreterInCertainLanguage_subfield")
     private String needInterpreterInCertainLanguageDetails;
     @JsonProperty("ra_specialArrangements")
     private String[] specialArrangements;
-    @JsonProperty("ra_specialArrangementsOtherSubField")
+    @JsonProperty("ra_specialArrangementsOther_subfield")
     private String specialArrangementsOtherSubField;
     @JsonProperty("ra_disabilityRequirements")
     private String[] disabilityRequirements;
     @JsonProperty("ra_documentInformation")
     private String[] documentInformation;
-    @JsonProperty("ra_specifiedColorDocumentsDetails")
+    @JsonProperty("ra_specifiedColorDocuments_subfield")
     private String specifiedColorDocumentsDetails;
-    @JsonProperty("ra_largePrintDocumentsDetails")
+    @JsonProperty("ra_largePrintDocuments_subfield")
     private String largePrintDocumentsDetails;
-    @JsonProperty("ra_otherDetails")
+    @JsonProperty("ra_documentHelpOther_subfield")
     private String otherDetails;
     @JsonProperty("ra_communicationHelp")
     private String[] communicationHelp;
-    @JsonProperty("ra_signLanguageInterpreterDetails")
+    @JsonProperty("ra_signLanguageInterpreter_subfield")
     private String signLanguageInterpreterDetails;
-    @JsonProperty("ra_communicationHelpOtherDetails")
+    @JsonProperty("ra_communicationHelpOther_subfield")
     private String communicationHelpOtherDetails;
     @JsonProperty("ra_supportCourt")
     private String[] supportCourt;
-    @JsonProperty("ra_supportWorkerCarerSubField")
+    @JsonProperty("ra_supportWorkerCarer_subfield")
     private String supportWorkerCarerSubField;
-    @JsonProperty("ra_friendFamilyMemberSubField")
+    @JsonProperty("ra_friendFamilyMember_subfield")
     private String friendFamilyMemberSubField;
-    @JsonProperty("ra_therapyAnimalSubField")
+    @JsonProperty("ra_therapyAnimal_subfield")
     private String therapyAnimalSubField;
-    @JsonProperty("ra_supportCourtOtherSubField")
+    @JsonProperty("ra_supportCourtOther_subfield")
     private String supportCourtOtherSubField;
     @JsonProperty("ra_feelComportable")
     private String[] feelComfortable;
-    @JsonProperty("ra_appropriateLightingSubField")
+    @JsonProperty("ra_appropriateLighting_subfield")
     private String appropriateLightingSubField;
-    @JsonProperty("ra_feelComportableOtherSubField")
+    @JsonProperty("ra_feelComportableOther_subfield")
     private String feelComfortableOtherSubField;
     @JsonProperty("ra_travellingCourt")
     private String[] travellingCourt;
-    @JsonProperty("ra_parkingSpaceSubField")
+    @JsonProperty("ra_parkingSpace_subfield")
     private String parkingSpaceSubField;
-    @JsonProperty("ra_differentTypeChairSubField")
+    @JsonProperty("ra_differentTypeChair_subfield")
     private String differentTypeChairSubField;
-    @JsonProperty("ra_travellingCourtOtherSubField")
+    @JsonProperty("ra_travellingCourtOther_subfield")
     private String travellingCourtOtherSubField;
 }
