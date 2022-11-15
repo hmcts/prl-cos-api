@@ -436,7 +436,7 @@ public class CallbackController {
 
         // The caseLinks field is initialised as an empty Collection so that it can be accessed by ExUI Manage Case.
         List<DynamicListElement> caselinks = List.of(DynamicListElement.EMPTY);
-            caseDataUpdated.put("caseLinks",caselinks);
+        caseDataUpdated.put("caseLinks",caselinks);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
