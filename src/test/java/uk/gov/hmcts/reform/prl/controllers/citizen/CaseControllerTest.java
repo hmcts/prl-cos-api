@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,7 +51,7 @@ public class CaseControllerTest {
     public static final String authToken = "Bearer TestAuthToken";
     public static final String servAuthToken = "Bearer TestServToken";
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
     }
@@ -64,6 +66,7 @@ public class CaseControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
@@ -90,6 +93,7 @@ public class CaseControllerTest {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
@@ -203,5 +207,62 @@ public class CaseControllerTest {
         String data = caseController.validateAccessCode(authToken, servAuthToken, caseId, accessCode);
         assertNotNull(data);
 
+    }
+
+    @Test
+    public void testretrieveCitizenCases() {
+        List<CaseData> caseDataList = new ArrayList<>();
+
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .build();
+
+        caseDataList.add(CaseData.builder()
+                             .id(1234567891234567L)
+                             .applicantCaseName("test")
+                             .build());
+
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+
+        List<CaseDetails> caseDetails = new ArrayList<>();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        caseDetails.add(CaseDetails.builder().id(
+            1234567891234567L).data(stringObjectMap).build());
+
+        String userId = "12345";
+        String role = "test role";
+
+        List<CaseData> caseDataList1 = new ArrayList<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(caseService.retrieveCases(role, userId, authToken, servAuthToken)).thenReturn(caseDataList);
+        caseDataList1 = caseController.retrieveCitizenCases(authToken, servAuthToken);
+        assertNotNull(caseDataList1);
+    }
+
+    @Test
+    public void shouldCreateCase() {
+        //Given
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1234567891234567L).data(stringObjectMap).build();
+
+        Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        Mockito.when(caseService.createCase(caseData, authToken)).thenReturn(caseDetails);
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        //When
+        CaseData actualCaseData = caseController.createCase(authToken, servAuthToken, caseData);
+
+        //Then
+        assertThat(actualCaseData).isEqualTo(caseData);
     }
 }
