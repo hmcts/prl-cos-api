@@ -210,6 +210,8 @@ public class HearingManagementService {
             ));
 
             List<String> respondentSolicitorsEmailList = respondents.stream()
+                .filter(respondentSolicitor -> null != respondentSolicitor.getSolicitorEmail()
+                    && YesOrNo.Yes.equals(respondentSolicitor.getDoTheyHaveLegalRepresentation()))
                 .map(PartyDetails::getSolicitorEmail)
                 .collect(Collectors.toList());
 
