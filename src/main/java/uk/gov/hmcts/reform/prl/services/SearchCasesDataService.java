@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -83,7 +82,7 @@ public class SearchCasesDataService {
                 applicant.setApplicantFlag(applicantFlag);
             }
 
-            caseDetails.put("applicants", element(applicants));
+            caseDetails.put("applicants", applicantsWrapped);
             log.info("caseDetails Applicants -> {}", applicants);
         }
     }
@@ -102,7 +101,7 @@ public class SearchCasesDataService {
                     .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
                 respondent.setRespondentFlag(respondentFlag);
             }
-            caseDetails.put("respondents", element(respondents));
+            caseDetails.put("respondents", respondentsWrapped);
             log.info("caseDetails respondents -> {}", respondents);
         }
     }
