@@ -172,11 +172,11 @@ public class PrlAppsConstants {
     public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     public static final String CITIZEN_ROLE = "citizen";
 
-    public static final String WAITING_TO_BE_LISTED = "waiting to be listed";
+    public static final String WAITING_TO_BE_LISTED = "WAITING_TO_BE_LISTED";
     public static final String LISTED = "LISTED";
-    public static final String AWAITING_HEARING_DETAILS = "awaiting hearing details";
-    public static final String CANCELLED = "cancelled";
-    public static final String ADJOURNED = "adjourned";
-    public static final String POSTPONED = "postponed";
-    public static final String COMPLETED = "completed";
+    public static final String AWAITING_HEARING_DETAILS = "AWAITING_HEARING_DETAILS";
+    public static final String CANCELLED = "CANCELLED";
+    public static final String ADJOURNED = "ADJOURNED";
+    public static final String POSTPONED = "POSTPONED";
+    public static final String COMPLETED = "COMPLETED";
 }

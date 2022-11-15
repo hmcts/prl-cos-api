@@ -171,7 +171,7 @@ public class HearingManagementService {
             applicantsEmailList.forEach(email -> emailService.send(
                 email,
                 EmailTemplateNames.HEARING_DETAILS,
-                buildHearingDetailsEmail(caseData),
+                buildApplicantHearingDetailsEmail(caseData),
                 LanguagePreference.english
             ));
 
@@ -187,13 +187,13 @@ public class HearingManagementService {
                 .map(PartyDetails::getEmail)
                 .collect(Collectors.toList());
 
-            applicantsEmailList.forEach(email -> log.info("respondent Email:: {}", email));
-            log.info("Building email data:: {}", buildHearingDetailsEmail(caseData));
+            respondentsEmailList.forEach(email -> log.info("respondent Email:: {}", email));
+            log.info("Building email data:: {}", buildRespondentHearingDetailsEmail(caseData));
             if (!respondentsEmailList.isEmpty()) {
                 respondentsEmailList.forEach(email -> emailService.send(
                     email,
                     EmailTemplateNames.HEARING_DETAILS,
-                    buildHearingDetailsEmail(caseData),
+                    buildRespondentHearingDetailsEmail(caseData),
                     LanguagePreference.english
                 ));
             }
@@ -210,12 +210,10 @@ public class HearingManagementService {
             ));
 
             List<String> respondentSolicitorsEmailList = respondents.stream()
-                .filter(respondentSolicitor -> null != respondentSolicitor.getSolicitorEmail()
-                    && YesOrNo.Yes.equals(respondentSolicitor.getDoTheyHaveLegalRepresentation()))
                 .map(PartyDetails::getSolicitorEmail)
                 .collect(Collectors.toList());
 
-            if (!respondentSolicitorsEmailList.isEmpty()) {
+            if (!respondentSolicitorsEmailList.isEmpty() && !respondentSolicitorsEmailList.contains(null)) {
                 respondentSolicitorsEmailList.forEach(email -> emailService.send(
                     email,
                     EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
@@ -317,7 +315,7 @@ public class HearingManagementService {
         return hearingDetailsEmail;
     }
 
-    private EmailTemplateVars buildHearingDetailsEmail(CaseData caseData) {
+    private EmailTemplateVars buildApplicantHearingDetailsEmail(CaseData caseData) {
 
         HearingDetailsEmail hearingDetailsEmail = null;
         List<String> partyNamesList = new ArrayList<>();
@@ -333,6 +331,34 @@ public class HearingManagementService {
                 .map(element -> element.getFirstName() + " " + element.getLastName())
                 .collect(Collectors.toList());
 
+            partyNamesList.add(String.valueOf(applicantNamesList));
+
+        } else {
+
+            PartyDetails fl401Applicant = caseData
+                .getApplicantsFL401();
+
+            partyNamesList.add(fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
+        }
+
+        for (String partyName: partyNamesList) {
+            hearingDetailsEmail = HearingDetailsEmail.builder()
+                .caseReference(String.valueOf(caseData.getId()))
+                .caseName(caseData.getApplicantCaseName())
+                .partyName(partyName)
+                .hearingDetailsPageLink(manageCaseUrl + "/" + caseData.getId())
+                .build();
+        }
+
+        return hearingDetailsEmail;
+    }
+
+    private EmailTemplateVars buildRespondentHearingDetailsEmail(CaseData caseData) {
+
+        HearingDetailsEmail hearingDetailsEmail = null;
+        List<String> partyNamesList = new ArrayList<>();
+
+        if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             List<PartyDetails> respondents = caseData
                 .getRespondents()
                 .stream()
@@ -343,16 +369,12 @@ public class HearingManagementService {
                 .map(element -> element.getFirstName() + " " + element.getLastName())
                 .collect(Collectors.toList());
 
-            partyNamesList.add(String.valueOf(applicantNamesList));
             partyNamesList.add(String.valueOf(respondentNamesList));
         } else {
 
-            PartyDetails fl401Applicant = caseData
-                .getApplicantsFL401();
             PartyDetails fl401Respondent = caseData
                 .getRespondentsFL401();
 
-            partyNamesList.add(fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
             partyNamesList.add(fl401Respondent.getFirstName() + " " + fl401Respondent.getLastName());
         }
 
