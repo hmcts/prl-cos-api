@@ -83,7 +83,7 @@ public class SearchCasesDataService {
                 applicant.setApplicantFlag(applicantFlag);
             }
 
-            caseDetails.put("applicants", List.of(element(applicants)));
+            caseDetails.put("applicants", element(applicants));
             log.info("caseDetails Applicants -> {}", applicants);
         }
     }
@@ -102,7 +102,7 @@ public class SearchCasesDataService {
                     .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
                 respondent.setRespondentFlag(respondentFlag);
             }
-            caseDetails.put("respondents", respondents);
+            caseDetails.put("respondents", element(respondents));
             log.info("caseDetails respondents -> {}", respondents);
         }
     }
