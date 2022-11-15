@@ -58,8 +58,11 @@ public class CaseDataMiamElementsMapper {
     }
 
     private static List<MiamOtherGroundsChecklistEnum> buildMiamOtherGroundsChecklist(C100RebuildMiamElements c100RebuildMiamElements) {
-        List<String> miamNotAttendingReasons = nonNull(c100RebuildMiamElements.getMiamNotAttendingReasons())
-                ? new java.util.ArrayList<>(List.of(c100RebuildMiamElements.getMiamNotAttendingReasons())) : Collections.emptyList();
+        List<String> miamNotAttendingReasons = new java.util.ArrayList<>(nonNull(c100RebuildMiamElements.getMiamNotAttendingReasons())
+                ? new java.util.ArrayList<>(List.of(c100RebuildMiamElements.getMiamNotAttendingReasons())) : Collections.emptyList());
+
+        //TODO This needs to be added once we have corresponding solicitor field
+        miamNotAttendingReasons.remove(MiamNotAttendingReasonsMapperEnum.under18.name());
 
         if (miamNotAttendingReasons.isEmpty() || miamNotAttendingReasons.contains("none")) {
             return null;
