@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -166,13 +167,16 @@ public class HearingManagementService {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
 
-            List<String> applicantEmailList = applicants.stream()
+            List<String> applicantsEmailList = applicants.stream()
                 .map(PartyDetails::getEmail)
                 .collect(Collectors.toList());
 
-            List<String> applicantSolicitorEmailList = applicants.stream()
-                .map(PartyDetails::getSolicitorEmail)
-                .collect(Collectors.toList());
+            applicantsEmailList.forEach(email -> emailService.send(
+                email,
+                EmailTemplateNames.HEARING_DETAILS,
+                buildHearingDetailsEmail(caseData),
+                LanguagePreference.english
+            ));
 
             List<PartyDetails> respondents = caseData
                 .getRespondents()
@@ -180,30 +184,44 @@ public class HearingManagementService {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
 
-            List<String> respondentEmailList = respondents.stream()
+            List<String> respondentsEmailList = respondents.stream()
+                .filter(respondent -> null != respondent.getEmail()
+                    && YesOrNo.Yes.equals(respondent.getCanYouProvideEmailAddress()))
                 .map(PartyDetails::getEmail)
                 .collect(Collectors.toList());
 
-            emailList.add(String.valueOf(applicantEmailList));
-            emailList.add(String.valueOf(respondentEmailList));
+            if (!respondentsEmailList.isEmpty()) {
+                respondentsEmailList.forEach(email -> emailService.send(
+                    email,
+                    EmailTemplateNames.HEARING_DETAILS,
+                    buildHearingDetailsEmail(caseData),
+                    LanguagePreference.english
+                ));
+            }
 
-            applicantSolicitorEmailList.forEach(email ->   emailService.send(
+            List<String> applicantSolicitorsEmailList = applicants.stream()
+                .map(PartyDetails::getSolicitorEmail)
+                .collect(Collectors.toList());
+
+            applicantSolicitorsEmailList.forEach(email -> emailService.send(
                 email,
                 EmailTemplateNames.APPLICANT_SOLICITOR_HEARING_DETAILS,
                 buildApplicantSolicitorHearingDetailsEmail(caseData, hearingRequest),
                 LanguagePreference.english
             ));
 
-            List<String> respondentSolicitorEmailList = respondents.stream()
+            List<String> respondentSolicitorsEmailList = respondents.stream()
                 .map(PartyDetails::getSolicitorEmail)
                 .collect(Collectors.toList());
 
-            respondentSolicitorEmailList.forEach(email ->   emailService.send(
-                email,
-                EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
-                buildRespondentSolicitorHearingDetailsEmail(caseData, hearingRequest),
-                LanguagePreference.english
-            ));
+            if (!respondentSolicitorsEmailList.isEmpty() && null != respondentSolicitorsEmailList) {
+                respondentSolicitorsEmailList.forEach(email -> emailService.send(
+                    email,
+                    EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
+                    buildRespondentSolicitorHearingDetailsEmail(caseData, hearingRequest),
+                    LanguagePreference.english
+                ));
+            }
         } else {
 
             PartyDetails fl401Applicant = caseData
@@ -220,13 +238,6 @@ public class HearingManagementService {
                 LanguagePreference.english
             );
         }
-
-        emailList.forEach(email ->   emailService.send(
-            email,
-            EmailTemplateNames.HEARING_DETAILS,
-            buildHearingDetailsEmail(caseData),
-            LanguagePreference.english
-        ));
     }
 
     private EmailTemplateVars buildApplicantSolicitorHearingDetailsEmail(CaseData caseData, HearingRequest hearingRequest) {
