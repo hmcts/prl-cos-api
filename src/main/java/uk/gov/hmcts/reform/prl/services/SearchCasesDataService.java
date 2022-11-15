@@ -8,10 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caseflags.CaseFlag;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,6 +57,7 @@ public class SearchCasesDataService {
                 }
 
             }
+
             // set applicant and respondent case flag
             setApplicantFlag(caseData, caseDetails);
             setRespondentFlag(caseData, caseDetails);
@@ -75,12 +77,13 @@ public class SearchCasesDataService {
 
             for (PartyDetails applicant : applicants) {
                 final String partyName = applicant.getFirstName() + " " + applicant.getLastName();
-                final CaseFlag applicantFlag = CaseFlag.builder().partyName(partyName)
-                    .roleOnCase(PartyEnum.applicant.getDisplayedValue()).build();
+                final Flags applicantFlag = Flags.builder().partyName(partyName)
+                    .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
                 applicant.setApplicantFlag(applicantFlag);
             }
 
-            caseDetails.put("applicants", applicants);
+            caseDetails.put("applicants", applicantsWrapped);
+            log.info("caseDetails Applicants -> {}", applicants);
         }
     }
 
@@ -94,11 +97,12 @@ public class SearchCasesDataService {
 
             for (PartyDetails respondent : respondents) {
                 final String partyName = respondent.getFirstName() + " " + respondent.getLastName();
-                final CaseFlag respondentFlag = CaseFlag.builder().partyName(partyName)
-                    .roleOnCase(PartyEnum.respondent.getDisplayedValue()).build();
+                final Flags respondentFlag = Flags.builder().partyName(partyName)
+                    .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
                 respondent.setRespondentFlag(respondentFlag);
             }
-            caseDetails.put("respondents", respondents);
+            caseDetails.put("respondents", respondentsWrapped);
+            log.info("caseDetails respondents -> {}", respondents);
         }
     }
 }

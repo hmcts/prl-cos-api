@@ -9,7 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caseflags.CaseFlag;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -177,7 +177,7 @@ public class SearchCasesDataServiceTest {
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
         searchCasesDataService.updateApplicantAndChildNames(objectMapper,caseDataUpdated);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
-        final CaseFlag applicantFlag = (CaseFlag) caseDataUpdated.get(APPLICANT_FLAG);
+        final Flags applicantFlag = (Flags) caseDataUpdated.get(APPLICANT_FLAG);
         assertNotNull(caseDataUpdated.get("applicants"));
     }
 
@@ -215,7 +215,7 @@ public class SearchCasesDataServiceTest {
 
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
         searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated);
-        final CaseFlag respondentFlag = (CaseFlag) caseDataUpdated.get(RESPONDENT_FLAG);
+        final Flags respondentFlag = (Flags) caseDataUpdated.get(RESPONDENT_FLAG);
         assertNotNull("respondents");
     }
 
