@@ -23,7 +23,7 @@ public enum DisabilityRequirementEnum {
     audioTranslationDocuments("Audio translation of documents"),
     readOutDocuments("Documents read out to me"),
     emailInformation("Information emailed to me"),
-    other("Other"),
+    documentHelpOther("Other"),
     none("No, I do not need any support at this time"),
 
     hearingLoop("Hearing loop (hearing enhancement system)"),
@@ -36,6 +36,7 @@ public enum DisabilityRequirementEnum {
     visitCourtBeforeHearing("Visit to court before the hearing"),
     explanationOfCourt("Explanation of the court and who's in the room at the hearing"),
     intermediary("Intermediary"),
+    communicationHelpOther("Other"),
 
     supportWorkerCarer("A support worker or carer"),
     friendFamilyMember("A friend or family member"),
