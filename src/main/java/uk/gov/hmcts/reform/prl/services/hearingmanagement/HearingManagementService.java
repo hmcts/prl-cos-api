@@ -61,8 +61,8 @@ public class HearingManagementService {
     private final EmailService emailService;
     private final AllTabServiceImpl allTabService;
 
-    @Value("${citizen.url}")
-    private String hearingDetailsUrl;
+    @Value("${xui.url}")
+    private String manageCaseUrl;
 
     public void stateChangeForHearingManagement(HearingRequest hearingRequest) throws Exception {
 
@@ -108,13 +108,9 @@ public class HearingManagementService {
                 break;
         }
 
-        allTabService.updateAllTabsIncludingConfTab(caseData);
-
         if (isStateChanged) {
             sendHearingDetailsEmail(caseData, hearingRequest);
-
         }
-
     }
 
     private CaseDetails createEvent(HearingRequest hearingRequest, String userToken,
@@ -171,6 +167,7 @@ public class HearingManagementService {
                 .map(PartyDetails::getEmail)
                 .collect(Collectors.toList());
 
+            applicantsEmailList.forEach(email -> log.info("Applicant Email:: {}", email));
             applicantsEmailList.forEach(email -> emailService.send(
                 email,
                 EmailTemplateNames.HEARING_DETAILS,
@@ -190,6 +187,8 @@ public class HearingManagementService {
                 .map(PartyDetails::getEmail)
                 .collect(Collectors.toList());
 
+            applicantsEmailList.forEach(email -> log.info("respondent Email:: {}", email));
+            log.info("Building email data:: {}", buildHearingDetailsEmail(caseData));
             if (!respondentsEmailList.isEmpty()) {
                 respondentsEmailList.forEach(email -> emailService.send(
                     email,
@@ -214,7 +213,7 @@ public class HearingManagementService {
                 .map(PartyDetails::getSolicitorEmail)
                 .collect(Collectors.toList());
 
-            if (!respondentSolicitorsEmailList.isEmpty() && null != respondentSolicitorsEmailList) {
+            if (!respondentSolicitorsEmailList.isEmpty()) {
                 respondentSolicitorsEmailList.forEach(email -> emailService.send(
                     email,
                     EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
@@ -360,7 +359,7 @@ public class HearingManagementService {
                 .caseReference(String.valueOf(caseData.getId()))
                 .caseName(caseData.getApplicantCaseName())
                 .partyName(partyName)
-                .hearingDetailsPageLink(hearingDetailsUrl)
+                .hearingDetailsPageLink(manageCaseUrl + "/" + caseData.getId())
                 .build();
         }
 
