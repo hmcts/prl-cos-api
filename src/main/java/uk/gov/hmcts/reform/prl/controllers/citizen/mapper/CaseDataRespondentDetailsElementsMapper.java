@@ -52,9 +52,11 @@ public class CaseDataRespondentDetailsElementsMapper {
             .isAtAddressLessThan5Years(buildAddressLivedLessThan5YearsDetails(respondentDetails))
             .addressLivedLessThan5YearsDetails(respondentDetails.getAddress().getProvideDetailsOfPreviousAddresses())
             .canYouProvideEmailAddress(buildCanYouProvideEmailAddress(respondentDetails))
-            .email(respondentDetails.getRespondentContactDetail().getEmailAddress())
+            .email(isNotEmpty(respondentDetails.getRespondentContactDetail().getEmailAddress())
+                       ? respondentDetails.getRespondentContactDetail().getEmailAddress() : null)
             .canYouProvidePhoneNumber(buildCanYouProvidePhoneNumber(respondentDetails))
-            .phoneNumber(respondentDetails.getRespondentContactDetail().getTelephoneNumber())
+            .phoneNumber(isNotEmpty(respondentDetails.getRespondentContactDetail().getTelephoneNumber())
+                             ? respondentDetails.getRespondentContactDetail().getTelephoneNumber() : null)
             .build();
     }
 
@@ -80,23 +82,21 @@ public class CaseDataRespondentDetailsElementsMapper {
 
     private static YesOrNo buildAddressLivedLessThan5YearsDetails(RespondentDetails respondentDetails) {
 
-        return (!respondentDetails.getAddress().getAddressHistory()
-            .equalsIgnoreCase("Yes")) ? YesOrNo.Yes : YesOrNo.No;
+        return (!"Yes".equalsIgnoreCase(respondentDetails.getAddress().getAddressHistory())) ? YesOrNo.Yes : YesOrNo.No;
     }
 
     private static String buildPreviousName(RespondentDetails respondentDetails) {
 
-        return respondentDetails.getPersonalDetails().getHasNameChanged()
-            .equalsIgnoreCase("Yes") ? respondentDetails.getPersonalDetails().getResPreviousName() : null;
+        return "Yes".equalsIgnoreCase(respondentDetails.getPersonalDetails().getHasNameChanged())
+            ? respondentDetails.getPersonalDetails().getResPreviousName() : null;
     }
 
     private static DontKnow buildDateOfBirthUnknown(PersonalDetails personalDetails) {
-        return personalDetails.getIsDateOfBirthUnknown().equalsIgnoreCase("Yes") ? DontKnow.dontKnow : null;
+        return "Yes".equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null;
     }
 
     private static YesOrNo buildRespondentPlaceOfBirthKnown(PersonalDetails personalDetails) {
-        return (!personalDetails.getRespondentPlaceOfBirthUnknown()
-            .equalsIgnoreCase("Yes")) ? YesOrNo.Yes : No;
+        return (!"Yes".equalsIgnoreCase(personalDetails.getRespondentPlaceOfBirthUnknown())) ? YesOrNo.Yes : No;
     }
 
     private static YesOrNo buildCanYouProvideEmailAddress(RespondentDetails respondentDetails) {
