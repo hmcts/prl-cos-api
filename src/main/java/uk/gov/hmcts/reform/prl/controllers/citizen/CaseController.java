@@ -68,7 +68,8 @@ public class CaseController {
     }
 
     private boolean isAuthorized(String authorisation, String s2sToken) {
-        return true;
+        return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
+            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken));
     }
 
     @PostMapping(value = "{caseId}/{eventId}/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
