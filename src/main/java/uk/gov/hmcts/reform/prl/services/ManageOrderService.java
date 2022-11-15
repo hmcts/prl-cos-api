@@ -74,6 +74,12 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c21_welsh_filename}")
     protected String c21WelshFileName;
 
+    @Value("${document.templates.common.prl_c21_welsh_draft_template}")
+    protected String c21DraftWelshTemplate;
+
+    @Value("${document.templates.common.prl_c21_welsh_draft_filename}")
+    protected String c21DraftWelshFileName;
+
     @Value("${document.templates.common.prl_c43a_draft_template}")
     protected String c43ADraftTemplate;
 
@@ -104,17 +110,35 @@ public class ManageOrderService {
     @Value("${document.templates.fl401.fl401_fl406_engllish_filename}")
     protected String fl406FileEnglish;
 
+    @Value("${document.templates.fl401.fl401_fl406_welsh_draft_template}")
+    protected String fl406WelshDraftTemplate;
+
+    @Value("${document.templates.fl401.fl401_fl406_welsh_draft_filename}")
+    protected String fl406WelshDraftFile;
+
     @Value("${document.templates.fl401.fl401_fl406_welsh_template}")
-    protected String fl406TemplateWelsh;
+    protected String fl406WelshTemplate;
 
     @Value("${document.templates.fl401.fl401_fl406_welsh_filename}")
-    protected String fl406FileWelsh;
+    protected String fl406WelshFile;
 
     @Value("${document.templates.common.prl_c43a_final_template}")
     protected String c43AFinalTemplate;
 
     @Value("${document.templates.common.prl_c43a_final_filename}")
     protected String c43AFinalFilename;
+
+    @Value("${document.templates.common.prl_c43a_welsh_final_template}")
+    protected String c43AWelshFinalTemplate;
+
+    @Value("${document.templates.common.prl_c43a_welsh_final_filename}")
+    protected String c43AWelshFinalFilename;
+
+    @Value("${document.templates.common.prl_c43a_welsh_draft_template}")
+    protected String c43AWelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_c43a_welsh_draft_filename}")
+    protected String c43AWelshDraftFilename;
 
     @Value("${document.templates.common.prl_c43_draft_template}")
     protected String c43DraftTemplate;
@@ -128,6 +152,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c43_filename}")
     protected String c43File;
 
+    @Value("${document.templates.common.prl_c43_welsh_draft_template}")
+    protected String c43WelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_c43_welsh_draft_filename}")
+    protected String c43WelshDraftFile;
+
+    @Value("${document.templates.common.prl_c43_welsh_template}")
+    protected String c43WelshTemplate;
+
+    @Value("${document.templates.common.prl_c43_welsh_filename}")
+    protected String c43WelshFile;
+
     @Value("${document.templates.common.prl_fl404_draft_template}")
     protected String fl404DraftTemplate;
 
@@ -139,6 +175,18 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_fl404_filename}")
     protected String fl404File;
+
+    @Value("${document.templates.common.prl_fl404_welsh_draft_template}")
+    protected String fl404WelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl404_welsh_draft_filename}")
+    protected String fl404WelshDraftFile;
+
+    @Value("${document.templates.common.prl_fl404_welsh_template}")
+    protected String fl404WelshTemplate;
+
+    @Value("${document.templates.common.prl_fl404_welsh_filename}")
+    protected String fl404WelshFile;
 
     @Value("${document.templates.common.prl_fl404a_draft_template}")
     protected String fl404aDraftTemplate;
@@ -152,6 +200,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_fl404a_final_filename}")
     protected String fl404aFinalFile;
 
+    @Value("${document.templates.common.prl_fl404a_welsh_draft_template}")
+    protected String fl404aWelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl404a_welsh_draft_filename}")
+    protected String fl404aWelshDraftFile;
+
+    @Value("${document.templates.common.prl_fl404a_welsh_final_template}")
+    protected String fl404aWelshFinalTemplate;
+
+    @Value("${document.templates.common.prl_fl404a_welsh_final_filename}")
+    protected String fl404aWelshFinalFile;
+
     @Value("${document.templates.common.prl_c45a_draft_template}")
     protected String c45aDraftTemplate;
 
@@ -163,6 +223,18 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_c45a_filename}")
     protected String c45aFile;
+
+    @Value("${document.templates.common.prl_c45a_welsh_draft_template}")
+    protected String c45aWelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_c45a_welsh_draft_filename}")
+    protected String c45aWelshDraftFile;
+
+    @Value("${document.templates.common.prl_c45a_welsh_template}")
+    protected String c45aWelshTemplate;
+
+    @Value("${document.templates.common.prl_c45a_welsh_filename}")
+    protected String c45aWelshFile;
 
     @Value("${document.templates.common.prl_c47a_draft_template}")
     protected String c47aDraftTemplate;
@@ -176,6 +248,18 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c47a_filename}")
     protected String c47aFile;
 
+    @Value("${document.templates.common.prl_c47a_welsh_draft_template}")
+    protected String c47aWelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_c47a_welsh_draft_filename}")
+    protected String c47aWelshDraftFile;
+
+    @Value("${document.templates.common.prl_c47a_welsh_template}")
+    protected String c47aWelshTemplate;
+
+    @Value("${document.templates.common.prl_c47a_welsh_filename}")
+    protected String c47aWelshFile;
+
     @Value("${document.templates.common.prl_fl402_draft_template}")
     protected String fl402DraftTemplate;
 
@@ -188,11 +272,29 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_fl402_final_filename}")
     protected String fl402FinalFile;
 
+    @Value("${document.templates.common.prl_fl402_welsh_draft_template}")
+    protected String fl402WelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl402_welsh_draft_filename}")
+    protected String fl402WelshDraftFile;
+
+    @Value("${document.templates.common.prl_fl402_welsh_final_template}")
+    protected String fl402WelshFinalTemplate;
+
+    @Value("${document.templates.common.prl_fl402_welsh_final_filename}")
+    protected String fl402WelshFinalFile;
+
     @Value("${document.templates.common.prl_fl404b_draft_template}")
     protected String fl404bDraftTemplate;
 
     @Value("${document.templates.common.prl_fl404b_draft_filename}")
     protected String fl404bDraftFile;
+
+    @Value("${document.templates.common.prl_fl404b_welsh_draft_template}")
+    protected String fl404bWelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_fl404b_welsh_draft_filename}")
+    protected String fl404bWelshDraftFile;
 
     @Value("${document.templates.common.prl_fl404b_blank_draft_filename}")
     protected String fl404bBlankDraftFile;
@@ -202,6 +304,12 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_fl404b_final_filename}")
     protected String fl404bFile;
+
+    @Value("${document.templates.common.prl_fl404b_welsh_final_template}")
+    protected String fl404bWelshTemplate;
+
+    @Value("${document.templates.common.prl_fl404b_welsh_final_filename}")
+    protected String fl404bWelshFile;
 
     @Value("${document.templates.common.prl_fl404b_blank_final_filename}")
     protected String fl404bBlankFile;
@@ -217,6 +325,18 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_n117_filename}")
     protected String n117File;
+
+    @Value("${document.templates.common.prl_n117_welsh_draft_template}")
+    protected String n117WelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_n117_welsh_draft_filename}")
+    protected String n117WelshDraftFile;
+
+    @Value("${document.templates.common.prl_n117_welsh_template}")
+    protected String n117WelshTemplate;
+
+    @Value("${document.templates.common.prl_n117_welsh_filename}")
+    protected String n117WelshFile;
 
     private final DocumentLanguageService documentLanguageService;
 
@@ -238,7 +358,8 @@ public class ManageOrderService {
 
     public CaseData getUpdatedCaseData(CaseData caseData) {
         return caseData.toBuilder().childrenList(getChildInfoFromCaseData(caseData))
-            .manageOrders(ManageOrders.builder().childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
+            .manageOrders(ManageOrders.builder()
+                              .childListForSpecialGuardianship(getChildInfoFromCaseData(caseData)).build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
@@ -250,7 +371,9 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c21DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c21Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c21File);
-                fieldsMap.put(FINAL_TEMPLATE_WELSH, c21WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, c21DraftWelshTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, c21DraftWelshFileName);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, c21WelshTemplate);
                 fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c21WelshFileName);
                 break;
             case powerOfArrest:
@@ -258,6 +381,11 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl406DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl406TemplateEnglish);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl406FileEnglish);
+
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, fl406WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, fl406WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, fl406WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl406WelshFile);
                 break;
             case standardDirectionsOrder:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, "");
@@ -274,36 +402,64 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c43DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c43Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c43File);
+
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, c43WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, c43WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, c43WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c43WelshFile);
                 break;
             case occupation:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404DraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404File);
+
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, fl404WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, fl404WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, fl404WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl404WelshFile);
                 break;
             case specialGuardianShip:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c43ADraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c43ADraftFilename);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c43AFinalTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c43AFinalFilename);
+
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, c43AWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, c43AWelshDraftFilename);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, c43AWelshFinalTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c43AWelshFinalFilename);
                 break;
             case appointmentOfGuardian:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c47aDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c47aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c47aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c47aFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, c47aWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, c47aWelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, c47aWelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c47aWelshFile);
                 break;
             case nonMolestation:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404aDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404aFinalTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404aFinalFile);
+
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, fl404aWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, fl404aWelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, fl404aWelshFinalTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl404aWelshFinalFile);
                 break;
             case parentalResponsibility:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c45aDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, c45aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, c45aTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, c45aFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, c45aWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, c45aWelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, c45aWelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c45aWelshFile);
                 break;
             case transferOfCaseToAnotherCourt:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, c49TDraftTemplate);
@@ -316,18 +472,30 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl402DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl402FinalTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl402FinalFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, fl402WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, fl402WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, fl402WelshFinalTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl402WelshFinalFile);
                 break;
             case generalForm:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, n117DraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, n117DraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, n117Template);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, n117File);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, n117WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, n117WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, n117WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, n117WelshFile);
                 break;
             case amendDischargedVaried:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404bDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404bDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404bTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404bFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, fl404bWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, fl404bWelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, fl404bWelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl404bWelshFile);
                 break;
             case blank:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404bDraftTemplate);
@@ -371,7 +539,8 @@ public class ManageOrderService {
                 builder.append("\n");
             }
         } else {
-            Optional<List<Element<ApplicantChild>>> applicantChildDetails = ofNullable(caseData.getApplicantChildDetails());
+            Optional<List<Element<ApplicantChild>>> applicantChildDetails =
+                ofNullable(caseData.getApplicantChildDetails());
             if (applicantChildDetails.isPresent()) {
                 List<ApplicantChild> children = applicantChildDetails.get().stream()
                     .map(Element::getValue)
@@ -426,10 +595,11 @@ public class ManageOrderService {
                                        .orderDocument(caseData.getAppointmentOfGuardian())
                                        .otherDetails(OtherOrderDetails.builder()
                                                          .createdBy(caseData.getJudgeOrMagistratesLastName())
-                                                         .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
-                                                             PrlAppsConstants.D_MMMM_YYYY,
-                                                             Locale.UK
-                                                         )))
+                                                         .orderCreatedDate(dateTime.now()
+                                                                               .format(DateTimeFormatter.ofPattern(
+                                                                                   PrlAppsConstants.D_MMMM_YYYY,
+                                                                                   Locale.UK
+                                                                               )))
                                                          .orderRecipients(getAllRecipients(caseData)).build())
                                        .dateCreated(dateTime.now())
                                        .build()));
@@ -498,7 +668,8 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData) throws Exception {
+    public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
+        throws Exception {
         List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
         List<Element<OrderDetails>> orderCollection;
         orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
@@ -537,20 +708,37 @@ public class ManageOrderService {
     public Map<String, Object> getCaseData(String authorisation, CaseData caseData)
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        GeneratedDocumentInfo generatedDocumentInfo = null;
         Map<String, String> fieldsMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (documentLanguage.isGenEng()) {
+            caseDataUpdated.put("isEngDocGen", Yes.toString());
+            generatedDocumentInfo = dgsService.generateDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                fieldsMap.get(PrlAppsConstants.TEMPLATE)
+            );
+            caseDataUpdated.put("previewOrderDoc", Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
 
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-            fieldsMap.get(PrlAppsConstants.TEMPLATE)
-        );
+        }
+        if (documentLanguage.isGenWelsh()) {
+            caseDataUpdated.put("isWelshDocGen", Yes.toString());
+            generatedDocumentInfo = dgsService.generateWelshDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
+            );
+            caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
 
-        caseDataUpdated.put("isEngDocGen", Yes.toString());
-        caseDataUpdated.put("previewOrderDoc", Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+        }
         return caseDataUpdated;
     }
 
@@ -579,10 +767,12 @@ public class ManageOrderService {
         log.info("Court name after N117 order set{}", orderData.getManageOrdersCourtName());
 
         if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
-            orderData = orderData.toBuilder().manageOrdersRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+            orderData = orderData.toBuilder()
+                .manageOrdersRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
         }
         if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
-            orderData = orderData.toBuilder().manageOrdersRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+            orderData = orderData.toBuilder()
+                .manageOrdersRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
 
         return caseData.toBuilder().manageOrders(orderData)
@@ -626,10 +816,12 @@ public class ManageOrderService {
         log.info("FL404b court name: {}", orderData.getFl404bCourtName());
 
         if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
-            orderData = orderData.toBuilder().fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+            orderData = orderData.toBuilder()
+                .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
         }
         if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
-            orderData = orderData.toBuilder().fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+            orderData = orderData.toBuilder()
+                .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
         return caseData.toBuilder().manageOrders(ManageOrders.builder()
                                                      .fl404CustomFields(orderData)
@@ -694,15 +886,19 @@ public class ManageOrderService {
                                                          String flagSelectedOrder, String template, String fileName,
                                                          CaseData caseData) throws Exception {
         log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, template);
-        GeneratedDocumentInfo generatedDocumentInfo = template.contains("-WEL-") ? dgsService.generateWelshDocument(
-            authorisation,
-            CaseDetails.builder().caseData(caseData).build(),
-            template
-        ) : dgsService.generateDocument(
-            authorisation,
-            CaseDetails.builder().caseData(caseData).build(),
-            template
-        );
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().build();
+        if (template != null) {
+            generatedDocumentInfo = template.contains("-WEL-") ? dgsService.generateWelshDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                template
+            ) : dgsService.generateDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                template
+            );
+        }
+
         return element(OrderDetails.builder().orderType(flagSelectedOrder)
                            .orderTypeId(flagSelectedOrderId)
                            .orderDocument(Document.builder()

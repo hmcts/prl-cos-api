@@ -95,7 +95,9 @@ allprojects {
   }
 
   repositories {
+    mavenLocal()
     mavenCentral()
+    jcenter()
     maven { url 'https://jitpack.io' }
     maven { url 'https://repo.spring.io/libs-milestone' }
   }
@@ -545,7 +547,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/controllers/DraftAnOrderController.java',
   '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController',
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java'
+  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
+  '**uk/gov/hmcts/reform/prl/Application.*'
 ]
 
 sonarqube {
