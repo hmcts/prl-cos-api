@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
@@ -78,8 +79,8 @@ public class PartyDetails {
     private Response response;
     private YesOrNo currentRespondent;
 
-    //    private Flags applicantFlag;
-    //    private Flags respondentFlag;
+    private Flags applicantFlag;
+    private Flags respondentFlag;
 
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
