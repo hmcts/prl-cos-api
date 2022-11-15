@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -82,7 +83,7 @@ public class SearchCasesDataService {
                 applicant.setApplicantFlag(applicantFlag);
             }
 
-            caseDetails.put("applicants", applicants);
+            caseDetails.put("applicants", List.of(element(applicants)));
             log.info("caseDetails Applicants -> {}", applicants);
         }
     }
