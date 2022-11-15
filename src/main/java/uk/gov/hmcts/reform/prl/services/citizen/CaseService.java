@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,11 +61,7 @@ public class CaseService {
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
             return caseRepository.getCase(authToken, caseId);
         }
-
-        if (CITIZEN_INTERNAL_CASE_UPDATE.equalsIgnoreCase(eventId)) {
-            return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
-        }
-        return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.valueOf(eventId));
+        return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken, String role, String userId) {
@@ -92,7 +89,7 @@ public class CaseService {
         caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
         return caseDetails
             .stream()
-            .map(caseDetailsConverter::extractCase)
+            .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
             .collect(Collectors.toList());
     }
 
@@ -104,7 +101,7 @@ public class CaseService {
         caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
         return caseDetails
             .stream()
-            .map(caseDetailsConverter::extractCaseData)
+            .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
             .collect(Collectors.toList());
     }
 
