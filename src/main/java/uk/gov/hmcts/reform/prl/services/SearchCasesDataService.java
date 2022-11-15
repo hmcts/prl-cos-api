@@ -58,12 +58,6 @@ public class SearchCasesDataService {
 
             }
 
-            caseDetails.put("applicantFlag", Flags.builder().partyName("Applicant test case flag")
-                .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build());
-
-            caseDetails.put("respondentFlag", Flags.builder().partyName("Respondent test case flag")
-                .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build());
-
             // set applicant and respondent case flag
             //            setApplicantFlag(caseData, caseDetails);
             //            setRespondentFlag(caseData, caseDetails);
