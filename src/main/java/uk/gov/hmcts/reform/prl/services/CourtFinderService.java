@@ -6,12 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
+import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -38,6 +40,9 @@ public class CourtFinderService {
     @Autowired
     private CourtFinderApi courtFinderApi;
 
+    @Autowired
+    private LocationRefDataApi locationRefDataApi;
+
     public Court getNearestFamilyCourt(CaseData caseData) throws NotFoundException {
         ServiceArea serviceArea;
 
@@ -58,6 +63,12 @@ public class CourtFinderService {
         } else {
             return null;
         }
+    }
+
+    public CourtDetails getCourtDetails(String authorisation, String s2sAuth) {
+        CourtDetails courtDetails;
+        courtDetails = locationRefDataApi.getCourtDetailsByService(authorisation, s2sAuth, "ABA5");
+        return courtDetails;
     }
 
     public Court getCourtDetails(String courtSlug) {

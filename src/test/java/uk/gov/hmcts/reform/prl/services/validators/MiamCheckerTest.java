@@ -102,7 +102,6 @@ public class MiamCheckerTest {
             .build();
 
         assertTrue(miamChecker.isFinished(caseData));
-
     }
 
     @Test
