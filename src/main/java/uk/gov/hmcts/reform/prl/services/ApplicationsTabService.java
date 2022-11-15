@@ -88,6 +88,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 
@@ -189,28 +190,31 @@ public class ApplicationsTabService implements TabService {
 
     private ChildDetails mapChildDetails(Child child) {
 
-        List<OtherPersonWhoLivesWithChild> otherPersonList = child.getPersonWhoLivesWithChild().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
         List<Element<OtherPersonWhoLivesWithChildDetails>> otherPersonLiving = new ArrayList<>();
-        for (OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild : otherPersonList) {
-            otherPersonLiving.add(Element.<OtherPersonWhoLivesWithChildDetails>builder()
-                                      .value(OtherPersonWhoLivesWithChildDetails.builder()
-                          .firstName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                         .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL
-                                         : otherPersonWhoLivesWithChild.getFirstName())
-                          .lastName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+
+        if (nonNull(child.getPersonWhoLivesWithChild())) {
+            List<OtherPersonWhoLivesWithChild> otherPersonList = child.getPersonWhoLivesWithChild().stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+
+            for (OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild : otherPersonList) {
+                otherPersonLiving.add(Element.<OtherPersonWhoLivesWithChildDetails>builder()
+                        .value(OtherPersonWhoLivesWithChildDetails.builder()
+                                .firstName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                        .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL
+                                        : otherPersonWhoLivesWithChild.getFirstName())
+                                .lastName((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
                                         .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
                                         otherPersonWhoLivesWithChild.getLastName())
-                          .relationshipToChildDetails((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                         .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
-                                         otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
-                          .isPersonIdentityConfidential(otherPersonWhoLivesWithChild.getIsPersonIdentityConfidential())
-                          .address((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
-                                                            .getIsPersonIdentityConfidential())
-                                       ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
-                                       : otherPersonWhoLivesWithChild.getAddress()).build()).build());
+                                .relationshipToChildDetails((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                        .getIsPersonIdentityConfidential()) ? THIS_INFORMATION_IS_CONFIDENTIAL :
+                                        otherPersonWhoLivesWithChild.getRelationshipToChildDetails())
+                                .isPersonIdentityConfidential(otherPersonWhoLivesWithChild.getIsPersonIdentityConfidential())
+                                .address((YesOrNo.Yes).equals(otherPersonWhoLivesWithChild
+                                        .getIsPersonIdentityConfidential())
+                                        ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
+                                        : otherPersonWhoLivesWithChild.getAddress()).build()).build());
+            }
         }
         Optional<RelationshipsEnum> applicantsRelationshipToChild =
             ofNullable(child.getApplicantsRelationshipToChild());
@@ -359,7 +363,8 @@ public class ApplicationsTabService implements TabService {
         TypeOfApplication typeOfApplication = TypeOfApplication.builder()
             .ordersApplyingFor(String.join(", ", ordersApplyingFor))
             .typeOfChildArrangementsOrder(typeOfChildArrangementsOrder)
-            .applicationPermissionRequired(caseData.getApplicationPermissionRequired().getDisplayedValue())
+            .applicationPermissionRequired(nonNull(caseData.getApplicationPermissionRequired())
+                    ? caseData.getApplicationPermissionRequired().getDisplayedValue() : null)
             .applicationPermissionRequiredReason(caseData.getApplicationPermissionRequiredReason())
             .natureOfOrder(natureOfOrder)
             .build();
