@@ -132,7 +132,7 @@ public class BundleCreateRequestMapperTest {
             .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
             .build();
 
-        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(caseData,"sample.yaml");
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(caseData,"eventId","sample.yaml");
         assertNotNull(bundleCreateRequest);
     }
 }

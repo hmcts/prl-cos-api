@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -9,16 +10,19 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
@@ -26,6 +30,8 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.APPLICANT_FLAG;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.RESPONDENT_FLAG;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SearchCasesDataServiceTest {
@@ -135,4 +141,86 @@ public class SearchCasesDataServiceTest {
         assertEquals("test1 test22", caseDataUpdated.get("respondentName"));
 
     }
+
+    @Ignore
+    @Test
+    public void testCaseFlagApplicantsC100() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("applicant2")
+            .lastName("lastname")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedApplicant1 = Element.<PartyDetails>builder().value(applicant).build();
+        Element<PartyDetails> wrappedApplicant2 = Element.<PartyDetails>builder().value(applicant1).build();
+
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(wrappedApplicant1);
+        applicantList.add(wrappedApplicant2);
+
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantList)
+            .build();
+
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+        searchCasesDataService.updateApplicantAndChildNames(objectMapper,caseDataUpdated);
+        assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
+        final Flags applicantFlag = (Flags) caseDataUpdated.get(APPLICANT_FLAG);
+        assertNotNull(caseDataUpdated.get("applicants"));
+    }
+
+    @Ignore
+    @Test
+    public void testCaseFlagRespondentsC100() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        PartyDetails respondent1 = PartyDetails.builder()
+            .firstName("respondent1")
+            .lastName("lastname1")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        PartyDetails respondent2 = PartyDetails.builder()
+            .firstName("respondent2")
+            .lastName("lastname222")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent1).build();
+        Element<PartyDetails> wrappedRespondent2 = Element.<PartyDetails>builder().value(respondent2).build();
+
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondent1);
+        respondentList.add(wrappedRespondent2);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .respondents(respondentList)
+            .build();
+
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+        searchCasesDataService.updateApplicantAndChildNames(objectMapper, caseDataUpdated);
+        final Flags respondentFlag = (Flags) caseDataUpdated.get(RESPONDENT_FLAG);
+        assertNotNull("respondents");
+    }
+
+
 }
