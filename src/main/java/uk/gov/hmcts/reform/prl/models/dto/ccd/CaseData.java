@@ -19,12 +19,6 @@ import uk.gov.hmcts.reform.prl.enums.CourtDetailsPilotEnum;
 import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamDomesticViolenceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamExemptionsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamOtherGroundsChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamPreviousAttendanceChecklistEnum;
-import uk.gov.hmcts.reform.prl.enums.MiamUrgencyReasonChecklistEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
@@ -248,24 +242,9 @@ public class CaseData implements MappableObject {
     /**
      * MIAM.
      */
-    private final YesOrNo applicantAttendedMiam;
-    private final YesOrNo claimingExemptionMiam;
-    private final YesOrNo familyMediatorMiam;
-    private final List<MiamExemptionsChecklistEnum> miamExemptionsChecklist;
-    private final List<MiamDomesticViolenceChecklistEnum> miamDomesticViolenceChecklist;
-    private final List<MiamUrgencyReasonChecklistEnum> miamUrgencyReasonChecklist;
-    private final List<MiamChildProtectionConcernChecklistEnum> miamChildProtectionConcernList;
-    private final MiamPreviousAttendanceChecklistEnum miamPreviousAttendanceChecklist;
-    private final MiamOtherGroundsChecklistEnum miamOtherGroundsChecklist;
-    private final String mediatorRegistrationNumber;
-    private final String familyMediatorServiceName;
-    private final String soleTraderName;
-    //TODO: refactor to remove duplicated details screen
-    private final Document miamCertificationDocumentUpload;
-    private final String mediatorRegistrationNumber1;
-    private final String familyMediatorServiceName1;
-    private final String soleTraderName1;
-    private final Document miamCertificationDocumentUpload1;
+    @JsonUnwrapped
+    @Builder.Default
+    private final MiamDetails miamDetails;
 
     /**
      * Allegations of harm.

@@ -85,6 +85,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -213,18 +214,21 @@ public class ApplicationsTabServiceTest {
                                   .allegationsOfHarmDomesticAbuseYesNo(Yes)
                                   .allegationsOfHarmChildAbductionYesNo(Yes).build())
             //miam
-            .applicantAttendedMiam(Yes)
-            .claimingExemptionMiam(No)
-            .familyMediatorMiam(Yes)
-            .miamExemptionsChecklist(Collections.singletonList(MiamExemptionsChecklistEnum.domesticViolence))
-            .miamDomesticViolenceChecklist(Collections.singletonList(
-                MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_4))
-            .miamUrgencyReasonChecklist(Collections.singletonList(MiamUrgencyReasonChecklistEnum
-                                                                      .miamUrgencyReasonChecklistEnum_Value_1))
-            .miamChildProtectionConcernList(Collections.singletonList(MiamChildProtectionConcernChecklistEnum
-                                                                          .MIAMChildProtectionConcernChecklistEnum_value_1))
-            .miamPreviousAttendanceChecklist(MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_1)
-            .miamOtherGroundsChecklist(MiamOtherGroundsChecklistEnum.miamOtherGroundsChecklistEnum_Value_2)
+            .miamDetails(MiamDetails.builder()
+                             .applicantAttendedMiam(Yes)
+                             .claimingExemptionMiam(No)
+                             .familyMediatorMiam(Yes)
+                             .miamExemptionsChecklist(Collections.singletonList(MiamExemptionsChecklistEnum.domesticViolence))
+                             .miamDomesticViolenceChecklist(Collections.singletonList(
+                                 MiamDomesticViolenceChecklistEnum.miamDomesticViolenceChecklistEnum_Value_4))
+                             .miamUrgencyReasonChecklist(Collections.singletonList(MiamUrgencyReasonChecklistEnum
+                                                                                       .miamUrgencyReasonChecklistEnum_Value_1))
+                             .miamChildProtectionConcernList(Collections.singletonList(MiamChildProtectionConcernChecklistEnum
+                                                                                           .MIAMChildProtectionConcernChecklistEnum_value_1))
+                             .miamPreviousAttendanceChecklist(MiamPreviousAttendanceChecklistEnum.miamPreviousAttendanceChecklistEnum_Value_1)
+                             .miamOtherGroundsChecklist(MiamOtherGroundsChecklistEnum.miamOtherGroundsChecklistEnum_Value_2)
+                             .build())
+
             //other proceedings
             .previousOrOngoingProceedingsForChildren(YesNoDontKnow.yes)
             .existingProceedings(Collections.singletonList(proceedingDetailsElement))
@@ -297,7 +301,9 @@ public class ApplicationsTabServiceTest {
             .solicitorName("Test Solicitor")
             .build();
 
-        emptyCaseData = CaseData.builder().build();
+        emptyCaseData = CaseData.builder()
+            .miamDetails(MiamDetails.builder()
+                             .build()).build();
     }
 
     @Test
