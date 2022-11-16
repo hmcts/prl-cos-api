@@ -28,6 +28,8 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +54,7 @@ public class HearingManagementService {
 
     public static final String HEARING_STATE_CHANGE_SUCCESS = "hmcCaseUpdateSuccess";
     public static final String HEARING_STATE_CHANGE_FAILURE = "hmcCaseUpdateFailure";
+    private static final String DATE_FORMAT = "dd-MM-yyyy";
 
     private final AuthorisationService authorisationService;
     private final ObjectMapper objectMapper;
@@ -272,10 +275,13 @@ public class HearingManagementService {
             String applicantSolicitorName = fl401Applicant.getRepresentativeFirstName() + " "
                 + fl401Applicant.getRepresentativeLastName();
 
+            LocalDate issueDate = LocalDate.now();
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+
             hearingDetailsEmail = HearingDetailsEmail.builder()
                 .caseReference(String.valueOf(caseData.getId()))
                 .caseName(caseData.getApplicantCaseName())
-                .issueDate(String.valueOf(caseData.getIssueDate()))
+                .issueDate(issueDate.format(dateTimeFormatter))
                 .typeOfHearing(" ")
                 .hearingDateAndTime(String.valueOf(hearingRequest.getHearingUpdate().getNextHearingDate()))
                 .hearingVenue(hearingRequest.getHearingUpdate().getHearingVenueId())
@@ -299,12 +305,15 @@ public class HearingManagementService {
             .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
             .collect(Collectors.toList());
 
+        LocalDate issueDate = LocalDate.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+        log.info("Issue date from casedata: {}", caseData.getIssueDate());
         for (String respondentSolicitorName: respondentSolicitorNamesList) {
 
             hearingDetailsEmail = HearingDetailsEmail.builder()
                 .caseReference(String.valueOf(caseData.getId()))
                 .caseName(caseData.getApplicantCaseName())
-                .issueDate(String.valueOf(caseData.getIssueDate()))
+                .issueDate(issueDate.format(dateTimeFormatter))
                 .typeOfHearing(" ")
                 .hearingDateAndTime(String.valueOf(hearingRequest.getHearingUpdate().getNextHearingDate()))
                 .hearingVenue(hearingRequest.getHearingUpdate().getHearingVenueId())
