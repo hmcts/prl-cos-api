@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
@@ -33,10 +34,12 @@ public class DraftOrder {
     private FL404 fl404CustomFields;
     @JsonProperty("isOrderDrawnForCafcass")
     private final YesOrNo isOrderDrawnForCafcass;
+    private final YesOrNo isCaseWithdrawn;
+    private final YesOrNo isTheOrderByConsent;
     private final SelectTypeOfOrderEnum selectTypeOfOrder;
     private final YesOrNo doesOrderClosesCase;
-    private final YesOrNo isTheOrderByConsent;
     private final YesOrNo wasTheOrderApprovedAtHearing;
+    private final JudgeOrMagistrateTitleEnum judgeOrMagistrateTitle;
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
     @JsonProperty("magistrateLastName")

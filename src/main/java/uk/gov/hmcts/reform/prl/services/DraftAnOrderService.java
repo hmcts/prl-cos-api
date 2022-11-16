@@ -160,8 +160,9 @@ public class DraftAnOrderService {
             .isOrderDrawnForCafcass(caseData.getManageOrders().getIsOrderDrawnForCafcass())
             .selectTypeOfOrder(caseData.getSelectTypeOfOrder())
             .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
-            .isTheOrderByConsent(caseData.getConsentOrder())
+            .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
+            .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
             .judgeOrMagistratesLastName(caseData.getJudgeOrMagistratesLastName())
             .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
             .magistrateLastName(caseData.getMagistrateLastName())
@@ -393,9 +394,11 @@ public class DraftAnOrderService {
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("isOrderDrawnForCafcass", selectedOrder.getIsOrderDrawnForCafcass());
         caseDataMap.put("selectTypeOfOrder", selectedOrder.getSelectTypeOfOrder());
+        caseDataMap.put("isCaseWithdrawn", selectedOrder.getIsCaseWithdrawn());
         caseDataMap.put("doesOrderClosesCase", selectedOrder.getDoesOrderClosesCase());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put("wasTheOrderApprovedAtHearing", selectedOrder.getWasTheOrderApprovedAtHearing());
+        caseDataMap.put("judgeOrMagistrateTitle", selectedOrder.getJudgeOrMagistrateTitle());
         caseDataMap.put("judgeOrMagistratesLastName", selectedOrder.getJudgeOrMagistratesLastName());
         caseDataMap.put("justiceLegalAdviserFullName", selectedOrder.getJusticeLegalAdviserFullName());
         caseDataMap.put("magistrateLastName", selectedOrder.getMagistrateLastName());
