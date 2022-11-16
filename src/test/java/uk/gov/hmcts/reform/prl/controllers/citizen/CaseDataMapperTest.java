@@ -63,7 +63,7 @@ public class CaseDataMapperTest {
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData);
 
         //Then
-        JSONAssert.assertEquals(TestUtil.readFileFrom("classpath:c100-rebuild/response.json"),
+        JSONAssert.assertEquals(TestUtil.readFileFrom("classpath:c100-rebuild/mapper-response.json"),
                 mapper.writeValueAsString(updatedCaseData), false);
     }
 

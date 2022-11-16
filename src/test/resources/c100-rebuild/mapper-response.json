@@ -160,7 +160,9 @@
         "gender":"female",
         "otherGender":"",
         "orderAppliedFor":[
-          "childArrangementsOrder"
+          "childArrangementsOrder",
+          "prohibitedStepsOrder",
+          "specificIssueOrder"
         ],
         "applicantsRelationshipToChild":null,
         "otherApplicantsRelationshipToChild":null,
@@ -181,7 +183,9 @@
         "gender":"other",
         "otherGender":"Other gender test",
         "orderAppliedFor":[
-          "childArrangementsOrder"
+          "childArrangementsOrder",
+          "prohibitedStepsOrder",
+          "specificIssueOrder"
         ],
         "applicantsRelationshipToChild":null,
         "otherApplicantsRelationshipToChild":null,
