@@ -422,6 +422,8 @@ public class CallbackController {
         // Updating the case name for FL401
         if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
             caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
+            //Added for Case linking
+            caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get("applicantOrRespondentCaseName"));
         }
         if (caseDataUpdated.get("caseTypeOfApplication") != null) {
             caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));

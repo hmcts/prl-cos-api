@@ -138,6 +138,8 @@ public class CaseData implements MappableObject {
     @JsonAlias({"applicantCaseName", "applicantOrRespondentCaseName"})
     private final String applicantCaseName;
 
+    @JsonAlias({"caseNameHmctsInternal", "applicantOrRespondentCaseName"})
+    private final String caseNameHmctsInternal;
 
     private String applicantName;
 
