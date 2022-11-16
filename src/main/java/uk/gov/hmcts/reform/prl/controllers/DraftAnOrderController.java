@@ -94,9 +94,11 @@ public class DraftAnOrderController {
             log.info("Court name before prepopulate: {}", caseData.getCourtName());
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
-        log.info("Case data {}", caseData);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
+        log.info("Case data updated map {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseData.toMap(CcdObjectMapper.getObjectMapper())).build();
+            .data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/generate-doc", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -118,9 +120,10 @@ public class DraftAnOrderController {
         log.info("Case data {}", caseData);
         log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
-        fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(PrlAppsConstants.FORMAT,
-                                                                        caseData.getApplicantsFL401().getFirstName(),
-                                                                        caseData.getApplicantsFL401().getLastName()
+        fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
+            PrlAppsConstants.FORMAT,
+            caseData.getApplicantsFL401().getFirstName(),
+            caseData.getApplicantsFL401().getLastName()
         ))
             .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT, caseData.getRespondentsFL401().getFirstName(),
                                                 caseData.getRespondentsFL401().getLastName()
@@ -137,7 +140,7 @@ public class DraftAnOrderController {
             .manageOrders(ManageOrders.builder().fl404CustomFields(fl404CustomFields).build()).build();
         log.info("Case data after prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated = manageOrderService.getCaseData(authorisation, caseData);
+        caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
