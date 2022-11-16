@@ -697,8 +697,4 @@ public class CaseData implements MappableObject {
     private String helpWithFeesReferenceNumber;
     private String c100RebuildChildPostCode;
     private String c100RebuildConsentOrderDetails;
-    /**
-     * Case Links.
-     */
-    private String caseLinks;
 }
