@@ -554,9 +554,13 @@ public class CaseData implements MappableObject {
     private final SelectTypeOfOrderEnum selectTypeOfOrder;
 
 
+    @JsonProperty("doesOrderClosesCase")
     private final YesOrNo doesOrderClosesCase;
+    @JsonProperty("wasTheOrderApprovedAtHearing")
     private final YesOrNo wasTheOrderApprovedAtHearing;
+    @JsonProperty("judgeOrMagistratesLastName")
     private final String judgeOrMagistratesLastName;
+    @JsonProperty("justiceLegalAdviserFullName")
     private final String justiceLegalAdviserFullName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;

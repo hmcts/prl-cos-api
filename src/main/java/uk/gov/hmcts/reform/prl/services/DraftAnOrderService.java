@@ -147,6 +147,7 @@ public class DraftAnOrderService {
     }*/
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData) {
+        log.info(" Getting current order details from case data {}", caseData);
         return DraftOrder.builder().orderType(caseData.getSelectedOrder())
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
