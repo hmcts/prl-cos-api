@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
@@ -436,6 +437,7 @@ public class CaseData implements MappableObject {
      */
     private final List<Element<LocalCourtAdminEmail>> localCourtAdmin;
     private final DynamicList courtList;
+    private final CaseManagementLocation caseManagementLocation;
 
     /**
      * This field contains Application Submitter solicitor email address.
