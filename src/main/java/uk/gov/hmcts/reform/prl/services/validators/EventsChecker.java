@@ -11,7 +11,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
-import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_NEW;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
@@ -72,7 +72,7 @@ public class EventsChecker {
     private AllegationsOfHarmChecker allegationsOfHarmChecker;
 
     @Autowired
-    private AllegationsOfHarmCheckerNew allegationsOfHarmCheckerNew;
+    private AllegationsOfHarmRevisedChecker allegationsOfHarmRevisedChecker;
 
     @Autowired
     private OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
@@ -137,7 +137,7 @@ public class EventsChecker {
         eventStatus.put(RESPONDENT_DETAILS, respondentsChecker);
         eventStatus.put(MIAM, miamChecker);
         eventStatus.put(ALLEGATIONS_OF_HARM, allegationsOfHarmChecker);
-        eventStatus.put(ALLEGATIONS_OF_HARM_NEW, allegationsOfHarmCheckerNew);
+        eventStatus.put(ALLEGATIONS_OF_HARM_REVISED, allegationsOfHarmRevisedChecker);
         eventStatus.put(OTHER_PEOPLE_IN_THE_CASE, otherPeopleInTheCaseChecker);
         eventStatus.put(OTHER_PROCEEDINGS, otherProceedingsChecker);
         eventStatus.put(ATTENDING_THE_HEARING, attendingTheHearingChecker);
