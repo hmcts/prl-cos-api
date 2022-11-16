@@ -431,6 +431,10 @@ public class CallbackController {
         // Saving the logged-in Solicitor and Org details for the docs..
         caseDataUpdated = getSolicitorDetails(authorisation, caseDataUpdated, caseData);
 
+        // The caseLinks field is initialised as an empty Collection so that it can be accessed by ExUI Manage Case.
+        List<DynamicListElement> caselinks = List.of(DynamicListElement.EMPTY);
+        caseDataUpdated.put("caseLinks",caselinks);
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
