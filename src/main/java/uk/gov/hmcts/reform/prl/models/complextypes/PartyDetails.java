@@ -79,8 +79,8 @@ public class PartyDetails {
     private Response response;
     private YesOrNo currentRespondent;
 
-    private Flags applicantFlag;
-    private Flags respondentFlag;
+    // it will hold either applicant flag or respondent flag
+    private Flags partyLevelFlag;
 
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
