@@ -823,9 +823,9 @@ public class ManageOrderService {
             orderData = orderData.toBuilder()
                 .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
-         caseData = caseData.toBuilder().manageOrders(ManageOrders.builder()
-                                                     .fl404CustomFields(orderData)
-                                                     .build())
+        caseData = caseData.toBuilder().manageOrders(ManageOrders.builder()
+                                                         .fl404CustomFields(orderData)
+                                                         .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
         log.info("Case data ---->: {}", caseData);
         return caseData;
