@@ -823,10 +823,12 @@ public class ManageOrderService {
             orderData = orderData.toBuilder()
                 .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
-        return caseData.toBuilder().manageOrders(ManageOrders.builder()
+         caseData = caseData.toBuilder().manageOrders(ManageOrders.builder()
                                                      .fl404CustomFields(orderData)
                                                      .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
+        log.info("Case data ---->: {}", caseData);
+        return caseData;
     }
 
     public DynamicList getOrdersAsDynamicList(CaseData caseData) {
