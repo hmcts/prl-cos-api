@@ -437,6 +437,7 @@ public class CaseData implements MappableObject {
     private final List<Element<LocalCourtAdminEmail>> localCourtAdmin;
     private final DynamicList courtList;
 
+
     /**
      * This field contains Application Submitter solicitor email address.
      */
