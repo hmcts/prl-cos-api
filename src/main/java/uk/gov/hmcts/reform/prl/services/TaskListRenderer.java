@@ -26,7 +26,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
-import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_NEW;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
@@ -102,7 +102,7 @@ public class TaskListRenderer {
         TaskSection requiredDetails = null;
         if (YesOrNo.Yes.equals(caseData.getIsNewCaseCreated())) {
             requiredDetails = newSection("Add required details")
-                .withTask(tasks.get(ALLEGATIONS_OF_HARM_NEW));
+                .withTask(tasks.get(ALLEGATIONS_OF_HARM_REVISED));
         } else {
             requiredDetails = newSection("Add required details")
                 .withTask(tasks.get(ALLEGATIONS_OF_HARM));

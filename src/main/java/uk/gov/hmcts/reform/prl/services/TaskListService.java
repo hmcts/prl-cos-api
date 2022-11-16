@@ -21,7 +21,7 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
-import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_NEW;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
@@ -104,7 +104,7 @@ public class TaskListService {
             SUBMIT
         ));
         if (YesOrNo.Yes.equals(caseData.getIsNewCaseCreated())) {
-            eventsList.add(ALLEGATIONS_OF_HARM_NEW);
+            eventsList.add(ALLEGATIONS_OF_HARM_REVISED);
         } else {
             eventsList.add(ALLEGATIONS_OF_HARM);
         }
