@@ -78,6 +78,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
@@ -88,6 +89,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentC
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.MultiBundleConfig;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -346,20 +349,12 @@ public class CaseData implements MappableObject {
     private final Document draftOrderDocWelsh;
     @JsonProperty("c8Document")
     private final Document c8Document;
-    @JsonProperty("c8DraftDocument")
-    private final Document c8DraftDocument;
     @JsonProperty("c8WelshDocument")
     private final Document c8WelshDocument;
-    @JsonProperty("c8WelshDraftDocument")
-    private final Document c8WelshDraftDocument;
     @JsonProperty("c1ADocument")
     private final Document c1ADocument;
-    @JsonProperty("c1ADraftDocument")
-    private final Document c1ADraftDocument;
     @JsonProperty("c1AWelshDocument")
     private final Document c1AWelshDocument;
-    @JsonProperty("c1AWelshDraftDocument")
-    private final Document c1AWelshDraftDocument;
 
     @JsonProperty("isEngDocGen")
     private final String isEngDocGen;
@@ -661,10 +656,14 @@ public class CaseData implements MappableObject {
     private String previewDraftAnOrder;
 
     private String citizenUploadedStatement;
+    @JsonProperty("paymentReferenceNumber")
+    private final String paymentReferenceNumber;
 
     /**
      * Respondent Solicitor.
      */
+
+    private final Consent respondentConsentToApplication;
 
     private final KeepDetailsPrivate keepContactDetailsPrivate;
     private final KeepDetailsPrivate keepContactDetailsPrivateOther;
@@ -672,16 +671,67 @@ public class CaseData implements MappableObject {
 
     private final AttendToCourt respondentAttendingToCourt;
 
+    /**
+     * Respondent solicitor's international element.
+     */
     private final SolicitorInternationalElement internationalElementChild;
     private final SolicitorInternationalElement internationalElementParent;
     private final SolicitorInternationalElement internationalElementJurisdiction;
     private final SolicitorInternationalElement internationalElementRequest;
 
+    /**
+     * Respondent solicitor's allegations of harm.
+     */
     private final RespondentAllegationsOfHarm respondentAllegationsOfHarm;
-    private final Behaviours respondentDomesticAbuseBehaviour;
-    private final Behaviours respondentChildAbuseBehaviour;
+    private final List<Element<Behaviours>> respondentDomesticAbuseBehaviour;
+    private final List<Element<Behaviours>> respondentChildAbuseBehaviour;
     private final RespondentChildAbduction respondentChildAbduction;
     private final RespondentOtherConcerns respondentOtherConcerns;
+    
     /** Confirm or Edit your contact details. **/
     private final ConfirmEditDetails rsConfirmEditContactDetails;
+
+    /**
+     * Respondent solicitor's Draft PDF response.
+     */
+    private final String viewC7PdflinkText;
+    private final String isEngC7DocGen;
+    private final Document draftC7ResponseDoc;
+
+    /**
+     * Respondent solicitor's Current or Past proceedings.
+     */
+    private final YesNoDontKnow currentOrPastProceedingsForChildren;
+    private final List<Element<ProceedingDetails>> respondentExistingProceedings;
+    // C100 Rebuild
+    private String c100RebuildInternationalElements;
+    private String c100RebuildReasonableAdjustments;
+    private String c100RebuildTypeOfOrder;
+    private String c100RebuildHearingWithoutNotice;
+    private String c100RebuildHearingUrgency;
+    private String c100RebuildOtherProceedings;
+    private String c100RebuildReturnUrl;
+
+    /**
+     * Bundle.
+     */
+    private List<Bundle> caseBundles;
+    private List<Bundle> historicalBundles;
+    private String bundleConfiguration;
+    private List<MultiBundleConfig> multiBundleConfiguration;
+
+    private String c100RebuildMaim;
+    private String c100RebuildChildDetails;
+    private String c100RebuildApplicantDetails;
+    private String c100RebuildOtherChildrenDetails;
+    private String c100RebuildRespondentDetails;
+    private String c100RebuildOtherPersonsDetails;
+
+    private String c100RebuildSafetyConcerns;
+    private String c100RebuildScreeningQuestions;
+    private String c100RebuildHelpWithFeesDetails;
+    private String c100RebuildStatementOfTruth;
+    private String helpWithFeesReferenceNumber;
+    private String c100RebuildChildPostCode;
+    private String c100RebuildConsentOrderDetails;
 }

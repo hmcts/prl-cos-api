@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum WhomConsistPassportList {
-
     @JsonProperty("mother")
     mother("mother", "Mother"),
 
