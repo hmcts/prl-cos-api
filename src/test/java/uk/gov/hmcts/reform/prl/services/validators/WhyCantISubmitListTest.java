@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
@@ -214,7 +215,11 @@ public class WhyCantISubmitListTest {
 
     @Test
     public void testAttendingTheHearingCheckerAddsError() {
-        caseData = caseData.toBuilder().isWelshNeeded(YesOrNo.Yes).build();
+        caseData = caseData.toBuilder()
+                .attendHearing(AttendHearing.builder()
+                                   .isWelshNeeded(YesOrNo.Yes)
+                                   .build())
+ .build();
         attendingTheHearingChecker.isStarted(caseData);
         verify(taskErrorService).addEventError(ATTENDING_THE_HEARING, ATTENDING_THE_HEARING_ERROR, ATTENDING_THE_HEARING_ERROR.getError());
     }
