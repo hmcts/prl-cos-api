@@ -30,8 +30,11 @@ import static uk.gov.hmcts.reform.prl.enums.citizen.DomesticAbuseMapperEnum.fina
 
 public class CaseDataMiamElementsMapper {
 
+    private CaseDataMiamElementsMapper() {
+    }
+
     public static void updateMiamElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
-                                                      C100RebuildMiamElements c100RebuildMiamElements) {
+                                                     C100RebuildMiamElements c100RebuildMiamElements) {
 
         List<MiamPreviousAttendanceChecklistEnum> previousAttendanceChecklistEnums =
                 buildMiamPreviousAttendanceChecklist(c100RebuildMiamElements);
@@ -44,6 +47,7 @@ public class CaseDataMiamElementsMapper {
                 .familyMediatorMiam(c100RebuildMiamElements.getMiamMediatorDocument())
                 .applicantConsentMiam(c100RebuildMiamElements.getMiamConsent())
                 .otherProceedingsMiam(c100RebuildMiamElements.getMiamOtherProceedings())
+                .claimingExemptionMiam(c100RebuildMiamElements.getMiamValidReason())
                 .miamExemptionsChecklist(buildMiamExemptionsCheckList(c100RebuildMiamElements))
                 .miamDomesticViolenceChecklist(buildMiamDomesticViolenceChecklist(c100RebuildMiamElements))
                 .miamChildProtectionConcernList(buildMiamChildProtectionConcernList(c100RebuildMiamElements))

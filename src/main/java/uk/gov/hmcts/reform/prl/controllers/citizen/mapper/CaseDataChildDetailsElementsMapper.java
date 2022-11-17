@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,8 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 public class CaseDataChildDetailsElementsMapper {
-
+    private CaseDataChildDetailsElementsMapper() {
+    }
 
     private static final String WHO_THE_CHILD_LIVE_WITH = "whoChildLiveWith";
     private static final String CHILD_TIME_SPENT = "childTimeSpent";
@@ -76,6 +78,7 @@ public class CaseDataChildDetailsElementsMapper {
                    .otherGender(childDetail.getPersonalDetails().getOtherGenderDetails())
                    .parentalResponsibilityDetails(buildParentalResponsibility(
                        childDetail.getParentialResponsibility()))
+                   .personWhoLivesWithChild(Collections.emptyList())
                    .orderAppliedFor(buildOrdersApplyingFor(childDetail.getChildMatters()))
                    .build()
             ).build();

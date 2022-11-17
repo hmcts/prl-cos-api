@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import org.junit.Before;
@@ -68,18 +67,12 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForOrderTypeExtraFields() throws JsonProcessingException {
+    public void testCaseDataMapperForOrderTypeExtraFields() throws IOException {
 
         //Given
         CaseData caseData1 = caseData
                 .toBuilder()
-                .c100RebuildTypeOfOrder("{\"too_courtOrder\":[\"whoChildLiveWith\","
-                        + "\"stopOtherPeopleDoingSomething\"" + ",\"resolveSpecificIssue\"],\"too_stopOtherPeopleDoingSomethingSubField"
-                        + "\":[\"changeChildrenNameSurname\",\"allowMedicalTreatment\",\"takingChildOnHoliday\","
-                        + "\"relocateChildrenDifferentUkArea\",\"relocateChildrenOutsideUk\"],\"too_resolveSpecificIssueSubField"
-                        + "\":[\"specificHoliday\",\"whatSchoolChildrenWillGoTo\",\"religiousIssue\",\"changeChildrenNameSurnameA"
-                        + "\",\"medicalTreatment\",\"relocateChildrenDifferentUkAreaA\",\"relocateChildrenOutsideUkA\","
-                        + "\"returningChildrenToYourCare\"]}")
+                .c100RebuildTypeOfOrder(TestUtil.readFileFrom("classpath:c100-rebuild/too1.json"))
                 .build();
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -93,13 +86,12 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperWhenNoOtherProceedingOrdersExist() throws JsonProcessingException {
+    public void testCaseDataMapperWhenNoOtherProceedingOrdersExist() throws IOException {
 
         //Given
         CaseData caseData1 = caseData
                 .toBuilder()
-                .c100RebuildOtherProceedings("{\n   \"op_childrenInvolvedCourtCase\": \"No\",\n\"op_courtOrderProtection\": "
-                        + "\"No\",\n   \"op_courtProceedingsOrders\": []\n}")
+                .c100RebuildOtherProceedings(TestUtil.readFileFrom("classpath:c100-rebuild/op1.json"))
                 .build();
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -109,15 +101,12 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForMiamExtraFields() throws JsonProcessingException {
+    public void testCaseDataMapperForMiamExtraFields() throws IOException {
 
         //Given
         CaseData caseData1 = caseData
                 .toBuilder()
-                .c100RebuildMaim("{\n  \"miam_otherProceedings\": \"No\",\n\"miam_consent\": \"s\",\n\"miam_attendance\": "
-                        + "\"No\",\n\"miam_haveDocSigned\": \"Yes\",\n\"miam_mediatorDocument\": \"No\",\n\"miam_validReason\": "
-                        + "\"Yes\",\n\"miam_nonAttendanceReasons\": [\n\"none\"\n],\n\"miam_certificate\": {\n  \"id\": "
-                        + "\"test\",\n  \"url\": \"test\",\n  \"filename\": \"test\",\n  \"binaryUrl\": \"test\"\n}\n}")
+                .c100RebuildMaim(TestUtil.readFileFrom("classpath:c100-rebuild/miam1.json"))
                 .build();
 
         //When
@@ -129,21 +118,10 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForChildDetail() throws JsonProcessingException {
+    public void testCaseDataMapperForChildDetail() throws IOException {
         //Given
-        CaseData caseData1 = caseData.toBuilder().c100RebuildChildDetails("{\"cd_children\":"
-                  + "[{\"id\":\"6c2505da-dae5-4541-9df5-5f4045f0ad4a\",\"firstName\":\"c1\",\"lastName\":\"c11\","
-                 + "\"personalDetails\":{\"dateOfBirth\":{\"year\":\"2021\",\"month\":\"10\",\"day\":\"10\"},\""
-                 + "isDateOfBirthUnknown\":\"\",\"approxDateOfBirth\":{\"day\":\"\",\"month\":\"\",\"year\":\"\"},\""
-                 + "gender\":\"Female\",\"otherGenderDetails\":\"\"},\"childMatters\":{\"needsResolution\":"
-                 + "[\"whoChildLiveWith\"]},\"parentialResponsibility\":{\"statement\":\"test11\"}},{\"id\":\""
-                 + "ce9a93c4-8d7d-4aeb-8ac5-619de4d91a8c\",\"firstName\":\"c2\",\"lastName\":\"c22\",\"personalDetails\""
-                 + ":{\"dateOfBirth\":{\"year\":\"\",\"month\":\"\",\"day\":\"\"},\"isDateOfBirthUnknown\":\"Yes\","
-                  + "\"approxDateOfBirth\":{\"year\":\"2000\",\"month\":\"10\",\"day\":\"20\"},\"gender\":\"Other\",\""
-                 + "otherGenderDetails\":\"TestOther\"},\"childMatters\":{\"needsResolution\":[\"childTimeSpent\"]},"
-             + "\"parentialResponsibility\":{\"statement\":\"test22\"}}],\"cd_childrenKnownToSocialServices\":\"Yes\","
-                 + "\"cd_childrenKnownToSocialServicesDetails\":\"Testchild\",\"cd_childrenSubjectOfProtectionPlan\":\""
-                  + "Dontknow\"}").build();
+        CaseData caseData1 = caseData.toBuilder()
+                .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd1.json")).build();
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -154,20 +132,10 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForOtherChildrenDetail() throws JsonProcessingException {
+    public void testCaseDataMapperForOtherChildrenDetail() throws IOException {
         //Given
-        CaseData caseData1 = caseData.toBuilder().c100RebuildOtherChildrenDetails("{\"ocd_hasOtherChildren\":\"Yes\","
-                      + "\"ocd_otherChildren\":"
-                      + "[{\"id\":\"a6c3e7f1-ce2f-42a7-b60e-82b80f8f36ab\",\"firstName\":\"test1\",\"lastName\":\"test11\","
-                      + "\"personalDetails\":{\"dateOfBirth\":{\"year\":\"2000\",\"month\":\"12\",\"day\":\"7\"},"
-                      + "\"isDateOfBirthUnknown\":\"\",\"approxDateOfBirth\":{\"day\":\"\",\"month\":\"\",\"year\":\"\"},"
-                      + "\"gender\":\"Male\",\"otherGenderDetails\":\"\"},\"childMatters\":{\"needsResolution\":[]},"
-                    + "\"parentialResponsibility\":{\"statement\":\"\"}},{\"id\":\"498bbf69-f8ab-45bb-a762-1810a339566f\","
-                  + "\"firstName\":\"test2\",\"lastName\":\"test22\",\"personalDetails\":{\"dateOfBirth\":"
-                  + "{\"year\":\"\",\"month\":\"\",\"day\":\"\"},\"isDateOfBirthUnknown\":\"Yes\",\"approxDateOfBirth\":"
-                  + "{\"year\":\"2012\",\"month\":\"8\",\"day\":\"8\"},\"gender\":\"Other\",\"otherGenderDetails\":\"test\"},"
-              + "\"childMatters\":{\"needsResolution\":[]},\"parentialResponsibility\":{\"statement\":\"\"}}]}")
-                                .build();
+        CaseData caseData1 = caseData.toBuilder()
+                .c100RebuildOtherChildrenDetails(TestUtil.readFileFrom("classpath:c100-rebuild/ocd1.json")).build();
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -178,19 +146,10 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForOtherChildrenDetailNull() throws JsonProcessingException {
+    public void testCaseDataMapperForOtherChildrenDetailNull() throws IOException {
         //Given
-        CaseData caseData1 = caseData.toBuilder().c100RebuildOtherChildrenDetails("{\"ocd_hasOtherChildren\":\"No\",\"ocd_otherChildren\":"
-                  + "[{\"id\":\"a6c3e7f1-ce2f-42a7-b60e-82b80f8f36ab\",\"firstName\":\"test1\",\"lastName\":\"test11\","
-                  + "\"personalDetails\":{\"dateOfBirth\":{\"year\":\"2000\",\"month\":\"12\",\"day\":\"7\"},"
-                  + "\"isDateOfBirthUnknown\":\"\",\"approxDateOfBirth\":{\"day\":\"\",\"month\":\"\",\"year\":\"\"},"
-                  + "\"gender\":\"Male\",\"otherGenderDetails\":\"\"},\"childMatters\":{\"needsResolution\":[]},"
-                  + "\"parentialResponsibility\":{\"statement\":\"\"}},{\"id\":\"498bbf69-f8ab-45bb-a762-1810a339566f\","
-                  + "\"firstName\":\"test2\",\"lastName\":\"test22\",\"personalDetails\":{\"dateOfBirth\":"
-                  + "{\"year\":\"\",\"month\":\"\",\"day\":\"\"},\"isDateOfBirthUnknown\":\"Yes\",\"approxDateOfBirth\":"
-                  + "{\"year\":\"2012\",\"month\":\"8\",\"day\":\"8\"},\"gender\":\"Other\",\"otherGenderDetails\":\"test\"},"
-                  + "\"childMatters\":{\"needsResolution\":[]},\"parentialResponsibility\":{\"statement\":\"\"}}]}")
-            .build();
+        CaseData caseData1 = caseData.toBuilder()
+                .c100RebuildOtherChildrenDetails(TestUtil.readFileFrom("classpath:c100-rebuild/ocd2.json")).build();
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -201,13 +160,9 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperReasonableAdjustmentsExtraFields() throws JsonProcessingException {
+    public void testCaseDataMapperReasonableAdjustmentsExtraFields() throws IOException {
         CaseData caseData1 = caseData.toBuilder()
-                .c100RebuildReasonableAdjustments("{\n  \"ra_typeOfHearing\": [\n\"videoHearing\",\n\"phoneHearing\"\n],"
-                        + "\n\"ra_languageNeeds\": [\n\"speakInWelsh\",\n\"readAndWriteInWelsh\","
-                        + "\n\"needInterpreterInCertainLanguage\"\n],\n\"ra_needInterpreterInCertainLanguage_subfield\": "
-                        + "\"test\",\n\"ra_specialArrangements\": [\n\"noSafetyRequirements\"\n],"
-                        + "\n\"ra_disabilityRequirements\": [\n\"noSupport\"\n]\n}")
+                .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra1.json"))
                 .build();
 
         //When
@@ -218,19 +173,10 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForOtherPersonDetails() throws JsonProcessingException {
+    public void testCaseDataMapperForOtherPersonDetails() throws IOException {
         //Given
-        CaseData caseData1 = caseData.toBuilder().c100RebuildOtherPersonsDetails("{\"oprs_otherPersons\":[{"
-              + "\"id\":\"530b66b8-b718-4aca-bc29-09cca1c0429f\",\"firstName\":\"c1\",\"lastName\":\"c1\","
-              + "\"personalDetails\":{\"dateOfBirth\":{\"year\":\"1990\",\"month\":\"12\",\"day\":\"12\"},"
-              + "\"isDateOfBirthUnknown\":\"\",\"isNameChanged\":\"yes\",\"previousFullName\":\"previous name\","
-              + "\"approxDateOfBirth\":{\"day\":\"\",\"month\":\"\",\"year\":\"\"},\"gender\":\"Male\","
-              + "\"otherGenderDetails\":\"\"},\"relationshipDetails\":{\"relationshipToChildren\":[{\"childId\":"
-              + "\"4a9f3ec0-c359-4dc0-9e94-e4fc868f0341\",\"relationshipType\":\"Mother\","
-              + "\"otherRelationshipTypeDetails\":\"\"}]},\"address\":{\"AddressLine1\":\"add1\","
-              + "\"AddressLine2\":\"add2\",\"AddressLine3\":\"add3\",\"PostTown\":\"\",\"County\":\"thames\",\"PostCode\":\"tw22tr8\","
-              + "\"Country\":\"uk\"}}]}")
-            .build();
+        CaseData caseData1 = caseData.toBuilder()
+                .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs1.json")).build();
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -241,19 +187,10 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForOtherPersonDetailsUnknownDoB() throws JsonProcessingException {
+    public void testCaseDataMapperForOtherPersonDetailsUnknownDoB() throws IOException {
         //Given
-        CaseData caseData1 = caseData.toBuilder().c100RebuildOtherPersonsDetails("{\"oprs_otherPersons\":"
-             + "[{\"id\":\"530b66b8-b718-4aca-bc29-09cca1c0429f\",\"firstName\":\"c1\",\"lastName\":\"c1\","
-             + "\"personalDetails\":{\"dateOfBirth\":{\"year\":\"\",\"month\":\"\",\"day\":\"\"},"
-             + "\"isDateOfBirthUnknown\":\"Yes\",\"isNameChanged\":\"yes\",\"previousFullName\":\"previous name\","
-             + "\"approxDateOfBirth\":{\"day\":\"12\",\"month\":\"12\",\"year\":\"1990\"},\"gender\":\"Other\","
-             + "\"otherGenderDetails\":\"Test\"},\"relationshipDetails\":{\"relationshipToChildren\":[{\"childId\":"
-             + "\"4a9f3ec0-c359-4dc0-9e94-e4fc868f0341\",\"relationshipType\":\"Mother\","
-             + "\"otherRelationshipTypeDetails\":\"\"}]},\"address\":{\"AddressLine1\":\"address1\","
-             + "\"AddressLine2\":\"address2\",\"AddressLine3\":\"address3\",\"PostTown\":\"town\",\"County\":\"sdy\","
-             + "\"PostCode\":\"tw23tr9\",\"Country\":\"uk\"}}]}")
-            .build();
+        CaseData caseData1 = caseData.toBuilder()
+                .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs2.json")).build();
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -264,24 +201,10 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForRespondentDetails() throws JsonProcessingException {
+    public void testCaseDataMapperForRespondentDetails() throws IOException {
         //Given
-        CaseData caseData1 = caseData.toBuilder().c100RebuildRespondentDetails("{\"resp_Respondents\""
-                                + ":[{\"id\":\"5739186d-e782-4e49-9f0e-dc62729fdbf2\","
-                                + "\"firstName\":\"Nir\",\"lastName\":\"Sin\",\"personalDetails\""
-                                + ":{\"hasNameChanged\":\"Yes\",\"resPreviousName\":\"\",\"dateOfBirth\""
-                                + ":{\"year\":\"\",\"month\":\"\",\"day\":\"\"},\"isDateOfBirthUnknown\":"
-                                + "\"Yes\",\"approxDateOfBirth\":{\"year\":\"1993\",\"month\":\"11\","
-                                + "\"day\":\"22\"},\"gender\":\"Other\",\"otherGenderDetails\":\"Male\","
-                                + "\"respondentPlaceOfBirth\":\"London\",\"respondentPlaceOfBirthUnknown\":\"No\"},"
-                                + "\"address\":{\"AddressLine1\":\"FLAT23,THAMESVIEW,AXONPLACE\",\"AddressLine2\":"
-                                + "\"CENTREWAYAPARTMENTS\",\"PostTown\":\"ILFORD\",\"PostCode\":\"IG11NB\","
-                                + "\"selectedAddress\":\"ILFORD\",\"addressHistory\":\"Yes\",\"provideDetailsOfPreviousAddresses\":"
-                                + "\"\",\"County\":\"\"},\"relationshipDetails\":{\"relationshipToChildren\":"
-                                + "[{\"childId\":\"2e665739-0578-46cf-a4c4-bdaaefd61b0a\",\"relationshipType\":"
-                                + "\"Other\",\"otherRelationshipTypeDetails\":\"others\"}]},\"contactDetails\""
-                                + ":{\"emailAddress\":\"abc@gmail.com\",\"telephoneNumber\":\"+447205308786\","
-                                + "\"donKnowEmailAddress\":\"No\",\"donKnowTelephoneNumber\":\"No\"}}]}").build();
+        CaseData caseData1 = caseData.toBuilder()
+                .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp1.json")).build();
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);

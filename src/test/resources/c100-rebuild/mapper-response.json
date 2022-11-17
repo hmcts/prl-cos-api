@@ -169,7 +169,9 @@
         "respondentsRelationshipToChild":null,
         "otherRespondentsRelationshipToChild":null,
         "childLiveWith":null,
-        "personWhoLivesWithChild":null,
+        "personWhoLivesWithChild":[
+
+        ],
         "parentalResponsibilityDetails":"childFN1 childLN1"
       }
     },
@@ -192,7 +194,9 @@
         "respondentsRelationshipToChild":null,
         "otherRespondentsRelationshipToChild":null,
         "childLiveWith":null,
-        "personWhoLivesWithChild":null,
+        "personWhoLivesWithChild":[
+
+        ],
         "parentalResponsibilityDetails":"childFN2 childLN2"
       }
     }
@@ -258,6 +262,7 @@
     }
   ],
   "applicantAttendedMiam":"No",
+  "claimingExemptionMiam":"Yes",
   "familyMediatorMiam":"No",
   "otherProceedingsMiam":"No",
   "applicantConsentMiam":"s",

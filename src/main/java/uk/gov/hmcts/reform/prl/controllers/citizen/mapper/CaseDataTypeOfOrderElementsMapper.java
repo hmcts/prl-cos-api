@@ -24,6 +24,9 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
 
 public class CaseDataTypeOfOrderElementsMapper {
 
+    private CaseDataTypeOfOrderElementsMapper() {
+    }
+
     private static final String SHORT_STATEMENT_INFO = "Short Statement Information";
     private static final String WHO_THE_CHILD_LIVE_WITH = "whoChildLiveWith";
     private static final String CHILD_TIME_SPENT = "childTimeSpent";

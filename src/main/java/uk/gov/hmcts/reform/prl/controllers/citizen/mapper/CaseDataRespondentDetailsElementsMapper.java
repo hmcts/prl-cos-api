@@ -21,6 +21,10 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 
 public class CaseDataRespondentDetailsElementsMapper {
+
+    private CaseDataRespondentDetailsElementsMapper() {
+    }
+
     public static void updateRespondentDetailsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
                                                                   C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
         caseDataBuilder.respondents(buildRespondentDetails(c100RebuildRespondentDetailsElements));
