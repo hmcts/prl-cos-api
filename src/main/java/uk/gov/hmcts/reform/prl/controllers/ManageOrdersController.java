@@ -172,6 +172,7 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("**** Case management location {}", caseData.getCaseManagementLocation());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageOrderService.populateHeader(caseData))
             .build();
