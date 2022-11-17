@@ -13,7 +13,8 @@ public enum CaseEvent {
     KEEP_DETAILS_PRIVATE("keepYourDetailsPrivate"),
     CONSENT_TO_APPLICATION("consentToTheApplication"),
     EVENT_INTERNATIONAL_ELEMENT("citizenInternationalElement"),
-    LEGAL_REPRESENTATION("legalRepresentation");
+    LEGAL_REPRESENTATION("legalRepresentation"),
+    REVIEW_AND_SUBMIT("reviewAndSubmit");
 
     private final String value;
 
