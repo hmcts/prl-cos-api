@@ -20,6 +20,9 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 public class CaseDataOtherChildrenDetailsElementsMapper {
 
+    private CaseDataOtherChildrenDetailsElementsMapper() {
+    }
+
     public static void updateOtherChildDetailsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
                                                                   C100RebuildOtherChildrenDetailsElements c100RebuildOtherChildrenDetailsElements) {
 

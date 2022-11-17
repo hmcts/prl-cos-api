@@ -48,6 +48,9 @@ import static uk.gov.hmcts.reform.prl.enums.citizen.SpecialArrangementEnum.noSaf
 
 public class CaseDataReasonableAdjustmentsElementsMapper {
 
+    private CaseDataReasonableAdjustmentsElementsMapper() {
+    }
+
     private static final String NEED_INTERPRETER = "needInterpreterInCertainLanguage";
     private static final String SPEAK_WELSH = "speakInWelsh";
     private static final String READ_WRITE_WELSH = "readAndWriteInWelsh";

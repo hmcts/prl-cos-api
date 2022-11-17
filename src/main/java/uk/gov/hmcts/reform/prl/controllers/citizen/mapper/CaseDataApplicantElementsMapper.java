@@ -21,6 +21,10 @@ import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataOtherPe
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 public class CaseDataApplicantElementsMapper {
+
+    private CaseDataApplicantElementsMapper() {
+    }
+
     private static final String ADDRESS_FIELD = "address";
     private static final String EMAIL_FIELD = "email";
     private static final String TELEPHONE_FIELD = "telephone";

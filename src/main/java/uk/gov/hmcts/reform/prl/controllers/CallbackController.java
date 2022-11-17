@@ -252,6 +252,18 @@ public class CallbackController {
         allTabsService.updateAllTabs(caseData);
     }
 
+    @PostMapping(path = "/update-citizen-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to refresh the tabs")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public void updateCitizenApplication(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        allTabsService.updateAllTabsIncludingConfTab(caseData);
+    }
+
     @PostMapping(path = "/case-withdrawn-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Send Email Notification on Case Withdraw")
     @ApiResponses(value = {

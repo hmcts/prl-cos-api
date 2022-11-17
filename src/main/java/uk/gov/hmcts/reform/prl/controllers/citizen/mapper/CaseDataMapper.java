@@ -34,6 +34,9 @@ import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataUrgency
 @Component
 public class CaseDataMapper {
 
+    private CaseDataMapper() {
+    }
+
     public static final String COMMA_SEPARATOR = ", ";
     public static final String HYPHEN_SEPARATOR = " - ";
 

@@ -13,6 +13,9 @@ import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper.
 
 public class CaseDataUrgencyElementsMapper {
 
+    private CaseDataUrgencyElementsMapper() {
+    }
+
     private static final String CASE_URGENCY_TIME = "Case Urgency Time - ";
     private static final String CASE_URGENCY_REASONS = " Case Urgency Reasons - ";
 

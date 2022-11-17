@@ -9,6 +9,9 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 public class CaseDataHwnElementsMapper {
 
+    private CaseDataHwnElementsMapper() {
+    }
+
     private static final String DETAILS_OF_NOTICE_OTHER_PEOPLE_WILL_DO_SOMETHING = "Details of without notice "
             + "hearing because the other person or people may do something that would obstruct the order";
 

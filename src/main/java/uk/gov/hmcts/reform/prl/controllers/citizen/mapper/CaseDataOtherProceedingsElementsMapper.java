@@ -30,8 +30,11 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 public class CaseDataOtherProceedingsElementsMapper {
 
+    private CaseDataOtherProceedingsElementsMapper() {
+    }
+
     public static void updateOtherProceedingsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
-                                                           C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements) {
+                                                                 C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements) {
         caseDataBuilder
                 .previousOrOngoingProceedingsForChildren(buildPreviousOrOngoingProceedingsForChildren(c100RebuildOtherProceedingsElements))
                 .existingProceedings(buildExistingProceedings(c100RebuildOtherProceedingsElements));

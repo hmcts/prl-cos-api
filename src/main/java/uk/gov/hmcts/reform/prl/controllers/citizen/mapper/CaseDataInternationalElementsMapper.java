@@ -14,8 +14,11 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 public class CaseDataInternationalElementsMapper {
 
+    private CaseDataInternationalElementsMapper() {
+    }
+
     public static void updateInternationalElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
-                                                        C100RebuildInternationalElements c100RebuildInternationalElements) {
+                                                              C100RebuildInternationalElements c100RebuildInternationalElements) {
         caseDataBuilder
                 .habitualResidentInOtherState(buildHabitualResidentInOtherState(c100RebuildInternationalElements))
                 .habitualResidentInOtherStateGiveReason(buildHabitualResidentInOtherStateReason(

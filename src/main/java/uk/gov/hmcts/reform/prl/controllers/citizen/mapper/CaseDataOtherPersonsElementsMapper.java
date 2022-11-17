@@ -24,8 +24,11 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 public class CaseDataOtherPersonsElementsMapper {
 
+    private CaseDataOtherPersonsElementsMapper() {
+    }
+
     public static void updateOtherPersonDetailsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
-                                                 C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements) {
+                                                                   C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements) {
         caseDataBuilder
                 .othersToNotify(buildOtherPeople(c100RebuildOtherPersonDetailsElements));
     }
