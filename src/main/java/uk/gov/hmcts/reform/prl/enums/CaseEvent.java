@@ -11,7 +11,8 @@ public enum CaseEvent {
     DELETE_CASE("deleteApplication"),
     EVENT_RESPONDENT_MIAM("respondentMiam"),
     KEEP_DETAILS_PRIVATE("keepYourDetailsPrivate"),
-    CONSENT_TO_APPLICATION("consentToTheApplication");
+    CONSENT_TO_APPLICATION("consentToTheApplication"),
+    EVENT_INTERNATIONAL_ELEMENT("internationalElement");
 
     private final String value;
 
