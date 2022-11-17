@@ -130,7 +130,6 @@ public class CaseApplicationResponseController {
                                                                              .build());
             responseDocumentsList.add(responseDocumentElement);
             caseData = caseData.toBuilder().citizenResponseC7DocumentList(responseDocumentsList).build();
-            log.info("****** updating Case with event " + REVIEW_AND_SUBMIT + " for case id " + caseId);
             caseDetailsReturn = caseService.updateCase(
                 caseData,
                 authorisation,
@@ -140,18 +139,19 @@ public class CaseApplicationResponseController {
                 null
             );
         }
-        log.info("***** CaseDetails return ***** " + caseDetailsReturn);
+
         if (caseDetailsReturn != null) {
+            /**
+             * send notification to Applicant solicitor for respondent's response
+             */
+            log.info("***** sending notification to applicant solicitor ***** ");
+            citizenResponseNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
             return objectMapper.convertValue(
                 caseDetailsReturn.getData(),
                 CaseData.class
             );
         }
 
-        /**
-         * send notification to Applicant solicitor for respondent's response
-         */
-        citizenResponseNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
         return objectMapper.convertValue(
             caseData,
             CaseData.class
