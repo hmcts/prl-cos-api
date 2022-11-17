@@ -70,7 +70,7 @@ public class BundlingControllerTest {
         bundleCreateResponse = BundleCreateResponse.builder().data(BundleData.builder().id("334").caseBundles(bundleList).build()).build();
         caseData = new HashMap<>();
         caseData.put("caseBundles",bundleCreateResponse.getData().getCaseBundles());
-        caseDetails = CaseDetails.builder().data(caseData).state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue())
+        caseDetails = CaseDetails.builder().data(caseData).state(State.CASE_HEARING.getValue())
             .id(123488888L).createdDate(LocalDateTime.now()).lastModified(LocalDateTime.now()).build();
     }
 
