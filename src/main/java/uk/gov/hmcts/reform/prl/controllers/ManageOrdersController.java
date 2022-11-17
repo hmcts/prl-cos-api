@@ -224,8 +224,6 @@ public class ManageOrdersController {
                 authorisation,
                 caseData
             ));
-            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authorisation,
-                                                                                                caseData));
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();

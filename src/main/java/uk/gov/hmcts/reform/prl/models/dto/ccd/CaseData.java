@@ -694,4 +694,5 @@ public class CaseData implements MappableObject {
 
     private String judgeDirectionsToAdmin;
     private YesNoNotRequiredEnum isTheOrderAboutAllChildren;
+    private String adminNotes;
 }

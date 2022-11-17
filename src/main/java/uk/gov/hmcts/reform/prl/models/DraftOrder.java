@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
@@ -26,7 +27,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class DraftOrder {
     private final String typeOfOrder;
-    private String orderType;
+    private CreateSelectOrderOptionsEnum orderType;
     private String orderTypeId;
     private Document orderDocument;
     private OtherDraftOrderDetails otherDetails;

@@ -82,8 +82,12 @@ public class EditAndApproveDraftOrderController {
             "********caseData.getDoYouWantCourtAdminToAddAnything***** {}",
             caseData.getJudgeDirectionsToAdmin()
         );
-        caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
 
+        if (callbackRequest.getEventId().equalsIgnoreCase("adminEditAndApproveAnOrder")) {
+            caseDataUpdated.putAll(draftAnOrderService.removeDraftOrderAndAddToFinalOrder(authorisation, caseData));
+        } else {
+            caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(caseData));
+        }
         log.info("*** before returning {} ***", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
