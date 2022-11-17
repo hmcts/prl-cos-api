@@ -160,6 +160,7 @@ public class DraftAnOrderService {
             .isOrderDrawnForCafcass(caseData.getManageOrders().getIsOrderDrawnForCafcass())
             .selectTypeOfOrder(caseData.getSelectTypeOfOrder())
             .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
+            .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
             .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
@@ -422,4 +423,62 @@ public class DraftAnOrderService {
             .orElseThrow(() -> new UnsupportedOperationException(String.format(
                 "Could not find order")));
     }
+
+
+    public Map<String, Object> updateDraftOrderCollection(CaseData caseData) {
+
+        log.info(" ************previewDraftAnOrder {}", caseData.getPreviewDraftAnOrder());
+        log.info(" ************ casedata {}", caseData);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection = caseData.getDraftOrderCollection();
+        for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
+            DraftOrder draftOrder = e.getValue();
+            if (draftOrder.getOrderDocument().getDocumentFileName()
+                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())) {
+                log.info("matching draftorder {}", draftOrder);
+                draftOrderCollection.set(
+                    draftOrderCollection.indexOf(e),
+                    element(getUpdatedDraftOrder(draftOrder, caseData))
+                );
+                break;
+            }
+        }
+        draftOrderCollection.sort(Comparator.comparing(
+            m -> m.getValue().getOtherDetails().getDateCreated(),
+            Comparator.reverseOrder()
+        ));
+        return Map.of("draftOrderCollection", draftOrderCollection
+        );
+    }
+
+    private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData) {
+
+        return DraftOrder.builder().orderType(caseData.getSelectedOrder())
+            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
+                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
+            .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
+            .orderDocument(caseData.getPreviewOrderDoc())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .dateCreated(dateTime.now())
+                              .status("Draft").build())
+            .isOrderDrawnForCafcass(caseData.getManageOrders().getIsOrderDrawnForCafcass())
+            .selectTypeOfOrder(caseData.getSelectTypeOfOrder())
+            .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
+            .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
+            .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
+            .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
+            .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+            .judgeOrMagistratesLastName(caseData.getJudgeOrMagistratesLastName())
+            .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
+            .magistrateLastName(caseData.getMagistrateLastName())
+            .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+            .orderDirections(caseData.getManageOrders().getOrderDirections())
+            .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
+            .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+            .judgeNotes(caseData.getJudgeDirectionsToAdmin())
+            .build();
+    }
+
+
 }
