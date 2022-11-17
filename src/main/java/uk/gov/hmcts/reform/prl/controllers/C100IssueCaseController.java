@@ -73,15 +73,13 @@ public class C100IssueCaseController {
         } catch (Exception ex) {
             log.error("Email notification could not be sent");
         }
-        if (null != caseData.getCourtList()) {
-            if (caseData.getCourtList().getValue() != null) {
-                String[] venueDetails = caseData.getCourtList().getValue().getCode().split("-");
-                String baseLocation = Arrays.stream(venueDetails).toArray()[0].toString();
-                String region = Arrays.stream(venueDetails).toArray()[1].toString();
-                caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-                    .region(region).baseLocation(baseLocation).build());
-                log.info("******* CaseManagementLocation {}", caseDataUpdated.get("caseManagementLocation"));
-            }
+        if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
+            String[] venueDetails = caseData.getCourtList().getValue().getCode().split("-");
+            String baseLocation = Arrays.stream(venueDetails).toArray()[0].toString();
+            String region = Arrays.stream(venueDetails).toArray()[1].toString();
+            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+                .region(region).baseLocation(baseLocation).build());
+            log.info("******* CaseManagementLocation {}", caseDataUpdated.get("caseManagementLocation"));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

@@ -35,11 +35,10 @@ public class LocationRefDataService {
     }
 
     private List<DynamicListElement> onlyEnglandAndWalesLocations(CourtDetails locationRefData) {
-        List<DynamicListElement> listItems = locationRefData == null
+        return (locationRefData == null
             ? new ArrayList<>()
             : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
-            .map(this::getDisplayEntry).collect(Collectors.toList());
-        return listItems;
+            .map(this::getDisplayEntry).collect(Collectors.toList()));
     }
 
     private DynamicListElement getDisplayEntry(CourtVenue location) {
