@@ -80,10 +80,6 @@ public class CaseApplicationResponseController {
                 DOCUMENT_C7_DRAFT_HINT,
                 false
             );
-        /**
-         * send notification to Applicant solicitor for respondent's response
-         */
-        citizenResponseNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
         log.info("C7 draft document generated successfully for respondent ");
         return document;
     }
@@ -151,6 +147,11 @@ public class CaseApplicationResponseController {
                 CaseData.class
             );
         }
+
+        /**
+         * send notification to Applicant solicitor for respondent's response
+         */
+        citizenResponseNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
         return objectMapper.convertValue(
             caseData,
             CaseData.class
