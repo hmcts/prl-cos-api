@@ -692,4 +692,5 @@ public class CaseData implements MappableObject {
     private String c100RebuildConsentOrderDetails;
 
     private String judgeDirectionsToAdmin;
+    private YesOrNo isTheOrderAboutAllChildren;
 }

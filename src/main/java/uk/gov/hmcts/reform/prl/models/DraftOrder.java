@@ -45,6 +45,7 @@ public class DraftOrder {
     @JsonProperty("magistrateLastName")
     private final List<Element<MagistrateLastName>> magistrateLastName;
     private final LocalDate dateOrderMade;
+    private final YesOrNo isTheOrderAboutAllChildren;
     private final String recitalsOrPreamble;
     @JsonProperty("orderDirections")
     private final String orderDirections;
