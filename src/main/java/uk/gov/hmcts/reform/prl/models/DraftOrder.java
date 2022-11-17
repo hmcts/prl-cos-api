@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -45,7 +46,7 @@ public class DraftOrder {
     @JsonProperty("magistrateLastName")
     private final List<Element<MagistrateLastName>> magistrateLastName;
     private final LocalDate dateOrderMade;
-    private final YesOrNo isTheOrderAboutAllChildren;
+    private final YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     private final String recitalsOrPreamble;
     @JsonProperty("orderDirections")
     private final String orderDirections;

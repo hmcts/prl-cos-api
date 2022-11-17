@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -692,5 +693,5 @@ public class CaseData implements MappableObject {
     private String c100RebuildConsentOrderDetails;
 
     private String judgeDirectionsToAdmin;
-    private YesOrNo isTheOrderAboutAllChildren;
+    private YesNoNotRequiredEnum isTheOrderAboutAllChildren;
 }
