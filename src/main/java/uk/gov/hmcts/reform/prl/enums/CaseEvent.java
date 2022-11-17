@@ -12,7 +12,8 @@ public enum CaseEvent {
     EVENT_RESPONDENT_MIAM("respondentMiam"),
     KEEP_DETAILS_PRIVATE("keepYourDetailsPrivate"),
     CONSENT_TO_APPLICATION("consentToTheApplication"),
-    EVENT_INTERNATIONAL_ELEMENT("internationalElement");
+    EVENT_INTERNATIONAL_ELEMENT("citizenInternationalElement"),
+    LEGAL_REPRESENTATION("legalRepresentation");
 
     private final String value;
 
