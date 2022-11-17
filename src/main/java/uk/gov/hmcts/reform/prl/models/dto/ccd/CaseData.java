@@ -138,6 +138,8 @@ public class CaseData implements MappableObject {
     @JsonAlias({"applicantCaseName", "applicantOrRespondentCaseName"})
     private final String applicantCaseName;
 
+    @JsonProperty("caseNameHmctsInternal")
+    private final String caseNameHmctsInternal;
 
     private String applicantName;
 
@@ -697,4 +699,5 @@ public class CaseData implements MappableObject {
     private String helpWithFeesReferenceNumber;
     private String c100RebuildChildPostCode;
     private String c100RebuildConsentOrderDetails;
+
 }
