@@ -119,8 +119,8 @@ notify:
 
 payments:
   api:
-    url: http://payment-api-demo.service.core-compute-demo.internal
-    callback-url: http://prl-cos-demo.service.core-compute-demo.internal/service-request-update
+    url: ${PAY_URL:}
+    callback-url: ${PAY_CALLBACK_URL:}
 private-law:
   authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend}
 
