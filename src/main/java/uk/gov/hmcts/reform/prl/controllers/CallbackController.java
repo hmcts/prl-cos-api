@@ -424,6 +424,8 @@ public class CallbackController {
             caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
             //Added for Case linking
             caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get("applicantOrRespondentCaseName"));
+        }
+        if (caseDataUpdated.get("applicantCaseName") != null) {
             caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get("applicantCaseName"));
         }
         if (caseDataUpdated.get("caseTypeOfApplication") != null) {
