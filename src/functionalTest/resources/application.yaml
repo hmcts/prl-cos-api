@@ -374,9 +374,19 @@ document:
       prl_c45a_welsh_filename: Welsh_Parental_Responsibility_Order_C45A.pdf
       prl_c45a_welsh_draft_template: PRL-GOR-WEL-C45A-Parental-Responsibility-Order-Draft.docx
       prl_c45a_welsh_draft_filename: Welsh_Parental_Responsibility_Order_C45A_draft.pdf
+      prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
+      prl_c7_blank_filename: C7BlankDocument.pdf
+      prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
+      prl_c8_blank_filename: C8BlankDocument.pdf
+      prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
+      prl_c1a_blank_filename: C1ABlankDocument.pdf
+      prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
+      prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf
+      prl_citizen_c7_blank_template: FL-PRL-GOR-ENG-C7R.docx
+      prl_citizen_c7_blank_filename: Citizen_Respond_To_Application.pdf
 
 southampton:
   court:

@@ -36,6 +36,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 public class CaseService {
 
     public static final String LINK_CASE = "linkCase";
+    public static final String CITIZEN_INTERNAL_CASE_UPDATE = "citizen-internal-case-update";
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
 
