@@ -47,7 +47,7 @@ public class ApplicantsListGenerator {
         IncrementalInteger i = new IncrementalInteger(1);
         List<InterlocutoryApplicant> parties = new ArrayList<>();
 
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<Element<PartyDetails>> applicants = caseData.getApplicants();
 
             applicants.forEach(applicant -> parties.add(
@@ -70,7 +70,7 @@ public class ApplicantsListGenerator {
         IncrementalInteger i = new IncrementalInteger(1);
         List<InterlocutoryApplicant> parties = new ArrayList<>();
 
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<Element<PartyDetails>> respondents = caseData.getRespondents();
 
             respondents.forEach(respondent -> parties.add(
