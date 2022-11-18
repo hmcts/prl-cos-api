@@ -48,7 +48,7 @@ public class ApplicantsListGenerator {
         List<InterlocutoryApplicant> parties = new ArrayList<>();
 
         if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
-            List<Element<PartyDetails>> applicants = caseData.getRespondents();
+            List<Element<PartyDetails>> applicants = caseData.getApplicants();
 
             applicants.forEach(applicant -> parties.add(
                 InterlocutoryApplicant.builder().code(applicant.getId().toString())
