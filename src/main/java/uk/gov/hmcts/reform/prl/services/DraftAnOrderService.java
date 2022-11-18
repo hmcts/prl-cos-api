@@ -149,6 +149,7 @@ public class DraftAnOrderService {
                            .orderType(draftOrder.getOrderTypeId())
                            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
+                           .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
                            .orderDocument(
                                Document.builder().documentUrl(draftOrder.getOrderDocument().getDocumentUrl())
                                    .documentBinaryUrl(draftOrder.getOrderDocument().getDocumentBinaryUrl())
