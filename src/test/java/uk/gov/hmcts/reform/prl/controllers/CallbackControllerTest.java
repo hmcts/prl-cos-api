@@ -648,61 +648,6 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void updateCitizenApplicationTest() throws Exception {
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-                .url("TestUrl")
-                .binaryUrl("binaryUrl")
-                .hashToken("testHashToken")
-                .build();
-
-        Address address = Address.builder()
-                .addressLine1("address")
-                .postTown("London")
-                .build();
-
-        OtherPersonWhoLivesWithChild personWhoLivesWithChild = OtherPersonWhoLivesWithChild.builder()
-                .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
-                .firstName("test First Name").lastName("test Last Name").address(address).build();
-
-        Element<OtherPersonWhoLivesWithChild> wrappedList = Element.<OtherPersonWhoLivesWithChild>builder().value(
-                personWhoLivesWithChild).build();
-        List<Element<OtherPersonWhoLivesWithChild>> listOfOtherPersonsWhoLivedWithChild = Collections.singletonList(
-                wrappedList);
-
-        Child child = Child.builder()
-                .firstName("Test")
-                .lastName("Name")
-                .gender(female)
-                .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-                .applicantsRelationshipToChild(specialGuardian)
-                .respondentsRelationshipToChild(father)
-                .childLiveWith(Collections.singletonList(anotherPerson))
-                .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
-                .parentalResponsibilityDetails("test")
-                .build();
-
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        CaseData caseData = CaseData.builder().children(listOfChildren)
-                .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-                .childrenKnownToLocalAuthorityTextArea("Test")
-                .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
-                .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-                .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                        .data(stringObjectMap).build()).build();
-        doNothing().when(allTabsService).updateAllTabs(any(CaseData.class));
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        callbackController.updateCitizenApplication(authToken, callbackRequest);
-
-        verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(any(CaseData.class));
-    }
-
-    @Test
     public void testSendCaseWithdrawNotification() throws Exception {
         WithdrawApplication withdrawApplication = WithdrawApplication.builder()
             .withDrawApplication(YesOrNo.Yes)
