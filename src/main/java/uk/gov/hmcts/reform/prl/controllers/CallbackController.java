@@ -417,6 +417,11 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        //Added for Case linking
+        if (caseDataUpdated.get("applicantCaseName") != null) {
+            caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get("applicantCaseName"));
+        }
+
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         // Updating the case name for FL401
