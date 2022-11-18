@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.concat;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRL_SERVICE_IDENTIFIER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REGION_SCOTLAND;
 
 @Slf4j
 @Service
@@ -26,7 +28,8 @@ public class LocationRefDataService {
         try {
             CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(authToken,
                                                                                     authTokenGenerator.generate(),
-                                                                                    "ABA5");
+                                                                                    PRL_SERVICE_IDENTIFIER
+            );
 
             return onlyEnglandAndWalesLocations(courtDetails);
         } catch (Exception e) {
@@ -38,7 +41,7 @@ public class LocationRefDataService {
     private List<DynamicListElement> onlyEnglandAndWalesLocations(CourtDetails locationRefData) {
         return (locationRefData == null
             ? new ArrayList<>()
-            : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
+            : locationRefData.getCourtVenues().stream().filter(location -> !REGION_SCOTLAND.equals(location.getRegion()))
             .map(this::getDisplayEntry).collect(Collectors.toList()));
     }
 
