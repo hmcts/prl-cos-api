@@ -80,10 +80,6 @@ public class DraftAnOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status("Draft").build())
-            .isOrderDrawnForCafcass(caseData.getManageOrders().getIsOrderDrawnForCafcass())
-            .selectTypeOfOrder(caseData.getSelectTypeOfOrder())
-            .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
-            .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
             .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
@@ -272,10 +268,6 @@ public class DraftAnOrderService {
     public Map<String, Object> populateCommonDraftOrderFields(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-        caseDataMap.put("isOrderDrawnForCafcass", selectedOrder.getIsOrderDrawnForCafcass());
-        caseDataMap.put("selectTypeOfOrder", selectedOrder.getSelectTypeOfOrder());
-        caseDataMap.put("isCaseWithdrawn", selectedOrder.getIsCaseWithdrawn());
-        caseDataMap.put("doesOrderClosesCase", selectedOrder.getDoesOrderClosesCase());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put("wasTheOrderApprovedAtHearing", selectedOrder.getWasTheOrderApprovedAtHearing());
         caseDataMap.put("judgeOrMagistrateTitle", selectedOrder.getJudgeOrMagistrateTitle());
@@ -342,10 +334,6 @@ public class DraftAnOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status("Judge reviewed").build())
-            .isOrderDrawnForCafcass(caseData.getManageOrders().getIsOrderDrawnForCafcass())
-            .selectTypeOfOrder(caseData.getSelectTypeOfOrder())
-            .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
-            .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
             .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
