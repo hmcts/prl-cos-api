@@ -240,7 +240,7 @@
         "doTheyHaveLegalRepresentation":null,
         "sendSignUpLink":null,
         "solicitorEmail":null,
-        "phoneNumber":"",
+        "phoneNumber":null,
         "email":"resp1@gmail.com",
         "address":{
           "AddressLine1":"resp1 adrs line 1",
