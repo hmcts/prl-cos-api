@@ -417,11 +417,18 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        //Added for Case linking
+        if (caseDataUpdated.get("applicantCaseName") != null) {
+            caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get("applicantCaseName"));
+        }
+
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         // Updating the case name for FL401
         if (caseDataUpdated.get("applicantOrRespondentCaseName") != null) {
             caseDataUpdated.put("applicantCaseName", caseDataUpdated.get("applicantOrRespondentCaseName"));
+            //Added for Case linking
+            caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get("applicantOrRespondentCaseName"));
         }
         if (caseDataUpdated.get("caseTypeOfApplication") != null) {
             caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
@@ -430,10 +437,6 @@ public class CallbackController {
 
         // Saving the logged-in Solicitor and Org details for the docs..
         caseDataUpdated = getSolicitorDetails(authorisation, caseDataUpdated, caseData);
-
-        // The caseLinks field is initialised as an empty Collection so that it can be accessed by ExUI Manage Case.
-        List<DynamicListElement> caselinks = List.of(DynamicListElement.EMPTY);
-        caseDataUpdated.put("caseLinks",caselinks);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
