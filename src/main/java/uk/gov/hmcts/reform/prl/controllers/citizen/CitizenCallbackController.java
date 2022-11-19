@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -52,6 +53,9 @@ public class CitizenCallbackController extends AbstractCallbackController {
     @Autowired
     CitizenEmailService citizenEmailService;
 
+    @Autowired
+    CaseDataMapper caseDataMapper;
+
     @PostMapping("/citizen-case-creation-callback/submitted")
     public void handleSubmitted(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                 @RequestBody CallbackRequest callbackRequest) {
@@ -71,6 +75,21 @@ public class CitizenCallbackController extends AbstractCallbackController {
         );
 
         publishEvent(new CaseDataChanged(caseData));
+    }
+
+    @PostMapping(path = "/map-citizen-data-to-solicitor", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to Map Citizen data to solicitor")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse generateAndStoreDocument(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody @Parameter(name = "CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest request
+    ) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
+
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData);
+        CaseData.CaseDataBuilder caseDataBuilder = updatedCaseData.toBuilder();
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataBuilder.build().toMap(objectMapper)).build();
     }
 
     @PostMapping(path = "/generate-citizen-final-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
