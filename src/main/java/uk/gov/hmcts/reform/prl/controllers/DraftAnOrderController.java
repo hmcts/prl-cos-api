@@ -137,7 +137,16 @@ public class DraftAnOrderController {
                 .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
         }
         caseData = caseData.toBuilder()
-            .manageOrders(ManageOrders.builder().fl404CustomFields(fl404CustomFields).build()).build();
+            .manageOrders(ManageOrders.builder()
+                              .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+                              .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
+                              .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
+                              .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+                              .isOrderDrawnForCafcass(caseData.getManageOrders().getIsOrderDrawnForCafcass())
+                              .orderDirections(caseData.getManageOrders().getOrderDirections())
+                              .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
+                              .fl404CustomFields(fl404CustomFields)
+                              .build()).build();
         log.info("Case data after prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
