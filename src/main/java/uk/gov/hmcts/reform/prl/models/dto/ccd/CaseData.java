@@ -275,6 +275,10 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     private final AllegationOfHarm allegationOfHarm;
 
+
+    @JsonUnwrapped
+    private final AllegationOfHarmRevised allegationOfHarmRevised;
+
     private final String allegationOfHarmNewText;
 
     /**
