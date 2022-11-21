@@ -21,10 +21,12 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -116,16 +118,21 @@ public class CaseController {
     }
 
     @GetMapping(path = "/cases", produces = APPLICATION_JSON)
-    public List<CaseData> retrieveCitizenCases(
+    public List<CitizenCaseData> retrieveCitizenCases(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
+        List<CaseData>  caseDataList;
         if (isAuthorized(authorisation, s2sToken)) {
-            return caseService.retrieveCases(authorisation, authTokenGenerator.generate());
+            caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate());
         } else {
             throw (new RuntimeException("Invalid Client"));
         }
+        return caseDataList.stream().map(this::buildCitizenCaseData).collect(Collectors.toList());
+    }
 
+    private CitizenCaseData buildCitizenCaseData(CaseData caseData) {
+        return new CitizenCaseData(caseData, caseData.getState().getLabel());
     }
 
     @PostMapping(path = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
