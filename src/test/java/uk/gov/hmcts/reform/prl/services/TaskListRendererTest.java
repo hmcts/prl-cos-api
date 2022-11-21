@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -183,7 +182,6 @@ public class TaskListRendererTest {
         assertNotEquals(expectedTaskList, actualTaskList);
     }
 
-    @Ignore
     @Test
     public void shouldRenderTaskList() throws IOException {
         CaseData caseData = CaseData.builder()
@@ -206,7 +204,6 @@ public class TaskListRendererTest {
         assertThat(expectedTaskList).isEqualTo(actualTaskList);
     }
 
-    @Ignore
     @Test
     public void shouldRenderTaskListWithNoErrors() throws IOException {
         List<EventValidationErrors> emptyErrors = Collections.emptyList();
