@@ -100,13 +100,13 @@ public class CitizenCallbackController extends AbstractCallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
-        allTabsService.updateAllTabsIncludingConfTab(caseData);
 
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated)
-            .build();
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        // Generate draft documents and set to casedataupdated..
+        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/update-citizen-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

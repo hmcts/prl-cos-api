@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -63,6 +64,9 @@ public class CaseService {
     @Autowired
     CitizenEmailService citizenEmailService;
 
+    @Autowired
+    AllTabServiceImpl allTabsService;
+
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
 
@@ -73,6 +77,7 @@ public class CaseService {
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)) {
             //citizenEmailService.sendCitizenCaseSubmissionEmail(authToken, caseId);
             CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData);
+            allTabsService.updateAllTabsIncludingConfTab(updatedCaseData);
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
