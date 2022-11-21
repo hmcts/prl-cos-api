@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.util.Map;
 import java.util.Objects;
@@ -26,6 +27,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
 @Service
@@ -207,6 +209,16 @@ public class CitizenCoreCaseDataService {
     public CaseDetails createCase(String authorisation, CaseData caseData) {
         String cosApis2sToken = authTokenGenerator.generate();
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
+
+        UserInfo userInfo = UserInfo
+                .builder()
+                .idamId(userDetails.getId())
+                .firstName(userDetails.getForename())
+                .lastName(userDetails.getSurname().orElse(null))
+                .emailAddress(userDetails.getEmail())
+                .build();
+
+        caseData.toBuilder().userInfo(wrapElements(userInfo)).build();
 
         // We can Add a Caseworker Event as well in future depending on the Role from userdetails
         EventRequestData eventRequestData = eventRequest(CITIZEN_CASE_CREATE,
