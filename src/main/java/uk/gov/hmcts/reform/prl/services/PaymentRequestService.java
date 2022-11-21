@@ -48,7 +48,7 @@ public class PaymentRequestService {
     public static final String ENG_LANGUAGE = "English";
     private final CaseService caseService;
     private static final String SERVICE_AUTH = "ServiceAuthorization";
-    private static final String PAYMENTSTATUS = "Success";
+    private static final String PAYMENT_STATUS_SUCCESS = "Success";
     private PaymentResponse paymentResponse;
 
     @Value("${payments.api.callback-url}")
@@ -108,76 +108,91 @@ public class PaymentRequestService {
                                          @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
                                          @RequestBody CreatePaymentRequest createPaymentRequest)
         throws Exception {
-
-        //Get case using Caseid
+        //Get case using caseId
         String caseId = createPaymentRequest.getCaseId();
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
             authorization,
             serviceAuthorization,
             caseId
         );
-        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
+        log.info("Case Data retrieved for caseId : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
         String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
-        log.info("paymentServiceReferenceNumber : {}, paymentReferenceNumber :{} for the case id: {} ",
+        log.info("paymentServiceReferenceNumber : {}, paymentReferenceNumber :{} for the caseId: {} ",
             paymentServiceReferenceNumber,paymentReferenceNumber,caseId);
         //Check if paymentServiceReferenceNumber and PaymentReference exist and if yes get the status of payment.
-        //If its success then payment is success else create payment
+        //If status is success then return, else create payment
         if (paymentServiceReferenceNumber != null) {
             if (null != paymentReferenceNumber) {
                 PaymentStatusResponse paymentStatus = fetchPaymentStatus(authorization, paymentReferenceNumber);
-                if (paymentStatus.getStatus() != null && paymentStatus.getStatus() != PAYMENTSTATUS) {
-                    log.info("Payment Status :{} for the case id: {} ",paymentStatus.getStatus(),caseId);
+                String status = (null != paymentStatus && null != paymentStatus.getStatus()) ? paymentStatus.getStatus() : null;
+                log.info("Payment Status : {} for paymentRef: {} caseId: {} ",status, paymentReferenceNumber, caseId);
+                if (PAYMENT_STATUS_SUCCESS.equalsIgnoreCase(status)) {
+                    paymentResponse = PaymentResponse.builder()
+                        .paymentReference(paymentReferenceNumber)
+                        .paymentStatus(paymentStatus.getStatus())
+                        .build();
+
+                    log.info("Payment is already successful for the case id: {} ",caseId);
+                    return paymentResponse;
+                } else {
                     paymentResponse = createServicePayment(paymentServiceReferenceNumber,
                                                            authorization,
                                                            createPaymentRequest.getReturnUrl());
-                    log.info("Payments made for the case id: {} ",caseId);
-                    caseData = caseData.builder().paymentReferenceNumber(paymentResponse.getPaymentReference()).build();
-                    caseService.updateCase(caseData,
+                    log.info("Payment is being made for the caseId: {} and for payment ref: {} ",caseId, paymentResponse.getPaymentReference());
+
+                    caseService.updateCase(caseData.toBuilder().paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
                                            authorization,
                                            serviceAuthorization,
                                            caseId,
                                            CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
                                            null
                     );
-
+                    log.info("Updated the case data for the caseId :{}",caseId);
                 }
             } else {
                 //PaymentReference is null
+                log.info("Creating new payment request for the caseId: {}", caseId);
                 paymentResponse = createServicePayment(paymentServiceReferenceNumber,
                                                        authorization,
                                                        createPaymentRequest.getReturnUrl());
-                log.info("Payments made for the case id: {} ",caseId);
-                caseData = caseData.builder().paymentReferenceNumber(paymentResponse.getPaymentReference()).build();
-                caseService.updateCase(caseData,
+                log.info("Payment is being made for the case id: {} and for payment ref: {} ",caseId, paymentResponse.getPaymentReference());
+
+                caseService.updateCase(caseData.toBuilder().paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
                                        authorization,
                                        serviceAuthorization,
                                        caseId,
                                        CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
                                        null
                 );
-                log.info("Updated the case data for the case id :{}",caseId);
+                log.info("Updated the case data for the caseId :{}",caseId);
             }
         } else {
             // if CR and PR doesn't exist
+            log.info("Creating new service request and payment request for the case id: {}", caseId);
             CallbackRequest request = buildCallBackRequest(createPaymentRequest);
             PaymentServiceResponse paymentServiceResponse = createServiceRequest(request, authorization);
             paymentResponse = createServicePayment(paymentServiceResponse.getServiceRequestReference(),
                                                                    authorization, createPaymentRequest.getReturnUrl()
             );
-            log.info("Payments made for the case id: {} ",caseId);
-            caseData = caseData.builder()
-                .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference())
-                .paymentReferenceNumber(paymentResponse.getPaymentReference()).build();
-            caseService.updateCase(caseData,
+            log.info(
+                "Payment is being made for serviceReqRef: {} for paymentRef: {} and for caseId: {}",
+                paymentServiceResponse.getServiceRequestReference(),
+                paymentResponse.getPaymentReference(),
+                caseId
+            );
+
+            caseService.updateCase(caseData.toBuilder()
+                                       .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference())
+                                       .paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
                                    authorization,
                                    serviceAuthorization,
                                    caseId,
                                    CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
                                    null
                                    );
-            log.info("Updated the case data for the case id :{} ",caseId);
+            log.info("Updated the case data for the caseId :{} ",caseId);
 
         }
         return paymentResponse;
