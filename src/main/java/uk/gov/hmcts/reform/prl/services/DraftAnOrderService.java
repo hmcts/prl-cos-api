@@ -14,7 +14,9 @@ import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -46,6 +48,8 @@ public class DraftAnOrderService {
     private final Time dateTime;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
+    private final ManageOrderService manageOrderService;
+    private final DgsService dgsService;
 
     private static final String NON_MOLESTATION_ORDER = "draftAnOrder/non-molestation-order.html";
     private static final String SPECIAL_GUARDIANSHIP_ORDER = "draftAnOrder/special-guardianship-c43.html";
@@ -145,16 +149,32 @@ public class DraftAnOrderService {
     }
 
     private Element<OrderDetails> convertDraftOrderToFinal(String auth, CaseData caseData, DraftOrder draftOrder) {
+        Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        try {
+            generatedDocumentInfo = dgsService.generateDocument(
+                auth,
+                CaseDetails.builder().caseData(caseData).build(),
+                fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
+            );
+        } catch (Exception e) {
+            log.error(
+                "Error while generating the final document for case {} and  order {}",
+                caseData.getId(),
+                draftOrder.getOrderType()
+            );
+        }
+
         return element(OrderDetails.builder()
                            .orderType(draftOrder.getOrderTypeId())
                            .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                                             ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
                            .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
                            .orderDocument(
-                               Document.builder().documentUrl(draftOrder.getOrderDocument().getDocumentUrl())
-                                   .documentBinaryUrl(draftOrder.getOrderDocument().getDocumentBinaryUrl())
-                                   .documentHash(draftOrder.getOrderDocument().getDocumentHash())
-                                   .documentFileName(draftOrder.getOrderDocument().getDocumentFileName()).build())
+                               Document.builder().documentUrl(generatedDocumentInfo.getUrl())
+                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                   .documentHash(generatedDocumentInfo.getHashToken())
+                                   .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
                            .adminNotes(caseData.getCourtAdminNotes())
                            .dateCreated(draftOrder.getOtherDetails().getDateCreated())
                            .judgeNotes(draftOrder.getJudgeNotes())
@@ -349,6 +369,5 @@ public class DraftAnOrderService {
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .build();
     }
-
 
 }
