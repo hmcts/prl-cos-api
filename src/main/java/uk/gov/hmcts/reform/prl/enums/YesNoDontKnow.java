@@ -15,7 +15,7 @@ public enum YesNoDontKnow {
     @JsonProperty("no")
     no("no", "No"),
     @JsonProperty("dontKnow")
-    dontKnow("dontKnow", "Don't know || Dont know");
+    dontKnow("dontKnow", "Don't know");
 
 
     private final String id;
