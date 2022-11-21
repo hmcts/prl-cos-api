@@ -95,7 +95,7 @@ public class CaseApplicationResponseController {
         @PathVariable("partyId") String partyId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
-
+        log.info("Party Id " + partyId);
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -112,6 +112,7 @@ public class CaseApplicationResponseController {
         CaseDetails caseDetailsReturn = null;
         List<Element<ResponseDocuments>> responseDocumentsList = new ArrayList<>();
         if (document != null) {
+            log.info("Party Id " + partyId);
             if (caseData.getCitizenResponseC7DocumentList() != null) {
                 responseDocumentsList.addAll(caseData.getCitizenResponseC7DocumentList());
             }
@@ -121,14 +122,16 @@ public class CaseApplicationResponseController {
                 + " "
                 + partyDetails
                 .getLastName()).orElse("");
-
+            log.info("Party Id " + partyId);
             Element<ResponseDocuments> responseDocumentElement = element(ResponseDocuments.builder()
                                                                              .partyName(partyName)
                                                                              .createdBy(partyId)
                                                                              .citizenDocument(document)
                                                                              .dateCreated(LocalDate.now())
                                                                              .build());
+            log.info("responseDocumentElement" + responseDocumentElement);
             responseDocumentsList.add(responseDocumentElement);
+            log.info("responseDocumentsList " + responseDocumentsList);
             caseData = caseData.toBuilder().citizenResponseC7DocumentList(responseDocumentsList).build();
             caseDetailsReturn = caseService.updateCase(
                 caseData,
