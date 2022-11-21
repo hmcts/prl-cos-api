@@ -108,6 +108,7 @@ public class DocumentGenServiceTest {
     CaseData c100CaseData;
     CaseData c100CaseDataFinal;
     CaseData c100CaseDataC1A;
+
     CaseData fl401CaseData;
     CaseData fl401CaseData1;
     PartyDetails partyDetails;
@@ -199,7 +200,8 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .allegationOfHarm(allegationOfHarmYes)
+            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(Yes).build())
+            .isNewCaseCreated(YesOrNo.No)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
             //.allegationsOfHarmYesNo(No)
@@ -213,6 +215,8 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.No).build())
+            .isNewCaseCreated(YesOrNo.No)
             //.allegationsOfHarmYesNo(Yes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
@@ -227,13 +231,15 @@ public class DocumentGenServiceTest {
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUE)
+            .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
+            .isNewCaseCreated(YesOrNo.No)
             //.allegationsOfHarmYesNo(Yes)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
+
 
         ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
             .keepChildrenInfoConfidential(Yes)
@@ -376,6 +382,7 @@ public class DocumentGenServiceTest {
         );
         verifyNoMoreInteractions(dgsService);
     }
+
 
 
     @Test
