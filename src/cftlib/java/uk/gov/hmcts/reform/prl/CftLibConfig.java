@@ -28,7 +28,7 @@ public class CftLibConfig implements CFTLibConfigurer {
             "caseworker-wa-task-configuration",
             "caseworker-ras-validation",
             "GS_profile"
-            );
+        );
 
         //var def = Files.readAllBytes(Path.of("build/ccd-config/ccd-A58-dev.xlsx"));
         //lib.importDefinition(def);
