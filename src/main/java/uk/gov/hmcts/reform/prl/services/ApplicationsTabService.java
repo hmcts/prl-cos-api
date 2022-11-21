@@ -77,6 +77,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.ChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.DomesticAbuseVictim;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.services.tab.TabService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.FieldGenerator;
 
@@ -90,6 +91,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 
 
@@ -326,16 +328,23 @@ public class ApplicationsTabService implements TabService {
     public Map<String, Object> getDeclarationTable(CaseData caseData) {
         Map<String, Object> declarationMap = new HashMap<>();
         String solicitor = caseData.getSolicitorName();
+        String statementOfTruthPlaceHolder = null;
+
+        if (nonNull(solicitor)) {
+            statementOfTruthPlaceHolder = solicitor;
+        } else if (isNotEmpty(caseData.getUserInfo())) {
+            UserInfo userInfo = caseData.getUserInfo().get(0).getValue();
+            statementOfTruthPlaceHolder = userInfo.getFirstName() + " " + userInfo.getLastName();
+        }
 
         String declarationText = "I understand that proceedings for contempt of court may be brought"
             + " against anyone who makes, or causes to be made, a false statement in a document verified"
             + " by a statement of truth without an honest belief in its truth. The applicant believes "
-            + "that the facts stated in this form and any continuation sheets are true. " + solicitor
+            + "that the facts stated in this form and any continuation sheets are true. " + statementOfTruthPlaceHolder
             + " is authorised by the applicant to sign this statement.";
 
         declarationMap.put("declarationText", declarationText);
-        declarationMap.put("agreedBy", solicitor);
-
+        declarationMap.put("agreedBy", statementOfTruthPlaceHolder);
         return declarationMap;
     }
 
