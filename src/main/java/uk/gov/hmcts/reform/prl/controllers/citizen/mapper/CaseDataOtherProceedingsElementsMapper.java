@@ -133,7 +133,7 @@ public class CaseDataOtherProceedingsElementsMapper {
         return null;
     }
 
-    private static Document buildDocument(uk.gov.hmcts.reform.prl.models.c100rebuild.Document orderDocument) {
+    public static Document buildDocument(uk.gov.hmcts.reform.prl.models.c100rebuild.Document orderDocument) {
         if (isNotEmpty(orderDocument)) {
             return Document.builder()
                     .documentUrl(orderDocument.getUrl())

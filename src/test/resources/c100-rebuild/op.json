@@ -44,9 +44,9 @@
           "orderCopy":"Yes",
           "orderDocument":{
             "id":"e5afa4d1-5d46-4f56-9588-1cc8f41e3891",
-            "url":"http://dm-store-aat.service.core-compute-aat.internal/documents/e5afa4d1-5d46-4f56-9588-1cc8f41e3891",
-            "filename":"applicant__child_arrangements_order_2__11112022.png",
-            "binaryUrl":"http://dm-store-aat.service.core-compute-aat.internal/documents/e5afa4d1-5d46-4f56-9588-1cc8f41e3891/binary"
+            "url":"test",
+            "filename":"test.png",
+            "binaryUrl":"test"
           }
         }
       ],
@@ -69,9 +69,9 @@
           "orderCopy":"Yes",
           "orderDocument":{
             "id":"ab040f14-50a1-42c5-bc9b-c5b2b58602f5",
-            "url":"http://dm-store-aat.service.core-compute-aat.internal/documents/ab040f14-50a1-42c5-bc9b-c5b2b58602f5",
-            "filename":"applicant__emergency_protection_order__11112022.png",
-            "binaryUrl":"http://dm-store-aat.service.core-compute-aat.internal/documents/ab040f14-50a1-42c5-bc9b-c5b2b58602f5/binary"
+            "url":"test",
+            "filename":"test.png",
+            "binaryUrl":"test"
           }
         },
         {
@@ -111,9 +111,9 @@
           "orderCopy":"Yes",
           "orderDocument":{
             "id":"ec4a56b2-358c-4b9f-ab7c-89102efa24cb",
-            "url":"http://dm-store-aat.service.core-compute-aat.internal/documents/ec4a56b2-358c-4b9f-ab7c-89102efa24cb",
-            "filename":"applicant__supervision_order__11112022.png",
-            "binaryUrl":"http://dm-store-aat.service.core-compute-aat.internal/documents/ec4a56b2-358c-4b9f-ab7c-89102efa24cb/binary"
+            "url":"test",
+            "filename":"test.png",
+            "binaryUrl":"test"
           }
         },
         {
@@ -134,9 +134,9 @@
           "orderCopy":"Yes",
           "orderDocument":{
             "id":"e9388e68-896d-4a20-bc33-2f9ed763b42f",
-            "url":"http://dm-store-aat.service.core-compute-aat.internal/documents/e9388e68-896d-4a20-bc33-2f9ed763b42f",
-            "filename":"applicant__supervision_order_2__11112022.png",
-            "binaryUrl":"http://dm-store-aat.service.core-compute-aat.internal/documents/e9388e68-896d-4a20-bc33-2f9ed763b42f/binary"
+            "url":"test",
+            "filename":"test.png",
+            "binaryUrl":"test"
           }
         },
         {
@@ -157,9 +157,9 @@
           "orderCopy":"Yes",
           "orderDocument":{
             "id":"2ce73119-9dca-4b38-8a75-d2f2591f1f2d",
-            "url":"http://dm-store-aat.service.core-compute-aat.internal/documents/2ce73119-9dca-4b38-8a75-d2f2591f1f2d",
-            "filename":"applicant__supervision_order_3__11112022.png",
-            "binaryUrl":"http://dm-store-aat.service.core-compute-aat.internal/documents/2ce73119-9dca-4b38-8a75-d2f2591f1f2d/binary"
+            "url":"test",
+            "filename":"test.png",
+            "binaryUrl":"test"
           }
         }
       ]
