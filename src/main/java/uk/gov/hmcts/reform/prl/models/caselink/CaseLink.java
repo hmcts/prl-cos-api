@@ -11,8 +11,8 @@ import org.joda.time.DateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
 public class CaseLink {
-    private final String CaseReference;
-    private final LinkReason ReasonForLink;
-    private final DateTime CreatedDateTime;
-    private final String CaseType;
+    private final String caseReference;
+    private final LinkReason reasonForLink;
+    private final DateTime createdDateTime;
+    private final String caseType;
 }

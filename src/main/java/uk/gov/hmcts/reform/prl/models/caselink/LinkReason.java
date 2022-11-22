@@ -10,6 +10,6 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
 public class LinkReason {
-    private final String Reason;
-    private final String OtherDescription;
+    private final String reason;
+    private final String otherDescription;
 }
