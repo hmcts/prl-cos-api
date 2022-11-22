@@ -32,7 +32,6 @@ public class AllegationOfHarmRevised {
     private final YesOrNo newAbductionPassportOfficeNotified;
     private final YesOrNo newAbductionChildHasPassport;
 
-    @JsonProperty("childPassportDetails")
     private final ChildPassportDetails childPassportDetails;
 
     private final YesOrNo newAbductionPreviousPoliceInvolvement;
