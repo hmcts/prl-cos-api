@@ -40,11 +40,9 @@ public class CaseDataApplicantElementsMapper {
 
         List<ApplicantDto> applicantDtoList = c100RebuildApplicantDetailsElements.getApplicants();
 
-        List<Element<PartyDetails>> elementList = applicantDtoList.stream()
+        return applicantDtoList.stream()
                 .map(applicantDto -> Element.<PartyDetails>builder().value(buildPartyDetails(applicantDto)).build())
                 .collect(Collectors.toList());
-
-        return elementList;
     }
 
     private static PartyDetails buildPartyDetails(ApplicantDto applicantDto) {
