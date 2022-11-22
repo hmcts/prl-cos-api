@@ -49,8 +49,8 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundleCreateRequestMapper {
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, String bundleConfigFileName) {
-        BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder().caseDetails(BundlingCaseDetails.builder().id(String.valueOf(caseData.getId()))
-                .caseData(mapCaseData(caseData, bundleConfigFileName)).build())
+        BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder().caseDetails(BundlingCaseDetails.builder()
+                .id(String.valueOf(caseData.getId())).caseData(mapCaseData(caseData, bundleConfigFileName)).build())
             .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
         log.info("*** createbundle request payload  : {}", bundleCreateRequest.toString());
         return bundleCreateRequest;
