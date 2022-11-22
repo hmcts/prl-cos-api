@@ -77,14 +77,28 @@ public class BundleCreateRequestMapper {
     private List<BundlingRequestDocument> mapApplicationsFromCaseData(CaseData caseData) {
         List<BundlingRequestDocument> applications = new ArrayList<>();
         if (YesOrNo.Yes.equals(caseData.getLanguagePreferenceWelsh())) {
-            applications.add(mapBundlingRequestDocument(caseData.getFinalWelshDocument(), BundlingDocGroupEnum.applicantApplication));
-            applications.add(mapBundlingRequestDocument(caseData.getC1AWelshDocument(), BundlingDocGroupEnum.applicantC1AApplication));
+            if (null != caseData.getFinalWelshDocument()) {
+                applications.add(mapBundlingRequestDocument(caseData.getFinalWelshDocument(), BundlingDocGroupEnum.applicantApplication));
+            }
+            if (null != caseData.getC1AWelshDocument()) {
+                applications.add(mapBundlingRequestDocument(caseData.getC1AWelshDocument(), BundlingDocGroupEnum.applicantC1AApplication));
+            }
         } else {
-            applications.add(mapBundlingRequestDocument(caseData.getFinalDocument(), BundlingDocGroupEnum.applicantApplication));
-            applications.add(mapBundlingRequestDocument(caseData.getC1ADocument(), BundlingDocGroupEnum.applicantC1AApplication));
+            if (null != caseData.getFinalDocument()) {
+                applications.add(mapBundlingRequestDocument(caseData.getFinalDocument(), BundlingDocGroupEnum.applicantApplication));
+            }
+            if (null != caseData.getC1ADocument()) {
+                applications.add(mapBundlingRequestDocument(caseData.getC1ADocument(), BundlingDocGroupEnum.applicantC1AApplication));
+            }
         }
-        applications.addAll(mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences()));
-        applications.addAll(mapC7DocumentsFromCaseData(caseData.getCitizenResponseC7DocumentList()));
+        List<BundlingRequestDocument> documentsUploadedByCourtAdmin = mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences());
+        if (documentsUploadedByCourtAdmin.size() > 0) {
+            applications.addAll(documentsUploadedByCourtAdmin);
+        }
+        List<BundlingRequestDocument> citizenUploadedC7Documents = mapC7DocumentsFromCaseData(caseData.getCitizenResponseC7DocumentList());
+        if (citizenUploadedC7Documents.size() > 0) {
+            applications.addAll(citizenUploadedC7Documents);
+        }
         return applications;
     }
 
