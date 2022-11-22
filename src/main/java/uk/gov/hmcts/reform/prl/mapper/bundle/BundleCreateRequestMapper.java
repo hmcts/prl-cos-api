@@ -58,12 +58,10 @@ public class BundleCreateRequestMapper {
             .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
         ObjectMapper om = new ObjectMapper();
         try {
-            om.writeValueAsString(bundleCreateRequest);
+            log.info("*** createbundle request payload  : {}", om.writeValueAsString(bundleCreateRequest));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-
-        log.info("*** createbundle request payload  : {}", om.toString());
         return bundleCreateRequest;
     }
 
