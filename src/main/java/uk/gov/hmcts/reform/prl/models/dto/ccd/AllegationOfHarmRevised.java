@@ -98,7 +98,6 @@ public class AllegationOfHarmRevised {
     private final String allegationsOfHarmOtherConcernsDetails;
     private final String allegationOfHarmSubstanceDetails;
 
-
     // For new case reference added under orders;
     private final String nonMolestationOrderCaseNumber;
 
