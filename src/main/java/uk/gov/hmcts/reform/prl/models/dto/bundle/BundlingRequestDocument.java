@@ -3,17 +3,20 @@ package uk.gov.hmcts.reform.prl.models.dto.bundle;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
+import lombok.Value;
+import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@lombok.Value
+@Value
 @Builder(toBuilder = true)
-public class Order {
+public class BundlingRequestDocument {
+    @JsonProperty("documentLink")
+    private final Document bundlingDocument;
+
     @JsonProperty("documentFileName")
     public String documentFileName;
-    @JsonProperty("orderType")
-    private final String orderType;
-    @JsonProperty("documentLink")
-    private final Document orderDocument;
 
+    @JsonProperty("documentGroup")
+    public BundlingDocGroupEnum documentGroup;
 }

@@ -4,20 +4,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.Applications;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Data;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.Order;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.Value;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -27,8 +27,20 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 
 @Slf4j
@@ -48,46 +60,50 @@ public class BundleCreateRequestMapper {
                 bundleConfigFileName)
             .data(Data.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
                 .otherDocuments(mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).applications(mapApplicationsFromCaseData(caseData))
-                .orders(mapOrdersFromCaseData(caseData.getOrderCollection())).build()).build();
-
+                .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
+                .citizenUploadedDocuments(mapBundlingDocsFromCitizenUploadedDocs(caseData.getCitizenUploadedDocumentList())).build()).build();
     }
 
-    private List<Applications> mapApplicationsFromCaseData(CaseData caseData) {
-        List<Applications> applications = new ArrayList<>();
+    private List<BundlingRequestDocument> mapApplicationsFromCaseData(CaseData caseData) {
+        List<BundlingRequestDocument> applications = new ArrayList<>();
         if (YesOrNo.Yes.equals(caseData.getLanguagePreferenceWelsh())) {
-            applications.add(mapApplicationsFromDocument(caseData.getFinalWelshDocument()));
-            applications.add(mapApplicationsFromDocument(caseData.getC1AWelshDocument()));
+            applications.add(mapBundlingRequestDocument(caseData.getFinalWelshDocument(), BundlingDocGroupEnum.applicantApplication));
+            applications.add(mapBundlingRequestDocument(caseData.getC1AWelshDocument(), BundlingDocGroupEnum.applicantC1AApplication));
         } else {
-            applications.add(mapApplicationsFromDocument(caseData.getFinalDocument()));
-            applications.add(mapApplicationsFromDocument(caseData.getC1ADocument()));
+            applications.add(mapBundlingRequestDocument(caseData.getFinalDocument(), BundlingDocGroupEnum.applicantApplication));
+            applications.add(mapBundlingRequestDocument(caseData.getC1ADocument(), BundlingDocGroupEnum.applicantC1AApplication));
         }
         applications.addAll(mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences()));
         return applications;
     }
 
-    private Applications mapApplicationsFromDocument(Document document) {
-        return (null != document) ? Applications.builder().appDocument(document).documentFileName(document.getDocumentFileName()).build()
-            : Applications.builder().build();
+    private BundlingRequestDocument mapBundlingRequestDocument(Document document, BundlingDocGroupEnum applicationsDocGroup) {
+        return (null != document) ? BundlingRequestDocument.builder().bundlingDocument(document).documentFileName(document.getDocumentFileName())
+            .documentGroup(applicationsDocGroup).build() : BundlingRequestDocument.builder().build();
     }
 
-    private List<Applications> mapApplicationsFromFurtherEvidences(List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
-        List<Applications> applications = new ArrayList<>();
+    private List<BundlingRequestDocument> mapApplicationsFromFurtherEvidences(List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
+        List<BundlingRequestDocument> applications = new ArrayList<>();
         Optional<List<Element<FurtherEvidence>>> existingFurtherEvidences = ofNullable(furtherEvidencesFromCaseData);
         if (existingFurtherEvidences.isEmpty()) {
             return applications;
         }
         ElementUtils.unwrapElements(furtherEvidencesFromCaseData).forEach(furtherEvidence -> {
             if (!furtherEvidence.getRestrictCheckboxFurtherEvidence().contains(restrictToGroup)) {
-                if (!FurtherEvidenceDocumentType.consentOrder.equals(furtherEvidence.getTypeOfDocumentFurtherEvidence())) {
-                    applications.add(mapApplicationsFromDocument(furtherEvidence.getDocumentFurtherEvidence()));
+                if (FurtherEvidenceDocumentType.miamCertificate.equals(furtherEvidence.getTypeOfDocumentFurtherEvidence())) {
+                    applications.add(mapBundlingRequestDocument(furtherEvidence.getDocumentFurtherEvidence(),
+                        BundlingDocGroupEnum.applicantMiamCertificate));
+                } else if (FurtherEvidenceDocumentType.previousOrders.equals(furtherEvidence.getTypeOfDocumentFurtherEvidence())) {
+                    applications.add(mapBundlingRequestDocument(furtherEvidence.getDocumentFurtherEvidence(),
+                        BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication));
                 }
             }
         });
         return applications;
     }
 
-    private List<Element<Order>> mapOrdersFromCaseData(List<Element<OrderDetails>> ordersFromCaseData) {
-        List<Element<Order>> orders = new ArrayList<>();
+    private List<BundlingRequestDocument> mapOrdersFromCaseData(List<Element<OrderDetails>> ordersFromCaseData) {
+        List<BundlingRequestDocument> orders = new ArrayList<>();
         Optional<List<Element<OrderDetails>>> existingOrders = ofNullable(ordersFromCaseData);
         if (existingOrders.isEmpty()) {
             return orders;
@@ -95,36 +111,98 @@ public class BundleCreateRequestMapper {
         ordersFromCaseData.forEach(orderDetailsElement -> {
             OrderDetails orderDetails = orderDetailsElement.getValue();
             Document document = orderDetails.getOrderDocument();
-            orders.add(ElementUtils.element(orderDetailsElement.getId(),
-                Order.builder().orderType(orderDetails.getOrderType()).documentFileName(document.getDocumentFileName())
-                    .orderDocument(document).build()));
+            orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
+                .documentFileName(document.getDocumentFileName()).bundlingDocument(document).build());
         });
         return orders;
     }
 
-    private List<uk.gov.hmcts.reform.prl.models.dto.bundle.OtherDocument> mapOtherDocumentsFromCaseData(
+    private List<BundlingRequestDocument> mapOtherDocumentsFromCaseData(
         List<Element<OtherDocuments>> otherDocumentsFromCaseData) {
-        List<uk.gov.hmcts.reform.prl.models.dto.bundle.OtherDocument> otherDocuments = new ArrayList<>();
+        List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
         Optional<List<Element<OtherDocuments>>> existingOtherDocuments = ofNullable(otherDocumentsFromCaseData);
         if (existingOtherDocuments.isEmpty()) {
-            return otherDocuments;
+            return otherBundlingDocuments;
         }
         List<Element<OtherDocuments>> otherDocumentsNotConfidential = otherDocumentsFromCaseData.stream()
             .filter(element -> !element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
             .collect(Collectors.toList());
 
-        otherDocumentsNotConfidential
-            .forEach(otherDocumentsElement -> {
-                Document otherDocument = otherDocumentsElement.getValue().getDocumentOther();
-                otherDocuments.add(uk.gov.hmcts.reform.prl.models.dto.bundle.OtherDocument.builder().id(
-                    (null != otherDocumentsElement.getId() ? otherDocumentsElement.getId().toString() : null))
-                    .value(Value.builder().documentFileName(otherDocument.getDocumentFileName()).documentLink(
-                            DocumentLink.builder().documentFilename(otherDocument.getDocumentFileName())
-                                .documentUrl(otherDocument.getDocumentUrl()).documentBinaryUrl(
-                                    otherDocument.getDocumentBinaryUrl()).build())
-                        .typeOfDocumentFurtherEvidence(otherDocumentsElement.getValue().getDocumentTypeOther().getId()).build()).build());
+        ElementUtils.unwrapElements(otherDocumentsNotConfidential)
+            .forEach(otherDocuments ->
+                otherBundlingDocuments.add(
+                    mapBundlingRequestDocument(otherDocuments.getDocumentOther(),
+                        getDocumentGroup("", otherDocuments.getDocumentTypeOther().getDisplayedValue()))));
 
-            });
-        return otherDocuments;
+        return otherBundlingDocuments;
+    }
+
+    private List<BundlingRequestDocument> mapBundlingDocsFromCitizenUploadedDocs(List<Element<UploadedDocuments>> citizenUploadedDocumentList) {
+        List<BundlingRequestDocument> bundlingCitizenStatements = new ArrayList<>();
+        Optional<List<Element<UploadedDocuments>>> uploadedPositionStatements = ofNullable(citizenUploadedDocumentList);
+        if (uploadedPositionStatements.isEmpty()) {
+            return bundlingCitizenStatements;
+        }
+        citizenUploadedDocumentList.forEach(citizenUploadedDocumentElement -> {
+            UploadedDocuments uploadedDocuments = citizenUploadedDocumentElement.getValue();
+            Document uploadedDocument = uploadedDocuments.getCitizenDocument();
+            bundlingCitizenStatements.add(BundlingRequestDocument.builder()
+                .documentGroup(getDocumentGroup(uploadedDocuments.getIsApplicant(), uploadedDocuments.getDocumentType()))
+                .documentFileName(uploadedDocument.getDocumentFileName())
+                .bundlingDocument(uploadedDocument).build());
+
+        });
+        return bundlingCitizenStatements;
+    }
+
+    private BundlingDocGroupEnum getDocumentGroup(String isApplicant, String docType) {
+        BundlingDocGroupEnum bundlingDocGroupEnum = BundlingDocGroupEnum.notRequiredGroup;
+        switch (docType) {
+            case YOUR_POSITION_STATEMENTS:
+                bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentPositionStatements :
+                    BundlingDocGroupEnum.applicantPositionStatements;
+                break;
+            case YOUR_WITNESS_STATEMENTS:
+                bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentWitnessStatements :
+                    BundlingDocGroupEnum.applicantWitnessStatements;
+                break;
+            case LETTERS_FROM_SCHOOL:
+                bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentLettersFromSchool :
+                    BundlingDocGroupEnum.applicantLettersFromSchool;
+                break;
+            case OTHER_WITNESS_STATEMENTS:
+                bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentOtherWitnessStatements :
+                    BundlingDocGroupEnum.applicantOtherWitnessStatements;
+                break;
+            case MAIL_SCREENSHOTS_MEDIA_FILES:
+                bundlingDocGroupEnum =
+                    PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentEmailsOrScreenshotsOrImagesOrOtherMediaFiles :
+                        BundlingDocGroupEnum.applicantEmailsOrScreenshotsOrImagesOrOtherMediaFiles;
+                break;
+            case MEDICAL_REPORTS:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalReports;
+                break;
+            case MEDICAL_RECORDS:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalRecords;
+                break;
+            case PATERNITY_TEST_REPORTS:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.expertDNAReports;
+                break;
+            case DRUG_AND_ALCOHOL_TESTS:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.expertReportsForDrugAndAlcholTest;
+                break;
+            case POLICE_REPORTS:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.policeReports;
+                break;
+            case CAFCASS_REPORTS:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.cafcassReportsUploadedByCourtAdmin;
+                break;
+            case EXPERT_REPORTS:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.expertReportsUploadedByCourtAdmin;
+                break;
+            default:
+                break;
+        }
+        return bundlingDocGroupEnum;
     }
 }

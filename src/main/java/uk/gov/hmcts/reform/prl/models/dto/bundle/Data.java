@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
-import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.util.List;
 
@@ -12,21 +11,23 @@ import java.util.List;
 @Value
 @Builder(toBuilder = true)
 public class Data {
+
+    @JsonProperty("orders")
+    private final List<BundlingRequestDocument> orders;
+
+    @JsonProperty("citizenUploadedDocuments")
+    private List<BundlingRequestDocument> citizenUploadedDocuments;
+
+    @JsonProperty("applications")
+    private List<BundlingRequestDocument> applications;
+
     @JsonProperty("applicantCaseName")
     private final String applicantCaseName;
 
     @JsonProperty("caseNumber")
     private final String caseNumber;
 
-    @JsonProperty("furtherEvidences")
-    private List<FurtherEvidence> furtherEvidences;
+    @JsonProperty("cafcassAndExpertReportsUploadedByCourtAdmin")
+    private List<BundlingRequestDocument> otherDocuments;
 
-    @JsonProperty("otherDocuments")
-    private List<OtherDocument> otherDocuments;
-
-    @JsonProperty("applications")
-    private List<Applications> applications;
-
-    @JsonProperty("orders")
-    private final List<Element<Order>> orders;
 }
