@@ -12,6 +12,12 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class BundlingData {
 
+    @JsonProperty("applicantCaseName")
+    private final String applicantCaseName;
+
+    @JsonProperty("caseNumber")
+    private final String caseNumber;
+
     @JsonProperty("orders")
     private final List<BundlingRequestDocument> orders;
 
@@ -21,12 +27,8 @@ public class BundlingData {
     @JsonProperty("applications")
     private List<BundlingRequestDocument> applications;
 
-    @JsonProperty("applicantCaseName")
-    private final String applicantCaseName;
-
-    @JsonProperty("caseNumber")
-    private final String caseNumber;
-
-    @JsonProperty("cafcassAndExpertReportsUploadedByCourtAdmin")
+    @JsonProperty("otherDocumentsUploadedByCourtAdmin")
     private List<BundlingRequestDocument> otherDocuments;
+
+
 }

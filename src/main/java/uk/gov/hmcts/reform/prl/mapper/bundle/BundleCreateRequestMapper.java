@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
@@ -28,6 +29,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_STATMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
@@ -75,6 +77,20 @@ public class BundleCreateRequestMapper {
             applications.add(mapBundlingRequestDocument(caseData.getC1ADocument(), BundlingDocGroupEnum.applicantC1AApplication));
         }
         applications.addAll(mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences()));
+        applications.addAll(mapC7DocumentsFromCaseData(caseData.getCitizenResponseC7DocumentList()));
+        return applications;
+    }
+
+    private List<BundlingRequestDocument> mapC7DocumentsFromCaseData(List<Element<ResponseDocuments>> citizenResponseC7DocumentList) {
+        List<BundlingRequestDocument> applications = new ArrayList<>();
+        Optional<List<Element<ResponseDocuments>>> uploadedC7CitizenDocs = ofNullable(citizenResponseC7DocumentList);
+        if (uploadedC7CitizenDocs.isEmpty()) {
+            return applications;
+        }
+        ElementUtils.unwrapElements(citizenResponseC7DocumentList).forEach(c7CitizenResponseDocument -> {
+            applications.add(mapBundlingRequestDocument(c7CitizenResponseDocument.getCitizenDocument(),
+                BundlingDocGroupEnum.c7Documents));
+        });
         return applications;
     }
 
@@ -172,8 +188,7 @@ public class BundleCreateRequestMapper {
                     BundlingDocGroupEnum.applicantLettersFromSchool;
                 break;
             case OTHER_WITNESS_STATEMENTS:
-                bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentOtherWitnessStatements :
-                    BundlingDocGroupEnum.applicantOtherWitnessStatements;
+                bundlingDocGroupEnum =  BundlingDocGroupEnum.otherWitnessStatements;
                 break;
             case MAIL_SCREENSHOTS_MEDIA_FILES:
                 bundlingDocGroupEnum =
@@ -200,6 +215,9 @@ public class BundleCreateRequestMapper {
                 break;
             case EXPERT_REPORTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertReportsUploadedByCourtAdmin;
+                break;
+            case APPLICANT_STATMENT:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.applicantStatementDocsUploadedByCourtAdmin;
                 break;
             default:
                 break;

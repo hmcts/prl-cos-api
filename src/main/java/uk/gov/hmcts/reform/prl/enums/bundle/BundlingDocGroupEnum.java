@@ -65,11 +65,8 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("respondentLettersFromSchool")
     respondentLettersFromSchool("respondentLettersFromSchool", "respondentLettersFromSchool"),
 
-    @JsonProperty("applicantOtherWitnessStatements")
-    applicantOtherWitnessStatements("applicantOtherWitnessStatements", "applicantOtherWitnessStatements"),
-
-    @JsonProperty("respondentOtherWitnessStatements")
-    respondentOtherWitnessStatements("respondentOtherWitnessStatements", "respondentOtherWitnessStatements"),
+    @JsonProperty("otherWitnessStatements")
+    otherWitnessStatements("otherWitnessStatements", "otherWitnessStatements"),
 
     @JsonProperty("applicantEmailsOrScreenshotsOrImagesOrOtherMediaFiles")
     applicantEmailsOrScreenshotsOrImagesOrOtherMediaFiles("applicantEmailsOrScreenshotsOrImagesOrOtherMediaFiles",
@@ -99,6 +96,12 @@ public enum BundlingDocGroupEnum {
 
     @JsonProperty("cafcassReportsUploadedByCourtAdmin")
     cafcassReportsUploadedByCourtAdmin("cafcassReportsUploadedByCourtAdmin", "cafcassReportsUploadedByCourtAdmin"),
+
+    @JsonProperty("applicantStatementDocsUploadedByCourtAdmin")
+    applicantStatementDocsUploadedByCourtAdmin("applicantStatementDocsUploadedByCourtAdmin", "applicantStatementDocsUploadedByCourtAdmin"),
+
+    @JsonProperty("c7Documents")
+    c7Documents("c7Documents", "c7Documents"),
 
     @JsonProperty("notRequiredGroup")
     notRequiredGroup("notRequiredGroup", "notRequiredGroup");
