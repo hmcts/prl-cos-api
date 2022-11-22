@@ -218,7 +218,7 @@ public class CitizenCoreCaseDataService {
                 .emailAddress(userDetails.getEmail())
                 .build();
 
-        caseData.toBuilder().userInfo(wrapElements(userInfo)).build();
+        CaseData updateCaseData = caseData.toBuilder().userInfo(wrapElements(userInfo)).build();
 
         // We can Add a Caseworker Event as well in future depending on the Role from userdetails
         EventRequestData eventRequestData = eventRequest(CITIZEN_CASE_CREATE,
@@ -233,7 +233,7 @@ public class CitizenCoreCaseDataService {
             !userDetails.getRoles().contains(CITIZEN_ROLE)
         );
 
-        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+        Map<String, Object> caseDataMap = updateCaseData.toMap(objectMapper);
         Iterables.removeIf(caseDataMap.values(), Objects::isNull);
         CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataMap);
 
