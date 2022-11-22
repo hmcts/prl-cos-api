@@ -36,13 +36,13 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
         boolean finished = validateFields(caseData);
 
-        if (caseData.getAllegationOfHarmNewText() == null || finished) {
-            taskErrorService.addEventError(ALLEGATIONS_OF_HARM_REVISED,
-                ALLEGATIONS_OF_HARM_ERROR_NEW,
-                ALLEGATIONS_OF_HARM_ERROR_NEW.getError());
+        if (finished) {
+            taskErrorService.removeError(ALLEGATIONS_OF_HARM_ERROR_NEW);
             return true;
         }
-        taskErrorService.removeError(ALLEGATIONS_OF_HARM_ERROR_NEW);
+        taskErrorService.addEventError(ALLEGATIONS_OF_HARM_REVISED,
+                                       ALLEGATIONS_OF_HARM_ERROR_NEW,
+                                       ALLEGATIONS_OF_HARM_ERROR_NEW.getError());
         return false;
     }
 
