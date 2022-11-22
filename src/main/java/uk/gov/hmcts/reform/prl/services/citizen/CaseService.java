@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 
 @Slf4j
@@ -76,7 +78,17 @@ public class CaseService {
         }
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)) {
             //citizenEmailService.sendCitizenCaseSubmissionEmail(authToken, caseId);
-            CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData);
+            UserDetails userDetails = idamClient.getUserDetails(authToken);
+            UserInfo userInfo = UserInfo
+                    .builder()
+                    .idamId(userDetails.getId())
+                    .firstName(userDetails.getForename())
+                    .lastName(userDetails.getSurname().orElse(null))
+                    .emailAddress(userDetails.getEmail())
+                    .build();
+
+            CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData.toBuilder()
+                    .userInfo(wrapElements(userInfo)).build());
             allTabsService.updateAllTabsIncludingConfTab(updatedCaseData);
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
