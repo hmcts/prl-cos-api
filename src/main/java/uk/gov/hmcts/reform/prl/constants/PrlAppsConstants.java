@@ -176,5 +176,6 @@ public class PrlAppsConstants {
 
     public static final String EXPERT_REPORTS = "Expert reports";
 
-    public static final String APPLICANT_STATMENT = "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";
+    public static final String APPLICANT_STATMENT =
+        "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";
 }
