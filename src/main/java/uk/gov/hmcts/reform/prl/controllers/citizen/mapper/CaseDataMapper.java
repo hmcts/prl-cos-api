@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildConsentOrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildCourtOrderElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildHearingWithoutNoticeElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildInternationalElements;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataApplicantElementsMapper.updateApplicantElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataChildDetailsElementsMapper.updateChildDetailsElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataConsentOrderDetailsElementsMapper.updateConsentOrderDetailsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataHwnElementsMapper.updateHearingWithoutNoticeElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataInternationalElementsMapper.updateInternationalElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
@@ -91,6 +93,10 @@ public class CaseDataMapper {
         C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = mapper
             .readValue(caseData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
         updateRespondentDetailsElementsForCaseData(caseDataBuilder, c100RebuildRespondentDetailsElements);
+
+        C100RebuildConsentOrderDetails c100RebuildConsentOrderDetails = mapper
+                .readValue(caseData.getC100RebuildConsentOrderDetails(), C100RebuildConsentOrderDetails.class);
+        updateConsentOrderDetailsForCaseData(caseDataBuilder, c100RebuildConsentOrderDetails);
 
         return caseDataBuilder.build();
     }
