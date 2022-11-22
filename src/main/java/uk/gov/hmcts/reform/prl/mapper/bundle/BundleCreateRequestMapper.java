@@ -139,21 +139,21 @@ public class BundleCreateRequestMapper {
     }
 
     private List<BundlingRequestDocument> mapBundlingDocsFromCitizenUploadedDocs(List<Element<UploadedDocuments>> citizenUploadedDocumentList) {
-        List<BundlingRequestDocument> bundlingCitizenStatements = new ArrayList<>();
-        Optional<List<Element<UploadedDocuments>>> uploadedPositionStatements = ofNullable(citizenUploadedDocumentList);
-        if (uploadedPositionStatements.isEmpty()) {
-            return bundlingCitizenStatements;
+        List<BundlingRequestDocument> bundlingCitizenDocuments = new ArrayList<>();
+        Optional<List<Element<UploadedDocuments>>> citizenUploadedDocuments = ofNullable(citizenUploadedDocumentList);
+        if (citizenUploadedDocuments.isEmpty()) {
+            return bundlingCitizenDocuments;
         }
         citizenUploadedDocumentList.forEach(citizenUploadedDocumentElement -> {
             UploadedDocuments uploadedDocuments = citizenUploadedDocumentElement.getValue();
             Document uploadedDocument = uploadedDocuments.getCitizenDocument();
-            bundlingCitizenStatements.add(BundlingRequestDocument.builder()
+            bundlingCitizenDocuments.add(BundlingRequestDocument.builder()
                 .documentGroup(getDocumentGroup(uploadedDocuments.getIsApplicant(), uploadedDocuments.getDocumentType()))
                 .documentFileName(uploadedDocument.getDocumentFileName())
                 .bundlingDocument(uploadedDocument).build());
 
         });
-        return bundlingCitizenStatements;
+        return bundlingCitizenDocuments;
     }
 
     private BundlingDocGroupEnum getDocumentGroup(String isApplicant, String docType) {
