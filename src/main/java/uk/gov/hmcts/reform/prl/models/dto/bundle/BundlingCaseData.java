@@ -1,4 +1,3 @@
-
 package uk.gov.hmcts.reform.prl.models.dto.bundle;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -9,13 +8,12 @@ import lombok.Value;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Value
 @Builder(toBuilder = true)
-public class CaseData {
+public class BundlingCaseData {
 
     @JsonProperty("bundleConfiguration")
     public String bundleConfiguration;
     @JsonProperty("id")
     public String id;
     @JsonProperty("data")
-    public Data data;
-
+    public BundlingData data;
 }

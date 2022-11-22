@@ -10,7 +10,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Value
 @Builder(toBuilder = true)
-public class Data {
+public class BundlingData {
 
     @JsonProperty("orders")
     private final List<BundlingRequestDocument> orders;
@@ -29,5 +29,4 @@ public class Data {
 
     @JsonProperty("cafcassAndExpertReportsUploadedByCourtAdmin")
     private List<BundlingRequestDocument> otherDocuments;
-
 }

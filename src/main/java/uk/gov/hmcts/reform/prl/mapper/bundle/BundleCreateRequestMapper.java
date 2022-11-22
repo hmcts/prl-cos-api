@@ -15,9 +15,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.Data;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -48,17 +49,17 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundleCreateRequestMapper {
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, String bundleConfigFileName) {
-        BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder().caseDetails(CaseDetails.builder().id(String.valueOf(caseData.getId()))
+        BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder().caseDetails(BundlingCaseDetails.builder().id(String.valueOf(caseData.getId()))
                 .caseData(mapCaseData(caseData, bundleConfigFileName)).build())
             .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
-        //log.info("*** createbundle request payload  : {}", bundleCreateRequest.toString());
+        log.info("*** createbundle request payload  : {}", bundleCreateRequest.toString());
         return bundleCreateRequest;
     }
 
-    private uk.gov.hmcts.reform.prl.models.dto.bundle.CaseData mapCaseData(CaseData caseData, String bundleConfigFileName) {
-        return uk.gov.hmcts.reform.prl.models.dto.bundle.CaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
+    private BundlingCaseData mapCaseData(CaseData caseData, String bundleConfigFileName) {
+        return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
-            .data(Data.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
+            .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
                 .otherDocuments(mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).applications(mapApplicationsFromCaseData(caseData))
                 .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
                 .citizenUploadedDocuments(mapBundlingDocsFromCitizenUploadedDocs(caseData.getCitizenUploadedDocumentList())).build()).build();

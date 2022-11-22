@@ -8,12 +8,13 @@ import lombok.Value;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Value
 @Builder(toBuilder = true)
-public class CaseDetails {
+public class BundlingCaseDetails {
 
     @JsonProperty("case_data")
-    public CaseData caseData;
+    public BundlingCaseData caseData;
 
     @JsonProperty("id")
     public String id;
 
 }
+
