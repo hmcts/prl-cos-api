@@ -38,11 +38,9 @@ public class CaseDataOtherPersonsElementsMapper {
 
         List<OtherPersonDetail> otherPersonDetailsList = c100RebuildOtherPersonDetailsElements.getOtherPersonDetails();
 
-        List<Element<PartyDetails>> elementList = otherPersonDetailsList.stream()
-                .map(OtherPersonDetail -> Element.<PartyDetails>builder().value(buildPartyDetails(OtherPersonDetail)).build())
+        return otherPersonDetailsList.stream()
+                .map(otherPersonDetail -> Element.<PartyDetails>builder().value(buildPartyDetails(otherPersonDetail)).build())
                 .collect(Collectors.toList());
-
-        return elementList;
     }
 
     private static PartyDetails buildPartyDetails(OtherPersonDetail otherPersonDetail) {
