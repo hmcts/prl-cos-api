@@ -70,6 +70,12 @@ public class AllegationOfHarmRevised {
     private final LocalDate newOrdersRestrainingDateIssued;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate newOrdersRestrainingEndDate;
+    private final String newOrdersNonMolestationCaseNumber;
+    private final String newOrdersOccupationCaseNumber;
+    private final String newOrdersForcedMarriageProtectionCaseNumber;
+    private final String newOrdersRestrainingCaseNumber;
+    private final String newOrdersOtherInjunctiveCaseNumber;
+    private final String newOrdersUndertakingInPlaceCaseNumber;
     private final YesOrNo newOrdersRestrainingCurrent;
     private final String newOrdersRestrainingCourtName;
     private final Document newOrdersRestrainingDocument;
