@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 @Builder(toBuilder = true)
 public class BundlingRequestDocument {
     @JsonProperty("documentLink")
-    private final Document bundlingDocument;
+    private final Document documentLink;
 
     @JsonProperty("documentFileName")
     public String documentFileName;

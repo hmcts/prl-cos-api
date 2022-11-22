@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.mapper.bundle;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +56,14 @@ public class BundleCreateRequestMapper {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder().caseDetails(BundlingCaseDetails.builder()
                 .id(String.valueOf(caseData.getId())).caseData(mapCaseData(caseData, bundleConfigFileName)).build())
             .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
-        log.info("*** createbundle request payload  : {}", bundleCreateRequest.toString());
+        ObjectMapper om = new ObjectMapper();
+        try {
+            om.writeValueAsString(bundleCreateRequest);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        log.info("*** createbundle request payload  : {}", om.toString());
         return bundleCreateRequest;
     }
 
@@ -95,7 +104,7 @@ public class BundleCreateRequestMapper {
     }
 
     private BundlingRequestDocument mapBundlingRequestDocument(Document document, BundlingDocGroupEnum applicationsDocGroup) {
-        return (null != document) ? BundlingRequestDocument.builder().bundlingDocument(document).documentFileName(document.getDocumentFileName())
+        return (null != document) ? BundlingRequestDocument.builder().documentLink(document).documentFileName(document.getDocumentFileName())
             .documentGroup(applicationsDocGroup).build() : BundlingRequestDocument.builder().build();
     }
 
@@ -129,7 +138,7 @@ public class BundleCreateRequestMapper {
             OrderDetails orderDetails = orderDetailsElement.getValue();
             Document document = orderDetails.getOrderDocument();
             orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
-                .documentFileName(document.getDocumentFileName()).bundlingDocument(document).build());
+                .documentFileName(document.getDocumentFileName()).documentLink(document).build());
         });
         return orders;
     }
@@ -166,7 +175,7 @@ public class BundleCreateRequestMapper {
             bundlingCitizenDocuments.add(BundlingRequestDocument.builder()
                 .documentGroup(getDocumentGroup(uploadedDocuments.getIsApplicant(), uploadedDocuments.getDocumentType()))
                 .documentFileName(uploadedDocument.getDocumentFileName())
-                .bundlingDocument(uploadedDocument).build());
+                .documentLink(uploadedDocument).build());
 
         });
         return bundlingCitizenDocuments;
