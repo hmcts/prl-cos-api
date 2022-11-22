@@ -331,8 +331,10 @@ public class ApplicationsTabService implements TabService {
         String statementOfTruthPlaceHolder = null;
 
         if (nonNull(solicitor)) {
+            log.info("Inside solicitor");
             statementOfTruthPlaceHolder = solicitor;
         } else if (isNotEmpty(caseData.getUserInfo())) {
+            log.info("Inside UserInfo");
             UserInfo userInfo = caseData.getUserInfo().get(0).getValue();
             statementOfTruthPlaceHolder = userInfo.getFirstName() + " " + userInfo.getLastName();
         }
