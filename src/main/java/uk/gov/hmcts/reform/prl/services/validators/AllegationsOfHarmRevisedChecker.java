@@ -184,8 +184,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionPreviousPoliceInvolvement());
         Optional<String> abductionPreviousPoliceInvolvementDetails =
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionPreviousPoliceInvolvementDetails());
-        Optional<String> abductionChildPassportPosessionOtherDetail =
-            ofNullable(caseData.getAllegationOfHarmRevised().getChildPassportDetails().getAbductionChildPassportPosessionOtherDetail());
 
         boolean abductionSectionCompleted;
         boolean previousThreatSectionComplete = false;
