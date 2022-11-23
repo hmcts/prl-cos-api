@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,9 +17,11 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
@@ -69,6 +72,9 @@ public class CaseService {
     @Autowired
     AllTabServiceImpl allTabsService;
 
+    @Autowired
+    CourtFinderService courtLocatorService;
+
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
 
@@ -87,12 +93,25 @@ public class CaseService {
                     .emailAddress(userDetails.getEmail())
                     .build();
 
+            Court closestChildArrangementsCourt = buildCourt(caseData);
+
             CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData.toBuilder()
-                    .userInfo(wrapElements(userInfo)).build());
+                    .userInfo(wrapElements(userInfo))
+                    .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
+                    .build());
             allTabsService.updateAllTabsIncludingConfTab(updatedCaseData);
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
+    }
+
+    private Court buildCourt(CaseData caseData) {
+        try {
+            return courtLocatorService.getNearestFamilyCourt(caseData);
+        } catch (NotFoundException e) {
+            log.error("Cannot find court");
+        }
+        return null;
     }
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken, String role, String userId) {
