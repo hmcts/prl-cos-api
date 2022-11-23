@@ -142,6 +142,8 @@ public class AllegationsOfHarmRevisedCheckerTest {
     public void whenOtherConcernsPresentThenValidateOtherConcernsTrue() {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                  .newAllegationsOfHarmOtherConcerns(Yes)
+                                  .newAllegationsOfHarmOtherConcernsDetails("Details")
                                   .newAllegationsOfHarmOtherConcernsCourtActions("Court actions").build())
             .build();
 
@@ -578,7 +580,10 @@ public class AllegationsOfHarmRevisedCheckerTest {
                                   .newOrdersOtherInjunctive(No)
                                   .newOrdersUndertakingInPlace(No)
                                   .newAllegationsOfHarmChildAbductionYesNo(No)
+                                  .newAllegationsOfHarmOtherConcerns(Yes)
+                                  .newAllegationsOfHarmOtherConcernsDetails("Details")
                                   .newAllegationsOfHarmOtherConcernsCourtActions("testing")
+                                  .newAllegationsOfHarmOtherConcerns(No)
                                   .newAgreeChildUnsupervisedTime(No)
                                   .childPassportDetails(childPassportDetails)
                                   .newAgreeChildSupervisedTime(No)
