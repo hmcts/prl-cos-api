@@ -266,7 +266,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
         childAbuseBehavioursElement.add(abductionChildPassportPossessionEnum);
         ChildPassportDetails  childPassportDetails =
             ChildPassportDetails.builder().childPassportHolder(childAbuseBehavioursElement)
-                .abductionChildPassportPosessionOtherDetail("")
+                .abductionChildPassportPosessionOtherDetail("TEST")
                 .childrenHasMoreThanOnePassPort(Yes).build();
 
         CaseData caseData = CaseData.builder()
