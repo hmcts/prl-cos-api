@@ -23,8 +23,8 @@ public enum BoldEnum {
     }
 
     @JsonCreator
-    public static YesNoDontKnow getValue(String key) {
-        return YesNoDontKnow.valueOf(key);
+    public static BoldEnum getValue(String key) {
+        return BoldEnum.valueOf(key);
     }
 
 
