@@ -184,8 +184,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionPreviousPoliceInvolvement());
         Optional<String> abductionPreviousPoliceInvolvementDetails =
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionPreviousPoliceInvolvementDetails());
-        Optional<List<AbductionChildPassportPossessionEnum>> abductionChildPassportPosession =
-            ofNullable(caseData.getAllegationOfHarmRevised().getChildPassportDetails().getChildPassportHolder());
         Optional<String> abductionChildPassportPosessionOtherDetail =
             ofNullable(caseData.getAllegationOfHarmRevised().getChildPassportDetails().getAbductionChildPassportPosessionOtherDetail());
 
@@ -193,7 +191,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         boolean previousThreatSectionComplete = false;
         boolean passportCompleted = abductionPassportOfficeNotified.isPresent();
         boolean hasPassportCompleted = abductionChildHasPassport.isPresent();
-        boolean passportPossessionCompleted = false;
         boolean policeCompleted = false;
 
         if (childAbduction.isPresent() && No.equals(childAbduction.get())) {
@@ -213,15 +210,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                     previousAbductionThreatsCompleted
                 );
 
-                boolean abductionChildPassportPosessionCompleted = abductionChildPassportPosession.isPresent();
-
-                passportPossessionCompleted = isPassportPossessionCompleted(
-                    abductionChildPassportPosession,
-                    abductionChildPassportPosessionOtherDetail,
-                    passportPossessionCompleted,
-                    abductionChildPassportPosessionCompleted
-                );
-
                 boolean
                     abductionPreviousPoliceInvolvementCompleted = abductionPreviousPoliceInvolvement.isPresent();
 
@@ -239,7 +227,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                 && previousThreatSectionComplete
                 && passportCompleted
                 && hasPassportCompleted
-                && passportPossessionCompleted
                 && policeCompleted;
 
         } else {
