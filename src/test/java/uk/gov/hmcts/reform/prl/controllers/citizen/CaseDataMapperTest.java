@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.utils.TestUtil;
 import java.io.IOException;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -98,7 +99,7 @@ public class CaseDataMapperTest {
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
 
         //Then
-        assertNull(updatedCaseData.getExistingProceedings());
+        assertThat(updatedCaseData.getExistingProceedings()).isEmpty();
     }
 
     @Test
@@ -115,7 +116,7 @@ public class CaseDataMapperTest {
 
         //Then
         assertNotNull(updatedCaseData);
-        assertNull(updatedCaseData.getMiamExemptionsChecklist());
+        assertThat(updatedCaseData.getMiamExemptionsChecklist()).isEmpty();
     }
 
     @Test

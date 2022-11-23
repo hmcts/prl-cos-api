@@ -45,7 +45,7 @@ public class CaseDataOtherProceedingsElementsMapper {
                                                                                      c100RebuildOtherProceedingsElements) {
         List<Element<ProceedingDetails>> ordersElements = new ArrayList<>();
         if (Arrays.stream(c100RebuildOtherProceedingsElements.getCourtProceedingsOrders()).findAny().isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
         OrderDetails orderDetails = c100RebuildOtherProceedingsElements.getOtherProceedings().getOrder();
 
