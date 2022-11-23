@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
@@ -24,6 +25,7 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@Slf4j
 @Service
 public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
@@ -83,6 +85,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
                     for (DomesticAbuseBehaviours behaviour : behaviours) {
                         domesticBehavioursCompleted = validateDomesticAbuseBehaviours(behaviour);
+                        log.debug("domesticBehavioursCompleted  :{} ",domesticBehavioursCompleted);
                         if (!domesticBehavioursCompleted) {
                             return false;
                         }
@@ -102,6 +105,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
                     for (ChildAbuseBehaviours behaviour : behaviours) {
                         childBehavioursCompleted = validateChildAbuseBehaviours(behaviour);
+                        log.debug("childBehavioursCompleted  :{} ",childBehavioursCompleted);
                         if (!childBehavioursCompleted) {
                             return false;
                         }
@@ -153,6 +157,14 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
     public boolean isSectionsFinished(CaseData caseData, boolean domesticBehavioursCompleted, boolean childBehavioursCompleted,
                                       boolean previousOrders) {
+
+        log.debug("validateOrders  :{} ",validateOrders(caseData));
+        log.debug("previousOrders  :{} ",previousOrders);
+        log.debug("domesticBehavioursCompleted  :{} ",domesticBehavioursCompleted);
+        log.debug("childBehavioursCompleted  :{} ",childBehavioursCompleted);
+        log.debug("validateAbductionSection(caseData)  :{} ",validateAbductionSection(caseData));
+        log.debug("validateOtherConcerns(caseData)  :{} ",validateOtherConcerns(caseData));
+        log.debug("validateChildContact(caseData)  :{} ",validateChildContact(caseData));
         boolean isFinished;
         isFinished =  validateOrders(caseData)
             && previousOrders
