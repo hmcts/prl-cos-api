@@ -57,7 +57,8 @@ public class CaseDataOtherPersonsElementsMapper {
                         : buildDateOfBirth(personalDetails.getDateOfBirth()))
                 .isDateOfBirthUnknown(PrlAppsConstants.YES.equalsIgnoreCase(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null)
                 .address(buildAddress(otherPersonDetail.getOtherPersonAddress()))
-                .relationshipToChildren(buildChildRelationship(otherPersonDetail.getRelationshipDetails()))
+        //TODO Needs to updated once solictior mapping is finalized
+        //.relationshipToChildren(buildChildRelationship(otherPersonDetail.getRelationshipDetails()))
         .build();
     }
 

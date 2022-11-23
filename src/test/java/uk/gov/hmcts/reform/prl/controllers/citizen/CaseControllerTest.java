@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
@@ -85,7 +86,7 @@ public class CaseControllerTest {
     }
 
     @Test
-    public void testCitizenUpdateCase() throws JsonProcessingException {
+    public void testCitizenUpdateCase() throws JsonProcessingException, NotFoundException {
 
         caseData = CaseData.builder()
             .id(1234567891234567L)

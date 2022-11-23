@@ -78,6 +78,7 @@ public class CaseDataChildDetailsElementsMapper {
                    .otherGender(childDetail.getPersonalDetails().getOtherGenderDetails())
                    .parentalResponsibilityDetails(buildParentalResponsibility(
                        childDetail.getParentialResponsibility()))
+                   //This is to fix allTabService null pointer exception
                    .personWhoLivesWithChild(Collections.emptyList())
                    .orderAppliedFor(buildOrdersApplyingFor(childDetail.getChildMatters()))
                    .build()
