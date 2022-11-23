@@ -85,6 +85,6 @@ public class FL404 {
     private final String fl404bTimeOfNextHearing;
 
     //Draft order changes
-    private final List<Element<String>> addDirections;
+    private final List<Element<DirectionDetails>> addDirections;
 
 }

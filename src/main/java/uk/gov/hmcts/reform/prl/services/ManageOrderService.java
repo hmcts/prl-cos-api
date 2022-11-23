@@ -441,6 +441,7 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, c47aWelshFile);
                 break;
             case nonMolestation:
+                log.info("******** Inside non molestation case ********: ");
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, fl404aDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404aDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404aFinalTemplate);
@@ -504,6 +505,7 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404bBlankFile);
                 break;
             default:
+                log.info("******** Inside default case ********: ");
                 break;
         }
         log.info("selected order is ********: {}", selectedOrder);
