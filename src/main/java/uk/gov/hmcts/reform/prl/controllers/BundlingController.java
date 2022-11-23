@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 
@@ -51,13 +53,18 @@ public class BundlingController extends AbstractCallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         moveExistingCaseBundlesToHistoricalBundles(caseData);
         log.info("*** Creating Bundle for the case id : {}", caseData.getId());
-        caseDataUpdated.put("caseBundles",
-            bundlingService.createBundleServiceRequest(caseData,
-                callbackRequest.getEventId(),authorization).getData().getCaseBundles());
-        caseDataUpdated.put("historicalBundles",caseData.getHistoricalBundles());
-        log.info("*** Bundle created successfully.. Updating caseBundles in case data for the case id: {}", caseData.getId());
+        BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(caseData,
+            callbackRequest.getEventId(),authorization);
+        if (bundleCreateResponse.getErrors().isEmpty()) {
+            caseDataUpdated.put("caseBundles",
+                bundleCreateResponse.getData().getCaseBundles());
+            caseDataUpdated.put("historicalBundles",caseData.getHistoricalBundles());
+            log.info("*** Bundle created successfully.. Updating caseBundles in case data for the case id: {}", caseData.getId());
+        } else {
+            log.info("Bundle creation failed due to these errors returned from the bundle api response for the case id: {} and errors {}",
+                caseData.getId(),new ObjectMapper().writeValueAsString(bundleCreateResponse.getErrors()));
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-
     }
 
     private void moveExistingCaseBundlesToHistoricalBundles(CaseData caseData) {
