@@ -257,6 +257,9 @@ public class HearingManagementService {
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
                 .collect(Collectors.toList());
 
+
+            log.info("Issue date:{}====", caseData.getIssueDate());
+
             for (String applicantSolicitorName : applicantSolicitorNamesList) {
 
                 hearingDetailsEmail = HearingDetailsEmail.builder()
@@ -383,11 +386,12 @@ public class HearingManagementService {
 
             PartyDetails fl401Respondent = caseData
                 .getRespondentsFL401();
-
             partyNamesList.add(fl401Respondent.getFirstName() + " " + fl401Respondent.getLastName());
         }
 
         for (String partyName: partyNamesList) {
+            log.info("PartyName:******{}******", partyName);
+
             hearingDetailsEmail = HearingDetailsEmail.builder()
                 .caseReference(String.valueOf(caseData.getId()))
                 .caseName(caseData.getApplicantCaseName())
