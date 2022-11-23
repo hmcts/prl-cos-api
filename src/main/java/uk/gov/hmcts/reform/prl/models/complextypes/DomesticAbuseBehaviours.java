@@ -13,9 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DomesticAbuseBehaviours {
 
-    private TypeOfAbuseEnum abuseType;
-
-    private String newBehavioursNature;
+    private TypeOfAbuseEnum typeOfAbuse;
 
     private String newAbuseNatureDescription;
 

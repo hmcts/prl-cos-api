@@ -300,10 +300,9 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
     public boolean validateDomesticAbuseBehaviours(DomesticAbuseBehaviours domesticAbuseBehaviours) {
 
-        Optional<TypeOfAbuseEnum> typeOfAbuse = ofNullable(domesticAbuseBehaviours.getAbuseType());
-        Optional<String> abuseNatureDescription = ofNullable(domesticAbuseBehaviours.getNewBehavioursNature());
+        Optional<TypeOfAbuseEnum> typeOfAbuse = ofNullable(domesticAbuseBehaviours.getTypeOfAbuse());
         Optional<String> behavioursStartDateAndLength = ofNullable(domesticAbuseBehaviours.getNewBehavioursStartDateAndLength());
-        Optional<String> behavioursNature = ofNullable(domesticAbuseBehaviours.getNewBehavioursNature());
+        Optional<String> abuseNatureDescription = ofNullable(domesticAbuseBehaviours.getNewAbuseNatureDescription());
         Optional<YesOrNo> behavioursApplicantSoughtHelp = ofNullable(domesticAbuseBehaviours.getNewBehavioursApplicantSoughtHelp());
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(domesticAbuseBehaviours.getNewBehavioursApplicantHelpSoughtWho());
         Optional<String> behavioursApplicantHelpAction = ofNullable(domesticAbuseBehaviours.getNewBehavioursApplicantHelpAction());
@@ -312,7 +311,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         fields.add(ofNullable(typeOfAbuse.get().getDisplayedValue()));
         fields.add(abuseNatureDescription);
         fields.add(behavioursStartDateAndLength);
-        fields.add(behavioursNature);
         fields.add(behavioursApplicantSoughtHelp);
         if (behavioursApplicantSoughtHelp.isPresent()
             && behavioursApplicantSoughtHelp.get().equals(Yes)) {
@@ -329,10 +327,9 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
     public boolean validateChildAbuseBehaviours(ChildAbuseBehaviours childAbuseBehaviours) {
 
-        Optional<TypeOfAbuseEnum> typeOfAbuse = ofNullable(childAbuseBehaviours.getAbuseType());
-        Optional<String> abuseNatureDescription = ofNullable(childAbuseBehaviours.getNewBehavioursNature());
+        Optional<TypeOfAbuseEnum> typeOfAbuse = ofNullable(childAbuseBehaviours.getTypeOfAbuse());
+        Optional<String> abuseNatureDescription = ofNullable(childAbuseBehaviours.getNewAbuseNatureDescription());
         Optional<String> behavioursStartDateAndLength = ofNullable(childAbuseBehaviours.getNewBehavioursStartDateAndLength());
-        Optional<String> behavioursNature = ofNullable(childAbuseBehaviours.getNewBehavioursNature());
         Optional<YesOrNo> behavioursApplicantSoughtHelp = ofNullable(childAbuseBehaviours.getNewBehavioursApplicantSoughtHelp());
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(childAbuseBehaviours.getNewBehavioursApplicantHelpSoughtWho());
         Optional<String> behavioursApplicantHelpAction = ofNullable(childAbuseBehaviours.getNewBehavioursApplicantHelpAction());
@@ -341,7 +338,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         fields.add(ofNullable(typeOfAbuse.get().getDisplayedValue()));
         fields.add(abuseNatureDescription);
         fields.add(behavioursStartDateAndLength);
-        fields.add(behavioursNature);
         fields.add(behavioursApplicantSoughtHelp);
         if (behavioursApplicantSoughtHelp.isPresent()
             && behavioursApplicantSoughtHelp.get().equals(Yes)) {
