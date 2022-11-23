@@ -55,7 +55,7 @@ public class BundlingController extends AbstractCallbackController {
         log.info("*** Creating Bundle for the case id : {}", caseData.getId());
         BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(caseData,
             callbackRequest.getEventId(),authorization);
-        if (bundleCreateResponse.getErrors().isEmpty()) {
+        if (null == bundleCreateResponse.getErrors()) {
             caseDataUpdated.put("caseBundles",
                 bundleCreateResponse.getData().getCaseBundles());
             caseDataUpdated.put("historicalBundles",caseData.getHistoricalBundles());
