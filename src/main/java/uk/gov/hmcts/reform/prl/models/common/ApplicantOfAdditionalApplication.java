@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 @Builder(toBuilder = true)
-public class InterlocutoryApplicant {
+public class ApplicantOfAdditionalApplication {
     String code;
     String name;
 }
