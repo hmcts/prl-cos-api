@@ -149,6 +149,7 @@ public class DraftAnOrderService {
     }
 
     private Element<OrderDetails> convertDraftOrderToFinal(String auth, CaseData caseData, DraftOrder draftOrder) {
+        log.info("draftOrder.getOrderType************ {}", draftOrder.getOrderType());
         Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {

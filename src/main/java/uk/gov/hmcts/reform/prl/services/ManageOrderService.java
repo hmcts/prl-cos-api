@@ -506,6 +506,8 @@ public class ManageOrderService {
             default:
                 break;
         }
+        log.info("selected order is ********: {}", selectedOrder);
+        log.info("fieldsMap is ********: {}", fieldsMap);
         return fieldsMap;
     }
 
