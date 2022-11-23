@@ -337,18 +337,11 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     }
 
     public boolean validateOtherConcerns(CaseData caseData) {
-        Optional<YesOrNo> allegationsOfHarmRevisedOtherConcerns = ofNullable(caseData.getAllegationOfHarmRevised()
-                                                                          .getNewAllegationsOfHarmOtherConcerns());
-        Optional<String> allegationsOfHarmevisedOtherConcernsDetails = ofNullable(caseData.getAllegationOfHarmRevised()
-                                                                                .getNewAllegationsOfHarmOtherConcernsDetails());
+
         Optional<String> allegationsOfHarmevisedOtherConcernsCourtActions = ofNullable(caseData.getAllegationOfHarmRevised()
                                                                                      .getNewAllegationsOfHarmOtherConcernsCourtActions());
 
         List<Optional<?>> fields = new ArrayList<>();
-        fields.add(allegationsOfHarmRevisedOtherConcerns);
-        if (allegationsOfHarmRevisedOtherConcerns.isPresent() && allegationsOfHarmRevisedOtherConcerns.get().equals(Yes)) {
-            fields.add(allegationsOfHarmevisedOtherConcernsDetails);
-        }
         fields.add(allegationsOfHarmevisedOtherConcernsCourtActions);
 
         return fields.stream().noneMatch(Optional::isEmpty)
