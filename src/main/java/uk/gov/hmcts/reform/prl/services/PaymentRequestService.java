@@ -121,6 +121,7 @@ public class PaymentRequestService {
         String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
         log.info("paymentServiceReferenceNumber : {}, paymentReferenceNumber :{} for the caseId: {} ",
             paymentServiceReferenceNumber,paymentReferenceNumber,caseId);
+
         //Check if paymentServiceReferenceNumber and PaymentReference exist and if yes get the status of payment.
         //If status is success then return, else create payment
         if (paymentServiceReferenceNumber != null) {
@@ -131,6 +132,7 @@ public class PaymentRequestService {
                 if (PAYMENT_STATUS_SUCCESS.equalsIgnoreCase(status)) {
                     paymentResponse = PaymentResponse.builder()
                         .paymentReference(paymentReferenceNumber)
+                        .serviceRequestReference(paymentServiceReferenceNumber)
                         .paymentStatus(paymentStatus.getStatus())
                         .build();
 
@@ -142,14 +144,16 @@ public class PaymentRequestService {
                                                            createPaymentRequest.getReturnUrl());
                     log.info("Payment is being made for the caseId: {} and for payment ref: {} ",caseId, paymentResponse.getPaymentReference());
 
-                    caseService.updateCase(caseData.toBuilder().paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
-                                           authorization,
-                                           serviceAuthorization,
-                                           caseId,
-                                           CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
-                                           null
+                    caseService.updateCase(
+                        caseData.toBuilder()
+                            .paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
+                        authorization,
+                        serviceAuthorization,
+                        caseId,
+                        CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+                        null
                     );
-                    log.info("Updated the case data for the caseId :{}",caseId);
+                    log.info("Update case successful for the caseId :{} ", caseId);
                 }
             } else {
                 //PaymentReference is null
@@ -159,41 +163,74 @@ public class PaymentRequestService {
                                                        createPaymentRequest.getReturnUrl());
                 log.info("Payment is being made for the case id: {} and for payment ref: {} ",caseId, paymentResponse.getPaymentReference());
 
-                caseService.updateCase(caseData.toBuilder().paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
-                                       authorization,
-                                       serviceAuthorization,
-                                       caseId,
-                                       CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
-                                       null
+                caseService.updateCase(
+                    caseData.toBuilder()
+                        .paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
+                    authorization,
+                    serviceAuthorization,
+                    caseId,
+                    CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+                    null
                 );
-                log.info("Updated the case data for the caseId :{}",caseId);
+                log.info("Update case successful for the caseId :{} ", caseId);
             }
         } else {
-            // if CR and PR doesn't exist
-            log.info("Creating new service request and payment request for the case id: {}", caseId);
-            CallbackRequest request = buildCallBackRequest(createPaymentRequest);
-            PaymentServiceResponse paymentServiceResponse = createServiceRequest(request, authorization);
-            paymentResponse = createServicePayment(paymentServiceResponse.getServiceRequestReference(),
-                                                                   authorization, createPaymentRequest.getReturnUrl()
-            );
-            log.info(
-                "Payment is being made for serviceReqRef: {} for paymentRef: {} and for caseId: {}",
-                paymentServiceResponse.getServiceRequestReference(),
-                paymentResponse.getPaymentReference(),
-                caseId
-            );
+            //For help with fees we only need to create service request
+            if (!isHelpWithFeesOptedInAlready(caseData)
+                && null != createPaymentRequest.getHwfRefNumber()) {
+                log.info("Help with fees is opted -> creating only service request for the case id: {}", caseId);
+                CallbackRequest request = buildCallBackRequest(createPaymentRequest);
+                PaymentServiceResponse paymentServiceResponse = createServiceRequest(request, authorization);
 
-            caseService.updateCase(caseData.toBuilder()
-                                       .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference())
-                                       .paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
-                                   authorization,
-                                   serviceAuthorization,
-                                   caseId,
-                                   CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
-                                   null
-                                   );
-            log.info("Updated the case data for the caseId :{} ",caseId);
+                paymentResponse = PaymentResponse.builder()
+                    .serviceRequestReference(paymentServiceResponse.getServiceRequestReference())
+                    .build();
+                log.info(
+                    "Payment is being made for hwfRefNumber: {} , serviceReqRef: {} and for caseId: {}",
+                    createPaymentRequest.getHwfRefNumber(),
+                    paymentServiceResponse.getServiceRequestReference(),
+                    caseId
+                );
+                caseService.updateCase(
+                    caseData.toBuilder()
+                        .helpWithFeesReferenceNumber(createPaymentRequest.getHwfRefNumber())
+                        .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference()).build(),
+                    authorization,
+                    serviceAuthorization,
+                    caseId,
+                    CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+                    null
+                );
+                log.info("Update case successful for the caseId :{} ", caseId);
+            } else {
+                // if CR and PR doesn't exist
+                log.info("Creating new service request and payment request for the case id: {}", caseId);
+                CallbackRequest request = buildCallBackRequest(createPaymentRequest);
+                PaymentServiceResponse paymentServiceResponse = createServiceRequest(request, authorization);
+                paymentResponse = createServicePayment(paymentServiceResponse.getServiceRequestReference(),
+                                                       authorization, createPaymentRequest.getReturnUrl()
+                );
+                log.info(
+                    "Payment is being made for serviceReqRef: {} for paymentRef: {} and for caseId: {}",
+                    paymentServiceResponse.getServiceRequestReference(),
+                    paymentResponse.getPaymentReference(),
+                    caseId
+                );
+                //set service request ref
+                paymentResponse.setServiceRequestReference(paymentServiceResponse.getServiceRequestReference());
 
+                caseService.updateCase(
+                    caseData.toBuilder()
+                        .paymentServiceRequestReferenceNumber(paymentResponse.getServiceRequestReference())
+                        .paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
+                    authorization,
+                    serviceAuthorization,
+                    caseId,
+                    CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+                    null
+                );
+                log.info("Update case successful for the caseId :{} ", caseId);
+            }
         }
         return paymentResponse;
     }
@@ -211,4 +248,12 @@ public class PaymentRequestService {
                                            .build()).build())
             .build();
     }
+
+    private boolean isHelpWithFeesOptedInAlready(CaseData caseData) {
+        return null != caseData
+            && null != caseData.getHelpWithFeesReferenceNumber()
+            && !caseData.getHelpWithFeesReferenceNumber().isEmpty()
+            && null != caseData.getPaymentServiceRequestReferenceNumber();
+    }
+
 }
