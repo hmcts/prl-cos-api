@@ -123,7 +123,7 @@ public class CaseController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        List<CaseData>  caseDataList;
+        List<CaseData> caseDataList;
         if (isAuthorized(authorisation, s2sToken)) {
             caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate());
         } else {
