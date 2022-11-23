@@ -56,9 +56,8 @@ public class BundleCreateRequestMapper {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder().caseDetails(BundlingCaseDetails.builder()
                 .id(String.valueOf(caseData.getId())).caseData(mapCaseData(caseData, bundleConfigFileName)).build())
             .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
-        ObjectMapper om = new ObjectMapper();
         try {
-            log.info("*** createbundle request payload  : {}", om.writeValueAsString(bundleCreateRequest));
+            log.info("*** createbundle request payload  : {}", new ObjectMapper().writeValueAsString(bundleCreateRequest));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -74,7 +73,7 @@ public class BundleCreateRequestMapper {
                 .citizenUploadedDocuments(mapBundlingDocsFromCitizenUploadedDocs(caseData.getCitizenUploadedDocumentList())).build()).build();
     }
 
-    private List<BundlingRequestDocument> mapApplicationsFromCaseData(CaseData caseData) {
+    private List<Element<BundlingRequestDocument>> mapApplicationsFromCaseData(CaseData caseData) {
         List<BundlingRequestDocument> applications = new ArrayList<>();
         if (YesOrNo.Yes.equals(caseData.getLanguagePreferenceWelsh())) {
             if (null != caseData.getFinalWelshDocument()) {
@@ -99,7 +98,7 @@ public class BundleCreateRequestMapper {
         if (citizenUploadedC7Documents.size() > 0) {
             applications.addAll(citizenUploadedC7Documents);
         }
-        return applications;
+        return ElementUtils.wrapElements(applications);
     }
 
     private List<BundlingRequestDocument> mapC7DocumentsFromCaseData(List<Element<ResponseDocuments>> citizenResponseC7DocumentList) {
@@ -140,11 +139,11 @@ public class BundleCreateRequestMapper {
         return applications;
     }
 
-    private List<BundlingRequestDocument> mapOrdersFromCaseData(List<Element<OrderDetails>> ordersFromCaseData) {
+    private List<Element<BundlingRequestDocument>> mapOrdersFromCaseData(List<Element<OrderDetails>> ordersFromCaseData) {
         List<BundlingRequestDocument> orders = new ArrayList<>();
         Optional<List<Element<OrderDetails>>> existingOrders = ofNullable(ordersFromCaseData);
         if (existingOrders.isEmpty()) {
-            return orders;
+            return new ArrayList<>();
         }
         ordersFromCaseData.forEach(orderDetailsElement -> {
             OrderDetails orderDetails = orderDetailsElement.getValue();
@@ -152,15 +151,15 @@ public class BundleCreateRequestMapper {
             orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
                 .documentFileName(document.getDocumentFileName()).documentLink(document).build());
         });
-        return orders;
+        return ElementUtils.wrapElements(orders);
     }
 
-    private List<BundlingRequestDocument> mapOtherDocumentsFromCaseData(
+    private List<Element<BundlingRequestDocument>> mapOtherDocumentsFromCaseData(
         List<Element<OtherDocuments>> otherDocumentsFromCaseData) {
         List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
         Optional<List<Element<OtherDocuments>>> existingOtherDocuments = ofNullable(otherDocumentsFromCaseData);
         if (existingOtherDocuments.isEmpty()) {
-            return otherBundlingDocuments;
+            return new ArrayList<>();
         }
         List<Element<OtherDocuments>> otherDocumentsNotConfidential = otherDocumentsFromCaseData.stream()
             .filter(element -> !element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
@@ -172,14 +171,15 @@ public class BundleCreateRequestMapper {
                     mapBundlingRequestDocument(otherDocuments.getDocumentOther(),
                         getDocumentGroup("", otherDocuments.getDocumentTypeOther().getDisplayedValue()))));
 
-        return otherBundlingDocuments;
+        return ElementUtils.wrapElements(otherBundlingDocuments);
     }
 
-    private List<BundlingRequestDocument> mapBundlingDocsFromCitizenUploadedDocs(List<Element<UploadedDocuments>> citizenUploadedDocumentList) {
+    private List<Element<BundlingRequestDocument>> mapBundlingDocsFromCitizenUploadedDocs(List<Element<UploadedDocuments>>
+                                                                                              citizenUploadedDocumentList) {
         List<BundlingRequestDocument> bundlingCitizenDocuments = new ArrayList<>();
         Optional<List<Element<UploadedDocuments>>> citizenUploadedDocuments = ofNullable(citizenUploadedDocumentList);
         if (citizenUploadedDocuments.isEmpty()) {
-            return bundlingCitizenDocuments;
+            return new ArrayList<>();
         }
         citizenUploadedDocumentList.forEach(citizenUploadedDocumentElement -> {
             UploadedDocuments uploadedDocuments = citizenUploadedDocumentElement.getValue();
@@ -190,7 +190,7 @@ public class BundleCreateRequestMapper {
                 .documentLink(uploadedDocument).build());
 
         });
-        return bundlingCitizenDocuments;
+        return ElementUtils.wrapElements(bundlingCitizenDocuments);
     }
 
     private BundlingDocGroupEnum getDocumentGroup(String isApplicant, String docType) {

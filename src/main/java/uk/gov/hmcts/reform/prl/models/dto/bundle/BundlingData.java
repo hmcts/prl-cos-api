@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
+import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.util.List;
 
@@ -19,16 +20,16 @@ public class BundlingData {
     private final String caseNumber;
 
     @JsonProperty("orders")
-    private final List<BundlingRequestDocument> orders;
+    private final List<Element<BundlingRequestDocument>> orders;
 
     @JsonProperty("citizenUploadedDocuments")
-    private List<BundlingRequestDocument> citizenUploadedDocuments;
+    private List<Element<BundlingRequestDocument>> citizenUploadedDocuments;
 
     @JsonProperty("applications")
-    private List<BundlingRequestDocument> applications;
+    private List<Element<BundlingRequestDocument>> applications;
 
     @JsonProperty("otherDocumentsUploadedByCourtAdmin")
-    private List<BundlingRequestDocument> otherDocuments;
+    private List<Element<BundlingRequestDocument>> otherDocuments;
 
 
 }
