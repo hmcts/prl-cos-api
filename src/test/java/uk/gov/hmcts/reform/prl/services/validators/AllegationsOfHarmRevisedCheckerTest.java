@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -66,7 +65,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
         assertFalse(allegationsOfHarmChecker.isStarted(casedata));
     }
 
-    @Ignore
+
     @Test
     public void whenNoCaseDataThenNotFinished() {
 
@@ -292,10 +291,9 @@ public class AllegationsOfHarmRevisedCheckerTest {
     public void whenDomesticBehaviourPresentButIncompleteReturnTure() {
 
         DomesticAbuseBehaviours behaviour = DomesticAbuseBehaviours.builder()
-            .abuseType(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
+            .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
             .newAbuseNatureDescription("Test")
             .newBehavioursStartDateAndLength("5 days")
-            .newBehavioursNature("Testing")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
             .newBehavioursApplicantHelpAction("Action")
@@ -309,8 +307,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     public void whenDomesticBehaviourPresentButIncompleteReturnFalse() {
 
         DomesticAbuseBehaviours behaviour = DomesticAbuseBehaviours.builder()
-            .abuseType(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
-            .newAbuseNatureDescription("Test")
+            .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
             .newBehavioursStartDateAndLength("5 days")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
@@ -326,10 +323,9 @@ public class AllegationsOfHarmRevisedCheckerTest {
     public void whenChildBehaviourPresentButIncompleteReturnTure() {
 
         DomesticAbuseBehaviours behaviour = DomesticAbuseBehaviours.builder()
-            .abuseType(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
+            .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
             .newAbuseNatureDescription("Test")
             .newBehavioursStartDateAndLength("5 days")
-            .newBehavioursNature("Testing")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
             .newBehavioursApplicantHelpAction("Action")
@@ -343,8 +339,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     public void whenChildBehaviourPresentButIncompleteReturnFalse() {
 
         DomesticAbuseBehaviours behaviour = DomesticAbuseBehaviours.builder()
-            .abuseType(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
-            .newAbuseNatureDescription("Test")
+            .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
             .newBehavioursStartDateAndLength("5 days")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
@@ -360,10 +355,9 @@ public class AllegationsOfHarmRevisedCheckerTest {
     public void whenCompleteBehaviourReturnTrue() {
 
         DomesticAbuseBehaviours behaviour = DomesticAbuseBehaviours.builder()
-            .abuseType(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
+            .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
             .newAbuseNatureDescription("Test")
             .newBehavioursStartDateAndLength("5 days")
-            .newBehavioursNature("Testing")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
             .newBehavioursApplicantHelpAction("Action")
@@ -549,10 +543,9 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
 
         DomesticAbuseBehaviours domesticAbuseBehaviours = DomesticAbuseBehaviours.builder()
-            .abuseType(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
+            .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
             .newAbuseNatureDescription("Test")
             .newBehavioursStartDateAndLength("5 days")
-            .newBehavioursNature("Testing")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
             .newBehavioursApplicantHelpAction("Action")
@@ -562,10 +555,9 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .value(domesticAbuseBehaviours)
             .build();
         ChildAbuseBehaviours childAbuseBehaviours = ChildAbuseBehaviours.builder()
-            .abuseType(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
+            .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
             .newAbuseNatureDescription("Test")
             .newBehavioursStartDateAndLength("5 days")
-            .newBehavioursNature("Testing")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
             .newBehavioursApplicantHelpAction("Action")

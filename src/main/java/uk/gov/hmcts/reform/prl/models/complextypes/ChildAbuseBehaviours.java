@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.ChildAbuseBehaviorsListEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
@@ -14,13 +13,9 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ChildAbuseBehaviours {
 
-    private  TypeOfAbuseEnum abuseType;
-
-    private ChildAbuseBehaviorsListEnum childAbuseBehaviorsListEnum;
+    private  TypeOfAbuseEnum typeOfAbuse;
 
     private String newAbuseNatureDescription;
-
-    private String newBehavioursNature;
 
     private String newBehavioursStartDateAndLength;
 
@@ -29,5 +24,7 @@ public class ChildAbuseBehaviours {
     private String newBehavioursApplicantHelpSoughtWho;
 
     private String newBehavioursApplicantHelpAction;
+
+    private YesOrNo allChildrenAreRisk;
 
 }
