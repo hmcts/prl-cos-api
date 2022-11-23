@@ -52,9 +52,9 @@ public class CaseDataMiamElementsMapper {
                 .miamDomesticViolenceChecklist(buildMiamDomesticViolenceChecklist(c100RebuildMiamElements))
                 .miamChildProtectionConcernList(buildMiamChildProtectionConcernList(c100RebuildMiamElements))
                 .miamUrgencyReasonChecklist(buildMiamUrgencyReasonChecklist(c100RebuildMiamElements))
-                .miamPreviousAttendanceChecklist(nonNull(previousAttendanceChecklistEnums)
+                .miamPreviousAttendanceChecklist(isNotEmpty(previousAttendanceChecklistEnums)
                         ? previousAttendanceChecklistEnums.get(0) : null)
-                .miamOtherGroundsChecklist(nonNull(otherGroundsChecklistEnums)
+                .miamOtherGroundsChecklist(isNotEmpty(otherGroundsChecklistEnums)
                         ? otherGroundsChecklistEnums.get(0) : null)
                 .miamPreviousAttendanceChecklist1(previousAttendanceChecklistEnums)
                 .miamOtherGroundsChecklist1(otherGroundsChecklistEnums)
@@ -69,7 +69,7 @@ public class CaseDataMiamElementsMapper {
         miamNotAttendingReasons.remove(MiamNotAttendingReasonsMapperEnum.under18.name());
 
         if (miamNotAttendingReasons.isEmpty() || miamNotAttendingReasons.contains("none")) {
-            return null;
+            return Collections.emptyList();
         }
 
         List<String> noMediatorAccessSubfields = nonNull(c100RebuildMiamElements.getMiamNoMediatorAccessSubfields())
@@ -88,7 +88,7 @@ public class CaseDataMiamElementsMapper {
                 ? List.of(c100RebuildMiamElements.getMiamPreviousAttendance()) : Collections.emptyList();
 
         if (previousAttendance.isEmpty() || previousAttendance.contains("none")) {
-            return null;
+            return Collections.emptyList();
         }
         return previousAttendance.stream().map(value -> MiamPreviousAttendanceMapperEnum.valueOf(value).getValue())
                 .collect(Collectors.toList()).stream().distinct().collect(Collectors.toList());
@@ -100,7 +100,7 @@ public class CaseDataMiamElementsMapper {
                 ? List.of(c100RebuildMiamElements.getMiamUrgency()) : Collections.emptyList();
 
         if (miamUrgencies.isEmpty() || miamUrgencies.contains("none")) {
-            return null;
+            return Collections.emptyList();
         }
         return miamUrgencies.stream().map(value -> MiamUrgencyMapperEnum.valueOf(value).getValue())
                 .collect(Collectors.toList()).stream().distinct().collect(Collectors.toList());
@@ -112,7 +112,7 @@ public class CaseDataMiamElementsMapper {
                 ? List.of(c100RebuildMiamElements.getMiamChildProtectionEvidence()) : Collections.emptyList();
 
         if (childProtectionEvidences.isEmpty() || childProtectionEvidences.contains("none")) {
-            return null;
+            return Collections.emptyList();
         }
         return childProtectionEvidences.stream().map(value -> ChildProtectionMapperEnum.valueOf(value).getValue())
                 .collect(Collectors.toList());
@@ -124,7 +124,7 @@ public class CaseDataMiamElementsMapper {
                 ? List.of(c100RebuildMiamElements.getMiamDomesticAbuse()) : Collections.emptyList());
 
         if (domesticAbuses.isEmpty() || domesticAbuses.contains("none")) {
-            return null;
+            return Collections.emptyList();
         }
 
         String[] domesticAbuse1 = c100RebuildMiamElements.getMiamDomesticAbuseInvolvementSubfields();
@@ -162,7 +162,7 @@ public class CaseDataMiamElementsMapper {
                 ? List.of(c100RebuildMiamElements.getMiamNonAttendanceReasons()) : Collections.emptyList();
 
         if (nonAttendanceReasons.isEmpty() || nonAttendanceReasons.contains("none")) {
-            return null;
+            return Collections.emptyList();
         }
         return nonAttendanceReasons.stream().map(value -> MiamExemptionMapperEnum.valueOf(value).getValue())
                 .collect(Collectors.toList());

@@ -6,18 +6,15 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherPersonDetailsElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildRelationship;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.OtherPersonAddress;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.OtherPersonDetail;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.PersonalDetails;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.RelationshipDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -62,17 +59,17 @@ public class CaseDataOtherPersonsElementsMapper {
         .build();
     }
 
-    public static String buildChildRelationship(RelationshipDetails relationshipDetails) {
-        Optional<ChildRelationship> childRelationship = relationshipDetails.getRelationshipToChildren().stream().findFirst();
-        if (childRelationship.isPresent()) {
-            ChildRelationship relationship = childRelationship.get();
-            if (PrlAppsConstants.OTHER.equalsIgnoreCase(relationship.getRelationshipType())) {
-                return relationship.getOtherRelationshipTypeDetails();
-            }
-            return relationship.getRelationshipType();
-        }
-        return null;
-    }
+    //    public static String buildChildRelationship(RelationshipDetails relationshipDetails) {
+    //        Optional<ChildRelationship> childRelationship = relationshipDetails.getRelationshipToChildren().stream().findFirst();
+    //        if (childRelationship.isPresent()) {
+    //            ChildRelationship relationship = childRelationship.get();
+    //            if (PrlAppsConstants.OTHER.equalsIgnoreCase(relationship.getRelationshipType())) {
+    //                return relationship.getOtherRelationshipTypeDetails();
+    //            }
+    //            return relationship.getRelationshipType();
+    //        }
+    //        return null;
+    //    }
 
     private static Address buildAddress(OtherPersonAddress address) {
         return Address
