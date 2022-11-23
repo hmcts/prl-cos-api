@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.prl.services.bundle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -45,12 +45,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class BundlingServiceTest {
     @Mock
@@ -140,7 +138,8 @@ public class BundlingServiceTest {
             .build();
         Element<PartyDetails> applicants = Element.<PartyDetails>builder().value(partyDetailsWithOrganisations).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(applicants);
-        OtherPersonConfidentialityDetails otherPersonConfidentialityDetails = OtherPersonConfidentialityDetails.builder()
+        OtherPersonConfidentialityDetails otherPersonConfidentialityDetails = uk.gov.hmcts.reform.prl.models.complextypes.confidentiality
+            .OtherPersonConfidentialityDetails.builder()
             .isPersonIdentityConfidential(Yes)
             .firstName("test1")
             .lastName("last1")
@@ -184,7 +183,7 @@ public class BundlingServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
-            .state(State.GATEKEEPING)
+            .state(State.CASE_HEARING)
             //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
@@ -196,11 +195,9 @@ public class BundlingServiceTest {
         bundleCreateRequestMapper = new BundleCreateRequestMapper();
     }
 
-    @Ignore
+    @Test
     public void testCreateBundleService() throws Exception {
-        when(authTokenGenerator.generate()).thenReturn("authToken");
-        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseData,
-            "eventId","authorization","ServiceAuth");
+        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization");
     }
 
 }
