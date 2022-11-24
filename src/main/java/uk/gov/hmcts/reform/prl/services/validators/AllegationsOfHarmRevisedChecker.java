@@ -315,7 +315,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         Optional<String> abuseNatureDescription = ofNullable(domesticAbuseBehaviours.getNewAbuseNatureDescription());
         Optional<YesOrNo> behavioursApplicantSoughtHelp = ofNullable(domesticAbuseBehaviours.getNewBehavioursApplicantSoughtHelp());
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(domesticAbuseBehaviours.getNewBehavioursApplicantHelpSoughtWho());
-        Optional<String> behavioursApplicantHelpAction = ofNullable(domesticAbuseBehaviours.getNewBehavioursApplicantHelpAction());
 
         List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(typeOfAbuse.get().getDisplayedValue()));
@@ -325,7 +324,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         if (behavioursApplicantSoughtHelp.isPresent()
             && behavioursApplicantSoughtHelp.get().equals(Yes)) {
             fields.add(behavioursApplicantHelpSoughtWho);
-            fields.add(behavioursApplicantHelpAction);
         }
 
         return fields.stream().noneMatch(Optional::isEmpty)
@@ -342,7 +340,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         Optional<String> behavioursStartDateAndLength = ofNullable(childAbuseBehaviours.getNewBehavioursStartDateAndLength());
         Optional<YesOrNo> behavioursApplicantSoughtHelp = ofNullable(childAbuseBehaviours.getNewBehavioursApplicantSoughtHelp());
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(childAbuseBehaviours.getNewBehavioursApplicantHelpSoughtWho());
-        Optional<String> behavioursApplicantHelpAction = ofNullable(childAbuseBehaviours.getNewBehavioursApplicantHelpAction());
 
         List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(typeOfAbuse.get().getDisplayedValue()));
@@ -352,7 +349,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         if (behavioursApplicantSoughtHelp.isPresent()
             && behavioursApplicantSoughtHelp.get().equals(Yes)) {
             fields.add(behavioursApplicantHelpSoughtWho);
-            fields.add(behavioursApplicantHelpAction);
         }
 
         return fields.stream().noneMatch(Optional::isEmpty)
