@@ -36,7 +36,7 @@ import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.fr
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.helpTravellingMovingBuildingSupport;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.intermediary;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.largePrintDocuments;
-import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.noSupport;
+import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.noSupportRequired;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.parkingSpace;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.signLanguageInterpreter;
 import static uk.gov.hmcts.reform.prl.enums.citizen.DisabilityRequirementEnum.specifiedColorDocuments;
@@ -95,7 +95,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                     .party(List.of(applicant)).otherAssistance(needInterpreterInCertainLanguageDetails).build();
             return List.of(Element.<InterpreterNeed>builder().value(interpreterNeed).build());
         }
-        return Collections.emptyList();
+        return null;
     }
 
     private static YesOrNo buildInterpreterNeeded(List<String> languageList) {
@@ -133,8 +133,8 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
         String extraSupportDetails;
         String feelComfortableSupportDetails;
         String helpTravellingMovingBuildingSupportDetails;
-        if (disabilityRequirementsList.contains(noSupport.name())) {
-            return noSupport.getDisplayedValue();
+        if (disabilityRequirementsList.contains(noSupportRequired.name())) {
+            return noSupportRequired.getDisplayedValue();
         }
         if (disabilityRequirementsList.contains(documentsHelp.name())) {
             documentInformation = buildDocumentInformation(c100RebuildReasonableAdjustmentsElements
@@ -281,7 +281,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
     }
 
     private static YesOrNo buildIsDisabilityPresent(List<String> disabilityRequirementsList) {
-        return disabilityRequirementsList.contains(noSupport.name()) ? YesOrNo.No : YesOrNo.Yes;
+        return disabilityRequirementsList.contains(noSupportRequired.name()) ? YesOrNo.No : YesOrNo.Yes;
     }
 
     private static String buildSpecialArrangementList(List<String> specialArrangementList, String otherSubField) {
