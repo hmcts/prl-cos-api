@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfiden
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -189,7 +190,7 @@ public class BundlingServiceTest {
             .childrenConfidentialDetails(childConfidentialList)
             .otherDocuments(ElementUtils.wrapElements(otherDocuments))
             .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
-            .bundleConfiguration("sampleConfig.yaml")
+            .bundleInformation(BundlingInformation.builder().build())
             //.home(homefull)
             .build();
         bundleCreateRequestMapper = new BundleCreateRequestMapper();
