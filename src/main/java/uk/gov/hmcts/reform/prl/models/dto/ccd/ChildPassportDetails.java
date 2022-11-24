@@ -14,7 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ChildPassportDetails {
-    private List<AbductionChildPassportPossessionEnum> childPassportHolder;
-    private YesOrNo childrenHasMoreThanOnePassPort;
-    private String abductionChildPassportPosessionOtherDetail;
+
+    private List<AbductionChildPassportPossessionEnum> newChildPassportPossession;
+    private YesOrNo newChildHasMultiplePassports;
+    private String newChildPassportPossessionOtherDetails;
 }
