@@ -190,8 +190,6 @@ public class BundlingServiceTest {
             .childrenConfidentialDetails(childConfidentialList)
             .otherDocuments(ElementUtils.wrapElements(otherDocuments))
             .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
-            .bundleConfiguration("sampleConfig.yaml")
-            //.home(homefull)
             .build();
         bundleCreateRequestMapper = new BundleCreateRequestMapper();
     }
