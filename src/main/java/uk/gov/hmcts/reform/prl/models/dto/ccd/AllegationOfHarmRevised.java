@@ -40,6 +40,7 @@ public class AllegationOfHarmRevised {
     private final String newAbductionPreviousPoliceInvolvementDetails;
     private final YesOrNo allegationsOfHarmChildAbuseYesNo;
     private final YesOrNo newAllegationsOfHarmSubstanceAbuseYesNo;
+    private final String newAllegationsOfHarmSubstanceAbuseDetails;
 
     private final YesOrNo newOrdersNonMolestation;
     private final YesOrNo newOrdersOccupation;
