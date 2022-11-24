@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
@@ -45,18 +44,24 @@ public class BundlingController extends AbstractCallbackController {
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse createBundle(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
                                                              @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
-                                                             String serviceAuthorization,
+                                                                 String serviceAuthorization,
                                                              @RequestBody CallbackRequest callbackRequest)
         throws Exception {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         moveExistingCaseBundlesToHistoricalBundles(caseData);
-        BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(caseData,
-            callbackRequest.getEventId(),authorization,serviceAuthorization);
+        BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(
+            caseData,
+            callbackRequest.getEventId(),
+            authorization,
+            serviceAuthorization
+        );
         log.info("*** caseBundles from bundling api response : {}", bundleCreateResponse);
-        caseDataUpdated.put("caseBundles",
-            bundleCreateResponse.getData().getCaseBundles());
-        caseDataUpdated.put("historicalBundles",caseData.getHistoricalBundles());
+        caseDataUpdated.put(
+            "caseBundles",
+            bundleCreateResponse.getData().getCaseBundles()
+        );
+        //      caseDataUpdated.put("historicalBundles",caseData.getHistoricalBundles());
         log.info("*** caseBundles updated in caseData : {}", caseDataUpdated.get("caseBundles"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
 
@@ -64,7 +69,8 @@ public class BundlingController extends AbstractCallbackController {
 
     @PostMapping(path = "/createBundleCallback", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",  content = @Content(mediaType = "application/json",
+        @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType =
+            "application/json",
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse saveBundleDocument(
@@ -78,13 +84,5 @@ public class BundlingController extends AbstractCallbackController {
 
     private void moveExistingCaseBundlesToHistoricalBundles(CaseData caseData) {
         List<Bundle> historicalBundles = new ArrayList<>();
-        if (nonNull(caseData.getHistoricalBundles())) {
-            historicalBundles.addAll(caseData.getHistoricalBundles());
-        }
-        if (nonNull(caseData.getCaseBundles())) {
-            historicalBundles.addAll(caseData.getCaseBundles());
-        }
-        caseData.setHistoricalBundles(historicalBundles);
-        caseData.setCaseBundles(null);
     }
 }
