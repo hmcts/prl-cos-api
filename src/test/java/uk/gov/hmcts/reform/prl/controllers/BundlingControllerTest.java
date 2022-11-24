@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolderDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
@@ -76,7 +77,9 @@ public class BundlingControllerTest {
 
     @Test
     public void testCreateBundle() throws Exception {
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder()
+            .bundleInformation(BundlingInformation.builder()
+            .build()).build());
         when(bundlingService.createBundleServiceRequest(any(CaseData.class),anyString(),anyString())).thenReturn(bundleCreateResponse);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
         response = bundlingController.createBundle(authToken,"serviceAuth",callbackRequest);
