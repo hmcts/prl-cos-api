@@ -32,6 +32,8 @@ public class AllegationOfHarmRevised {
     private final String newChildrenLocationNow;
     private final YesOrNo newAbductionPassportOfficeNotified;
     private final YesOrNo newAbductionChildHasPassport;
+
+    @JsonProperty("newChildPassportPossession")
     private List<AbductionChildPassportPossessionEnum> newChildPassportPossession;
     private YesOrNo newChildHasMultiplePassports;
     private String newChildPassportPossessionOtherDetails;
