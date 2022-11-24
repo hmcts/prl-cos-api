@@ -58,8 +58,11 @@ public class CaseDataTypeOfOrderElementsMapper {
         String natureOfOrder = Stream.concat(prohibitedOrderList.stream(), specificIssueOrderList.stream())
                 .collect(Collectors.joining(COMMA_SEPARATOR));
 
-        if (isNotEmpty(c100RebuildCourtOrderElements.getShortStatement())) {
+        if (isNotEmpty(natureOfOrder) && isNotEmpty(c100RebuildCourtOrderElements.getShortStatement())) {
             return natureOfOrder + COMMA_SEPARATOR + SHORT_STATEMENT_INFO + HYPHEN_SEPARATOR
+                    + c100RebuildCourtOrderElements.getShortStatement();
+        } else if (isNotEmpty(c100RebuildCourtOrderElements.getShortStatement())) {
+            return SHORT_STATEMENT_INFO + HYPHEN_SEPARATOR
                     + c100RebuildCourtOrderElements.getShortStatement();
         } else {
             return natureOfOrder;
