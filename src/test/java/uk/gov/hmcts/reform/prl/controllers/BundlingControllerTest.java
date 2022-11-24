@@ -52,6 +52,7 @@ public class BundlingControllerTest {
     private CaseDetails caseDetails;
 
     private Map<String,Object> caseData;
+    @Mock
     private AboutToStartOrSubmitCallbackResponse response;
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -83,7 +84,8 @@ public class BundlingControllerTest {
         when(bundlingService.createBundleServiceRequest(any(CaseData.class),anyString(),anyString())).thenReturn(bundleCreateResponse);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
         response = bundlingController.createBundle(authToken,"serviceAuth",callbackRequest);
-        List<Bundle> responseCaseBundles = (List)response.getData().get("caseBundles");
+        BundlingInformation bundleInformation = (BundlingInformation) response.getData().get("bundleInformation");
+        List<Bundle> responseCaseBundles = bundleInformation.getCaseBundles();
         assertEquals("CaseDocuments",
             responseCaseBundles.get(0).getValue().getFolders().get(0)
                     .getValue().getFolders().get(0).getValue().getDocuments().get(0).getValue().getName());

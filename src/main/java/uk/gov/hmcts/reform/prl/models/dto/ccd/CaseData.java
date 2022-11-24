@@ -661,6 +661,7 @@ public class CaseData implements MappableObject {
     /**
      * Bundle.
      */
+    @JsonProperty("bundleInformation")
     private BundlingInformation bundleInformation;
 
     private String c100RebuildMaim;

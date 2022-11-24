@@ -61,7 +61,7 @@ public class BundlingController extends AbstractCallbackController {
             caseDataUpdated.put("bundleInformation",
                 BundlingInformation.builder().caseBundles(bundleCreateResponse.getData().getCaseBundles())
                     .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
-                    .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration()));
+                    .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration()).build());
             log.info("*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}", caseData.getId());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
