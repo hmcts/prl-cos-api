@@ -192,6 +192,10 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionPassportOfficeNotified());
         Optional<YesOrNo> abductionChildHasPassport =
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionChildHasPassport());
+        Optional<List<AbductionChildPassportPossessionEnum>> abductionChildPassportPosessionList =
+            ofNullable(caseData.getAllegationOfHarmRevised().getNewChildPassportPossession());
+        Optional<String> abductionChildPassportPosessionOtherDetail = ofNullable(caseData.getAllegationOfHarmRevised()
+                                                                                     .getNewChildPassportPossessionOtherDetails());
         Optional<YesOrNo> abductionPreviousPoliceInvolvement =
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionPreviousPoliceInvolvement());
         Optional<String> abductionPreviousPoliceInvolvementDetails =
@@ -202,7 +206,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         boolean passportCompleted = abductionPassportOfficeNotified.isPresent();
         boolean hasPassportCompleted = abductionChildHasPassport.isPresent();
         boolean policeCompleted = false;
-
+        boolean passportPossessionCompleted = false;
         if (childAbduction.isPresent() && No.equals(childAbduction.get())) {
             return true;
         }
@@ -218,6 +222,15 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                     previousAbductionThreatsDetails,
                     previousThreatSectionComplete,
                     previousAbductionThreatsCompleted
+                );
+
+                boolean abductionChildPassportPosessionCompleted = abductionChildPassportPosessionList.isPresent();
+
+                passportPossessionCompleted = isPassportPossessionCompleted(
+                    abductionChildPassportPosessionList,
+                    abductionChildPassportPosessionOtherDetail,
+                    passportPossessionCompleted,
+                    abductionChildPassportPosessionCompleted
                 );
 
                 boolean

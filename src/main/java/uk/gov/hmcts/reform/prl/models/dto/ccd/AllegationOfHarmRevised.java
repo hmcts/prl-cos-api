@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
@@ -31,8 +32,9 @@ public class AllegationOfHarmRevised {
     private final String newChildrenLocationNow;
     private final YesOrNo newAbductionPassportOfficeNotified;
     private final YesOrNo newAbductionChildHasPassport;
-
-    private final ChildPassportDetails childPassportDetails;
+    private List<AbductionChildPassportPossessionEnum> newChildPassportPossession;
+    private YesOrNo newChildHasMultiplePassports;
+    private String newChildPassportPossessionOtherDetails;
 
     private final YesOrNo newAbductionPreviousPoliceInvolvement;
     private final String newAbductionPreviousPoliceInvolvementDetails;

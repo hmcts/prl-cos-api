@@ -5,7 +5,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -13,12 +12,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -242,16 +238,9 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
     @Test
     public void whenNoCaseDataThenAbductionSectionNotComplete() {
-        AbductionChildPassportPossessionEnum abductionChildPassportPossessionEnum =
-            AbductionChildPassportPossessionEnum.father;
-        List<AbductionChildPassportPossessionEnum> abductionChildPassportPossessionList = new ArrayList<>();
-        abductionChildPassportPossessionList.add(abductionChildPassportPossessionEnum);
-        ChildPassportDetails  childPassportDetails =
-            ChildPassportDetails.builder().childPassportHolder(abductionChildPassportPossessionList)
-                .abductionChildPassportPosessionOtherDetail("").childrenHasMoreThanOnePassPort(Yes).build();
 
         CaseData caseData = CaseData.builder()
-            .allegationOfHarmRevised(AllegationOfHarmRevised.builder().childPassportDetails(childPassportDetails)
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .build())
             .build();
 
@@ -261,13 +250,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     @Test
     public void whenCaseDataPresentThenAbductionSectionReturnTrue() {
 
-        AbductionChildPassportPossessionEnum abductionChildPassportPossessionEnum = AbductionChildPassportPossessionEnum.father;
-        List<AbductionChildPassportPossessionEnum> childAbuseBehavioursElement = new ArrayList<>();
-        childAbuseBehavioursElement.add(abductionChildPassportPossessionEnum);
-        ChildPassportDetails  childPassportDetails =
-            ChildPassportDetails.builder().childPassportHolder(childAbuseBehavioursElement)
-                .abductionChildPassportPosessionOtherDetail("TEST")
-                .childrenHasMoreThanOnePassPort(Yes).build();
+
 
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
@@ -279,7 +262,6 @@ public class AllegationsOfHarmRevisedCheckerTest {
                                   .newAbductionChildHasPassport(Yes)
                                   .newAbductionPreviousPoliceInvolvement(No)
                                   .newAbductionPreviousPoliceInvolvementDetails("Details")
-                                  .childPassportDetails(childPassportDetails)
                                   .build())
             .build();
 
@@ -369,13 +351,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
     @Test
     public void whenAbuseInCompleteReturnFalse() {
 
-        AbductionChildPassportPossessionEnum abductionChildPassportPossessionEnum = AbductionChildPassportPossessionEnum.father;
-        List<AbductionChildPassportPossessionEnum> childAbuseBehavioursElement = new ArrayList<>();
-        childAbuseBehavioursElement.add(abductionChildPassportPossessionEnum);
-        ChildPassportDetails  childPassportDetails =
-            ChildPassportDetails.builder().childPassportHolder(childAbuseBehavioursElement)
-                    .abductionChildPassportPosessionOtherDetail("")
-                .childrenHasMoreThanOnePassPort(Yes).build();
+
 
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
@@ -383,8 +359,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
                                   .newAllegationsOfHarmChildAbductionYesNo(Yes)
                                   .newChildAbductionReasons("harm")
                                   .newPreviousAbductionThreats(Yes)
-                                  .newPreviousAbductionThreatsDetails("none")
-                                         .childPassportDetails(childPassportDetails).build())
+                                  .newPreviousAbductionThreatsDetails("none").build())
             .build();
 
         assertFalse(allegationsOfHarmChecker.validateAbductionSection(caseData));
@@ -533,15 +508,6 @@ public class AllegationsOfHarmRevisedCheckerTest {
     @Test
     public void whenAllCaseDataPresentValidateFieldsReturnTrue() {
 
-        AbductionChildPassportPossessionEnum abductionChildPassportPossessionEnum = AbductionChildPassportPossessionEnum.father;
-        List<AbductionChildPassportPossessionEnum> abductionChildPassportPossessionList = new ArrayList<>();
-        abductionChildPassportPossessionList.add(abductionChildPassportPossessionEnum);
-        ChildPassportDetails  childPassportDetails =
-            ChildPassportDetails.builder().childPassportHolder(abductionChildPassportPossessionList)
-                .abductionChildPassportPosessionOtherDetail("")
-                .childrenHasMoreThanOnePassPort(Yes).build();
-
-
         DomesticAbuseBehaviours domesticAbuseBehaviours = DomesticAbuseBehaviours.builder()
             .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
             .newAbuseNatureDescription("Test")
@@ -585,7 +551,6 @@ public class AllegationsOfHarmRevisedCheckerTest {
                                   .newAllegationsOfHarmOtherConcernsCourtActions("testing")
                                   .newAllegationsOfHarmOtherConcerns(No)
                                   .newAgreeChildUnsupervisedTime(No)
-                                  .childPassportDetails(childPassportDetails)
                                   .newAgreeChildSupervisedTime(No)
                                   .newAgreeChildOtherContact(No).build())
             .build();
