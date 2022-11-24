@@ -8,10 +8,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper.COMMA_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper.HYPHEN_SEPARATOR;
@@ -42,12 +44,20 @@ public class CaseDataTypeOfOrderElementsMapper {
     }
 
     private static String buildNatureOfOrder(C100RebuildCourtOrderElements c100RebuildCourtOrderElements) {
-        List<String> prohibitedOrderList = Arrays.stream(c100RebuildCourtOrderElements.getReasonsOfHearingWithoutNotice())
-                .map(element -> CourtOrderTypeEnum.valueOf(element).getDisplayedValue()).collect(Collectors.toList());
-        List<String> specificIssueOrderList = Arrays.stream(c100RebuildCourtOrderElements.getResolveSpecificIssueSubField())
-                .map(element -> CourtOrderTypeEnum.valueOf(element).getDisplayedValue()).collect(Collectors.toList());
+
+        List<String> prohibitedOrderList = nonNull(c100RebuildCourtOrderElements.getReasonsOfHearingWithoutNotice())
+                ? Arrays.stream(c100RebuildCourtOrderElements.getReasonsOfHearingWithoutNotice())
+                .map(element -> CourtOrderTypeEnum.valueOf(element).getDisplayedValue())
+                        .collect(Collectors.toList()) : Collections.emptyList();
+
+        List<String> specificIssueOrderList = nonNull(c100RebuildCourtOrderElements.getResolveSpecificIssueSubField())
+                ? Arrays.stream(c100RebuildCourtOrderElements.getResolveSpecificIssueSubField())
+                .map(element -> CourtOrderTypeEnum.valueOf(element).getDisplayedValue())
+                        .collect(Collectors.toList()) : Collections.emptyList();
+
         String natureOfOrder = Stream.concat(prohibitedOrderList.stream(), specificIssueOrderList.stream())
                 .collect(Collectors.joining(COMMA_SEPARATOR));
+
         if (isNotEmpty(c100RebuildCourtOrderElements.getShortStatement())) {
             return natureOfOrder + COMMA_SEPARATOR + SHORT_STATEMENT_INFO + HYPHEN_SEPARATOR
                     + c100RebuildCourtOrderElements.getShortStatement();
