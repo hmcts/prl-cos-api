@@ -23,6 +23,5 @@ public class DomesticAbuseBehaviours {
 
     private String newBehavioursApplicantHelpSoughtWho;
 
-    private String newBehavioursApplicantHelpAction;
 
 }
