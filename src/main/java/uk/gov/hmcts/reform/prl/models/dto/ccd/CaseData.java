@@ -161,15 +161,6 @@ public class CaseData implements MappableObject {
     private final List<ConfidentialityStatementDisclaimerEnum> c100ConfidentialityStatementDisclaimer;
     private final ConfidentialityDisclaimer confidentialityDisclaimer;
 
-
-    /**
-     * Upload documents.
-     */
-
-    private final List<Document> contactOrderDocumentsUploaded;
-    private final List<Document> c8FormDocumentsUploaded;
-    private final List<Document> otherDocumentsUploaded;
-
     /**
      * People in the case.
      */
