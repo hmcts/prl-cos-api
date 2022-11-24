@@ -278,7 +278,6 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .newBehavioursStartDateAndLength("5 days")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
-            .newBehavioursApplicantHelpAction("Action")
             .build();
 
         assertTrue(allegationsOfHarmChecker.validateDomesticAbuseBehaviours(behaviour));
@@ -293,7 +292,6 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .newBehavioursStartDateAndLength("5 days")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
-            .newBehavioursApplicantHelpAction("Action")
             .build();
 
         assertFalse(allegationsOfHarmChecker.validateDomesticAbuseBehaviours(behaviour));
@@ -310,7 +308,6 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .newBehavioursStartDateAndLength("5 days")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
-            .newBehavioursApplicantHelpAction("Action")
             .build();
 
         assertTrue(allegationsOfHarmChecker.validateDomesticAbuseBehaviours(behaviour));
@@ -325,7 +322,6 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .newBehavioursStartDateAndLength("5 days")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
-            .newBehavioursApplicantHelpAction("Action")
             .build();
 
         assertFalse(allegationsOfHarmChecker.validateDomesticAbuseBehaviours(behaviour));
@@ -342,7 +338,6 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .newBehavioursStartDateAndLength("5 days")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
-            .newBehavioursApplicantHelpAction("Action")
             .build();
 
         assertTrue(allegationsOfHarmChecker.validateDomesticAbuseBehaviours(behaviour));
@@ -514,7 +509,6 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .newBehavioursStartDateAndLength("5 days")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
-            .newBehavioursApplicantHelpAction("Action")
             .build();
 
         Element<DomesticAbuseBehaviours>  domesticAbuseBehavioursElement = Element.<DomesticAbuseBehaviours>builder()
@@ -526,7 +520,6 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .newBehavioursStartDateAndLength("5 days")
             .newBehavioursApplicantSoughtHelp(Yes)
             .newBehavioursApplicantHelpSoughtWho("Who from")
-            .newBehavioursApplicantHelpAction("Action")
             .build();
 
         Element<ChildAbuseBehaviours> childAbuseBehavioursElement = Element.<ChildAbuseBehaviours>builder()

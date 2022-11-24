@@ -23,8 +23,6 @@ public class ChildAbuseBehaviours {
 
     private String newBehavioursApplicantHelpSoughtWho;
 
-    private String newBehavioursApplicantHelpAction;
-
     private YesOrNo allChildrenAreRisk;
 
 }
