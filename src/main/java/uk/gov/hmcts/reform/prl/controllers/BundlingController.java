@@ -79,6 +79,8 @@ public class BundlingController extends AbstractCallbackController {
             }
             existingBundleInformation.setHistoricalBundles(historicalBundles);
             existingBundleInformation.setCaseBundles(null);
+        } else {
+            caseData.setBundleInformation(BundlingInformation.builder().build());
         }
     }
 }
