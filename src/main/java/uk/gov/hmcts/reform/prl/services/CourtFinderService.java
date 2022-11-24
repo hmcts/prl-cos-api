@@ -52,7 +52,9 @@ public class CourtFinderService {
                       getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));
             } else {
                 serviceArea = courtFinderApi
-                    .findClosestChildArrangementsCourtByPostcode(getCorrectPartyPostcode(caseData));
+                    .findClosestChildArrangementsCourtByPostcode(
+                    null != caseData.getC100RebuildChildPostCode() ? caseData.getC100RebuildChildPostCode() :
+                        getCorrectPartyPostcode(caseData));
             }
         } catch (Exception e) {
             log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : ",e.getMessage());
@@ -103,7 +105,7 @@ public class CourtFinderService {
             return getFirstOtherPerson(child).getAddress().getPostCode();
         }
         //default to the applicant postcode
-        return getPostcodeFromWrappedParty(caseData.    getApplicants().get(0));
+        return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
     }
 
     public String getPostCode(OtherPersonWhoLivesWithChild otherPerson) {
@@ -150,7 +152,7 @@ public class CourtFinderService {
                 emailAddress = findEmailWithFamilyOnlyKey(nearestDomesticAbuseCourt);
             }
             if (emailAddress.isEmpty()) {
-                emailAddress  = findEmailWithChildOnlyKey(nearestDomesticAbuseCourt);
+                emailAddress = findEmailWithChildOnlyKey(nearestDomesticAbuseCourt);
             }
         }
         return emailAddress;
