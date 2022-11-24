@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 
@@ -54,28 +55,32 @@ public class BundlingController extends AbstractCallbackController {
         moveExistingCaseBundlesToHistoricalBundles(caseData);
         log.info("*** Creating Bundle for the case id : {}", caseData.getId());
         BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(caseData,
-            callbackRequest.getEventId(),authorization);
-        if (null == bundleCreateResponse.getErrors()) {
-            caseDataUpdated.put("caseBundles",
-                bundleCreateResponse.getData().getCaseBundles());
-            caseDataUpdated.put("historicalBundles",caseData.getHistoricalBundles());
-            log.info("*** Bundle created successfully.. Updating caseBundles in case data for the case id: {}", caseData.getId());
-        } else {
-            log.info("Bundle creation failed due to these errors returned from the bundle api response for the case id: {} and errors {}",
-                caseData.getId(),new ObjectMapper().writeValueAsString(bundleCreateResponse.getErrors()));
+            callbackRequest.getEventId(), authorization);
+        log.info("*** Bundle response from api : {}", new ObjectMapper().writeValueAsString(bundleCreateResponse));
+        if (null != bundleCreateResponse && null != bundleCreateResponse.getData() && null != bundleCreateResponse.getData().getCaseBundles()) {
+            caseDataUpdated.put("bundleInformation",
+                BundlingInformation.builder().caseBundles(bundleCreateResponse.getData().getCaseBundles())
+                    .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
+                    .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration()).build());
+            log.info("*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}", caseData.getId());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     private void moveExistingCaseBundlesToHistoricalBundles(CaseData caseData) {
         List<Bundle> historicalBundles = new ArrayList<>();
-        if (nonNull(caseData.getHistoricalBundles())) {
-            historicalBundles.addAll(caseData.getHistoricalBundles());
+        BundlingInformation existingBundleInformation = caseData.getBundleInformation();
+        if (nonNull(existingBundleInformation)) {
+            if (nonNull(existingBundleInformation.getHistoricalBundles())) {
+                historicalBundles.addAll(existingBundleInformation.getHistoricalBundles());
+            }
+            if (nonNull(existingBundleInformation.getCaseBundles())) {
+                historicalBundles.addAll(existingBundleInformation.getCaseBundles());
+            }
+            existingBundleInformation.setHistoricalBundles(historicalBundles);
+            existingBundleInformation.setCaseBundles(null);
+        } else {
+            caseData.setBundleInformation(BundlingInformation.builder().build());
         }
-        if (nonNull(caseData.getCaseBundles())) {
-            historicalBundles.addAll(caseData.getCaseBundles());
-        }
-        caseData.setHistoricalBundles(historicalBundles);
-        caseData.setCaseBundles(null);
     }
 }
