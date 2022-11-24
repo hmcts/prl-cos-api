@@ -379,8 +379,9 @@ public class DocumentGenService {
 
 
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                && caseData.getAllegationOfHarm() != null
-                && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
+                && (caseData.getAllegationOfHarm() != null
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) || (caseData.getAllegationOfHarmRevised() != null
+                    && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
                 if (State.CASE_ISSUE.equals(caseData.getState())) {
                     updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(authorisation, caseData, C1A_HINT, true));
                 } else {
