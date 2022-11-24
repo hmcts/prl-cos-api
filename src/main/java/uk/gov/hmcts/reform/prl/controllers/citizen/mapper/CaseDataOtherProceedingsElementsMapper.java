@@ -44,40 +44,42 @@ public class CaseDataOtherProceedingsElementsMapper {
     private static List<Element<ProceedingDetails>> buildExistingProceedings(C100RebuildOtherProceedingsElements
                                                                                      c100RebuildOtherProceedingsElements) {
         List<Element<ProceedingDetails>> ordersElements = new ArrayList<>();
-        if (Arrays.stream(c100RebuildOtherProceedingsElements.getCourtProceedingsOrders()).findAny().isEmpty()) {
-            return Collections.emptyList();
+        if (nonNull(c100RebuildOtherProceedingsElements.getCourtProceedingsOrders())
+                && CollectionUtils.isNotEmpty(Arrays.asList(c100RebuildOtherProceedingsElements.getCourtProceedingsOrders()))) {
+
+            OrderDetails orderDetails = c100RebuildOtherProceedingsElements.getOtherProceedings().getOrder();
+
+            List<Order> childSupervisionOrders = getChildSupervisionOrders(orderDetails);
+            List<Order> careOrders = getCareOrders(orderDetails);
+            List<Order> emergencyProtectionOrders = getEmergencyProtectionOrders(orderDetails);
+            List<Order> childArrangementsOrders = getChildArrangementsOrders(orderDetails);
+            List<Order> childAbductionOrders = getChildAbductionOrders(orderDetails);
+            List<Order> contactOrdersForDivorce = getContactOrdersForDivorce(orderDetails);
+            List<Order> contactOrdersForAdoption = getContactOrdersForAdoption(orderDetails);
+            List<Order> childMaintenanceOrders = getChildMaintenanceOrders(orderDetails);
+            List<Order> financialOrders = getFinancialOrders(orderDetails);
+            List<Order> nonMolestationOrders = getNonMolestationOrders(orderDetails);
+            List<Order> occupationOrders = getOccupationOrders(orderDetails);
+            List<Order> forcedMarriageProtectionOrders = getForcedMarriageProtectionOrders(orderDetails);
+            List<Order> restrainingOrders = getRestrainingOrders(orderDetails);
+            List<Order> otherInjuctionOrders = getOtherInjuctionOrders(orderDetails);
+            List<Order> undertakingOrders = getUndertakingOrders(orderDetails);
+            List<Order> otherOrders = getOtherOrders(orderDetails);
+
+            List<List<Order>> ordersLists = Lists.newArrayList(childSupervisionOrders, careOrders, emergencyProtectionOrders,
+                    childArrangementsOrders, childAbductionOrders, contactOrdersForDivorce, contactOrdersForAdoption,
+                    childMaintenanceOrders, financialOrders, nonMolestationOrders, occupationOrders, forcedMarriageProtectionOrders,
+                    restrainingOrders, otherInjuctionOrders, undertakingOrders, otherOrders);
+            CollectionUtils.filter(ordersLists, PredicateUtils.notNullPredicate());
+
+            for (List<Order> orderList : ordersLists) {
+                ordersElements.addAll(orderList.stream()
+                        .map(order -> mapToProceedingDetails(order, order.getTypeOfOrderEnum())).collect(Collectors.toList()));
+            }
+
+            return ordersElements;
         }
-        OrderDetails orderDetails = c100RebuildOtherProceedingsElements.getOtherProceedings().getOrder();
-
-        List<Order> childSupervisionOrders = getChildSupervisionOrders(orderDetails);
-        List<Order> careOrders = getCareOrders(orderDetails);
-        List<Order> emergencyProtectionOrders = getEmergencyProtectionOrders(orderDetails);
-        List<Order> childArrangementsOrders = getChildArrangementsOrders(orderDetails);
-        List<Order> childAbductionOrders = getChildAbductionOrders(orderDetails);
-        List<Order> contactOrdersForDivorce = getContactOrdersForDivorce(orderDetails);
-        List<Order> contactOrdersForAdoption = getContactOrdersForAdoption(orderDetails);
-        List<Order> childMaintenanceOrders = getChildMaintenanceOrders(orderDetails);
-        List<Order> financialOrders = getFinancialOrders(orderDetails);
-        List<Order> nonMolestationOrders = getNonMolestationOrders(orderDetails);
-        List<Order> occupationOrders = getOccupationOrders(orderDetails);
-        List<Order> forcedMarriageProtectionOrders = getForcedMarriageProtectionOrders(orderDetails);
-        List<Order> restrainingOrders = getRestrainingOrders(orderDetails);
-        List<Order> otherInjuctionOrders = getOtherInjuctionOrders(orderDetails);
-        List<Order> undertakingOrders = getUndertakingOrders(orderDetails);
-        List<Order> otherOrders = getOtherOrders(orderDetails);
-
-        List<List<Order>> ordersLists = Lists.newArrayList(childSupervisionOrders, careOrders, emergencyProtectionOrders,
-                childArrangementsOrders, childAbductionOrders, contactOrdersForDivorce, contactOrdersForAdoption,
-                childMaintenanceOrders, financialOrders, nonMolestationOrders, occupationOrders, forcedMarriageProtectionOrders,
-                restrainingOrders, otherInjuctionOrders, undertakingOrders, otherOrders);
-        CollectionUtils.filter(ordersLists, PredicateUtils.notNullPredicate());
-
-        for (List<Order> orderList : ordersLists) {
-            ordersElements.addAll(orderList.stream()
-                    .map(order -> mapToProceedingDetails(order, order.getTypeOfOrderEnum())).collect(Collectors.toList()));
-        }
-
-        return ordersElements;
+        return Collections.emptyList();
     }
 
     private static List<Order> getOtherOrders(OrderDetails orderDetails) {
