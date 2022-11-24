@@ -171,4 +171,6 @@ public class PrlAppsConstants {
     public static final String CITIZEN_ROLE = "citizen";
 
     public static final String REGION_SCOTLAND = "Scotland";
+
+    public static final String OTHER = "Other";
 }

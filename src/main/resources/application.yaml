@@ -107,6 +107,7 @@ uk:
             SOLICITOR_RESUBMIT_EMAIL: c8fa581b-10c7-4d48-8a22-3d055ae4be79
             LOCAL_AUTHORITY: cd275fbe-7987-4b3e-bcd1-c7cf17101b77
             DOCUMENT_UPLOADED: 5dd653ff-747f-4df1-9b0e-1532d767035f
+            CITIZEN_CASE_SUBMISSION: 1e9c07a2-e565-4b16-9ead-bd49206ba8de
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:

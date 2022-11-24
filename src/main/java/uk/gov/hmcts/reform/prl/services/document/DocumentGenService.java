@@ -284,6 +284,24 @@ public class DocumentGenService {
         return caseData;
     }
 
+    /*
+    Need to remove this method once we have clarity on document generation for citizen
+     */
+    public Map<String, Object> generateDocumentsForCitizenSubmission(String authorisation, CaseData caseData) throws Exception {
+
+        Map<String, Object> updatedCaseData = new HashMap<>();
+
+        caseData = fillOrgDetails(caseData);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        updatedCaseData.put("isEngDocGen", Yes.toString());
+        updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
+        if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, null);
+        }
+        return updatedCaseData;
+
+    }
+
     public Map<String, Object> generateDocuments(String authorisation, CaseData caseData) throws Exception {
 
         Map<String, Object> updatedCaseData = new HashMap<>();
