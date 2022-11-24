@@ -57,13 +57,15 @@ public class BundlingController extends AbstractCallbackController {
         log.info("*** Creating Bundle for the case id : {}", caseData.getId());
         BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(caseData,
             callbackRequest.getEventId(), authorization);
-        if (isNull(bundleCreateResponse.getErrors())) {
+        log.info("*** Bundle response from api : {}", new ObjectMapper().writeValueAsString(bundleCreateResponse));
+        if (null != bundleCreateResponse && null != bundleCreateResponse.getData() && null != bundleCreateResponse.getData().getCaseBundles()) {
             caseDataUpdated.put("bundleInformation",
                 BundlingInformation.builder().caseBundles(bundleCreateResponse.getData().getCaseBundles())
                     .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
                     .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration()));
             log.info("*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}", caseData.getId());
-        } else {
+        }
+        if (nonNull(bundleCreateResponse.getErrors())) {
             log.info("Bundle creation failed due to these errors returned from the bundle api response for the case id: {} and errors {}",
                 caseData.getId(), new ObjectMapper().writeValueAsString(bundleCreateResponse.getErrors()));
         }
