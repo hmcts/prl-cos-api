@@ -125,6 +125,13 @@ public class DocumentGenService {
     @Value("${document.templates.c100.c100_c1a_draft_template}")
     protected String c100C1aDraftTemplate;
 
+    @Value("${document.templates.c100.c100_c1a_revised_template}")
+    protected String c100C1aRevisedTemplate;
+
+    @Value("${document.templates.c100.c100_c1a_revised_draft_template}")
+    protected String c100C1aRevisedDraftTemplate;
+
+
     @Value("${document.templates.c100.c100_c1a_filename}")
     protected String c100C1aFilename;
 
@@ -158,11 +165,17 @@ public class DocumentGenService {
     @Value("${document.templates.c100.c100_c1a_welsh_template}")
     protected String c100C1aWelshTemplate;
 
+    @Value("${document.templates.c100.c100_c1a_revised_welsh_template}")
+    protected String c100C1aRevisedWelshTemplate;
+
     @Value("${document.templates.c100.c100_c1a_welsh_filename}")
     protected String c100C1aWelshFilename;
 
     @Value("${document.templates.c100.c100_c1a_draft_welsh_template}")
     protected String c100C1aDraftWelshTemplate;
+
+    @Value("${document.templates.c100.c100_c1a_revised_draft_welsh_template}")
+    protected String c100C1aRevisedDraftWelshTemplate;
 
     @Value("${document.templates.c100.c100_c1a_draft_welsh_filename}")
     protected String c100C1aDraftWelshFilename;
@@ -681,10 +694,10 @@ public class DocumentGenService {
                 template = !isWelsh ? c100C8DraftTemplate : c100C8DraftWelshTemplate;
                 break;
             case C1A_HINT:
-                template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
+                template = findC1ATemplate(isWelsh, caseData.getIsNewCaseCreated());
                 break;
             case C1A_DRAFT_HINT:
-                template = !isWelsh ? c100C1aDraftTemplate : c100C1aDraftWelshTemplate;
+                template = findDraftC1ATemplate(isWelsh, caseData.getIsNewCaseCreated());
                 break;
             case FINAL_HINT:
                 template = findFinalTemplate(isWelsh, caseTypeOfApp);
@@ -738,6 +751,26 @@ public class DocumentGenService {
             template = !isWelsh ? c100FinalTemplate : c100FinalWelshTemplate;
         } else {
             template = !isWelsh ? fl401FinalTemplate : fl401FinalWelshTemplate;
+        }
+        return template;
+    }
+
+    private String findC1ATemplate(boolean isWelsh, YesOrNo newCaseCreated) {
+        String template;
+        if (Yes.equals(newCaseCreated)) {
+            template = !isWelsh ? c100C1aRevisedTemplate : c100C1aRevisedWelshTemplate;
+        } else {
+            template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
+        }
+        return template;
+    }
+
+    private String findDraftC1ATemplate(boolean isWelsh, YesOrNo newCaseCreated) {
+        String template;
+        if (Yes.equals(newCaseCreated)) {
+            template = !isWelsh ? c100C1aRevisedDraftTemplate : c100C1aRevisedDraftWelshTemplate;
+        } else {
+            template = !isWelsh ? c100C1aDraftTemplate : c100C1aDraftWelshTemplate;
         }
         return template;
     }
