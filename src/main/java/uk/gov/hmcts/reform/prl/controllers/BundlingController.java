@@ -64,10 +64,6 @@ public class BundlingController extends AbstractCallbackController {
                     .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration()));
             log.info("*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}", caseData.getId());
         }
-        if (nonNull(bundleCreateResponse.getErrors())) {
-            log.info("Bundle creation failed due to these errors returned from the bundle api response for the case id: {} and errors {}",
-                caseData.getId(), new ObjectMapper().writeValueAsString(bundleCreateResponse.getErrors()));
-        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
