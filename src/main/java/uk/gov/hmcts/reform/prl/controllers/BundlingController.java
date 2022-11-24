@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -56,7 +57,7 @@ public class BundlingController extends AbstractCallbackController {
         log.info("*** Creating Bundle for the case id : {}", caseData.getId());
         BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(caseData,
             callbackRequest.getEventId(), authorization);
-        if (null == bundleCreateResponse.getErrors()) {
+        if (isNull(bundleCreateResponse.getErrors())) {
             caseDataUpdated.put("bundleInformation",
                 BundlingInformation.builder().caseBundles(bundleCreateResponse.getData().getCaseBundles())
                     .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
