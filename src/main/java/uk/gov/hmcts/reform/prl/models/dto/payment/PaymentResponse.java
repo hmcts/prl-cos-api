@@ -24,5 +24,6 @@ public class PaymentResponse {
     private String nextUrl;
     @JsonProperty(value = "status")
     private String paymentStatus;
+    private String serviceRequestReference;
 }
 
