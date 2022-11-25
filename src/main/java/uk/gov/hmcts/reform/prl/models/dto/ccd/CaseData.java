@@ -84,6 +84,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -159,15 +160,6 @@ public class CaseData implements MappableObject {
      */
     private final List<ConfidentialityStatementDisclaimerEnum> c100ConfidentialityStatementDisclaimer;
     private final ConfidentialityDisclaimer confidentialityDisclaimer;
-
-
-    /**
-     * Upload documents.
-     */
-
-    private final List<Document> contactOrderDocumentsUploaded;
-    private final List<Document> c8FormDocumentsUploaded;
-    private final List<Document> otherDocumentsUploaded;
 
     /**
      * People in the case.
@@ -682,6 +674,13 @@ public class CaseData implements MappableObject {
     private String c100RebuildHearingUrgency;
     private String c100RebuildOtherProceedings;
     private String c100RebuildReturnUrl;
+
+    /**
+     * Bundle.
+     */
+    @JsonProperty("bundleInformation")
+    private BundlingInformation bundleInformation;
+
     private String c100RebuildMaim;
     private String c100RebuildChildDetails;
     private String c100RebuildApplicantDetails;

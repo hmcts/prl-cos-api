@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolderDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
@@ -51,10 +52,10 @@ public class BundlingControllerTest {
     private CaseDetails caseDetails;
 
     private Map<String,Object> caseData;
+    @Mock
     private AboutToStartOrSubmitCallbackResponse response;
 
     public static final String authToken = "Bearer TestAuthToken";
-    public static final String serviceAuthToken = "Bearer TestAuthToken";
 
     @Before
     public void setUp() {
@@ -71,17 +72,20 @@ public class BundlingControllerTest {
         bundleCreateResponse = BundleCreateResponse.builder().data(BundleData.builder().id("334").caseBundles(bundleList).build()).build();
         caseData = new HashMap<>();
         caseData.put("caseBundles",bundleCreateResponse.getData().getCaseBundles());
-        caseDetails = CaseDetails.builder().data(caseData).state(State.GATEKEEPING.getValue())
+        caseDetails = CaseDetails.builder().data(caseData).state(State.CASE_HEARING.getValue())
             .id(123488888L).createdDate(LocalDateTime.now()).lastModified(LocalDateTime.now()).build();
     }
 
     @Test
     public void testCreateBundle() throws Exception {
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder().build());
-        when(bundlingService.createBundleServiceRequest(any(CaseData.class),anyString(),anyString(),anyString())).thenReturn(bundleCreateResponse);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(CaseData.builder()
+            .bundleInformation(BundlingInformation.builder()
+            .build()).build());
+        when(bundlingService.createBundleServiceRequest(any(CaseData.class),anyString(),anyString())).thenReturn(bundleCreateResponse);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).eventId("eventId").build();
-        response = bundlingController.createBundle(authToken,serviceAuthToken,callbackRequest);
-        List<Bundle> responseCaseBundles = (List)response.getData().get("caseBundles");
+        response = bundlingController.createBundle(authToken,"serviceAuth",callbackRequest);
+        BundlingInformation bundleInformation = (BundlingInformation) response.getData().get("bundleInformation");
+        List<Bundle> responseCaseBundles = bundleInformation.getCaseBundles();
         assertEquals("CaseDocuments",
             responseCaseBundles.get(0).getValue().getFolders().get(0)
                     .getValue().getFolders().get(0).getValue().getDocuments().get(0).getValue().getName());

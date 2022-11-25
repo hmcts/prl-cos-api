@@ -1,9 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -19,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 
@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
@@ -44,45 +45,42 @@ public class BundlingController extends AbstractCallbackController {
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse createBundle(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
                                                              @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
-                                                                 String serviceAuthorization,
+                                                             String serviceAuthorization,
                                                              @RequestBody CallbackRequest callbackRequest)
         throws Exception {
+
+        //log.info("*** callRecieved to createBundle api in prl-cos-api : {}", callbackRequest.toString());
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         moveExistingCaseBundlesToHistoricalBundles(caseData);
-        BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(
-            caseData,
-            callbackRequest.getEventId(),
-            authorization,
-            serviceAuthorization
-        );
-        log.info("*** caseBundles from bundling api response : {}", bundleCreateResponse);
-        caseDataUpdated.put(
-            "caseBundles",
-            bundleCreateResponse.getData().getCaseBundles()
-        );
-        //      caseDataUpdated.put("historicalBundles",caseData.getHistoricalBundles());
-        log.info("*** caseBundles updated in caseData : {}", caseDataUpdated.get("caseBundles"));
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-
-    }
-
-    @PostMapping(path = "/createBundleCallback", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType =
-            "application/json",
-            schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse saveBundleDocument(
-        @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestBody CallbackRequest callbackRequest
-    ) throws Exception {
-        log.info("*** callback data recieved to cos api : {}", callbackRequest.getCaseDetails().getData());
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("*** Creating Bundle for the case id : {}", caseData.getId());
+        BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(caseData,
+            callbackRequest.getEventId(), authorization);
+        log.info("*** Bundle response from api : {}", new ObjectMapper().writeValueAsString(bundleCreateResponse));
+        if (null != bundleCreateResponse && null != bundleCreateResponse.getData() && null != bundleCreateResponse.getData().getCaseBundles()) {
+            caseDataUpdated.put("bundleInformation",
+                BundlingInformation.builder().caseBundles(bundleCreateResponse.getData().getCaseBundles())
+                    .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
+                    .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration()).build());
+            log.info("*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}", caseData.getId());
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     private void moveExistingCaseBundlesToHistoricalBundles(CaseData caseData) {
         List<Bundle> historicalBundles = new ArrayList<>();
+        BundlingInformation existingBundleInformation = caseData.getBundleInformation();
+        if (nonNull(existingBundleInformation)) {
+            if (nonNull(existingBundleInformation.getHistoricalBundles())) {
+                historicalBundles.addAll(existingBundleInformation.getHistoricalBundles());
+            }
+            if (nonNull(existingBundleInformation.getCaseBundles())) {
+                historicalBundles.addAll(existingBundleInformation.getCaseBundles());
+            }
+            existingBundleInformation.setHistoricalBundles(historicalBundles);
+            existingBundleInformation.setCaseBundles(null);
+        } else {
+            caseData.setBundleInformation(BundlingInformation.builder().build());
+        }
     }
 }

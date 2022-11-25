@@ -173,4 +173,8 @@ public class PrlAppsConstants {
     public static final String REGION_SCOTLAND = "Scotland";
 
     public static final String OTHER = "Other";
+    public static final String CAFCASS_REPORTS = "Cafcass reports";
+    public static final String EXPERT_REPORTS = "Expert reports";
+    public static final String APPLICANT_STATMENT =
+        "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";
 }
