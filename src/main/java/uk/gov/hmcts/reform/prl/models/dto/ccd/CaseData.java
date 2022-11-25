@@ -186,9 +186,9 @@ public class CaseData implements MappableObject {
     /**
      * Type of application.
      */
-    private final List<OrderTypeEnum> ordersApplyingFor;
-    private final ChildArrangementOrderTypeEnum typeOfChildArrangementsOrder;
-    private final String natureOfOrder;
+    private List<OrderTypeEnum> ordersApplyingFor;
+    private ChildArrangementOrderTypeEnum typeOfChildArrangementsOrder;
+    private String natureOfOrder;
     private final YesOrNo consentOrder;
     private final Document draftConsentOrderFile;
     private final PermissionRequiredEnum applicationPermissionRequired;
@@ -198,14 +198,14 @@ public class CaseData implements MappableObject {
     /**
      * Hearing urgency.
      */
-    private final YesOrNo isCaseUrgent;
-    private final String caseUrgencyTimeAndReason;
-    private final String effortsMadeWithRespondents;
-    private final YesOrNo doYouNeedAWithoutNoticeHearing;
-    private final String reasonsForApplicationWithoutNotice;
-    private final YesOrNo doYouRequireAHearingWithReducedNotice;
-    private final String setOutReasonsBelow;
-    private final YesOrNo areRespondentsAwareOfProceedings;
+    private YesOrNo isCaseUrgent;
+    private String caseUrgencyTimeAndReason;
+    private String effortsMadeWithRespondents;
+    private YesOrNo doYouNeedAWithoutNoticeHearing;
+    private String reasonsForApplicationWithoutNotice;
+    private YesOrNo doYouRequireAHearingWithReducedNotice;
+    private String setOutReasonsBelow;
+    private YesOrNo areRespondentsAwareOfProceedings;
 
     /**
      * Applicant details.
@@ -226,10 +226,10 @@ public class CaseData implements MappableObject {
     /**
      * Child details.
      */
-    private final List<Element<Child>> children;
-    private final YesNoDontKnow childrenKnownToLocalAuthority;
-    private final String childrenKnownToLocalAuthorityTextArea;
-    private final YesNoDontKnow childrenSubjectOfChildProtectionPlan;
+    private List<Element<Child>> children;
+    private YesNoDontKnow childrenKnownToLocalAuthority;
+    private String childrenKnownToLocalAuthorityTextArea;
+    private YesNoDontKnow childrenSubjectOfChildProtectionPlan;
 
     /**
      * Respondent details.
@@ -275,12 +275,12 @@ public class CaseData implements MappableObject {
     /**
      * International element.
      */
-    private final YesOrNo habitualResidentInOtherState;
-    private final String habitualResidentInOtherStateGiveReason;
-    private final YesOrNo jurisdictionIssue;
-    private final String jurisdictionIssueGiveReason;
-    private final YesOrNo requestToForeignAuthority;
-    private final String requestToForeignAuthorityGiveReason;
+    private YesOrNo habitualResidentInOtherState;
+    private String habitualResidentInOtherStateGiveReason;
+    private YesOrNo jurisdictionIssue;
+    private String jurisdictionIssueGiveReason;
+    private YesOrNo requestToForeignAuthority;
+    private String requestToForeignAuthorityGiveReason;
 
     /**
      * Litigation capacity.
@@ -356,7 +356,7 @@ public class CaseData implements MappableObject {
     private final List<Element<Correspondence>> correspondenceForTabDisplay;
     private final List<Element<OtherDocuments>> otherDocumentsForTabDisplay;
 
-    private final List<Element<UserInfo>> userInfo;
+    private List<Element<UserInfo>> userInfo;
 
     /**
      * Return Application.
@@ -497,7 +497,7 @@ public class CaseData implements MappableObject {
      * FL401 Statement Of truth and submit.
      */
     @JsonProperty("fl401StmtOfTruth")
-    private final StatementOfTruth fl401StmtOfTruth;
+    private StatementOfTruth fl401StmtOfTruth;
 
     @JsonProperty("viewPDFlinkLabelText")
     private String viewPdfLinkLabelText;
