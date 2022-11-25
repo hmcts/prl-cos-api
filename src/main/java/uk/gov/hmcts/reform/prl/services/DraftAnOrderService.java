@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
@@ -13,10 +15,12 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -35,6 +39,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
@@ -371,4 +376,44 @@ public class DraftAnOrderService {
             .build();
     }
 
+    public CaseData generateDocument(@RequestBody CallbackRequest callbackRequest, CaseData caseData) {
+        if (callbackRequest
+            .getCaseDetailsBefore() != null && callbackRequest
+            .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
+            caseData.setCourtName(callbackRequest
+                                      .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
+        }
+        log.info("Case data {}", caseData);
+        log.info("Case data before prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
+        FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
+        fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
+            PrlAppsConstants.FORMAT,
+            caseData.getApplicantsFL401().getFirstName(),
+            caseData.getApplicantsFL401().getLastName()
+        ))
+            .fl404bRespondentName(String.format(PrlAppsConstants.FORMAT, caseData.getRespondentsFL401().getFirstName(),
+                                                caseData.getRespondentsFL401().getLastName()
+            )).build();
+        if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+            fl404CustomFields = fl404CustomFields.toBuilder()
+                .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+        }
+        if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+            fl404CustomFields = fl404CustomFields.toBuilder()
+                .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+        }
+        caseData = caseData.toBuilder()
+            .manageOrders(ManageOrders.builder()
+                              .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+                              .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
+                              .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
+                              .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+                              .isOrderDrawnForCafcass(caseData.getManageOrders().getIsOrderDrawnForCafcass())
+                              .orderDirections(caseData.getManageOrders().getOrderDirections())
+                              .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
+                              .fl404CustomFields(fl404CustomFields)
+                              .build()).build();
+        log.info("Case data after prepopulate: {}", caseData.getManageOrders().getFl404CustomFields());
+        return caseData;
+    }
 }
