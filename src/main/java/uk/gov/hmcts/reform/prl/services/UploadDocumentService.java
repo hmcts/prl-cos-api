@@ -87,8 +87,8 @@ public class UploadDocumentService {
 
         }
         log.info("******** Out of uploadedDocumentRequest is null check");
-        log.info("******** uploadedDocumentRequest = "+uploadedDocumentRequest);
-        log.info("******** uploadedDocumentRequest.getFiles() = "+uploadedDocumentRequest.getFiles());
+        log.info("******** uploadedDocumentRequest = " + uploadedDocumentRequest);
+        log.info("******** uploadedDocumentRequest.getFiles() = " + uploadedDocumentRequest.getFiles());
         if (!uploadedDocumentRequest.getFiles().isEmpty()) {
             log.info("******** !uploadedDocumentRequest.getFiles().isEmpty() is true");
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
@@ -100,7 +100,7 @@ public class UploadDocumentService {
             );
             UploadedDocuments uploadedDocuments = null;
 
-            for (MultipartFile file: uploadedDocumentRequest.getFiles()) {
+            for (MultipartFile file : uploadedDocumentRequest.getFiles()) {
 
                 uploadedDocuments = UploadedDocuments.builder().dateCreated(LocalDate.now())
                     .uploadedBy(partyId)
