@@ -11,8 +11,11 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -20,6 +23,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -32,7 +47,7 @@ public class BundleCreateRequestMapperTest {
     @Test
     public void testBundleCreateRequestMapper() {
         List<FurtherEvidence> furtherEvidences = new ArrayList<>();
-        furtherEvidences.add(FurtherEvidence.builder().typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.consentOrder)
+        furtherEvidences.add(FurtherEvidence.builder().typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.miamCertificate)
             .documentFurtherEvidence(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("Sample1.pdf").build())
             .restrictCheckboxFurtherEvidence(new ArrayList<>()).build());
 
@@ -40,25 +55,78 @@ public class BundleCreateRequestMapperTest {
         otherDocuments.add(OtherDocuments.builder().documentName("Application docu")
             .documentOther(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("Sample2.pdf").build()).documentTypeOther(
                 DocTypeOtherDocumentsEnum.applicantStatement).restrictCheckboxOtherDocuments(new ArrayList<>()).build());
-        Document document = Document.builder().documentUrl("url").documentBinaryUrl("Url").documentFileName("fileName").build();
 
-        OrderDetails orderDetails = OrderDetails.builder().orderDocument(document).orderType("ChildArrangement").build();
-        List<OrderDetails> orderDetailsList = new ArrayList<>();
-        orderDetailsList.add(orderDetails);
-        CaseData caseData = CaseData.builder()
+        List<OrderDetails> orders = new ArrayList<>();
+        orders.add(OrderDetails.builder().orderType("orders")
+            .orderDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("Order.pdf").build()).build());
+
+        List<ResponseDocuments> citizenC7uploadedDocs = new ArrayList<>();
+        citizenC7uploadedDocs.add(ResponseDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C7Document.pdf").build()).build());
+
+        List<UploadedDocuments> uploadedDocuments = new ArrayList<>();
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("PositionStatement.pdf").build())
+            .documentType(YOUR_POSITION_STATEMENTS).isApplicant("No").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("PositionStatement.pdf").build())
+            .documentType(YOUR_POSITION_STATEMENTS).isApplicant("Yes").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("WitnessStatement.pdf").build())
+            .documentType(YOUR_WITNESS_STATEMENTS).isApplicant("Yes").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("WitnessStatement.pdf").build())
+            .documentType(YOUR_WITNESS_STATEMENTS).isApplicant("No").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("LettersFromSchool.pdf").build())
+            .documentType(LETTERS_FROM_SCHOOL).isApplicant("No").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("LettersFromSchool.pdf").build())
+            .documentType(EXPERT_REPORTS).isApplicant("No").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("CAFCASSReports.pdf").build())
+            .documentType(CAFCASS_REPORTS).isApplicant("No").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("OtherWitnessDocuments.pdf").build())
+            .documentType(OTHER_WITNESS_STATEMENTS).isApplicant("No").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("MedicalRecords.pdf").build())
+            .documentType(MEDICAL_RECORDS).isApplicant("No").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("MedicalReports.pdf").build())
+            .documentType(MEDICAL_REPORTS).isApplicant("No").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("PaternityReports.pdf").build())
+            .documentType(PATERNITY_TEST_REPORTS).isApplicant("No").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("DrugAndAlchol.pdf").build())
+            .documentType(DRUG_AND_ALCOHOL_TESTS).isApplicant("No").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("PoliceReports.pdf").build())
+            .documentType(POLICE_REPORTS).isApplicant("No").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("MediaScreenshots.pdf").build())
+            .documentType(MAIL_SCREENSHOTS_MEDIA_FILES).isApplicant("No").build());
+        //uploadedDocuments.add(uploadedDocuments);
+        CaseData c100CaseData = CaseData.builder()
             .id(123456789123L)
-            .welshLanguageRequirement(No)
+            .languagePreferenceWelsh(No)
+            .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .state(State.CASE_HEARING)
+            .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
+            .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
             .otherDocuments(ElementUtils.wrapElements(otherDocuments))
             .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
-            .finalDocument(document)
-            .orderCollection(ElementUtils.wrapElements(orderDetailsList))
+            .orderCollection(ElementUtils.wrapElements(orders))
+            .bundleInformation(BundlingInformation.builder().build())
+            .citizenResponseC7DocumentList(ElementUtils.wrapElements(citizenC7uploadedDocs))
+            .citizenUploadedDocumentList(ElementUtils.wrapElements(uploadedDocuments))
             .build();
 
-        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(caseData,"eventI","sample.yaml");
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI","sample.yaml");
         assertNotNull(bundleCreateRequest);
     }
 }
