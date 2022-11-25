@@ -29,7 +29,7 @@ public class CaseDataHwnElementsMapper {
 
     private static String buildReasonsForApplicationWithoutNotice(
             C100RebuildHearingWithoutNoticeElements c100RebuildHearingWithoutNoticeElements) {
-        if (c100RebuildHearingWithoutNoticeElements.getDoYouNeedHearingWithoutNoticeAsOtherPplDoSomething().equals(Yes)) {
+        if (Yes.equals(c100RebuildHearingWithoutNoticeElements.getDoYouNeedHearingWithoutNoticeAsOtherPplDoSomething())) {
             return c100RebuildHearingWithoutNoticeElements.getReasonsOfHearingWithoutNotice()
                     + COMMA_SEPARATOR + DETAILS_OF_NOTICE_OTHER_PEOPLE_WILL_DO_SOMETHING
                     + HYPHEN_SEPARATOR +  c100RebuildHearingWithoutNoticeElements
