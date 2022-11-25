@@ -28,6 +28,14 @@ public class HearingsUpdate {
     private final LocalDate nextHearingDate;
     @JsonProperty("hearingVenueId")
     private final String hearingVenueId;
+    @JsonProperty("hearingVenueName")
+    private final String hearingVenueName;
+    @JsonProperty("hearingVenueAddress")
+    private final String hearingVenueAddress;
+    @JsonProperty("hearingVenueLocationCode")
+    private final String hearingVenueLocationCode;
+    @JsonProperty("courtTypeId")
+    private final String courtTypeId;
     @JsonProperty("hearingJudgeId")
     private final String hearingJudgeId;
     @JsonProperty("hearingRoomId")
