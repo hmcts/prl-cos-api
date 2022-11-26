@@ -27,7 +27,7 @@ public enum State {
     ALL_FINAL_ORDERS_ISSUED("ALL_FINAL_ORDERS_ISSUED"),
     CASE_HEARING("CASE_HEARING","Prepare for hearing"),
     DELETED("DELETED", "Deleted"),
-    DECISION_OUTCOME("DECISION_OUTCOME","Hearing Decision");
+    DECISION_OUTCOME("DECISION_OUTCOME","Hearing outcome");
     private final String value;
     private final String label;
 
