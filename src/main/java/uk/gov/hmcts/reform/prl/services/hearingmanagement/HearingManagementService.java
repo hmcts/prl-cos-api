@@ -346,14 +346,14 @@ public class HearingManagementService {
             applicantsEmailList.forEach(email -> log.info("Applicant Email:: {}", email));
             for (String email: applicantsEmailList) {
 
-                Optional<String> partyName = applicants.stream()
-                    .filter(applicantEmail -> applicantEmail.equals(email))
+                String partyName = String.valueOf(applicants.stream()
+                    .filter(p -> p.getEmail().equals(email))
                     .map(element -> element.getFirstName() + " " + element.getLastName())
-                    .findFirst();
+                    .findAny());
                 emailService.send(
                     email,
                     EmailTemplateNames.HEARING_DETAILS,
-                    buildApplicantHearingDetailsEmail(caseData, String.valueOf(partyName)),
+                    buildApplicantHearingDetailsEmail(caseData, partyName),
                     LanguagePreference.english
                 );
             }
