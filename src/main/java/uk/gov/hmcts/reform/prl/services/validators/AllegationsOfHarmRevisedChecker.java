@@ -192,10 +192,15 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionPassportOfficeNotified());
         Optional<YesOrNo> abductionChildHasPassport =
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionChildHasPassport());
-        Optional<List<AbductionChildPassportPossessionEnum>> abductionChildPassportPosessionList =
-            ofNullable(caseData.getAllegationOfHarmRevised().getNewChildPassportPossession());
-        Optional<String> abductionChildPassportPosessionOtherDetail = ofNullable(caseData.getAllegationOfHarmRevised()
-                                                                                     .getNewChildPassportPossessionOtherDetails());
+        Optional<String> abductionChildPassportPosessionOtherDetail = null;
+        Optional<List<AbductionChildPassportPossessionEnum>> abductionChildPassportPosessionList = null;
+        if (Yes.equals(abductionChildHasPassport)) {
+            abductionChildPassportPosessionList =
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildPassportDetails().getNewChildPassportPossession());
+            abductionChildPassportPosessionOtherDetail = ofNullable(caseData.getAllegationOfHarmRevised()
+                                                                                         .getChildPassportDetails()
+                                                                                         .getNewChildPassportPossessionOtherDetails());
+        }
         Optional<YesOrNo> abductionPreviousPoliceInvolvement =
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionPreviousPoliceInvolvement());
         Optional<String> abductionPreviousPoliceInvolvementDetails =
@@ -223,16 +228,17 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                     previousThreatSectionComplete,
                     previousAbductionThreatsCompleted
                 );
+                if (Yes.equals(abductionChildHasPassport)) {
 
-                boolean abductionChildPassportPosessionCompleted = abductionChildPassportPosessionList.isPresent();
+                    boolean abductionChildPassportPosessionCompleted = abductionChildPassportPosessionList.isPresent();
 
-                passportPossessionCompleted = isPassportPossessionCompleted(
-                    abductionChildPassportPosessionList,
-                    abductionChildPassportPosessionOtherDetail,
-                    passportPossessionCompleted,
-                    abductionChildPassportPosessionCompleted
-                );
-
+                    passportPossessionCompleted = isPassportPossessionCompleted(
+                        abductionChildPassportPosessionList,
+                        abductionChildPassportPosessionOtherDetail,
+                        passportPossessionCompleted,
+                        abductionChildPassportPosessionCompleted
+                    );
+                }
                 boolean
                     abductionPreviousPoliceInvolvementCompleted = abductionPreviousPoliceInvolvement.isPresent();
 
