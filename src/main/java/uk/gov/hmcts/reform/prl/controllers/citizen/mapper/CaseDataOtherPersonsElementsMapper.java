@@ -14,9 +14,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 public class CaseDataOtherPersonsElementsMapper {
@@ -35,9 +37,9 @@ public class CaseDataOtherPersonsElementsMapper {
 
         List<OtherPersonDetail> otherPersonDetailsList = c100RebuildOtherPersonDetailsElements.getOtherPersonDetails();
 
-        return otherPersonDetailsList.stream()
+        return nonNull(otherPersonDetailsList) ? otherPersonDetailsList.stream()
                 .map(otherPersonDetail -> Element.<PartyDetails>builder().value(buildPartyDetails(otherPersonDetail)).build())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : Collections.emptyList();
     }
 
     private static PartyDetails buildPartyDetails(OtherPersonDetail otherPersonDetail) {

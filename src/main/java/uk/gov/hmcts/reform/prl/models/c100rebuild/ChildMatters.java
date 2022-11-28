@@ -13,5 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ChildMatters {
 
+    //TODO Needs to check for single value
     private List<String> needsResolution;
 }
