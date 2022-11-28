@@ -148,9 +148,7 @@ public class ManageOrderEmailService {
                 );
             }
         }
-
     }
-
 
     private void sendNotificationToRespondentSolicitor(CaseDetails caseDetails) {
         log.info("inside sendNotificationToRespondentSolicitor ");
