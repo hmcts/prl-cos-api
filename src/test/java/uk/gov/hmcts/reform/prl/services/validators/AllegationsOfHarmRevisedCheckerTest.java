@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -12,9 +13,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -250,8 +254,14 @@ public class AllegationsOfHarmRevisedCheckerTest {
     @Test
     public void whenCaseDataPresentThenAbductionSectionReturnTrue() {
 
-
-
+        List<AbductionChildPassportPossessionEnum> abductionChildPassportPosessionList =
+            new ArrayList<>();
+        abductionChildPassportPosessionList.add(AbductionChildPassportPossessionEnum.mother);
+        ChildPassportDetails childPassportDetails = ChildPassportDetails.builder()
+            .newChildPassportPossession(abductionChildPassportPosessionList)
+            .newChildHasMultiplePassports(Yes)
+            .newChildPassportPossessionOtherDetails("Test")
+            .build();
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                   .newAllegationsOfHarmChildAbductionYesNo(Yes)
@@ -260,6 +270,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
                                   .newPreviousAbductionThreatsDetails("Details")
                                   .newAbductionPassportOfficeNotified(No)
                                   .newAbductionChildHasPassport(Yes)
+                                         .childPassportDetails(childPassportDetails)
                                   .newAbductionPreviousPoliceInvolvement(No)
                                   .newAbductionPreviousPoliceInvolvementDetails("Details")
                                   .build())
@@ -354,6 +365,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
                                   .newAllegationsOfHarmChildAbductionYesNo(Yes)
                                   .newChildAbductionReasons("harm")
                                   .newPreviousAbductionThreats(Yes)
+                                  .newAbductionChildHasPassport(No)
                                   .newPreviousAbductionThreatsDetails("none").build())
             .build();
 
