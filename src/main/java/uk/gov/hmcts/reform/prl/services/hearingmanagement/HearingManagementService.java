@@ -32,6 +32,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADJOURNED;
@@ -177,12 +178,17 @@ public class HearingManagementService {
 
             applicantsEmailList.forEach(email -> log.info("Applicant Email:: {}", email));
             for (String email: applicantsEmailList) {
-                partyNamesList.forEach(partyName -> emailService.send(
+
+                Optional<String> partyName = applicants.stream()
+                    .filter(applicantEmail -> applicantEmail.equals(email))
+                    .map(element -> element.getFirstName() + " " + element.getLastName())
+                    .findFirst();
+                emailService.send(
                     email,
                     EmailTemplateNames.HEARING_DETAILS,
-                    buildApplicantHearingDetailsEmail(caseData, partyName),
+                    buildApplicantHearingDetailsEmail(caseData, String.valueOf(partyName)),
                     LanguagePreference.english
-                ));
+                );
             }
 
             List<PartyDetails> respondents = caseData
@@ -339,12 +345,17 @@ public class HearingManagementService {
 
             applicantsEmailList.forEach(email -> log.info("Applicant Email:: {}", email));
             for (String email: applicantsEmailList) {
-                partyNamesList.forEach(partyName -> emailService.send(
+
+                Optional<String> partyName = applicants.stream()
+                    .filter(applicantEmail -> applicantEmail.equals(email))
+                    .map(element -> element.getFirstName() + " " + element.getLastName())
+                    .findFirst();
+                emailService.send(
                     email,
                     EmailTemplateNames.HEARING_DETAILS,
-                    buildApplicantHearingDetailsEmail(caseData, partyName),
+                    buildApplicantHearingDetailsEmail(caseData, String.valueOf(partyName)),
                     LanguagePreference.english
-                ));
+                );
             }
 
             List<PartyDetails> respondents = caseData
