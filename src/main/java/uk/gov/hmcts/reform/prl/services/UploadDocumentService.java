@@ -65,7 +65,6 @@ public class UploadDocumentService {
         YesOrNo documentRequest = null;
 
         if (uploadedDocumentRequest != null) {
-            log.info("******** uploadedDocumentRequest is not null");
             if (null != uploadedDocumentRequest.getParentDocumentType()) {
                 parentDocumentType = uploadedDocumentRequest.getParentDocumentType();
             }
@@ -86,11 +85,7 @@ public class UploadDocumentService {
             }
 
         }
-        log.info("******** Out of uploadedDocumentRequest is null check");
-        log.info("******** uploadedDocumentRequest = " + uploadedDocumentRequest);
-        log.info("******** uploadedDocumentRequest.getFiles() = " + uploadedDocumentRequest.getFiles());
         if (!uploadedDocumentRequest.getFiles().isEmpty()) {
-            log.info("******** !uploadedDocumentRequest.getFiles().isEmpty() is true");
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -123,7 +118,6 @@ public class UploadDocumentService {
             return uploadedDocuments;
 
         } else {
-            log.info("******** !uploadedDocumentRequest.getFiles().isEmpty() is false");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
     }

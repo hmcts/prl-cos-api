@@ -144,7 +144,7 @@ public class CaseApplicationResponseController {
             /**
              * send notification to Applicant solicitor for respondent's response
              */
-            log.info("***** sending notification to applicant solicitor ***** ");
+            log.info("generateC7FinalDocument:: sending notification to applicant solicitor ***** ");
             citizenResponseNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
             return objectMapper.convertValue(
                 caseDetailsReturn.getData(),

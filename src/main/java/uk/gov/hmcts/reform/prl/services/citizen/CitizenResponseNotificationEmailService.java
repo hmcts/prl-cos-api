@@ -55,7 +55,6 @@ public class CitizenResponseNotificationEmailService {
                 ));
 
             for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
-                log.info("***** sending email to  applicant solicitor ***** " + appSols.getKey());
                 emailService.send(
                     appSols.getKey(),
                     EmailTemplateNames.CA_APPLICANT_SOLICITOR_RES_NOTIFICATION,
