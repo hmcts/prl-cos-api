@@ -100,7 +100,7 @@ public class CaseApplicationResponseController {
         log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
-        log.info(" Generating C7 Final document for respondent ");
+        log.info(" Generating C7 Final document for respondent {}", caseData);
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
