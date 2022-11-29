@@ -43,9 +43,9 @@ public class OtherProceedingsChecker implements EventChecker {
 
         if (proceedingDetails.isPresent()) {
             List<ProceedingDetails> allProceedings = proceedingDetails.get()
-                                                .stream()
-                                                .map(Element::getValue)
-                                                .collect(Collectors.toList());
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
 
             //if a collection item is added and then removed the collection exists as length 0
             if (allProceedings.isEmpty()) {
