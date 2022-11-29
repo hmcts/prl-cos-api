@@ -76,13 +76,7 @@
         "otherGenderDetails":"Other gender test"
       },
       "childMatters":{
-        "needsResolution":[
-          "whoChildLiveWith",
-          "changeChildrenNameSurname",
-          "relocateChildrenDifferentUkArea",
-          "religiousIssue",
-          "relocateChildrenDifferentUkAreaA"
-        ]
+        "needsResolution": "whoChildLiveWith"
       },
       "parentialResponsibility":{
         "statement":"childFN2 childLN2"
