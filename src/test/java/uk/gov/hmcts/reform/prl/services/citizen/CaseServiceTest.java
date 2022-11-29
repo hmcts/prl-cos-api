@@ -144,6 +144,11 @@ public class CaseServiceTest {
     }
 
     @Test
+    public void testRetrieveCasesTwoParams() {
+        assertNotNull(caseService.retrieveCases("",""));
+    }
+
+    @Test
     public void testupdateCaseCitizenUpdate() throws JsonProcessingException {
         CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","","citizen-case-submit","123");
         assertNotNull(caseDetailsAfterUpdate);
