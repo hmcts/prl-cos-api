@@ -46,7 +46,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -225,7 +224,7 @@ public class BundlingServiceTest {
     }
 
     @Test
-    public void testCreateBundleServiceWhenLanguagePreferenceWelshASYes() throws Exception {
+    public void testCreateBundleServiceWhenLanguagePreferenceWelshAsYes() throws Exception {
         BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseDataOther,"eventId","authorization");
     }
 
