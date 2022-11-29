@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -202,7 +203,9 @@ public class CaseDocumentController {
     private void findAndSendEmail(String partyId, CaseData tempCaseData, PartyDetails partyDetails) {
         if (partyDetails.getUser() != null && !partyId.equalsIgnoreCase(partyDetails.getUser().getIdamId())) {
             String email = partyDetails.getEmail();
-            sendEmailToCitizen(tempCaseData, partyDetails.getFirstName(), email);
+            if (!StringUtils.isEmpty(email)) {
+                sendEmailToCitizen(tempCaseData, partyDetails.getFirstName(), email);
+            }
         }
     }
 
