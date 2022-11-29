@@ -392,6 +392,8 @@ public class ManageOrderService {
             );
             return OrderDetails.builder().orderType(flagSelectedOrder)
                 .orderTypeId(flagSelectedOrderId)
+                .typeOfOrder(caseData.getSelectTypeOfOrder() != null
+                                 ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
                 .orderDocument(Document.builder()
                                    .documentUrl(generatedDocumentInfo.getUrl())
                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -413,6 +415,8 @@ public class ManageOrderService {
         } else {
             return OrderDetails.builder().orderType(flagSelectedOrder)
                 .orderDocument(caseData.getAppointmentOfGuardian())
+                .typeOfOrder(caseData.getSelectTypeOfOrder() != null
+                                 ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
                 .otherDetails(OtherOrderDetails.builder()
                                   .createdBy(caseData.getJudgeOrMagistratesLastName())
                                   .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(

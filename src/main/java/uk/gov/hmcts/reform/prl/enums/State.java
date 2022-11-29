@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.prl.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,6 +12,7 @@ import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Getter
+@JsonSerialize(using = CustomEnumSerializer.class)
 public enum State {
 
     AWAITING_SUBMISSION_TO_HMCTS("AWAITING_SUBMISSION_TO_HMCTS", "Draft"),
@@ -22,7 +26,8 @@ public enum State {
     PREPARE_FOR_HEARING_CONDUCT_HEARING("PREPARE_FOR_HEARING_CONDUCT_HEARING", "Hearing"),
     DECISION_OUTCOME("DECISION_OUTCOME"),
     ALL_FINAL_ORDERS_ISSUED("ALL_FINAL_ORDERS_ISSUED"),
-    CASE_HEARING("CASE_HEARING","Prepare for hearing");
+    CASE_HEARING("CASE_HEARING","Prepare for hearing"),
+    DELETED("DELETED", "Deleted");
     private final String value;
     private final String label;
 
@@ -42,9 +47,14 @@ public enum State {
             .findFirst();
     }
 
+    @JsonValue
     public String getLabel() {
         return label;
     }
 
+    @JsonCreator
+    public static State getValue(String key) {
+        return State.valueOf(key);
+    }
 
 }

@@ -40,6 +40,8 @@ public class ManageOrderEmail extends EmailTemplateVars {
 
     private final String caseLink;
 
+    private final String dashboardLink;
+
     @Builder
     public ManageOrderEmail(String caseReference,
                             String caseName,
@@ -47,7 +49,8 @@ public class ManageOrderEmail extends EmailTemplateVars {
                             String courtEmail, String firstName,
                             String lastName, String fullName,
                             String familyManNumber, String caseUrgency, String orderLink,
-                            String issueDate, String caseLink) {
+                            String issueDate, String caseLink,
+                            String dashboardLink) {
         super(caseReference);
         this.caseName = caseName;
         this.applicantName = applicantName;
@@ -59,5 +62,6 @@ public class ManageOrderEmail extends EmailTemplateVars {
         this.orderLink = orderLink;
         this.issueDate = issueDate;
         this.caseLink = caseLink;
+        this.dashboardLink = dashboardLink;
     }
 }

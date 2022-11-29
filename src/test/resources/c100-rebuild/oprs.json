@@ -1,0 +1,53 @@
+{
+  "oprs_otherPersonCheck":"Yes",
+  "oprs_otherPersons":[
+    {
+      "id":"9b751978-8c32-4e70-aadc-4900afdebbfd",
+      "firstName":"othFN1",
+      "lastName":"othLN1",
+      "personalDetails":{
+        "dateOfBirth":{
+          "year":"2005",
+          "month":"10",
+          "day":"30"
+        },
+        "isDateOfBirthUnknown":"",
+        "approxDateOfBirth":{
+          "day":"",
+          "month":"",
+          "year":""
+        },
+        "gender":"Female",
+        "otherGenderDetails":"",
+        "hasNameChanged":"no",
+        "previousFullName":""
+      },
+      "address":{
+        "AddressLine1":"oth1 adrs line 1",
+        "AddressLine2":"oth1 adrs line 2",
+        "PostTown":"oth1Town",
+        "PostCode":"CV3 2ND"
+      },
+      "relationshipDetails":{
+        "relationshipToChildren":[
+          {
+            "childId":"b3b7208a-443e-432c-9824-0d7ca768f7b9",
+            "relationshipType":"Special Guardian",
+            "otherRelationshipTypeDetails":""
+          },
+          {
+            "childId":"d2513831-e99f-4f38-af32-be46b9802a19",
+            "relationshipType":"Special Guardian",
+            "otherRelationshipTypeDetails":""
+          }
+        ]
+      },
+      "contactDetails":{
+        "donKnowEmailAddress":"No",
+        "emailAddress":"",
+        "telephoneNumber":"",
+        "donKnowTelephoneNumber":"No"
+      }
+    }
+  ]
+}

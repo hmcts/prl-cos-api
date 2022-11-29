@@ -20,7 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
@@ -99,7 +99,7 @@ public class ServiceOfApplicationPostService {
         CaseData blankCaseData = CaseData.builder().build();
         docs.add(generateDocument(auth, blankCaseData,DOCUMENT_PRIVACY_NOTICE_HINT));
         docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C1A_BLANK_HINT));
-        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C7_BLANK_HINT));
+        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C7_DRAFT_HINT));
         docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C8_BLANK_HINT));
         return docs;
     }
@@ -150,7 +150,7 @@ public class ServiceOfApplicationPostService {
 
     private List<GeneratedDocumentInfo> getSelectedOrders(CaseData caseData) {
         List<String> orderNames = caseData.getServiceOfApplicationScreen1()
-            .getSelectedOrders();
+            .retrieveSelectedOrders();
 
         return caseData.getOrderCollection().stream()
             .map(Element::getValue)
