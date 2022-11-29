@@ -12,20 +12,26 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
+import uk.gov.hmcts.reform.prl.models.dto.notify.SolicitorEmail;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.services.pin.CaseInviteEmailService.CITIZEN_HOME;
 
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -63,10 +70,7 @@ public class CitizenCallbackControllerTest {
     private CitizenCallbackController citizenCallbackController;
 
     @Mock
-    ApplicationEventPublisher applicationEventPublisher;
-
-    @Mock
-    CitizenEmailService citizenEmailService;
+    private CitizenEmailService citizenEmailService;
 
     @Mock
     private EventService eventService;
@@ -141,4 +145,28 @@ public class CitizenCallbackControllerTest {
         verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(any(CaseData.class));
     }
 
+    @Test
+    public void sendNotitficationAfterSubmissionTest() throws Exception {
+
+        UserDetails userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("last")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        EmailTemplateVars email = CitizenCaseSubmissionEmail.builder()
+            .caseNumber(String.valueOf(caseData.getId()))
+            .caseLink(citizenSignUpLink + CITIZEN_HOME)
+            .applicantName(userDetails.getFullName())
+            .build();
+
+        doNothing().when(citizenEmailService).sendCitizenCaseSubmissionEmail(authToken,
+                                                           String.valueOf(caseData.getId()));
+        citizenCallbackController.sendNotificationsOnCaseSubmission(authToken, callbackRequest);
+    }
 }

@@ -50,8 +50,7 @@ public class CitizenCallbackController extends AbstractCallbackController {
     @Autowired
     private DocumentGenService documentGenService;
 
-    @Autowired
-    CitizenEmailService citizenEmailService;
+    private final CitizenEmailService citizenEmailService;
 
     @Autowired
     CaseDataMapper caseDataMapper;
