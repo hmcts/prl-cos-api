@@ -443,7 +443,7 @@ public class HearingManagementService {
                 .caseReference(String.valueOf(caseData.getId()))
                 .caseName(caseData.getApplicantCaseName())
                 .partyName(partyName)
-                .hearingDetailsPageLink(manageCaseUrl + "/" + caseData.getId())
+                .hearingDetailsPageLink(dashboardUrl + "/dashboard")
                 .build();
     }
 }
