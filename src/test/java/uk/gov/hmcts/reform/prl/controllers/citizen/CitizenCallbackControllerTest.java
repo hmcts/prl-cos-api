@@ -1,12 +1,17 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEventPublisher;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -15,6 +20,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Collections;
@@ -37,21 +45,45 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 public class CitizenCallbackControllerTest {
 
     @Mock
-    private GeneratedDocumentInfo generatedDocumentInfo;
+    private AllTabServiceImpl allTabsService;
 
     @Mock
-    private AllTabServiceImpl allTabsService;
+    private CoreCaseDataApi coreCaseDataApi;
 
     @Mock
     private ObjectMapper objectMapper;
 
-    public static final String authToken = "Bearer TestAuthToken";
+    @Mock
+    private SystemUserService systemUserService;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
 
     @InjectMocks
     private CitizenCallbackController citizenCallbackController;
 
-    @Test
-    public void updateCitizenApplicationTest() throws Exception {
+    @Mock
+    ApplicationEventPublisher applicationEventPublisher;
+
+    @Mock
+    CitizenEmailService citizenEmailService;
+
+    @Mock
+    private EventService eventService;
+
+    @Mock
+    private GeneratedDocumentInfo generatedDocumentInfo;
+    Map<String, Object> caseDataMap;
+    CaseDetails caseDetails;
+    CaseData caseData;
+    CallbackRequest callbackRequest;
+
+    public static final String authToken = "Bearer TestAuthToken";
+    private String citizenSignUpLink = "https://privatelaw.aat.platform.hmcts.net";
+
+
+    @Before
+    public void setup() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -87,11 +119,15 @@ public class CitizenCallbackControllerTest {
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
-        CaseData caseData = CaseData.builder().children(listOfChildren)
+        caseData = CaseData.builder().children(listOfChildren)
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .build();
+    }
+
+    @Test
+    public void updateCitizenApplicationTest() throws Exception {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -104,4 +140,5 @@ public class CitizenCallbackControllerTest {
 
         verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(any(CaseData.class));
     }
+
 }
