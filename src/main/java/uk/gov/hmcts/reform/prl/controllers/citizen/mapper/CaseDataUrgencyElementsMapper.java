@@ -4,7 +4,6 @@ import uk.gov.hmcts.reform.prl.enums.citizen.UrgentHearingReasonEnum;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,9 +31,7 @@ public class CaseDataUrgencyElementsMapper {
 
     private static String buildCaseUrgencyTimeAndReason(C100RebuildUrgencyElements c100RebuildUrgencyElements) {
         List<String> riskList = nonNull(c100RebuildUrgencyElements.getReasonOfUrgentHearing())
-                ? Arrays.stream(c100RebuildUrgencyElements.getReasonOfUrgentHearing())
-                        .map(value -> value.replace(" ", ""))
-                        .collect(Collectors.toList()) : Collections.emptyList();
+                ? List.of(c100RebuildUrgencyElements.getReasonOfUrgentHearing()) : Collections.emptyList();
 
         List<String> riskList1 = riskList.stream().map(value -> UrgentHearingReasonEnum.valueOf(value)
                 .getDisplayedValue()).collect(Collectors.toList());
