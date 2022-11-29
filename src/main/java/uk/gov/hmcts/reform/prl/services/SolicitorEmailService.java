@@ -83,11 +83,23 @@ public class SolicitorEmailService {
 
 
     public void sendEmail(CaseDetails caseDetails) {
-        log.info("Sending the email to solicitor for caseId {}", caseDetails.getId());
-        String applicantSolicitorEmailAddress = caseDetails.getData().get("applicantSolicitorEmailAddress").toString();
+        String applicantSolicitorEmailAddress = caseDetails.getData()
+            .get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS).toString();
         emailService.send(
             applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR,
+            buildEmail(caseDetails),
+            LanguagePreference.english
+        );
+
+    }
+
+    public void sendReSubmitEmail(CaseDetails caseDetails) {
+        String applicantSolicitorEmailAddress = caseDetails.getData()
+            .get(PrlAppsConstants.APPLICANT_SOLICITOR_EMAIL_ADDRESS).toString();
+        emailService.send(
+            applicantSolicitorEmailAddress,
+            EmailTemplateNames.SOLICITOR_RESUBMIT_EMAIL,
             buildEmail(caseDetails),
             LanguagePreference.english
         );
@@ -131,9 +143,6 @@ public class SolicitorEmailService {
     }
 
     public void sendEmailToFl401Solicitor(CaseDetails caseDetails, UserDetails userDetails) {
-
-        log.info("trying to send email for Solicitor FL401 {} :", caseDetails.getId());
-
         String solicitorEmail = "";
 
         String applicantSolicitorEmail = emailService.getCaseData(caseDetails)
@@ -152,9 +161,6 @@ public class SolicitorEmailService {
     }
 
     public EmailTemplateVars buildFl401SolicitorEmail(CaseDetails caseDetails) {
-
-        log.info("trying to build email for Solicitor FL401 {} :", caseDetails.getId());
-
         CaseData caseData = emailService.getCaseData(caseDetails);
 
         PartyDetails fl401Applicant = caseData
@@ -232,7 +238,6 @@ public class SolicitorEmailService {
     }
 
     private EmailTemplateVars buildCaseWithdrawEmailAfterIssuedState(CaseDetails caseDetails) {
-
         return SolicitorEmail.builder()
             .issueDate(caseDetails.getData().get("issueDate").toString())
             .caseReference(String.valueOf(caseDetails.getId()))

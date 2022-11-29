@@ -87,8 +87,8 @@ feature-toggle:
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
 
-citizen_frontend:
-  url: http://example.com
+citizen:
+  url: ${CITIZEN_URL:https://privatelaw.aat.platform.hmcts.net}
 
 uk:
   gov:
@@ -182,6 +182,9 @@ idam:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+  citizen:
+    username: ${IDAM_CITIZEN_USERNAME:xxxxxxxxx}
+    password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxxx}
 
 test-url: ${TEST_URL:http://localhost:4044}
 
@@ -249,14 +252,6 @@ document:
       c100_c8_filename: C8Document.pdf
       c100_c1a_template: PRL-C1A.docx
       c100_c1a_filename: C1A_Document.pdf
-      c100_c8_draft_template: FL-PRL-CON-ENG-01118.docx
-      c100_c8_draft_filename: C8DocumentDraft.pdf
-      c100_c1a_draft_template: FL-PRL-APP-ENG-01119.docx
-      c100_c1a_draft_filename: C1A_DocumentDraft.pdf
-      c100_c8_draft_welsh_template: FL-PRL-CON-WEL-01122.docx
-      c100_c8_draft_welsh_filename: C8Document_Welsh.pdf
-      c100_c1a_draft_welsh_template: FL-PRL-APP-WEL-01121.docx
-      c100_c1a_draft_welsh_filename: C1A_Document_Welsh.pdf
       c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
       c100_final_welsh_filename: C100FinalDocumentWelsh.pdf
       c100_draft_welsh_template: PRL-C100-R1-Draft-WelshLang.docx
@@ -331,6 +326,12 @@ document:
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
       prl_n117_filename: N117CreateOrder.pdf
+      prl_c7_draft_template: FL-PRL-GOR-ENG-C7R.docx
+      prl_c7_draft_filename: C7_Draft_Document.pdf
+      prl_c7_final_template_eng: FL-PRL-GOR-ENG-C7R-Final.docx
+      prl_c7_final_filename_eng: C7_Document.pdf
+      prl_c7_final_template_wel: FL-PRL-GOR-WEL-C7R-Final.docx
+      prl_c7_final_filename_wel: C7_Document_Welsh.pdf
       prl_fl404b_final_template: PRL-GOR-ENG-FL404B-Common-Final.docx
       prl_c7_blank_template: PRL-C7-BLANK-DOCUMENT.docx
       prl_c7_blank_filename: C7BlankDocument.pdf
