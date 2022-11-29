@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 
 @Slf4j
@@ -119,8 +120,6 @@ public class PaymentRequestService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
         String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
-        log.info("paymentServiceReferenceNumber : {}, paymentReferenceNumber :{} for the caseId: {} ",
-            paymentServiceReferenceNumber,paymentReferenceNumber,caseId);
 
         //Check if paymentServiceReferenceNumber and PaymentReference exist and if yes get the status of payment.
         //If status is success then return, else create payment
@@ -128,7 +127,7 @@ public class PaymentRequestService {
             if (null != paymentReferenceNumber) {
                 PaymentStatusResponse paymentStatus = fetchPaymentStatus(authorization, paymentReferenceNumber);
                 String status = (null != paymentStatus && null != paymentStatus.getStatus()) ? paymentStatus.getStatus() : null;
-                log.info("Payment Status : {} for paymentRef: {} caseId: {} ",status, paymentReferenceNumber, caseId);
+                log.info("Payment Status : {} caseId: {} ",status, caseId);
                 if (PAYMENT_STATUS_SUCCESS.equalsIgnoreCase(status)) {
                     paymentResponse = PaymentResponse.builder()
                         .paymentReference(paymentReferenceNumber)
@@ -142,7 +141,7 @@ public class PaymentRequestService {
                     paymentResponse = createServicePayment(paymentServiceReferenceNumber,
                                                            authorization,
                                                            createPaymentRequest.getReturnUrl());
-                    log.info("Payment is being made for the caseId: {} and for payment ref: {} ",caseId, paymentResponse.getPaymentReference());
+                    log.info("Payment is being made for the caseId: {}", caseId);
 
                     caseService.updateCase(
                         caseData.toBuilder()
@@ -156,12 +155,11 @@ public class PaymentRequestService {
                     log.info("Update case successful for the caseId :{} ", caseId);
                 }
             } else {
-                //PaymentReference is null
                 log.info("Creating new payment request for the caseId: {}", caseId);
                 paymentResponse = createServicePayment(paymentServiceReferenceNumber,
                                                        authorization,
                                                        createPaymentRequest.getReturnUrl());
-                log.info("Payment is being made for the case id: {} and for payment ref: {} ",caseId, paymentResponse.getPaymentReference());
+                log.info("Payment is being made for the case id: {} ", caseId);
 
                 caseService.updateCase(
                     caseData.toBuilder()
@@ -210,12 +208,6 @@ public class PaymentRequestService {
                 paymentResponse = createServicePayment(paymentServiceResponse.getServiceRequestReference(),
                                                        authorization, createPaymentRequest.getReturnUrl()
                 );
-                log.info(
-                    "Payment is being made for serviceReqRef: {} for paymentRef: {} and for caseId: {}",
-                    paymentServiceResponse.getServiceRequestReference(),
-                    paymentResponse.getPaymentReference(),
-                    caseId
-                );
                 //set service request ref
                 paymentResponse.setServiceRequestReference(paymentServiceResponse.getServiceRequestReference());
 
@@ -251,8 +243,7 @@ public class PaymentRequestService {
 
     private boolean isHelpWithFeesOptedInAlready(CaseData caseData) {
         return null != caseData
-            && null != caseData.getHelpWithFeesReferenceNumber()
-            && !caseData.getHelpWithFeesReferenceNumber().isEmpty()
+            && isNotEmpty(caseData.getHelpWithFeesReferenceNumber())
             && null != caseData.getPaymentServiceRequestReferenceNumber();
     }
 
