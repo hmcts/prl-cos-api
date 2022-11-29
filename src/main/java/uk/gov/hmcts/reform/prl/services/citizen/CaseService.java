@@ -84,7 +84,6 @@ public class CaseService {
             return caseRepository.getCase(authToken, caseId);
         }
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)) {
-            //citizenEmailService.sendCitizenCaseSubmissionEmail(authToken, caseId);
             UserDetails userDetails = idamClient.getUserDetails(authToken);
             UserInfo userInfo = UserInfo
                     .builder()
@@ -100,7 +99,6 @@ public class CaseService {
                     .userInfo(wrapElements(userInfo))
                     .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                     .build());
-            allTabsService.updateAllTabsIncludingConfTab(updatedCaseData);
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
