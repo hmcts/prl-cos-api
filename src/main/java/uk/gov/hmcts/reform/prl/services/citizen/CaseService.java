@@ -84,7 +84,6 @@ public class CaseService {
             return caseRepository.getCase(authToken, caseId);
         }
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)) {
-            //citizenEmailService.sendCitizenCaseSubmissionEmail(authToken, caseId);
             UserDetails userDetails = idamClient.getUserDetails(authToken);
             UserInfo userInfo = UserInfo
                     .builder()
