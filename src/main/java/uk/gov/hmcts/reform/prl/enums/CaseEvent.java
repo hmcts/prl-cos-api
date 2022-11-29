@@ -8,7 +8,13 @@ public enum CaseEvent {
     CITIZEN_CASE_UPDATE("citizen-case-update"),
     CITIZEN_UPLOADED_DOCUMENT("citizenUploadedDocument"),
     CITIZEN_CASE_SUBMIT("citizen-case-submit"),
-    DELETE_CASE("deleteApplication");
+    DELETE_CASE("deleteApplication"),
+    EVENT_RESPONDENT_MIAM("respondentMiam"),
+    KEEP_DETAILS_PRIVATE("keepYourDetailsPrivate"),
+    CONSENT_TO_APPLICATION("consentToTheApplication"),
+    EVENT_INTERNATIONAL_ELEMENT("citizenInternationalElement"),
+    LEGAL_REPRESENTATION("legalRepresentation"),
+    REVIEW_AND_SUBMIT("reviewAndSubmit");
 
     private final String value;
 
