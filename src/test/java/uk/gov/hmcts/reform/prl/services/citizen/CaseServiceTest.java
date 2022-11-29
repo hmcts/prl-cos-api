@@ -136,4 +136,9 @@ public class CaseServiceTest {
     public void testValidateAccessCode() {
         assertNotNull(caseService.validateAccessCode("","","",""));
     }
+
+    @Test
+    public void testRetrieveCases() {
+        assertNotNull(caseService.retrieveCases("","","",""));
+    }
 }
