@@ -68,7 +68,6 @@ public class HearingManagementService {
 
     @Value("${citizen.url}")
     private String dashboardUrl;
-    private LocalDate issueDate;
 
     public void stateChangeForHearingManagement(HearingRequest hearingRequest) throws Exception {
 
@@ -87,11 +86,7 @@ public class HearingManagementService {
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        issueDate = caseData.getIssueDate();
-        log.info("Retrieving issuedate from casedata: {}",issueDate);
-
         String hmcStatus = hearingRequest.getHearingUpdate().getHmcStatus();
-
         switch (hmcStatus) {
             case LISTED:
                 CaseDetails listedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
@@ -104,7 +99,7 @@ public class HearingManagementService {
                 CaseDetails cancelledCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
                                                              HEARING_STATE_CHANGE_FAILURE, caseData);
                 updateTabsAfterStateChange(cancelledCaseDetails.getData(), cancelledCaseDetails.getId());
-                sendHearingCancelledEmail(caseData, hearingRequest);
+                sendHearingCancelledEmail(caseData);
                 break;
             case WAITING_TO_BE_LISTED:
             case COMPLETED:
@@ -113,7 +108,7 @@ public class HearingManagementService {
                 CaseDetails completedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
                             HEARING_STATE_CHANGE_FAILURE, caseData);
                 updateTabsAfterStateChange(completedCaseDetails.getData(), completedCaseDetails.getId());
-                sendHearingChangeDetailsEmail(caseData, hearingRequest);
+                sendHearingChangeDetailsEmail(caseData);
                 break;
             default:
                 break;
@@ -159,7 +154,7 @@ public class HearingManagementService {
         allTabService.updateAllTabsIncludingConfTab(caseData);
     }
 
-    private void sendHearingChangeDetailsEmail(CaseData caseData, HearingRequest hearingRequest) {
+    private void sendHearingChangeDetailsEmail(CaseData caseData) {
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             List<PartyDetails> applicants = caseData
@@ -235,7 +230,7 @@ public class HearingManagementService {
         }
     }
 
-    private void sendHearingCancelledEmail(CaseData caseData, HearingRequest hearingRequest) {
+    private void sendHearingCancelledEmail(CaseData caseData) {
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             List<PartyDetails> applicants = caseData
@@ -364,24 +359,36 @@ public class HearingManagementService {
                 .map(PartyDetails::getSolicitorEmail)
                 .collect(Collectors.toList());
 
-            applicantSolicitorsEmailList.forEach(email -> emailService.send(
-                email,
-                EmailTemplateNames.APPLICANT_SOLICITOR_HEARING_DETAILS,
-                buildApplicantSolicitorHearingDetailsEmail(caseData, hearingRequest),
-                LanguagePreference.english
-            ));
+            for (String applicantSolicitorEmail: applicantSolicitorsEmailList) {
+                Optional<String> solicitorName = applicants.stream()
+                    .filter(p -> p.getSolicitorEmail().equals(applicantSolicitorEmail))
+                    .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                    .findAny();
+                emailService.send(
+                    applicantSolicitorEmail,
+                    EmailTemplateNames.APPLICANT_SOLICITOR_HEARING_DETAILS,
+                    buildApplicantOrRespondentSolicitorHearingEmail(caseData, hearingRequest, solicitorName.orElse(null)),
+                    LanguagePreference.english
+                );
+            }
 
             List<String> respondentSolicitorsEmailList = respondents.stream()
                 .map(PartyDetails::getSolicitorEmail)
                 .collect(Collectors.toList());
 
             if (!respondentSolicitorsEmailList.isEmpty() && !respondentSolicitorsEmailList.contains(null)) {
-                respondentSolicitorsEmailList.forEach(email -> emailService.send(
-                    email,
-                    EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
-                    buildRespondentSolicitorHearingDetailsEmail(caseData, hearingRequest),
-                    LanguagePreference.english
-                ));
+                for (String respondentSolicitorEmail : respondentSolicitorsEmailList) {
+                    Optional<String> solicitorName = respondents.stream()
+                        .filter(p -> p.getSolicitorEmail().equals(respondentSolicitorEmail))
+                        .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                        .findAny();
+                    respondentSolicitorsEmailList.forEach(email -> emailService.send(
+                        email,
+                        EmailTemplateNames.RESPONDENT_SOLICITOR_HEARING_DETAILS,
+                        buildApplicantOrRespondentSolicitorHearingEmail(caseData, hearingRequest, solicitorName.orElse(null)),
+                        LanguagePreference.english
+                    ));
+                }
             }
         } else {
             PartyDetails fl401Applicant = caseData
@@ -390,110 +397,44 @@ public class HearingManagementService {
             PartyDetails fl401Respondent = caseData
                 .getRespondentsFL401();
             String respondentName = fl401Respondent.getFirstName() + " " + fl401Respondent.getLastName();
-
+            String applicantSolicitorName = fl401Applicant.getRepresentativeFirstName() + " "
+                + fl401Applicant.getRepresentativeLastName();
             emailService.send(
                 fl401Applicant.getEmail(),
                 EmailTemplateNames.HEARING_DETAILS,
                 buildApplicantOrRespondentEmail(caseData, applicantName),
                 LanguagePreference.english
             );
-
             emailService.send(
                 fl401Respondent.getEmail(),
                 EmailTemplateNames.HEARING_DETAILS,
                 buildApplicantOrRespondentEmail(caseData, respondentName),
                 LanguagePreference.english
             );
-
-
             emailService.send(
                 fl401Applicant.getSolicitorEmail(),
                 EmailTemplateNames.APPLICANT_SOLICITOR_HEARING_DETAILS,
-                buildApplicantSolicitorHearingDetailsEmail(caseData, hearingRequest),
+                buildApplicantOrRespondentSolicitorHearingEmail(caseData, hearingRequest, applicantSolicitorName),
                 LanguagePreference.english
             );
         }
     }
 
-    private EmailTemplateVars buildApplicantSolicitorHearingDetailsEmail(CaseData caseData, HearingRequest hearingRequest) {
-
-        HearingDetailsEmail hearingDetailsEmail = null;
-
-        if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            List<PartyDetails> applicants = caseData
-                .getApplicants()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-
-            List<String> applicantSolicitorNamesList = applicants.stream()
-                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
-                .collect(Collectors.toList());
-
-            for (String applicantSolicitorName : applicantSolicitorNamesList) {
-
-                hearingDetailsEmail = HearingDetailsEmail.builder()
-                    .caseReference(String.valueOf(caseData.getId()))
-                    .caseName(caseData.getApplicantCaseName())
-                    .issueDate(String.valueOf(issueDate))
-                    .typeOfHearing(" ")
-                    .hearingDateAndTime(String.valueOf(hearingRequest.getHearingUpdate().getNextHearingDate()))
-                    .hearingVenue(hearingRequest.getHearingUpdate().getHearingVenueName())
-                    .partySolicitorName(applicantSolicitorName)
-                    .build();
-            }
-        } else {
-            PartyDetails fl401Applicant = caseData
-                .getApplicantsFL401();
-            String applicantSolicitorName = fl401Applicant.getRepresentativeFirstName() + " "
-                + fl401Applicant.getRepresentativeLastName();
-
-            LocalDate issueDate = LocalDate.now();
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
-
-            hearingDetailsEmail = HearingDetailsEmail.builder()
-                .caseReference(String.valueOf(caseData.getId()))
-                .caseName(caseData.getApplicantCaseName())
-                .issueDate(issueDate.format(dateTimeFormatter))
-                .typeOfHearing(" ")
-                .hearingDateAndTime(String.valueOf(hearingRequest.getHearingUpdate().getNextHearingDate()))
-                .hearingVenue(hearingRequest.getHearingUpdate().getHearingVenueId())
-                .partySolicitorName(applicantSolicitorName)
-                .build();
-        }
-
-        return hearingDetailsEmail;
-    }
-
-    private EmailTemplateVars buildRespondentSolicitorHearingDetailsEmail(CaseData caseData, HearingRequest hearingRequest) {
-        HearingDetailsEmail hearingDetailsEmail = null;
-
-        List<PartyDetails> respondents = caseData
-            .getRespondents()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
-        List<String> respondentSolicitorNamesList = respondents.stream()
-            .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
-            .collect(Collectors.toList());
+    private EmailTemplateVars buildApplicantOrRespondentSolicitorHearingEmail(CaseData caseData, HearingRequest hearingRequest,
+                                                                         String applicantSolicitorName) {
 
         LocalDate issueDate = LocalDate.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
-        for (String respondentSolicitorName: respondentSolicitorNamesList) {
 
-            hearingDetailsEmail = HearingDetailsEmail.builder()
-                .caseReference(String.valueOf(caseData.getId()))
-                .caseName(caseData.getApplicantCaseName())
-                .issueDate(issueDate.format(dateTimeFormatter))
-                .typeOfHearing(" ")
-                .hearingDateAndTime(String.valueOf(hearingRequest.getHearingUpdate().getNextHearingDate()))
-                .hearingVenue(hearingRequest.getHearingUpdate().getHearingVenueId())
-                .partySolicitorName(respondentSolicitorName)
-                .build();
-        }
-
-        return hearingDetailsEmail;
+        return HearingDetailsEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .issueDate(String.valueOf(issueDate.format(dateTimeFormatter)))
+            .typeOfHearing(" ")
+            .hearingDateAndTime(String.valueOf(hearingRequest.getHearingUpdate().getNextHearingDate()))
+            .hearingVenue(hearingRequest.getHearingUpdate().getHearingVenueName())
+            .partySolicitorName(applicantSolicitorName)
+            .build();
     }
 
     private EmailTemplateVars buildApplicantOrRespondentEmail(CaseData caseData, String partyName) {
@@ -502,7 +443,7 @@ public class HearingManagementService {
                 .caseReference(String.valueOf(caseData.getId()))
                 .caseName(caseData.getApplicantCaseName())
                 .partyName(partyName)
-                .hearingDetailsPageLink(manageCaseUrl + "/" + caseData.getId())
+                .hearingDetailsPageLink(dashboardUrl + "/dashboard")
                 .build();
     }
 }

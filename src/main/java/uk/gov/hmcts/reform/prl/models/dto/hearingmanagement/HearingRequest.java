@@ -9,7 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class HearingRequest {
 
     @JsonProperty("hmctsServiceCode")
