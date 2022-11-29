@@ -69,6 +69,7 @@ public class AmendOrderService {
                 OrderDetails amended = order.getValue().toBuilder()
                     .orderDocument(amendedDocument)
                     .orderType(order.getValue().getOrderType())
+                    .typeOfOrder(order.getValue().getTypeOfOrder())
                     .otherDetails(order.getValue().getOtherDetails().toBuilder()
                                       .orderAmendedDate(time.now().format(DateTimeFormatter.ofPattern(
                                           PrlAppsConstants.D_MMMM_YYYY,
