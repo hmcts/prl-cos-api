@@ -1221,6 +1221,46 @@ public class DocumentGenServiceTest {
     }
 
     @Test
+    public void testGenerateDocumentsForCitizenSubmissionForEnglish() throws Exception {
+
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+
+        Map<String, Object> updatedCaseData = documentGenService.generateDocumentsForCitizenSubmission(authToken,
+                                                                                                       c100CaseData);
+        assertEquals(updatedCaseData.get("isEngDocGen"), Yes.toString());
+        assertTrue(updatedCaseData.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+    }
+
+    @Test
+    public void testGenerateDocumentsForCitizenSubmissionForWelsh() throws Exception {
+
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseDetails.class),
+            Mockito.any()
+        );
+
+        Map<String, Object> updatedCaseData = documentGenService.generateDocumentsForCitizenSubmission(authToken,
+                                                                                                       c100CaseData);
+        assertEquals(updatedCaseData.get("isEngDocGen"), Yes.toString());
+        assertTrue(!updatedCaseData.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+    }
+
+    @Test
     public void testGenerateDocumentsForCitizen() throws Exception {
         //Given
         when(documentLanguageService.docGenerateLang(c100CaseData)).thenReturn(DocumentLanguage
