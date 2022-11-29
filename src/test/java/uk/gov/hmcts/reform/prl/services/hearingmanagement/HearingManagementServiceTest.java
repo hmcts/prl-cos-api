@@ -214,7 +214,7 @@ public class HearingManagementServiceTest {
                                             respondentSolicitorEmailvars,
                                             LanguagePreference.english);
 
-        hearingManagementService.stateChangeForHearingManagement(hearingRequest);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest.getCaseRef(), "hmcCaseUpdateSuccess"
@@ -266,7 +266,7 @@ public class HearingManagementServiceTest {
                                             respondentEmailVars,
                                             LanguagePreference.english);
 
-        hearingManagementService.stateChangeForHearingManagement(hearingRequest1);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
@@ -319,7 +319,7 @@ public class HearingManagementServiceTest {
                                             respondentEmailVars,
                                             LanguagePreference.english);
 
-        hearingManagementService.stateChangeForHearingManagement(hearingRequest1);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
@@ -444,7 +444,7 @@ public class HearingManagementServiceTest {
                                             respondentEmailVars,
                                             LanguagePreference.english);
 
-        hearingManagementService.stateChangeForHearingManagement(hearingRequest1);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateSuccess"
@@ -538,7 +538,7 @@ public class HearingManagementServiceTest {
                                             respondentEmailVars,
                                             LanguagePreference.english);
 
-        hearingManagementService.stateChangeForHearingManagement(hearingRequest1);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"
@@ -629,7 +629,7 @@ public class HearingManagementServiceTest {
                                             respondentEmailVars,
                                             LanguagePreference.english);
 
-        hearingManagementService.stateChangeForHearingManagement(hearingRequest1);
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest1);
 
         verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                         caseType, hearingRequest1.getCaseRef(), "hmcCaseUpdateFailure"

@@ -69,7 +69,7 @@ public class HearingManagementService {
     @Value("${citizen.url}")
     private String dashboardUrl;
 
-    public void stateChangeForHearingManagement(HearingRequest hearingRequest) throws Exception {
+    public void caseStateChangeForHearingManagement(HearingRequest hearingRequest) throws Exception {
 
         log.info("Processing the callback for the caseId {} with HMC status {}", hearingRequest.getCaseRef(),
                      hearingRequest.getHearingUpdate().getHmcStatus());

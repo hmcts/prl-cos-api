@@ -173,10 +173,7 @@ public class FL401ApplicationMapper {
                                                                                                           .mergeDate()))
                                                     .relationshipDateComplexEndDate(getRelationShipEndDate(courtNavCaseData))
                                                     .build())
-                .applicantRelationshipDate(LocalDate.parse(courtNavCaseData
-                                                               .getFl401()
-                                                               .getRelationshipWithRespondent()
-                                                               .getCeremonyDate().mergeDate()))
+                .applicantRelationshipDate(getRelationShipCeremonyDate(courtNavCaseData))
                 .build()) : null)
             .respondentRelationOptions((courtNavCaseData
                 .getFl401()
@@ -258,6 +255,20 @@ public class FL401ApplicationMapper {
             .getRespondentBehaviour().getStopBehaviourTowardsApplicant())
             ? getBehaviourTowardsApplicant(courtNavCaseData) : null;
     }
+
+
+    private LocalDate getRelationShipCeremonyDate(CourtNavFl401 courtNavCaseData) {
+        LocalDate cermonyDate = null;
+
+        if (null != courtNavCaseData.getFl401().getRelationshipWithRespondent().getCeremonyDate()) {
+            cermonyDate = LocalDate.parse(courtNavCaseData
+                                              .getFl401()
+                                              .getRelationshipWithRespondent()
+                                              .getCeremonyDate().mergeDate());
+        }
+        return cermonyDate;
+    }
+
 
     private LocalDate getRelationShipEndDate(CourtNavFl401 courtNavCaseData) {
         LocalDate endDate = null;

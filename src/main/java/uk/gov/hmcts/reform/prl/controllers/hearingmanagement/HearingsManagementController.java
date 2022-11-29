@@ -65,13 +65,13 @@ public class HearingsManagementController {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public void hearingManagementStateUpdate(@RequestHeader("serviceAuthorization") String s2sToken,
+    public void caseStateUpdateByHearingManagement(@RequestHeader("serviceAuthorization") String s2sToken,
                                      @RequestBody HearingRequest hearingRequest) throws Exception {
 
         if (Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
             throw new HearingManagementValidationException("Provide a valid s2s token");
         } else {
-            hearingManagementService.stateChangeForHearingManagement(hearingRequest);
+            hearingManagementService.caseStateChangeForHearingManagement(hearingRequest);
         }
 
     }
