@@ -97,6 +97,7 @@ public class CaseServiceTest {
         userDetails = UserDetails.builder().build();
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
+        when(caseRepository.updateCase(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(caseDetails);
         when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(coreCaseDataApi.getCase(Mockito.any(),Mockito.any(), Mockito.any())).thenReturn(caseDetails);
     }
@@ -140,5 +141,16 @@ public class CaseServiceTest {
     @Test
     public void testRetrieveCases() {
         assertNotNull(caseService.retrieveCases("","","",""));
+    }
+
+    @Test
+    public void testRetrieveCasesTwoParams() {
+        assertNotNull(caseService.retrieveCases("",""));
+    }
+
+    @Test
+    public void testupdateCaseCitizenUpdate() throws JsonProcessingException {
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","","citizen-case-submit","123");
+        assertNotNull(caseDetailsAfterUpdate);
     }
 }
