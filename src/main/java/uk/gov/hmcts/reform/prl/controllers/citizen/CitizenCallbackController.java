@@ -89,7 +89,7 @@ public class CitizenCallbackController extends AbstractCallbackController {
 
         // Generate draft documents and set to casedataupdated..
         caseDataUpdated.putAll(documentGenService.generateDocumentsForCitizenSubmission(authorisation, caseData));
-
+        allTabsService.updateAllTabsIncludingConfTab(objectMapper.convertValue(caseDataUpdated, CaseData.class));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
