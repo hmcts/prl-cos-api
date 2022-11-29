@@ -133,7 +133,7 @@ public class PaymentRequestService {
                     paymentResponse = PaymentResponse.builder()
                         .paymentReference(paymentReferenceNumber)
                         .serviceRequestReference(paymentServiceReferenceNumber)
-                        .paymentStatus(paymentStatus.getStatus())
+                        .paymentStatus(status)
                         .build();
 
                     log.info("Payment is already successful for the case id: {} ",caseId);
