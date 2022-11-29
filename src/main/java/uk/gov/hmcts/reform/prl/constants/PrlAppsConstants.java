@@ -172,6 +172,8 @@ public class PrlAppsConstants {
     public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     public static final String CITIZEN_ROLE = "citizen";
 
+    public static final String OTHER = "Other";
+
     public static final String CAFCASS_REPORTS = "Cafcass reports";
 
     public static final String EXPERT_REPORTS = "Expert reports";

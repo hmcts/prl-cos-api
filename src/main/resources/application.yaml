@@ -110,6 +110,7 @@ uk:
             CA_APPLICANT_SOLICITOR_RES_NOTIFICATION: a08975e3-6438-4f58-a0f6-827c0dcab291
             CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION: b6224e6a-f55c-46f8-bfc7-631d273070a4
             CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
+            CITIZEN_CASE_SUBMISSION: 1e9c07a2-e565-4b16-9ead-bd49206ba8de
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
         application:
@@ -122,8 +123,8 @@ notify:
 
 payments:
   api:
-    url: http://payment-api-demo.service.core-compute-demo.internal
-    callback-url: http://prl-cos-demo.service.core-compute-demo.internal/service-request-update
+    url: ${PAY_URL:}
+    callback-url: ${PAY_CALLBACK_URL:}
 private-law:
   authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend}
 
@@ -185,7 +186,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    url: https://ccd-data-store-api-prl-ccd-definitions-pr-543.service.core-compute-preview.internal
+    url: https://ccd-data-store-api-prl-ccd-definitions-pr-676.service.core-compute-preview.internal
 
 auth:
   idam:
