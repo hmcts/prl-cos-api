@@ -51,6 +51,10 @@ public class BundleCreateRequestMapperTest {
             .documentFurtherEvidence(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("Sample1.pdf").build())
             .restrictCheckboxFurtherEvidence(new ArrayList<>()).build());
 
+        furtherEvidences.add(FurtherEvidence.builder().typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.previousOrders)
+            .documentFurtherEvidence(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("Sample1.pdf").build())
+            .restrictCheckboxFurtherEvidence(new ArrayList<>()).build());
+
         List<OtherDocuments> otherDocuments = new ArrayList<>();
         otherDocuments.add(OtherDocuments.builder().documentName("Application docu")
             .documentOther(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("Sample2.pdf").build()).documentTypeOther(
@@ -82,6 +86,9 @@ public class BundleCreateRequestMapperTest {
             .documentType(LETTERS_FROM_SCHOOL).isApplicant("No").build());
         uploadedDocuments.add(UploadedDocuments.builder()
             .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("LettersFromSchool.pdf").build())
+            .documentType(LETTERS_FROM_SCHOOL).isApplicant("Yes").build());
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("LettersFromSchool.pdf").build())
             .documentType(EXPERT_REPORTS).isApplicant("No").build());
         uploadedDocuments.add(UploadedDocuments.builder()
             .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("CAFCASSReports.pdf").build())
@@ -107,7 +114,10 @@ public class BundleCreateRequestMapperTest {
         uploadedDocuments.add(UploadedDocuments.builder()
             .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("MediaScreenshots.pdf").build())
             .documentType(MAIL_SCREENSHOTS_MEDIA_FILES).isApplicant("No").build());
-        //uploadedDocuments.add(uploadedDocuments);
+        uploadedDocuments.add(UploadedDocuments.builder()
+            .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("MediaScreenshots.pdf").build())
+            .documentType(MAIL_SCREENSHOTS_MEDIA_FILES).isApplicant("Yes").build());
+
         CaseData c100CaseData = CaseData.builder()
             .id(123456789123L)
             .languagePreferenceWelsh(No)
@@ -129,4 +139,28 @@ public class BundleCreateRequestMapperTest {
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI","sample.yaml");
         assertNotNull(bundleCreateRequest);
     }
+
+    @Test
+    public void testBundleCreateRequestMapperForEmptyDetails() {
+
+
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .languagePreferenceWelsh(Yes)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.CASE_HEARING)
+            .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
+            .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
+            .bundleInformation(BundlingInformation.builder().build())
+            .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
+            .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
+            .build();
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI","sample.yaml");
+        assertNotNull(bundleCreateRequest);
+    }
+
 }

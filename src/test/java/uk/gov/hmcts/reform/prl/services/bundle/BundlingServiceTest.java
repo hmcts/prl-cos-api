@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -73,6 +74,7 @@ public class BundlingServiceTest {
     private CaseData caseData;
 
     CaseData c100CaseData;
+    CaseData c100CaseDataOther;
     AllegationOfHarm allegationOfHarmYes;
     Map<String, Object> caseDataMap;
 
@@ -194,11 +196,37 @@ public class BundlingServiceTest {
             //.home(homefull)
             .build();
         bundleCreateRequestMapper = new BundleCreateRequestMapper();
+
+        c100CaseDataOther = CaseData.builder()
+            .id(123456789123L)
+            .languagePreferenceWelsh(Yes)
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .allegationOfHarm(allegationOfHarmYes)
+            .applicants(listOfApplicants)
+            .state(State.CASE_HEARING)
+            //.allegationsOfHarmYesNo(No)
+            .applicantsConfidentialDetails(applicantConfidentialList)
+            .childrenConfidentialDetails(childConfidentialList)
+            .otherDocuments(ElementUtils.wrapElements(otherDocuments))
+            .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
+            .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
+            .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
+            .bundleInformation(BundlingInformation.builder().build())
+            //.home(homefull)
+            .build();
     }
 
     @Test
     public void testCreateBundleService() throws Exception {
         BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseData,"eventId","authorization");
+    }
+
+    @Test
+    public void testCreateBundleServiceWhenLanguagePreferenceWelshASYes() throws Exception {
+        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseDataOther,"eventId","authorization");
     }
 
 }
