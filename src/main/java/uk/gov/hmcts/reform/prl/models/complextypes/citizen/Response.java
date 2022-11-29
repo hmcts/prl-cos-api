@@ -27,4 +27,5 @@ public class Response {
     private final CitizenInternationalElements citizenInternationalElements;
 
     private final CitizenFlags citizenFlags;
+    private final String safeToCallOption;
 }
