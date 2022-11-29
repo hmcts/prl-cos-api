@@ -170,7 +170,7 @@ public class HearingManagementService {
             for (String email: applicantsEmailList) {
 
                 Optional<String> partyName = applicants.stream()
-                    .filter(applicantEmail -> applicantEmail.equals(email))
+                    .filter(applicantEmail -> applicantEmail.getEmail().equals(email))
                     .map(element -> element.getFirstName() + " " + element.getLastName())
                     .findFirst();
                 emailService.send(
