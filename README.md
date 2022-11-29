@@ -5,6 +5,7 @@
 # Notes
 
 Update with master until 2.2
+base branch for notice of change
 
 Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you will need to set `spring.main.allow-bean-definition-overriding` to `true`.
 
