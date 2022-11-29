@@ -172,6 +172,8 @@ public class PrlAppsConstants {
     public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     public static final String CITIZEN_ROLE = "citizen";
 
+    public static final String OTHER = "Other";
+
     public static final String WAITING_TO_BE_LISTED = "WAITING_TO_BE_LISTED";
     public static final String LISTED = "LISTED";
     public static final String AWAITING_HEARING_DETAILS = "AWAITING_HEARING_DETAILS";

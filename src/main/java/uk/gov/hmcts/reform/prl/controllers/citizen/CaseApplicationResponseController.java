@@ -144,7 +144,7 @@ public class CaseApplicationResponseController {
             /**
              * send notification to Applicant solicitor for respondent's response
              */
-            log.info("***** sending notification to applicant solicitor ***** ");
+            log.info("generateC7FinalDocument:: sending notification to applicant solicitor ***** ");
             citizenResponseNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
             return objectMapper.convertValue(
                 caseDetailsReturn.getData(),
@@ -163,8 +163,7 @@ public class CaseApplicationResponseController {
         for (Element<PartyDetails> partyElement: caseData.getRespondents()) {
             if (partyElement.getId().toString().equalsIgnoreCase(partyId)) {
                 PartyDetails respondent = partyElement.getValue();
-                respondent = respondent.toBuilder().currentRespondent(currentRespondent).build();
-                partyElement = Element.<PartyDetails>builder().id(partyElement.getId()).value(respondent).build();
+                respondent.setCurrentRespondent(currentRespondent);
             }
         }
         return caseData;

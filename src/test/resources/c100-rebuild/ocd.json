@@ -1,0 +1,25 @@
+{
+  "ocd_hasOtherChildren":"Yes",
+  "ocd_otherChildren":[
+    {
+      "id":"2dfe5764-f349-4453-87df-6e7a0e30d164",
+      "firstName":"otherChildFN1",
+      "lastName":"otherChildLN1",
+      "personalDetails":{
+        "dateOfBirth":{
+          "year":"2019",
+          "month":"10",
+          "day":"10"
+        },
+        "isDateOfBirthUnknown":"",
+        "approxDateOfBirth":{
+          "day":"",
+          "month":"",
+          "year":""
+        },
+        "gender":"Male",
+        "otherGenderDetails":""
+      }
+    }
+  ]
+}
