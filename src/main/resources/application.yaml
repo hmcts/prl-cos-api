@@ -214,6 +214,9 @@ courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
+fis-hmc-api:
+  url: ${PRL_FIS_API_URL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
+
 launchdarkly:
   sdk-key: ${LAUNCH_DARKLY_SDK_KEY:}
 
