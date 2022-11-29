@@ -163,8 +163,7 @@ public class CaseApplicationResponseController {
         for (Element<PartyDetails> partyElement: caseData.getRespondents()) {
             if (partyElement.getId().toString().equalsIgnoreCase(partyId)) {
                 PartyDetails respondent = partyElement.getValue();
-                respondent = respondent.toBuilder().currentRespondent(currentRespondent).build();
-                partyElement = Element.<PartyDetails>builder().id(partyElement.getId()).value(respondent).build();
+                respondent.setCurrentRespondent(currentRespondent);
             }
         }
         return caseData;
