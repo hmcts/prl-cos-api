@@ -1,8 +1,8 @@
 {
   "hu_urgentHearingReasons":"Yes",
   "hu_reasonOfUrgentHearing":[
-    "risk of safety",
-    "risk of child abduction"
+    "riskOfSafety",
+    "riskOfChildAbduction"
   ],
   "hu_otherRiskDetails":"Give details of the risk in your case",
   "hu_timeOfHearingDetails":"10 days",

@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum UrgentHearingReasonEnum {
-    riskofsafety("Risk to my safety or the children's safety"),
-    riskofchildabduction("Risk that the children will be abducted"),
-    overseaslegalproceeding("Legal proceedings taking place overseas"),
-    otherrisks("Other risks");
+    riskOfSafety("Risk to my safety or the children's safety"),
+    riskOfChildAbduction("Risk that the children will be abducted"),
+    overseasLegalProceeding("Legal proceedings taking place overseas"),
+    otherRisks("Other risks");
 
     public String getDisplayedValue() {
         return displayedValue;
