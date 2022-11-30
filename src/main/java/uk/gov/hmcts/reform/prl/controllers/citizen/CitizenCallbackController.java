@@ -19,18 +19,27 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 
 @Slf4j
 @RestController
@@ -46,6 +55,10 @@ public class CitizenCallbackController extends AbstractCallbackController {
     private final ObjectMapper objectMapper;
 
     private final SystemUserService systemUserService;
+
+    private final ConfidentialityTabService confidentialityTabService;
+
+    private final CaseSummaryTabService caseSummaryTab;
 
     @Autowired
     private DocumentGenService documentGenService;
@@ -90,6 +103,36 @@ public class CitizenCallbackController extends AbstractCallbackController {
         // Generate draft documents and set to casedataupdated..
         caseDataUpdated.putAll(documentGenService.generateDocumentsForCitizenSubmission(authorisation, caseData));
         allTabsService.updateAllTabsIncludingConfTab(objectMapper.convertValue(caseDataUpdated, CaseData.class));
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/generate-citizen-draft-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to Issue and send to local court")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse generateDocumentSubmitApplication(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
+        caseData = caseData.toBuilder().applicantsConfidentialDetails(confidentialityTabService
+                        .getConfidentialApplicantDetails(caseData.getApplicants().stream()
+                                .map(Element::getValue)
+                                .collect(Collectors.toList())))
+                .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(caseData.getChildren()
+                        .stream()
+                        .map(Element::getValue)
+                        .collect(Collectors.toList()))).state(State.SUBMITTED_NOT_PAID)
+                .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)).build();
+
+        // updating Summary tab to update case status
+        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+        caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+        caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
