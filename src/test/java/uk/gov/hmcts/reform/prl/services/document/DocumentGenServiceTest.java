@@ -1259,6 +1259,19 @@ public class DocumentGenServiceTest {
         assertEquals(updatedCaseData.get("isEngDocGen"), Yes.toString());
         assertTrue(!updatedCaseData.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
     }
+
+    @Test
+    public void testGenerateDocumentsForCitizen() throws Exception {
+        //Given
+        when(documentLanguageService.docGenerateLang(c100CaseData)).thenReturn(DocumentLanguage
+                .builder().isGenEng(true).build());
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+        //When
+        Map<String, Object> response = documentGenService.generateDocumentsForCitizenSubmission(authToken, c100CaseData);
+        //Then
+        assertEquals(Yes.toString(), response.get("isEngDocGen"));
+    }
 }
 
 
