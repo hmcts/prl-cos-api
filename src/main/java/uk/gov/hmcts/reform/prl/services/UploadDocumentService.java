@@ -79,9 +79,7 @@ public class UploadDocumentService {
             }
 
         }
-
         if (!uploadedDocumentRequest.getFiles().isEmpty()) {
-
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -91,7 +89,7 @@ public class UploadDocumentService {
             );
             UploadedDocuments uploadedDocuments = null;
 
-            for (MultipartFile file: uploadedDocumentRequest.getFiles()) {
+            for (MultipartFile file : uploadedDocumentRequest.getFiles()) {
 
                 uploadedDocuments = UploadedDocuments.builder().dateCreated(LocalDate.now())
                     .uploadedBy(partyId)

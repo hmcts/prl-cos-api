@@ -24,4 +24,6 @@ public class Response {
     private final CurrentOrPreviousProceedings currentOrPreviousProceedings;
     // TODO: Add safety Concerns here
     private final CitizenInternationalElements citizenInternationalElements;
+    private final CitizenFlags citizenFlags;
+    private final String safeToCallOption;
 }

@@ -110,6 +110,12 @@ public class PrlAppsConstants {
     public static final String FINAL_TEMPLATE_NAME = "finalTemplateName";
     public static final String GENERATE_FILE_NAME = "generateFileName";
 
+    public static final String DRAFT_TEMPLATE_WELSH = "draftTemplateWelsh";
+    public static final String DRAFT_WELSH_FILE_NAME = "draftWelshFileName";
+
+    public static final String FINAL_TEMPLATE_WELSH = "finaltemplateWelsh";
+    public static final String WELSH_FILE_NAME = "welshFileName";
+
     public static final String URL_STRING = "/";
     public static final String D_MMMM_YYYY = "d MMMM yyyy";
 
