@@ -25,4 +25,6 @@ public class ChildAbuseBehaviours {
 
     private YesOrNo allChildrenAreRisk;
 
+    private String whichChildrenAreRisk;
+
 }
