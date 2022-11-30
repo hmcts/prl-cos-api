@@ -54,12 +54,12 @@ withNightlyPipeline(type, product, component) {
   enableMutationTest()
   enableFullFunctionalTest(200)
 
-  after('fullFunctionalTest') {
+  afterAlways('fullFunctionalTest') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
   }
 
-  after('fortify-scan') {
+  afterAlways('fortify-scan') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/**/*'
   }
