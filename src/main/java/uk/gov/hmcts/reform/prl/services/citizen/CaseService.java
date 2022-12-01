@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 public class CaseService {
 
     public static final String LINK_CASE = "linkCase";
+    public static final String CITIZEN_INTERNAL_CASE_UPDATE = "citizen-internal-case-update";
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
 
@@ -83,7 +84,6 @@ public class CaseService {
             return caseRepository.getCase(authToken, caseId);
         }
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)) {
-            //citizenEmailService.sendCitizenCaseSubmissionEmail(authToken, caseId);
             UserDetails userDetails = idamClient.getUserDetails(authToken);
             UserInfo userInfo = UserInfo
                     .builder()

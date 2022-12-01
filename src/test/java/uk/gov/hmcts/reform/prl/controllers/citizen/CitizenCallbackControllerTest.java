@@ -162,7 +162,7 @@ public class CitizenCallbackControllerTest {
             .build();
 
         doNothing().when(citizenEmailService).sendCitizenCaseSubmissionEmail(authToken,
-                                                                             String.valueOf(caseData.getId()));
+                                                           String.valueOf(caseData.getId()));
         citizenCallbackController.sendNotificationsOnCaseSubmission(authToken, callbackRequest);
     }
 }
