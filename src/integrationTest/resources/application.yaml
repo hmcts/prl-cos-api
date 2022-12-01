@@ -409,10 +409,4 @@ ccd:
   elastic-search-api:
     result-size: 100
     boost: 2.0
-bundle:
-  api:
-    url: ${BUNDLE_URL:}
-  english:
-    config: ${BUNDLE_ENGLISH_CONFIG:sample-config.yaml}
-  welsh:
-    config: ${BUNDLE_WELSH_CONFIG:sample-config.yaml}
+
