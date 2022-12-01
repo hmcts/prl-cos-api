@@ -6,16 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.Data;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.Value;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -62,56 +52,13 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundleCreateRequestMapper {
-    public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String bundleConfigFileName) {
-        return BundleCreateRequest.builder().caseDetails(CaseDetails.builder().id(String.valueOf(caseData.getId())).caseData(mapCaseData(
-            caseData, bundleConfigFileName)).build()).caseTypeId(caseData.getSelectedCaseTypeID()).jurisdictionId(
-            caseData.getCourtId()).build();
-    }
-
-    private uk.gov.hmcts.reform.prl.models.dto.bundle.CaseData mapCaseData(CaseData caseData, String bundleConfigFileName) {
-        return uk.gov.hmcts.reform.prl.models.dto.bundle.CaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
-                bundleConfigFileName)
-            .data(Data.builder().furtherEvidences(mapFurtherEvidencesFromCaseData(caseData.getFurtherEvidences())).otherDocuments(
-                mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).build()).build();
-
-    }
-
-    private List<uk.gov.hmcts.reform.prl.models.dto.bundle.FurtherEvidence> mapFurtherEvidencesFromCaseData(
-        List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
-        List<uk.gov.hmcts.reform.prl.models.dto.bundle.FurtherEvidence> furtherEvidences = new ArrayList<>();
-        Optional<List<Element<FurtherEvidence>>> existingFurtherEvidences = ofNullable(furtherEvidencesFromCaseData);
-        if (existingFurtherEvidences.isEmpty()) {
-            return furtherEvidences;
-        }
-        List<Element<FurtherEvidence>> furtherEvidencesNotConfidential = furtherEvidencesFromCaseData.stream()
-            .filter(element -> !element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
-            .collect(Collectors.toList());
-
-        furtherEvidencesNotConfidential
-            .forEach(furtherEvidenceElement -> {
-                Document furtherEvidenceDocument = furtherEvidenceElement.getValue().getDocumentFurtherEvidence();
-                furtherEvidences.add(uk.gov.hmcts.reform.prl.models.dto.bundle.FurtherEvidence.builder().id(
-                    (null != furtherEvidenceElement.getId()) ? furtherEvidenceElement.getId().toString() : null)
-                    .value(Value.builder().documentFileName(furtherEvidenceDocument.getDocumentFileName()).documentLink(
-                            DocumentLink.builder().documentFilename(furtherEvidenceDocument.getDocumentFileName())
-                                .documentUrl(furtherEvidenceDocument.getDocumentUrl()).documentBinaryUrl(
-                                    furtherEvidenceDocument.getDocumentBinaryUrl()).build())
-                        .typeOfDocumentFurtherEvidence(furtherEvidenceElement.getValue().getTypeOfDocumentFurtherEvidence().getId()).build())
-                    .build());
-
-            });
-        return furtherEvidences;
-    }
-
-    private List<uk.gov.hmcts.reform.prl.models.dto.bundle.OtherDocument> mapOtherDocumentsFromCaseData(
-        List<Element<OtherDocuments>> otherDocumentsFromCaseData) {
-        List<uk.gov.hmcts.reform.prl.models.dto.bundle.OtherDocument> otherDocuments = new ArrayList<>();
-        Optional<List<Element<OtherDocuments>>> existingOtherDocuments = ofNullable(otherDocumentsFromCaseData);
-        if (existingOtherDocuments.isEmpty()) {
-            return otherDocuments;
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, String bundleConfigFileName) {
-        BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder().caseDetails(BundlingCaseDetails.builder()
-                .id(String.valueOf(caseData.getId())).caseData(mapCaseData(caseData, bundleConfigFileName)).build())
+        BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder()
+            .caseDetails(BundlingCaseDetails.builder()
+                             .id(String.valueOf(caseData.getId()))
+                             .caseData(mapCaseData(caseData,
+                                                   bundleConfigFileName))
+                             .build())
             .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
         try {
             log.info("*** createbundle request payload  : {}", new ObjectMapper().writeValueAsString(bundleCreateRequest));
@@ -125,9 +72,9 @@ public class BundleCreateRequestMapper {
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
-                .otherDocuments(mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).applications(mapApplicationsFromCaseData(caseData))
-                .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
-                .citizenUploadedDocuments(mapBundlingDocsFromCitizenUploadedDocs(caseData.getCitizenUploadedDocumentList())).build()).build();
+                      .otherDocuments(mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).applications(mapApplicationsFromCaseData(caseData))
+                      .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
+                      .citizenUploadedDocuments(mapBundlingDocsFromCitizenUploadedDocs(caseData.getCitizenUploadedDocumentList())).build()).build();
     }
 
     private List<Element<BundlingRequestDocument>> mapApplicationsFromCaseData(CaseData caseData) {
@@ -166,7 +113,7 @@ public class BundleCreateRequestMapper {
         }
         ElementUtils.unwrapElements(citizenResponseC7DocumentList).forEach(c7CitizenResponseDocument -> {
             applications.add(mapBundlingRequestDocument(c7CitizenResponseDocument.getCitizenDocument(),
-                BundlingDocGroupEnum.c7Documents));
+                                                        BundlingDocGroupEnum.c7Documents));
         });
         return applications;
     }
@@ -186,10 +133,10 @@ public class BundleCreateRequestMapper {
             if (!furtherEvidence.getRestrictCheckboxFurtherEvidence().contains(restrictToGroup)) {
                 if (FurtherEvidenceDocumentType.miamCertificate.equals(furtherEvidence.getTypeOfDocumentFurtherEvidence())) {
                     applications.add(mapBundlingRequestDocument(furtherEvidence.getDocumentFurtherEvidence(),
-                        BundlingDocGroupEnum.applicantMiamCertificate));
+                                                                BundlingDocGroupEnum.applicantMiamCertificate));
                 } else if (FurtherEvidenceDocumentType.previousOrders.equals(furtherEvidence.getTypeOfDocumentFurtherEvidence())) {
                     applications.add(mapBundlingRequestDocument(furtherEvidence.getDocumentFurtherEvidence(),
-                        BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication));
+                                                                BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication));
                 }
             }
         });
@@ -206,7 +153,7 @@ public class BundleCreateRequestMapper {
             OrderDetails orderDetails = orderDetailsElement.getValue();
             Document document = orderDetails.getOrderDocument();
             orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
-                .documentFileName(document.getDocumentFileName()).documentLink(document).build());
+                           .documentFileName(document.getDocumentFileName()).documentLink(document).build());
         });
         return ElementUtils.wrapElements(orders);
     }
@@ -222,24 +169,11 @@ public class BundleCreateRequestMapper {
             .filter(element -> !element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
             .collect(Collectors.toList());
 
-        otherDocumentsNotConfidential
-            .forEach(otherDocumentsElement -> {
-                Document otherDocument = otherDocumentsElement.getValue().getDocumentOther();
-                otherDocuments.add(uk.gov.hmcts.reform.prl.models.dto.bundle.OtherDocument.builder().id(
-                    (null != otherDocumentsElement.getId() ? otherDocumentsElement.getId().toString() : null))
-                    .value(Value.builder().documentFileName(otherDocument.getDocumentFileName()).documentLink(
-                            DocumentLink.builder().documentFilename(otherDocument.getDocumentFileName())
-                                .documentUrl(otherDocument.getDocumentUrl()).documentBinaryUrl(
-                                    otherDocument.getDocumentBinaryUrl()).build())
-                        .typeOfDocumentFurtherEvidence(otherDocumentsElement.getValue().getDocumentTypeOther().getId()).build()).build());
-
-            });
-        return otherDocuments;
         ElementUtils.unwrapElements(otherDocumentsNotConfidential)
             .forEach(otherDocuments ->
-                otherBundlingDocuments.add(
-                    mapBundlingRequestDocument(otherDocuments.getDocumentOther(),
-                        getDocumentGroup("", otherDocuments.getDocumentTypeOther().getDisplayedValue()))));
+                         otherBundlingDocuments.add(
+                             mapBundlingRequestDocument(otherDocuments.getDocumentOther(),
+                                                        getDocumentGroup("", otherDocuments.getDocumentTypeOther().getDisplayedValue()))));
 
         return ElementUtils.wrapElements(otherBundlingDocuments);
     }
@@ -255,9 +189,9 @@ public class BundleCreateRequestMapper {
             UploadedDocuments uploadedDocuments = citizenUploadedDocumentElement.getValue();
             Document uploadedDocument = uploadedDocuments.getCitizenDocument();
             bundlingCitizenDocuments.add(BundlingRequestDocument.builder()
-                .documentGroup(getDocumentGroup(uploadedDocuments.getIsApplicant(), uploadedDocuments.getDocumentType()))
-                .documentFileName(uploadedDocument.getDocumentFileName())
-                .documentLink(uploadedDocument).build());
+                                             .documentGroup(getDocumentGroup(uploadedDocuments.getIsApplicant(), uploadedDocuments.getDocumentType()))
+                                             .documentFileName(uploadedDocument.getDocumentFileName())
+                                             .documentLink(uploadedDocument).build());
 
         });
         return ElementUtils.wrapElements(bundlingCitizenDocuments);
