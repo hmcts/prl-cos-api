@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FAMILY_COURT_TYPE_ID;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class LocationRefDataServiceTest {
@@ -63,7 +64,7 @@ public class LocationRefDataServiceTest {
     public void testgetCourtDetailsWithData() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
-                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").build()))
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtTypeId(FAMILY_COURT_TYPE_ID).build()))
                             .build());
         List<DynamicListElement> courtLocations = locationRefDataService.getCourtLocations("test");
         assertFalse(courtLocations.isEmpty());

@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.concat;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FAMILY_COURT_TYPE_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 
 @Slf4j
 @Service
@@ -26,7 +28,7 @@ public class LocationRefDataService {
         try {
             CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(authToken,
                                                                                     authTokenGenerator.generate(),
-                                                                                    "ABA5");
+                                                                                    SERVICE_ID);
             return onlyEnglandAndWalesLocations(courtDetails);
         } catch (Exception e) {
             log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
@@ -38,13 +40,14 @@ public class LocationRefDataService {
         return (locationRefData == null
             ? new ArrayList<>()
             : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
+            .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .map(this::getDisplayEntry).collect(Collectors.toList()));
     }
 
     private DynamicListElement getDisplayEntry(CourtVenue location) {
         String value = concat(concat(concat(location.getSiteName(), " - "), concat(location.getCourtAddress(), " - ")),
                               location.getPostcode());
-        String key = location.getCourtEpimmsId() + "-" + location.getRegionId();
+        String key = location.getCourtEpimmsId() + "-" + location.getRegionId() + "-" + location.getCourtName();
         return DynamicListElement.builder().code(key).label(value).build();
     }
 }
