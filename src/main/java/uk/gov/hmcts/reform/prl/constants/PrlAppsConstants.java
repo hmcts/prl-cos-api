@@ -10,6 +10,7 @@ import java.util.List;
 public class PrlAppsConstants {
     public static final String JURISDICTION = "PRIVATELAW";
     public static final String CASE_TYPE = "PRLAPPS";
+    public static final String PRL_SERVICE_IDENTIFIER = "ABA5";
 
     public static final String C100_CASE_TYPE = "C100";
     public static final String FL401_CASE_TYPE = "FL401";
@@ -172,6 +173,8 @@ public class PrlAppsConstants {
     public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     public static final String CITIZEN_ROLE = "citizen";
 
+    public static final String REGION_SCOTLAND = "Scotland";
+
     public static final String OTHER = "Other";
 
     public static final String WAITING_TO_BE_LISTED = "WAITING_TO_BE_LISTED";
@@ -181,4 +184,8 @@ public class PrlAppsConstants {
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
     public static final String COMPLETED = "COMPLETED";
+    public static final String CAFCASS_REPORTS = "Cafcass reports";
+    public static final String EXPERT_REPORTS = "Expert reports";
+    public static final String APPLICANT_STATMENT =
+        "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";
 }

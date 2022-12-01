@@ -21,25 +21,25 @@ public class CaseDataUrgencyElementsMapper {
     private static final String CASE_URGENCY_REASONS = " Case Urgency Reasons - ";
 
     public static void updateUrgencyElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
-                                                      C100RebuildUrgencyElements c100RebuildUrgencyElements) {
+                                                        C100RebuildUrgencyElements c100RebuildUrgencyElements) {
         caseDataBuilder
-                .isCaseUrgent(c100RebuildUrgencyElements.getUrgentHearingRequired())
-                .caseUrgencyTimeAndReason(buildCaseUrgencyTimeAndReason(c100RebuildUrgencyElements))
-                .areRespondentsAwareOfProceedings(c100RebuildUrgencyElements.getHearingWithNext48HrsDetails())
-                .effortsMadeWithRespondents(c100RebuildUrgencyElements.getHearingWithNext48HrsMsg());
+            .isCaseUrgent(c100RebuildUrgencyElements.getUrgentHearingRequired())
+            .caseUrgencyTimeAndReason(buildCaseUrgencyTimeAndReason(c100RebuildUrgencyElements))
+            .areRespondentsAwareOfProceedings(c100RebuildUrgencyElements.getHearingWithNext48HrsDetails())
+            .effortsMadeWithRespondents(c100RebuildUrgencyElements.getHearingWithNext48HrsMsg());
     }
 
     private static String buildCaseUrgencyTimeAndReason(C100RebuildUrgencyElements c100RebuildUrgencyElements) {
         List<String> riskList = nonNull(c100RebuildUrgencyElements.getReasonOfUrgentHearing())
-                ? List.of(c100RebuildUrgencyElements.getReasonOfUrgentHearing()) : Collections.emptyList();
+            ? List.of(c100RebuildUrgencyElements.getReasonOfUrgentHearing()) : Collections.emptyList();
 
         List<String> riskList1 = riskList.stream().map(value -> UrgentHearingReasonEnum.valueOf(value)
-                .getDisplayedValue()).collect(Collectors.toList());
+            .getDisplayedValue()).collect(Collectors.toList());
 
         if (isNotEmpty(c100RebuildUrgencyElements.getOtherRiskDetails())) {
             riskList1.add(c100RebuildUrgencyElements.getOtherRiskDetails());
         }
         return CASE_URGENCY_TIME + c100RebuildUrgencyElements.getTimeOfHearingDetails()
-                + CASE_URGENCY_REASONS + String.join(COMMA_SEPARATOR, riskList1);
+            + CASE_URGENCY_REASONS + String.join(COMMA_SEPARATOR, riskList1);
     }
 }

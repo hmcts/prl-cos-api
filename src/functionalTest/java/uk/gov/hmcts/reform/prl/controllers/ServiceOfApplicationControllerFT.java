@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 
 public class ServiceOfApplicationControllerFT {
 
-    private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
+    private static final String VALID_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
 
 
     private final String targetInstance =

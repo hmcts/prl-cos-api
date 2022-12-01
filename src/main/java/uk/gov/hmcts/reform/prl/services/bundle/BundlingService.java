@@ -28,10 +28,12 @@ public class BundlingService {
     @Value("${bundle.welsh.config}")
     private String bundleWelshConfig;
 
-    public BundleCreateResponse createBundleServiceRequest(CaseData caseData, String authorization) throws Exception {
-        return createBundle(authorization, authTokenGenerator.generate(),
+    public BundleCreateResponse createBundleServiceRequest(CaseData caseData,String eventId,
+                                                           String authorization) throws Exception {
+        return createBundle(authorization,authTokenGenerator.generate(),
             bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(
-                caseData, getBundleConfig(caseData.getLanguagePreferenceWelsh())));
+                caseData, eventId,
+                getBundleConfig(null != caseData.getLanguagePreferenceWelsh() ? caseData.getLanguagePreferenceWelsh() : YesOrNo.No)));
     }
 
     private BundleCreateResponse createBundle(String authorization, String serviceAuthorization,
