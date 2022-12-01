@@ -176,6 +176,14 @@ public class PrlAppsConstants {
     public static final String REGION_SCOTLAND = "Scotland";
 
     public static final String OTHER = "Other";
+
+    public static final String WAITING_TO_BE_LISTED = "WAITING_TO_BE_LISTED";
+    public static final String LISTED = "LISTED";
+    public static final String AWAITING_HEARING_DETAILS = "AWAITING_HEARING_DETAILS";
+    public static final String CANCELLED = "CANCELLED";
+    public static final String ADJOURNED = "ADJOURNED";
+    public static final String POSTPONED = "POSTPONED";
+    public static final String COMPLETED = "COMPLETED";
     public static final String CAFCASS_REPORTS = "Cafcass reports";
     public static final String EXPERT_REPORTS = "Expert reports";
     public static final String APPLICANT_STATMENT =
