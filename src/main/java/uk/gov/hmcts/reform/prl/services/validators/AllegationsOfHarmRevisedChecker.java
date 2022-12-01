@@ -163,6 +163,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         log.debug("domesticBehavioursCompleted  :{} ",domesticBehavioursCompleted);
         log.debug("childBehavioursCompleted  :{} ",childBehavioursCompleted);
         log.debug("validateAbductionSection(caseData)  :{} ",validateAbductionSection(caseData));
+        log.debug("validateSubstanceAbuse(caseData)  :{} ",validateSubstanceAbuse(caseData));
         log.debug("validateOtherConcerns(caseData)  :{} ",validateOtherConcerns(caseData));
         log.debug("validateChildContact(caseData)  :{} ",validateChildContact(caseData));
         boolean isFinished;
@@ -172,6 +173,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
             && childBehavioursCompleted
             && validateAbductionSection(caseData)
             && validateOtherConcerns(caseData)
+            && validateSubstanceAbuse(caseData)
             && validateChildContact(caseData);
         return isFinished;
     }
@@ -362,6 +364,24 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
             .map(Optional::get).noneMatch(field -> field.equals(""));
 
     }
+
+
+    public boolean validateSubstanceAbuse(CaseData caseData) {
+        Optional<YesOrNo> allegationsOfHarmRevisedSubstanceAbuse = ofNullable(caseData.getAllegationOfHarmRevised()
+                                                                                 .getNewAllegationsOfHarmSubstanceAbuseYesNo());
+        Optional<String> allegationsOfHarmevisedOtherSubstanceAbuseDetails = ofNullable(caseData.getAllegationOfHarmRevised()
+                                                                                      .getNewAllegationsOfHarmSubstanceAbuseDetails());
+
+        List<Optional<?>> fields = new ArrayList<>();
+        fields.add(allegationsOfHarmRevisedSubstanceAbuse);
+        if (allegationsOfHarmRevisedSubstanceAbuse.isPresent() && allegationsOfHarmRevisedSubstanceAbuse.get().equals(Yes)) {
+            fields.add(allegationsOfHarmevisedOtherSubstanceAbuseDetails);
+        }
+
+        return fields.stream().noneMatch(Optional::isEmpty)
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
+    }
+
 
     public boolean validateOtherConcerns(CaseData caseData) {
         Optional<YesOrNo> allegationsOfHarmRevisedOtherConcerns = ofNullable(caseData.getAllegationOfHarmRevised()

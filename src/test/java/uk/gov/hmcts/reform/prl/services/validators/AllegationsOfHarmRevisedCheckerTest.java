@@ -150,6 +150,26 @@ public class AllegationsOfHarmRevisedCheckerTest {
         assertTrue(allegationsOfHarmChecker.validateOtherConcerns(caseData));
     }
 
+
+    @Test
+    public void whenNoCaseDataThenValidateSubstanceAbuseIsFalse() {
+        CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
+            .build();
+
+        assertFalse(allegationsOfHarmChecker.validateSubstanceAbuse(caseData));
+    }
+
+    @Test
+    public void whenOtherConcernsPresentThenValidateSubstanceAbuseTrue() {
+        CaseData caseData = CaseData.builder()
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                         .newAllegationsOfHarmSubstanceAbuseYesNo(Yes)
+                                         .newAllegationsOfHarmSubstanceAbuseDetails("Details").build())
+            .build();
+
+        assertTrue(allegationsOfHarmChecker.validateSubstanceAbuse(caseData));
+    }
+
     @Test
     public void whenNoCaseDataThenValidateChildContactIsFalse() {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder().build())
@@ -554,6 +574,8 @@ public class AllegationsOfHarmRevisedCheckerTest {
                                   .newAllegationsOfHarmOtherConcerns(Yes)
                                   .newAllegationsOfHarmOtherConcernsDetails("Details")
                                   .newAllegationsOfHarmOtherConcernsCourtActions("testing")
+                                  .newAllegationsOfHarmSubstanceAbuseYesNo(Yes)
+                                  .newAllegationsOfHarmSubstanceAbuseDetails("Details")
                                   .newAllegationsOfHarmOtherConcerns(No)
                                   .newAgreeChildUnsupervisedTime(No)
                                   .newAgreeChildSupervisedTime(No)
