@@ -548,6 +548,8 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .build();
         ChildAbuseBehaviours childAbuseBehaviours = ChildAbuseBehaviours.builder()
             .typeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
+            .allChildrenAreRisk(No)
+            .whichChildrenAreRisk("Test")
             .newAbuseNatureDescription("Test")
             .newBehavioursStartDateAndLength("5 days")
             .newBehavioursApplicantSoughtHelp(Yes)
