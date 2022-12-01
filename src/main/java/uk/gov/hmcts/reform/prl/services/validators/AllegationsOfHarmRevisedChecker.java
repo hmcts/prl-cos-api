@@ -344,21 +344,26 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     public boolean validateChildAbuseBehaviours(ChildAbuseBehaviours childAbuseBehaviours) {
 
         Optional<TypeOfAbuseEnum> typeOfAbuse = ofNullable(childAbuseBehaviours.getTypeOfAbuse());
+        Optional<YesOrNo> allChildrenAreRisk = ofNullable(childAbuseBehaviours.getAllChildrenAreRisk());
+        Optional<String> whichChildrenAreRisk = ofNullable(childAbuseBehaviours.getWhichChildrenAreRisk());
         Optional<String> abuseNatureDescription = ofNullable(childAbuseBehaviours.getNewAbuseNatureDescription());
-        Optional<String> behavioursStartDateAndLength = ofNullable(childAbuseBehaviours.getNewBehavioursStartDateAndLength());
-        Optional<YesOrNo> behavioursApplicantSoughtHelp = ofNullable(childAbuseBehaviours.getNewBehavioursApplicantSoughtHelp());
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(childAbuseBehaviours.getNewBehavioursApplicantHelpSoughtWho());
 
         List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(typeOfAbuse.get().getDisplayedValue()));
+        if (allChildrenAreRisk.isPresent()
+              && allChildrenAreRisk.get().equals(No)) {
+            fields.add(whichChildrenAreRisk);
+        }
         fields.add(abuseNatureDescription);
+        Optional<String> behavioursStartDateAndLength = ofNullable(childAbuseBehaviours.getNewBehavioursStartDateAndLength());
         fields.add(behavioursStartDateAndLength);
+        Optional<YesOrNo> behavioursApplicantSoughtHelp = ofNullable(childAbuseBehaviours.getNewBehavioursApplicantSoughtHelp());
         fields.add(behavioursApplicantSoughtHelp);
         if (behavioursApplicantSoughtHelp.isPresent()
             && behavioursApplicantSoughtHelp.get().equals(Yes)) {
             fields.add(behavioursApplicantHelpSoughtWho);
         }
-
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent)
             .map(Optional::get).noneMatch(field -> field.equals(""));
