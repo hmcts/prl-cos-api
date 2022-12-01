@@ -11,14 +11,14 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Value
 @Builder(toBuilder = true)
-public class BundleSubfolderDetails {
+public class BundleNestedSubfolder2Details {
     private String name;
-    private List<BundleNestedSubfolder1> folders;
+    private List<BundleNestedSubfolder3> folders;
     private List<BundleDocument> documents;
 
     @JsonCreator
-    public BundleSubfolderDetails(@JsonProperty("name") String name,@JsonProperty("folders") List<BundleNestedSubfolder1> folders,
-                                  @JsonProperty("documents") List<BundleDocument> documents) {
+    public BundleNestedSubfolder2Details(@JsonProperty("name") String name, @JsonProperty("folders") List<BundleNestedSubfolder3> folders,
+                                         @JsonProperty("documents") List<BundleDocument> documents) {
         this.name = name;
         this.folders = folders;
         this.documents = documents;
