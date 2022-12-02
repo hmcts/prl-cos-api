@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
 import uk.gov.hmcts.reform.prl.controllers.citizen.mapper.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
@@ -41,6 +42,7 @@ public class CaseDataMapperTest {
         caseData = CaseData.builder()
                 .id(1234567891234567L)
                 .caseTypeOfApplication(CASE_TYPE)
+                .c100RebuildData(C100RebuildData.builder()
                 .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
                 .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
                 .c100RebuildTypeOfOrder(TestUtil.readFileFrom("classpath:c100-rebuild/too.json"))
@@ -54,6 +56,7 @@ public class CaseDataMapperTest {
                 .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs.json"))
                 .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
                 .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
+                .build())
                 .build();
     }
 
@@ -74,7 +77,9 @@ public class CaseDataMapperTest {
         //Given
         CaseData caseData1 = caseData
                 .toBuilder()
+                .c100RebuildData(caseData.getC100RebuildData().toBuilder()
                 .c100RebuildTypeOfOrder(TestUtil.readFileFrom("classpath:c100-rebuild/too1.json"))
+                        .build())
                 .build();
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -93,7 +98,9 @@ public class CaseDataMapperTest {
         //Given
         CaseData caseData1 = caseData
                 .toBuilder()
-                .c100RebuildOtherProceedings(TestUtil.readFileFrom("classpath:c100-rebuild/op1.json"))
+                .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                        .c100RebuildOtherProceedings(TestUtil.readFileFrom("classpath:c100-rebuild/op1.json"))
+                        .build())
                 .build();
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -108,8 +115,11 @@ public class CaseDataMapperTest {
         //Given
         CaseData caseData1 = caseData
                 .toBuilder()
-                .c100RebuildMaim(TestUtil.readFileFrom("classpath:c100-rebuild/miam1.json"))
+                .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                        .c100RebuildMaim(TestUtil.readFileFrom("classpath:c100-rebuild/miam1.json"))
+                        .build())
                 .build();
+
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -122,8 +132,12 @@ public class CaseDataMapperTest {
     @Test
     public void testCaseDataMapperForChildDetail() throws IOException {
         //Given
-        CaseData caseData1 = caseData.toBuilder()
-                .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd1.json")).build();
+        CaseData caseData1 = caseData
+                .toBuilder()
+                .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                        .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd1.json"))
+                        .build())
+                .build();
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -136,8 +150,12 @@ public class CaseDataMapperTest {
     @Test
     public void testCaseDataMapperForOtherChildrenDetail() throws IOException {
         //Given
-        CaseData caseData1 = caseData.toBuilder()
-                .c100RebuildOtherChildrenDetails(TestUtil.readFileFrom("classpath:c100-rebuild/ocd1.json")).build();
+        CaseData caseData1 = caseData
+                .toBuilder()
+                .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                        .c100RebuildOtherChildrenDetails(TestUtil.readFileFrom("classpath:c100-rebuild/ocd1.json"))
+                        .build())
+                .build();
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -150,8 +168,12 @@ public class CaseDataMapperTest {
     @Test
     public void testCaseDataMapperForOtherChildrenDetailNull() throws IOException {
         //Given
-        CaseData caseData1 = caseData.toBuilder()
-                .c100RebuildOtherChildrenDetails(TestUtil.readFileFrom("classpath:c100-rebuild/ocd2.json")).build();
+        CaseData caseData1 = caseData
+                .toBuilder()
+                .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                        .c100RebuildOtherChildrenDetails(TestUtil.readFileFrom("classpath:c100-rebuild/ocd2.json"))
+                        .build())
+                .build();
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -163,8 +185,11 @@ public class CaseDataMapperTest {
 
     @Test
     public void testCaseDataMapperReasonableAdjustmentsExtraFields() throws IOException {
-        CaseData caseData1 = caseData.toBuilder()
-                .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra1.json"))
+        CaseData caseData1 = caseData
+                .toBuilder()
+                .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                        .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra1.json"))
+                        .build())
                 .build();
 
         //When
@@ -177,8 +202,12 @@ public class CaseDataMapperTest {
     @Test
     public void testCaseDataMapperForOtherPersonDetails() throws IOException {
         //Given
-        CaseData caseData1 = caseData.toBuilder()
-                .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs1.json")).build();
+        CaseData caseData1 = caseData
+                .toBuilder()
+                .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                        .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs1.json"))
+                        .build())
+                .build();
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -191,8 +220,12 @@ public class CaseDataMapperTest {
     @Test
     public void testCaseDataMapperForOtherPersonDetailsUnknownDoB() throws IOException {
         //Given
-        CaseData caseData1 = caseData.toBuilder()
-                .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs2.json")).build();
+        CaseData caseData1 = caseData
+                .toBuilder()
+                .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                        .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs2.json"))
+                        .build())
+                .build();
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -205,8 +238,12 @@ public class CaseDataMapperTest {
     @Test
     public void testCaseDataMapperForRespondentDetails() throws IOException {
         //Given
-        CaseData caseData1 = caseData.toBuilder()
-                .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp1.json")).build();
+        CaseData caseData1 = caseData
+                .toBuilder()
+                .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                        .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp1.json"))
+                        .build())
+                .build();
 
         //When
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
@@ -220,7 +257,7 @@ public class CaseDataMapperTest {
     public void testCaseDataMapperWhenAllBlocksEmpty() throws IOException {
 
         //When
-        CaseData caseData1 = CaseData.builder().build();
+        CaseData caseData1 = CaseData.builder().c100RebuildData(C100RebuildData.builder().build()).build();
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
 
         //Then
@@ -231,8 +268,13 @@ public class CaseDataMapperTest {
     public void testCaseDataMapperWhenUrgencyDataEmpty() throws IOException {
 
         //When
-        CaseData caseData1 = caseData.toBuilder()
-                .c100RebuildHearingUrgency(TestUtil.readFileFrom("classpath:c100-rebuild/hu1.json")).build();
+        CaseData caseData1 = caseData
+                .toBuilder()
+                .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                        .c100RebuildHearingUrgency(TestUtil.readFileFrom("classpath:c100-rebuild/hu1.json"))
+                        .build())
+                .build();
+
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
 
         //Then
