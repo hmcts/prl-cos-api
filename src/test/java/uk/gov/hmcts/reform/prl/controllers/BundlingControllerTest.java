@@ -89,8 +89,7 @@ public class BundlingControllerTest {
         bundleNestedSubfolders2.add(BundleNestedSubfolder2.builder()
             .value(BundleNestedSubfolder2Details.builder().documents(bundleDocuments).build()).build());
         bundleNestedSubfolders1.add(BundleNestedSubfolder1.builder()
-            .value(BundleNestedSubfolder1Details.builder().documents(bundleDocuments).folders(
-            bundleNestedSubfolders2).build()).build());
+            .value(BundleNestedSubfolder1Details.builder().documents(bundleDocuments).build()).build());
         List<BundleFolder> bundleFolders = new ArrayList<>();
         List<BundleSubfolder> bundleSubfolders = new ArrayList<>();
         bundleSubfolders.add(BundleSubfolder.builder()
