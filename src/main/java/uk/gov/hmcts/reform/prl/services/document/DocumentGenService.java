@@ -72,6 +72,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ENG_DOC_GEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
@@ -293,7 +294,7 @@ public class DocumentGenService {
 
         caseData = fillOrgDetails(caseData);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        updatedCaseData.put("isEngDocGen", Yes.toString());
+        updatedCaseData.put(IS_ENG_DOC_GEN, Yes.toString());
         updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
         if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
             updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, null);
@@ -310,7 +311,7 @@ public class DocumentGenService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         if (documentLanguage.isGenEng()) {
-            updatedCaseData.put("isEngDocGen", Yes.toString());
+            updatedCaseData.put(IS_ENG_DOC_GEN, Yes.toString());
             if (isConfidentialInformationPresentForC100(caseData)) {
                 if (State.CASE_ISSUE.equals(caseData.getState())) {
                     updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
@@ -420,7 +421,7 @@ public class DocumentGenService {
             documentLanguage.isGenWelsh()
         );
         if (documentLanguage.isGenEng()) {
-            updatedCaseData.put("isEngDocGen", Yes.toString());
+            updatedCaseData.put(IS_ENG_DOC_GEN, Yes.toString());
             updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
         }
         if (documentLanguage.isGenWelsh()) {
