@@ -28,6 +28,10 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocument;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolderDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1Details;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder2;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder2Details;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
@@ -75,13 +79,22 @@ public class BundlingControllerTest {
 
     @Before
     public void setUp() {
-        List<BundleFolder> bundleFolders = new ArrayList<>();
-        List<BundleSubfolder> bundleSubfolders = new ArrayList<>();
+
         List<BundleDocument> bundleDocuments = new ArrayList<>();
         bundleDocuments.add(BundleDocument.builder().value(
             BundleDocumentDetails.builder().name("CaseDocuments").description("Case Documents").sortIndex(1)
-            .sourceDocument(DocumentLink.builder().build()).build()).build());
-        bundleSubfolders.add(BundleSubfolder.builder().value(BundleSubfolderDetails.builder().documents(bundleDocuments).build()).build());
+                .sourceDocument(DocumentLink.builder().build()).build()).build());
+        List<BundleNestedSubfolder2> bundleNestedSubfolders2 = new ArrayList<>();
+        List<BundleNestedSubfolder1> bundleNestedSubfolders1 = new ArrayList<>();
+        bundleNestedSubfolders2.add(BundleNestedSubfolder2.builder()
+            .value(BundleNestedSubfolder2Details.builder().documents(bundleDocuments).build()).build());
+        bundleNestedSubfolders1.add(BundleNestedSubfolder1.builder()
+            .value(BundleNestedSubfolder1Details.builder().documents(bundleDocuments).folders(
+            bundleNestedSubfolders2).build()).build());
+        List<BundleFolder> bundleFolders = new ArrayList<>();
+        List<BundleSubfolder> bundleSubfolders = new ArrayList<>();
+        bundleSubfolders.add(BundleSubfolder.builder()
+            .value(BundleSubfolderDetails.builder().documents(bundleDocuments).folders(bundleNestedSubfolders1).build()).build());
         bundleFolders.add(BundleFolder.builder().value(BundleFolderDetails.builder().folders(bundleSubfolders).build()).build());
         List<Bundle> bundleList = new ArrayList<>();
         bundleList.add(Bundle.builder().value(BundleDetails.builder().folders(bundleFolders).build()).build());
@@ -111,7 +124,7 @@ public class BundlingControllerTest {
         List<UploadedDocuments> uploadedDocuments = new ArrayList<>();
         uploadedDocuments.add(UploadedDocuments.builder()
             .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("PositionStatement.pdf").build())
-                .documentType(YOUR_POSITION_STATEMENTS).isApplicant("No").build());
+            .documentType(YOUR_POSITION_STATEMENTS).isApplicant("No").build());
         uploadedDocuments.add(UploadedDocuments.builder()
             .citizenDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("PositionStatement.pdf").build())
             .documentType(YOUR_POSITION_STATEMENTS).isApplicant("Yes").build());
@@ -141,7 +154,6 @@ public class BundlingControllerTest {
             .citizenResponseC7DocumentList(ElementUtils.wrapElements(citizenC7uploadedDocs))
             .citizenUploadedDocumentList(ElementUtils.wrapElements(uploadedDocuments))
             .bundleInformation(BundlingInformation.builder().bundleConfiguration("sample.yaml").historicalBundles(bundleList).build())
-            //.home(homefull)
             .build();
     }
 
@@ -155,6 +167,6 @@ public class BundlingControllerTest {
         List<Bundle> responseCaseBundles = bundleInformation.getCaseBundles();
         assertEquals("CaseDocuments",
             responseCaseBundles.get(0).getValue().getFolders().get(0)
-                    .getValue().getFolders().get(0).getValue().getDocuments().get(0).getValue().getName());
+                .getValue().getFolders().get(0).getValue().getDocuments().get(0).getValue().getName());
     }
 }

@@ -676,15 +676,6 @@ public class CaseData implements MappableObject {
     /**
      * Bundle.
      */
-    private List<Bundle> caseBundles;
-    private List<Bundle> historicalBundles;
-    private String bundleConfiguration;
-    private List<MultiBundleConfig> multiBundleConfiguration;
-
-
-    /**
-     * Bundle.
-     */
     @JsonProperty("bundleInformation")
     private BundlingInformation bundleInformation;
 
