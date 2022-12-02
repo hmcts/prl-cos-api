@@ -353,6 +353,7 @@ public class ManageOrderService {
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
         headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
+        headerMap.put("serveOrderDynamicList", getOrdersAsDynamicList(caseData));
         return headerMap;
     }
 
