@@ -354,6 +354,7 @@ public class ManageOrderService {
         Map<String, Object> headerMap = new HashMap<>();
         headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
         headerMap.put("serveOrderDynamicList", getOrdersAsDynamicList(caseData));
+        log.info("caseData=====" + caseData.getCaseTypeOfApplication());
         return headerMap;
     }
 
