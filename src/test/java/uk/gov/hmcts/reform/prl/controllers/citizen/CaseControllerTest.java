@@ -181,7 +181,7 @@ public class CaseControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         doNothing().when(caseService).linkCitizenToCase(authToken, servAuthToken, caseId, accessCode);
-        caseController.linkDefendantToClaim(authToken, caseId, servAuthToken, accessCode);
+        caseController.linkCitizenToCase(authToken, caseId, servAuthToken, accessCode);
         assertNotNull(caseData);
 
     }

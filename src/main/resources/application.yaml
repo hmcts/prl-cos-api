@@ -121,20 +121,19 @@ notify:
   api-key: fake-key
   baseUrl: https://api.notifications.service.gov.uk
 
+payments:
+  api:
+    url: ${PAY_URL:}
+    callback-url: ${PAY_CALLBACK_URL:}
+private-law:
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend}
+
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
-
-payments:
-  api:
-    url: ${PAY_URL:}
-    callback-url: ${PAY_CALLBACK_URL:}
-
-private-law:
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend}
 
 fees-register:
   api:
@@ -382,8 +381,8 @@ document:
       prl_c45a_welsh_draft_template: PRL-GOR-WEL-C45A-Parental-Responsibility-Order-Draft.docx
       prl_c45a_welsh_draft_filename: Welsh_Parental_Responsibility_Order_C45A_draft.pdf
     citizen:
-      prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
-      prl_citizen_upload_filename: Self_created.pdf
+      prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
+      prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
 
 southampton:
   court:
