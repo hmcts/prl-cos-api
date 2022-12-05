@@ -76,6 +76,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofh
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.AllegationsOfHarmOverview;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.ChildAbductionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharm.DomesticAbuseVictim;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.AllegationsOfHarmRevisedOverview;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.services.tab.TabService;
@@ -116,7 +117,15 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("respondentTable", getRespondentsTable(caseData));
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
             applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
-            applicationTab.put("allegationsOfHarmOverviewTable", getAllegationsOfHarmOverviewTable(caseData));
+            if (YesOrNo.Yes.equals(caseData.getIsNewCaseCreated())) {
+                applicationTab.put("allegationsOfHarmRevisedOverviewTable", getAllegationsOfHarmRevisedOverviewTable((caseData)));
+            } else {
+                applicationTab.put("allegationsOfHarmOrdersTable", getAllegationsOfHarmOrdersTable(caseData));
+                applicationTab.put("allegationsOfHarmOverviewTable", getAllegationsOfHarmOverviewTable(caseData));
+                applicationTab.put("allegationsOfHarmDomesticAbuseTable", getDomesticAbuseTable(caseData));
+                applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
+                applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
+            }
             applicationTab.put("miamTable", getMiamTable(caseData));
             applicationTab.put("miamExemptionsTable", getMiamExemptionsTable(caseData));
             applicationTab.put("otherProceedingsTable", getOtherProceedingsTable(caseData));
@@ -126,10 +135,6 @@ public class ApplicationsTabService implements TabService {
             applicationTab.put("litigationCapacityTable", getLitigationCapacityDetails(caseData));
             applicationTab.put("welshLanguageRequirementsTable", getWelshLanguageRequirementsTable(caseData));
             applicationTab.put("otherPeopleInTheCaseTable", getOtherPeopleInTheCaseTable(caseData));
-            applicationTab.put("allegationsOfHarmOrdersTable", getAllegationsOfHarmOrdersTable(caseData));
-            applicationTab.put("allegationsOfHarmDomesticAbuseTable", getDomesticAbuseTable(caseData));
-            applicationTab.put("allegationsOfHarmChildAbductionTable", getChildAbductionTable(caseData));
-            applicationTab.put("allegationsOfHarmOtherConcernsTable", getAllegationsOfHarmOtherConcerns(caseData));
             applicationTab.put("childDetailsTable", getChildDetails(caseData));
             applicationTab.put("childDetailsExtraTable", getExtraChildDetailsTable(caseData));
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -385,6 +390,13 @@ public class ApplicationsTabService implements TabService {
         AllegationsOfHarmOverview allegationsOfHarmOverview = objectMapper
             .convertValue(caseData, AllegationsOfHarmOverview.class);
         return toMap(allegationsOfHarmOverview);
+
+    }
+
+    public Map<String, Object> getAllegationsOfHarmRevisedOverviewTable(CaseData caseData) {
+        AllegationsOfHarmRevisedOverview allegationsOfHarmRevisedOverview = objectMapper
+                .convertValue(caseData, AllegationsOfHarmRevisedOverview.class);
+        return toMap(allegationsOfHarmRevisedOverview);
 
     }
 
