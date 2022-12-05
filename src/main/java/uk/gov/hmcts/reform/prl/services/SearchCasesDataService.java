@@ -40,15 +40,12 @@ public class SearchCasesDataService {
             if (Objects.nonNull(fl401Applicant)) {
                 caseDetails.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
 
-                setFL401PartyLevelFlag(caseDetails, fl401Applicant);
-
-                caseDetails.put("applicantsFL401", fl401Applicant);
+                setFL401ApplicantFlag(caseDetails, fl401Applicant);
             }
 
             if (Objects.nonNull(fl401respondent)) {
                 caseDetails.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
-                setFL401PartyLevelFlag(caseDetails,fl401respondent);
-                caseDetails.put("respondentsFL401", fl401respondent);
+                setFL401RespondentFlag(caseDetails,fl401respondent);
             }
         } else {
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
@@ -112,12 +109,22 @@ public class SearchCasesDataService {
         }
     }
 
-    private void setFL401PartyLevelFlag(Map<String, Object> caseDetails, PartyDetails partyDetails) {
-        String partyName = partyDetails.getFirstName() + " " + partyDetails.getLastName();
+    private void setFL401ApplicantFlag(Map<String, Object> caseDetails, PartyDetails fl401Applicant) {
+        String partyName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
         final Flags applicantFlag = Flags.builder().partyName(partyName)
             .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
-        partyDetails.setPartyLevelFlag(applicantFlag);
+        fl401Applicant.setPartyLevelFlag(applicantFlag);
 
+        caseDetails.put("applicantsFL401", fl401Applicant);
+    }
+
+    private void setFL401RespondentFlag(Map<String, Object> caseDetails, PartyDetails fl401respondent) {
+        String partyName = fl401respondent.getFirstName() + " " + fl401respondent.getLastName();
+        final Flags respondentFlag = Flags.builder().partyName(partyName)
+            .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
+        fl401respondent.setPartyLevelFlag(respondentFlag);
+
+        caseDetails.put("respondentsFL401", fl401respondent);
     }
 
 }
