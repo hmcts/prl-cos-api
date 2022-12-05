@@ -118,7 +118,6 @@ public class EditAndApproveDraftOrderController {
         ) {
             caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
             caseDataUpdated.putAll(manageOrderService.getCaseData(authorisation, caseData));
-            caseDataUpdated.put("createSelectOrderOptions", caseData.getSelectedOrder());
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
         }
