@@ -5,14 +5,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
 
-import java.util.List;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Value
 @Builder(toBuilder = true)
-public class Data {
-    @JsonProperty("furtherEvidences")
-    public List<FurtherEvidence> furtherEvidences;
-    @JsonProperty("otherDocuments")
-    public List<OtherDocument> otherDocuments;
+public class BundlingCaseDetails {
+
+    @JsonProperty("case_data")
+    public BundlingCaseData caseData;
+
+    @JsonProperty("id")
+    public String id;
+
 }

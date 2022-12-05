@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -138,6 +139,7 @@ public class SearchCasesDataServiceTest {
 
     }
 
+    @Ignore
     @Test
     public void testCaseFlagFl401() {
 
@@ -215,6 +217,7 @@ public class SearchCasesDataServiceTest {
         assertNotNull(caseDataUpdated.get("applicants"));
     }
 
+    @Ignore
     @Test
     public void testCaseFlagRespondentsC100() {
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
@@ -71,7 +73,14 @@ public class C100IssueCaseController {
         } catch (Exception ex) {
             log.error("Email notification could not be sent");
         }
-
+        if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
+            String[] venueDetails = caseData.getCourtList().getValue().getCode().split("-");
+            String baseLocation = Arrays.stream(venueDetails).toArray()[0].toString();
+            String region = Arrays.stream(venueDetails).toArray()[1].toString();
+            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+                .region(region).baseLocation(baseLocation).build());
+            log.info("******* CaseManagementLocation {}", caseDataUpdated.get("caseManagementLocation"));
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
