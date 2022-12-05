@@ -39,10 +39,16 @@ public class SearchCasesDataService {
 
             if (Objects.nonNull(fl401Applicant)) {
                 caseDetails.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
+
+                setFL401PartyLevelFlag(caseDetails, fl401Applicant);
+
+                caseDetails.put("applicantsFL401", fl401Applicant);
             }
 
             if (Objects.nonNull(fl401respondent)) {
                 caseDetails.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
+                setFL401PartyLevelFlag(caseDetails,fl401respondent);
+                caseDetails.put("respondentsFL401", fl401respondent);
             }
         } else {
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
@@ -105,4 +111,13 @@ public class SearchCasesDataService {
             log.info("caseDetails respondents -> {}", respondents);
         }
     }
+
+    private void setFL401PartyLevelFlag(Map<String, Object> caseDetails, PartyDetails partyDetails) {
+        String partyName = partyDetails.getFirstName() + " " + partyDetails.getLastName();
+        final Flags applicantFlag = Flags.builder().partyName(partyName)
+            .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
+        partyDetails.setPartyLevelFlag(applicantFlag);
+
+    }
+
 }

@@ -139,6 +139,44 @@ public class SearchCasesDataServiceTest {
     }
 
     @Test
+    public void testCaseFlagFl401() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("applicant")
+            .lastName("lastName")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        PartyDetails respondent1 = PartyDetails.builder()
+            .firstName("respondent")
+            .lastName("lastName")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantsFL401(applicant1)
+            .respondentsFL401(respondent1)
+            .build();
+
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+        searchCasesDataService.updateApplicantAndChildNames(objectMapper,caseDataUpdated);
+
+        final PartyDetails applicantsFL401 = (PartyDetails) caseDataUpdated.get("applicantsFL401");
+        final PartyDetails respondentsFL401 = (PartyDetails) caseDataUpdated.get("respondentsFL401");
+
+        assertNotNull(caseDataUpdated.get("applicantsFL401"));
+        assertNotNull(caseDataUpdated.get("respondentsFL401"));
+
+        assertEquals("applicant lastName", applicantsFL401.getPartyLevelFlag().getPartyName());
+        assertEquals("respondent lastName", respondentsFL401.getPartyLevelFlag().getPartyName());
+    }
+
+    @Test
     public void testCaseFlagApplicantsC100() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
