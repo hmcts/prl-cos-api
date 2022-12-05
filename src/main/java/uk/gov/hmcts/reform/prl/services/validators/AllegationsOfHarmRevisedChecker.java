@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -19,7 +18,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum.other;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR_NEW;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -194,15 +192,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionPassportOfficeNotified());
         Optional<YesOrNo> abductionChildHasPassport =
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionChildHasPassport());
-        Optional<String> abductionChildPassportPosessionOtherDetail = null;
-        Optional<List<AbductionChildPassportPossessionEnum>> abductionChildPassportPosessionList = null;
-        if (Yes.equals(abductionChildHasPassport)) {
-            abductionChildPassportPosessionList =
-                ofNullable(caseData.getAllegationOfHarmRevised().getChildPassportDetails().getNewChildPassportPossession());
-            abductionChildPassportPosessionOtherDetail = ofNullable(caseData.getAllegationOfHarmRevised()
-                                                                                         .getChildPassportDetails()
-                                                                                         .getNewChildPassportPossessionOtherDetails());
-        }
         Optional<YesOrNo> abductionPreviousPoliceInvolvement =
             ofNullable(caseData.getAllegationOfHarmRevised().getNewAbductionPreviousPoliceInvolvement());
         Optional<String> abductionPreviousPoliceInvolvementDetails =
@@ -213,7 +202,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         boolean passportCompleted = abductionPassportOfficeNotified.isPresent();
         boolean hasPassportCompleted = abductionChildHasPassport.isPresent();
         boolean policeCompleted = false;
-        boolean passportPossessionCompleted = false;
         if (childAbduction.isPresent() && No.equals(childAbduction.get())) {
             return true;
         }
@@ -230,17 +218,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                     previousThreatSectionComplete,
                     previousAbductionThreatsCompleted
                 );
-                if (Yes.equals(abductionChildHasPassport)) {
-
-                    boolean abductionChildPassportPosessionCompleted = abductionChildPassportPosessionList.isPresent();
-
-                    passportPossessionCompleted = isPassportPossessionCompleted(
-                        abductionChildPassportPosessionList,
-                        abductionChildPassportPosessionOtherDetail,
-                        passportPossessionCompleted,
-                        abductionChildPassportPosessionCompleted
-                    );
-                }
                 boolean
                     abductionPreviousPoliceInvolvementCompleted = abductionPreviousPoliceInvolvement.isPresent();
 
@@ -282,23 +259,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         return policeCompleted;
     }
 
-    private boolean isPassportPossessionCompleted(
-        Optional<List<AbductionChildPassportPossessionEnum>> abductionChildPassportPossession,
-        Optional<String> abductionChildPassportPossessionOtherDetail,
-        boolean passportPossessionCompleted,
-        boolean abductionChildPassportPossessionCompleted) {
-
-        if (abductionChildPassportPossessionCompleted) {
-            if (!abductionChildPassportPossession.isEmpty()
-                && other.equals(abductionChildPassportPossession.get())) {
-                passportPossessionCompleted = abductionChildPassportPossessionOtherDetail.isPresent();
-            } else {
-                passportPossessionCompleted = true;
-            }
-        }
-        return passportPossessionCompleted;
-    }
-
     private boolean isPreviousThreatSectionComplete(
         Optional<YesOrNo> previousAbductionThreats,
         Optional<String> previousAbductionThreatsDetails,
@@ -325,7 +285,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(domesticAbuseBehaviours.getNewBehavioursApplicantHelpSoughtWho());
 
         List<Optional<?>> fields = new ArrayList<>();
-        fields.add(ofNullable(typeOfAbuse.get().getDisplayedValue()));
         fields.add(abuseNatureDescription);
         fields.add(behavioursStartDateAndLength);
         fields.add(behavioursApplicantSoughtHelp);
@@ -350,7 +309,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(childAbuseBehaviours.getNewBehavioursApplicantHelpSoughtWho());
 
         List<Optional<?>> fields = new ArrayList<>();
-        fields.add(ofNullable(typeOfAbuse.get().getDisplayedValue()));
+
         if (allChildrenAreRisk.isPresent()
               && allChildrenAreRisk.get().equals(No)) {
             fields.add(whichChildrenAreRisk);
