@@ -4,6 +4,9 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.rse.ccd.lib.api.CFTLib;
 import uk.gov.hmcts.rse.ccd.lib.api.CFTLibConfigurer;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 
 @Component
 public class CftLibConfig implements CFTLibConfigurer {
@@ -16,11 +19,21 @@ public class CftLibConfig implements CFTLibConfigurer {
             "caseworker-privatelaw-superuser",
             "caseworker-privatelaw-solicitor",
             "caseworker-privatelaw-systemupdate",
-            "citizen"
+            "citizen",
+            "courtnav",
+            "payments",
+            "caseworker-wa-task-configuration",
+            "caseworker-ras-validation",
+            "GS_profile",
+            "caseworker-caa",
+            "caseworker-privatelaw-bulkscansystemupdate",
+            "caseworker-privatelaw-bulkscan",
+            "pui-case-manager"
         );
 
-        //var def = Files.readAllBytes(Path.of("build/ccd-config/ccd-A58-dev.xlsx"));
-        //lib.importDefinition(def);
+        var def = Files.readAllBytes(Path.of("bin/ccd-config-PRL-local.xlsx"));
+        lib.importDefinition(def);
+        System.out.println("*****************Definitionuploaded******************");
     }
 }
 
