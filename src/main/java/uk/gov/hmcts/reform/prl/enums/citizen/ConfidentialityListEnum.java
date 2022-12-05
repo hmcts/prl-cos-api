@@ -16,6 +16,8 @@ public enum ConfidentialityListEnum {
     phoneNumber("phoneNumber", "Telephone number"),
     @JsonProperty("email")
     email("email", "Email"),
+    @JsonProperty("postalAddress")
+    postalAddress("postalAddress", "Postal address"),
     @JsonProperty("address")
     address("address", "Address");
 
