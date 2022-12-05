@@ -27,6 +27,7 @@ import java.util.List;
 public class DraftOrder {
     private final String typeOfOrder;
     private CreateSelectOrderOptionsEnum orderType;
+    private CreateSelectOrderOptionsEnum createSelectOrderOptions;
     private String orderTypeId;
     private Document orderDocument;
     private OtherDraftOrderDetails otherDetails;
@@ -47,6 +48,7 @@ public class DraftOrder {
     private final String orderDirections;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
+
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
