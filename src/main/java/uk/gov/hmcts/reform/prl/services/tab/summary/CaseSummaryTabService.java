@@ -7,12 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.TabService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllegationOfHarmGenerator;
-import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllegationOfHarmRevisedGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllocatedJudgeDetailsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseStatusGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
@@ -63,8 +61,6 @@ public class CaseSummaryTabService implements TabService {
     AllegationOfHarmGenerator allegationOfHarmGenerator;
 
     @Autowired
-    AllegationOfHarmRevisedGenerator allegationOfHarmRevisedGenerator;
-    @Autowired
     DateOfSubmissionGenerator dateOfSubmissionGenerator;
 
     @Autowired
@@ -109,18 +105,7 @@ public class CaseSummaryTabService implements TabService {
                            specialArrangementsGenerator,dateOfSubmissionGenerator);
 
         }
-        if (YesOrNo.Yes.equals(caseData.getIsNewCaseCreated())) {
-            return List.of(allocatedJudgeDetailsGenerator,
-                           caseStatusGenerator,
-                           confidentialDetailsGenerator,
-                           orderAppliedForGenerator,
-                           specialArrangementsGenerator,
-                           urgencyGenerator,
-                           allegationOfHarmRevisedGenerator,
-                           dateOfSubmissionGenerator
-            );
-        } else {
-            return List.of(allocatedJudgeDetailsGenerator,
+        return List.of(allocatedJudgeDetailsGenerator,
                            caseStatusGenerator,
                            confidentialDetailsGenerator,
                            orderAppliedForGenerator,
@@ -129,7 +114,6 @@ public class CaseSummaryTabService implements TabService {
                            allegationOfHarmGenerator,
                            dateOfSubmissionGenerator
             );
-        }
     }
 
     @Override
