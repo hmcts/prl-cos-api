@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
@@ -12,6 +14,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
@@ -84,7 +87,7 @@ public class CaseControllerTest {
     }
 
     @Test
-    public void testCitizenUpdateCase() {
+    public void testCitizenUpdateCase() throws JsonProcessingException, NotFoundException {
 
         caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -207,6 +210,40 @@ public class CaseControllerTest {
         String data = caseController.validateAccessCode(authToken, servAuthToken, caseId, accessCode);
         assertNotNull(data);
 
+    }
+
+    @Test
+    public void testretrieveCitizenCases() {
+        List<CaseData> caseDataList = new ArrayList<>();
+
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .build();
+
+        caseDataList.add(CaseData.builder()
+                             .id(1234567891234567L)
+                             .applicantCaseName("test")
+                             .build());
+
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+
+        List<CaseDetails> caseDetails = new ArrayList<>();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        caseDetails.add(CaseDetails.builder().id(
+            1234567891234567L).data(stringObjectMap).build());
+
+        String userId = "12345";
+        String role = "test role";
+
+        List<CitizenCaseData> citizenCaseDataList = new ArrayList<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(caseService.retrieveCases(role, userId, authToken, servAuthToken)).thenReturn(caseDataList);
+        citizenCaseDataList = caseController.retrieveCitizenCases(authToken, servAuthToken);
+        assertNotNull(citizenCaseDataList);
     }
 
     @Test
