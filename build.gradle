@@ -642,12 +642,6 @@ task loadEnvSecrets() {
   }
 }
 
-//task buildCCDXlsx(type: Exec, dependsOn: generateCCDConfig) {
-//  group 'ccd tasks'
-//  commandLine './bin/ccd-build-definition.sh'
-//  inputs.dir layout.buildDirectory.dir('definitions')
-//  outputs.dir layout.buildDirectory.dir('ccd-config')
-//}
 
 bootWithCCD {
   dependsOn(loadEnvSecrets)
