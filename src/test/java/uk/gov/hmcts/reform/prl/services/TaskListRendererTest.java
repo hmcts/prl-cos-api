@@ -231,6 +231,32 @@ public class TaskListRendererTest {
     }
 
     @Test
+    public void shouldRenderTaskListWithAllegationOfHarmRevisedNoErrors() throws IOException {
+        List<EventValidationErrors> emptyErrors = Collections.emptyList();
+
+        CaseData caseData = CaseData.builder()
+                .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+                .state(State.AWAITING_SUBMISSION_TO_HMCTS).isNewCaseCreated(YesOrNo.Yes)
+                .build();
+
+        List<String> lines = new ArrayList<>();
+
+        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/task-list-allegations-revised-no-errors.md"));
+
+        String line = taskListMarkDown.readLine();
+        while (line != null) {
+            lines.add(line);
+            line = taskListMarkDown.readLine();
+        }
+
+        String expectedTaskList = String.join("\n", lines);
+        String actualTaskList = taskListRenderer.render(tasks, emptyErrors, true, caseData);
+
+        assertEquals(expectedTaskList, actualTaskList);
+
+    }
+
+    @Test
     public void shouldRenderFl401TaskListNonMolestationOrderType() throws IOException {
 
         BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-markdown.md"));
