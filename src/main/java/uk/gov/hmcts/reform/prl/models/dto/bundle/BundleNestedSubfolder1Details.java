@@ -13,14 +13,12 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class BundleNestedSubfolder1Details {
     private String name;
-    private List<BundleNestedSubfolder2> folders;
     private List<BundleDocument> documents;
 
     @JsonCreator
-    public BundleNestedSubfolder1Details(@JsonProperty("name") String name, @JsonProperty("folders") List<BundleNestedSubfolder2> folders,
+    public BundleNestedSubfolder1Details(@JsonProperty("name") String name,
                                   @JsonProperty("documents") List<BundleDocument> documents) {
         this.name = name;
-        this.folders = folders;
         this.documents = documents;
     }
 }

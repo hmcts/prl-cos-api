@@ -30,8 +30,6 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleFolderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder1Details;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder2;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleNestedSubfolder2Details;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolder;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
@@ -84,13 +82,9 @@ public class BundlingControllerTest {
         bundleDocuments.add(BundleDocument.builder().value(
             BundleDocumentDetails.builder().name("CaseDocuments").description("Case Documents").sortIndex(1)
                 .sourceDocument(DocumentLink.builder().build()).build()).build());
-        List<BundleNestedSubfolder2> bundleNestedSubfolders2 = new ArrayList<>();
         List<BundleNestedSubfolder1> bundleNestedSubfolders1 = new ArrayList<>();
-        bundleNestedSubfolders2.add(BundleNestedSubfolder2.builder()
-            .value(BundleNestedSubfolder2Details.builder().documents(bundleDocuments).build()).build());
         bundleNestedSubfolders1.add(BundleNestedSubfolder1.builder()
-            .value(BundleNestedSubfolder1Details.builder().documents(bundleDocuments).folders(
-            bundleNestedSubfolders2).build()).build());
+            .value(BundleNestedSubfolder1Details.builder().documents(bundleDocuments).build()).build());
         List<BundleFolder> bundleFolders = new ArrayList<>();
         List<BundleSubfolder> bundleSubfolders = new ArrayList<>();
         bundleSubfolders.add(BundleSubfolder.builder()
