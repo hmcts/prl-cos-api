@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.applicant;
@@ -53,8 +54,10 @@ public class CourtFinderService {
             } else {
                 serviceArea = courtFinderApi
                     .findClosestChildArrangementsCourtByPostcode(
-                    null != caseData.getC100RebuildChildPostCode() ? caseData.getC100RebuildChildPostCode() :
-                        getCorrectPartyPostcode(caseData));
+                            nonNull(caseData.getC100RebuildData())
+                                    && nonNull(caseData.getC100RebuildData().getC100RebuildChildPostCode())
+                            ? caseData.getC100RebuildData().getC100RebuildChildPostCode()
+                            : getCorrectPartyPostcode(caseData));
             }
         } catch (Exception e) {
             log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : ",e.getMessage());
