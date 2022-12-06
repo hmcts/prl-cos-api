@@ -1253,19 +1253,23 @@ public class ManageOrderServiceTest {
                 Address.builder().postCode("NE65LA").build()).build())
             .build();
 
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .dateCreated(dateTime.now())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(List.of(Element.<OrderDetails>builder().id(uuid).value(OrderDetails
-                                                                                        .builder()
-                                                                                        .orderDocument(Document
-                                                                                                           .builder()
-                                                                                                           .build())
-                                                                                        .dateCreated(dateTime.now())
-                                                                                        .build()).build()))
+            .orderCollection(orderList)
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
@@ -1298,6 +1302,16 @@ public class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .dateCreated(dateTime.now())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
         ManageOrders manageOrders = ManageOrders.builder()
             .serveOrderDynamicList(dynamicList)
             .serveOrderAdditionalDocuments(List.of(Element.<ServeOrderAdditionalDocument>builder()
@@ -1319,13 +1333,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(List.of(Element.<OrderDetails>builder().id(uuid).value(OrderDetails
-                                                                                        .builder()
-                                                                                        .orderDocument(Document
-                                                                                                           .builder()
-                                                                                                           .build())
-                                                                                        .dateCreated(dateTime.now())
-                                                                                        .build()).build()))
+            .orderCollection(orderList)
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)

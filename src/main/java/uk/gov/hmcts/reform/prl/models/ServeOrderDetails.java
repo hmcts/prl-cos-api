@@ -18,7 +18,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class ServeOrderDetails {
 
-    private final List<Document> additionalDocuments;
+    private final List<Element<Document>> additionalDocuments;
     private final YesOrNo serveOnRespondent;
     private final ServingRespondentsEnum servingRespondent;
     private final YesOrNo cafcassServed;

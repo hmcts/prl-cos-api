@@ -8,18 +8,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -46,6 +51,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLIC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
@@ -694,9 +700,39 @@ public class ManageOrderService {
                         log.info("ServingRespondentsOptionsCA ====>" + caseData.getManageOrders()
                             .getServingRespondentsOptionsCA().getDisplayedValue());
                         log.info("CafcassCymruEmail ====>" + caseData.getManageOrders().getCafcassCymruEmail());
-                        log.info("ServeOtherPartiesCA ====>" + caseData.getManageOrders().getAnotherOrganisationOptions().get(0).getDisplayedValue());
+                        log.info("ServeOtherPartiesCA ====>" + caseData.getManageOrders().getAnotherOrganisationOptions().get(
+                            0).getDisplayedValue());
                         log.info("DeliveryByOptionsCA() ====>" + caseData.getManageOrders().getDeliveryByOptionsCA().getDisplayedValue());
                         log.info("EmailAddress() ====>" + caseData.getManageOrders().getEmailInformationCA().getEmailAddress());
+
+                        YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
+                        ServingRespondentsEnum servingRespondentsOptions = null;
+                        if (serveOnRespondent.equals(Yes)) {
+                            servingRespondentsOptions = caseData.getManageOrders()
+                                .getServingRespondentsOptionsCA();
+                        }
+                        YesOrNo otherPartiesServed = No;
+                        PostalInformation postalInformation = null;
+                        EmailInformation emailInformation = null;
+                        if (!caseData.getManageOrders().getAnotherOrganisationOptions().isEmpty()) {
+                            otherPartiesServed = Yes;
+                            if (caseData.getManageOrders().getEmailInformationCA() != null) {
+                                emailInformation = caseData.getManageOrders().getEmailInformationCA();
+                            }
+                            if (caseData.getManageOrders().getPostalInformationCA() != null) {
+                                postalInformation = caseData.getManageOrders().getPostalInformationCA();
+                            }
+                        }
+                        updateServedOrderDetails(
+                            caseData.getManageOrders().getCafcassServedOptions(),
+                            orders,
+                            order,
+                            serveOnRespondent,
+                            servingRespondentsOptions,
+                            otherPartiesServed,
+                            postalInformation,
+                            emailInformation
+                        );
                     } else {
                         if (!caseData.getManageOrders().getServeOrderAdditionalDocuments().isEmpty()) {
                             log.info("serveOrderDocument ====>"
@@ -707,11 +743,55 @@ public class ManageOrderService {
                             .getServingRespondentsOptionsDA().getDisplayedValue());
                         log.info("ServeOtherPartiesDA ====>" + caseData.getManageOrders().getServeOtherParties().get(0).getDisplayedValue());
                         log.info("PostalAddress() ====>" + caseData.getManageOrders().getPostalInformationDA().getPostalAddress().getPostCode());
+                        ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
+                            .getServingRespondentsOptionsDA();
+                        YesOrNo otherPartiesServed = No;
+                        PostalInformation postalInformation = null;
+                        EmailInformation emailInformation = null;
+                        if (!caseData.getManageOrders().getServeOtherParties().isEmpty()) {
+                            otherPartiesServed = Yes;
+                            if (caseData.getManageOrders().getEmailInformationCA() != null) {
+                                emailInformation = caseData.getManageOrders().getEmailInformationDA();
+                            }
+                            if (caseData.getManageOrders().getPostalInformationCA() != null) {
+                                postalInformation = caseData.getManageOrders().getPostalInformationDA();
+                            }
+                        }
+                        updateServedOrderDetails(
+                            null,
+                            orders,
+                            order,
+                            null,
+                            servingRespondentsOptions,
+                            otherPartiesServed,
+                            postalInformation,
+                            emailInformation
+                        );
                     }
                 });
-            orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-            return Map.of("orderCollection", orderCollection);
+            return Map.of("orderCollection", orders);
         }
+    }
+
+    private static void updateServedOrderDetails(YesOrNo cafcassServed, List<Element<OrderDetails>> orders, Element<OrderDetails> order,
+                                                 YesOrNo serveOnRespondent, ServingRespondentsEnum servingRespondentsOptions,
+                                                 YesOrNo otherPartiesServed, PostalInformation postalInformation, EmailInformation emailInformation) {
+        ServeOrderDetails serveOrderDetails = ServeOrderDetails.builder().serveOnRespondent(serveOnRespondent)
+            .servingRespondent(servingRespondentsOptions)
+            .cafcassServed(cafcassServed)
+            .otherPartiesServed(otherPartiesServed)
+            .postalInformation(postalInformation)
+            .emailInformation(emailInformation)
+            .build();
+
+        OrderDetails amended = order.getValue().toBuilder()
+            .orderDocument(order.getValue().getOrderDocument())
+            .orderType(order.getValue().getOrderType())
+            .typeOfOrder(order.getValue().getTypeOfOrder())
+            .otherDetails(order.getValue().getOtherDetails())
+            .serveOrderDetails(serveOrderDetails)
+            .build();
+        orders.set(orders.indexOf(order), element(order.getId(), amended));
     }
 
     public void updateCaseDataWithAppointedGuardianNames(uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails,
