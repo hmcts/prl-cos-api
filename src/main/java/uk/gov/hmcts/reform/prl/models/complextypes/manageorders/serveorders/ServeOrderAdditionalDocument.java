@@ -5,7 +5,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class ServeOrderAdditionalDocument {
 
     private final Document serveOrderDocument;
