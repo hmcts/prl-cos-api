@@ -12,8 +12,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -27,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrderAdditionalDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -1230,6 +1233,20 @@ public class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveOrderDynamicList(dynamicList)
+            .serveOrderAdditionalDocuments(List.of(Element.<ServeOrderAdditionalDocument>builder()
+                                                       .value(ServeOrderAdditionalDocument.builder()
+                                                                  .serveOrderDocument(Document.builder().documentFileName(
+                                                                      "abc.pdf").build()).build())
+                                                       .build()))
+            .serveToRespondentOptions(YesOrNo.No)
+            .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
+            .cafcassCymruEmail("test")
+            .deliveryByOptionsCA(DeliveryByEnum.post)
+            .emailInformationCA(EmailInformation.builder().emailAddress("test").build())
+            .build();
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -1240,13 +1257,7 @@ public class ManageOrderServiceTest {
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
-            .serveOrderDynamicList(dynamicList)
-            .serveOrderAdditionalDocuments(List.of(Element.<ServeOrderAdditionalDocument>builder()
-                                                       .value(ServeOrderAdditionalDocument.builder()
-                                                                  .serveOrderDocument(Document.builder().documentFileName(
-                                                                      "abc.pdf").build()).build())
-                                                       .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .manageOrders(manageOrders)
             .build();
 
 

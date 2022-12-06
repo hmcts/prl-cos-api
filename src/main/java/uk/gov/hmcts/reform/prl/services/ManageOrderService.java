@@ -676,12 +676,18 @@ public class ManageOrderService {
             orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
             return Map.of("orderCollection", orderCollection);
         } else {
-            log.info("serveOrderDynamicList ====>" + caseData.getServeOrderDynamicList().getValueCodeAsUuid());
-            if (!caseData.getServeOrderAdditionalDocuments().isEmpty()) {
+            log.info("serveOrderDynamicList ====>" + caseData.getManageOrders().getServeOrderDynamicList().getValueCodeAsUuid());
+            if (!caseData.getManageOrders().getServeOrderAdditionalDocuments().isEmpty()) {
                 log.info("serveOrderDocument ====>"
-                             + caseData.getServeOrderAdditionalDocuments().get(0).getValue().getServeOrderDocument().getDocumentFileName());
+                             + caseData.getManageOrders().getServeOrderAdditionalDocuments()
+                    .get(0).getValue().getServeOrderDocument().getDocumentFileName());
             }
-            log.info("serveToRespondentOptions ====>" + caseData.getServeToRespondentOptions().getDisplayedValue());
+            log.info("serveToRespondentOptions ====>" + caseData.getManageOrders().getServeToRespondentOptions().getDisplayedValue());
+            log.info("ServingRespondentsOptionsCA ====>" + caseData.getManageOrders().getServingRespondentsOptionsCA().getDisplayedValue());
+            log.info("CafcassCymruEmail ====>" + caseData.getManageOrders().getCafcassCymruEmail());
+            log.info("DeliveryByOptionsCA() ====>" + caseData.getManageOrders().getDeliveryByOptionsCA().getDisplayedValue());
+            log.info("EmailAddress() ====>" + caseData.getManageOrders().getEmailInformationCA().getEmailAddress());
+
             orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
             orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
             return Map.of("orderCollection", orderCollection);

@@ -12,14 +12,18 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildSelectorEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentOccupationEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrderAdditionalDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
@@ -193,4 +197,17 @@ public class ManageOrders {
     private final YesOrNo isOrderDrawnForCafcass;
     @JsonProperty("cafcassReports")
     private final List<CafcassReportsEnum> cafcassReports;
+
+    private DynamicList serveOrderDynamicList;
+    @JsonProperty("serveOrderAdditionalDocuments")
+    private final List<Element<ServeOrderAdditionalDocument>> serveOrderAdditionalDocuments;
+    private final YesOrNo serveToRespondentOptions;
+    private final ServingRespondentsEnum servingRespondentsOptionsCA;
+    private final YesOrNo cafcassServedOptions;
+    private final YesOrNo cafcassCymruServedOptions;
+    private String cafcassCymruEmail;
+    private final DeliveryByEnum deliveryByOptionsCA;
+    @JsonProperty("emailInformationCA")
+    private final EmailInformation emailInformationCA;
+
 }
