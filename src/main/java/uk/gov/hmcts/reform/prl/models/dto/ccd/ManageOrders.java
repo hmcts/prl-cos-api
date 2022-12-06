@@ -211,14 +211,14 @@ public class ManageOrders {
     private final YesOrNo cafcassCymruServedOptions;
     private String cafcassCymruEmail;
     @JsonProperty("anotherOrganisationOptions")
-    private final AnotherOrganisationEnum anotherOrganisationOptions;
+    private final List<AnotherOrganisationEnum> anotherOrganisationOptions;
     private final DeliveryByEnum deliveryByOptionsCA;
     @JsonProperty("emailInformationCA")
     private final EmailInformation emailInformationCA;
     @JsonProperty("postalInformationCA")
     private final PostalInformation postalInformationCA;
 
-    private final ServingRespondentsEnum servingRespondentsOptionsDA;
+    private final List<ServingRespondentsEnum> servingRespondentsOptionsDA;
     private final ServeOtherPartiesEnum serveOtherParties;
     private final DeliveryByEnum deliveryByOptionsDA;
     @JsonProperty("emailInformationDA")
