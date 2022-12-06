@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrderAdditionalDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -1209,5 +1211,51 @@ public class ManageOrderServiceTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings).build();
         assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
+    }
+
+    @Test
+    public void testServeOrder() throws Exception {
+
+        UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code("00000000-0000-0000-0000-000000000000").label(
+            " ").build();
+        DynamicList dynamicList = DynamicList.builder()
+            .listItems(List.of(dynamicListElement))
+            .value(dynamicListElement)
+            .build();
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(new ArrayList<>())
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .serveOrderDynamicList(dynamicList)
+            .serveOrderAdditionalDocuments(List.of(Element.<ServeOrderAdditionalDocument>builder()
+                                                       .value(ServeOrderAdditionalDocument.builder()
+                                                                  .serveOrderDocument(Document.builder().documentFileName(
+                                                                      "abc.pdf").build()).build())
+                                                       .build()))
+            .serveToRespondentOptions(YesOrNo.No)
+            .build();
+
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+
     }
 }
