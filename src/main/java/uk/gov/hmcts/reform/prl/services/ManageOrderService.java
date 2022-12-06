@@ -677,19 +677,41 @@ public class ManageOrderService {
             return Map.of("orderCollection", orderCollection);
         } else {
             log.info("serveOrderDynamicList ====>" + caseData.getManageOrders().getServeOrderDynamicList().getValueCodeAsUuid());
-            if (!caseData.getManageOrders().getServeOrderAdditionalDocuments().isEmpty()) {
-                log.info("serveOrderDocument ====>"
-                             + caseData.getManageOrders().getServeOrderAdditionalDocuments()
-                    .get(0).getValue().getServeOrderDocument().getDocumentFileName());
-            }
-            log.info("serveToRespondentOptions ====>" + caseData.getManageOrders().getServeToRespondentOptions().getDisplayedValue());
-            log.info("ServingRespondentsOptionsCA ====>" + caseData.getManageOrders().getServingRespondentsOptionsCA().getDisplayedValue());
-            log.info("CafcassCymruEmail ====>" + caseData.getManageOrders().getCafcassCymruEmail());
-            log.info("DeliveryByOptionsCA() ====>" + caseData.getManageOrders().getDeliveryByOptionsCA().getDisplayedValue());
-            log.info("EmailAddress() ====>" + caseData.getManageOrders().getEmailInformationCA().getEmailAddress());
+            UUID selectedOrderId = caseData.getManageOrders().getServeOrderDynamicList().getValueCodeAsUuid();
+            List<Element<OrderDetails>> orders = caseData.getOrderCollection();
 
+            orders.stream()
+                .filter(order -> Objects.equals(order.getId(), selectedOrderId))
+                .findFirst()
+                .ifPresent(order -> {
+                    if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                        if (!caseData.getManageOrders().getServeOrderAdditionalDocuments().isEmpty()) {
+                            log.info("serveOrderDocument ====>"
+                                         + caseData.getManageOrders().getServeOrderAdditionalDocuments()
+                                .get(0).getValue().getServeOrderDocument().getDocumentFileName());
+                        }
+                        log.info("serveToRespondentOptions ====>" + caseData.getManageOrders().getServeToRespondentOptions().getDisplayedValue());
+                        log.info("ServingRespondentsOptionsCA ====>" + caseData.getManageOrders()
+                            .getServingRespondentsOptionsCA().getDisplayedValue());
+                        log.info("CafcassCymruEmail ====>" + caseData.getManageOrders().getCafcassCymruEmail());
+                        log.info("ServeOtherPartiesCA ====>" + caseData.getManageOrders().getServeOtherPartiesCA().getDisplayedValue());
+                        log.info("DeliveryByOptionsCA() ====>" + caseData.getManageOrders().getDeliveryByOptionsCA().getDisplayedValue());
+                        log.info("EmailAddress() ====>" + caseData.getManageOrders().getEmailInformationCA().getEmailAddress());
+                        log.info("PostalAddress() ====>" + caseData.getManageOrders().getPostalInformationCA().getPostalAddress().getPostCode());
+                    } else {
+                        if (!caseData.getManageOrders().getServeOrderAdditionalDocuments().isEmpty()) {
+                            log.info("serveOrderDocument ====>"
+                                         + caseData.getManageOrders().getServeOrderAdditionalDocuments()
+                                .get(0).getValue().getServeOrderDocument().getDocumentFileName());
+                        }
+                        log.info("ServingRespondentsOptionsDA ====>" + caseData.getManageOrders()
+                            .getServingRespondentsOptionsDA().getDisplayedValue());
+                        log.info("ServeOtherPartiesDA ====>" + caseData.getManageOrders().getServeOtherPartiesDA().getDisplayedValue());
+                        log.info("EmailAddress() ====>" + caseData.getManageOrders().getEmailInformationDA().getEmailAddress());
+                        log.info("PostalAddress() ====>" + caseData.getManageOrders().getPostalInformationDA().getPostalAddress().getPostCode());
+                    }
+                });
             orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-            orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
             return Map.of("orderCollection", orderCollection);
         }
     }

@@ -24,6 +24,9 @@ public class OrderDetails {
     private final String orderTypeId;
     private final Document orderDocument;
     private final OtherOrderDetails otherDetails;
+    private final ServeOrderDetails serveOrderDetails;
+    private final Boolean orderServed;
+
 
     @JsonIgnore
     public String getLabelForDynamicList() {
