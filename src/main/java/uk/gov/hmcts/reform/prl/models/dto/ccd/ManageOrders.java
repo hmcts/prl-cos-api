@@ -203,7 +203,7 @@ public class ManageOrders {
 
     private DynamicList serveOrderDynamicList;
     @JsonProperty("serveOrderAdditionalDocuments")
-    private final List<ServeOrderAdditionalDocument> serveOrderAdditionalDocuments;
+    private final List<Element<ServeOrderAdditionalDocument>> serveOrderAdditionalDocuments;
 
     private final YesOrNo serveToRespondentOptions;
     private final ServingRespondentsEnum servingRespondentsOptionsCA;

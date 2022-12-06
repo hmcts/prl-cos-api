@@ -688,7 +688,7 @@ public class ManageOrderService {
                         if (!caseData.getManageOrders().getServeOrderAdditionalDocuments().isEmpty()) {
                             log.info("serveOrderDocument ====>"
                                          + caseData.getManageOrders().getServeOrderAdditionalDocuments()
-                                .get(0).getServeOrderDocument().getDocumentFileName());
+                                .get(0).getValue().getServeOrderDocument().getDocumentFileName());
                         }
                         log.info("serveToRespondentOptions ====>" + caseData.getManageOrders().getServeToRespondentOptions().getDisplayedValue());
                         log.info("ServingRespondentsOptionsCA ====>" + caseData.getManageOrders()
@@ -701,7 +701,7 @@ public class ManageOrderService {
                         if (!caseData.getManageOrders().getServeOrderAdditionalDocuments().isEmpty()) {
                             log.info("serveOrderDocument ====>"
                                          + caseData.getManageOrders().getServeOrderAdditionalDocuments()
-                                .get(0).getServeOrderDocument().getDocumentFileName());
+                                .get(0).getValue().getServeOrderDocument().getDocumentFileName());
                         }
                         log.info("ServingRespondentsOptionsDA ====>" + caseData.getManageOrders()
                             .getServingRespondentsOptionsDA().getDisplayedValue());
