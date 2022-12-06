@@ -47,6 +47,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -667,12 +668,24 @@ public class ManageOrderService {
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
         throws Exception {
-        List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
         List<Element<OrderDetails>> orderCollection;
-        orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-        orderCollection.addAll(orderDetails);
-        orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
-        return Map.of("orderCollection", orderCollection);
+        if (!caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+            List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
+            orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
+            orderCollection.addAll(orderDetails);
+            orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
+            return Map.of("orderCollection", orderCollection);
+        } else {
+            log.info("serveOrderDynamicList ====>" + caseData.getServeOrderDynamicList().getValueCodeAsUuid());
+            if (!caseData.getServeOrderAdditionalDocuments().isEmpty()) {
+                log.info("serveOrderDocument ====>"
+                             + caseData.getServeOrderAdditionalDocuments().get(0).getValue().getServeOrderDocument().getDocumentFileName());
+            }
+            log.info("serveToRespondentOptions ====>" + caseData.getServeToRespondentOptions().getDisplayedValue());
+            orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
+            orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
+            return Map.of("orderCollection", orderCollection);
+        }
     }
 
     public void updateCaseDataWithAppointedGuardianNames(uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails,
