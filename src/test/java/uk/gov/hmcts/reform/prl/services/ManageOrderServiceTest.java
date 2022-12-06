@@ -1243,7 +1243,7 @@ public class ManageOrderServiceTest {
                                                                   .serveOrderDocument(Document.builder().documentFileName(
                                                                       "abc.pdf").build()).build())
                                                        .build()))
-            .serveToRespondentOptions(YesOrNo.No)
+            .serveToRespondentOptions(YesOrNo.Yes)
             .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
             .anotherOrganisationOptions(List.of(AnotherOrganisationEnum.anotherOrganisation))
             .cafcassCymruEmail("test")
