@@ -697,7 +697,6 @@ public class ManageOrderService {
                         log.info("ServeOtherPartiesCA ====>" + caseData.getManageOrders().getAnotherOrganisationOptions().get(0).getDisplayedValue());
                         log.info("DeliveryByOptionsCA() ====>" + caseData.getManageOrders().getDeliveryByOptionsCA().getDisplayedValue());
                         log.info("EmailAddress() ====>" + caseData.getManageOrders().getEmailInformationCA().getEmailAddress());
-                        log.info("PostalAddress() ====>" + caseData.getManageOrders().getPostalInformationCA().getPostalAddress().getPostCode());
                     } else {
                         if (!caseData.getManageOrders().getServeOrderAdditionalDocuments().isEmpty()) {
                             log.info("serveOrderDocument ====>"
