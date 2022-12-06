@@ -288,7 +288,9 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        log.info("parent Name " + selectedOrder.getParentName());
         caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
+        caseDataMap.put("parentName", selectedOrder.getParentName());
         return caseDataMap;
     }
 
