@@ -239,4 +239,69 @@ public class CaseDataMapperTest {
         assertNotNull(updatedCaseData);
     }
 
+    @Test
+    public void testCaseDataMapperForHearingWithoutNotice() throws IOException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json")).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testCaseDataMapperForHearingWithoutNoticeElse() throws IOException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn1.json")).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testCaseDataMapperReasonableAdjustmentsExcludingNeedInterpreter() throws IOException {
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra2.json"))
+            .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testCaseDataMapperReasonableAdjustmentsDisabilityRequirementsNoSupport() throws IOException {
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra2.json"))
+            .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testCaseDataMapperReasonableAdjustmentWelshNeededElse() throws IOException {
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra3.json"))
+            .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
 }
