@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.ConfidentialityChecksDisclaimerEnum;
@@ -42,6 +43,7 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
@@ -84,7 +86,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.MultiBundleConfig;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNav;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -127,6 +131,11 @@ public class CaseData implements MappableObject {
      * Case Type Of Application.
      */
     private final String caseTypeOfApplication;
+
+    /**
+     * Case created by.
+     */
+    private CaseCreatedBy caseCreatedBy;
 
     /**
      * Case Type Of Application.
@@ -655,21 +664,15 @@ public class CaseData implements MappableObject {
     private String previewDraftAnOrder;
 
     private String citizenUploadedStatement;
-    @JsonProperty("paymentReferenceNumber")
-    private final String paymentReferenceNumber;
 
     @JsonProperty("cafcassUploadedDocs")
     private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
 
 
     // C100 Rebuild
-    private String c100RebuildInternationalElements;
-    private String c100RebuildReasonableAdjustments;
-    private String c100RebuildTypeOfOrder;
-    private String c100RebuildHearingWithoutNotice;
-    private String c100RebuildHearingUrgency;
-    private String c100RebuildOtherProceedings;
-    private String c100RebuildReturnUrl;
+    @JsonUnwrapped
+    @Builder.Default
+    private final C100RebuildData c100RebuildData;
 
     /**
      * Bundle.
@@ -677,19 +680,12 @@ public class CaseData implements MappableObject {
     @JsonProperty("bundleInformation")
     private BundlingInformation bundleInformation;
 
-    private String c100RebuildMaim;
-    private String c100RebuildChildDetails;
-    private String c100RebuildApplicantDetails;
-    private String c100RebuildOtherChildrenDetails;
-    private String c100RebuildRespondentDetails;
-    private String c100RebuildOtherPersonsDetails;
-
-    private String c100RebuildSafetyConcerns;
-    private String c100RebuildScreeningQuestions;
-    private String c100RebuildHelpWithFeesDetails;
-    private String c100RebuildStatementOfTruth;
-    private String helpWithFeesReferenceNumber;
-    private String c100RebuildChildPostCode;
-    private String c100RebuildConsentOrderDetails;
+    /**
+     * Bundle.
+     */
+    private List<Bundle> caseBundles;
+    private List<Bundle> historicalBundles;
+    private String bundleConfiguration;
+    private List<MultiBundleConfig> multiBundleConfiguration;
     private final List<Element<CaseLink>> caseLinks;
 }
