@@ -100,6 +100,7 @@ public class DraftAnOrderService {
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+            .parentName(caseData.getManageOrders().getParentName())
             .build();
     }
 
