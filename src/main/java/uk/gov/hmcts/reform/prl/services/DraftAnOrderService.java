@@ -100,6 +100,7 @@ public class DraftAnOrderService {
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+            .parentName(caseData.getManageOrders().getParentName())
             .build();
     }
 
@@ -288,7 +289,9 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        log.info("parent Name " + selectedOrder.getParentName());
         caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
+        caseDataMap.put("parentName", selectedOrder.getParentName());
         return caseDataMap;
     }
 
@@ -378,6 +381,7 @@ public class DraftAnOrderService {
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
+            .parentName(caseData.getManageOrders().getParentName())
             .build();
     }
 
