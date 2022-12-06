@@ -22,6 +22,7 @@ public class ServeOrderDetails {
     private final YesOrNo serveOnRespondent;
     private final ServingRespondentsEnum servingRespondent;
     private final YesOrNo cafcassServed;
+    private final String cafcassEmail;
     private final YesOrNo otherPartiesServed;
     private final PostalInformation postalInformation;
     private final EmailInformation emailInformation;

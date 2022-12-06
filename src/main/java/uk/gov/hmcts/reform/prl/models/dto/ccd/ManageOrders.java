@@ -208,7 +208,7 @@ public class ManageOrders {
     private final ServingRespondentsEnum servingRespondentsOptionsCA;
     private final YesOrNo cafcassServedOptions;
     private final YesOrNo cafcassCymruServedOptions;
-    private String cafcassCymruEmail;
+    private final String cafcassCymruEmail;
     @JsonProperty("anotherOrganisationOptions")
     private final List<AnotherOrganisationEnum> anotherOrganisationOptions;
     private final DeliveryByEnum deliveryByOptionsCA;

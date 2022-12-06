@@ -691,11 +691,6 @@ public class ManageOrderService {
                 .findFirst()
                 .ifPresent(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                        if (!caseData.getManageOrders().getServeOrderAdditionalDocuments().isEmpty()) {
-                            log.info("serveOrderDocument ====>"
-                                         + caseData.getManageOrders().getServeOrderAdditionalDocuments()
-                                .get(0).getValue().getDocumentFileName());
-                        }
                         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
                         ServingRespondentsEnum servingRespondentsOptions = null;
                         if (serveOnRespondent.equals(Yes)) {
@@ -714,8 +709,22 @@ public class ManageOrderService {
                                 postalInformation = caseData.getManageOrders().getPostalInformationCA();
                             }
                         }
+                        YesOrNo cafcassServedOptions;
+                        String cafCassEmail = null;
+                        if (caseData.getManageOrders().getCafcassServedOptions() != null) {
+                            cafcassServedOptions = caseData.getManageOrders().getCafcassServedOptions();
+                        } else if (caseData.getManageOrders().getCafcassCymruServedOptions() != null) {
+                            cafcassServedOptions = caseData.getManageOrders().getCafcassCymruServedOptions();
+                            if (No.equals(caseData.getManageOrders().getCafcassCymruServedOptions())) {
+                                cafCassEmail = caseData.getManageOrders().getCafcassCymruEmail();
+                            }
+                        } else {
+                            cafcassServedOptions = No;
+                        }
+
                         updateServedOrderDetails(
-                            caseData.getManageOrders().getCafcassServedOptions(),
+                            cafcassServedOptions,
+                            cafCassEmail,
                             orders,
                             order,
                             serveOnRespondent,
@@ -726,11 +735,6 @@ public class ManageOrderService {
                             caseData.getManageOrders().getServeOrderAdditionalDocuments()
                         );
                     } else {
-                        if (!caseData.getManageOrders().getServeOrderAdditionalDocuments().isEmpty()) {
-                            log.info("serveOrderDocument ====>"
-                                         + caseData.getManageOrders().getServeOrderAdditionalDocuments()
-                                .get(0).getValue().getDocumentFileName());
-                        }
                         ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
                             .getServingRespondentsOptionsDA();
                         YesOrNo otherPartiesServed = No;
@@ -747,6 +751,7 @@ public class ManageOrderService {
                         }
                         updateServedOrderDetails(
                             null,
+                            null,
                             orders,
                             order,
                             null,
@@ -762,13 +767,15 @@ public class ManageOrderService {
         }
     }
 
-    private static void updateServedOrderDetails(YesOrNo cafcassServed, List<Element<OrderDetails>> orders, Element<OrderDetails> order,
-                                                 YesOrNo serveOnRespondent, ServingRespondentsEnum servingRespondentsOptions,
-                                                 YesOrNo otherPartiesServed, PostalInformation postalInformation, EmailInformation emailInformation,
-                                                 List<Element<Document>> additionalDocuments) {
+    private static void updateServedOrderDetails(YesOrNo cafcassServed, String cafCassEmail, List<Element<OrderDetails>> orders,
+                                                 Element<OrderDetails> order, YesOrNo serveOnRespondent,
+                                                 ServingRespondentsEnum servingRespondentsOptions,
+                                                 YesOrNo otherPartiesServed, PostalInformation postalInformation,
+                                                 EmailInformation emailInformation, List<Element<Document>> additionalDocuments) {
         ServeOrderDetails serveOrderDetails = ServeOrderDetails.builder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
             .cafcassServed(cafcassServed)
+            .cafcassEmail(cafCassEmail)
             .otherPartiesServed(otherPartiesServed)
             .postalInformation(postalInformation)
             .emailInformation(emailInformation)
