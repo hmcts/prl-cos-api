@@ -382,6 +382,8 @@ public class DraftAnOrderService {
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .parentName(caseData.getManageOrders().getParentName())
+            .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
+            .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
             .build();
     }
 
