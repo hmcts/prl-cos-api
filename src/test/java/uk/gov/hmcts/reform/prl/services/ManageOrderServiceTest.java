@@ -1238,11 +1238,9 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .serveOrderDynamicList(dynamicList)
-            .serveOrderAdditionalDocuments(List.of(Element.<ServeOrderAdditionalDocument>builder()
-                                                       .value(ServeOrderAdditionalDocument.builder()
+            .serveOrderAdditionalDocuments(List.of(ServeOrderAdditionalDocument.builder()
                                                                   .serveOrderDocument(Document.builder().documentFileName(
-                                                                      "abc.pdf").build()).build())
-                                                       .build()))
+                                                                      "abc.pdf").build()).build()))
             .serveToRespondentOptions(YesOrNo.No)
             .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
             .anotherOrganisationOptions(List.of(AnotherOrganisationEnum.anotherOrganisation))
@@ -1300,11 +1298,9 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .serveOrderDynamicList(dynamicList)
-            .serveOrderAdditionalDocuments(List.of(Element.<ServeOrderAdditionalDocument>builder()
-                                                       .value(ServeOrderAdditionalDocument.builder()
+            .serveOrderAdditionalDocuments(List.of(ServeOrderAdditionalDocument.builder()
                                                                   .serveOrderDocument(Document.builder().documentFileName(
-                                                                      "abc.pdf").build()).build())
-                                                       .build()))
+                                                                      "abc.pdf").build()).build()))
             .servingRespondentsOptionsDA(ServingRespondentsEnum.courtAdmin)
             .serveOtherParties(List.of(ServeOtherPartiesEnum.other))
             .deliveryByOptionsDA(DeliveryByEnum.post)
