@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.AnotherOrganisationOptions;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AnotherOrganisationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
@@ -1245,7 +1245,7 @@ public class ManageOrderServiceTest {
                                                        .build()))
             .serveToRespondentOptions(YesOrNo.No)
             .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(AnotherOrganisationOptions.other)
+            .anotherOrganisationOptions(AnotherOrganisationEnum.anotherOrganisation)
             .cafcassCymruEmail("test")
             .deliveryByOptionsCA(DeliveryByEnum.post)
             .emailInformationCA(EmailInformation.builder().emailAddress("test").build())
@@ -1306,7 +1306,7 @@ public class ManageOrderServiceTest {
                                                                       "abc.pdf").build()).build())
                                                        .build()))
             .servingRespondentsOptionsDA(ServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesDA(ServeOtherPartiesEnum.other)
+            .serveOtherParties(ServeOtherPartiesEnum.other)
             .deliveryByOptionsDA(DeliveryByEnum.post)
             .emailInformationDA(EmailInformation.builder().emailAddress("test").build())
             .postalInformationDA(PostalInformation.builder().postalAddress(

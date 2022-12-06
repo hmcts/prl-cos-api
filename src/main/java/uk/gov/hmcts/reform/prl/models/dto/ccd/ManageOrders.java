@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.CafcassReportsEnum;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.AnotherOrganisationOptions;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AnotherOrganisationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildSelectorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
@@ -210,7 +210,7 @@ public class ManageOrders {
     private final YesOrNo cafcassServedOptions;
     private final YesOrNo cafcassCymruServedOptions;
     private String cafcassCymruEmail;
-    private final AnotherOrganisationOptions serveOtherPartiesCA;
+    private final AnotherOrganisationEnum anotherOrganisationOptions;
     private final DeliveryByEnum deliveryByOptionsCA;
     @JsonProperty("emailInformationCA")
     private final EmailInformation emailInformationCA;
@@ -218,7 +218,7 @@ public class ManageOrders {
     private final PostalInformation postalInformationCA;
 
     private final ServingRespondentsEnum servingRespondentsOptionsDA;
-    private final ServeOtherPartiesEnum serveOtherPartiesDA;
+    private final ServeOtherPartiesEnum serveOtherParties;
     private final DeliveryByEnum deliveryByOptionsDA;
     @JsonProperty("emailInformationDA")
     private final EmailInformation emailInformationDA;
