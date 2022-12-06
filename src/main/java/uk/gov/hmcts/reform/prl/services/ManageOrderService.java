@@ -707,7 +707,6 @@ public class ManageOrderService {
                         log.info("ServingRespondentsOptionsDA ====>" + caseData.getManageOrders()
                             .getServingRespondentsOptionsDA().getDisplayedValue());
                         log.info("ServeOtherPartiesDA ====>" + caseData.getManageOrders().getServeOtherPartiesDA().getDisplayedValue());
-                        log.info("EmailAddress() ====>" + caseData.getManageOrders().getEmailInformationDA().getEmailAddress());
                         log.info("PostalAddress() ====>" + caseData.getManageOrders().getPostalInformationDA().getPostalAddress().getPostCode());
                     }
                 });
