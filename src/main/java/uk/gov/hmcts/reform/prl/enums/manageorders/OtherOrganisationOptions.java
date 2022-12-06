@@ -10,9 +10,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum ServeOtherPartiesEnum {
-    @JsonProperty("other")
-    other("other", "Other (optional)");
+public enum OtherOrganisationOptions {
+    @JsonProperty("anotherOrganisation")
+    anotherOrganisation("anotherOrganisation", "Another organisation (optional)");
 
     private final String id;
     private final String displayedValue;
@@ -23,7 +23,7 @@ public enum ServeOtherPartiesEnum {
     }
 
     @JsonCreator
-    public static ServeOtherPartiesEnum getValue(String key) {
-        return ServeOtherPartiesEnum.valueOf(key);
+    public static OtherOrganisationOptions getValue(String key) {
+        return OtherOrganisationOptions.valueOf(key);
     }
 }

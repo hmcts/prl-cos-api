@@ -682,7 +682,6 @@ public class ManageOrderService {
             orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
             return Map.of("orderCollection", orderCollection);
         } else {
-            log.info("serveOrderDynamicList ====>" + caseData.getManageOrders().getServeOrderDynamicList().getValueCodeAsUuid());
             UUID selectedOrderId = caseData.getManageOrders().getServeOrderDynamicList().getValueCodeAsUuid();
             List<Element<OrderDetails>> orders = caseData.getOrderCollection();
 
@@ -700,7 +699,7 @@ public class ManageOrderService {
                         YesOrNo otherPartiesServed = No;
                         PostalInformation postalInformation = null;
                         EmailInformation emailInformation = null;
-                        if (!caseData.getManageOrders().getAnotherOrganisationOptions().isEmpty()) {
+                        if (!caseData.getManageOrders().getServeOtherPartiesCA().isEmpty()) {
                             otherPartiesServed = Yes;
                             if (caseData.getManageOrders().getEmailInformationCA() != null) {
                                 emailInformation = caseData.getManageOrders().getEmailInformationCA();
@@ -740,7 +739,7 @@ public class ManageOrderService {
                         YesOrNo otherPartiesServed = No;
                         PostalInformation postalInformation = null;
                         EmailInformation emailInformation = null;
-                        if (!caseData.getManageOrders().getServeOtherParties().isEmpty()) {
+                        if (!caseData.getManageOrders().getServeOtherPartiesDA().isEmpty()) {
                             otherPartiesServed = Yes;
                             if (caseData.getManageOrders().getEmailInformationDA() != null) {
                                 emailInformation = caseData.getManageOrders().getEmailInformationDA();

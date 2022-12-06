@@ -10,13 +10,13 @@ import uk.gov.hmcts.reform.prl.enums.CafcassReportsEnum;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.AnotherOrganisationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildSelectorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentOccupationEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -210,7 +210,7 @@ public class ManageOrders {
     private final YesOrNo cafcassCymruServedOptions;
     private final String cafcassCymruEmail;
     @JsonProperty("anotherOrganisationOptions")
-    private final List<AnotherOrganisationEnum> anotherOrganisationOptions;
+    private final List<OtherOrganisationOptions> serveOtherPartiesCA;
     private final DeliveryByEnum deliveryByOptionsCA;
     @JsonProperty("emailInformationCA")
     private final EmailInformation emailInformationCA;
@@ -218,7 +218,7 @@ public class ManageOrders {
     private final PostalInformation postalInformationCA;
 
     private final ServingRespondentsEnum servingRespondentsOptionsDA;
-    private final List<ServeOtherPartiesEnum> serveOtherParties;
+    private final List<ServeOtherPartiesOptions> serveOtherPartiesDA;
     private final DeliveryByEnum deliveryByOptionsDA;
     @JsonProperty("emailInformationDA")
     private final EmailInformation emailInformationDA;
