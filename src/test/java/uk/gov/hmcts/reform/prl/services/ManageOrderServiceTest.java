@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
-import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrderAdditionalDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -1238,10 +1237,9 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .serveOrderDynamicList(dynamicList)
-            .serveOrderAdditionalDocuments(List.of(Element.<ServeOrderAdditionalDocument>builder()
-                                                       .value(ServeOrderAdditionalDocument.builder()
-                                                                  .serveOrderDocument(Document.builder().documentFileName(
-                                                                      "abc.pdf").build()).build())
+            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+                                                       .value(Document.builder().documentFileName(
+                                                                      "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesOrNo.Yes)
             .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
@@ -1314,10 +1312,9 @@ public class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .serveOrderDynamicList(dynamicList)
-            .serveOrderAdditionalDocuments(List.of(Element.<ServeOrderAdditionalDocument>builder()
-                                                       .value(ServeOrderAdditionalDocument.builder()
-                                                                  .serveOrderDocument(Document.builder().documentFileName(
-                                                                      "abc.pdf").build()).build())
+            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+                                                       .value(Document.builder().documentFileName(
+                                                                      "abc.pdf").build())
                                                        .build()))
             .servingRespondentsOptionsDA(ServingRespondentsEnum.courtAdmin)
             .serveOtherParties(List.of(ServeOtherPartiesEnum.other))

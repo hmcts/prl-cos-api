@@ -694,7 +694,7 @@ public class ManageOrderService {
                         if (!caseData.getManageOrders().getServeOrderAdditionalDocuments().isEmpty()) {
                             log.info("serveOrderDocument ====>"
                                          + caseData.getManageOrders().getServeOrderAdditionalDocuments()
-                                .get(0).getValue().getServeOrderDocument().getDocumentFileName());
+                                .get(0).getValue().getDocumentFileName());
                         }
                         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
                         ServingRespondentsEnum servingRespondentsOptions = null;
@@ -728,7 +728,7 @@ public class ManageOrderService {
                         if (!caseData.getManageOrders().getServeOrderAdditionalDocuments().isEmpty()) {
                             log.info("serveOrderDocument ====>"
                                          + caseData.getManageOrders().getServeOrderAdditionalDocuments()
-                                .get(0).getValue().getServeOrderDocument().getDocumentFileName());
+                                .get(0).getValue().getDocumentFileName());
                         }
                         ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
                             .getServingRespondentsOptionsDA();
@@ -779,6 +779,7 @@ public class ManageOrderService {
             .dateCreated(order.getValue().getDateCreated())
             .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
+            .orderServed(Yes)
             .build();
         orders.set(orders.indexOf(order), element(order.getId(), amended));
     }

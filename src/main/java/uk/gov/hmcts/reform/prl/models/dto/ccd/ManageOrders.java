@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
-import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrderAdditionalDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
@@ -203,7 +202,7 @@ public class ManageOrders {
 
     private DynamicList serveOrderDynamicList;
     @JsonProperty("serveOrderAdditionalDocuments")
-    private final List<Element<ServeOrderAdditionalDocument>> serveOrderAdditionalDocuments;
+    private final List<Element<Document>> serveOrderAdditionalDocuments;
 
     private final YesOrNo serveToRespondentOptions;
     private final ServingRespondentsEnum servingRespondentsOptionsCA;
