@@ -210,6 +210,7 @@ public class ManageOrders {
     private final YesOrNo cafcassServedOptions;
     private final YesOrNo cafcassCymruServedOptions;
     private String cafcassCymruEmail;
+    @JsonProperty("anotherOrganisationOptions")
     private final AnotherOrganisationEnum anotherOrganisationOptions;
     private final DeliveryByEnum deliveryByOptionsCA;
     @JsonProperty("emailInformationCA")
