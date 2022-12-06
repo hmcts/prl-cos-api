@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
@@ -49,6 +51,13 @@ public class DraftOrder {
     private final String furtherDirectionsIfRequired;
     private final String parentName;
 
+    /**
+     * C43.
+     */
+    @JsonProperty("childArrangementsOrdersToIssue")
+    private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
+    @JsonProperty("selectChildArrangementsOrder")
+    private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
