@@ -297,6 +297,7 @@ public class DraftAnOrderService {
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         log.info("order type " + selectedOrder.getOrderType());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
+        caseDataMap.put("parentName", selectedOrder.getParentName());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put("wasTheOrderApprovedAtHearing", selectedOrder.getWasTheOrderApprovedAtHearing());
         caseDataMap.put("judgeOrMagistrateTitle", selectedOrder.getJudgeOrMagistrateTitle());
@@ -420,6 +421,7 @@ public class DraftAnOrderService {
         } else {
             caseData = caseData.toBuilder()
                 .manageOrders(ManageOrders.builder()
+                                  .parentName(caseData.getManageOrders().getParentName())
                                   .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
                                   .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
                                   .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())

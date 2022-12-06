@@ -47,6 +47,7 @@ public class DraftOrder {
     private final String orderDirections;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
+    private final String parentName;
 
 
     @JsonIgnore
