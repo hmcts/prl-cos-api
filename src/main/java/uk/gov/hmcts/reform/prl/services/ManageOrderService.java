@@ -722,7 +722,8 @@ public class ManageOrderService {
                             servingRespondentsOptions,
                             otherPartiesServed,
                             postalInformation,
-                            emailInformation
+                            emailInformation,
+                            caseData.getManageOrders().getServeOrderAdditionalDocuments()
                         );
                     } else {
                         if (!caseData.getManageOrders().getServeOrderAdditionalDocuments().isEmpty()) {
@@ -752,7 +753,8 @@ public class ManageOrderService {
                             servingRespondentsOptions,
                             otherPartiesServed,
                             postalInformation,
-                            emailInformation
+                            emailInformation,
+                            caseData.getManageOrders().getServeOrderAdditionalDocuments()
                         );
                     }
                 });
@@ -762,13 +764,15 @@ public class ManageOrderService {
 
     private static void updateServedOrderDetails(YesOrNo cafcassServed, List<Element<OrderDetails>> orders, Element<OrderDetails> order,
                                                  YesOrNo serveOnRespondent, ServingRespondentsEnum servingRespondentsOptions,
-                                                 YesOrNo otherPartiesServed, PostalInformation postalInformation, EmailInformation emailInformation) {
+                                                 YesOrNo otherPartiesServed, PostalInformation postalInformation, EmailInformation emailInformation,
+                                                 List<Element<Document>> additionalDocuments) {
         ServeOrderDetails serveOrderDetails = ServeOrderDetails.builder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
             .cafcassServed(cafcassServed)
             .otherPartiesServed(otherPartiesServed)
             .postalInformation(postalInformation)
             .emailInformation(emailInformation)
+            .additionalDocuments(additionalDocuments)
             .build();
 
         OrderDetails amended = order.getValue().toBuilder()
