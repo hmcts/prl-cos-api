@@ -110,6 +110,9 @@ public class PrlAppsConstants {
     public static final String FINAL_TEMPLATE_NAME = "finalTemplateName";
     public static final String GENERATE_FILE_NAME = "generateFileName";
 
+    public static final String DRAFT_TEMPLATE_WELSH = "draftTemplateWelsh";
+    public static final String DRAFT_WELSH_FILE_NAME = "draftWelshFileName";
+
     public static final String FINAL_TEMPLATE_WELSH = "finaltemplateWelsh";
     public static final String WELSH_FILE_NAME = "welshFileName";
 
@@ -168,4 +171,6 @@ public class PrlAppsConstants {
     public static final String CITIZEN_PRL_CREATE_EVENT = "citizenCreate";
     public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     public static final String CITIZEN_ROLE = "citizen";
+
+    public static final String OTHER = "Other";
 }
