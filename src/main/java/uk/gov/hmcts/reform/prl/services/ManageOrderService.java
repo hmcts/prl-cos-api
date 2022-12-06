@@ -696,15 +696,6 @@ public class ManageOrderService {
                                          + caseData.getManageOrders().getServeOrderAdditionalDocuments()
                                 .get(0).getValue().getServeOrderDocument().getDocumentFileName());
                         }
-                        log.info("serveToRespondentOptions ====>" + caseData.getManageOrders().getServeToRespondentOptions().getDisplayedValue());
-                        log.info("ServingRespondentsOptionsCA ====>" + caseData.getManageOrders()
-                            .getServingRespondentsOptionsCA().getDisplayedValue());
-                        log.info("CafcassCymruEmail ====>" + caseData.getManageOrders().getCafcassCymruEmail());
-                        log.info("ServeOtherPartiesCA ====>" + caseData.getManageOrders().getAnotherOrganisationOptions().get(
-                            0).getDisplayedValue());
-                        log.info("DeliveryByOptionsCA() ====>" + caseData.getManageOrders().getDeliveryByOptionsCA().getDisplayedValue());
-                        log.info("EmailAddress() ====>" + caseData.getManageOrders().getEmailInformationCA().getEmailAddress());
-
                         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
                         ServingRespondentsEnum servingRespondentsOptions = null;
                         if (serveOnRespondent.equals(Yes)) {
@@ -739,10 +730,6 @@ public class ManageOrderService {
                                          + caseData.getManageOrders().getServeOrderAdditionalDocuments()
                                 .get(0).getValue().getServeOrderDocument().getDocumentFileName());
                         }
-                        log.info("ServingRespondentsOptionsDA ====>" + caseData.getManageOrders()
-                            .getServingRespondentsOptionsDA().getDisplayedValue());
-                        log.info("ServeOtherPartiesDA ====>" + caseData.getManageOrders().getServeOtherParties().get(0).getDisplayedValue());
-                        log.info("PostalAddress() ====>" + caseData.getManageOrders().getPostalInformationDA().getPostalAddress().getPostCode());
                         ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
                             .getServingRespondentsOptionsDA();
                         YesOrNo otherPartiesServed = No;
@@ -750,10 +737,10 @@ public class ManageOrderService {
                         EmailInformation emailInformation = null;
                         if (!caseData.getManageOrders().getServeOtherParties().isEmpty()) {
                             otherPartiesServed = Yes;
-                            if (caseData.getManageOrders().getEmailInformationCA() != null) {
+                            if (caseData.getManageOrders().getEmailInformationDA() != null) {
                                 emailInformation = caseData.getManageOrders().getEmailInformationDA();
                             }
-                            if (caseData.getManageOrders().getPostalInformationCA() != null) {
+                            if (caseData.getManageOrders().getPostalInformationDA() != null) {
                                 postalInformation = caseData.getManageOrders().getPostalInformationDA();
                             }
                         }
@@ -789,6 +776,8 @@ public class ManageOrderService {
             .orderType(order.getValue().getOrderType())
             .typeOfOrder(order.getValue().getTypeOfOrder())
             .otherDetails(order.getValue().getOtherDetails())
+            .dateCreated(order.getValue().getDateCreated())
+            .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
             .build();
         orders.set(orders.indexOf(order), element(order.getId(), amended));
