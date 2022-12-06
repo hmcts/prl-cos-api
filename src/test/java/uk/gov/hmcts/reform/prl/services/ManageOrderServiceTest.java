@@ -1245,7 +1245,7 @@ public class ManageOrderServiceTest {
                                                        .build()))
             .serveToRespondentOptions(YesOrNo.No)
             .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
-            .anotherOrganisationOptions(AnotherOrganisationEnum.anotherOrganisation)
+            .anotherOrganisationOptions(List.of(AnotherOrganisationEnum.anotherOrganisation))
             .cafcassCymruEmail("test")
             .deliveryByOptionsCA(DeliveryByEnum.post)
             .emailInformationCA(EmailInformation.builder().emailAddress("test").build())
@@ -1306,7 +1306,7 @@ public class ManageOrderServiceTest {
                                                                       "abc.pdf").build()).build())
                                                        .build()))
             .servingRespondentsOptionsDA(ServingRespondentsEnum.courtAdmin)
-            .serveOtherParties(ServeOtherPartiesEnum.other)
+            .serveOtherParties(List.of(ServeOtherPartiesEnum.other))
             .deliveryByOptionsDA(DeliveryByEnum.post)
             .emailInformationDA(EmailInformation.builder().emailAddress("test").build())
             .postalInformationDA(PostalInformation.builder().postalAddress(

@@ -694,7 +694,7 @@ public class ManageOrderService {
                         log.info("ServingRespondentsOptionsCA ====>" + caseData.getManageOrders()
                             .getServingRespondentsOptionsCA().getDisplayedValue());
                         log.info("CafcassCymruEmail ====>" + caseData.getManageOrders().getCafcassCymruEmail());
-                        log.info("ServeOtherPartiesCA ====>" + caseData.getManageOrders().getAnotherOrganisationOptions().getDisplayedValue());
+                        log.info("ServeOtherPartiesCA ====>" + caseData.getManageOrders().getAnotherOrganisationOptions().get(0).getDisplayedValue());
                         log.info("DeliveryByOptionsCA() ====>" + caseData.getManageOrders().getDeliveryByOptionsCA().getDisplayedValue());
                         log.info("EmailAddress() ====>" + caseData.getManageOrders().getEmailInformationCA().getEmailAddress());
                         log.info("PostalAddress() ====>" + caseData.getManageOrders().getPostalInformationCA().getPostalAddress().getPostCode());
@@ -706,7 +706,7 @@ public class ManageOrderService {
                         }
                         log.info("ServingRespondentsOptionsDA ====>" + caseData.getManageOrders()
                             .getServingRespondentsOptionsDA().getDisplayedValue());
-                        log.info("ServeOtherPartiesDA ====>" + caseData.getManageOrders().getServeOtherParties().getDisplayedValue());
+                        log.info("ServeOtherPartiesDA ====>" + caseData.getManageOrders().getServeOtherParties().get(0).getDisplayedValue());
                         log.info("PostalAddress() ====>" + caseData.getManageOrders().getPostalInformationDA().getPostalAddress().getPostCode());
                     }
                 });

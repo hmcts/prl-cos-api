@@ -218,8 +218,8 @@ public class ManageOrders {
     @JsonProperty("postalInformationCA")
     private final PostalInformation postalInformationCA;
 
-    private final List<ServingRespondentsEnum> servingRespondentsOptionsDA;
-    private final ServeOtherPartiesEnum serveOtherParties;
+    private final ServingRespondentsEnum servingRespondentsOptionsDA;
+    private final List<ServeOtherPartiesEnum> serveOtherParties;
     private final DeliveryByEnum deliveryByOptionsDA;
     @JsonProperty("emailInformationDA")
     private final EmailInformation emailInformationDA;
