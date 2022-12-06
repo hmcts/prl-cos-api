@@ -209,7 +209,7 @@ public class ManageOrders {
     private final YesOrNo cafcassServedOptions;
     private final YesOrNo cafcassCymruServedOptions;
     private final String cafcassCymruEmail;
-    @JsonProperty("anotherOrganisationOptions")
+    @JsonProperty("serveOtherPartiesCA")
     private final List<OtherOrganisationOptions> serveOtherPartiesCA;
     private final DeliveryByEnum deliveryByOptionsCA;
     @JsonProperty("emailInformationCA")
