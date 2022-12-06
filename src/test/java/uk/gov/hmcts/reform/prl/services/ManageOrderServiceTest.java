@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -1305,7 +1306,7 @@ public class ManageOrderServiceTest {
                                                                       "abc.pdf").build()).build())
                                                        .build()))
             .servingRespondentsOptionsDA(ServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesDA(AnotherOrganisationOptions.other)
+            .serveOtherPartiesDA(ServeOtherPartiesEnum.other)
             .deliveryByOptionsDA(DeliveryByEnum.post)
             .emailInformationDA(EmailInformation.builder().emailAddress("test").build())
             .postalInformationDA(PostalInformation.builder().postalAddress(

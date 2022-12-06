@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ChildSelectorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentOccupationEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -217,7 +218,7 @@ public class ManageOrders {
     private final PostalInformation postalInformationCA;
 
     private final ServingRespondentsEnum servingRespondentsOptionsDA;
-    private final AnotherOrganisationOptions serveOtherPartiesDA;
+    private final ServeOtherPartiesEnum serveOtherPartiesDA;
     private final DeliveryByEnum deliveryByOptionsDA;
     @JsonProperty("emailInformationDA")
     private final EmailInformation emailInformationDA;
