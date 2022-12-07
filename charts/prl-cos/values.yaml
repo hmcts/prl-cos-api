@@ -48,3 +48,4 @@ java:
         - southampton-court-email-address
         - idam-solicitor-username
         - idam-solicitor-password
+        - filtered-court-ids

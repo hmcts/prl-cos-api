@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +26,9 @@ public class LocationRefDataService {
     private final AuthTokenGenerator authTokenGenerator;
     private final LocationRefDataApi locationRefDataApi;
 
+    @Value("${COURT_IDS_TO_FILTER}")
+    private final String courtsToFilter;
+
     public List<DynamicListElement> getCourtLocations(String authToken) {
         try {
             CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(authToken,
@@ -37,10 +42,12 @@ public class LocationRefDataService {
     }
 
     private List<DynamicListElement> onlyEnglandAndWalesLocations(CourtDetails locationRefData) {
+        String[] courtList = courtsToFilter.split(",");
         return (locationRefData == null
             ? new ArrayList<>()
             : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
+            .filter(location -> Arrays.stream(courtList).anyMatch(location.getCourtName()::equals))
             .map(this::getDisplayEntry).collect(Collectors.toList()));
     }
 

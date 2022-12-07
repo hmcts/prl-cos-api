@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.LocationRefDataApi;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -42,6 +43,7 @@ public class LocationRefDataServiceTest {
     @Before
     public void setUp() {
         when(authTokenGenerator.generate()).thenReturn("");
+        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1,2,3,4");
     }
 
     @Test
@@ -64,7 +66,8 @@ public class LocationRefDataServiceTest {
     public void testgetCourtDetailsWithData() {
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
-                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
                             .build());
         List<DynamicListElement> courtLocations = locationRefDataService.getCourtLocations("test");
         assertFalse(courtLocations.isEmpty());

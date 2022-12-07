@@ -379,3 +379,6 @@ bundle:
     config: ${BUNDLE_ENGLISH_CONFIG:sample-config.yaml}
   welsh:
     config: ${BUNDLE_WELSH_CONFIG:sample-config.yaml}
+
+courts:
+  filter: ${COURT_IDS_TO_FILTER}
