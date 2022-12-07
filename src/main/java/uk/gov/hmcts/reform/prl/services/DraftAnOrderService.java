@@ -301,6 +301,7 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("previewDraftOrder", selectedOrder.getOrderDocument());
+        caseDataMap.put("previewDraftOrderWelsh", selectedOrder.getOrderDocumentWelsh());
         if (selectedOrder.getJudgeNotes() != null) {
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
         }
