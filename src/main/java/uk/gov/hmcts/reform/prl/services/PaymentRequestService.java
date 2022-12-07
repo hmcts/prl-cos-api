@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.clients.PaymentApi;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -119,7 +120,7 @@ public class PaymentRequestService {
         log.info("Case Data retrieved for caseId : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
-        String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
+        String paymentReferenceNumber = caseData.getC100RebuildData().getPaymentReferenceNumber();
 
         //Check if paymentServiceReferenceNumber and PaymentReference exist and if yes get the status of payment.
         //If status is success then return, else create payment
@@ -143,9 +144,13 @@ public class PaymentRequestService {
                                                            createPaymentRequest.getReturnUrl());
                     log.info("Payment is being made for the caseId: {}", caseId);
 
+                    C100RebuildData c100RebuildData = caseData.getC100RebuildData();
                     caseService.updateCase(
                         caseData.toBuilder()
-                            .paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
+                                .c100RebuildData(c100RebuildData
+                                        .toBuilder()
+                                        .paymentReferenceNumber(paymentResponse.getPaymentReference())
+                                        .build()).build(),
                         authorization,
                         serviceAuthorization,
                         caseId,
@@ -161,9 +166,14 @@ public class PaymentRequestService {
                                                        createPaymentRequest.getReturnUrl());
                 log.info("Payment is being made for the case id: {} ", caseId);
 
+                C100RebuildData c100RebuildData = caseData.getC100RebuildData();
+
                 caseService.updateCase(
-                    caseData.toBuilder()
-                        .paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
+                        caseData.toBuilder()
+                                .c100RebuildData(c100RebuildData
+                                        .toBuilder()
+                                        .paymentReferenceNumber(paymentResponse.getPaymentReference())
+                                        .build()).build(),
                     authorization,
                     serviceAuthorization,
                     caseId,
@@ -189,10 +199,15 @@ public class PaymentRequestService {
                     paymentServiceResponse.getServiceRequestReference(),
                     caseId
                 );
+                C100RebuildData c100RebuildData = caseData.getC100RebuildData();
                 caseService.updateCase(
-                    caseData.toBuilder()
-                        .helpWithFeesReferenceNumber(createPaymentRequest.getHwfRefNumber())
-                        .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference()).build(),
+                        caseData.toBuilder()
+                                .c100RebuildData(c100RebuildData
+                                        .toBuilder()
+                                        .helpWithFeesReferenceNumber(createPaymentRequest.getHwfRefNumber())
+                                        .build())
+                                .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference())
+                                .build(),
                     authorization,
                     serviceAuthorization,
                     caseId,
@@ -211,10 +226,16 @@ public class PaymentRequestService {
                 //set service request ref
                 paymentResponse.setServiceRequestReference(paymentServiceResponse.getServiceRequestReference());
 
+                C100RebuildData c100RebuildData = caseData.getC100RebuildData();
+
                 caseService.updateCase(
-                    caseData.toBuilder()
-                        .paymentServiceRequestReferenceNumber(paymentResponse.getServiceRequestReference())
-                        .paymentReferenceNumber(paymentResponse.getPaymentReference()).build(),
+                        caseData.toBuilder()
+                                .c100RebuildData(c100RebuildData
+                                        .toBuilder()
+                                        .paymentReferenceNumber(paymentResponse.getPaymentReference())
+                                        .build())
+                                .paymentServiceRequestReferenceNumber(paymentResponse.getServiceRequestReference())
+                                .build(),
                     authorization,
                     serviceAuthorization,
                     caseId,
@@ -243,7 +264,7 @@ public class PaymentRequestService {
 
     private boolean isHelpWithFeesOptedInAlready(CaseData caseData) {
         return null != caseData
-            && isNotEmpty(caseData.getHelpWithFeesReferenceNumber())
+            && isNotEmpty(caseData.getC100RebuildData().getHelpWithFeesReferenceNumber())
             && null != caseData.getPaymentServiceRequestReferenceNumber();
     }
 
