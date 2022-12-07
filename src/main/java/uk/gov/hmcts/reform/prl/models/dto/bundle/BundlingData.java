@@ -31,5 +31,11 @@ public class BundlingData {
     @JsonProperty("otherDocumentsUploadedByCourtAdmin")
     private List<Element<BundlingRequestDocument>> otherDocuments;
 
+    @JsonProperty("fl401WitnessDocs")
+    private List<Element<BundlingRequestDocument>> fl401WitnessDocs;
+
+    @JsonProperty("fl401SupportingDocs")
+    private List<Element<BundlingRequestDocument>> fl401SupportingDocs;
+
 
 }

@@ -74,7 +74,35 @@ public class BundleCreateRequestMapper {
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
                       .otherDocuments(mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).applications(mapApplicationsFromCaseData(caseData))
                       .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
+                      .fl401SupportingDocs(mapFl401SupportingDocs(caseData.getFl401UploadSupportDocuments()))
+                      .fl401WitnessDocs(mapFl401WitnessDocs(caseData.getFl401UploadWitnessDocuments()))
                       .citizenUploadedDocuments(mapBundlingDocsFromCitizenUploadedDocs(caseData.getCitizenUploadedDocumentList())).build()).build();
+    }
+
+    private List<Element<BundlingRequestDocument>> mapFl401WitnessDocs(List<Element<Document>> fl401UploadWitnessDocuments) {
+        List<Element<BundlingRequestDocument>> fl401WitnessDocs = new ArrayList<>();
+        Optional<List<Element<Document>>> existingfl401WitnessDocs = ofNullable(fl401UploadWitnessDocuments);
+        if (existingfl401WitnessDocs.isEmpty()) {
+            return fl401WitnessDocs;
+        }
+        ElementUtils.unwrapElements(fl401UploadWitnessDocuments).forEach(witnessDocs -> {
+            fl401WitnessDocs.add(ElementUtils.element(mapBundlingRequestDocument(witnessDocs,
+                BundlingDocGroupEnum.applicantWitnessStatements)));
+        });
+        return fl401WitnessDocs;
+    }
+
+    private List<Element<BundlingRequestDocument>> mapFl401SupportingDocs(List<Element<Document>> fl401UploadSupportDocuments) {
+        List<Element<BundlingRequestDocument>> fl401SupportingDocs = new ArrayList<>();
+        Optional<List<Element<Document>>> existingfl401SupportingDocs = ofNullable(fl401UploadSupportDocuments);
+        if (existingfl401SupportingDocs.isEmpty()) {
+            return fl401SupportingDocs;
+        }
+        ElementUtils.unwrapElements(fl401UploadSupportDocuments).forEach(supportDocs -> {
+            fl401SupportingDocs.add(ElementUtils.element(mapBundlingRequestDocument(supportDocs,
+                BundlingDocGroupEnum.applicantStatementSupportingEvidence)));
+        });
+        return fl401SupportingDocs;
     }
 
     private List<Element<BundlingRequestDocument>> mapApplicationsFromCaseData(CaseData caseData) {

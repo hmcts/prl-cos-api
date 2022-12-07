@@ -22,6 +22,8 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +64,9 @@ public class BundlingController extends AbstractCallbackController {
             caseDataUpdated.put("bundleInformation",
                 BundlingInformation.builder().caseBundles(bundleCreateResponse.getData().getCaseBundles())
                     .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
-                    .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration()).build());
+                    .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration())
+                    .bundleCreationDate(ZonedDateTime.now(ZoneId.of("Europe/London")).toLocalDateTime())
+                    .build());
             log.info("*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}", caseData.getId());
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
