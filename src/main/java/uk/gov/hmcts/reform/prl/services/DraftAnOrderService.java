@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -55,6 +56,7 @@ public class DraftAnOrderService {
     private final ObjectMapper objectMapper;
     private final ManageOrderService manageOrderService;
     private final DgsService dgsService;
+    private final DocumentLanguageService documentLanguageService;
 
     private static final String NON_MOLESTATION_ORDER = "draftAnOrder/non-molestation-order.html";
     private static final String SPECIAL_GUARDIANSHIP_ORDER = "draftAnOrder/special-guardianship-c43.html";
@@ -80,11 +82,13 @@ public class DraftAnOrderService {
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData) {
         log.info(" Getting current order details from case data {}", caseData);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
             .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
-            .orderDocument(caseData.getPreviewOrderDoc())
+            .orderDocument(documentLanguage.isGenEng()
+                               ? caseData.getPreviewOrderDoc() : caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
@@ -122,7 +126,9 @@ public class DraftAnOrderService {
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if (draftOrder.getOrderDocument().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())) {
+                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())
+                || draftOrder.getOrderDocument().getDocumentFileName()
+                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName())) {
                 updatedCaseData.put("orderCollection", getFinalOrderCollection(authorisation, caseData, draftOrder));
                 draftOrderCollection.remove(
                     draftOrderCollection.indexOf(e)
@@ -339,7 +345,9 @@ public class DraftAnOrderService {
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if (draftOrder.getOrderDocument().getDocumentFileName()
-                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())) {
+                .equalsIgnoreCase(caseData.getPreviewOrderDoc().getDocumentFileName())
+                || draftOrder.getOrderDocument().getDocumentFileName()
+                .equalsIgnoreCase(caseData.getPreviewOrderDocWelsh().getDocumentFileName())) {
                 log.info("matching draftorder {}", draftOrder);
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),
@@ -357,12 +365,14 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData) {
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
             .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
-            .orderDocument(caseData.getPreviewOrderDoc())
+            .orderDocument(documentLanguage.isGenEng()
+                               ? caseData.getPreviewOrderDoc() : caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
