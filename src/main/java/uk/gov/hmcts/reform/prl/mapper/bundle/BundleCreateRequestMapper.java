@@ -72,12 +72,36 @@ public class BundleCreateRequestMapper {
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
-                      .otherDocuments(mapOtherDocumentsFromCaseData(caseData.getOtherDocuments())).applications(mapApplicationsFromCaseData(caseData))
+                      .applications(mapApplicationsFromCaseData(caseData))
                       .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
-                      .fl401SupportingDocs(mapFl401SupportingDocs(caseData.getFl401UploadSupportDocuments()))
-                      .fl401WitnessDocs(mapFl401WitnessDocs(caseData.getFl401UploadWitnessDocuments()))
-                      .citizenUploadedDocuments(mapBundlingDocsFromCitizenUploadedDocs(caseData.getCitizenUploadedDocumentList())).build()).build();
+                      .allOtherDocuments(mapAllOtherDocuments(caseData)).build()).build();
     }
+
+    private List<Element<BundlingRequestDocument>> mapAllOtherDocuments(CaseData caseData) {
+
+        List<Element<BundlingRequestDocument>> allOtherDocuments = new ArrayList<>();
+
+        List<Element<BundlingRequestDocument>> fl401SupportingDocs = mapFl401SupportingDocs(caseData.getFl401UploadSupportDocuments());
+        if (!ofNullable(fl401SupportingDocs).isEmpty()) {
+            allOtherDocuments.addAll(fl401SupportingDocs);
+        }
+        List<Element<BundlingRequestDocument>> fl401WitnessDocs = mapFl401WitnessDocs(caseData.getFl401UploadWitnessDocuments());
+        if (!ofNullable(fl401WitnessDocs).isEmpty()) {
+            allOtherDocuments.addAll(fl401WitnessDocs);
+        }
+        List<Element<BundlingRequestDocument>> citizenUploadedDocuments =
+            mapBundlingDocsFromCitizenUploadedDocs(caseData.getCitizenUploadedDocumentList());
+        if (!ofNullable(citizenUploadedDocuments).isEmpty()) {
+            allOtherDocuments.addAll(citizenUploadedDocuments);
+        }
+
+        List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData.getOtherDocuments());
+        if (!ofNullable(otherDocuments).isEmpty()) {
+            allOtherDocuments.addAll(otherDocuments);
+        }
+        return allOtherDocuments;
+    }
+
 
     private List<Element<BundlingRequestDocument>> mapFl401WitnessDocs(List<Element<Document>> fl401UploadWitnessDocuments) {
         List<Element<BundlingRequestDocument>> fl401WitnessDocs = new ArrayList<>();
