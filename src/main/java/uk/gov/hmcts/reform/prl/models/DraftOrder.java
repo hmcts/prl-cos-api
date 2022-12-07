@@ -29,6 +29,7 @@ public class DraftOrder {
     private CreateSelectOrderOptionsEnum orderType;
     private String orderTypeId;
     private Document orderDocument;
+    private Document orderDocumentWelsh;
     private OtherDraftOrderDetails otherDetails;
     private String judgeNotes;
     private String adminNotes;

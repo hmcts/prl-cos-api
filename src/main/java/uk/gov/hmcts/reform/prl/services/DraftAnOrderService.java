@@ -82,13 +82,13 @@ public class DraftAnOrderService {
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData) {
         log.info(" Getting current order details from case data {}", caseData);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
             .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
-            .orderDocument(documentLanguage.isGenEng()
-                               ? caseData.getPreviewOrderDoc() : caseData.getPreviewOrderDocWelsh())
+            .orderDocument(caseData.getPreviewOrderDoc())
+            .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
@@ -162,14 +162,25 @@ public class DraftAnOrderService {
 
     private Element<OrderDetails> convertDraftOrderToFinal(String auth, CaseData caseData, DraftOrder draftOrder) {
         log.info("draftOrder.getOrderType************ {}", draftOrder.getOrderType());
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
         GeneratedDocumentInfo generatedDocumentInfo = null;
+        GeneratedDocumentInfo generatedDocumentInfoWelsh = null;
         try {
-            generatedDocumentInfo = dgsService.generateDocument(
-                auth,
-                CaseDetails.builder().caseData(caseData).build(),
-                fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
-            );
+            if (documentLanguage.isGenEng()) {
+                generatedDocumentInfo = dgsService.generateDocument(
+                    auth,
+                    CaseDetails.builder().caseData(caseData).build(),
+                    fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
+                );
+            }
+            if (documentLanguage.isGenWelsh()) {
+                generatedDocumentInfoWelsh = dgsService.generateDocument(
+                    auth,
+                    CaseDetails.builder().caseData(caseData).build(),
+                    fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH)
+                );
+            }
         } catch (Exception e) {
             log.error(
                 "Error while generating the final document for case {} and  order {}",
@@ -188,6 +199,10 @@ public class DraftAnOrderService {
                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                                    .documentHash(generatedDocumentInfo.getHashToken())
                                    .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
+                           .orderDocumentWelsh(Document.builder().documentUrl(generatedDocumentInfoWelsh.getUrl())
+                                            .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
+                                            .documentHash(generatedDocumentInfoWelsh.getHashToken())
+                                            .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
                            .adminNotes(caseData.getCourtAdminNotes())
                            .dateCreated(draftOrder.getOtherDetails().getDateCreated())
                            .judgeNotes(draftOrder.getJudgeNotes())
@@ -365,14 +380,12 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData) {
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(caseData.getSelectTypeOfOrder() != null
                              ? caseData.getSelectTypeOfOrder().getDisplayedValue() : null)
             .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
-            .orderDocument(documentLanguage.isGenEng()
-                               ? caseData.getPreviewOrderDoc() : caseData.getPreviewOrderDocWelsh())
+            .orderDocument(caseData.getPreviewOrderDoc())
+            .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
