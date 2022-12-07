@@ -90,8 +90,8 @@ public class DraftAnOrderController {
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
-            || CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw.equals(caseData.getCreateSelectOrderOptions())
-            && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
+            || CreateSelectOrderOptionsEnum.blankOrderOrDirectionsWithdraw.equals(caseData.getCreateSelectOrderOptions()))
+            && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
             log.info("Court name before prepopulate: {}", caseData.getCourtName());
             caseData = manageOrderService.populateCustomOrderFields(caseData);
