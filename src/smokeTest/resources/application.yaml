@@ -415,4 +415,4 @@ bundle:
     config: ${BUNDLE_WELSH_CONFIG:sample-config.yaml}
 
 courts:
-  filter: ${COURT_IDS_TO_FILTER}
+  filter: ${COURT_IDS_TO_FILTER:}
