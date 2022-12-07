@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -43,6 +44,9 @@ public class FeesAndPaymentCitizenControllerTest {
 
     @Mock
     private PaymentRequestService paymentRequestService;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
 
     private FeeResponseForCitizen feeResponseForCitizen;
 
@@ -114,6 +118,7 @@ public class FeesAndPaymentCitizenControllerTest {
 
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(paymentRequestService.createPayment(authToken,s2sToken,createPaymentRequest)).thenReturn(paymentResponse);
 
         //When
