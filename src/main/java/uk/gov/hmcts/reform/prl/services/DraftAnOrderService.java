@@ -202,7 +202,7 @@ public class DraftAnOrderService {
                            .orderDocumentWelsh(Document.builder().documentUrl(generatedDocumentInfoWelsh.getUrl())
                                             .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
                                             .documentHash(generatedDocumentInfoWelsh.getHashToken())
-                                            .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)).build())
+                                            .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build())
                            .adminNotes(caseData.getCourtAdminNotes())
                            .dateCreated(draftOrder.getOtherDetails().getDateCreated())
                            .judgeNotes(draftOrder.getJudgeNotes())
