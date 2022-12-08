@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -48,7 +46,6 @@ public class PaymentRequestService {
     private final ObjectMapper objectMapper;
     public static final String GBP_CURRENCY = "GBP";
     public static final String ENG_LANGUAGE = "English";
-    private final CaseService caseService;
     private static final String SERVICE_AUTH = "ServiceAuthorization";
     private static final String PAYMENT_STATUS_SUCCESS = "Success";
     private PaymentResponse paymentResponse;
@@ -110,11 +107,8 @@ public class PaymentRequestService {
                                          @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
                                          @RequestBody CreatePaymentRequest createPaymentRequest)
         throws Exception {
-        //TEMP success response
-        paymentResponse = createSrAndUpdateCase(createPaymentRequest, authorization, serviceAuthorization);
-
         //Get case using caseId
-        /*String caseId = createPaymentRequest.getCaseId();
+        String caseId = createPaymentRequest.getCaseId();
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
             authorization,
             serviceAuthorization,
@@ -142,48 +136,18 @@ public class PaymentRequestService {
                     log.info("Payment is already successful for the case id: {} ",caseId);
                     return paymentResponse;
                 } else {
+                    log.info("Previous payment failed, creating new payment for the caseId: {}", caseId);
                     paymentResponse = createServicePayment(paymentServiceReferenceNumber,
                                                            authorization,
                                                            createPaymentRequest.getReturnUrl());
-                    log.info("Payment is being made for the caseId: {}", caseId);
-
-                    C100RebuildData c100RebuildData = caseData.getC100RebuildData();
-                    caseService.updateCase(
-                        caseData.toBuilder()
-                                .c100RebuildData(c100RebuildData
-                                        .toBuilder()
-                                        .paymentReferenceNumber(paymentResponse.getPaymentReference())
-                                        .build()).build(),
-                        authorization,
-                        serviceAuthorization,
-                        caseId,
-                        CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
-                        null
-                    );
-                    log.info("Update case successful for the caseId :{} ", caseId);
                 }
             } else {
-                log.info("Creating new payment request for the caseId: {}", caseId);
+                log.info("Creating new payment for the case id: {} ", caseId);
                 paymentResponse = createServicePayment(paymentServiceReferenceNumber,
                                                        authorization,
                                                        createPaymentRequest.getReturnUrl());
-                log.info("Payment is being made for the case id: {} ", caseId);
 
-                C100RebuildData c100RebuildData = caseData.getC100RebuildData();
-
-                caseService.updateCase(
-                        caseData.toBuilder()
-                                .c100RebuildData(c100RebuildData
-                                        .toBuilder()
-                                        .paymentReferenceNumber(paymentResponse.getPaymentReference())
-                                        .build()).build(),
-                    authorization,
-                    serviceAuthorization,
-                    caseId,
-                    CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
-                    null
-                );
-                log.info("Update case successful for the caseId :{} ", caseId);
+                paymentResponse.setServiceRequestReference(paymentServiceReferenceNumber);
             }
         } else {
             //For help with fees we only need to create service request
@@ -196,28 +160,6 @@ public class PaymentRequestService {
                 paymentResponse = PaymentResponse.builder()
                     .serviceRequestReference(paymentServiceResponse.getServiceRequestReference())
                     .build();
-                log.info(
-                    "Payment is being made for hwfRefNumber: {} , serviceReqRef: {} and for caseId: {}",
-                    createPaymentRequest.getHwfRefNumber(),
-                    paymentServiceResponse.getServiceRequestReference(),
-                    caseId
-                );
-                C100RebuildData c100RebuildData = caseData.getC100RebuildData();
-                caseService.updateCase(
-                        caseData.toBuilder()
-                                .c100RebuildData(c100RebuildData
-                                        .toBuilder()
-                                        .helpWithFeesReferenceNumber(createPaymentRequest.getHwfRefNumber())
-                                        .build())
-                                .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference())
-                                .build(),
-                    authorization,
-                    serviceAuthorization,
-                    caseId,
-                    CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
-                    null
-                );
-                log.info("Update case successful for the caseId :{} ", caseId);
             } else {
                 // if CR and PR doesn't exist
                 log.info("Creating new service request and payment request for the case id: {}", caseId);
@@ -228,54 +170,8 @@ public class PaymentRequestService {
                 );
                 //set service request ref
                 paymentResponse.setServiceRequestReference(paymentServiceResponse.getServiceRequestReference());
-
-                C100RebuildData c100RebuildData = caseData.getC100RebuildData();
-
-                caseService.updateCase(
-                        caseData.toBuilder()
-                                .c100RebuildData(c100RebuildData
-                                        .toBuilder()
-                                        .paymentReferenceNumber(paymentResponse.getPaymentReference())
-                                        .build())
-                                .paymentServiceRequestReferenceNumber(paymentResponse.getServiceRequestReference())
-                                .build(),
-                    authorization,
-                    serviceAuthorization,
-                    caseId,
-                    CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
-                    null
-                );
-                log.info("Update case successful for the caseId :{} ", caseId);
             }
-        }*/
-        return paymentResponse;
-    }
-
-    private PaymentResponse createSrAndUpdateCase(CreatePaymentRequest createPaymentRequest,
-                                                  String authorization,
-                                                  String serviceAuthorization) throws JsonProcessingException {
-        paymentResponse = PaymentResponse.builder()
-            .serviceRequestReference("2022120716300010")
-            .paymentStatus("Initiated")
-            .build();
-
-        String caseId = createPaymentRequest.getCaseId();
-        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
-            authorization,
-            serviceAuthorization,
-            caseId
-        );
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseService.updateCase(
-            caseData.toBuilder()
-                .paymentServiceRequestReferenceNumber(paymentResponse.getServiceRequestReference()).build(),
-            authorization,
-            serviceAuthorization,
-            caseId,
-            CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
-            null
-        );
-        log.info("Update case successful for the caseId :{} ", caseId);
+        }
         return paymentResponse;
     }
 
