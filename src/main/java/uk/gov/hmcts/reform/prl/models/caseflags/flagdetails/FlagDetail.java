@@ -1,15 +1,16 @@
 package uk.gov.hmcts.reform.prl.models.caseflags.flagdetails;
 
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @lombok.Data
 @Builder(toBuilder = true)
-@NoArgsConstructor
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class FlagDetail {
     //  public List<Element<Path>> path;

@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.prl.models.caseflags;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
