@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +46,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSTPONED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WAITING_TO_BE_LISTED;
+import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
+import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 
 @Slf4j
 @RestController
@@ -90,14 +94,14 @@ public class HearingManagementService {
         switch (hmcStatus) {
             case LISTED:
                 CaseDetails listedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                            HEARING_STATE_CHANGE_SUCCESS, caseData);
+                                                            DECISION_OUTCOME, HEARING_STATE_CHANGE_SUCCESS, caseData);
                 updateTabsAfterStateChange(listedCaseDetails.getData(), listedCaseDetails.getId());
                 sendHearingDetailsEmail(caseData, hearingRequest);
                 break;
 
             case CANCELLED:
                 CaseDetails cancelledCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                                                             HEARING_STATE_CHANGE_FAILURE, caseData);
+                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE, caseData);
                 updateTabsAfterStateChange(cancelledCaseDetails.getData(), cancelledCaseDetails.getId());
                 sendHearingCancelledEmail(caseData);
                 break;
@@ -106,7 +110,7 @@ public class HearingManagementService {
             case POSTPONED:
             case ADJOURNED:
                 CaseDetails completedCaseDetails = createEvent(hearingRequest, userToken, systemUpdateUserId,
-                            HEARING_STATE_CHANGE_FAILURE, caseData);
+                                                               PREPARE_FOR_HEARING_CONDUCT_HEARING,HEARING_STATE_CHANGE_FAILURE, caseData);
                 updateTabsAfterStateChange(completedCaseDetails.getData(), completedCaseDetails.getId());
                 sendHearingChangeDetailsEmail(caseData);
                 break;
@@ -116,7 +120,7 @@ public class HearingManagementService {
     }
 
     private CaseDetails createEvent(HearingRequest hearingRequest, String userToken,
-                             String systemUpdateUserId, String eventId, CaseData caseData) {
+                                    String systemUpdateUserId, State state, String eventId, CaseData caseData) {
 
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             userToken,
@@ -128,12 +132,15 @@ public class HearingManagementService {
             eventId
         );
 
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("state", state);
+
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
                        .id(startEventResponse.getEventId())
                        .build())
-            .data(caseData)
+            .data(caseDataMap)
             .build();
 
         return  coreCaseDataApi.submitEventForCaseWorker(
@@ -318,17 +325,20 @@ public class HearingManagementService {
                 .map(PartyDetails::getEmail)
                 .collect(Collectors.toList());
 
-            for (String email: applicantsEmailList) {
-                Optional<String> partyName = applicants.stream()
-                    .filter(p -> p.getEmail().equals(email))
-                    .map(element -> element.getFirstName() + " " + element.getLastName())
-                    .findAny();
-                emailService.send(
-                    email,
-                    EmailTemplateNames.HEARING_DETAILS,
-                    buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
-                    LanguagePreference.english
-                );
+            if (!applicantsEmailList.isEmpty() && !applicantsEmailList.contains(null)) {
+
+                for (String email : applicantsEmailList) {
+                    Optional<String> partyName = applicants.stream()
+                        .filter(p -> p.getEmail().equals(email))
+                        .map(element -> element.getFirstName() + " " + element.getLastName())
+                        .findAny();
+                    emailService.send(
+                        email,
+                        EmailTemplateNames.HEARING_DETAILS,
+                        buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
+                        LanguagePreference.english
+                    );
+                }
             }
             List<PartyDetails> respondents = caseData
                 .getRespondents()
@@ -342,17 +352,20 @@ public class HearingManagementService {
                 .map(PartyDetails::getEmail)
                 .collect(Collectors.toList());
 
-            for (String email: respondentsEmailList) {
-                Optional<String> partyName = respondents.stream()
-                    .filter(p -> p.getEmail().equals(email))
-                    .map(element -> element.getFirstName() + " " + element.getLastName())
-                    .findAny();
-                emailService.send(
-                    email,
-                    EmailTemplateNames.HEARING_DETAILS,
-                    buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
-                    LanguagePreference.english
-                );
+            if (!respondentsEmailList.isEmpty() && !respondentsEmailList.contains(null)) {
+
+                for (String email : respondentsEmailList) {
+                    Optional<String> partyName = respondents.stream()
+                        .filter(p -> p.getEmail().equals(email))
+                        .map(element -> element.getFirstName() + " " + element.getLastName())
+                        .findAny();
+                    emailService.send(
+                        email,
+                        EmailTemplateNames.HEARING_DETAILS,
+                        buildApplicantOrRespondentEmail(caseData, partyName.orElse(null)),
+                        LanguagePreference.english
+                    );
+                }
             }
 
             List<String> applicantSolicitorsEmailList = applicants.stream()

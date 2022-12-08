@@ -66,35 +66,35 @@ public class PaymentRequestService {
         return paymentApi
             .createPaymentServiceRequest(authorisation, authTokenGenerator.generate(),
                                          PaymentServiceRequest.builder()
-             .callBackUrl(callBackUrl)
-             .casePaymentRequest(CasePaymentRequestDto.builder()
-                                     .action(PAYMENT_ACTION)
-                                     .responsibleParty(caseData.getApplicantCaseName()).build())
-             .caseReference(String.valueOf(caseData.getId()))
-             .ccdCaseNumber(String.valueOf(caseData.getId()))
-             .fees(new FeeDto[]{
-                 FeeDto.builder()
-                     .calculatedAmount(feeResponse.getAmount())
-                     .code(feeResponse.getCode())
-                     .version(feeResponse.getVersion())
-                     .volume(1).build()
-             })
-             .build()
-        );
+                                             .callBackUrl(callBackUrl)
+                                             .casePaymentRequest(CasePaymentRequestDto.builder()
+                                                                     .action(PAYMENT_ACTION)
+                                                                     .responsibleParty(caseData.getApplicantCaseName()).build())
+                                             .caseReference(String.valueOf(caseData.getId()))
+                                             .ccdCaseNumber(String.valueOf(caseData.getId()))
+                                             .fees(new FeeDto[]{
+                                                 FeeDto.builder()
+                                                     .calculatedAmount(feeResponse.getAmount())
+                                                     .code(feeResponse.getCode())
+                                                     .version(feeResponse.getVersion())
+                                                     .volume(1).build()
+                                             })
+                                             .build()
+            );
     }
 
     public PaymentResponse createServicePayment(String serviceRequestReference, String authorization,
                                                 String returnUrl) throws Exception {
         FeeResponse feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
         return paymentApi
-                .createPaymentRequest(serviceRequestReference, authorization, authTokenGenerator.generate(),
-                        OnlineCardPaymentRequest.builder()
-                                .amount(feeResponse.getAmount())
-                                .currency(GBP_CURRENCY)
-                                .language(ENG_LANGUAGE)
-                                .returnUrl(returnUrl)
-                                .build()
-                );
+            .createPaymentRequest(serviceRequestReference, authorization, authTokenGenerator.generate(),
+                                  OnlineCardPaymentRequest.builder()
+                                      .amount(feeResponse.getAmount())
+                                      .currency(GBP_CURRENCY)
+                                      .language(ENG_LANGUAGE)
+                                      .returnUrl(returnUrl)
+                                      .build()
+            );
     }
 
     public PaymentStatusResponse fetchPaymentStatus(String authorization,
@@ -127,8 +127,9 @@ public class PaymentRequestService {
         if (paymentServiceReferenceNumber != null) {
             if (null != paymentReferenceNumber) {
                 PaymentStatusResponse paymentStatus = fetchPaymentStatus(authorization, paymentReferenceNumber);
-                String status = (null != paymentStatus && null != paymentStatus.getStatus()) ? paymentStatus.getStatus() : null;
-                log.info("Payment Status : {} caseId: {} ",status, caseId);
+                String status = (null != paymentStatus && null != paymentStatus.getStatus())
+                    ? paymentStatus.getStatus() : null;
+                log.info("Payment Status : {} caseId: {} ", status, caseId);
                 if (PAYMENT_STATUS_SUCCESS.equalsIgnoreCase(status)) {
                     paymentResponse = PaymentResponse.builder()
                         .paymentReference(paymentReferenceNumber)
@@ -136,21 +137,23 @@ public class PaymentRequestService {
                         .paymentStatus(status)
                         .build();
 
-                    log.info("Payment is already successful for the case id: {} ",caseId);
+                    log.info("Payment is already successful for the case id: {} ", caseId);
                     return paymentResponse;
                 } else {
-                    paymentResponse = createServicePayment(paymentServiceReferenceNumber,
-                                                           authorization,
-                                                           createPaymentRequest.getReturnUrl());
+                    paymentResponse = createServicePayment(
+                        paymentServiceReferenceNumber,
+                        authorization,
+                        createPaymentRequest.getReturnUrl()
+                    );
                     log.info("Payment is being made for the caseId: {}", caseId);
 
                     C100RebuildData c100RebuildData = caseData.getC100RebuildData();
                     caseService.updateCase(
                         caseData.toBuilder()
-                                .c100RebuildData(c100RebuildData
-                                        .toBuilder()
-                                        .paymentReferenceNumber(paymentResponse.getPaymentReference())
-                                        .build()).build(),
+                            .c100RebuildData(c100RebuildData
+                                                 .toBuilder()
+                                                 .paymentReferenceNumber(paymentResponse.getPaymentReference())
+                                                 .build()).build(),
                         authorization,
                         serviceAuthorization,
                         caseId,
@@ -161,19 +164,21 @@ public class PaymentRequestService {
                 }
             } else {
                 log.info("Creating new payment request for the caseId: {}", caseId);
-                paymentResponse = createServicePayment(paymentServiceReferenceNumber,
-                                                       authorization,
-                                                       createPaymentRequest.getReturnUrl());
+                paymentResponse = createServicePayment(
+                    paymentServiceReferenceNumber,
+                    authorization,
+                    createPaymentRequest.getReturnUrl()
+                );
                 log.info("Payment is being made for the case id: {} ", caseId);
 
                 C100RebuildData c100RebuildData = caseData.getC100RebuildData();
 
                 caseService.updateCase(
-                        caseData.toBuilder()
-                                .c100RebuildData(c100RebuildData
-                                        .toBuilder()
-                                        .paymentReferenceNumber(paymentResponse.getPaymentReference())
-                                        .build()).build(),
+                    caseData.toBuilder()
+                        .c100RebuildData(c100RebuildData
+                                             .toBuilder()
+                                             .paymentReferenceNumber(paymentResponse.getPaymentReference())
+                                             .build()).build(),
                     authorization,
                     serviceAuthorization,
                     caseId,
@@ -199,22 +204,6 @@ public class PaymentRequestService {
                     paymentServiceResponse.getServiceRequestReference(),
                     caseId
                 );
-                C100RebuildData c100RebuildData = caseData.getC100RebuildData();
-                caseService.updateCase(
-                        caseData.toBuilder()
-                                .c100RebuildData(c100RebuildData
-                                        .toBuilder()
-                                        .helpWithFeesReferenceNumber(createPaymentRequest.getHwfRefNumber())
-                                        .build())
-                                .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference())
-                                .build(),
-                    authorization,
-                    serviceAuthorization,
-                    caseId,
-                    CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
-                    null
-                );
-                log.info("Update case successful for the caseId :{} ", caseId);
             } else {
                 // if CR and PR doesn't exist
                 log.info("Creating new service request and payment request for the case id: {}", caseId);
@@ -225,24 +214,6 @@ public class PaymentRequestService {
                 );
                 //set service request ref
                 paymentResponse.setServiceRequestReference(paymentServiceResponse.getServiceRequestReference());
-
-                C100RebuildData c100RebuildData = caseData.getC100RebuildData();
-
-                caseService.updateCase(
-                        caseData.toBuilder()
-                                .c100RebuildData(c100RebuildData
-                                        .toBuilder()
-                                        .paymentReferenceNumber(paymentResponse.getPaymentReference())
-                                        .build())
-                                .paymentServiceRequestReferenceNumber(paymentResponse.getServiceRequestReference())
-                                .build(),
-                    authorization,
-                    serviceAuthorization,
-                    caseId,
-                    CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
-                    null
-                );
-                log.info("Update case successful for the caseId :{} ", caseId);
             }
         }
         return paymentResponse;
