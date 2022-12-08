@@ -227,4 +227,16 @@ public class CaseDataMapperTest {
         assertEquals(caseData1, updatedCaseData);
     }
 
+    @Test
+    public void testCaseDataMapperWhenUrgencyDataEmpty() throws IOException {
+
+        //When
+        CaseData caseData1 = caseData.toBuilder()
+                .c100RebuildHearingUrgency(TestUtil.readFileFrom("classpath:c100-rebuild/hu1.json")).build();
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
 }

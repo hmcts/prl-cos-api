@@ -50,8 +50,7 @@ public class CitizenCallbackController extends AbstractCallbackController {
     @Autowired
     private DocumentGenService documentGenService;
 
-    @Autowired
-    CitizenEmailService citizenEmailService;
+    private final CitizenEmailService citizenEmailService;
 
     @Autowired
     CaseDataMapper caseDataMapper;
@@ -61,7 +60,7 @@ public class CitizenCallbackController extends AbstractCallbackController {
                                 @RequestBody CallbackRequest callbackRequest) {
 
         final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        final CaseData caseData = getCaseData(caseDetails);
+        final CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         String userToken = systemUserService.getSysUserToken();
         // setting supplementary data updates to enable global search
         String caseId = String.valueOf(caseData.getId());
@@ -75,21 +74,6 @@ public class CitizenCallbackController extends AbstractCallbackController {
         );
 
         publishEvent(new CaseDataChanged(caseData));
-    }
-
-    @PostMapping(path = "/map-citizen-data-to-solicitor", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to Map Citizen data to solicitor")
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse generateAndStoreDocument(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody @Parameter(name = "CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest request
-    ) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
-
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData);
-        CaseData.CaseDataBuilder caseDataBuilder = updatedCaseData.toBuilder();
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataBuilder.build().toMap(objectMapper)).build();
     }
 
     @PostMapping(path = "/generate-citizen-final-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -117,7 +101,6 @@ public class CitizenCallbackController extends AbstractCallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        // caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
         allTabsService.updateAllTabsIncludingConfTab(caseData);
     }
 
