@@ -49,7 +49,7 @@ public class LocationRefDataService {
             ? new ArrayList<>()
             : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
-            .filter(location -> Arrays.stream(courtList).anyMatch(location.getCourtName()::equals))
+            .filter(location -> Arrays.stream(courtList).anyMatch(location.getCourtEpimmsId()::equals))
             .map(this::getDisplayEntry).collect(Collectors.toList()));
     }
 
