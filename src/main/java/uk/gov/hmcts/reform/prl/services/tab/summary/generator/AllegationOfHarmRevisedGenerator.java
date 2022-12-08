@@ -16,7 +16,7 @@ public class AllegationOfHarmRevisedGenerator implements FieldGenerator {
 
     @Override
     public CaseSummary generate(CaseData caseData) {
-        log.info("AllegationOfHarmRevisedGenerator.generate --> ");
+        log.debug("AllegationOfHarmRevisedGenerator.generate --> ");
         String typeOfHarm = getTypeOfHarm(caseData);
         CaseSummary.CaseSummaryBuilder builder = CaseSummary.builder();
         builder.allegationOfHarmRevised(AllegationOfHarmRevised.builder()
@@ -26,7 +26,7 @@ public class AllegationOfHarmRevisedGenerator implements FieldGenerator {
     }
 
     private String getTypeOfHarm(CaseData caseData) {
-        log.info("AllegationOfHarmRevisedGenerator.getTypeOfHarm --> ");
+        log.debug("AllegationOfHarmRevisedGenerator.getTypeOfHarm --> ");
         List<String> typeOfHarm = new ArrayList<>();
         uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised allegationOfHarm = caseData.getAllegationOfHarmRevised();
         if (YesOrNo.Yes.equals(allegationOfHarm.getNewAllegationsOfHarmDomesticAbuseYesNo())) {

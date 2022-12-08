@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.tab.summary;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -32,7 +31,6 @@ import java.util.Objects;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 
-@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Qualifier("caseSummaryTab")
@@ -103,7 +101,6 @@ public class CaseSummaryTabService implements TabService {
 
     @Override
     public List<FieldGenerator> getGenerators(CaseData caseData) {
-        log.info("CaseSummaryTabService.getGenerators --> ");
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
 
             return List.of(allocatedJudgeDetailsGenerator,
