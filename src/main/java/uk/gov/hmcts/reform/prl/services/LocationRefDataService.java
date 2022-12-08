@@ -43,6 +43,8 @@ public class LocationRefDataService {
 
     private List<DynamicListElement> onlyEnglandAndWalesLocations(CourtDetails locationRefData) {
         String[] courtList = courtsToFilter.split(",");
+        log.info("*** courtsToFilter {} ***", courtsToFilter, courtList);
+        log.info("*** court venues {} ***", locationRefData);
         return (locationRefData == null
             ? new ArrayList<>()
             : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
