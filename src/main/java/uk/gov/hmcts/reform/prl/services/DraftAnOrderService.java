@@ -103,7 +103,7 @@ public class DraftAnOrderService {
             .build();
     }
 
-    public Map<String, Object> getDraftOrderDynamicList(List<Element<DraftOrder>> draftOrderCollection) {
+    public Map<String, Object> getDraftOrderDynamicList(List<Element<DraftOrder>> draftOrderCollection, String caseTypeOfApplication) {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
@@ -111,6 +111,7 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
+        caseDataMap.put("caseTypeOfApplication", caseTypeOfApplication);
         return caseDataMap;
     }
 
