@@ -17,12 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
@@ -50,9 +46,6 @@ public class FeesAndPaymentCitizenController {
 
     @Autowired
     private PaymentRequestService paymentRequestService;
-
-    @Autowired
-    private AuthTokenGenerator authTokenGenerator;
 
     @GetMapping(path = "/getC100ApplicationFees", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the Fees Details for C100 Application Submission")
@@ -84,31 +77,29 @@ public class FeesAndPaymentCitizenController {
 
     @PostMapping(path = "/create-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Endpoint to create payment request . Returns payment related details if "
-        + "successful")
+            + "successful")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Payment processed.",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+            @ApiResponse(responseCode = "200", description = "Payment processed.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public PaymentResponse createPaymentRequest(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
-        @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
-        @RequestBody CreatePaymentRequest createPaymentRequest
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
+            @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+            @RequestBody CreatePaymentRequest createPaymentRequest
     ) throws Exception {
 
         if (!isAuthorized(authorization, serviceAuthorization)) {
             throw (new RuntimeException("Invalid Client"));
         }
 
-        return paymentRequestService.createPayment(authorization,
-                                                   authTokenGenerator.generate(),
-                                                   createPaymentRequest);
+        return paymentRequestService.createPayment(authorization,serviceAuthorization,createPaymentRequest);
 
     }
 
 
-    @GetMapping(path = "/retrievePaymentStatus/{paymentReference}/{caseId}", consumes = APPLICATION_JSON, produces =
-        APPLICATION_JSON)
+
+    @GetMapping(path = "/retrievePaymentStatus/{paymentReference}/{caseId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Endpoint to retrieve the payment status")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Payment created"),
@@ -125,29 +116,16 @@ public class FeesAndPaymentCitizenController {
         if (!isAuthorized(authorization, serviceAuthorization)) {
             throw (new RuntimeException("Invalid Client"));
         }
-        log.info("Payment Reference: {} for the Case id :{}", paymentReference, caseId);
-        return paymentRequestService.fetchPaymentStatus(authorization, paymentReference);
+        log.info("Retrieving payment status for the Case id :{}", caseId);
+        return paymentRequestService.fetchPaymentStatus(authorization,paymentReference);
 
 
-    }
 
-    private CallbackRequest buildCallBackRequest(CreatePaymentRequest createPaymentRequest) {
-        return CallbackRequest
-            .builder()
-            .caseDetails(CaseDetails
-                             .builder()
-                             .caseId(createPaymentRequest.getCaseId())
-                             .caseData(CaseData
-                                           .builder()
-                                           .id(Long.parseLong(createPaymentRequest.getCaseId()))
-                                           .applicantCaseName(createPaymentRequest.getApplicantCaseName())
-                                           .build()).build())
-            .build();
     }
 
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
         return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
-            authorisationService.authoriseService(serviceAuthorization));
+                authorisationService.authoriseService(serviceAuthorization));
     }
 
 }
