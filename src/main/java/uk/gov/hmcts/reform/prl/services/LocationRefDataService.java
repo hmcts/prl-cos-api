@@ -26,7 +26,7 @@ public class LocationRefDataService {
     private final AuthTokenGenerator authTokenGenerator;
     private final LocationRefDataApi locationRefDataApi;
 
-    @Value("${COURT_IDS_TO_FILTER}")
+    @Value("${courts.filter}")
     private final String courtsToFilter;
 
     public List<DynamicListElement> getCourtLocations(String authToken) {
