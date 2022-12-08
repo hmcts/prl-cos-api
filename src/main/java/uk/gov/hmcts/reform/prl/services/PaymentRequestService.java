@@ -204,27 +204,6 @@ public class PaymentRequestService {
                     paymentServiceResponse.getServiceRequestReference(),
                     caseId
                 );
-                C100RebuildData c100RebuildData = caseData.getC100RebuildData();
-                uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails1 = caseService.updateCase(
-                    caseData.toBuilder()
-                        .c100RebuildData(c100RebuildData
-                                             .toBuilder()
-                                             .helpWithFeesReferenceNumber(createPaymentRequest.getHwfRefNumber())
-                                             .build())
-                        .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference())
-                        .build(),
-                    authorization,
-                    serviceAuthorization,
-                    caseId,
-                    CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
-                    null
-                );
-                if (caseDetails1 != null) {
-                    log.info("returned casedetails");
-                    return paymentResponse;
-                }
-                log.info("could not returned casedetails");
-                log.info("Update case successful for the caseId :{} ", caseId);
             } else {
                 // if CR and PR doesn't exist
                 log.info("Creating new service request and payment request for the case id: {}", caseId);
@@ -235,29 +214,6 @@ public class PaymentRequestService {
                 );
                 //set service request ref
                 paymentResponse.setServiceRequestReference(paymentServiceResponse.getServiceRequestReference());
-
-                C100RebuildData c100RebuildData = caseData.getC100RebuildData();
-
-                uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails1 = caseService.updateCase(
-                    caseData.toBuilder()
-                        .c100RebuildData(c100RebuildData
-                                             .toBuilder()
-                                             .paymentReferenceNumber(paymentResponse.getPaymentReference())
-                                             .build())
-                        .paymentServiceRequestReferenceNumber(paymentResponse.getServiceRequestReference())
-                        .build(),
-                    authorization,
-                    serviceAuthorization,
-                    caseId,
-                    CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
-                    null
-                );
-                if (caseDetails1 != null) {
-                    log.info("returned casedetails");
-                    return paymentResponse;
-                }
-                log.info("could not returned casedetails");
-                log.info("Update case successful for the caseId :{} ", caseId);
             }
         }
         return paymentResponse;
