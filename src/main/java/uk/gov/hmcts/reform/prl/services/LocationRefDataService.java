@@ -27,7 +27,7 @@ public class LocationRefDataService {
     private final LocationRefDataApi locationRefDataApi;
 
     @Value("${courts.filter}")
-    private final String courtsToFilter;
+    protected String courtsToFilter;
 
     public List<DynamicListElement> getCourtLocations(String authToken) {
         try {
