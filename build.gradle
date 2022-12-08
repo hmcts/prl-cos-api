@@ -548,7 +548,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/citizen/*',
   '**uk/gov/hmcts/reform/prl/services/LocationRefDataService.java',
   '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
-  '**uk/gov/hmcts/reform/prl/services/hearingmanagement/HearingManagementService.java',
   '**uk/gov/hmcts/reform/prl/repositories/**/*'
 ]
 

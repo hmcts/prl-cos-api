@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.hearingmanagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -31,6 +30,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +39,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class HearingManagementServiceTest {
 
@@ -194,7 +193,8 @@ public class HearingManagementServiceTest {
             .thenReturn(buildStartEventResponse("hmcCaseUpdateSuccess", eventToken));
         when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                       caseType, hearingRequest.getCaseRef(), true,
-                                                      buildCaseDataContent("hmcCaseUpdateSuccess", eventToken, c100CaseData)))
+                                                      buildCaseDataContent("hmcCaseUpdateSuccess", eventToken,
+                                                                           c100CaseData.getState())))
             .thenReturn(caseDetails);
 
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
@@ -225,7 +225,8 @@ public class HearingManagementServiceTest {
         );
         verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                          caseType, hearingRequest.getCaseRef(), true,
-                                                         buildCaseDataContent("hmcCaseUpdateSuccess", eventToken, c100CaseData)
+                                                         buildCaseDataContent("hmcCaseUpdateSuccess", eventToken,
+                                                                              c100CaseData.getState())
         );
         assertTrue(true);
     }
@@ -258,7 +259,8 @@ public class HearingManagementServiceTest {
             .thenReturn(buildStartEventResponse("hmcCaseUpdateFailure", eventToken));
         when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                       caseType, hearingRequest1.getCaseRef(), true,
-                                                      buildCaseDataContent("hmcCaseUpdateFailure", eventToken, c100CaseData)))
+                                                      buildCaseDataContent("hmcCaseUpdateFailure", eventToken,
+                                                                           c100CaseData.getState())))
             .thenReturn(caseDetails);
 
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
@@ -279,7 +281,8 @@ public class HearingManagementServiceTest {
         );
         verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                          caseType, hearingRequest1.getCaseRef(), true,
-                                                         buildCaseDataContent("hmcCaseUpdateFailure", eventToken, c100CaseData)
+                                                         buildCaseDataContent("hmcCaseUpdateFailure", eventToken,
+                                                                              c100CaseData.getState())
         );
 
         assertTrue(true);
@@ -313,7 +316,7 @@ public class HearingManagementServiceTest {
             .thenReturn(buildStartEventResponse("hmcCaseUpdateFailure", eventToken));
         when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                       caseType, hearingRequest1.getCaseRef(), true,
-                                                      buildCaseDataContent("hmcCaseUpdateFailure", eventToken, c100CaseData)))
+                                                      buildCaseDataContent("hmcCaseUpdateFailure", eventToken, c100CaseData.getState())))
             .thenReturn(caseDetails);
 
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(c100CaseData);
@@ -334,19 +337,23 @@ public class HearingManagementServiceTest {
         );
         verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                          caseType, hearingRequest1.getCaseRef(), true,
-                                                         buildCaseDataContent("hmcCaseUpdateFailure", eventToken, c100CaseData)
+                                                         buildCaseDataContent("hmcCaseUpdateFailure", eventToken,
+                                                                              c100CaseData.getState())
         );
 
         assertTrue(true);
     }
 
-    private CaseDataContent buildCaseDataContent(String eventId, String eventToken, CaseData caseData) {
+    private CaseDataContent buildCaseDataContent(String eventId, String eventToken, State state) {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("state", state);
+
         return CaseDataContent.builder()
             .eventToken(eventToken)
             .event(Event.builder()
                        .id(eventId)
                        .build())
-            .data(caseData)
+            .data(caseDataMap)
             .build();
     }
 
@@ -436,7 +443,7 @@ public class HearingManagementServiceTest {
             .thenReturn(buildStartEventResponse("hmcCaseUpdateSuccess", eventToken));
         when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                       caseType, hearingRequest1.getCaseRef(), true,
-                                                      buildCaseDataContent("hmcCaseUpdateSuccess", eventToken, fl401CaseData)))
+                                                      buildCaseDataContent("hmcCaseUpdateSuccess", eventToken, fl401CaseData.getState())))
             .thenReturn(caseDetails);
 
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(fl401CaseData);
@@ -461,7 +468,7 @@ public class HearingManagementServiceTest {
         );
         verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                          caseType, hearingRequest1.getCaseRef(), true,
-                                                         buildCaseDataContent("hmcCaseUpdateSuccess", eventToken, fl401CaseData)
+                                                         buildCaseDataContent("hmcCaseUpdateSuccess", eventToken, fl401CaseData.getState())
         );
         assertTrue(true);
     }
@@ -535,7 +542,7 @@ public class HearingManagementServiceTest {
             .thenReturn(buildStartEventResponse("hmcCaseUpdateFailure", eventToken));
         when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                       caseType, hearingRequest1.getCaseRef(), true,
-                                                      buildCaseDataContent("hmcCaseUpdateFailure", eventToken, fl401CaseData)))
+                                                      buildCaseDataContent("hmcCaseUpdateFailure", eventToken, fl401CaseData.getState())))
             .thenReturn(caseDetails);
 
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(fl401CaseData);
@@ -556,7 +563,8 @@ public class HearingManagementServiceTest {
         );
         verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                          caseType, hearingRequest1.getCaseRef(), true,
-                                                         buildCaseDataContent("hmcCaseUpdateFailure", eventToken, fl401CaseData)
+                                                         buildCaseDataContent("hmcCaseUpdateFailure", eventToken,
+                                                                              fl401CaseData.getState())
         );
 
         assertTrue(true);
@@ -627,7 +635,8 @@ public class HearingManagementServiceTest {
             .thenReturn(buildStartEventResponse("hmcCaseUpdateFailure", eventToken));
         when(coreCaseDataApi.submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                       caseType, hearingRequest1.getCaseRef(), true,
-                                                      buildCaseDataContent("hmcCaseUpdateFailure", eventToken, fl401CaseData)))
+                                                      buildCaseDataContent("hmcCaseUpdateFailure", eventToken,
+                                                                           fl401CaseData.getState())))
             .thenReturn(caseDetails);
 
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(fl401CaseData);
@@ -648,7 +657,8 @@ public class HearingManagementServiceTest {
         );
         verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
                                                          caseType, hearingRequest1.getCaseRef(), true,
-                                                         buildCaseDataContent("hmcCaseUpdateFailure", eventToken, fl401CaseData)
+                                                         buildCaseDataContent("hmcCaseUpdateFailure", eventToken,
+                                                                              fl401CaseData.getState())
         );
         assertTrue(true);
     }
