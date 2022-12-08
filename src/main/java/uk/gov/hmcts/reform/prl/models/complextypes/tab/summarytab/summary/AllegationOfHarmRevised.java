@@ -6,5 +6,5 @@ import lombok.Data;
 @Builder
 @Data
 public class AllegationOfHarmRevised {
-    private final String typesOfHarm;
+    private final String typesOfHarmRevised;
 }
