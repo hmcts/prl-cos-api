@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.tab.summary.generator;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
@@ -10,13 +9,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 @Component
 public class AllegationOfHarmRevisedGenerator implements FieldGenerator {
 
     @Override
     public CaseSummary generate(CaseData caseData) {
-        log.debug("AllegationOfHarmRevisedGenerator.generate --> ");
         String typeOfHarm = getTypeOfHarm(caseData);
         CaseSummary.CaseSummaryBuilder builder = CaseSummary.builder();
         builder.allegationOfHarmRevised(AllegationOfHarmRevised.builder()
@@ -26,7 +23,6 @@ public class AllegationOfHarmRevisedGenerator implements FieldGenerator {
     }
 
     private String getTypeOfHarm(CaseData caseData) {
-        log.debug("AllegationOfHarmRevisedGenerator.getTypeOfHarm --> ");
         List<String> typeOfHarm = new ArrayList<>();
         uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised allegationOfHarm = caseData.getAllegationOfHarmRevised();
         if (YesOrNo.Yes.equals(allegationOfHarm.getNewAllegationsOfHarmDomesticAbuseYesNo())) {
