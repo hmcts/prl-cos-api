@@ -25,9 +25,9 @@ def versions = [
   bcpkixJdk15on                : '1.64',
   ccdClient                    : '4.7.6',
   commonsBeanUtils             : '1.9.4',
-  commonsIo                    : '2.11.0',
+  commonsIo                    : '2.8',
   commonsLang3                 : '3.12.0',
-  commonsMath3                 : '3.6.1',
+  commonsMath4                 : '4.0',
   dumbster                     : '1.7.1',
   //feignHttpClient              : '10.3.0',
   googleAuth                   : '1.5.0',
@@ -270,7 +270,7 @@ dependencies {
   implementation group: 'io.github.openfeign', name: 'feign-httpclient'
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.0'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
-  implementation group: 'org.apache.commons', name: 'commons-math3', version: versions.commonsMath3
+  implementation group: 'org.apache.commons', name: 'commons-math4', version: versions.commonsMath4
   implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.20'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
