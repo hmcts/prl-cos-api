@@ -25,8 +25,8 @@ def versions = [
   bcpkixJdk15on                : '1.64',
   ccdClient                    : '4.7.6',
   commonsBeanUtils             : '1.9.4',
-  commonsIo                    : '2.10.0',
-  commonsLang3                 : '3.12.0',
+  commonsIo                    : '2.7',
+  commonsLang3                 : '3.9',
   commonsMath3                 : '3.6.1',
   dumbster                     : '1.7.1',
   //feignHttpClient              : '10.3.0',
@@ -140,6 +140,7 @@ allprojects {
       }
       // CVE-2019-10086
       dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
+
       // CVE-2020-9484
       dependencySet(group: 'org.apache.tomcat.embed', version: versions.tomcat) {
         entry 'tomcat-embed-core'
@@ -267,6 +268,7 @@ dependencies {
   implementation group: 'com.github.kirviq', name: 'dumbster', version: versions.dumbster
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
   implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
+  implementation group: 'commons-net', name: 'commons-net', version: '3.9.0'
   implementation group: 'io.github.openfeign', name: 'feign-httpclient'
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.0'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
