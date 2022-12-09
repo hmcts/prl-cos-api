@@ -267,6 +267,12 @@ dependencies {
   implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '3.0.2'
   implementation group: 'com.github.kirviq', name: 'dumbster', version: versions.dumbster
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
+
+  implementation( group: 'commons-net', name: 'commons-net'){
+    version{
+      strictly "[3.9.0]"
+    }
+  }
   implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
   implementation group: 'io.github.openfeign', name: 'feign-httpclient'
   implementation group: 'jakarta.activation', name: 'jakarta.activation-api', version: '2.1.0'
